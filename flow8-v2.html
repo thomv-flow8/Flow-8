@@ -1149,87 +1149,115 @@ function pgHtml(totaal, page, pageSize, setPageFn) {
 // MODULE: DASHBOARD
 // ═══════════════════════════════════════════════
 function renderDashboard() {
-  var el  = document.getElementById('content');
-  var now = new Date();
-  var gr  = now.getHours()<12?'Goedemorgen':now.getHours()<18?'Goedemiddag':'Goedenavond';
-  var naam = APP.profiel ? (APP.profiel.naam||'').split(' ')[0] : '';
-  var vandaag  = now.toISOString().split('T')[0];
-  var morgen   = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1).toISOString().split('T')[0];
+  var el   = document.getElementById('content');
+  var now  = new Date();
+  var gr   = now.getHours()<12?'Goedemorgen':now.getHours()<18?'Goedemiddag':'Goedenavond';
+  var naam = APP.profiel?(APP.profiel.naam||'').split(' ')[0]:'';
+  var vandaag = now.toISOString().split('T')[0];
+  var morgen  = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1).toISOString().split('T')[0];
 
-  // Stats berekenen
-  var opVandaag    = APP.opdrachten.filter(function(o){return o.datum===vandaag&&o.status!=='afgehandeld';});
-  var spoedOps     = APP.opdrachten.filter(function(o){return o.status==='spoed'&&o.datum>=vandaag;});
-  var actieOps     = APP.opdrachten.filter(function(o){return o.status==='actie_vereist';});
-  var openGoedkeuring = [].concat(
-    APP.verlof.filter(function(v){return v.status==='aangevraagd';}),
-    APP.overuren.filter(function(v){return v.status==='aangevraagd';}),
-    APP.onkosten.filter(function(v){return v.status==='aangevraagd';})
-  );
-  var skVervallen  = APP.serviceklanten.filter(function(k){return k.volgendeDatum&&k.volgendeDatum<vandaag;});
-  var d30 = new Date(now); d30.setDate(d30.getDate()+30);
-  var d30str = d30.toISOString().split('T')[0];
-  var skBinnenkort = APP.serviceklanten.filter(function(k){return k.volgendeDatum&&k.volgendeDatum>=vandaag&&k.volgendeDatum<=d30str;});
+  // Eigen medewerker
+  var mijnId  = getMijnMedId();
+  var mijnMed = mijnId ? getMed(mijnId) : null;
+
+  // ── Persoonlijke stats ──────────────────────────────────────
+  var verlofSaldo  = mijnMed ? (parseFloat(mijnMed.verlofSaldo)||0) : 0;
+  var ouSaldo      = mijnMed ? APP.overuren.filter(function(o){
+    return String(o.medId)===String(mijnId) && o.status==='goedgekeurd';
+  }).reduce(function(s,o){return s+(o.uren||0);},0) : 0;
+  var onkostenGoed = mijnMed ? APP.onkosten.filter(function(o){
+    return String(o.medId)===String(mijnId) && o.status==='goedgekeurd';
+  }).reduce(function(s,o){return s+(o.bedrag||0);},0) : 0;
+  var mijnVerzuim  = mijnMed ? APP.verzuim.filter(function(v){
+    return String(v.medId)===String(mijnId) && (v.status==='actief'||v.status==='langdurig');
+  }) : [];
+
+  // Storingsdienst
+  var huidigWeek  = getISOWeek(vandaag);
+  var huidigWJaar = getISOWeekJaar(vandaag);
+  var sdKey       = huidigWJaar+'-W'+('0'+huidigWeek).slice(-2);
+  var sdDagIdx    = (now.getDay()||7)-1;
+  var sdDagDienst = (APP.storingsdienst||{})[sdKey+'-'+sdDagIdx];
+  var sdWeekDienst= (APP.storingsdienst||{})[sdKey];
+  var sdDienst    = sdDagDienst || sdWeekDienst;
+  var sdMed       = sdDienst ? getMed(sdDienst.medId) : null;
+  var sdKl        = sdMed?((APP.rollen[sdMed.rol]||{}).kleur||sdMed.kleur||'#3b82f6'):'#6b7694';
 
   var h = '';
 
   // ── Begroeting ──────────────────────────────────────────────
-  h += '<div style="margin-bottom:20px">';
+  h += '<div style="margin-bottom:18px">';
   h += '<h2 style="font-family:Syne,sans-serif;font-size:22px;font-weight:800">'+gr+', '+esc(naam)+' 👋</h2>';
-  h += '<div style="font-size:13px;color:var(--muted);margin-top:4px">'+now.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div>';
+  h += '<div style="font-size:13px;color:var(--muted);margin-top:3px">'+now.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div>';
   h += '</div>';
 
-  // ── Stat tiles ──────────────────────────────────────────────
-  h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px">';
-  function tile(label,waarde,kl,sub,nav){
-    return '<div class="dash-tile" data-nav="'+(nav||'')+'" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:'+(nav?'pointer':'default')+'">'
-      +'<div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">'+label+'</div>'
-      +'<div style="font-family:Syne,sans-serif;font-size:26px;font-weight:800;color:'+kl+'">'+waarde+'</div>'
-      +(sub?'<div style="font-size:11px;color:var(--muted);margin-top:4px">'+sub+'</div>':'')
-      +'</div>';
+  // ── TOP ROW: persoonlijke blokken + storingsdienst ──────────
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;margin-bottom:18px;align-items:stretch">';
+
+  // Verlofdagen
+  h += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">';
+  h += '<div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Verlofdagen</div>';
+  h += '<div style="font-family:Syne,sans-serif;font-size:28px;font-weight:800;color:var(--accent)">'+verlofSaldo.toFixed(1)+'</div>';
+  h += '<div style="font-size:11px;color:var(--muted);margin-top:4px">resterend</div>';
+  h += '</div>';
+
+  // Overuren saldo
+  h += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">';
+  h += '<div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Overuren</div>';
+  h += '<div style="font-family:Syne,sans-serif;font-size:28px;font-weight:800;color:'+(ouSaldo?'var(--accent)':'var(--text)')+'">'+ouSaldo+'u</div>';
+  h += '<div style="font-size:11px;color:var(--muted);margin-top:4px">goedgekeurd saldo</div>';
+  h += '</div>';
+
+  // Onkosten
+  h += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">';
+  h += '<div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Onkosten</div>';
+  h += '<div style="font-family:Syne,sans-serif;font-size:28px;font-weight:800;color:'+(onkostenGoed?'var(--green)':'var(--text)')+'">€ '+onkostenGoed.toFixed(0)+'</div>';
+  h += '<div style="font-size:11px;color:var(--muted);margin-top:4px">goed te betalen</div>';
+  h += '</div>';
+
+  // Verzuim
+  h += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px">';
+  h += '<div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Verzuim</div>';
+  if(mijnVerzuim.length){
+    var vz0=mijnVerzuim[0];
+    var vzDagen=vz0.van?Math.max(1,Math.ceil((now-new Date(vz0.van+'T00:00:00'))/86400000)):0;
+    h += '<div style="font-family:Syne,sans-serif;font-size:28px;font-weight:800;color:var(--orange)">'+vzDagen+'d</div>';
+    h += '<div style="font-size:11px;color:var(--orange);margin-top:4px">'+(vz0.status==='langdurig'?'Langdurig':'Actief')+'</div>';
+  } else {
+    h += '<div style="font-family:Syne,sans-serif;font-size:28px;font-weight:800;color:var(--green)">✓</div>';
+    h += '<div style="font-size:11px;color:var(--muted);margin-top:4px">geen actief verzuim</div>';
   }
-  h += tile('Vandaag', opVandaag.length, 'var(--accent)', 'opdrachten', 'planning');
-  h += tile('Spoed', spoedOps.length, spoedOps.length?'var(--red)':'var(--green)', spoedOps.length?'actief':'alles OK', 'planning');
-  h += tile('Actie vereist', actieOps.length, actieOps.length?'var(--orange)':'var(--green)', 'opdrachten', 'planning');
-  h += tile('Goedkeuren', openGoedkeuring.length, openGoedkeuring.length?'var(--orange)':'var(--green)', 'aanvragen', '');
-  h += tile('SK vervallen', skVervallen.length, skVervallen.length?'var(--red)':'var(--green)', 'niet ingepland', 'serviceklanten');
-  h += tile('SK binnenkort', skBinnenkort.length, 'var(--accent)', 'binnen 30 dagen', 'serviceklanten');
   h += '</div>';
 
-  // ── 2-koloms grid ────────────────────────────────────────────
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">';
-
-  // ── LINKS ────────────────────────────────────────────────────
-
-  // Storingsdienst
-  var huidigWeek = getISOWeek(vandaag);
-  var huidigWJaar = getISOWeekJaar(vandaag);
-  var sdKey = huidigWJaar+'-W'+('0'+huidigWeek).slice(-2);
-  var sdDagIdx = (now.getDay()||7)-1;
-  var sdDienst = (APP.storingsdienst||{})[sdKey+'-'+sdDagIdx]||(APP.storingsdienst||{})[sdKey];
-  var sdMed = sdDienst?getMed(sdDienst.medId):null;
-  var sdKl  = sdMed?((APP.rollen[sdMed.rol]||{}).kleur||sdMed.kleur||'#3b82f6'):'#6b7694';
-  h += '<div class="card" style="padding:14px 16px">';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
-  h += '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:14px">📟 Storingsdienst</div>';
-  h += '<span style="font-size:11px;color:var(--muted)">Week '+huidigWeek+'</span></div>';
+  // Storingsdienst (rechts naast blokken)
+  h += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;min-width:200px">';
+  h += '<div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📟 Storingsdienst · Week '+huidigWeek+'</div>';
   if(sdMed){
     h += '<div style="display:flex;align-items:center;gap:10px">';
-    h += '<div class="avatar" style="width:38px;height:38px;font-size:13px;background:'+sdKl+';color:#fff">'+initials(sdMed)+'</div>';
+    h += '<div class="avatar" style="width:36px;height:36px;font-size:13px;background:'+sdKl+';color:#fff">'+initials(sdMed)+'</div>';
     h += '<div><div style="font-weight:700;font-size:14px">'+esc(sdMed.voornaam+' '+sdMed.achternaam)+'</div>';
-    h += '<div style="font-size:12px;color:var(--muted)">'+esc(sdMed.telefoon||sdMed.email||'Geen telefoonnummer')+'</div></div></div>';
-    if((APP.storingsdienst||{})[sdKey+'-'+sdDagIdx]) h += '<div style="margin-top:8px;font-size:11px;color:var(--orange)">⚡ Dagwissel actief</div>';
+    h += '<div style="font-size:12px;color:var(--accent)">'+esc(sdMed.telefoon||sdMed.email||'—')+'</div></div></div>';
+    if(sdDagDienst) h += '<div style="font-size:11px;color:var(--orange);margin-top:8px">⚡ Dagwissel actief</div>';
   } else {
-    h += '<div style="color:var(--orange);font-size:13px">⚠️ Niet ingesteld voor deze week</div>';
+    h += '<div style="color:var(--orange);font-size:13px;font-weight:600">⚠️ Niet ingesteld</div>';
   }
   h += '</div>';
 
+  h += '</div>'; // top row
+
+  // ── HOOFD GRID: 2 kolommen ───────────────────────────────────
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+
+  // ── LINKER kolom ─────────────────────────────────────────────
+
   // Opdrachten vandaag
+  var opVandaag = APP.opdrachten.filter(function(o){return o.datum===vandaag&&o.status!=='afgehandeld';});
   h += '<div class="card" style="padding:14px 16px">';
   h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
   h += '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:14px">📋 Opdrachten vandaag</div>';
   h += '<span class="tag tag-blue">'+opVandaag.length+'</span></div>';
   if(!opVandaag.length){
-    h += '<div style="color:var(--muted);font-size:13px;padding:4px 0">Geen opdrachten vandaag</div>';
+    h += '<div style="color:var(--muted);font-size:13px">Geen opdrachten vandaag</div>';
   } else {
     var perMonteur={};
     opVandaag.forEach(function(o){
@@ -1239,14 +1267,15 @@ function renderDashboard() {
     h += '<div style="display:flex;flex-direction:column;gap:10px">';
     Object.keys(perMonteur).forEach(function(mid){
       var m=getMed(mid); var kl=m?((APP.rollen[m.rol]||{}).kleur||m.kleur||'#6b7694'):'#6b7694';
-      h += '<div><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">';
+      h += '<div>';
+      h += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">';
       if(m) h += '<div class="avatar" style="width:22px;height:22px;font-size:8px;background:'+kl+';color:#fff">'+initials(m)+'</div>';
       h += '<span style="font-size:12px;font-weight:700">'+esc(m?m.voornaam+' '+m.achternaam:'Niet toegewezen')+'</span>';
       h += '<span style="font-size:11px;color:var(--muted)">('+perMonteur[mid].length+')</span></div>';
       perMonteur[mid].forEach(function(o){
         var ot=getOpdrachttype(o.type); var isSpoed=o.status==='spoed'; var isActie=o.status==='actie_vereist';
         h += '<div style="display:flex;align-items:center;gap:7px;padding:5px 8px;background:var(--surface2);border-radius:6px;margin-bottom:3px;border-left:3px solid '+(isSpoed?'var(--red)':isActie?'var(--orange)':ot.kleur)+'">';
-        h += '<span>'+ot.icon+'</span>';
+        h += '<span style="font-size:13px">'+ot.icon+'</span>';
         h += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.klantNaam||'—')+'</div>';
         h += '<div style="font-size:11px;color:var(--muted)">'+(o.tijdVan||'—')+(o.tijdTot?' – '+o.tijdTot:'')+'</div></div>';
         if(isSpoed) h += '<span class="tag tag-red" style="font-size:10px;padding:1px 5px">Spoed</span>';
@@ -1259,82 +1288,18 @@ function renderDashboard() {
   }
   h += '</div>';
 
-  // Openstaande goedkeuringen
-  h += '<div class="card" style="padding:14px 16px">';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
-  h += '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:14px">✋ Goedkeuren</div>';
-  h += '<span class="tag '+(openGoedkeuring.length?'tag-orange':'tag-green')+'">'+openGoedkeuring.length+'</span></div>';
-  if(!openGoedkeuring.length){
-    h += '<div style="color:var(--muted);font-size:13px;padding:4px 0">Niets te keuren</div>';
-  } else {
-    [{lijst:APP.verlof.filter(function(v){return v.status==='aangevraagd';}),label:'Verlof',nav:'verlof',icon:'🏖'},
-     {lijst:APP.overuren.filter(function(v){return v.status==='aangevraagd';}),label:'Overuren',nav:'overuren',icon:'⏱'},
-     {lijst:APP.onkosten.filter(function(v){return v.status==='aangevraagd';}),label:'Onkosten',nav:'onkosten',icon:'💶'}
-    ].filter(function(g){return g.lijst.length>0;}).forEach(function(g){
-      h += '<div class="dash-tile" data-nav="'+g.nav+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:8px;margin-bottom:6px;cursor:pointer">';
-      h += '<span style="font-size:18px">'+g.icon+'</span>';
-      h += '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+g.label+'</div>';
-      h += '<div style="font-size:11px;color:var(--muted)">'+g.lijst.length+' aanvra'+(g.lijst.length===1?'ag':'gen')+'</div></div>';
-      h += '<span class="tag tag-orange">'+g.lijst.length+'</span></div>';
-    });
-  }
-  h += '</div>';
-
-  // ── RECHTS ───────────────────────────────────────────────────
-
-  // Agenda vandaag + morgen
-  var agVandaag = (typeof agAfsprakenOp==='function'?agAfsprakenOp(vandaag):[]);
-  var agMorgen  = (typeof agAfsprakenOp==='function'?agAfsprakenOp(morgen):[]);
-  h += '<div class="card" style="padding:14px 16px">';
-  h += '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:14px;margin-bottom:12px">📅 Agenda</div>';
-  if(!agVandaag.length&&!agMorgen.length){
-    h += '<div style="color:var(--muted);font-size:13px;padding:4px 0">Geen afspraken vandaag of morgen</div>';
-  } else {
-    [[agVandaag,'Vandaag'],[agMorgen,'Morgen']].forEach(function(set){
-      if(!set[0].length) return;
-      h += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">'+set[1]+'</div>';
-      set[0].sort(function(a,b){return (a.tijdVan||'00:00')>(b.tijdVan||'00:00')?1:-1;}).forEach(function(a){
-        var ti=agTypeInfo(a.type);
-        h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:7px;margin-bottom:4px;border-left:3px solid '+ti.kleur+'">';
-        h += '<span>'+ti.icon+'</span>';
-        h += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.titel||ti.l)+'</div>';
-        h += '<div style="font-size:11px;color:var(--muted)">'+(a.heelDag?'Hele dag':a.tijdVan+(a.tijdTot?' – '+a.tijdTot:''))+'</div></div></div>';
-      });
-      h += '<div style="height:8px"></div>';
-    });
-  }
-  h += '</div>';
-
-  // Verlof & verzuim vandaag
-  var verlofVandaag  = APP.verlof.filter(function(v){return v.status==='goedgekeurd'&&v.van<=vandaag&&(v.tot||v.van)>=vandaag;});
-  var verzuimVandaag = APP.verzuim.filter(function(v){return (v.status==='actief'||v.status==='langdurig')&&v.van<=vandaag&&(!v.tot||v.tot>=vandaag);});
-  var afwezig = verlofVandaag.map(function(v){var m=getMed(v.medId);return{med:m,reden:'🏖 Verlof'};})
-    .concat(verzuimVandaag.map(function(v){var m=getMed(v.medId);return{med:m,reden:'🤒 '+(v.type==='gedeeltelijk'?'Gedeeltelijk ziek':'Ziek')+(v.status==='langdurig'?' (langdurig)':'')};}) );
-  h += '<div class="card" style="padding:14px 16px">';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
-  h += '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:14px">👤 Afwezig vandaag</div>';
-  h += '<span class="tag '+(afwezig.length?'tag-orange':'tag-green')+'">'+afwezig.length+'</span></div>';
-  if(!afwezig.length){
-    h += '<div style="color:var(--muted);font-size:13px;padding:4px 0">Iedereen aanwezig</div>';
-  } else {
-    afwezig.filter(function(a){return a.med;}).forEach(function(a){
-      var kl=(APP.rollen[a.med.rol]||{}).kleur||a.med.kleur||'#6b7694';
-      h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:7px;margin-bottom:4px">';
-      h += '<div class="avatar" style="width:24px;height:24px;font-size:9px;background:'+kl+';color:#fff">'+initials(a.med)+'</div>';
-      h += '<span style="font-size:13px;font-weight:600;flex:1">'+esc(a.med.voornaam+' '+a.med.achternaam)+'</span>';
-      h += '<span style="font-size:11px;color:var(--muted)">'+a.reden+'</span></div>';
-    });
-  }
-  h += '</div>';
-
   // Serviceklanten binnenkort/vervallen
+  var d30 = new Date(now); d30.setDate(d30.getDate()+30);
+  var d30s = d30.toISOString().split('T')[0];
+  var skVervallen  = APP.serviceklanten.filter(function(k){return k.volgendeDatum&&k.volgendeDatum<vandaag;});
+  var skBinnenkort = APP.serviceklanten.filter(function(k){return k.volgendeDatum&&k.volgendeDatum>=vandaag&&k.volgendeDatum<=d30s;});
   var skLijst = skVervallen.concat(skBinnenkort).slice(0,8);
-  h += '<div class="card" style="padding:14px 16px">';
+  h += '<div class="card" style="padding:14px 16px;margin-top:0">';
   h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
   h += '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:14px">🔧 Serviceklanten</div>';
   h += '<span class="tag '+(skVervallen.length?'tag-red':'tag-orange')+'">'+(skVervallen.length+skBinnenkort.length)+'</span></div>';
   if(!skLijst.length){
-    h += '<div style="color:var(--muted);font-size:13px;padding:4px 0">Geen klanten binnenkort of vervallen</div>';
+    h += '<div style="color:var(--muted);font-size:13px">Geen klanten binnenkort of vervallen</div>';
   } else {
     skLijst.forEach(function(k){
       var vervallen=k.volgendeDatum<vandaag;
@@ -1342,16 +1307,61 @@ function renderDashboard() {
       h += '<div class="dash-tile" data-nav="serviceklanten" style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:7px;margin-bottom:4px;cursor:pointer;border-left:3px solid '+(vervallen?'var(--red)':'var(--orange)')+'">';
       h += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(k.naam)+'</div>';
       h += '<div style="font-size:11px;color:var(--muted)">'+(ct?ct.code+' · ':'')+esc(k.plaats||'')+'</div></div>';
-      h += '<span style="font-size:11px;color:'+(vervallen?'var(--red)':'var(--orange)')+';white-space:nowrap;font-weight:600">'+(vervallen?'Vervallen':fmtD(k.volgendeDatum))+'</span></div>';
+      h += '<span style="font-size:11px;font-weight:600;color:'+(vervallen?'var(--red)':'var(--orange)')+';white-space:nowrap">'+(vervallen?'Vervallen':fmtD(k.volgendeDatum))+'</span></div>';
     });
   }
   h += '</div>';
 
-  h += '</div>'; // grid
+  // ── RECHTER kolom ─────────────────────────────────────────────
 
+  // Agenda vandaag + morgen
+  var agVandaag=(typeof agAfsprakenOp==='function'?agAfsprakenOp(vandaag):[]);
+  var agMorgen =(typeof agAfsprakenOp==='function'?agAfsprakenOp(morgen):[]);
+  h += '<div class="card" style="padding:14px 16px">';
+  h += '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:14px;margin-bottom:12px">📅 Agenda</div>';
+  if(!agVandaag.length&&!agMorgen.length){
+    h += '<div style="color:var(--muted);font-size:13px">Geen afspraken vandaag of morgen</div>';
+  } else {
+    [[agVandaag,'Vandaag'],[agMorgen,'Morgen']].forEach(function(set){
+      if(!set[0].length) return;
+      h += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+set[1]+'</div>';
+      set[0].sort(function(a,b){return (a.tijdVan||'00:00')>(b.tijdVan||'00:00')?1:-1;}).forEach(function(a){
+        var ti=agTypeInfo(a.type);
+        h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:7px;margin-bottom:4px;border-left:3px solid '+ti.kleur+'">';
+        h += '<span>'+ti.icon+'</span>';
+        h += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.titel||ti.l)+'</div>';
+        h += '<div style="font-size:11px;color:var(--muted)">'+(a.heelDag?'Hele dag':a.tijdVan+(a.tijdTot?' – '+a.tijdTot:''))+'</div></div></div>';
+      });
+      h += '<div style="height:10px"></div>';
+    });
+  }
+  h += '</div>';
+
+  // Afwezig vandaag
+  var verlofVandaag  = APP.verlof.filter(function(v){return v.status==='goedgekeurd'&&v.van<=vandaag&&(v.tot||v.van)>=vandaag;});
+  var verzuimVandaag = APP.verzuim.filter(function(v){return (v.status==='actief'||v.status==='langdurig')&&v.van<=vandaag&&(!v.tot||v.tot>=vandaag);});
+  var afwezig = verlofVandaag.map(function(v){var m=getMed(v.medId);return{med:m,reden:'🏖 Verlof'};})
+    .concat(verzuimVandaag.map(function(v){var m=getMed(v.medId);return{med:m,reden:'🤒 '+(v.type==='gedeeltelijk'?'Gedeeltelijk':v.status==='langdurig'?'Langdurig':'Ziek')};}) );
+  h += '<div class="card" style="padding:14px 16px">';
+  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  h += '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:14px">👤 Afwezig vandaag</div>';
+  h += '<span class="tag '+(afwezig.length?'tag-orange':'tag-green')+'">'+afwezig.length+'</span></div>';
+  if(!afwezig.length){
+    h += '<div style="color:var(--muted);font-size:13px">Iedereen aanwezig</div>';
+  } else {
+    afwezig.filter(function(a){return a.med;}).forEach(function(a){
+      var kl=(APP.rollen[a.med.rol]||{}).kleur||a.med.kleur||'#6b7694';
+      h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:7px;margin-bottom:4px">';
+      h += '<div class="avatar" style="width:24px;height:24px;font-size:9px;background:'+kl+';color:#fff">'+initials(a.med)+'</div>';
+      h += '<span style="font-size:13px;font-weight:600;flex:1">'+esc(a.med.voornaam+' '+a.med.achternaam)+'</span>';
+      h += '<span style="font-size:12px;color:var(--muted)">'+a.reden+'</span></div>';
+    });
+  }
+  h += '</div>';
+
+  h += '</div>'; // hoofd grid
   el.innerHTML = h;
 
-  // Navigatie
   el.querySelectorAll('.dash-tile[data-nav]').forEach(function(t){
     if(t.dataset.nav) t.addEventListener('click',function(){ navigateTo(t.dataset.nav); });
   });
