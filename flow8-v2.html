@@ -8993,8 +8993,12 @@ function _openContractImport(){
   b += '<p style="font-size:13px;color:var(--muted);margin-bottom:14px">Importeer contracten (abonnementen) uit Unit4. Elke rij is één contract: een debiteurnummer met een contractcode. Heeft een klant meerdere contracten (bijv. <strong>A12 + B</strong>), zet die dan als aparte rijen in het bestand.</p>';
   b += '<div style="font-size:12px;color:var(--muted);background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.6">';
   b += '<strong>B-contracten</strong> worden herkend als 24-uurs storingsdienst en aangevinkt bij de serviceklant. Andere codes (A, C, …) komen in het veld Contracttype.<br>';
-  b += 'Alleen bestaande serviceklanten worden bijgewerkt — onbekende debiteurnummers worden overgeslagen en achteraf gemeld.';
+  b += 'Bestaande serviceklanten worden bijgewerkt. Debiteuren die nog geen serviceklant zijn, kun je hieronder automatisch laten aanmaken.';
   b += '</div>';
+  b += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--surface2);border-radius:8px;cursor:pointer;margin-bottom:14px">';
+  b += '<input type="checkbox" id="cimp-maak-sk" style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;margin-top:2px">';
+  b += '<span style="font-size:12.5px;line-height:1.5"><strong>Ontbrekende serviceklanten aanmaken</strong><br>';
+  b += '<span style="color:var(--muted)">Van elke debiteur met een contract wordt een serviceklant gemaakt, met het contracttype en het B-vinkje. Pompgegevens, serviceduur en uitvoeringsdatums moet je daarna zelf invullen. Debiteurnummers die niet in Flow8 bestaan blijven overgeslagen.</span></span></label>';
   b += '<label class="btn btn-ghost" style="cursor:pointer;width:100%;justify-content:center;padding:14px;border:1.5px dashed var(--border)">Bestand kiezen (.xlsx / .csv)<input type="file" id="cimp-file" accept=".xlsx,.xls,.csv" style="display:none"></label>';
   b += '<div id="cimp-stap2" style="display:none;margin-top:16px"></div>';
   var f = '<button class="btn btn-ghost" id="cimp-cancel">Annuleren</button><button class="btn btn-primary" id="cimp-doen" style="display:none">Importeren</button>';
@@ -9049,6 +9053,8 @@ function _openContractImport(){
     document.getElementById('cimp-stap2').innerHTML = h;
     document.getElementById('cimp-doen').style.display='';
     document.querySelectorAll('.cimp-map').forEach(function(s){ s.addEventListener('change', _preview); });
+    var mkCb = document.getElementById('cimp-maak-sk');
+    if(mkCb && !mkCb._geb){ mkCb._geb = true; mkCb.addEventListener('change', _preview); }
     _preview();
   }
 
@@ -9066,7 +9072,8 @@ function _openContractImport(){
       if(/^B/.test(code)) perDeb[nr].b = true;
       else if(perDeb[nr].onderhoud.indexOf(code)<0) perDeb[nr].onderhoud.push(code);
     });
-    var res = { bij:[], geenSk:[], conflict:[], onbekendeCode:[], bWeg:[] };
+    var maakSk = !!(document.getElementById('cimp-maak-sk') && document.getElementById('cimp-maak-sk').checked);
+    var res = { bij:[], geenSk:[], conflict:[], onbekendeCode:[], bWeg:[], nieuw:[], geenDeb:[], maakSk:maakSk };
     var geldig = (typeof getContracten==='function' ? getContracten() : []).map(function(c){ return String(c.code||c.id).toUpperCase(); });
     Object.keys(perDeb).forEach(function(nr){
       var d = perDeb[nr];
@@ -9075,7 +9082,15 @@ function _openContractImport(){
         if(k.debId){ var db=(APP.debiteuren||[]).find(function(x){ return String(x.id)===String(k.debId); }); if(db && db.nr && String(db.nr).trim()===nr) return true; }
         return false;
       });
-      if(!sk){ res.geenSk.push(d); return; }
+      if(!sk){
+        // Zonder serviceklant: aanmaken kan alleen als de debiteur wél bestaat.
+        var db2 = (APP.debiteuren||[]).find(function(x){ return x.nr && String(x.nr).trim()===nr; });
+        if(maakSk && db2 && d.onderhoud.length<=1){ res.nieuw.push({ deb:db2, code:d.onderhoud[0]||'', b:d.b }); }
+        else if(maakSk && db2 && d.onderhoud.length>1){ res.conflict.push({ nr:nr, naam:db2.naam, codes:d.onderhoud }); }
+        else if(maakSk){ res.geenDeb.push(d); }
+        else { res.geenSk.push(d); }
+        return;
+      }
       if(d.onderhoud.length > 1){ res.conflict.push({ nr:nr, naam:sk.naam, codes:d.onderhoud }); return; }
       var code = d.onderhoud[0] || '';
       if(code && geldig.length && geldig.indexOf(code)<0) res.onbekendeCode.push({ nr:nr, naam:sk.naam, code:code });
@@ -9094,8 +9109,10 @@ function _openContractImport(){
     if(!a){ el2.innerHTML = '<div style="font-size:12px;color:var(--orange)">Koppel eerst debiteurnummer én contractcode.</div>'; return; }
     var h = '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:10px 12px;line-height:1.7">';
     h += '<div><strong style="color:var(--green)">'+a.bij.length+'</strong> serviceklant(en) worden bijgewerkt</div>';
+    if(a.nieuw.length)         h += '<div><strong style="color:var(--accent)">'+a.nieuw.length+'</strong> nieuwe serviceklant(en) worden aangemaakt</div>';
     if(a.conflict.length)      h += '<div><strong style="color:var(--red)">'+a.conflict.length+'</strong> met meerdere onderhoudscontracten — worden overgeslagen</div>';
     if(a.geenSk.length)        h += '<div><strong style="color:var(--orange)">'+a.geenSk.length+'</strong> debiteurnummer(s) zonder serviceklant — worden overgeslagen</div>';
+    if(a.geenDeb.length)       h += '<div><strong style="color:var(--orange)">'+a.geenDeb.length+'</strong> debiteurnummer(s) bestaan niet in Flow8 — worden overgeslagen</div>';
     if(a.onbekendeCode.length) h += '<div><strong style="color:var(--orange)">'+a.onbekendeCode.length+'</strong> onbekende contractcode(s) — worden wél overgenomen</div>';
     if(a.bWeg.length)          h += '<div><strong style="color:var(--orange)">'+a.bWeg.length+'</strong> met B-vinkje maar zónder B in het bestand — ter controle, niets wordt uitgevinkt</div>';
     h += '</div>';
@@ -9110,23 +9127,59 @@ function _openContractImport(){
   document.getElementById('cimp-doen').addEventListener('click', function(){
     var a = _analyseer();
     if(!a){ toast('Koppel debiteurnummer én contractcode','error'); return; }
-    if(!a.bij.length){ toast('Geen serviceklanten om bij te werken','warning'); return; }
-    var vraag = a.bij.length+' serviceklant(en) bijwerken?';
+    if(!a.bij.length && !a.nieuw.length){ toast('Geen serviceklanten om bij te werken of aan te maken','warning'); return; }
+    var vraag = a.bij.length+' serviceklant(en) bijwerken';
+    if(a.nieuw.length) vraag += ' en '+a.nieuw.length+' nieuwe aanmaken';
+    vraag += '?';
     if(a.conflict.length) vraag += ' '+a.conflict.length+' met meerdere onderhoudscontracten worden overgeslagen.';
     if(a.geenSk.length)   vraag += ' '+a.geenSk.length+' zonder serviceklant worden overgeslagen.';
+    if(a.geenDeb.length)  vraag += ' '+a.geenDeb.length+' onbekende debiteurnummer(s) worden overgeslagen.';
     bevestigActie('Contracten importeren', vraag, function(){
-      var gew=0;
+      var gew=0, nw=0;
       a.bij.forEach(function(x){
         var k = x.sk, veranderd = false;
         if(x.code && k.contractType !== x.code){ k.contractType = x.code; veranderd = true; }
         if(x.b && !k.heeftBContract){ k.heeftBContract = true; veranderd = true; }
         if(veranderd){ dbSaveItem('serviceklanten', k.id, k); gew++; }
       });
+      // Nieuwe serviceklanten: gegevens uit de debiteur, contract uit het bestand.
+      // De rest (pomp, duur, datums) vult Homa daarna handmatig aan.
+      a.nieuw.forEach(function(x){
+        var d = x.deb;
+        var sk = {
+          id: uid(),
+          debId: d.id,
+          debNr: d.nr||'',
+          naam: d.naam||'',
+          adres: d.adres||'',
+          postcode: d.postcode||'',
+          plaats: d.plaats||'',
+          contactpersoon: d.contactpersoon||'',
+          email: d.email||'',
+          telefoon: d.telefoon||'',
+          contractType: x.code||'',
+          heeftBContract: !!x.b,
+          uitvoerder: 'intern',
+          pomptype: '',
+          besturing: '',
+          pompIds: null,
+          duurUren: null,
+          laatsteDatum: '',
+          volgendeDatum: '',
+          werkomschrijving: '',
+          notitie: 'Aangemaakt via contracten-import',
+          contractOpgezegd: null,
+          status: 'actief'
+        };
+        APP.serviceklanten.push(sk);
+        dbSaveItem('serviceklanten', sk.id, sk);
+        nw++;
+      });
       closeModal();
       renderDebiteuren();
-      toast(gew+' serviceklant(en) bijgewerkt','success');
+      toast(gew+' bijgewerkt'+(nw?(' · '+nw+' aangemaakt'):''),'success');
       // Overgeslagen rijen tonen zodat je ze handmatig kunt nalopen.
-      if(a.conflict.length || a.geenSk.length || a.bWeg.length){
+      if(a.conflict.length || a.geenSk.length || a.bWeg.length || a.geenDeb.length){
         var r = '';
         if(a.conflict.length){
           r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--red)">Meerdere onderhoudscontracten ('+a.conflict.length+')</div>';
@@ -9145,6 +9198,13 @@ function _openContractImport(){
               + '<button type="button" class="btn btn-ghost btn-sm cimp-bweg" data-id="'+esc(x.sk.id)+'" style="font-size:11px;padding:2px 8px;color:var(--red)">B uitvinken</button>'
               + '</div>';
           }).join('');
+          r += '</div>';
+        }
+        if(a.geenDeb.length){
+          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange)">Debiteur niet gevonden ('+a.geenDeb.length+')</div>';
+          r += '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze debiteurnummers staan niet in Flow8, dus er kon geen serviceklant worden aangemaakt. Importeer eerst de debiteuren.</p>';
+          r += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-bottom:14px;max-height:160px;overflow:auto">';
+          r += a.geenDeb.map(function(d){ return esc(d.nr)+' → '+esc(d.onderhoud.join(', '))+(d.b?(d.onderhoud.length?' + B':'B'):''); }).join('<br>');
           r += '</div>';
         }
         if(a.geenSk.length){
