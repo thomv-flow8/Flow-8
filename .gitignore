@@ -1,0 +1,17 @@
+# Besturingssysteem en editors
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Node en Firebase (flow8-functions heeft daarnaast een eigen .gitignore)
+node_modules/
+.firebase/
+*.log
+
+# Geheimen en lokale instellingen — nooit committen
+.env
+.env.*
+*.local
+.claude/settings.local.json

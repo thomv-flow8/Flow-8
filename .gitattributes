@@ -1,0 +1,11 @@
+# Alle tekstbestanden met LF-regeleindes, ook op Windows.
+# Voorkomt dat een editor een diff van 35.000 regels maakt door alleen CRLF/LF.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
