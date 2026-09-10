@@ -7,12 +7,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Publiceren naar GitHub Pages** — gecontroleerd op 10 september 2026: de versie op GitHub is
       gelijk aan het canonieke bestand.
 - [ ] **Firebase Authorized domains** — controleer dat `thomv-flow8.github.io` erin staat.
-- [ ] **RTDB-rules: admin kan zich naar een ander bedrijf verplaatsen** — in `flow8/gebruikers/$uid`
-      mag een admin bij een bestaand profiel `bedrijfId` vrij wijzigen, ook bij zijn eigen profiel.
-      Zo wordt hij admin van een ander bedrijf, en via `zetGebruikersClaim` ook in Firestore en
-      Storage. Direct uit te buiten voor bedrijven met een raadbaar id (zoals `demo`). Fix: in de
-      admin-tak voor bestaande profielen `newData.child('bedrijfId').val() === data.child('bedrijfId').val()`
-      eisen.
+- [x] **RTDB-rules: admin kan zich naar een ander bedrijf verplaatsen** — opgelost en live op
+      10 september 2026. In de admin-tak van `flow8/gebruikers/$uid` moet `bedrijfId` bij een
+      bestaand profiel gelijk blijven (verwijderen mag). Getest: account aanmaken, rol wijzigen,
+      toegang blokkeren/verlenen en verwijderen werken nog.
 - [ ] **Cloud Function mail-wrapper deployen** — zodat de huisstijl ook in de e-mails zit
       Code staat in `flow8-functions/` (`bouwMailHtml` zit er al in); controleren of de
       gedeployde versie gelijk is.
