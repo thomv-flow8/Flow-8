@@ -1,0 +1,113 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Flow8 — Firestore-rules, NIVEAU 2 (werkbonnen, op rechtvlaggen)
+    //
+    // Bouwt voort op niveau 1 (bedrijfscheiding). Werkbonnen krijgen een extra
+    // laag: wie alleen het 'eigen'-recht heeft (rch.werkbonnen=='e') mag losse bonnen alleen
+    // inzien/muteren als hij is toegewezen (medId in monteurIds).
+    //
+    // Claims op het token (gezet door zetGebruikersClaim):
+    //   bedrijfId, rol, actief, medId, rch (rch.werkbonnen: 's'/'e'/'g')
+    //
+    // GET vs LIST — belangrijk:
+    // Firestore evalueert een rule bij een query (list) VOORDAT documenten gelezen
+    // zijn; resource.data bestaat dan nog niet, dus een isToegewezen(resource.data)
+    // check breekt élke query. Daarom is 'read' hier gesplitst:
+    //   - get  : één document — streng, met isToegewezen (gerichte inzage in een
+    //            specifieke andermans bon wordt geblokkeerd).
+    //   - list : een query — toegestaan op de token-vlaggen; de client filtert op
+    //            de eigen medId (array-contains), wat de app al doet.
+    // Restrisico (bewust geaccepteerd, optie 1): een eigen-recht-gebruiker zou via een
+    // eigen query bonnen binnen zijn EIGEN bedrijf kunnen oplijsten. Cross-bedrijf
+    // blijft dicht (niveau 1) en gerichte get op een andermans bon blijft dicht.
+    // Later te verscherpen met query-constraint-checks (optie 2).
+    // ─────────────────────────────────────────────────────────────────────────
+
+    function isActiefBedrijf(bedrijfId) {
+      return request.auth != null
+        && request.auth.token.bedrijfId == bedrijfId
+        && request.auth.token.actief == true;
+    }
+
+    function magAlleBonnen() {
+      return request.auth.token.rch.werkbonnen == 's';
+    }
+
+    function magEigenBonnen() {
+      return request.auth.token.rch.werkbonnen == 'e';
+    }
+
+    // Is deze bon aan de ingelogde gebruiker toegewezen? monteurIds is een lijst
+    // van medewerker-id's; het token draagt medId.
+    function isToegewezen(bonData) {
+      return request.auth.token.medId != null
+        && bonData.monteurIds is list
+        && bonData.monteurIds.hasAny([request.auth.token.medId]);
+    }
+
+    // ── Werkbonnen ────────────────────────────────────────────────────────────
+    match /bedrijven/{bedrijfId}/werkbonnen/{werkbonId} {
+
+      // Losse bon (get): streng. Eigen-recht mag alleen zijn toegewezen bon.
+      allow get: if isActiefBedrijf(bedrijfId)
+        && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(resource.data)) );
+
+      // Query (list): toegestaan op token-vlaggen; client filtert op eigen medId.
+      allow list: if isActiefBedrijf(bedrijfId)
+        && ( magAlleBonnen() || magEigenBonnen() );
+
+      // Aanmaken: alle-recht altijd; eigen-recht alleen als hij zichzelf toewijst.
+      allow create: if isActiefBedrijf(bedrijfId)
+        && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(request.resource.data)) );
+
+      // Wijzigen: alle-recht altijd; eigen-recht alleen als de bon zowel vóór als
+      // ná de wijziging aan hem toegewezen blijft.
+      allow update: if isActiefBedrijf(bedrijfId)
+        && ( magAlleBonnen()
+             || (magEigenBonnen() && isToegewezen(resource.data) && isToegewezen(request.resource.data)) );
+
+      // Verwijderen: alle-recht altijd; eigen-recht alleen zijn eigen bon.
+      allow delete: if isActiefBedrijf(bedrijfId)
+        && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(resource.data)) );
+
+      // Subcollecties (uren, fotos, documenten, ...) erven de toegang van de bon.
+      // get op de bovenliggende bon met dezelfde get/list-splitsing.
+      match /{subcollectie}/{docId} {
+        function bon() {
+          return get(/databases/$(database)/documents/bedrijven/$(bedrijfId)/werkbonnen/$(werkbonId)).data;
+        }
+        allow get, list: if isActiefBedrijf(bedrijfId)
+          && ( magAlleBonnen() || magEigenBonnen() );
+        allow write: if isActiefBedrijf(bedrijfId)
+          && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(bon())) );
+      }
+    }
+
+    // ── Overige collecties: niveau-1 bedrijfscheiding (ongewijzigd) ────────────
+    match /bedrijven/{bedrijfId}/werkorders/{id} {
+      allow read, write: if isActiefBedrijf(bedrijfId);
+      match /{sub}/{subId} { allow read, write: if isActiefBedrijf(bedrijfId); }
+    }
+    match /bedrijven/{bedrijfId}/werkorderTypen/{id} {
+      allow read, write: if isActiefBedrijf(bedrijfId);
+      match /{sub}/{subId} { allow read, write: if isActiefBedrijf(bedrijfId); }
+    }
+    match /bedrijven/{bedrijfId}/werkdocumenten/{id} {
+      allow read, write: if isActiefBedrijf(bedrijfId);
+    }
+    match /bedrijven/{bedrijfId}/artikelen/{id} {
+      allow read, write: if isActiefBedrijf(bedrijfId);
+    }
+    match /bedrijven/{bedrijfId}/checklistTemplates/{id} {
+      allow read, write: if isActiefBedrijf(bedrijfId);
+    }
+
+    // Alles buiten de bedrijfsstructuur blijft dicht.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

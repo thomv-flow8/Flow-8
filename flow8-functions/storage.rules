@@ -1,0 +1,28 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Flow8 — Storage-rules, niveau 1: bedrijfsscheiding (multi-tenant)
+    //
+    // Alle bestanden staan onder flow8/{bedrijfId}/... (zie storageUpload in de
+    // app). Elke gebruiker mag alleen bij de bestanden van zijn EIGEN bedrijf.
+    // Het bedrijf komt van de custom claim op het auth-token (bedrijfId).
+    //
+    // Let op: verwijderen gebeurt in de app via refFromURL(url). Deze rules
+    // dwingen het bedrijf af op het PAD, niet op de URL — dus ook een verwijder-
+    // actie op een vreemde bedrijfsmap wordt hier geweigerd.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    match /flow8/{bedrijfId}/{allePaden=**} {
+      allow read, write: if request.auth != null
+        && request.auth.token.bedrijfId == bedrijfId
+        && request.auth.token.actief == true;
+    }
+
+    // Alles daarbuiten dicht.
+    match /{allePaden=**} {
+      allow read, write: if false;
+    }
+  }
+}

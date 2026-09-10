@@ -1,0 +1,106 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "flow8": {
+      "gebruikers": {
+        "$uid": {
+          ".read": "auth != null && (auth.uid === $uid || root.child('flow8/gebruikers/'+auth.uid+'/platformBeheer').val() === true || (root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === data.child('bedrijfId').val()))",
+          ".write": "auth != null && ( root.child('flow8/gebruikers/'+auth.uid+'/platformBeheer').val() === true || (auth.uid === $uid && !data.exists() && newData.child('uid').val() === auth.uid && newData.child('rol').val() === 'monteur' && newData.child('actief').val() === false) || (auth.uid === $uid && data.exists() && newData.child('rol').val() === data.child('rol').val() && newData.child('actief').val() === data.child('actief').val() && newData.child('bedrijfId').val() === data.child('bedrijfId').val()) || (root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( (!data.exists() && newData.child('bedrijfId').val() === root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val()) || (data.exists() && data.child('bedrijfId').val() === root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val()) ) ) )",
+          "uid": {
+            ".validate": "newData.val() === $uid"
+          },
+          "rol": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 40"
+          },
+          "bedrijfId": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 60"
+          },
+          "actief": {
+            ".validate": "newData.isBoolean()"
+          },
+          "email": {
+            ".validate": "newData.isString() && newData.val().length < 200"
+          },
+          "naam": {
+            ".validate": "newData.isString() && newData.val().length < 200"
+          },
+          "platformBeheer": {
+            ".validate": false
+          },
+          "$overig": {
+            ".validate": true
+          }
+        }
+      },
+      "bedrijvenIndex": {
+        ".read": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/platformBeheer').val() === true",
+        ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/platformBeheer').val() === true",
+        "$bedrijfId": {
+          ".read": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true",
+          ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'",
+          ".validate": "newData.hasChildren(['naam'])",
+          "naam": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length < 200"
+          },
+          "$overig": {
+            ".validate": false
+          }
+        }
+      },
+      "bedrijven": {
+        "$bedrijfId": {
+          ".read": "auth != null && ( root.child('flow8/gebruikers/'+auth.uid+'/platformBeheer').val() === true || (root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true) )",
+          ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/platformBeheer').val() === true",
+          "rollen": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
+          },
+          "instellingen": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
+          },
+          "gebruikers": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
+          },
+          "contracten": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
+          },
+          "opdrachttypes": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
+          },
+          "locaties": {
+            "$locUid": {
+              ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && (auth.uid === $locUid || root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin')"
+            }
+          },
+          "reistijdCache": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true",
+            "$sleutel": {
+              ".validate": "newData.hasChildren(['ts'])"
+            }
+          },
+          "$overig": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true"
+          },
+          "overuren": {
+            "$id": {
+              ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( (auth.token.ouRecht === 's') || ( (auth.token.ouRecht === 'e') && auth.token.medId != null && newData.child('medId').val() === auth.token.medId && ( !data.exists() || ( data.child('medId').val() === auth.token.medId && data.child('status').val() === 'aangevraagd' ) ) && ( !newData.exists() || newData.child('status').val() === 'aangevraagd' ) ) )"
+            }
+          },
+          "onkosten": {
+            "$id": {
+              ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( (auth.token.okRecht === 's') || ( (auth.token.okRecht === 'e') && auth.token.medId != null && newData.child('medId').val() === auth.token.medId && ( !data.exists() || ( data.child('medId').val() === auth.token.medId && data.child('status').val() === 'aangevraagd' ) ) && ( !newData.exists() || newData.child('status').val() === 'aangevraagd' ) ) )"
+            }
+          },
+          "verlof": {
+            "$id": {
+              ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( (auth.token.vlRecht === 's') || ( (auth.token.vlRecht === 'e') && auth.token.medId != null && newData.child('medId').val() === auth.token.medId && ( !data.exists() || ( data.child('medId').val() === auth.token.medId && data.child('status').val() === 'aangevraagd' ) ) && ( !newData.exists() || newData.child('status').val() === 'aangevraagd' ) ) )"
+            }
+          },
+          "verzuim": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && auth.token.vzRecht === 's'"
+          }
+        }
+      }
+    }
+  }
+}

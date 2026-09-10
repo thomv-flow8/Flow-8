@@ -77,6 +77,9 @@ Thomas keurt elke stap goed; presenteer opties en analyse, laat Thomas beslissen
   (niet in git). Zet nooit een sleutel in code of repo.
 - Deployen: `cd flow8-functions && firebase deploy --only functions`. Dat staat los van de
   Pages-push en is direct live — alleen na akkoord van Thomas.
+- Rules: `database.rules.json`, `firestore.rules` en `storage.rules` in `flow8-functions/` zijn een
+  kopie van de live-rules uit de Firebase Console (stand 10 september 2026). Ze zijn **nog niet**
+  gekoppeld aan `firebase.json`. Wijzig je rules, houd Console en repo dan gelijk.
 
 ## Designtokens (huisstijl — gebruik deze, geen losse waarden)
 
@@ -112,7 +115,7 @@ altijd beide.
   monteur (werkbon zichtbaar). Inplannen wijzigt de status niet. `spoed` staat nog ín het
   statusmodel maar hoort een aparte prioriteitsvlag te worden (zie TODO).
 - **Monteur-rechten**: monteurs dienen Overuren/Onkosten/Verlof zelf in (write, eigen records);
-  bewerkbaar zolang `ingediend`/`in behandeling`, daarna read-only. Verzuim: alleen eigen data
+  bewerkbaar zolang de status `aangevraagd` is (afgedwongen in de RTDB-rules), daarna read-only. Verzuim: alleen eigen data
   bekijken. Rechten zijn status-afhankelijk, niet alleen module aan/uit.
 
 ## Gotchas (hard geleerd)
