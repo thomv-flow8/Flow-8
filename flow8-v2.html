@@ -20741,6 +20741,13 @@ var WO_MAIL_DEFAULT = {
   body: 'Beste {contactNaam},\n\nHierbij ontvangt u de {typeWerk} #{bonnummer}.\n\nIn de bijlage vindt u alle details.',
   handtekening: 'Met vriendelijke groet,\n{bedrijfsnaam}'
 };
+// Ruimt resten van lege invulvelden op: een losse streep aan het eind van een regel
+// ("Assemblage ASSEM-3 —") en een spatie vóór de komma na de aanhef ("Beste ,").
+function _mailTekstOpschonen(t){
+  return String(t||'')
+    .replace(/[ \t]+[—–-][ \t]*$/gm, '')
+    .replace(/\b(Beste|Geachte|Hallo|Dag|Goedemorgen|Goedemiddag)[ \t]+,/g, '$1,');
+}
 // Vult placeholders in een werkbon-mailtekst.
 function _wbMailVul(tekst, wb, bonNr){
   if(!tekst) return '';
@@ -20757,7 +20764,7 @@ function _wbMailVul(tekst, wb, bonNr){
   };
   var t = tekst;
   Object.keys(vars).forEach(function(k){ t = t.split('{'+k+'}').join(vars[k]); });
-  return t;
+  return _mailTekstOpschonen(t);
 }
 
 
@@ -26313,7 +26320,7 @@ function vulMailIn(template, opdracht) {
   };
   var tekst = template;
   Object.keys(vars).forEach(function(k){ tekst = tekst.split('{'+k+'}').join(vars[k]); });
-  return tekst;
+  return _mailTekstOpschonen(tekst);
 }
 
 function stuurMail(opdrachtId, templateId) {
@@ -34278,20 +34285,24 @@ function _woBlokMailVersturen(bl, mailNaar){
     toast(welk+' ingesteld. Vul het aan in de mail-modal.','warning');
   }
 
-  var klantNaam = wo.klantnaam || (deb&&deb.naam) || '';
+  // Klantnaam zoals overal bij werkorders (_woKlantKort): ook "T.b.v. voorraad" en de
+  // debiteurnaam als terugval. Contact: de standaard contactpersoon van de debiteur.
+  var klantNaam = _woKlantKort(wo);
   var typeNaam = (type&&type.naam) || 'Werkorder';
   var nummer = _woNummerPlat(wo);
-  var contactNaam = (deb&&deb.contactpersoon) || klantNaam || '';
+  var _woCts = (deb && typeof debContacten==='function') ? debContacten(deb) : [];
+  var _woStdCt = _woCts.find(function(c){ return c && c.standaard; }) || _woCts[0];
+  var contactNaam = (_woStdCt && _woStdCt.naam) || (deb&&deb.contactpersoon) || (wo.tbvVoorraad ? '' : klantNaam) || '';
   var woi = APP.werkordersInst || {};
   // Template + placeholder-invulling
   function _vul(t){
-    return String(t||'')
+    return _mailTekstOpschonen(String(t||'')
       .replace(/\{klantNaam\}/g, klantNaam)
       .replace(/\{contactNaam\}/g, contactNaam)
       .replace(/\{datum\}/g, fmtD(new Date().toISOString().slice(0,10)))
       .replace(/\{bonnummer\}/g, nummer)
       .replace(/\{typeWerk\}/g, typeNaam)
-      .replace(/\{bedrijfsnaam\}/g, bg.naam||'');
+      .replace(/\{bedrijfsnaam\}/g, bg.naam||''));
   }
   var onderwerp = _vul(woi.mailOnderwerp || WO_MAIL_DEFAULT.onderwerp);
   var body = _vul(woi.mailBody || WO_MAIL_DEFAULT.body) + '\n\n' + _vul(woi.mailHandtekening!=null ? woi.mailHandtekening : WO_MAIL_DEFAULT.handtekening);

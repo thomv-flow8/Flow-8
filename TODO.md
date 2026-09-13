@@ -42,10 +42,9 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Rapportage → Medewerkers (was "Persoonlijk")** — 13 september 2026: cirkeldiagrammen
       medewerkers per rol en ingezette uren per rol (met % op de ring) en een staafdiagram per maand
       (gewerkt, verlof, verzuim, overuren). Gewerkt = roosteruren − verlof − verzuim (keuze A).
-- [ ] **Percentages op de ring ook op andere rapportagepagina's?** — optioneel; `donutSVG(…, true)`.
-- [ ] **Verzuimrecords van verwijderde medewerkers opruimen** — de lopende ziekmeldingen van de twee
-      verwijderde medewerkers staan nog in de RTDB (onzichtbaar). Gezondheidsgegevens: bewust opruimen
-      of bewaren (AVG-bewaartermijn).
+- [x] **Percentages op de ring ook op andere rapportagepagina's?** — besloten 13 september 2026: niet nodig.
+- [x] **Verzuimrecords van verwijderde medewerkers** — besloten 13 september 2026: bewaren. Ze staan in
+      de RTDB en tellen nergens meer mee.
 - [ ] **Assemblage-mail: klantnaam leeg** — onderwerp "Assemblage ASSEM-3 —" en aanhef "Beste ,"
       (gezien op 13 september 2026). Uitzoeken waar de klantnaam in dat sjabloon vandaan komt.
 
