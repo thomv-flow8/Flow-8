@@ -1,7 +1,7 @@
 // Flow8 — verstuurMail Cloud Function
 // Verstuurt mails direct via Resend, met optionele PDF-bijlage.
 // Beveiliging: alleen ingelogde Flow8-gebruikers met een geldig profiel;
-// elke verzending wordt gelogd naar flow8/{bedrijfId}/mailLog.
+// elke verzending wordt gelogd naar flow8/bedrijven/{bedrijfId}/mailLog.
 
 const { onRequest } = require('firebase-functions/v2/https');
 const { defineSecret, defineString } = require('firebase-functions/params');
@@ -166,10 +166,21 @@ function bouwMailHtml(gegevens, onderwerp, bodyTekst, label) {
 
   // Header: alleen de bedrijfsnaam in lichte tekst op de accentkleur (geen wit
   // logoblok meer — dat stak af). Het logo staat in de footer op wit.
-  const merk = '<span style="font-size:18px;font-weight:800;color:' + headerTekst + ';letter-spacing:-.3px;">' + naam + '</span>';
-  // Logo voor de footer (alleen als er een publieke URL is).
+  const merk = '<span style="font-size:20px;font-weight:800;color:' + headerTekst + ';letter-spacing:-.3px;">' + naam + '</span>';
+  // Logo voor de footer (alleen als er een publieke URL is). Weergave binnen
+  // 220x64px met behoud van verhouding. De afmetingen meet de app bij het uploaden;
+  // expliciete width/height zijn nodig voor Outlook (Windows), dat max-width negeert.
+  // Zonder afmetingen (oud logo, SVG): de oude, begrensde weergave.
+  const lb = Number(g.logoBreedte) || 0, lh = Number(g.logoHoogte) || 0;
+  let logoB = 0, logoH = 0;
+  if (lb > 0 && lh > 0) {
+    logoH = 64; logoB = Math.round(lb * 64 / lh);
+    if (logoB > 220) { logoB = 220; logoH = Math.max(1, Math.round(lh * 220 / lb)); }
+  }
   const logoFooter = (g.logo && /^https?:\/\//.test(g.logo))
-    ? '<img src="' + _esc(g.logo) + '" alt="' + naam + '" style="max-height:64px;max-width:200px;width:auto;height:auto;display:block;">'
+    ? (logoB
+        ? '<img src="' + _esc(g.logo) + '" alt="' + naam + '" width="' + logoB + '" height="' + logoH + '" style="width:' + logoB + 'px;height:auto;max-width:100%;display:block;border:0;">'
+        : '<img src="' + _esc(g.logo) + '" alt="' + naam + '" style="max-height:64px;max-width:200px;width:auto;height:auto;display:block;">')
     : '';
 
   // Footer-regel met contactgegevens (alleen tonen wat bestaat)
@@ -191,7 +202,7 @@ function bouwMailHtml(gegevens, onderwerp, bodyTekst, label) {
 '<td align="right" style="vertical-align:middle;">' + labelHtml + '</td>' +
 '</tr></table></td></tr>' +
 // titel
-'<tr><td style="padding:36px 32px 8px;"><h1 style="margin:0;font-size:24px;line-height:1.3;color:#16202e;font-weight:800;letter-spacing:-.3px;">' + _esc(onderwerp) + '</h1></td></tr>' +
+'<tr><td style="padding:36px 32px 8px;"><h1 style="margin:0;font-size:18px;line-height:1.35;color:#16202e;font-weight:700;letter-spacing:-.2px;">' + _esc(onderwerp) + '</h1></td></tr>' +
 // body
 '<tr><td style="padding:22px 32px 8px;">' + _bodyNaarHtml(bodyTekst) + '</td></tr>' +
 // Logo in het witte deel, onder de ondertekening (als er een publieke URL is).

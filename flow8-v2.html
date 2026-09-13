@@ -4594,6 +4594,86 @@ function comprimeerFotoVoorUpload(file, maxZijde, kwaliteit) {
   });
 }
 
+// Bereid een bedrijfslogo voor op upload: witruimte en dunne randjes rondom
+// wegsnijden en verkleinen tot max 800x400px. Geeft het bestand plus de
+// afmetingen terug; verstuurMail gebruikt die om het logo in e-mails op de
+// juiste maat te tonen (ook in Outlook). SVG of een onleesbaar bestand gaat
+// ongewijzigd door.
+function bereidLogoVoor(file) {
+  return new Promise(function(resolve){
+    var ongewijzigd = { file:file, breedte:null, hoogte:null };
+    if(!file.type || file.type.indexOf('image/') !== 0 || file.type === 'image/svg+xml') { resolve(ongewijzigd); return; }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var werk = document.createElement('canvas'), uit = document.createElement('canvas');
+        // Canvas-geheugen op iOS pas echt vrijgeven met 0x0
+        function ruimOp(){ werk.width = werk.height = 0; uit.width = uit.height = 0; }
+        var alsOrigineel = { file:file, breedte: img.naturalWidth || null, hoogte: img.naturalHeight || null };
+        try {
+          // 1. Werkkopie van max 2000px lange zijde (beperkt het geheugen op iOS)
+          var s = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
+          var w = Math.max(1, Math.round(img.naturalWidth*s)), h = Math.max(1, Math.round(img.naturalHeight*s));
+          werk.width = w; werk.height = h;
+          var wctx = werk.getContext('2d');
+          wctx.drawImage(img, 0, 0, w, h);
+          var px = wctx.getImageData(0, 0, w, h).data;
+          // 2. Achtergrond bepalen aan de vier hoeken, net binnen de buitenste 1%
+          //    (daar zitten vaak dunne randjes van een export).
+          var marge = Math.max(2, Math.round(Math.min(w, h)*0.01));
+          var hoeken = [[marge,marge],[w-1-marge,marge],[marge,h-1-marge],[w-1-marge,h-1-marge]]
+            .map(function(p){ return (p[1]*w+p[0])*4; });
+          var transparant = hoeken.every(function(i){ return px[i+3] <= 16; });
+          var wit = !transparant && hoeken.every(function(i){ return px[i+3] >= 250 && px[i] >= 235 && px[i+1] >= 235 && px[i+2] >= 235; });
+          function isLeeg(i){
+            return transparant ? px[i+3] <= 16 : (px[i] >= 235 && px[i+1] >= 235 && px[i+2] >= 235);
+          }
+          // 3. Kader van de inhoud zoeken (alleen bij een witte of transparante achtergrond;
+          //    een gekleurd vlak hoort bij het logo en blijft staan)
+          var x0 = 0, y0 = 0, x1 = w-1, y1 = h-1;
+          if(transparant || wit){
+            var bx0 = w, by0 = h, bx1 = -1, by1 = -1;
+            for(var y = marge; y < h-marge; y++){
+              for(var x = marge; x < w-marge; x++){
+                if(!isLeeg((y*w+x)*4)){
+                  if(x < bx0) bx0 = x; if(x > bx1) bx1 = x;
+                  if(y < by0) by0 = y; if(y > by1) by1 = y;
+                }
+              }
+            }
+            if(bx1 >= bx0 && by1 >= by0){
+              var pad = Math.max(2, Math.round(Math.min(bx1-bx0+1, by1-by0+1)*0.06));
+              x0 = Math.max(0, bx0-pad); y0 = Math.max(0, by0-pad);
+              x1 = Math.min(w-1, bx1+pad); y1 = Math.min(h-1, by1+pad);
+            }
+          }
+          // 4. Uitsnede verkleinen tot max 800x400px en exporteren (JPEG blijft JPEG, rest PNG)
+          var cw = x1-x0+1, ch = y1-y0+1;
+          var s2 = Math.min(1, 800/cw, 400/ch);
+          var ow = Math.max(1, Math.round(cw*s2)), oh = Math.max(1, Math.round(ch*s2));
+          uit.width = ow; uit.height = oh;
+          var octx = uit.getContext('2d');
+          var alsJpeg = (file.type === 'image/jpeg');
+          if(alsJpeg){ octx.fillStyle = '#ffffff'; octx.fillRect(0, 0, ow, oh); }
+          octx.imageSmoothingQuality = 'high';
+          octx.drawImage(werk, x0, y0, cw, ch, 0, 0, ow, oh);
+          uit.toBlob(function(blob){
+            ruimOp();
+            if(!blob){ resolve(alsOrigineel); return; }
+            var type = alsJpeg ? 'image/jpeg' : 'image/png';
+            resolve({ file: new File([blob], 'bedrijf_logo.' + (alsJpeg ? 'jpg' : 'png'), { type:type }), breedte: ow, hoogte: oh });
+          }, alsJpeg ? 'image/jpeg' : 'image/png', 0.92);
+        } catch(err){ ruimOp(); resolve(alsOrigineel); }
+      };
+      img.onerror = function(){ resolve(ongewijzigd); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function(){ resolve(ongewijzigd); };
+    reader.readAsDataURL(file);
+  });
+}
+
 // Werkbon archiveren: verbergen uit alle overzichten zonder gegevens te wissen.
 // Gebruikt bij het verwijderen van een opdracht — de werkbon blijft bewaard en is terug te halen.
 function fsWerkbonArchiveren(werkbonId) {
@@ -19648,7 +19728,9 @@ async function verstuurMailDirect(payload) {
       telefoon: _bg.telefoon || '',
       email:    _bg.email || '',
       website:  _bg.website || '',
-      mailKleur: _bg.mailKleur || ''
+      mailKleur: _bg.mailKleur || '',
+      logoBreedte: _bg.logoBreedte || null,
+      logoHoogte:  _bg.logoHoogte || null
     }
   });
   var token = await user.getIdToken();
@@ -25587,7 +25669,11 @@ function laadKaartData() {
             ctx.beginPath();
             ctx.arc(SIZE/2, SIZE/2, SIZE/2 - 3, 0, Math.PI*2);
             ctx.clip();
-            ctx.drawImage(img, 3, 3, SIZE-6, SIZE-6);
+            // Verhouding behouden; brede of hoge logo's iets kleiner zodat ze binnen de cirkel vallen
+            var _r = (img.naturalWidth && img.naturalHeight) ? img.naturalWidth/img.naturalHeight : 1;
+            var _vak = (_r > 1.2 || _r < 0.83) ? SIZE-10 : SIZE-6;
+            var _lw = _r >= 1 ? _vak : _vak*_r, _lh = _r >= 1 ? _vak/_r : _vak;
+            ctx.drawImage(img, (SIZE-_lw)/2, (SIZE-_lh)/2, _lw, _lh);
             ctx.restore();
             _plaatsBedrijfMarker(canvas.toDataURL('image/png'), SIZE);
           } catch(e) {
@@ -28352,7 +28438,7 @@ function renderInstBedrijf(el) {
   // Logo upload voor het kaartoverzicht
   h += '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">';
   h += '<div style="font-weight:700;font-size:14px;margin-bottom:12px">Bedrijfslogo</div>';
-  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Het logo wordt getoond op het kaartoverzicht als marker voor de bedrijfslocatie.</div>';
+  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Het logo wordt gebruikt in e-mails, op de werkbon-PDF en als marker op de kaart. Witruimte rondom wordt bij het uploaden automatisch weggesneden.</div>';
   if(bg.logo) {
     h += '<div style="margin-bottom:12px;display:flex;align-items:center;gap:12px">';
     h += '<img src="'+bg.logo+'" style="height:52px;width:auto;border-radius:8px;border:1px solid var(--border);background:#fff;padding:4px;object-fit:contain" alt="Bedrijfslogo">';
@@ -28400,8 +28486,10 @@ function renderInstBedrijf(el) {
       if(oudLogo && oudLogo.startsWith('https://firebasestorage')) {
         await storageVerwijder(oudLogo);
       }
-      var url = await storageUpload('instellingen/logo/bedrijf_logo.'+file.name.split('.').pop(), file);
-      var data = Object.assign({}, APP.bedrijfGegevens || {}, { logo: url });
+      // Witruimte wegsnijden + verkleinen; de afmetingen gaan mee voor de huisstijl-mail
+      var logo = await bereidLogoVoor(file);
+      var url = await storageUpload('instellingen/logo/bedrijf_logo.'+logo.file.name.split('.').pop(), logo.file);
+      var data = Object.assign({}, APP.bedrijfGegevens || {}, { logo: url, logoBreedte: logo.breedte, logoHoogte: logo.hoogte });
       APP.bedrijfGegevens = data;
       FB.ref(dbPath('instellingen','bedrijf')).set(data);
       toast('Logo opgeslagen','success');
@@ -28420,6 +28508,8 @@ function renderInstBedrijf(el) {
       await storageVerwijder(data.logo);
     }
     delete data.logo;
+    delete data.logoBreedte;
+    delete data.logoHoogte;
     APP.bedrijfGegevens = data;
     FB.ref(dbPath('instellingen','bedrijf')).set(data);
     toast('Logo verwijderd','success');
@@ -28455,11 +28545,14 @@ function renderInstBedrijf(el) {
       toonOpKaart: document.getElementById('bg-kaart') ? document.getElementById('bg-kaart').checked : !!(APP.bedrijfGegevens&&APP.bedrijfGegevens.toonOpKaart),
       // Bewaar het logo — anders wordt het overschreven door de save
       logo: (APP.bedrijfGegevens && APP.bedrijfGegevens.logo) || null,
+      logoBreedte: (APP.bedrijfGegevens && APP.bedrijfGegevens.logoBreedte) || null,
+      logoHoogte:  (APP.bedrijfGegevens && APP.bedrijfGegevens.logoHoogte) || null,
       // Huisstijlkleur voor e-mails
       mailKleur: (document.getElementById('bg-mailkleur') ? document.getElementById('bg-mailkleur').value : (APP.bedrijfGegevens && APP.bedrijfGegevens.mailKleur)) || '#1c3d5a',
     };
     // Verwijder null logo zodat Firebase het niet opslaat als null
     if(!data.logo) delete data.logo;
+    if(!data.logo || !data.logoBreedte || !data.logoHoogte){ delete data.logoBreedte; delete data.logoHoogte; }
     APP.bedrijfGegevens = data;
     FB.ref(dbPath('instellingen','bedrijf')).set(data);
     _bedrijfIndexBijwerken(data.naam);
