@@ -1855,14 +1855,21 @@ function _wbOpenPdf(id, btn){
 
 function _wbHistorieAccordion(containerId, bonnen, bron, bronId, beginOpen){
   var wrap = document.getElementById(containerId); if(!wrap) return;
-  if(!bonnen.length){ wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">Nog geen afgehandelde werkbonnen.</div>'; return; }
   var open = !!beginOpen;
+  // Nieuwste datum voor de samenvatting in de kop
+  var laatste = bonnen.reduce(function(m, b){ return (b.datum||'') > m ? (b.datum||'') : m; }, '');
+  var bronTekst = (bron==='debiteur' || bron==='serviceklant') ? 'deze klant' : (bron==='pomp' ? 'deze pomp' : 'dit object');
   function teken(){
-    var h='<div class="wbh-acc-hdr" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-    h+='<span style="flex:1;font-size:13px;font-weight:700">Werkbonnen ('+bonnen.length+')</span>';
-    h+='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="transform:rotate('+(open?'180':'0')+'deg);transition:transform .15s"><path d="M6 9l6 6 6-6"/></svg></div>';
-    if(open){
-      h+='<div style="margin-top:6px">';
+    // Zelfde kop als contactpersonen, locaties, pompen en verzonden mails
+    var h = _dpSectieKop('werkbonnen', '<span style="display:inline-flex;flex-shrink:0">'+(ICO.clipboard||'')+'</span>',
+      'Werkbonnen', bonnen.length,
+      laatste ? ('laatste: '+esc(fmtD(laatste))) : (bonnen.length ? '' : 'nog geen afgehandelde werkbonnen'),
+      open, 'wbh-acc-hdr');
+    if(open && !bonnen.length){
+      h+='<div style="font-size:12px;color:var(--muted);padding:10px 0">Er zijn nog geen afgehandelde werkbonnen voor '+bronTekst+'.</div>';
+    }
+    if(open && bonnen.length){
+      h+='<div>';
       bonnen.forEach(function(b){
         var bonNr = b.bonnummer || (b.planningId?('WB-'+String(b.planningId).slice(-6)):'werkbon');
         h+='<div class="wbh-item" data-id="'+esc(b.id)+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;cursor:pointer">';
@@ -9701,8 +9708,10 @@ function renderDebiteuren(){
 var _dpOpen = { contacten:null, locaties:null, zoekCt:'', zoekLoc:'' };
 
 // Inklapbare sectiekop met telling en een samenvatting van wat erin zit.
-function _dpSectieKop(sleutel, icoon, titel, aantal, samenvatting, open){
-  var h = '<div class="dp-sectie-kop" data-sectie="'+sleutel+'" style="display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--surface2);border-radius:9px;cursor:pointer;margin-bottom:8px">';
+// klasse (optioneel): een andere class voor koppen die hun klik zelf afhandelen (bv. werkbonnen),
+// zodat de paneel-handler op .dp-sectie-kop ze niet oppakt.
+function _dpSectieKop(sleutel, icoon, titel, aantal, samenvatting, open, klasse){
+  var h = '<div class="'+(klasse||'dp-sectie-kop')+'" data-sectie="'+sleutel+'" style="display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--surface2);border-radius:9px;cursor:pointer;margin-bottom:8px">';
   h += icoon;
   h += '<span style="flex:1;min-width:0"><span style="font-weight:700;font-size:13px">'+esc(titel)+' ('+aantal+')</span>';
   if(samenvatting) h += '<span style="display:block;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+samenvatting+'</span>';
@@ -10023,7 +10032,7 @@ function openDebPanel(id, opties){
     }
   }
   h+='</div>';
-  h+='<div style="margin-top:20px"><div id="dp-werkbonnen"><div style="font-size:12px;color:var(--muted);padding:6px 0">Laden…</div></div></div>';
+  h+='<div style="margin-top:16px"><div id="dp-werkbonnen"><div style="font-size:12px;color:var(--muted);padding:6px 0">Laden…</div></div></div>';
 
   // Memo sectie
   h += renderMemoSectie(id, true);

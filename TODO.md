@@ -31,6 +31,11 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Verwijderde medewerkers telden mee bij "Afwezig vandaag"** — opgelost op 13 september 2026.
       Tellingen (dashboard, verlof, verzuim, goedkeuringsmelding) slaan verwijderde medewerkers over;
       "vandaag" ook inactieve. Bij verwijderen volgt een waarschuwing bij lopend verzuim / open aanvragen.
+- [x] **Extra locatie in opdracht werd niet opgeslagen** — opgelost op 13 september 2026. Het
+      locatievenster (en "Nieuwe debiteur") opende in dezelfde modal en verving het opdrachtformulier;
+      nu een venster erboven (`openBovenModal`). Locatie komt in de keuzelijst, ook bij servicecontract-klanten.
+- [x] **Werkbonnen-kop in klantpanelen** — 13 september 2026: zelfde uitklapbare kop als contactpersonen,
+      locaties, pompen en mails (debiteur, serviceklant, object, pomp), ook bij 0 werkbonnen.
 - [ ] **Verzuimrecords van verwijderde medewerkers opruimen** — de lopende ziekmeldingen van de twee
       verwijderde medewerkers staan nog in de RTDB (onzichtbaar). Gezondheidsgegevens: bewust opruimen
       of bewaren (AVG-bewaartermijn).
