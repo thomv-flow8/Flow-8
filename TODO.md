@@ -36,6 +36,8 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       nu een venster erboven (`openBovenModal`). Locatie komt in de keuzelijst, ook bij servicecontract-klanten.
 - [x] **Werkbonnen-kop in klantpanelen** — 13 september 2026: zelfde uitklapbare kop als contactpersonen,
       locaties, pompen en mails (debiteur, serviceklant, object, pomp), ook bij 0 werkbonnen.
+- [x] **Register: foto's boven de kaart + checklist-kop** — 13 september 2026: bij pomp → Installatie en
+      in het objectdetail staan de foto's boven de kaart; checklists hebben dezelfde uitklapbare kop.
 - [ ] **Verzuimrecords van verwijderde medewerkers opruimen** — de lopende ziekmeldingen van de twee
       verwijderde medewerkers staan nog in de RTDB (onzichtbaar). Gezondheidsgegevens: bewust opruimen
       of bewaren (AVG-bewaartermijn).

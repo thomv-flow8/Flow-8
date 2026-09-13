@@ -1766,19 +1766,22 @@ function _objChecklistAccordion(containerId, bonnen, objId){
       }
     });
   });
-  if(!items.length){ wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:6px 0">Nog geen gekoppelde checklists.</div>'; return; }
   items.sort(function(a,b){ return (b.datum||'').localeCompare(a.datum||''); });
 
   // Bewaar voor de read-only weergave
   window._objChecklistCache = items;
   var open = false;
   function teken(){
-    var h='<div class="objcl-acc-hdr" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-    h+='<svg width="15" height="15" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>';
-    h+='<span style="flex:1;font-size:13px;font-weight:700">Checklists ('+items.length+')</span>';
-    h+='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="transform:rotate('+(open?'180':'0')+'deg);transition:transform .15s"><path d="M6 9l6 6 6-6"/></svg></div>';
-    if(open){
-      h+='<div style="margin-top:6px">';
+    // Zelfde kop als werkbonnen, contactpersonen, locaties, pompen en mails
+    var h = _dpSectieKop('checklists', '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+      'Checklists', items.length,
+      items.length ? (items[0].datum ? 'laatste: '+esc(fmtD(items[0].datum)) : '') : 'nog geen gekoppelde checklists',
+      open, 'objcl-acc-hdr');
+    if(open && !items.length){
+      h+='<div style="font-size:12px;color:var(--muted);padding:10px 0">Er zijn nog geen checklists aan dit object gekoppeld.</div>';
+    }
+    if(open && items.length){
+      h+='<div>';
       items.forEach(function(it, idx){
         h+='<div class="objcl-item" data-idx="'+idx+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;cursor:pointer">';
         h+='<svg width="15" height="15" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>';
@@ -22032,10 +22035,7 @@ function renderPompObjectDetail(objId) {
   h += '<div style="margin-bottom:16px"><div id="pr-obj-werkbonnen"><div style="font-size:12px;color:var(--muted);padding:6px 0">Werkbonnen laden…</div></div></div>';
   h += '<div style="margin-bottom:16px"><div id="pr-obj-checklists"><div style="font-size:12px;color:var(--muted);padding:6px 0">Checklists laden…</div></div></div>';
 
-  // Kaart (volle breedte)
-  h += '<div class="obj-kaart-wrap" style="border-radius:var(--radius);overflow:hidden;height:520px;margin-bottom:16px;background:var(--surface2)" id="pr-obj-kaart-wrap"></div>';
-
-  // Foto's sectie
+  // Foto's sectie (boven de kaart)
   var fotos = obj.fotoUrls||[];
   // Foto's (compacte bestanden-sectie → thumbnails klikbaar naar viewer, '+' opent upload-modal)
   var _objFotoRij = fotos.length
@@ -22044,6 +22044,9 @@ function renderPompObjectDetail(objId) {
       }).join('') + '</div>'
     : '';
   h += compacteBestanden('pr-obj-foto', 'Foto\'s', fotos.length, _objFotoRij);
+
+  // Kaart (volle breedte), onder de foto's
+  h += '<div class="obj-kaart-wrap" style="border-radius:var(--radius);overflow:hidden;height:520px;margin-bottom:16px;background:var(--surface2)" id="pr-obj-kaart-wrap"></div>';
 
   el.innerHTML = h;
 
@@ -23407,21 +23410,8 @@ function _renderPompInstallatieTab(pomp, klantNm, kanSchrijven) {
   h += '</div>';
   h += '</div>'; // einde rij 1
 
-  // ── Rij 2: Kaart (volle breedte) ──
-  if(mapCoords || mapAdres) {
-    h += '<div id="pr-install-map-placeholder" style="display:none" '
-      +'data-adres="'+esc(mapAdres)+'" '
-      +'data-lat="'+esc(String(mapCoords?mapCoords.lat:''))+'" '
-      +'data-lng="'+esc(String(mapCoords?mapCoords.lng:''))+'"></div>';
-    h += '<div id="pr-install-map-wrap" class="obj-kaart-wrap" style="border-radius:var(--radius);overflow:hidden;height:520px;background:var(--surface2);margin-bottom:16px">';
-    h += '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px">Kaart laden...</div>';
-    h += '</div>';
-  } else {
-    h += '<div class="card" style="margin-bottom:16px"><div style="font-size:13px;color:var(--muted)">Voer coördinaten in of koppel een locatie om de kaart te zien.</div></div>';
-  }
-
-  // ── Rij 3: Foto\'s (volle breedte) ──
-  h += '<div class="card">';
+  // ── Rij 2: Foto\'s (volle breedte) ──
+  h += '<div class="card" style="margin-bottom:16px">';
   h += '<div style="font-weight:700;font-size:14px;margin-bottom:12px">Foto\'s installatie</div>';
   var fotos = pomp.installatieUrls || [];
   if(fotos.length) {
@@ -23449,6 +23439,19 @@ function _renderPompInstallatieTab(pomp, klantNm, kanSchrijven) {
   }
   h += '</div>';
 
+
+  // ── Rij 3: Kaart (volle breedte) ──
+  if(mapCoords || mapAdres) {
+    h += '<div id="pr-install-map-placeholder" style="display:none" '
+      +'data-adres="'+esc(mapAdres)+'" '
+      +'data-lat="'+esc(String(mapCoords?mapCoords.lat:''))+'" '
+      +'data-lng="'+esc(String(mapCoords?mapCoords.lng:''))+'"></div>';
+    h += '<div id="pr-install-map-wrap" class="obj-kaart-wrap" style="border-radius:var(--radius);overflow:hidden;height:520px;background:var(--surface2);margin-bottom:16px">';
+    h += '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px">Kaart laden...</div>';
+    h += '</div>';
+  } else {
+    h += '<div class="card" style="margin-bottom:16px"><div style="font-size:13px;color:var(--muted)">Voer coördinaten in of koppel een locatie om de kaart te zien.</div></div>';
+  }
   return h;
 }
 // Kijkt of een werkorder (in velden of in een blok) aan deze pomp is gekoppeld.
