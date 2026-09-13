@@ -17,11 +17,17 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Huisstijl-mail verfijnd** (13 september 2026) — titel 18px, bedrijfsnaam 20px; het logo wordt
       bij het uploaden automatisch bijgesneden (`bereidLogoVoor`) en krijgt in de mail vaste
       afmetingen (max 220×64px, ook goed in Outlook). De kaartmarker behoudt nu de verhouding.
-- [ ] **Homa-logo opnieuw uploaden + testmail** — oude logo's hebben nog geen opgeslagen afmetingen;
-      één keer opnieuw uploaden via Instellingen → Bedrijf. Daarna testmail, kaart en werkbon-PDF checken.
+- [x] **Homa-logo opnieuw uploaden + testmail** — gedaan en goedgekeurd op 13 september 2026 (mail,
+      kaart en werkbon-PDF). Andere bedrijven: logo één keer opnieuw uploaden voor de nieuwe weergave.
 - [ ] **Resend: eigen domein verifiëren + `MAIL_FROM` aanpassen** — nu staat live het testadres
       `onboarding@resend.dev`, dat alleen naar het eigen Resend-adres mailt. Voorwaarde vóór mails
       naar echte klanten. Daarna `MAIL_FROM` in `functions/.env` aanpassen en `verstuurMail` deployen.
+- [x] **Planning dagweergave toonde niet alle opdrachten** — opgelost op 13 september 2026. Opdrachten
+      zonder starttijd (163 van 732) vielen weg; nu een rij "Zonder tijd", een kolom "Niet toegewezen",
+      een meerekkend rooster en een teller.
+- [ ] **99 oude opdrachten zonder geldige monteur** — 86 van een verwijderde medewerker (`mo043vnte2ar`,
+      mei–juli 2026) en 13 van Jeremy Smits (rol magazijn, juni–augustus). Onzichtbaar in dag- én
+      weekweergave. Kiezen: opruimen, opnieuw toewijzen of apart tonen.
 - [ ] **Assemblage-mail: klantnaam leeg** — onderwerp "Assemblage ASSEM-3 —" en aanhef "Beste ,"
       (gezien op 13 september 2026). Uitzoeken waar de klantnaam in dat sjabloon vandaan komt.
 

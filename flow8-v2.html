@@ -15386,26 +15386,93 @@ function renderPlanDag(monteurs) {
   var nu = vandaagISO();
   var isVandaag = _planDatum === nu;
   var zichtbareMonteurs = _planFilter === 'alle' ? monteurs : monteurs.filter(function(m){ return String(m.id) === _planFilter; });
-  var uren = [7,8,9,10,11,12,13,14,15,16,17];
 
-  var h = '<div style="overflow-x:auto"><table style="min-width:600px;border-collapse:collapse">';
+  // Alle monteur-id's van een opdracht (monteurId + monteurIds), zonder lege waarden
+  function _monteurIdsVan(o){
+    var ids = Array.isArray(o.monteurIds) ? o.monteurIds.slice() : [];
+    if(o.monteurId != null && o.monteurId !== '') ids.push(o.monteurId);
+    return ids.filter(function(x){ return x != null && x !== ''; }).map(String);
+  }
+  // Startuur uit tijdVan ("08:30" -> 8); null als er geen geldige tijd is
+  function _startUur(o){
+    var t = /^(\d{1,2}):\d{2}/.exec(String(o.tijdVan || '').trim());
+    if(!t) return null;
+    var u = parseInt(t[1], 10);
+    return (u >= 0 && u <= 23) ? u : null;
+  }
+
+  // Opdrachten van deze dag, per kolom: elke monteur + (bij "Alle monteurs") "Niet toegewezen"
+  var dagAlle = APP.opdrachten.filter(function(o){ return o.datum === _planDatum; })
+    .sort(function(a,b){ return (a.tijdVan||'') > (b.tijdVan||'') ? 1 : -1; });
+  var kolommen = zichtbareMonteurs.map(function(m){
+    return { m: m, ops: dagAlle.filter(function(o){ return _monteurIdsVan(o).indexOf(String(m.id)) >= 0; }) };
+  });
+  var nietToegewezen = dagAlle.filter(function(o){ return !_monteurIdsVan(o).length; });
+  if(_planFilter === 'alle' && nietToegewezen.length) kolommen.push({ m: null, ops: nietToegewezen });
+
+  // Teller: wat staat er in beeld, en wat valt weg omdat de monteur niet in de planning staat
+  var getoond = {};
+  kolommen.forEach(function(k){ k.ops.forEach(function(o){ getoond[o.id] = true; }); });
+  var aantalGetoond = Object.keys(getoond).length;
+  var aantalVerborgen = _planFilter === 'alle' ? dagAlle.filter(function(o){ return !getoond[o.id]; }).length : 0;
+
+  // Rooster 07:00-17:00; rekt mee als er eerder of later een opdracht start
+  var eersteUur = 7, laatsteUur = 17;
+  dagAlle.forEach(function(o){
+    var u = _startUur(o);
+    if(u === null) return;
+    if(u < eersteUur) eersteUur = u;
+    if(u > laatsteUur) laatsteUur = u;
+  });
+  var uren = [];
+  for(var u = eersteUur; u <= laatsteUur; u++) uren.push(u);
+  var heeftZonderTijd = kolommen.some(function(k){ return k.ops.some(function(o){ return _startUur(o) === null; }); });
+
+  function kaart(o){
+    var ot = getOpdrachttype(o.type);
+    var k = '<div class="plan-event" data-id="'+o.id+'" style="position:relative;background:'+ot.kleur+'22;border-left:3px solid '+ot.kleur+';border-radius:4px;padding:4px 6px;padding-right:62px;cursor:pointer;margin-bottom:2px">';
+    k += wkStatusBadge(o.status);
+    k += '<div style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px">';
+    if(o.notitie) k += '<svg width="9" height="9" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" title="'+esc(o.notitie)+'"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+    k += esc(o.klantNaam||'—')+'</div>';
+    k += '<div style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:3px">'+getOtSvg(ot.icon)+esc(ot.label)+(o.tijdVan ? ' · '+esc(o.tijdVan)+(o.tijdTot?' – '+esc(o.tijdTot):'') : '')+'</div>';
+    var _dgAdres = (o.adres||'') + (o.plaats ? (o.adres?', ':'')+o.plaats : '');
+    if(_dgAdres) k += '<div style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(_dgAdres)+'</div>';
+    k += '</div>';
+    return k;
+  }
+
+  var h = '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">'+aantalGetoond+(aantalGetoond === 1 ? ' opdracht' : ' opdrachten');
+  if(aantalVerborgen) h += ' · <span style="color:var(--orange-t)">'+aantalVerborgen+' niet getoond (monteur niet in de planning)</span>';
+  h += '</div>';
+  h += '<div style="overflow-x:auto"><table style="min-width:600px;border-collapse:collapse">';
   h += '<thead><tr>';
   h += '<th style="width:60px;background:var(--surface2);padding:8px;font-size:11px">Tijd</th>';
-  zichtbareMonteurs.forEach(function(m){
-    var kl = medKleur(m);
-    var verlofDag = APP.verlof.find(function(v){
-      return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&_planDatum>=(v.van||'')&&_planDatum<=(v.tot||v.van||'');
-    });
-    var verzuimDag = APP.verzuim.find(function(v){
-      return String(v.medId)===String(m.id)&&(v.status==='actief'||v.status==='langdurig')&&_planDatum>=(v.van||'')&&(!v.tot||_planDatum<=v.tot);
-    });
+  kolommen.forEach(function(k){
     h += '<th style="background:var(--surface2);padding:8px;min-width:160px;text-align:center">';
     h += '<div style="display:flex;align-items:center;justify-content:center;gap:6px">';
-    h += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:#fff">'+initials(m)+'</div>';
-    h += '<span style="font-size:12px;font-weight:600">'+esc(m.voornaam+' '+m.achternaam)+'</span></div>';
-    h += '</th>';
+    if(k.m){
+      h += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+medKleur(k.m)+';color:#fff">'+initials(k.m)+'</div>';
+      h += '<span style="font-size:12px;font-weight:600">'+esc(k.m.voornaam+' '+k.m.achternaam)+'</span>';
+    } else {
+      h += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--border);color:var(--muted)">?</div>';
+      h += '<span style="font-size:12px;font-weight:600;color:var(--muted)">Niet toegewezen</span>';
+    }
+    h += '</div></th>';
   });
   h += '</tr></thead><tbody>';
+
+  // Opdrachten zonder (geldige) starttijd: eigen rij bovenaan, per kolom
+  if(heeftZonderTijd){
+    h += '<tr>';
+    h += '<td style="padding:6px 8px;font-size:11px;font-weight:600;color:var(--muted);vertical-align:top;border-bottom:1px solid var(--border);line-height:1.3">Zonder<br>tijd</td>';
+    kolommen.forEach(function(k){
+      h += '<td style="padding:4px;vertical-align:top;border-left:1px solid var(--border);border-bottom:1px solid var(--border)">';
+      k.ops.forEach(function(o){ if(_startUur(o) === null) h += kaart(o); });
+      h += '</td>';
+    });
+    h += '</tr>';
+  }
 
   uren.forEach(function(uur) {
     var tijdStr = (uur < 10 ? '0' : '') + uur + ':00';
@@ -15413,15 +15480,13 @@ function renderPlanDag(monteurs) {
     h += '<tr style="'+(huidigUur?'background:rgba(74,108,247,.05)':'')+'">';
     h += '<td style="padding:6px 8px;font-size:11px;font-weight:600;color:var(--muted);vertical-align:top;border-bottom:1px solid var(--border)">'+tijdStr+'</td>';
 
-    zichtbareMonteurs.forEach(function(m){
-      var dagOps = APP.opdrachten.filter(function(o){
-        return o.datum === _planDatum && (String(o.monteurId) === String(m.id) || (Array.isArray(o.monteurIds) && o.monteurIds.map(String).indexOf(String(m.id))>=0)) &&
-          o.tijdVan && parseInt(o.tijdVan.split(':')[0]) === uur;
-      });
+    kolommen.forEach(function(k){
+      var m = k.m;
+      var dagOps = k.ops.filter(function(o){ return _startUur(o) === uur; });
 
       // Verlof/ziek voor deze monteur op deze dag — tonen in het tijdsblok
-      var _vDag = APP.verlof.find(function(v){ return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&_planDatum>=(v.van||'')&&_planDatum<=(v.tot||v.van||''); });
-      var _zDag = APP.verzuim.find(function(v){ return String(v.medId)===String(m.id)&&(v.status==='actief'||v.status==='langdurig')&&_planDatum>=(v.van||'')&&(!v.tot||_planDatum<=v.tot); });
+      var _vDag = m && APP.verlof.find(function(v){ return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&_planDatum>=(v.van||'')&&_planDatum<=(v.tot||v.van||''); });
+      var _zDag = m && APP.verzuim.find(function(v){ return String(v.medId)===String(m.id)&&(v.status==='actief'||v.status==='langdurig')&&_planDatum>=(v.van||'')&&(!v.tot||_planDatum<=v.tot); });
       // Bepaal of dit uur binnen een (gedeeltelijk) verlof/ziek-tijdvak valt
       function _uurInVak(item){
         if(!item) return false;
@@ -15451,18 +15516,7 @@ function renderPlanDag(monteurs) {
           }
         }
       }
-      dagOps.forEach(function(o){
-        var ot = getOpdrachttype(o.type);
-        h += '<div class="plan-event" data-id="'+o.id+'" style="position:relative;background:'+ot.kleur+'22;border-left:3px solid '+ot.kleur+';border-radius:4px;padding:4px 6px;padding-right:62px;cursor:pointer;margin-bottom:2px">';
-        h += wkStatusBadge(o.status);
-        h += '<div style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px">';
-        if(o.notitie) h += '<svg width="9" height="9" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" title="'+esc(o.notitie)+'"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
-        h += esc(o.klantNaam||'—')+'</div>';
-        h += '<div style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:3px">'+getOtSvg(ot.icon)+esc(ot.label)+' · '+esc(o.tijdVan||'')+(o.tijdTot?' – '+esc(o.tijdTot):'')+'</div>';
-        var _dgAdres = (o.adres||'') + (o.plaats ? (o.adres?', ':'')+o.plaats : '');
-        if(_dgAdres) h += '<div style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(_dgAdres)+'</div>';
-        h += '</div>';
-      });
+      dagOps.forEach(function(o){ h += kaart(o); });
       h += '</td>';
     });
     h += '</tr>';
