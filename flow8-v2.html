@@ -7019,6 +7019,30 @@ function getMed(id) {
 }
 // Forceer herbouw van de medewerker-Map (aanroepen na in-place wijziging van een record)
 function _invalideerMedMap() { _medMapCache = null; }
+// Venster BOVEN een open modal (zelfde aanpak als bevestigActie): het onderliggende
+// formulier blijft in de DOM staan, zodat invoer niet verloren gaat. Is er geen modal
+// open, dan wordt het de gewone modal. Geeft { el, sluit } terug; sluit() sluit alleen dit venster.
+function openBovenModal(titel, bodyHtml, footerHtml) {
+  var basis = document.getElementById('modal-overlay');
+  if(!(basis && basis.classList.contains('open'))) {
+    openModal(titel, bodyHtml, footerHtml);
+    return { el: basis, sluit: closeModal };
+  }
+  var ov = document.createElement('div');
+  ov.className = 'modal-overlay open';
+  ov.style.zIndex = '560';   // boven de basismodal (550)
+  ov.innerHTML = '<div class="modal" style="width:min(520px,95vw)">'
+    + '<div class="modal-header"><div class="modal-title">' + esc(titel) + '</div>'
+    + '<button class="modal-close" type="button">✕</button></div>'
+    + '<div class="modal-body">' + bodyHtml + '</div>'
+    + '<div class="modal-footer">' + (footerHtml || '') + '</div></div>';
+  document.body.appendChild(ov);
+  var sluit = function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+  ov.querySelector('.modal-close').addEventListener('click', sluit);
+  ov.addEventListener('click', function(e){ if(e.target === ov) sluit(); });
+  return { el: ov, sluit: sluit };
+}
+
 // Telt een record van een medewerker (verlof, verzuim, aanvraag) nog mee?
 // _medBestaat: de medewerker is niet verwijderd (modules, historie).
 // _medInDienst: bestaat én staat niet op inactief (bv. "Afwezig vandaag").
@@ -10603,7 +10627,8 @@ function openSnelDebiteurModal(naam, onKlaar) {
   var f = '<button class="btn btn-ghost" id="sd-cancel">Annuleren</button>'
         + '<button class="btn btn-primary" id="sd-save">Aanmaken &amp; koppelen</button>';
 
-  openModal('Nieuwe debiteur', '<div style="font-size:12px;color:var(--muted);margin-bottom:16px">Alleen de basis — later aanvullen kan in Debiteuren</div>'+b, f);
+  // Boven het opdrachtformulier openen: openModal zou het formulier vervangen
+  var _sdVenster = openBovenModal('Nieuwe debiteur', '<div style="font-size:12px;color:var(--muted);margin-bottom:16px">Alleen de basis — later aanvullen kan in Debiteuren</div>'+b, f);
 
   // PDOK adres-aanvulling bij postcode/huisnummer
   function _sdLookup(){
@@ -10617,7 +10642,7 @@ function openSnelDebiteurModal(naam, onKlaar) {
   var sdPc = document.getElementById('sd-pc'); if(sdPc) sdPc.addEventListener('blur', _sdLookup);
   var sdHnr = document.getElementById('sd-hnr'); if(sdHnr) sdHnr.addEventListener('blur', _sdLookup);
 
-  document.getElementById('sd-cancel').addEventListener('click', closeModal);
+  document.getElementById('sd-cancel').addEventListener('click', _sdVenster.sluit);
   document.getElementById('sd-save').addEventListener('click', function(){
     wisValidatieStijlen();
     var nm = document.getElementById('sd-nm').value.trim();
@@ -10643,7 +10668,7 @@ function openSnelDebiteurModal(naam, onKlaar) {
     };
     APP.debiteuren.push(nieuweDeb);
     dbSaveItem('debiteuren', nieuweDeb.id, nieuweDeb);
-    closeModal();
+    _sdVenster.sluit();
     toast('Debiteur "'+esc(nm)+'" aangemaakt','success');
     if(onKlaar) onKlaar(nieuweDeb);
   });
@@ -16438,8 +16463,9 @@ function openOpdrachtModal(id, prefill) {
     b2 += '<div style="font-size:11px;color:var(--muted)">Dit adres wordt automatisch ingevuld bij nieuwe opdrachten</div></div>';
     b2 += '</label>';
     var f2 = '<button class="btn btn-ghost" id="nloc-cancel">Annuleren</button><button class="btn btn-primary" id="nloc-save">Toevoegen</button>';
-    openModal('Nieuwe locatie toevoegen', b2, f2);
-    document.getElementById('nloc-cancel').addEventListener('click', closeModal);
+    // Boven het opdrachtformulier openen: openModal zou het formulier vervangen
+    var _nlocVenster = openBovenModal('Nieuwe locatie toevoegen', b2, f2);
+    document.getElementById('nloc-cancel').addEventListener('click', _nlocVenster.sluit);
     // Postcode + huisnummer → adres auto-aanvullen
     function _nlocZoekAdres(){
       var pcEl=document.getElementById('nloc-pc');
@@ -16469,8 +16495,15 @@ function openOpdrachtModal(id, prefill) {
       if(document.getElementById('op-adres')) document.getElementById('op-adres').value = adres;
       if(document.getElementById('op-pc'))    document.getElementById('op-pc').value    = pc;
       if(document.getElementById('op-pl'))    document.getElementById('op-pl').value    = pl;
-      if(debId) {
-        var deb = APP.debiteuren.find(function(d){return String(d.id)===String(debId.split(':')[1]||debId);});
+      // Debiteur achter de gekozen klant: direct (deb:) of via de serviceklant (sk:)
+      var _kParts = debId ? String(debId).split(':') : [];
+      var deb = null;
+      if(_kParts[0] === 'sk') {
+        var _skL = APP.serviceklanten.find(function(k){ return String(k.id)===String(_kParts[1]); });
+        if(_skL && _skL.debId) deb = APP.debiteuren.find(function(d){ return String(d.id)===String(_skL.debId); });
+      } else if(debId) {
+        deb = APP.debiteuren.find(function(d){ return String(d.id)===String(_kParts[1]||debId); });
+      }
         if(deb) {
           if(!deb.locaties) deb.locaties = {};
           // Standaard: andere locaties op false zetten
@@ -16486,10 +16519,25 @@ function openOpdrachtModal(id, prefill) {
           var locObj = {id:locId2, naam:naam||adres, adres:adres, postcode:pc, plaats:pl, contactpersoon:ct, telefoon:tel, isStandaard:standaard};
           deb.locaties[locId2] = locObj;
           FB.ref(dbPath('debiteuren', deb.id, 'locaties', locId2)).set(locObj);
+          // In de keuzelijst zetten en selecteren, zodat de locatie bij de opdracht wordt opgeslagen
+          var _locSel = document.getElementById('op-locatie');
+          if(_locSel) {
+            if(standaard) Array.prototype.forEach.call(_locSel.options, function(op){ op.textContent = op.textContent.replace(/^★ /, ''); });
+            if(_locSel.options.length === 1 && !_locSel.options[0].value) _locSel.options[0].textContent = '— Hoofdadres —';
+            var _nOpt = document.createElement('option');
+            _nOpt.value = locId2;
+            _nOpt.dataset.adres = adres; _nOpt.dataset.pc = pc; _nOpt.dataset.pl = pl;
+            _nOpt.textContent = (standaard ? '★ ' : '') + locObj.naam + ' – ' + adres + ', ' + pl;
+            _locSel.appendChild(_nOpt);
+            _locSel.value = locId2;
+            var _locWrap = document.getElementById('op-locatie-wrap');
+            if(_locWrap) _locWrap.style.display = '';
+          }
           toast('Locatie opgeslagen bij debiteur'+(standaard?' (standaard)':''),'success');
+        } else {
+          toast(debId ? 'Adres ingevuld; geen debiteur gevonden om de locatie bij op te slaan' : 'Adres ingevuld','success');
         }
-      } else { toast('Adres ingevuld','success'); }
-      closeModal();
+      _nlocVenster.sluit();
     });
   });
 
