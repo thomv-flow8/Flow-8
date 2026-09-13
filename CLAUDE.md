@@ -106,6 +106,9 @@ altijd beide.
   `verlofOpgenomenUren(lijst, med)` / `_verlofUrenPerDagVan(med)` — vereisen het medewerker-object.
 - `laadWerkordersCache(force)` / `laadWerkdocumenten(force)` — Firestore-caching.
 - `_mailRefParse()` / `_mailKlantNaam()` — maillog-refs en debiteurnaam.
+- `_medBestaat(id)` / `_medInDienst(id)` — telt een record van een medewerker nog mee (verwijderd/inactief).
+  `medArchiefNaam(id)` — naam van een verwijderde medewerker uit `medewerkersArchief` (anders '').
+- `openBovenModal(titel, body, footer)` — venster bóven een open modal; het formulier eronder blijft staan.
 - `enrichSortVelden()` maakt **kopieën** (`Object.assign`) — transient `_`-velden erop vervuilen
   de opgeslagen objecten niet.
 

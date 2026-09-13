@@ -3217,7 +3217,11 @@ function _wbObjectenHtml(pompen, wb){
 // Medewerker-naam + initialen ophalen (voor uren-weergave)
 function _wbMedInfo(medId){
   var med = (APP.medewerkers||[]).find(function(m){ return String(m.id)===String(medId); });
-  if(!med) return { naam:'', init:'?' };
+  if(!med){
+    // Verwijderde medewerker: naam uit het archief, zodat urenregels niet "Onbekend" tonen
+    var an = medArchiefNaam(medId);
+    return { naam: an, init: an ? an.split(' ').map(function(w){ return w[0]||''; }).join('').slice(0,2).toUpperCase() : '?' };
+  }
   var naam = ((med.voornaam||'')+' '+(med.achternaam||'')).trim() || med.email || '';
   var init = ((med.voornaam||' ')[0]||'')+((med.achternaam||' ')[0]||'');
   return { naam:naam, init:(init||'?').toUpperCase() };
@@ -5487,7 +5491,7 @@ async function doUitloggen() {
   log('INFO', 'AUTH', 'Uitloggen');
   dbUnlistenAll();
   APP.dataLoaded = false;
-  ['medewerkers','serviceklanten','debiteuren','opdrachten','verlof','overuren','onkosten','verzuim','agenda','storingsDienst','blokkadeDagen']
+  ['medewerkers','medewerkersArchief','serviceklanten','debiteuren','opdrachten','verlof','overuren','onkosten','verzuim','agenda','storingsDienst','blokkadeDagen']
     .forEach(function(k) { APP[k] = []; });
   await AUTH.signOut();
   // Verwijder Firebase IndexedDB sessiedata zodat geen data achterblijft op gedeelde apparaten
@@ -5723,6 +5727,7 @@ async function laadData() {
     dbListen('agenda',       'agenda',       function(){ if (APP.activePage==='agenda')      renderAgenda();      }),
     dbLoad('serviceklanten', 'serviceklanten'),
     dbLoad('debiteuren',     'debiteuren'),
+    dbLoad('medewerkersArchief', 'medewerkersArchief'),
     dbLoad('verlof',         'verlof'),
     dbLoad('verlofMutaties',  'verlofMutaties'),
     dbLoad('overuren',       'overuren'),
@@ -7051,6 +7056,14 @@ function openBovenModal(titel, bodyHtml, footerHtml) {
   ov.querySelector('.modal-close').addEventListener('click', sluit);
   ov.addEventListener('click', function(e){ if(e.target === ov) sluit(); });
   return { el: ov, sluit: sluit };
+}
+
+// Naam van een verwijderde medewerker uit het archief (medewerkersArchief), of ''.
+// Bij verwijderen bewaart verwijderMed alleen voornaam, achternaam, rol en datum.
+function medArchiefNaam(id){
+  if(id == null || id === '') return '';
+  var a = (APP.medewerkersArchief || []).find(function(x){ return x && String(x.id) === String(id); });
+  return a ? ((a.voornaam||'')+' '+(a.achternaam||'')).trim() : '';
 }
 
 // Telt een record van een medewerker (verlof, verzuim, aanvraag) nog mee?
@@ -8973,7 +8986,15 @@ function verwijderMed(id) {
     APP.medewerkers=APP.medewerkers.filter(function(x){return String(x.id)!==String(id);});
     renderMedewerkers();
     var verwijderd=false;
-    var timer=setTimeout(function(){ verwijderd=true; dbRemove('medewerkers',id); },6000);
+    var timer=setTimeout(function(){
+      verwijderd=true;
+      // Naam bewaren, zodat oude opdrachten en uren niet naamloos worden
+      var arch={ id:String(id), voornaam:backup.voornaam||'', achternaam:backup.achternaam||'', rol:backup.rol||'', verwijderdOp:vandaagISO() };
+      FB.ref(dbPath('medewerkersArchief', String(id))).set(arch);
+      if(!Array.isArray(APP.medewerkersArchief)) APP.medewerkersArchief=[];
+      APP.medewerkersArchief.push(arch);
+      dbRemove('medewerkers',id);
+    },6000);
     toast('Medewerker verwijderd','success',function(){
       clearTimeout(timer);
       if(!verwijderd){ APP.medewerkers.push(backup); dbSaveItem('medewerkers',backup.id,backup); renderMedewerkers(); toast('Verwijdering ongedaan gemaakt','success'); }
@@ -15239,7 +15260,7 @@ function renderPlanLijst(monteurs) {
                     var mkl = medKleur(mm);
                     monteursHtml += '<div class="avatar" style="width:22px;height:22px;font-size:8px;background:'+mkl+';color:#fff" title="'+esc(mm.voornaam+' '+mm.achternaam)+'">'+initials(mm)+'</div>';
                   } else {
-                    monteursHtml += '<div class="avatar" style="width:22px;height:22px;font-size:8px;background:var(--border);color:var(--muted)" title="Verwijderde medewerker">?</div>';
+                    monteursHtml += '<div class="avatar" style="width:22px;height:22px;font-size:8px;background:var(--border);color:var(--muted)" title="'+esc(medArchiefNaam(mid) ? medArchiefNaam(mid)+' (verwijderd)' : 'Verwijderde medewerker')+'">?</div>';
                   }
                 });
                 monteursHtml += '</div>';
@@ -15311,7 +15332,7 @@ function renderPlanLijst(monteurs) {
 // "Perry Windt · inactief" of "Verwijderde medewerker".
 function _planMonteurLabel(id){
   var m = getMed(id);
-  if(!m) return 'Verwijderde medewerker';
+  if(!m){ var an = medArchiefNaam(id); return an ? an+' · verwijderd' : 'Verwijderde medewerker'; }
   var rol = (APP.rollen && APP.rollen[m.rol] && APP.rollen[m.rol].naam) || m.rol || '';
   return ((m.voornaam||'')+' '+(m.achternaam||'')).trim() + (m.status === 'inactief' ? ' · inactief' : (rol ? ' · '+rol : ''));
 }
@@ -15454,7 +15475,8 @@ function renderPlanWeek(monteurs) {
     var _zichtbaarIds = zichtbareMonteurs.map(function(m){ return String(m.id); });
     var _idsVan = function(o){
       return (Array.isArray(o.monteurIds) ? o.monteurIds : []).concat((o.monteurId != null && o.monteurId !== '') ? [o.monteurId] : [])
-        .filter(function(x){ return x != null && x !== ''; }).map(String);
+        .filter(function(x){ return x != null && x !== ''; }).map(String)
+        .filter(function(x, i, a){ return a.indexOf(x) === i; });   // monteurId staat meestal ook in monteurIds
     };
     var _nipWeek = APP.opdrachten.filter(function(o){
       if(dagen.indexOf(o.datum) < 0) return false;
@@ -15495,7 +15517,8 @@ function renderPlanDag(monteurs) {
   function _monteurIdsVan(o){
     var ids = Array.isArray(o.monteurIds) ? o.monteurIds.slice() : [];
     if(o.monteurId != null && o.monteurId !== '') ids.push(o.monteurId);
-    return ids.filter(function(x){ return x != null && x !== ''; }).map(String);
+    return ids.filter(function(x){ return x != null && x !== ''; }).map(String)
+      .filter(function(x, i, a){ return a.indexOf(x) === i; });   // monteurId staat meestal ook in monteurIds
   }
   // Startuur uit tijdVan ("08:30" -> 8); null als er geen geldige tijd is
   function _startUur(o){
@@ -15707,7 +15730,8 @@ function openOpdrachtPanel(id) {
         // Monteur bestaat niet meer: laat dat zien, zodat de toewijzing niet onzichtbaar is
         h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
         h += '<div class="avatar" style="width:34px;height:34px;font-size:12px;background:var(--border);color:var(--muted)">?</div>';
-        h += '<div><div style="font-size:13px;font-weight:600">Verwijderde medewerker</div>';
+        var _arNaam = medArchiefNaam(mid);
+        h += '<div><div style="font-size:13px;font-weight:600">'+esc(_arNaam ? _arNaam+' (verwijderd)' : 'Verwijderde medewerker')+'</div>';
         h += '<div style="font-size:12px;color:var(--muted)">Wijs de opdracht opnieuw toe via Bewerken</div></div>';
         h += '</div>';
         return;

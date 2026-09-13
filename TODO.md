@@ -28,6 +28,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Opdrachten van monteurs buiten de planning apart tonen** — 13 september 2026: rij/kolom
       "Niet in planning" in week- en dagweergave, "Verwijderde medewerker" in paneel en lijst. Niets
       gewijzigd of verwijderd. (Oorspronkelijke melding hieronder.)
+- [x] **Namenarchief verwijderde medewerkers** — 13 september 2026: `medewerkersArchief` (naam, rol,
+      datum) wordt bij verwijderen gevuld; planning, paneel, lijst en werkbon-uren tonen "Naam · verwijderd".
+      Eenmalig aangevuld: `mo043vnte2ar` = Perry Windt (oud record), `mqyu6fdxzfzk` = Jonny Visser.
+      Dubbel label ("Verwijderde medewerker, Verwijderde medewerker") hersteld.
 - [x] **99 oude opdrachten zonder geldige monteur** — 86 van een verwijderde medewerker (`mo043vnte2ar`,
       mei–juli 2026) en 13 van Jeremy Smits (rol magazijn, juni–augustus). Onzichtbaar in dag- én
       weekweergave. Kiezen: opruimen, opnieuw toewijzen of apart tonen.
