@@ -6,14 +6,24 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 ## Praktisch / eerst doen
 - [x] **Publiceren naar GitHub Pages** — gecontroleerd op 10 september 2026: de versie op GitHub is
       gelijk aan het canonieke bestand.
-- [ ] **Firebase Authorized domains** — controleer dat `thomv-flow8.github.io` erin staat.
+- [x] **Firebase Authorized domains** — gecontroleerd op 13 september 2026 via de publieke Auth-config:
+      `thomv-flow8.github.io` staat erin (nodig voor inloggen met Google).
 - [x] **RTDB-rules: admin kan zich naar een ander bedrijf verplaatsen** — opgelost en live op
       10 september 2026. In de admin-tak van `flow8/gebruikers/$uid` moet `bedrijfId` bij een
       bestaand profiel gelijk blijven (verwijderen mag). Getest: account aanmaken, rol wijzigen,
       toegang blokkeren/verlenen en verwijderen werken nog.
-- [ ] **Cloud Function mail-wrapper deployen** — zodat de huisstijl ook in de e-mails zit
-      Code staat in `flow8-functions/` (`bouwMailHtml` zit er al in); controleren of de
-      gedeployde versie gelijk is.
+- [x] **Cloud Function mail-wrapper deployen** — bevestigd op 13 september 2026: de huisstijl-mail
+      (`bouwMailHtml`) staat live.
+- [x] **Huisstijl-mail verfijnd** (13 september 2026) — titel 18px, bedrijfsnaam 20px; het logo wordt
+      bij het uploaden automatisch bijgesneden (`bereidLogoVoor`) en krijgt in de mail vaste
+      afmetingen (max 220×64px, ook goed in Outlook). De kaartmarker behoudt nu de verhouding.
+- [ ] **Homa-logo opnieuw uploaden + testmail** — oude logo's hebben nog geen opgeslagen afmetingen;
+      één keer opnieuw uploaden via Instellingen → Bedrijf. Daarna testmail, kaart en werkbon-PDF checken.
+- [ ] **Resend: eigen domein verifiëren + `MAIL_FROM` aanpassen** — nu staat live het testadres
+      `onboarding@resend.dev`, dat alleen naar het eigen Resend-adres mailt. Voorwaarde vóór mails
+      naar echte klanten. Daarna `MAIL_FROM` in `functions/.env` aanpassen en `verstuurMail` deployen.
+- [ ] **Assemblage-mail: klantnaam leeg** — onderwerp "Assemblage ASSEM-3 —" en aanhef "Beste ,"
+      (gezien op 13 september 2026). Uitzoeken waar de klantnaam in dat sjabloon vandaan komt.
 
 ## Grote trajecten (elk een eigen analyse-sessie; op business-prioriteit kiezen)
 - [ ] **Offline upload veldwerk** — foto's lokaal bufferen en uploaden zodra er netwerk is.
@@ -43,19 +53,21 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Firebase-rules in de repo** — staan sinds 10 september 2026 in `flow8-functions/`.
 - [ ] **Rules koppelen aan `firebase.json`** — pas als zeker is dat de repo-versie gelijk is aan de
       live-versie; anders kan een deploy de live-rules overschrijven met een oudere versie.
+- [ ] **`zetGebruikersClaim`: live-versie niet geverifieerd** — gedeployed op 11 augustus 2026, los van
+      `verstuurMail`. Niet zeker dat die gelijk is aan de repo. Deploy daarom voorlopig per functie
+      (`--only functions:verstuurMail`) tot dit is gecontroleerd.
 - [ ] **`verstuurMail`: controleer `actief`** — een gedeactiveerde gebruiker met een nog geldig
       token kan nu mailen.
 - [ ] **`verstuurMail`: bedrijfsgegevens server-side** — naam, logo en kleur komen nu uit de
       payload van de app. Lees ze uit `flow8/bedrijven/{bedrijfId}/instellingen/bedrijf`, anders kan
       een ingelogde gebruiker via de console een mail opmaken namens een ander bedrijf.
-- [ ] **Commentaar `index.js` regel 4** — noemt `flow8/{bedrijfId}/mailLog`; de code schrijft naar
-      `flow8/bedrijven/{bedrijfId}/mailLog`.
+- [x] **Commentaar `index.js` regel 4** — rechtgezet op 13 september 2026 (`flow8/bedrijven/{bedrijfId}/mailLog`).
 
 ## Config / verificatie (niet puur code)
-- [ ] **Mail-logo oogt klein** — vermoedelijk klein bronbestand; check Instellingen → Bedrijf,
-      evt. groter logo uploaden.
-- [ ] **Logo-Storage-URL publiek leesbaar** — verifiëren dat het logo bij de ontvanger niet
-      gebroken is (Storage-rechten).
+- [x] **Mail-logo oogt klein** — oorzaak (13 september 2026): het logobestand was een vierkant met veel
+      witruimte en een grijs randje. Opgelost met automatisch bijsnijden bij het uploaden.
+- [x] **Logo-Storage-URL publiek leesbaar** — gecontroleerd op 13 september 2026: de download-URL
+      laadt zonder in te loggen (HTTP 200).
 
 ## Optioneel
 - [ ] **Mail fase 2** — rijkere sjablonen met iconen-blok.
