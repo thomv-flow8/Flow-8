@@ -7019,6 +7019,12 @@ function getMed(id) {
 }
 // Forceer herbouw van de medewerker-Map (aanroepen na in-place wijziging van een record)
 function _invalideerMedMap() { _medMapCache = null; }
+// Telt een record van een medewerker (verlof, verzuim, aanvraag) nog mee?
+// _medBestaat: de medewerker is niet verwijderd (modules, historie).
+// _medInDienst: bestaat én staat niet op inactief (bv. "Afwezig vandaag").
+function _medBestaat(medId) { return !!getMed(medId); }
+function _medInDienst(medId) { var m = getMed(medId); return !!m && m.status !== 'inactief'; }
+
 function bevestigActie(titel, tekst, onBevestig, type, extraHtml) {
   var isWarn   = type === 'warn';
   var kleur    = isWarn ? 'var(--orange)' : 'var(--red)';
@@ -7840,9 +7846,9 @@ function renderDashboard() {
 
   // ── Acties te goedkeuren banner (voor beheerders) ────────────
   if (isAdmin() || magSchrijven('onkosten') || magSchrijven('overuren')) {
-    var _openOnkosten = APP.onkosten.filter(function(o){ return o.status === 'aangevraagd'; }).length;
-    var _openOveruren = APP.overuren.filter(function(o){ return o.status === 'aangevraagd'; }).length;
-    var _openVerlof   = APP.verlof.filter(function(v){ return v.status === 'aangevraagd'; }).length;
+    var _openOnkosten = APP.onkosten.filter(function(o){ return o.status === 'aangevraagd' && _medBestaat(o.medId); }).length;
+    var _openOveruren = APP.overuren.filter(function(o){ return o.status === 'aangevraagd' && _medBestaat(o.medId); }).length;
+    var _openVerlof   = APP.verlof.filter(function(v){ return v.status === 'aangevraagd' && _medBestaat(v.medId); }).length;
     var _openTotaal = _openOnkosten + _openOveruren + _openVerlof;
     if (_openTotaal > 0) {
       h += '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;margin-bottom:18px">';
@@ -7907,8 +7913,11 @@ function renderDashboard() {
     ids.forEach(function(mid){ if(mid) _dsMonteurIds[mid]=1; });
   });
   var _dsIsWerkdag = (function(){ var d=new Date(vandaag+'T00:00:00').getDay(); return d>0 && d<6; })();
+  // Zelfde criteria als "Afwezig vandaag": verlof of ziek, alleen medewerkers in dienst
   var _dsAfwezig = !_dsIsWerkdag ? 0 : APP.medewerkers.filter(function(m){
-    return APP.verlof.some(function(v){ return String(v.medId)===String(m.id) && v.status==='goedgekeurd' && (v.van||'')<=vandaag && (v.tot||'')>=vandaag; });
+    if(m.status === 'inactief') return false;
+    return APP.verlof.some(function(v){ return String(v.medId)===String(m.id) && v.status==='goedgekeurd' && (v.van||'')<=vandaag && (v.tot||v.van||'')>=vandaag; })
+      || APP.verzuim.some(function(v){ return String(v.medId)===String(m.id) && (v.status==='actief'||v.status==='langdurig') && (v.van||'')<=vandaag && (!v.tot||v.tot>=vandaag); });
   }).length;
   var _dsAgenda = (typeof agAfsprakenOp==='function' ? agAfsprakenOp(vandaag).filter(function(a){ return !a.isStoringsdienst && !a.isVerlof && !a.isBlokkade; }).length : 0);
   h += '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
@@ -8100,8 +8109,8 @@ function renderDashboard() {
   // Afwezig vandaag
   var _dagNr = new Date(vandaag+'T00:00:00').getDay(); // 0=zo, 6=za
   var _isWerkdag = _dagNr > 0 && _dagNr < 6;
-  var verlofVandaag  = _isWerkdag ? APP.verlof.filter(function(v){return v.status==='goedgekeurd'&&v.van<=vandaag&&(v.tot||v.van)>=vandaag;}) : [];
-  var verzuimVandaag = _isWerkdag ? APP.verzuim.filter(function(v){return (v.status==='actief'||v.status==='langdurig')&&v.van<=vandaag&&(!v.tot||v.tot>=vandaag);}) : [];
+  var verlofVandaag  = _isWerkdag ? APP.verlof.filter(function(v){return v.status==='goedgekeurd'&&v.van<=vandaag&&(v.tot||v.van)>=vandaag&&_medInDienst(v.medId);}) : [];
+  var verzuimVandaag = _isWerkdag ? APP.verzuim.filter(function(v){return (v.status==='actief'||v.status==='langdurig')&&v.van<=vandaag&&(!v.tot||v.tot>=vandaag)&&_medInDienst(v.medId);}) : [];
   var afwezig = verlofVandaag.map(function(v){
     var m=getMed(v.medId);
     return{med:m, reden: verlofRedenLabel(v)};
@@ -8913,7 +8922,19 @@ function saveMed(id) {
 
 function verwijderMed(id) {
   var m=getMed(id); if(!m) return;
-  bevestigActie('Medewerker verwijderen', m.voornaam+' '+m.achternaam+' definitief verwijderen?', function(){
+  // Lopende ziekmeldingen en open aanvragen blijven na verwijderen in de database staan,
+  // maar tellen nergens meer mee. Waarschuw en raad inactief zetten aan.
+  var _sid=String(id);
+  var _lopendZiek=APP.verzuim.filter(function(v){return String(v.medId)===_sid&&(v.status==='actief'||v.status==='langdurig');}).length;
+  var _openAanvr=[APP.verlof,APP.overuren,APP.onkosten].reduce(function(s,arr){return s+(arr||[]).filter(function(x){return String(x.medId)===_sid&&x.status==='aangevraagd';}).length;},0);
+  var _tekst=m.voornaam+' '+m.achternaam+' definitief verwijderen?';
+  if(_lopendZiek||_openAanvr){
+    var _nog=[];
+    if(_lopendZiek) _nog.push(_lopendZiek+' lopende ziekmelding'+(_lopendZiek!==1?'en':''));
+    if(_openAanvr) _nog.push(_openAanvr+' open aanvra'+(_openAanvr!==1?'gen':'ag'));
+    _tekst+=' Let op: er '+((_lopendZiek+_openAanvr)!==1?'staan':'staat')+' nog '+_nog.join(' en ')+'. Die tellen na verwijderen nergens meer mee. Is de medewerker uit dienst, zet deze dan liever op inactief: dan blijft de historie bewaard.';
+  }
+  bevestigActie('Medewerker verwijderen', _tekst, function(){
     var backup=JSON.parse(JSON.stringify(m));
     APP.medewerkers=APP.medewerkers.filter(function(x){return String(x.id)!==String(id);});
     renderMedewerkers();
@@ -11236,7 +11257,7 @@ var _vlSaldoOpen = {}; // welke medewerker-accordions open zijn in saldo-histori
 function renderVerlof(){
   var mijnId=getMijnMedId();
   var jaarStr = String(_vlJaar);
-  var zichtbaar = filterEigen(APP.verlof, 'medId', 'verlof').filter(function(v){ return (v.van||'').startsWith(jaarStr); });
+  var zichtbaar = filterEigen(APP.verlof, 'medId', 'verlof').filter(function(v){ return (v.van||'').startsWith(jaarStr) && _medBestaat(v.medId); });
   var lijst=_vlFilter==='alle'?zichtbaar:zichtbaar.filter(function(v){return v.status===_vlFilter;});
   // Zoekfilter toepassen
   if(_vlZoek) {
@@ -11258,7 +11279,7 @@ function renderVerlof(){
 
   // ── Stat cards ──
   var actieveMedVl = APP.medewerkers.filter(function(m){return m.status!=='inactief';});
-  var openAanvragen = APP.verlof.filter(function(v){return v.status==='aangevraagd';}).length;
+  var openAanvragen = APP.verlof.filter(function(v){return v.status==='aangevraagd'&&_medBestaat(v.medId);}).length;
   var goedgekeurdJaar = zichtbaar.filter(function(v){return v.status==='goedgekeurd';}).length;
   var gemSaldo = actieveMedVl.length ? Math.round(actieveMedVl.reduce(function(s,m){return s+getVerlofSaldoUren(m);},0)/actieveMedVl.length*10)/10 : 0;
   var negSaldo = actieveMedVl.filter(function(m){return getVerlofSaldoUren(m)<0;}).length;
@@ -18070,7 +18091,7 @@ function renderVerzuim() {
   var kanBeheren=isAdmin()||magGoedkeuren('verzuim')||magSchrijven('verzuim');
   var vandaag=vandaagISO();
   var jaarStr = String(_vzJaar);
-  var zichtbaarVZ = filterEigen(APP.verzuim, 'medId', 'verzuim').filter(function(v){ return (v.van||'').startsWith(jaarStr); });
+  var zichtbaarVZ = filterEigen(APP.verzuim, 'medId', 'verzuim').filter(function(v){ return (v.van||'').startsWith(jaarStr) && _medBestaat(v.medId); });
 
   var lijst=zichtbaarVZ.filter(function(v){
     if(_vzFilter!=='alle'&&v.status!==_vzFilter) return false;

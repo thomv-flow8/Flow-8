@@ -28,6 +28,12 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [ ] **99 oude opdrachten zonder geldige monteur** — 86 van een verwijderde medewerker (`mo043vnte2ar`,
       mei–juli 2026) en 13 van Jeremy Smits (rol magazijn, juni–augustus). Onzichtbaar in dag- én
       weekweergave. Kiezen: opruimen, opnieuw toewijzen of apart tonen.
+- [x] **Verwijderde medewerkers telden mee bij "Afwezig vandaag"** — opgelost op 13 september 2026.
+      Tellingen (dashboard, verlof, verzuim, goedkeuringsmelding) slaan verwijderde medewerkers over;
+      "vandaag" ook inactieve. Bij verwijderen volgt een waarschuwing bij lopend verzuim / open aanvragen.
+- [ ] **Verzuimrecords van verwijderde medewerkers opruimen** — de lopende ziekmeldingen van de twee
+      verwijderde medewerkers staan nog in de RTDB (onzichtbaar). Gezondheidsgegevens: bewust opruimen
+      of bewaren (AVG-bewaartermijn).
 - [ ] **Assemblage-mail: klantnaam leeg** — onderwerp "Assemblage ASSEM-3 —" en aanhef "Beste ,"
       (gezien op 13 september 2026). Uitzoeken waar de klantnaam in dat sjabloon vandaan komt.
 
