@@ -518,7 +518,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .plan-tabel th[data-col]:not([data-col="tijd"]):not([data-col="naam"]):not([data-col="_indicator"]),
   .plan-tabel td[data-col]:not([data-col="tijd"]):not([data-col="naam"]):not([data-col="_indicator"]),
   .plan-tabel col[data-col]:not([data-col="tijd"]):not([data-col="naam"]):not([data-col="_indicator"]){display:none}
-  /* Dagplan-knop (slimme dagplanning) op mobiel verbergen — wordt in praktijk niet mobiel gebruikt */
+  /* Route-knop (voorheen slimme dagplanning) op mobiel verbergen — wordt in praktijk niet mobiel gebruikt */
   .plan-dagplan-dag{display:none!important}
 }
 /* Debug log */
@@ -12071,6 +12071,14 @@ function _dpResetBerekening() {
   _dpKaartOpruimen();
 }
 
+// Route direct berekenen zodra een monteur met planbare opdrachten gekozen is, zodat de
+// kaart meteen zichtbaar is zonder extra klik. Niet vanuit _renderDagplanning aanroepen:
+// die draait na elke berekening opnieuw en zou dan een lus geven.
+function _dpAutoBereken(){
+  if(!_dpMonteurId || !_dpOpdrachten.length || _dpBerekend) return;
+  _dpBerekenReistijden(false);
+}
+
 // Telt deze opdracht mee in de dagplanning en de route-optimalisatie?
 // Uitgesloten: 'actie' (er is een actie vereist — de opdracht wacht op kantoor en
 // hoort niet in de route van de monteur) en de eindstatussen 'afgehandeld' en
@@ -12138,7 +12146,7 @@ function _renderDagplanning() {
   b += fg('Starttijd', startSel);
   b += '<button class="btn btn-primary btn-sm" id="dp-bereken-btn" style="height:38px;display:inline-flex;align-items:center;gap:6px">'
      + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
-     + ' Bereken tijden</button>';
+     + ' Opnieuw berekenen</button>';
   b += '<button class="btn btn-ghost btn-sm" id="dp-optimaliseer-btn" style="height:38px;display:inline-flex;align-items:center;gap:6px">'
      + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 016-6"/><path d="M18 7v8a6 6 0 01-6 6"/></svg>'
      + ' Optimaliseer route</button>';
@@ -12154,7 +12162,7 @@ function _renderDagplanning() {
     content += '<div style="text-align:center;padding:40px 0;color:var(--muted)">'
        + '<svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
        + '<div style="font-weight:600;margin-bottom:4px">Kies een monteur</div>'
-       + '<div style="font-size:12px">Selecteer een monteur om de dagplanning te bekijken.</div>'
+       + '<div style="font-size:12px">Selecteer een monteur om de route te bekijken.</div>'
        + '</div>';
   } else if(!_dpOpdrachten.length) {
     content += '<div style="text-align:center;padding:40px 0;color:var(--muted)">'
@@ -12314,7 +12322,7 @@ function _renderDagplanning() {
       rechts = '<div class="dp-kaart-placeholder" id="dp-kaart-placeholder">'
         +       '<svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>'
         +       '<div style="font-weight:600">Kaart met route</div>'
-        +       '<div style="font-size:12px;max-width:220px">Klik op <strong>Bereken tijden</strong> om de route op de kaart te zien.</div>'
+        +       '<div style="font-size:12px;max-width:220px">Route wordt berekend… Lukt dat niet, klik dan op <strong>Opnieuw berekenen</strong>.</div>'
         +     '</div>';
     }
     b += '<div class="dp-split">'
@@ -12335,16 +12343,16 @@ function _renderDagplanning() {
 
   // Wrapper is een flex-kolom zodat de dp-split (kaart + scrollende lijst) hoogte krijgt.
   // xl-variant alleen als de kaartkolom er is; anders de normale brede modal.
-  openModal('Slimme Dagplanning',
+  openModal('Route',
     '<div style="display:flex;flex-direction:column;flex:1;min-height:0">'+b+'</div>',
     f, !_dpToonKaartKolom, _dpToonKaartKolom);
 
   // Event listeners
   document.getElementById('dp-cancel').addEventListener('click', function(){ _dpKaartOpruimen(); closeModal(); });
   var dpMontSel = document.getElementById('dp-monteur');
-  if(dpMontSel) dpMontSel.addEventListener('change', function(){ _dpMonteurId = this.value; _dpResetBerekening(); _dpOpdrachten = []; _dpLaadOpdrachten(); _renderDagplanning(); });
+  if(dpMontSel) dpMontSel.addEventListener('change', function(){ _dpMonteurId = this.value; _dpResetBerekening(); _dpOpdrachten = []; _dpLaadOpdrachten(); _renderDagplanning(); _dpAutoBereken(); });
   var dpDatumInp = document.getElementById('dp-datum');
-  if(dpDatumInp) dpDatumInp.addEventListener('change', function(){ _dpDatum = this.value; _dpResetBerekening(); _dpOpdrachten = []; _dpLaadOpdrachten(); _renderDagplanning(); });
+  if(dpDatumInp) dpDatumInp.addEventListener('change', function(){ _dpDatum = this.value; _dpResetBerekening(); _dpOpdrachten = []; _dpLaadOpdrachten(); _renderDagplanning(); _dpAutoBereken(); });
   var dpStartSel = document.getElementById('dp-starttijd');
   if(dpStartSel) dpStartSel.addEventListener('change', function(){ _dpStarttijd = this.value; if(_dpBerekend) _dpBerekenTijdenLokaal(); _renderDagplanning(); });
 
@@ -12546,7 +12554,7 @@ function _dpBerekenReistijden(optimaliseer) {
       clearInterval(_dpWacht);
       if(berekenBtnW && berekenBtnW.textContent === 'Kaart laden...') {
         berekenBtnW.disabled = false;
-        berekenBtnW.textContent = optimaliseer ? 'Optimaliseer route' : 'Bereken tijden';
+        berekenBtnW.textContent = optimaliseer ? 'Optimaliseer route' : 'Opnieuw berekenen';
         toast('Google Maps kon niet geladen worden','error');
       }
     }, 10000);
@@ -12558,7 +12566,7 @@ function _dpBerekenReistijden(optimaliseer) {
 
   // Pre-flight: geen route proberen als bedrijfs- of opdrachtadres ontbreekt (Fase 5).
   if(!_dpValideerVoorRoute()) {
-    if(berekenBtn) { berekenBtn.disabled = false; berekenBtn.textContent = optimaliseer ? 'Optimaliseer route' : 'Bereken tijden'; }
+    if(berekenBtn) { berekenBtn.disabled = false; berekenBtn.textContent = optimaliseer ? 'Optimaliseer route' : 'Opnieuw berekenen'; }
     return;
   }
 
@@ -12706,7 +12714,7 @@ function _dpBerekenReistijden(optimaliseer) {
         if(optimaliseer) toast('Route geoptimaliseerd', 'success');
       } else {
         toast('Routeberekening mislukt: '+status, 'error');
-        if(berekenBtn) { berekenBtn.disabled = false; berekenBtn.textContent = optimaliseer ? 'Optimaliseer route' : 'Bereken tijden'; }
+        if(berekenBtn) { berekenBtn.disabled = false; berekenBtn.textContent = optimaliseer ? 'Optimaliseer route' : 'Opnieuw berekenen'; }
       }
     });
   }
@@ -14419,7 +14427,7 @@ function renderPlanning() {
   }
 
   h += '<div style="flex:1"></div>';
-  h += '<button class="btn btn-ghost btn-sm" id="plan-dagplan-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Dagplanning</button>';
+  h += '<button class="btn btn-ghost btn-sm" id="plan-dagplan-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 016-6"/><path d="M18 7v8a6 6 0 01-6 6"/></svg> Route</button>';
   if (_planView === 'lijst') h += '<button class="btn btn-ghost btn-sm" id="plan-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
   if (_planView === 'lijst') h += '<button class="btn btn-ghost btn-sm hide-mobile" id="plan-export-btn">'+ICO.download+' Export</button>';
   if (magSchrijven('planning') && !_planMob) h += '<button class="btn btn-primary btn-sm" id="plan-add-btn">+ Opdracht</button>';
@@ -14580,6 +14588,7 @@ function bindPlanningEvents() {
       _dpOpdrachten = [];
       if(_dpMonteurId) _dpLaadOpdrachten();
       _renderDagplanning();
+      _dpAutoBereken();
     });
   });
 
@@ -14980,7 +14989,7 @@ function renderPlanLijst(monteurs) {
       var prefillDatum = datum;
       var prefillMont = _planFilter !== 'alle' ? _planFilter : '';
       h += '<button class="btn btn-ghost btn-sm plan-add-dag" data-datum="'+esc(prefillDatum)+'" data-monteur="'+esc(prefillMont)+'" style="font-size:11px;padding:2px 8px;margin-left:4px">+ Opdracht</button>';
-      h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(prefillDatum)+'" data-monteur="'+esc(prefillMont)+'" style="font-size:11px;padding:2px 8px;margin-left:2px;display:inline-flex;align-items:center;gap:3px"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Dagplan</button>';
+      h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(prefillDatum)+'" data-monteur="'+esc(prefillMont)+'" style="font-size:11px;padding:2px 8px;margin-left:2px;display:inline-flex;align-items:center;gap:3px"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 016-6"/><path d="M18 7v8a6 6 0 01-6 6"/></svg> Route</button>';
     }
     // (de beschikbaarheidsbalk hieronder staat in dezelfde kolom; sluiting volgt daarna)
 

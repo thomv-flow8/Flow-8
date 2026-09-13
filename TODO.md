@@ -28,6 +28,11 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Opdrachten van monteurs buiten de planning apart tonen** — 13 september 2026: rij/kolom
       "Niet in planning" in week- en dagweergave, "Verwijderde medewerker" in paneel en lijst. Niets
       gewijzigd of verwijderd. (Oorspronkelijke melding hieronder.)
+- [x] **"Slimme dagplanning" heet nu "Route"** — 13 september 2026: route-icoon; de route wordt direct
+      berekend bij het kiezen van een monteur, datum of via de knop per dag (`_dpAutoBereken`).
+      "Bereken tijden" heet nu "Opnieuw berekenen". Tijden overnemen blijft een bewuste stap.
+- [ ] **Oude route-wizard ("Route optimalisatie") is onbereikbaar** — `openRouteWizard` wordt alleen via
+      `.plan-route-dag`-knoppen geopend, die nergens meer getoond worden. Opruimen of bewust terugzetten.
 - [x] **Namenarchief verwijderde medewerkers** — 13 september 2026: `medewerkersArchief` (naam, rol,
       datum) wordt bij verwijderen gevuld; planning, paneel, lijst en werkbon-uren tonen "Naam · verwijderd".
       Eenmalig aangevuld: `mo043vnte2ar` = Perry Windt (oud record), `mqyu6fdxzfzk` = Jonny Visser.
