@@ -27078,7 +27078,7 @@ var _rapMedId = 'alle';
 function renderRapportage() {
   var el = document.getElementById('content');
   var tabs = [
-    { k:'persoonlijk',    l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Persoonlijk</span></span>' },
+    { k:'persoonlijk',    l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Medewerkers</span></span>' },
     { k:'opdrachten',     l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Opdrachten</span></span>' },
     { k:'serviceklanten', l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg><span>Serviceklanten</span></span>' },
     { k:'werkorders',     l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg><span>Werkorders</span></span>' },
@@ -27174,10 +27174,12 @@ function initGrafiekInteractie(el) {
   });
 }
 
-function donutSVG(segmenten, midden) {
+// metPct (optioneel): percentage midden op elk segment vanaf 5%.
+// seg.weergave (optioneel): tekst voor tooltip/legenda i.p.v. het kale getal (bv. "7.120 u").
+function donutSVG(segmenten, midden, metPct) {
   var totaal=segmenten.reduce(function(s,x){return s+x.waarde;},0);
   if(!totaal) return '<svg width="160" height="160" viewBox="0 0 160 160"><circle cx="80" cy="80" r="55" fill="none" stroke="var(--border)" stroke-width="28"/><text x="80" y="86" text-anchor="middle" font-size="12" fill="var(--muted)">Geen data</text></svg>';
-  var cx=80,cy=80,r=55,dik=28,hoek=-Math.PI/2,paden='';
+  var cx=80,cy=80,r=55,dik=28,hoek=-Math.PI/2,paden='',labels='';
   segmenten.forEach(function(seg){
     if(!seg.waarde) return;
     var sweep=(seg.waarde/totaal)*2*Math.PI;
@@ -27185,12 +27187,17 @@ function donutSVG(segmenten, midden) {
     var x1=cx+r*Math.cos(hoek),y1=cy+r*Math.sin(hoek);
     var x2=cx+r*Math.cos(hoek+sweep-0.001),y2=cy+r*Math.sin(hoek+sweep-0.001);
     var pct=Math.round(seg.waarde/totaal*100);
-    var tip=esc(seg.label)+': '+seg.waarde+' ('+pct+'%)';
+    var tip=esc(seg.label)+': '+(seg.weergave!=null?esc(String(seg.weergave)):seg.waarde)+' ('+pct+'%)';
     paden+='<path class="donut-seg" data-tip="'+tip+'" data-kl="'+seg.kleur+'" d="M'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+r+','+r+' 0 '+groot+',1 '+x2.toFixed(2)+','+y2.toFixed(2)+'" fill="none" stroke="'+seg.kleur+'" stroke-width="'+dik+'" stroke-linecap="butt" style="cursor:pointer;transition:stroke-width .15s,opacity .15s" onmouseover="this.setAttribute(\'stroke-width\',\'34\');this.style.opacity=\'.85\'" onmouseout="this.setAttribute(\'stroke-width\',\''+dik+'\');this.style.opacity=\'1\'"/>';
+    // Percentage midden op het segment (alleen vanaf 5%, anders te krap)
+    if(metPct && pct >= 5){
+      var mid=hoek+sweep/2, lx=cx+r*Math.cos(mid), ly=cy+r*Math.sin(mid);
+      labels+='<text x="'+lx.toFixed(1)+'" y="'+(ly+3.5).toFixed(1)+'" text-anchor="middle" font-family="\'Instrument Sans\',sans-serif" font-size="10" font-weight="700" fill="#fff" stroke="rgba(0,0,0,.35)" stroke-width="2" paint-order="stroke" style="pointer-events:none">'+pct+'%</text>';
+    }
     hoek+=sweep;
   });
   var parts=midden?midden.split('|'):['',''];
-  return '<svg width="160" height="160" viewBox="0 0 160 160" style="overflow:visible">'+paden
+  return '<svg width="160" height="160" viewBox="0 0 160 160" style="overflow:visible">'+paden+labels
     +'<text x="80" y="'+(parts[1]?'75':'86')+'" text-anchor="middle" font-family="\'Instrument Sans\',sans-serif" font-size="22" font-weight="700" fill="var(--text)">'+parts[0]+'</text>'
     +(parts[1]?'<text x="80" y="95" text-anchor="middle" font-family="\'Instrument Sans\',sans-serif" font-size="11" fill="var(--muted)">'+parts[1]+'</text>':'')
     +'</svg>';
@@ -27203,7 +27210,7 @@ function legendaHTML(segmenten,totaal) {
     h+='<div style="display:flex;align-items:center;gap:7px">';
     h+='<div style="width:10px;height:10px;border-radius:3px;background:'+s.kleur+';flex-shrink:0"></div>';
     h+='<div style="flex:1;font-size:12px">'+esc(s.label)+'</div>';
-    h+='<div style="font-size:12px;font-weight:700">'+s.waarde+'</div>';
+    h+='<div style="font-size:12px;font-weight:700">'+(s.weergave!=null?esc(String(s.weergave)):s.waarde)+'</div>';
     h+='<div style="font-size:11px;color:var(--muted);min-width:30px;text-align:right">'+pct+'%</div></div>';
   });
   return h+'</div>';
@@ -27974,6 +27981,122 @@ function renderRapWerkorders(el) {
   });
 }
 
+// Uren van één medewerker per maand in een jaar: gewerkt (rooster − verlof − verzuim), verlof,
+// verzuim en overuren. Telt vanaf datumInDienst t/m vandaag. Een ZZP'er zonder werkrooster
+// heeft geen roosteruren (anders zou de standaard van 8u per werkdag worden verzonnen).
+function _rapUrenPerMaand(m, jaar){
+  var uit = [];
+  for(var i = 0; i < 12; i++) uit.push({ gewerkt:0, verlof:0, verzuim:0, over:0 });
+  var vandaag = vandaagISO();
+  var start = jaar+'-01-01', eind = jaar+'-12-31';
+  if(eind > vandaag) eind = vandaag;
+  if(m.datumInDienst && m.datumInDienst > start) start = m.datumInDienst;
+  if(start > eind) return uit;
+  var metRooster = !(m.contractType === 'zzp' && !(m.werkrooster && m.werkrooster.week1));
+  var sid = String(m.id);
+  function dagenTussen(van, totIncl){
+    var r = [], p = van.split('-'), q = totIncl.split('-');
+    var d = new Date(+p[0], +p[1]-1, +p[2]), e = new Date(+q[0], +q[1]-1, +q[2]);
+    while(d <= e){ r.push(dateToStr(d)); d.setDate(d.getDate()+1); }
+    return r;
+  }
+  function dagVoor(ds){ var p = ds.split('-'); var d = new Date(+p[0], +p[1]-1, +p[2]); d.setDate(d.getDate()-1); return dateToStr(d); }
+  function rooster(ds){ return metRooster ? getRoosterUrenVoorDatum(m, ds) : 0; }
+  var perDag = {};
+  dagenTussen(start, eind).forEach(function(ds){ perDag[ds] = { r: rooster(ds), vl: 0, vz: 0 }; });
+  // Verlof: de opgenomen uren verdeeld over de roosterdagen van de periode
+  APP.verlof.forEach(function(v){
+    if(String(v.medId) !== sid || v.status !== 'goedgekeurd' || !v.van) return;
+    var uren = verlofOpgenomenUren([v], m);
+    if(!uren) return;
+    var lijst = dagenTussen(v.van, v.tot || v.van);
+    var roosterTot = lijst.reduce(function(s2, ds){ return s2 + rooster(ds); }, 0);
+    lijst.forEach(function(ds){
+      if(!perDag[ds]) return;
+      perDag[ds].vl += uren * (roosterTot ? rooster(ds) / roosterTot : 1 / lijst.length);
+    });
+  });
+  // Verzuim: van de startdatum t/m de dag vóór herstel (tot = hersteldatum), of t/m vandaag
+  APP.verzuim.forEach(function(v){
+    if(String(v.medId) !== sid || !v.van) return;
+    var laatste = v.tot ? dagVoor(v.tot) : eind;
+    if(laatste < v.van) return;
+    dagenTussen(v.van, laatste).forEach(function(ds){
+      var pd = perDag[ds]; if(!pd) return;
+      var u = v.type === 'gedeeltelijk'
+        ? (v.urenZiek != null ? Math.min(pd.r, parseFloat(v.urenZiek) || 0) : pd.r / 2)
+        : pd.r;
+      pd.vz = Math.max(pd.vz, u);
+    });
+  });
+  Object.keys(perDag).forEach(function(ds){
+    var pd = perDag[ds], mi = +ds.slice(5, 7) - 1;
+    uit[mi].verlof  += pd.vl;
+    uit[mi].verzuim += pd.vz;
+    uit[mi].gewerkt += Math.max(0, pd.r - pd.vl - pd.vz);
+  });
+  // Overuren (niet afgewezen), op datum
+  APP.overuren.forEach(function(o){
+    if(String(o.medId) !== sid || o.status === 'afgewezen' || !o.datum) return;
+    if(o.datum < jaar+'-01-01' || o.datum > eind) return;
+    uit[+o.datum.slice(5, 7) - 1].over += parseFloat(o.uren) || 0;
+  });
+  return uit;
+}
+
+// Grafieken voor Rapportage → Medewerkers. metRollen: de rolverdeling alleen tonen bij inzage
+// in het hele team (voor één persoon zegt een verdeling per rol niets).
+function _rapMedewerkersGrafieken(actieve, metRollen){
+  var jaar = _rapJaar;
+  var fmt = function(n){ return Math.round(n).toLocaleString('nl-NL'); };
+  var perMed = actieve.map(function(m){ return { m: m, mnd: _rapUrenPerMaand(m, jaar) }; });
+  var h = '';
+  if(metRollen){
+    var rollen = {};
+    perMed.forEach(function(x){
+      var rol = x.m.rol || 'onbekend';
+      if(!rollen[rol]) rollen[rol] = { n: 0, uren: 0 };
+      rollen[rol].n++;
+      rollen[rol].uren += x.mnd.reduce(function(s2, d){ return s2 + d.gewerkt + d.over; }, 0);
+    });
+    var rolNaam = function(r){ return (APP.rollen && APP.rollen[r] && APP.rollen[r].naam) || r; };
+    var segMed = Object.keys(rollen).map(function(r){ return { label: rolNaam(r), waarde: rollen[r].n, kleur: rolKleur(r) }; })
+      .sort(function(a, b){ return b.waarde - a.waarde; });
+    var segUren = Object.keys(rollen).map(function(r){ var u = Math.round(rollen[r].uren); return { label: rolNaam(r), waarde: u, weergave: fmt(u)+' u', kleur: rolKleur(r) }; })
+      .filter(function(x){ return x.waarde > 0; })
+      .sort(function(a, b){ return b.waarde - a.waarde; });
+    var totMed = segMed.reduce(function(s2, x){ return s2 + x.waarde; }, 0);
+    var totUren = segUren.reduce(function(s2, x){ return s2 + x.waarde; }, 0);
+    h += '<div class="obj-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
+    h += grafiekKaart('Medewerkers per rol', donutSVG(segMed, totMed+'|medewerkers', true), legendaHTML(segMed, totMed));
+    h += grafiekKaart('Ingezette uren per rol — '+jaar, donutSVG(segUren, fmt(totUren)+'|uren', true), legendaHTML(segUren, totUren));
+    h += '</div>';
+  }
+  // Staafdiagram: per maand gewerkt, verlof, verzuim en overuren (gestapeld, gewerkt onderaan)
+  var mndNamen = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+  var mnd = mndNamen.map(function(mn, i){
+    var d = { mn: mn, gewerkt: 0, verlof: 0, verzuim: 0, over: 0 };
+    perMed.forEach(function(x){ var q = x.mnd[i]; d.gewerkt += q.gewerkt; d.verlof += q.verlof; d.verzuim += q.verzuim; d.over += q.over; });
+    return d;
+  });
+  var KL = { gewerkt: '#10b981', verlof: '#4a6cf7', verzuim: '#ef4444', over: '#f59e0b' };
+  var totaal = function(d){ return d.gewerkt + d.verlof + d.verzuim + d.over; };
+  var maxT = Math.max.apply(null, mnd.map(totaal)) || 1;
+  h += '<div style="margin-bottom:16px">';
+  h += staafDiagram('Uren per maand — '+jaar, mnd, maxT,
+    function(d){ var t = totaal(d); return t >= 0.5 ? fmt(t) : ''; },
+    function(d){
+      var t = totaal(d); if(t < 0.5) return [];
+      var bH = Math.max(4, Math.round(t / maxT * 120));
+      return [['over','Overuren'], ['verzuim','Verzuim'], ['verlof','Verlof'], ['gewerkt','Gewerkt']].map(function(p){
+        return { h: Math.round(d[p[0]] / t * bH), kl: KL[p[0]], tip: d.mn+' · '+p[1]+': '+fmt(d[p[0]])+' u' };
+      });
+    },
+    [{ kl: KL.gewerkt, l: 'Gewerkt' }, { kl: KL.verlof, l: 'Verlof' }, { kl: KL.verzuim, l: 'Verzuim' }, { kl: KL.over, l: 'Overuren' }]);
+  h += '</div>';
+  return h;
+}
+
 function renderRapPersoonlijk(el) {
   // Dit overzicht telt per medewerker verlof, overuren, onkosten en verzuim op. Wie in
   // die modules alleen zijn eigen gegevens mag zien, hoort hier ook alleen zichzelf te
@@ -28004,6 +28127,9 @@ function renderRapPersoonlijk(el) {
   h+=statCard('Onkosten '+jaarStr, '€'+Math.round(totOk), '#10b981', SVGS.file);
   h+=statCard('Verzuim '+jaarStr, totVz+'d', totVz>20?'#ef4444':'#6b7694', SVGS.alert);
   h+='</div>';
+
+  // ── Grafieken: rolverdeling (alleen bij inzage in het hele team) + uren per maand ──
+  h+=_rapMedewerkersGrafieken(actieve, _magAlles && actieve.length > 1);
 
   // ── Tabel ──
   h+='<div class="card" style="padding:0"><div class="table-wrap"><table style="width:100%"><thead><tr>';
@@ -28047,7 +28173,7 @@ function renderRapPersoonlijk(el) {
         var okT=APP.onkosten.filter(function(o){return String(o.medId)===String(m.id)&&(o.datum||'').startsWith(jaarStr2);}).reduce(function(s,o){return s+(o.bedrag||0);},0);
         var vzD=APP.verzuim.filter(function(v){return String(v.medId)===String(m.id)&&(v.van||'').startsWith(jaarStr2);}).reduce(function(s,v){return s+telWerkdagen(v.van,v.tot||null);},0);
         return[m.voornaam+' '+m.achternaam,m.rol||'',getVerlofSaldoUren(m).toFixed(1),vlOp2.toFixed(1),ouT,okT.toFixed(2),vzD];
-      }),'persoonlijk_overzicht_'+_rapJaar);
+      }),'medewerkers_overzicht_'+_rapJaar);
   });
 }
 

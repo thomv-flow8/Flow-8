@@ -39,6 +39,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Register: foto's boven de kaart + checklist-kop** — 13 september 2026: bij pomp → Installatie en
       in het objectdetail staan de foto's boven de kaart; checklists hebben dezelfde uitklapbare kop.
       Werkbonnen en checklists staan op desktop naast elkaar, op mobiel onder elkaar.
+- [x] **Rapportage → Medewerkers (was "Persoonlijk")** — 13 september 2026: cirkeldiagrammen
+      medewerkers per rol en ingezette uren per rol (met % op de ring) en een staafdiagram per maand
+      (gewerkt, verlof, verzuim, overuren). Gewerkt = roosteruren − verlof − verzuim (keuze A).
+- [ ] **Percentages op de ring ook op andere rapportagepagina's?** — optioneel; `donutSVG(…, true)`.
 - [ ] **Verzuimrecords van verwijderde medewerkers opruimen** — de lopende ziekmeldingen van de twee
       verwijderde medewerkers staan nog in de RTDB (onzichtbaar). Gezondheidsgegevens: bewust opruimen
       of bewaren (AVG-bewaartermijn).
