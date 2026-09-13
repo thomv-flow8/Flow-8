@@ -25,7 +25,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Planning dagweergave toonde niet alle opdrachten** — opgelost op 13 september 2026. Opdrachten
       zonder starttijd (163 van 732) vielen weg; nu een rij "Zonder tijd", een kolom "Niet toegewezen",
       een meerekkend rooster en een teller.
-- [ ] **99 oude opdrachten zonder geldige monteur** — 86 van een verwijderde medewerker (`mo043vnte2ar`,
+- [x] **Opdrachten van monteurs buiten de planning apart tonen** — 13 september 2026: rij/kolom
+      "Niet in planning" in week- en dagweergave, "Verwijderde medewerker" in paneel en lijst. Niets
+      gewijzigd of verwijderd. (Oorspronkelijke melding hieronder.)
+- [x] **99 oude opdrachten zonder geldige monteur** — 86 van een verwijderde medewerker (`mo043vnte2ar`,
       mei–juli 2026) en 13 van Jeremy Smits (rol magazijn, juni–augustus). Onzichtbaar in dag- én
       weekweergave. Kiezen: opruimen, opnieuw toewijzen of apart tonen.
 - [x] **Verwijderde medewerkers telden mee bij "Afwezig vandaag"** — opgelost op 13 september 2026.
@@ -40,7 +43,7 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       in het objectdetail staan de foto's boven de kaart; checklists hebben dezelfde uitklapbare kop.
       Werkbonnen en checklists staan op desktop naast elkaar, op mobiel onder elkaar.
 - [x] **Rapportage → Medewerkers (was "Persoonlijk")** — 13 september 2026: cirkeldiagrammen
-      medewerkers per rol en ingezette uren per rol (met % op de ring) en een staafdiagram per maand
+      medewerkers per rol en ingezette uren per rol (% in de legenda) en een staafdiagram per maand
       (gewerkt, verlof, verzuim, overuren). Gewerkt = roosteruren − verlof − verzuim (keuze A).
 - [x] **Percentages op de ring ook op andere rapportagepagina's?** — besloten 13 september 2026: niet nodig.
 - [x] **Verzuimrecords van verwijderde medewerkers** — besloten 13 september 2026: bewaren. Ze staan in
