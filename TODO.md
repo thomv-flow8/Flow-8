@@ -31,6 +31,9 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **"Slimme dagplanning" heet nu "Route"** — 13 september 2026: route-icoon; de route wordt direct
       berekend bij het kiezen van een monteur, datum of via de knop per dag (`_dpAutoBereken`).
       "Bereken tijden" heet nu "Opnieuw berekenen". Tijden overnemen blijft een bewuste stap.
+      Daarna: na slepen pas doorrekenen na ~1 s pauze (één Google-aanvraag), verouderde antwoorden
+      genegeerd (`_dpRouteVersie`), "Tijden overnemen" geblokkeerd zolang de tijden niet kloppen, en
+      "Opnieuw berekenen" alleen zichtbaar als er geen geldige route is.
 - [ ] **Oude route-wizard ("Route optimalisatie") is onbereikbaar** — `openRouteWizard` wordt alleen via
       `.plan-route-dag`-knoppen geopend, die nergens meer getoond worden. Opruimen of bewust terugzetten.
 - [x] **Namenarchief verwijderde medewerkers** — 13 september 2026: `medewerkersArchief` (naam, rol,

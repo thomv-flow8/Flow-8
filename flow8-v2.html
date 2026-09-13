@@ -12048,6 +12048,12 @@ var _dpRenderer = null;       // DirectionsRenderer voor de route-polyline
 var _dpKaartMarkers = [];     // Genummerde markers + bedrijf, zodat we ze kunnen opruimen
 var _dpKaartOpdrachtMarkers = []; // Alleen de opdracht-markers, geïndexeerd op opdrachtvolgorde
 var _dpKaartInfoWindow = null; // Actieve InfoWindow op de kaart
+// Volgnummer van de laatste routeberekening: een antwoord van Google op een oudere aanvraag
+// (andere monteur, datum of volgorde, of een gesloten venster) wordt genegeerd.
+var _dpRouteVersie = 0;
+var _dpHerordenTimer = null;       // wachttijd na slepen, zodat snel schuiven één aanvraag geeft
+var _dpVolgordeGewijzigd = false;  // volgorde gesleept, reistijden nog niet bijgewerkt
+var _dpHerberekenLoopt = false;    // aanvraag na slepen is onderweg
 
 function openDagplanning() {
   var planRollen = APP.planningRollen || ['monteur','extern'];
@@ -12068,6 +12074,10 @@ function openDagplanning() {
 function _dpResetBerekening() {
   _dpBerekend = false;
   _dpRouteResult = null;
+  _dpRouteVersie++;                  // lopende aanvragen tellen niet meer
+  clearTimeout(_dpHerordenTimer); _dpHerordenTimer = null;
+  _dpVolgordeGewijzigd = false;
+  _dpHerberekenLoopt = false;
   _dpKaartOpruimen();
 }
 
@@ -12144,13 +12154,25 @@ function _renderDagplanning() {
   b += fg('Monteur', montSel);
   b += fg('Datum', datumInp);
   b += fg('Starttijd', startSel);
-  b += '<button class="btn btn-primary btn-sm" id="dp-bereken-btn" style="height:38px;display:inline-flex;align-items:center;gap:6px">'
-     + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
-     + ' Opnieuw berekenen</button>';
+  // "Opnieuw berekenen" alleen als er geen geldige route is: nog niet (goed) berekend, of het
+  // bijwerken na slepen is mislukt. In alle andere gevallen rekent de app zelf al door.
+  var _dpHerordenMislukt = _dpVolgordeGewijzigd && !_dpHerordenTimer && !_dpHerberekenLoopt;
+  if(_dpMonteurId && _dpOpdrachten.length && (!(_dpBerekend && _dpRouteResult) || _dpHerordenMislukt)) {
+    b += '<button class="btn btn-primary btn-sm" id="dp-bereken-btn" style="height:38px;display:inline-flex;align-items:center;gap:6px">'
+       + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+       + ' Opnieuw berekenen</button>';
+  }
   b += '<button class="btn btn-ghost btn-sm" id="dp-optimaliseer-btn" style="height:38px;display:inline-flex;align-items:center;gap:6px">'
      + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 016-6"/><path d="M18 7v8a6 6 0 01-6 6"/></svg>'
      + ' Optimaliseer route</button>';
   b += '</div>';
+  if(_dpVolgordeGewijzigd) {
+    b += '<div style="margin:-8px 0 14px;padding:8px 12px;border-radius:8px;font-size:12px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:var(--orange-t)">'
+       + (_dpHerordenMislukt
+           ? 'Volgorde gewijzigd — de reistijden konden niet worden bijgewerkt. Klik op <strong>Opnieuw berekenen</strong>.'
+           : 'Volgorde gewijzigd — reistijden worden bijgewerkt…')
+       + '</div>';
+  }
 
   // Vanaf hier bouwen we de "content" apart op. Bij een gekozen monteur mét opdrachten komt
   // die in een linkerkolom met rechts de kaart (Fase 2+). Bij de lege staten (geen monteur /
@@ -12335,7 +12357,7 @@ function _renderDagplanning() {
 
   // Footer
   var f = '<button class="btn btn-ghost" id="dp-cancel">Annuleren</button>';
-  if(_dpBerekend && _dpOpdrachten.length) {
+  if(_dpBerekend && _dpOpdrachten.length && !_dpVolgordeGewijzigd) {
     f += '<button class="btn btn-primary" id="dp-overnemen" style="background:#22c55e">'
        + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
        + ' Tijden overnemen</button>';
@@ -12348,7 +12370,7 @@ function _renderDagplanning() {
     f, !_dpToonKaartKolom, _dpToonKaartKolom);
 
   // Event listeners
-  document.getElementById('dp-cancel').addEventListener('click', function(){ _dpKaartOpruimen(); closeModal(); });
+  document.getElementById('dp-cancel').addEventListener('click', function(){ _dpResetBerekening(); closeModal(); });
   var dpMontSel = document.getElementById('dp-monteur');
   if(dpMontSel) dpMontSel.addEventListener('change', function(){ _dpMonteurId = this.value; _dpResetBerekening(); _dpOpdrachten = []; _dpLaadOpdrachten(); _renderDagplanning(); _dpAutoBereken(); });
   var dpDatumInp = document.getElementById('dp-datum');
@@ -12514,10 +12536,9 @@ function _dpInitDragDrop() {
       // Swap in array
       var moved = _dpOpdrachten.splice(fromIdx, 1)[0];
       _dpOpdrachten.splice(toIdx, 0, moved);
-      // Na herordening is de bewaarde route niet meer geldig: opnieuw ophalen in de nieuwe
-      // volgorde (zonder optimalisatie), zodat reistijden én kaart kloppen. Is er nog niet
-      // berekend, dan alleen de lijst hertekenen.
-      _dpHerberekenNaHerorden();
+      // Na herordening is de bewaarde route niet meer geldig: nieuwe volgorde meteen tonen en
+      // na een korte pauze opnieuw ophalen, zonder optimalisatie (zie _dpNaHerordenGepland).
+      _dpNaHerordenGepland();
     });
     // Klik op de kaart (Fase 3): selecteer de stop op de kaart. Kliks op de pin-knop en de
     // sleep-handle worden overgeslagen — die hebben hun eigen gedrag.
@@ -12576,6 +12597,7 @@ function _dpBerekenReistijden(optimaliseer) {
     return ((o.adres||'') + (o.postcode ? ' ' + o.postcode : '') + ' Nederland').trim();
   }
 
+  var versie = ++_dpRouteVersie;
   var heeftBeperkingen = optimaliseer && _dpOpdrachten.some(function(o){ return !!o._dpPinTijd || !!(o._dpBlokVan && o._dpBlokTot); });
 
   if(optimaliseer && heeftBeperkingen) {
@@ -12678,13 +12700,14 @@ function _dpBerekenReistijden(optimaliseer) {
     }
 
     Promise.all(segmentCalls).then(function(resultaten){
+      if(versie !== _dpRouteVersie) return;   // verouderd antwoord
       resultaten.sort(function(a,b){ return a.segIdx - b.segIdx; });
       _dpOpdrachten = [];
       resultaten.forEach(function(r){
         r.vrij.forEach(function(o){ _dpOpdrachten.push(o); });
         if(r.pin) _dpOpdrachten.push(r.pin);
       });
-      _dpBerekenReistijdenFinaal(bedrijfsAdres, berekenBtn, true);
+      _dpBerekenReistijdenFinaal(bedrijfsAdres, berekenBtn, true, versie);
     });
 
   } else {
@@ -12701,6 +12724,7 @@ function _dpBerekenReistijden(optimaliseer) {
       optimizeWaypoints: !!optimaliseer,
       travelMode: google.maps.TravelMode.DRIVING,
     }, function(result, status){
+      if(versie !== _dpRouteVersie) return;   // verouderd antwoord
       if(status === 'OK') {
         if(optimaliseer && result.routes[0].waypoint_order) {
           var order = result.routes[0].waypoint_order;
@@ -12708,6 +12732,7 @@ function _dpBerekenReistijden(optimaliseer) {
         }
         _dpRouteResult = result;   // bewaren voor de kaart (Fase 2) — geen extra Directions-call
         _dpVerwerkLegs(result.routes[0].legs);
+        _dpVolgordeGewijzigd = false;
         _dpBerekend = true;
         _dpBerekenTijdenLokaal();
         _renderDagplanning();
@@ -12894,7 +12919,7 @@ function _dpKaartStijlDonker() {
   ];
 }
 
-function _dpBerekenReistijdenFinaal(bedrijfsAdres, berekenBtn, isOptimaliseer) {
+function _dpBerekenReistijdenFinaal(bedrijfsAdres, berekenBtn, isOptimaliseer, versie) {
   function _opAdres(o) {
     return ((o.adres||'') + (o.postcode ? ' ' + o.postcode : '') + ' Nederland').trim();
   }
@@ -12909,9 +12934,11 @@ function _dpBerekenReistijdenFinaal(bedrijfsAdres, berekenBtn, isOptimaliseer) {
     optimizeWaypoints: false,
     travelMode: google.maps.TravelMode.DRIVING,
   }, function(result, status){
+    if(versie != null && versie !== _dpRouteVersie) return;   // verouderd antwoord
     if(status === 'OK') {
       _dpRouteResult = result;   // bewaren voor de kaart (Fase 2)
       _dpVerwerkLegs(result.routes[0].legs);
+      _dpVolgordeGewijzigd = false;
       _dpBerekend = true;
       _dpBerekenTijdenLokaal();
       _renderDagplanning();
@@ -12965,10 +12992,24 @@ function _dpValideerVoorRoute() {
 // routeresultaat niet meer geldig: de legs horen bij de oude volgorde. We halen de route
 // opnieuw op in de huidige volgorde — zónder optimalisatie, want de gebruiker bepaalt de
 // volgorde zelf. Eén Directions-call per herordening. Kaart + lijst updaten daarna samen.
-function _dpHerberekenNaHerorden() {
+// Na slepen: de nieuwe volgorde meteen tonen en pas doorrekenen als er ~1 seconde niet meer
+// gesleept is (vijf keer schuiven = één Google-aanvraag). Tot dan kloppen de getoonde tijden
+// niet; "Tijden overnemen" is in die tussentijd niet beschikbaar.
+function _dpNaHerordenGepland() {
   if(!_dpBerekend) { _renderDagplanning(); return; }   // nog niet berekend: alleen lijst hertekenen
+  _dpVolgordeGewijzigd = true;
+  _dpRouteVersie++;                  // een lopende aanvraag voor de oude volgorde telt niet meer
+  clearTimeout(_dpHerordenTimer);
+  _dpHerordenTimer = setTimeout(function(){ _dpHerordenTimer = null; _dpHerberekenNaHerorden(); }, 900);
+  _renderDagplanning();
+}
+
+function _dpHerberekenNaHerorden() {
+  if(!_dpBerekend) { _dpVolgordeGewijzigd = false; _renderDagplanning(); return; }   // nog niet berekend: alleen lijst hertekenen
   if(!window.google || !google.maps || !google.maps.DirectionsService) { _renderDagplanning(); return; }
   if(!_dpValideerVoorRoute()) { _renderDagplanning(); return; }
+  var versie = ++_dpRouteVersie;
+  _dpHerberekenLoopt = true;
   var bedrijfsAdres = _dpBedrijfsAdres();
   function _opAdres(o){ return ((o.adres||'') + (o.postcode ? ' ' + o.postcode : '') + ' Nederland').trim(); }
   var waypoints = _dpOpdrachten.map(function(o){ return { location:_opAdres(o), stopover:true }; });
@@ -12977,9 +13018,12 @@ function _dpHerberekenNaHerorden() {
     origin: bedrijfsAdres, destination: bedrijfsAdres, waypoints: waypoints,
     optimizeWaypoints: false, travelMode: google.maps.TravelMode.DRIVING,
   }, function(result, status){
+    if(versie !== _dpRouteVersie) return;   // er is inmiddels opnieuw gesleept of gewisseld
+    _dpHerberekenLoopt = false;
     if(status === 'OK') {
       _dpRouteResult = result;
       _dpVerwerkLegs(result.routes[0].legs);
+      _dpVolgordeGewijzigd = false;
       _dpBerekenTijdenLokaal();
       _renderDagplanning();
     } else {
