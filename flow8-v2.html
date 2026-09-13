@@ -22032,8 +22032,11 @@ function renderPompObjectDetail(objId) {
   h += '</div>';
 
   // ── Historie-accordions BOVEN de kaart: Werkbonnen + Checklists ──
-  h += '<div style="margin-bottom:16px"><div id="pr-obj-werkbonnen"><div style="font-size:12px;color:var(--muted);padding:6px 0">Werkbonnen laden…</div></div></div>';
-  h += '<div style="margin-bottom:16px"><div id="pr-obj-checklists"><div style="font-size:12px;color:var(--muted);padding:6px 0">Checklists laden…</div></div></div>';
+  // Naast elkaar op desktop, onder elkaar op mobiel (zelfde raster als de kaarten hierboven)
+  h += '<div class="obj-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:start">';
+  h += '<div style="min-width:0"><div id="pr-obj-werkbonnen"><div style="font-size:12px;color:var(--muted);padding:6px 0">Werkbonnen laden…</div></div></div>';
+  h += '<div style="min-width:0"><div id="pr-obj-checklists"><div style="font-size:12px;color:var(--muted);padding:6px 0">Checklists laden…</div></div></div>';
+  h += '</div>';
 
   // Foto's sectie (boven de kaart)
   var fotos = obj.fotoUrls||[];
