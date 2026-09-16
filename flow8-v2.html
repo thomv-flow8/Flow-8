@@ -9113,6 +9113,7 @@ function renderServiceklanten() {
   var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h+='<input class="input" id="sk-zoek" placeholder="Zoek serviceklant..." value="'+esc(safeZoek(_skZoek))+'" style="flex:1;min-width:160px;max-width:320px">';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
+  h+='<button class="btn btn-ghost btn-sm" id="sk-jaarplanner-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Jaarplanning</button>';
   h+='<button class="btn btn-ghost btn-sm" id="sk-snelinvoer-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg> Datums invoeren</button>';
   h+='<button class="btn btn-ghost btn-sm" id="sk-autoplanner-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg> Auto-plannen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
@@ -9245,6 +9246,8 @@ function renderServiceklanten() {
   if(skKolBtn) skKolBtn.addEventListener('click', openSkKolomKiezer);
   el.querySelectorAll('.sk-row').forEach(function(tr){tr.addEventListener('click',function(e){if(!e.target.closest('button')&&!e.target.closest('input'))openSkPanel(tr.dataset.id);});});
   el.querySelectorAll('.sk-edit-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();openSkModal(b.dataset.id);});});
+  var jaarplanBtn = el.querySelector('#sk-jaarplanner-btn');
+  if(jaarplanBtn) jaarplanBtn.addEventListener('click', openJaarplanner);
   var snelinvoerBtn = el.querySelector('#sk-snelinvoer-btn');
   if(snelinvoerBtn) snelinvoerBtn.addEventListener('click', openSnelinvoerDatums);
   var autoplanBtn = el.querySelector('#sk-autoplanner-btn');
@@ -13554,6 +13557,407 @@ function _haversine(lat1,lon1,lat2,lon2){
   var R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
   var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// JAARPLANNER — verdeling van servicebeurten over maanden
+// ══════════════════════════════════════════════════════════════════════════
+// De oude auto-planner werkt binnen één maand. Deze planner kijkt over een hele periode:
+// elke beurt mag binnen zijn speelruimte (Instellingen → Planning) schuiven, buren met
+// dezelfde vervalmaand schuiven samen, en een klant verschuift alleen als dat de piek
+// merkbaar verlaagt. Klanten met "vaste afspraak" schuiven nooit.
+var _jpPeriodeMaanden = null;   // aantal maanden in de gekozen periode
+var _jpStartMaand = null;       // 'JJJJ-MM'
+var _jpMetZonderDatum = false;  // klanten zonder laatste datum gelijkmatig meeverdelen
+var _jpMetAchterstallig = true; // beurten die vóór de periode hadden gemoeten, in de eerste maand
+var _jpResultaat = null;        // laatste berekening
+
+var _JP_ALFA = 2;               // kosten per uur werk per dag verschuiving
+var _JP_VOORKEUR_GEWICHT = 4;   // ankerdatum/voorkeurweek weegt zwaarder
+var _JP_GROEP = 4;              // klanten per regiogroepje (≈ één routedag)
+
+function _jpMaandPlus(maand, aantal){
+  var j = parseInt(maand.slice(0,4),10), m = parseInt(maand.slice(5,7),10) - 1 + aantal;
+  j += Math.floor(m/12); m = ((m % 12) + 12) % 12;
+  return j + '-' + ('0'+(m+1)).slice(-2);
+}
+function _jpMaandLabel(maand){
+  var mn = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  return mn[parseInt(maand.slice(5,7),10)-1] + ' ' + maand.slice(2,4);
+}
+function _jpEersteDag(maand){ return maand + '-01'; }
+function _jpLaatsteDag(maand){
+  var j = parseInt(maand.slice(0,4),10), m = parseInt(maand.slice(5,7),10);
+  var d = new Date(j, m, 0);
+  return maand + '-' + ('0'+d.getDate()).slice(-2);
+}
+function _jpDagenTussen(a, b){
+  return Math.round((new Date(b+'T12:00:00') - new Date(a+'T12:00:00')) / 86400000);
+}
+function _jpDatumPlus(datum, dagen){
+  var d = new Date(datum+'T12:00:00'); d.setDate(d.getDate()+dagen);
+  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+}
+
+// Gegevens die de planner van een serviceklant nodig heeft.
+function _jpKlantInfo(k){
+  var ct = getContract(k.contractType || k.contractId) || {};
+  var interval = ct.intervalMaanden || (ct.frequentie ? Math.round(12/ct.frequentie) : 12);
+  var vast = !!k.planVast;
+  return {
+    klant: k,
+    interval: interval,
+    tol: vast ? 0 : getSpeelruimteDagen(interval),
+    uren: (parseFloat(k.duurUren) || 1.5) * (ct.aantalMonteurs || 1),
+    voorkeur: !!(k.planningAnker || k.voorkeurWeek),
+    vast: vast,
+    lat: (k._geoLat != null) ? +k._geoLat : null,
+    lng: (k._geoLng != null) ? +k._geoLng : null,
+  };
+}
+
+// Bestaande belasting per maand: servicebeurten die al in de planning staan.
+function _jpBestaandeBelasting(maanden){
+  var servicetypes = (APP.planningInst&&APP.planningInst.serviceTypes&&APP.planningInst.serviceTypes.length)
+    ? APP.planningInst.serviceTypes : ['servicebeurt'];
+  var uit = {}; maanden.forEach(function(m){ uit[m] = 0; });
+  (APP.opdrachten||[]).forEach(function(o){
+    if(!o.datum || ['afgehandeld','verwerkt'].indexOf(o.status) >= 0) return;
+    if(servicetypes.indexOf(String(o.type)) < 0) return;
+    var m = o.datum.slice(0,7);
+    if(uit[m] == null) return;
+    uit[m] += (parseFloat(o.duurUren) || 1.5) * (parseInt(o.aantalMonteurs,10) || 1);
+  });
+  return uit;
+}
+
+// Regiogroepjes: k-means op coördinaten. Klanten zonder coördinaten krijgen een eigen groepje.
+function _jpGroepeer(lijst, groepGrootte){
+  var metGeo = lijst.filter(function(x){ return x.lat != null && x.lng != null; });
+  var zonderGeo = lijst.filter(function(x){ return x.lat == null || x.lng == null; });
+  var groepen = zonderGeo.map(function(x){ return [x]; });
+  var k = Math.max(1, Math.round(metGeo.length / groepGrootte));
+  if(!metGeo.length) return groepen;
+  var gesorteerd = metGeo.slice().sort(function(a,b){ return a.lat - b.lat || a.lng - b.lng; });
+  var cent = [];
+  for(var i=0;i<k;i++){ var p = gesorteerd[Math.floor((i+0.5) * metGeo.length / k)]; cent.push({lat:p.lat, lng:p.lng}); }
+  var toe = new Array(metGeo.length).fill(0);
+  for(var it=0; it<25; it++){
+    metGeo.forEach(function(p, idx){
+      var best = 0, bd = Infinity;
+      cent.forEach(function(c, j){
+        var d = (p.lat-c.lat)*(p.lat-c.lat) + ((p.lng-c.lng)*0.62)*((p.lng-c.lng)*0.62);
+        if(d < bd){ bd = d; best = j; }
+      });
+      toe[idx] = best;
+    });
+    cent = cent.map(function(c, j){
+      var leden = metGeo.filter(function(_, idx){ return toe[idx]===j; });
+      if(!leden.length) return c;
+      return { lat: leden.reduce(function(s,p){return s+p.lat;},0)/leden.length,
+               lng: leden.reduce(function(s,p){return s+p.lng;},0)/leden.length };
+    });
+  }
+  var perGroep = {};
+  metGeo.forEach(function(p, idx){ (perGroep[toe[idx]] = perGroep[toe[idx]] || []).push(p); });
+  Object.keys(perGroep).forEach(function(g){ groepen.push(perGroep[g]); });
+  return groepen;
+}
+
+// Hoofdberekening. Geeft maanden, belasting vóór/na, de eenheden en de kerncijfers terug.
+function _jpBerekenVerdeling(){
+  var maanden = [];
+  for(var i=0; i<_jpPeriodeMaanden; i++) maanden.push(_jpMaandPlus(_jpStartMaand, i));
+  var periodeVan = _jpEersteDag(maanden[0]), periodeTot = _jpLaatsteDag(maanden[maanden.length-1]);
+
+  // 1. Klanten verzamelen met hun venster (geclipt op de periode)
+  var items = [];
+  (APP.serviceklanten||[]).forEach(function(k){
+    if(k.status === 'passief' || k.contractOpgezegd) return;
+    var info = _jpKlantInfo(k);
+    if(!info.interval) return;                        // contract zonder herhaling (B)
+    if(k.volgendeDatum){
+      var van = _jpDatumPlus(k.volgendeDatum, -info.tol), tot = _jpDatumPlus(k.volgendeDatum, info.tol);
+      if(van > periodeTot) return;                                     // valt na deze periode
+      if(tot < periodeVan){
+        // Achterstallig: had vóór deze periode gemoeten. Alleen meenemen als dat gevraagd is,
+        // en dan in de eerste maand — zowel in "nu" als in het voorstel, zodat de vergelijking klopt.
+        if(!_jpMetAchterstallig) return;
+        info.achterstallig = true;
+        info.van = periodeVan; info.tot = _jpLaatsteDag(maanden[0]);
+      } else {
+        info.van = van < periodeVan ? periodeVan : van;
+        info.tot = tot > periodeTot ? periodeTot : tot;
+      }
+      info.due = k.volgendeDatum;
+    } else {
+      if(!_jpMetZonderDatum) return;
+      info.van = periodeVan; info.tot = periodeTot; info.due = null;   // vrij te plannen
+    }
+    items.push(info);
+  });
+  if(!items.length) return null;
+
+  // Verschuiving (dagen) als deze klant in maand m valt; null = buiten het venster
+  function verschuiving(info, m){
+    var lo = _jpEersteDag(m) > info.van ? _jpEersteDag(m) : info.van;
+    var hi = _jpLaatsteDag(m) < info.tot ? _jpLaatsteDag(m) : info.tot;
+    if(lo > hi) return null;
+    if(!info.due) return 0;                                            // geen vervaldatum: overal goed
+    if(info.due >= lo && info.due <= hi) return 0;
+    return Math.abs(_jpDagenTussen(info.due, info.due < lo ? lo : hi));
+  }
+
+  // 2. Regiogroepjes per vervalmaand (klanten zonder datum vormen een eigen pot)
+  var perMaand = {};
+  items.forEach(function(info){
+    var sleutel = info.due ? info.due.slice(0,7) : 'geen';
+    (perMaand[sleutel] = perMaand[sleutel] || []).push(info);
+  });
+  var eenheden = [];
+  Object.keys(perMaand).forEach(function(sleutel){
+    _jpGroepeer(perMaand[sleutel], _JP_GROEP).forEach(function(leden){
+      var opties = maanden.filter(function(m){ return leden.every(function(x){ return verschuiving(x, m) !== null; }); });
+      if(!opties.length){
+        leden.forEach(function(x){
+          var eigen = maanden.filter(function(m){ return verschuiving(x, m) !== null; });
+          if(eigen.length) eenheden.push({ leden:[x], opties:eigen });
+        });
+        return;
+      }
+      eenheden.push({ leden: leden, opties: opties });
+    });
+  });
+  eenheden.forEach(function(e){
+    e.uren = e.leden.reduce(function(s,x){ return s + x.uren; }, 0);
+    e.vast = e.leden.some(function(x){ return x.vast; });
+    e.maand = e.leden[0].due ? e.leden[0].due.slice(0,7) : e.opties[0];
+    if(e.opties.indexOf(e.maand) < 0) e.maand = e.opties[0];
+  });
+
+  // 3. Startsituatie: iedereen in zijn eigen maand, plus wat er al gepland staat
+  var bestaand = _jpBestaandeBelasting(maanden);
+  var belasting = {}; maanden.forEach(function(m){ belasting[m] = bestaand[m] || 0; });
+  eenheden.forEach(function(e){ belasting[e.maand] += e.uren; });
+
+  function kostenVerschuiving(e, m){
+    return _JP_ALFA * e.leden.reduce(function(s, x){
+      var d = verschuiving(x, m); if(d == null) return s;
+      return s + x.uren * d * (x.voorkeur ? _JP_VOORKEUR_GEWICHT : 1);
+    }, 0);
+  }
+  function totaal(){
+    var j = 0;
+    maanden.forEach(function(m){ j += belasting[m] * belasting[m]; });
+    eenheden.forEach(function(e){ j += kostenVerschuiving(e, e.maand); });
+    return j;
+  }
+
+  // 4. Verbeteren: verplaats een eenheid als het totaal daardoor daalt
+  for(var ronde=0; ronde<60; ronde++){
+    var verbeterd = false;
+    eenheden.slice().sort(function(a,b){ return belasting[b.maand] - belasting[a.maand] || b.uren - a.uren; }).forEach(function(e){
+      if(e.vast) return;                                   // vaste afspraak: nooit verschuiven
+      var oud = e.maand, best = oud, bj = totaal();
+      e.opties.forEach(function(m){
+        if(m === oud) return;
+        belasting[oud] -= e.uren; belasting[m] += e.uren; e.maand = m;
+        var j = totaal();
+        if(j < bj - 1e-6){ bj = j; best = m; }
+        belasting[m] -= e.uren; belasting[oud] += e.uren; e.maand = oud;
+      });
+      if(best !== oud){ belasting[oud] -= e.uren; belasting[best] += e.uren; e.maand = best; verbeterd = true; }
+    });
+    if(!verbeterd) break;
+  }
+
+  // 5. Uitkomst samenvatten
+  var voor = {}, na = {};
+  maanden.forEach(function(m){ voor[m] = { n:0, u: bestaand[m]||0 }; na[m] = { n:0, u: bestaand[m]||0 }; });
+  var verschoven = [];
+  eenheden.forEach(function(e){
+    e.leden.forEach(function(x){
+      // Achterstallige beurten horen in de eerste maand van de periode; zo tellen ze links
+      // en rechts even zwaar mee en blijven de balken vergelijkbaar.
+      var eigen = x.achterstallig ? maanden[0] : (x.due ? x.due.slice(0,7) : null);
+      // Vervalmaand buiten de periode (maar het venster reikt erin): toerekenen aan de rand,
+      // zodat links en rechts dezelfde klanten tellen en de balken vergelijkbaar blijven.
+      if(eigen && !voor[eigen]) eigen = (eigen < maanden[0]) ? maanden[0] : maanden[maanden.length-1];
+      if(eigen && voor[eigen]){ voor[eigen].n++; voor[eigen].u += x.uren; }
+      else if(!eigen){ /* zonder datum: telt in "nu" niet mee */ }
+      na[e.maand].n++; na[e.maand].u += x.uren;
+      x.nieuweMaand = e.maand;
+      if(eigen && eigen !== e.maand){
+        verschoven.push({ naam: x.klant.naam || '—', van: eigen, naar: e.maand,
+          dagen: verschuiving(x, e.maand) || 0, voorkeur: x.voorkeur, plaats: x.klant.plaats || '' });
+      }
+    });
+  });
+  var urenVoor = maanden.map(function(m){ return voor[m].u; });
+  var urenNa = maanden.map(function(m){ return na[m].u; });
+  function spreiding(v){
+    var gem = v.reduce(function(a,b){return a+b;},0) / (v.length||1);
+    return Math.sqrt(v.reduce(function(s,x){ return s + (x-gem)*(x-gem); }, 0) / (v.length||1));
+  }
+  var zonderDatum = items.filter(function(x){ return !x.due; }).length;
+  var achterstallig = items.filter(function(x){ return x.achterstallig; }).length;
+  _jpResultaat = {
+    maanden: maanden, voor: voor, na: na, eenheden: eenheden, items: items, verschoven: verschoven,
+    bestaand: bestaand, zonderDatum: zonderDatum, achterstallig: achterstallig,
+    eerlijkeVergelijking: (zonderDatum === 0),
+    piekVoor: Math.max.apply(null, urenVoor), piekNa: Math.max.apply(null, urenNa),
+    sdVoor: spreiding(urenVoor), sdNa: spreiding(urenNa),
+    aantal: items.length, blijft: items.length - verschoven.length,
+    gemDagen: verschoven.length ? Math.round(verschoven.reduce(function(s,v){return s+v.dagen;},0)/verschoven.length) : 0,
+    maxDagen: verschoven.length ? Math.max.apply(null, verschoven.map(function(v){return v.dagen;})) : 0,
+    voorkeurTotaal: items.filter(function(x){ return x.voorkeur; }).length,
+    voorkeurVerschoven: verschoven.filter(function(v){ return v.voorkeur; }).length,
+  };
+  return _jpResultaat;
+}
+
+// ── Scherm 1: periode en opties ──
+function openJaarplanner(){
+  var nu = new Date();
+  _jpStartMaand = _jpMaandPlus(nu.getFullYear()+'-'+('0'+(nu.getMonth()+1)).slice(-2), 1);
+  _jpPeriodeMaanden = getJaarplanPeriode();
+  _jpResultaat = null;
+  _jpRenderStap1();
+}
+
+function _jpRenderStap1(){
+  var zonderDatum = (APP.serviceklanten||[]).filter(function(k){ return k.status!=='passief' && !k.volgendeDatum; }).length;
+  var maandOpts = '';
+  var nu = new Date();
+  for(var i=0;i<18;i++){
+    var m = _jpMaandPlus(nu.getFullYear()+'-'+('0'+(nu.getMonth()+1)).slice(-2), i);
+    maandOpts += '<option value="'+m+'"'+(m===_jpStartMaand?' selected':'')+'>'+_jpMaandLabel(m)+'</option>';
+  }
+  var b = '';
+  b += '<div style="display:flex;gap:0;margin-bottom:18px;background:var(--surface2);border-radius:10px;padding:3px">';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent);color:#fff">1. Periode</div>';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted)">2. Voorstel</div>';
+  b += '</div>';
+  b += '<div class="inst-plan-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+  b += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.kalender+' Periode</div>';
+  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Over welke periode wil je de servicebeurten verdelen?</div>';
+  b += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">';
+  b += fg('Vanaf','<select class="input" id="jp-start" style="width:130px">'+maandOpts+'</select>');
+  b += fg('Aantal maanden','<input class="input" type="number" id="jp-maanden" value="'+_jpPeriodeMaanden+'" min="2" max="24" step="1" style="width:100px">');
+  b += '</div>';
+  b += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">';
+  [3,6,12].forEach(function(m){ b += '<button type="button" class="btn btn-ghost btn-sm jp-snel" data-m="'+m+'">'+m+' maanden</button>'; });
+  b += '</div></div>';
+  b += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.users+' Klanten</div>';
+  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">De speelruimte per contract staat bij Instellingen → Planning: halfjaarlijks '+getSpeelruimteDagen(6)+' dagen, jaarlijks '+getSpeelruimteDagen(12)+' dagen, 2 jaar '+getSpeelruimteDagen(24)+' dagen.</div>';
+  b += '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer;margin-bottom:8px">';
+  b += '<input type="checkbox" id="jp-achterstallig"'+(_jpMetAchterstallig?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0">';
+  b += '<div><div style="font-size:13px;font-weight:600">Achterstallige beurten meenemen</div>';
+  b += '<div style="font-size:11px;color:var(--muted)">Beurten die vóór deze periode hadden gemoeten, worden in de eerste maand ingepland.</div></div></label>';
+  b += '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
+  b += '<input type="checkbox" id="jp-zonderdatum"'+(_jpMetZonderDatum?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0">';
+  b += '<div><div style="font-size:13px;font-weight:600">Klanten zonder datum meeverdelen</div>';
+  b += '<div style="font-size:11px;color:var(--muted)">'+zonderDatum+' klanten hebben nog geen laatste beurt. Zonder vinkje blijven ze buiten de verdeling.</div></div></label>';
+  b += '</div></div>';
+
+  var f = '<button class="btn btn-ghost" id="jp-cancel">Annuleren</button><button class="btn btn-primary" id="jp-bereken">Berekenen →</button>';
+  openModal('Jaarplanning', b, f, true);
+  document.getElementById('jp-cancel').addEventListener('click', closeModal);
+  document.querySelectorAll('.jp-snel').forEach(function(btn){
+    btn.addEventListener('click', function(){ document.getElementById('jp-maanden').value = btn.dataset.m; });
+  });
+  document.getElementById('jp-bereken').addEventListener('click', function(){
+    _jpStartMaand = document.getElementById('jp-start').value;
+    _jpPeriodeMaanden = Math.max(2, Math.min(24, parseInt(document.getElementById('jp-maanden').value,10) || 6));
+    _jpMetZonderDatum = !!document.getElementById('jp-zonderdatum').checked;
+    _jpMetAchterstallig = !!document.getElementById('jp-achterstallig').checked;
+    var res = _jpBerekenVerdeling();
+    if(!res){ toast('Geen servicebeurten in deze periode','warning'); return; }
+    _jpRenderStap2();
+  });
+}
+
+// ── Scherm 2: voorstel ──
+function _jpStaven(res, sleutel, kleur){
+  var maxU = Math.max(res.piekVoor, res.piekNa) || 1;
+  var H = 130, W = 44, gap = 6;
+  var breed = res.maanden.length * (W+gap);
+  var h = '<svg viewBox="0 0 '+breed+' '+(H+40)+'" style="width:100%;max-width:'+breed+'px;height:auto;display:block">';
+  res.maanden.forEach(function(m, i){
+    var d = res[sleutel][m];
+    var hoogte = Math.round(d.u / maxU * H), x = i*(W+gap), y = H - hoogte + 12;
+    h += '<rect x="'+x+'" y="'+y+'" width="'+W+'" height="'+hoogte+'" rx="4" fill="'+kleur+'"><title>'+_jpMaandLabel(m)+': '+d.n+' beurten, '+Math.round(d.u)+' uur</title></rect>';
+    if(d.n) h += '<text x="'+(x+W/2)+'" y="'+(y-3)+'" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor">'+d.n+'</text>';
+    h += '<text x="'+(x+W/2)+'" y="'+(H+28)+'" text-anchor="middle" font-size="10" fill="currentColor" opacity=".6">'+_jpMaandLabel(m)+'</text>';
+  });
+  return h + '</svg>';
+}
+
+function _jpRenderStap2(){
+  var res = _jpResultaat;
+  var b = '';
+  b += '<div style="display:flex;gap:0;margin-bottom:16px;background:var(--surface2);border-radius:10px;padding:3px">';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green)">✓ Periode</div>';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent);color:#fff">2. Voorstel</div>';
+  b += '</div>';
+
+  var daling = res.piekVoor ? Math.round((1 - res.piekNa/res.piekVoor) * 100) : 0;
+  b += '<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
+  function kpi(label, waarde, extra, kleur){
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;min-width:150px">'
+      + '<div style="font-size:11px;color:var(--muted)">'+label+'</div>'
+      + '<div style="font-size:17px;font-weight:800'+(kleur?';color:'+kleur:'')+'">'+waarde+'</div>'
+      + (extra ? '<div style="font-size:11px;color:var(--muted)">'+extra+'</div>' : '') + '</div>';
+  }
+  b += kpi('Drukste maand', Math.round(res.piekVoor)+' → '+Math.round(res.piekNa)+' uur',
+        res.eerlijkeVergelijking ? (daling>0 ? daling+'% lager' : 'geen verbetering') : 'voorstel bevat ook klanten zonder datum',
+        (res.eerlijkeVergelijking && daling>0) ? 'var(--green-t)' : '');
+  b += kpi('Schommeling', '±'+Math.round(res.sdVoor)+' → ±'+Math.round(res.sdNa)+' uur', 'tussen de maanden');
+  b += kpi('Blijft in eigen maand', res.blijft+' / '+res.aantal, res.verschoven.length+' verschoven, gem. '+res.gemDagen+' dagen (max '+res.maxDagen+')');
+  b += kpi('Ankerdatum / voorkeurweek', (res.voorkeurTotaal - res.voorkeurVerschoven)+' / '+res.voorkeurTotaal, 'blijft in eigen maand');
+  if(res.achterstallig) b += kpi('Achterstallig', String(res.achterstallig), 'ingepland in '+_jpMaandLabel(res.maanden[0]), 'var(--orange-t)');
+  if(res.zonderDatum) b += kpi('Zonder datum meeverdeeld', String(res.zonderDatum), 'gelijkmatig over de periode');
+  b += '</div>';
+
+  b += '<div class="inst-plan-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
+  b += '<div class="card"><div style="font-weight:700;font-size:13px;margin-bottom:10px">Nu — volgens vervaldatum</div>'+_jpStaven(res,'voor','var(--orange)')+'</div>';
+  b += '<div class="card"><div style="font-weight:700;font-size:13px;margin-bottom:10px">Voorstel — gespreid</div>'+_jpStaven(res,'na','var(--accent)')+'</div>';
+  b += '</div>';
+
+  b += '<div class="card" style="padding:0;margin-bottom:16px"><div class="table-wrap"><table style="width:100%"><thead><tr>'
+    + '<th style="padding:8px 12px">Maand</th><th style="padding:8px 12px">Nu</th><th style="padding:8px 12px">Voorstel</th>'
+    + '<th style="padding:8px 12px">Uren nu</th><th style="padding:8px 12px">Uren voorstel</th><th style="padding:8px 12px">Al gepland</th></tr></thead><tbody>';
+  res.maanden.forEach(function(m){
+    b += '<tr><td style="padding:7px 12px;font-weight:600">'+_jpMaandLabel(m)+'</td>';
+    b += '<td style="padding:7px 12px">'+res.voor[m].n+'</td><td style="padding:7px 12px;font-weight:700;color:var(--accent)">'+res.na[m].n+'</td>';
+    b += '<td style="padding:7px 12px;color:var(--muted)">'+Math.round(res.voor[m].u)+'</td><td style="padding:7px 12px;color:var(--muted)">'+Math.round(res.na[m].u)+'</td>';
+    b += '<td style="padding:7px 12px;color:var(--muted)">'+Math.round(res.bestaand[m]||0)+'</td></tr>';
+  });
+  b += '</tbody></table></div></div>';
+
+  if(res.verschoven.length){
+    b += '<div class="card" style="padding:0"><div style="padding:12px 16px;font-weight:700;font-size:13px">Verschoven klanten ('+res.verschoven.length+')</div>';
+    b += '<div class="table-wrap" style="max-height:280px;overflow:auto"><table style="width:100%"><thead><tr>'
+      + '<th style="padding:8px 12px">Klant</th><th style="padding:8px 12px">Plaats</th><th style="padding:8px 12px">Van</th>'
+      + '<th style="padding:8px 12px">Naar</th><th style="padding:8px 12px">Dagen</th></tr></thead><tbody>';
+    res.verschoven.slice().sort(function(a,b2){ return b2.dagen - a.dagen; }).slice(0,100).forEach(function(v){
+      b += '<tr><td style="padding:6px 12px;font-size:13px">'+esc(v.naam)+(v.voorkeur?' <span class="tag tag-orange" style="font-size:10px">voorkeur</span>':'')+'</td>';
+      b += '<td style="padding:6px 12px;font-size:12px;color:var(--muted)">'+esc(v.plaats)+'</td>';
+      b += '<td style="padding:6px 12px;font-size:12px">'+_jpMaandLabel(v.van)+'</td>';
+      b += '<td style="padding:6px 12px;font-size:12px;font-weight:700;color:var(--accent)">'+_jpMaandLabel(v.naar)+'</td>';
+      b += '<td style="padding:6px 12px;font-size:12px;color:var(--muted)">'+v.dagen+'</td></tr>';
+    });
+    b += '</tbody></table></div>';
+    if(res.verschoven.length > 100) b += '<div style="padding:8px 16px;font-size:11px;color:var(--muted)">De 100 grootste verschuivingen worden getoond.</div>';
+    b += '</div>';
+  }
+
+  b += '<div style="font-size:12px;color:var(--muted);margin-top:14px">Dit is een voorstel. Er is nog niets opgeslagen en er zijn nog geen opdrachten aangemaakt.</div>';
+
+  var f = '<button class="btn btn-ghost" id="jp-terug">← Periode</button><button class="btn btn-ghost" id="jp-sluit">Sluiten</button>';
+  openModal('Jaarplanning — voorstel', b, f, true);
+  document.getElementById('jp-terug').addEventListener('click', _jpRenderStap1);
+  document.getElementById('jp-sluit').addEventListener('click', closeModal);
 }
 
 function openAutoPlanner(){

@@ -41,7 +41,9 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       Fases: 0 snelinvoerscherm "Datums invoeren": KLAAR 16-09 (typen + Enter, plakvak, geen export
       uit Outsmart mogelijk — invoeren blijft handwerk) ·
       1 instellingen + vinkje: KLAAR 16-09 (speelruimte per interval + standaardperiode, vinkje "vaste afspraak") ·
-      2 jaarverdeling met goedkeuren (geplande maand, contractdatum blijft) · 3 autoplanner per maand
+      2a jaarverdeling berekenen + voorstelscherm: KLAAR 16-09 (periode, achterstallig, klanten zonder
+      datum, bestaande planning telt mee) · 2b goedkeuren en vastleggen (geplande maand, contractdatum
+      blijft) · 3 autoplanner per maand
       gebruikt de geplande maand en maakt regiodagen. Let op: huidige autoplanner telt cumulatief.
 - [x] **"Slimme dagplanning" heet nu "Route"** — 13 september 2026: route-icoon; de route wordt direct
       berekend bij het kiezen van een monteur, datum of via de knop per dag (`_dpAutoBereken`).
