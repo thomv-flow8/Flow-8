@@ -9113,6 +9113,7 @@ function renderServiceklanten() {
   var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h+='<input class="input" id="sk-zoek" placeholder="Zoek serviceklant..." value="'+esc(safeZoek(_skZoek))+'" style="flex:1;min-width:160px;max-width:320px">';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
+  h+='<button class="btn btn-ghost btn-sm" id="sk-snelinvoer-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg> Datums invoeren</button>';
   h+='<button class="btn btn-ghost btn-sm" id="sk-autoplanner-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg> Auto-plannen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-export-btn">'+ICO.download+' Export</button>';
@@ -9244,6 +9245,8 @@ function renderServiceklanten() {
   if(skKolBtn) skKolBtn.addEventListener('click', openSkKolomKiezer);
   el.querySelectorAll('.sk-row').forEach(function(tr){tr.addEventListener('click',function(e){if(!e.target.closest('button')&&!e.target.closest('input'))openSkPanel(tr.dataset.id);});});
   el.querySelectorAll('.sk-edit-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();openSkModal(b.dataset.id);});});
+  var snelinvoerBtn = el.querySelector('#sk-snelinvoer-btn');
+  if(snelinvoerBtn) snelinvoerBtn.addEventListener('click', openSnelinvoerDatums);
   var autoplanBtn = el.querySelector('#sk-autoplanner-btn');
   if(autoplanBtn) autoplanBtn.addEventListener('click', openAutoPlanner);
   el.querySelectorAll('.sk-del-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();verwijderSk(b.dataset.id);});});
@@ -9395,6 +9398,196 @@ function openSkModal(id) {
   bindAutoGrow(document.getElementById('sk-nt'));
   document.getElementById('skmod-cancel').addEventListener('click',closeModal);
   document.getElementById('skmod-save').addEventListener('click',function(){saveSk(id);});
+}
+
+// ── SNELINVOER LAATSTE SERVICEDATUM ─────────────────────────────────────────
+// Er is geen export uit het oude systeem, dus honderden datums moeten met de hand ingevoerd
+// worden. Eén lijst met een invoerveld per klant: typ de datum, druk op Enter, de app rekent
+// de volgende beurt uit (berekenVolgend) en springt naar de volgende regel. Zoeken verbergt
+// rijen in plaats van opnieuw te tekenen, zodat de cursor nooit wegspringt.
+var _sdMax = 200;   // hoeveel rijen tegelijk in beeld
+
+// "12-5-2026", "12/05/26", "2026-05-12", "12052026" → "2026-05-12". Onleesbaar → null, leeg → ''.
+function _sdDatumNaarISO(tekst){
+  var t = String(tekst||'').trim();
+  if(!t) return '';
+  function maak(j, m, d){
+    if(j < 100) j += 2000;
+    var dt = new Date(j, m-1, d);
+    if(dt.getFullYear()!==j || dt.getMonth()!==m-1 || dt.getDate()!==d) return null;
+    return j+'-'+('0'+m).slice(-2)+'-'+('0'+d).slice(-2);
+  }
+  var m1 = t.match(/^(\d{1,2})[-\/. ](\d{1,2})[-\/. ](\d{2}|\d{4})$/);
+  if(m1) return maak(parseInt(m1[3],10), parseInt(m1[2],10), parseInt(m1[1],10));
+  var m2 = t.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);
+  if(m2) return maak(parseInt(m2[1],10), parseInt(m2[2],10), parseInt(m2[3],10));
+  var m3 = t.match(/^(\d{2})(\d{2})(\d{4})$/);
+  if(m3) return maak(parseInt(m3[3],10), parseInt(m3[2],10), parseInt(m3[1],10));
+  return null;
+}
+
+// Slaat de datum op bij de klant en berekent de volgende beurt. Geeft de bijgewerkte klant terug.
+function _sdBewaar(klantId, iso){
+  var i = (APP.serviceklanten||[]).findIndex(function(k){ return String(k.id)===String(klantId); });
+  if(i < 0) return null;
+  var data = Object.assign({}, APP.serviceklanten[i], { laatsteDatum: iso });
+  data.volgendeDatum = berekenVolgend(iso, data.contractType || data.contractId, data) || '';
+  APP.serviceklanten[i] = data;
+  dbSaveItem('serviceklanten', data.id, data);
+  return data;
+}
+
+function _sdTeDoen(){
+  return (APP.serviceklanten||[]).filter(function(k){ return k.status!=='passief' && !k.laatsteDatum; }).length;
+}
+
+function openSnelinvoerDatums(){
+  var zonder = (APP.serviceklanten||[]).filter(function(k){ return k.status!=='passief' && !k.laatsteDatum; })
+    .sort(function(a,b){ return (a.naam||'').localeCompare(b.naam||''); });
+  var toon = zonder.slice(0, _sdMax);
+
+  var b = '';
+  b += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">';
+  b += '<input class="input" id="sd-zoek" placeholder="Zoek klant, debiteurnummer of plaats..." style="flex:1;min-width:200px;max-width:340px">';
+  b += '<div style="flex:1"></div>';
+  b += '<span class="tag tag-orange" id="sd-teller" style="font-weight:700">nog '+_sdTeDoen()+' zonder datum</span>';
+  b += '<button class="btn btn-ghost btn-sm" id="sd-plak-btn" style="display:inline-flex;align-items:center;gap:5px">'+ICO.clipboard+' Plakken uit lijst</button>';
+  b += '</div>';
+  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Typ de datum van de laatste servicebeurt (dd-mm-jjjj) en druk op <strong>Enter</strong>. De volgende beurt wordt automatisch berekend. '+(zonder.length>_sdMax ? 'De eerste '+_sdMax+' van '+zonder.length+' klanten staan hieronder; sluit en heropen voor de volgende groep.' : '')+'</div>';
+
+  if(!toon.length){
+    b += legeStaat('<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+      'Alle klanten hebben een datum', 'Er zijn geen actieve serviceklanten zonder laatste uitvoeringsdatum.');
+  } else {
+    b += '<div class="table-wrap" style="max-height:min(60vh,520px);overflow:auto"><table style="width:100%"><thead><tr>'
+      +  '<th style="padding:8px 10px">Klant</th><th style="padding:8px 10px">Deb.nr</th><th style="padding:8px 10px">Plaats</th>'
+      +  '<th style="padding:8px 10px">Contract</th><th style="padding:8px 10px;width:140px">Laatste beurt</th><th style="padding:8px 10px;width:150px">Volgende beurt</th></tr></thead><tbody>';
+    toon.forEach(function(k){
+      var zoekTekst = ((k.naam||'')+' '+(k.debNr||'')+' '+(k.plaats||'')).toLowerCase();
+      b += '<tr class="sd-rij" data-zoek="'+esc(zoekTekst)+'">';
+      b += '<td style="padding:6px 10px;font-size:13px;font-weight:600">'+esc(k.naam||'—')+'</td>';
+      b += '<td style="padding:6px 10px;font-size:12px;color:var(--muted)">'+esc(k.debNr||'')+'</td>';
+      b += '<td style="padding:6px 10px;font-size:12px;color:var(--muted)">'+esc(k.plaats||'')+'</td>';
+      b += '<td style="padding:6px 10px;font-size:12px;color:var(--muted)">'+esc(k.contractType||'')+'</td>';
+      b += '<td style="padding:6px 10px"><input class="input input-sm sd-inp" data-id="'+esc(String(k.id))+'" placeholder="dd-mm-jjjj" style="width:120px"></td>';
+      b += '<td style="padding:6px 10px;font-size:12px;color:var(--muted)" class="sd-volgende">—</td>';
+      b += '</tr>';
+    });
+    b += '</tbody></table></div>';
+  }
+
+  var f = '<button class="btn btn-primary" id="sd-sluit">Klaar</button>';
+  openModal('Datums invoeren', b, f, true);
+  document.getElementById('sd-sluit').addEventListener('click', function(){ closeModal(); renderServiceklanten(); });
+
+  // Zoeken verbergt rijen; geen hertekening, dus de cursor blijft staan
+  var zoekEl = document.getElementById('sd-zoek');
+  if(zoekEl) zoekEl.addEventListener('input', function(){
+    var q = zoekEl.value.trim().toLowerCase();
+    document.querySelectorAll('.sd-rij').forEach(function(rij){
+      rij.style.display = (!q || rij.dataset.zoek.indexOf(q) >= 0) ? '' : 'none';
+    });
+  });
+
+  function verwerkVeld(inp, gaVerder){
+    var iso = _sdDatumNaarISO(inp.value);
+    if(iso === '') { inp.style.borderColor=''; return true; }
+    if(iso === null){ inp.style.borderColor='var(--red)'; toast('Onleesbare datum — gebruik dd-mm-jjjj','error'); return false; }
+    if(iso > vandaagISO()){ inp.style.borderColor='var(--red)'; toast('Die datum ligt in de toekomst; een laatste beurt ligt in het verleden','error'); return false; }
+    var data = _sdBewaar(inp.dataset.id, iso);
+    if(!data) return false;
+    inp.value = fmtD(iso);
+    inp.style.borderColor = 'var(--green)';
+    var rij = inp.closest('tr');
+    var cel = rij ? rij.querySelector('.sd-volgende') : null;
+    if(cel){ cel.textContent = data.volgendeDatum ? fmtD(data.volgendeDatum) : '— (geen vervolg)'; cel.style.color = 'var(--green-t)'; }
+    var teller = document.getElementById('sd-teller');
+    if(teller) teller.textContent = 'nog '+_sdTeDoen()+' zonder datum';
+    if(gaVerder && rij){
+      var rijen = Array.prototype.slice.call(document.querySelectorAll('.sd-rij'));
+      for(var j = rijen.indexOf(rij)+1; j < rijen.length; j++){
+        if(rijen[j].style.display === 'none') continue;
+        var volgend = rijen[j].querySelector('.sd-inp');
+        if(volgend && !volgend.value){ volgend.focus(); break; }
+      }
+    }
+    return true;
+  }
+  document.querySelectorAll('.sd-inp').forEach(function(inp){
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); verwerkVeld(inp, true); } });
+    inp.addEventListener('blur', function(){ verwerkVeld(inp, false); });
+    inp.addEventListener('input', function(){ inp.style.borderColor=''; });
+  });
+  var eerste = document.querySelector('.sd-inp'); if(eerste) eerste.focus();
+
+  var plakBtn = document.getElementById('sd-plak-btn');
+  if(plakBtn) plakBtn.addEventListener('click', _sdPlakvenster);
+}
+
+// Plakvak: regels met een klantnaam of debiteurnummer plus een datum. Eerst controleren, dan toepassen.
+function _sdPlakvenster(){
+  var b = '<div style="font-size:13px;color:var(--muted);margin-bottom:10px">Plak regels uit je andere systeem. Per regel een klantnaam of debiteurnummer en een datum, gescheiden door een tab, puntkomma of komma.</div>';
+  b += '<textarea class="input" id="sd-plak" rows="9" placeholder="106207;12-05-2026" style="width:100%;font-family:monospace;font-size:12px"></textarea>';
+  b += '<div id="sd-plak-uitslag" style="margin-top:12px"></div>';
+  var f = '<button class="btn btn-ghost" id="sd-plak-annuleer">Annuleren</button><button class="btn btn-primary" id="sd-plak-check">Controleren</button>';
+  var venster = openBovenModal('Plakken uit lijst', b, f);
+  document.getElementById('sd-plak-annuleer').addEventListener('click', venster.sluit);
+
+  document.getElementById('sd-plak-check').addEventListener('click', function(){
+    var regels = (document.getElementById('sd-plak').value||'').split(/\r?\n/).map(function(r){ return r.trim(); }).filter(Boolean);
+    var gevonden = [], fout = [];
+    regels.forEach(function(regel){
+      var delen = regel.split(/[\t;,]+/).map(function(x){ return x.trim(); }).filter(Boolean);
+      if(delen.length < 2){ fout.push({ regel: regel, reden: 'geen datum gevonden' }); return; }
+      var iso = _sdDatumNaarISO(delen[delen.length-1]);
+      if(!iso){ fout.push({ regel: regel, reden: 'datum onleesbaar' }); return; }
+      if(iso > vandaagISO()){ fout.push({ regel: regel, reden: 'datum ligt in de toekomst' }); return; }
+      var sleutel = delen.slice(0, delen.length-1).join(' ').trim().toLowerCase();
+      var kandidaten = (APP.serviceklanten||[]).filter(function(k){
+        if(k.status==='passief') return false;
+        return String(k.debNr||'').trim().toLowerCase() === sleutel || String(k.naam||'').trim().toLowerCase() === sleutel;
+      });
+      if(!kandidaten.length){
+        kandidaten = (APP.serviceklanten||[]).filter(function(k){
+          return k.status!=='passief' && sleutel.length > 3 && String(k.naam||'').toLowerCase().indexOf(sleutel) >= 0;
+        });
+      }
+      if(!kandidaten.length){ fout.push({ regel: regel, reden: 'klant niet gevonden' }); return; }
+      if(kandidaten.length > 1){ fout.push({ regel: regel, reden: kandidaten.length+' klanten passen hierbij' }); return; }
+      gevonden.push({ klant: kandidaten[0], iso: iso });
+    });
+
+    var u = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">';
+    u += '<span class="tag tag-green" style="font-weight:700">'+gevonden.length+' herkend</span>';
+    if(fout.length) u += '<span class="tag tag-red" style="font-weight:700">'+fout.length+' niet herkend</span>';
+    u += '</div>';
+    if(gevonden.length){
+      u += '<div class="table-wrap" style="max-height:220px;overflow:auto"><table style="width:100%"><thead><tr><th style="padding:6px 8px">Klant</th><th style="padding:6px 8px">Laatste beurt</th></tr></thead><tbody>';
+      gevonden.slice(0,50).forEach(function(g){ u += '<tr><td style="padding:5px 8px;font-size:12px">'+esc(g.klant.naam||'')+'</td><td style="padding:5px 8px;font-size:12px">'+fmtD(g.iso)+'</td></tr>'; });
+      u += '</tbody></table></div>';
+      if(gevonden.length > 50) u += '<div style="font-size:11px;color:var(--muted);margin-top:4px">en nog '+(gevonden.length-50)+' regels</div>';
+    }
+    if(fout.length){
+      u += '<div style="margin-top:10px;font-size:12px;color:var(--red)">Niet verwerkt:</div><ul style="margin:4px 0 0 18px;font-size:12px;color:var(--muted)">';
+      fout.slice(0,10).forEach(function(f2){ u += '<li>'+esc(f2.regel)+' — '+esc(f2.reden)+'</li>'; });
+      u += '</ul>';
+      if(fout.length > 10) u += '<div style="font-size:11px;color:var(--muted)">en nog '+(fout.length-10)+' regels</div>';
+    }
+    document.getElementById('sd-plak-uitslag').innerHTML = u;
+
+    var voet = venster.el.querySelector('.modal-footer');
+    if(voet && gevonden.length){
+      voet.innerHTML = '<button class="btn btn-ghost" id="sd-plak-annuleer2">Annuleren</button><button class="btn btn-primary" id="sd-plak-toepassen">'+gevonden.length+' datums invoeren</button>';
+      voet.querySelector('#sd-plak-annuleer2').addEventListener('click', venster.sluit);
+      voet.querySelector('#sd-plak-toepassen').addEventListener('click', function(){
+        var aantal = 0;
+        gevonden.forEach(function(g){ if(_sdBewaar(g.klant.id, g.iso)) aantal++; });
+        venster.sluit();
+        toast(aantal+' datums ingevoerd','success');
+        openSnelinvoerDatums();
+      });
+    }
+  });
 }
 
 // berekenVolgend is nu als helper gedefinieerd hierboven

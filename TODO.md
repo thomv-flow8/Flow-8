@@ -38,7 +38,8 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       Besluiten: speelruimte instelbaar via Instellingen → Planning (start: halfjaarlijks ±3 wk,
       jaarlijks ±6 wk, 2/3-jaarlijks ±2 mnd); periode kiesbaar (3/6/12 mnd of van–tot, standaard 6);
       ankerdatum/voorkeurweek = zachte wens + vinkje "vaste afspraak"; seizoen volgt uit historie.
-      Fases: 0 datums invoeren — géén Outsmart-export mogelijk, dus snelinvoerscherm (16-09) ·
+      Fases: 0 snelinvoerscherm "Datums invoeren": KLAAR 16-09 (typen + Enter, plakvak, geen export
+      uit Outsmart mogelijk — invoeren blijft handwerk) ·
       1 instellingen + vinkje: KLAAR 16-09 (speelruimte per interval + standaardperiode, vinkje "vaste afspraak") ·
       2 jaarverdeling met goedkeuren (geplande maand, contractdatum blijft) · 3 autoplanner per maand
       gebruikt de geplande maand en maakt regiodagen. Let op: huidige autoplanner telt cumulatief.
