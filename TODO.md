@@ -28,6 +28,19 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Opdrachten van monteurs buiten de planning apart tonen** — 13 september 2026: rij/kolom
       "Niet in planning" in week- en dagweergave, "Verwijderde medewerker" in paneel en lijst. Niets
       gewijzigd of verwijderd. (Oorspronkelijke melding hieronder.)
+- [x] **Serviceklant niet bijgewerkt na afronden door monteur** — 13 september 2026: de monteur-route
+      (`fsWerkbonStatusNaarPlanning`) werkte laatsteDatum/volgendeDatum niet bij; nu via gedeelde
+      `_skNaServicebeurt` (alleen vooruit, ook bij 'verwerkt').
+- [ ] **Eenmalige reparatie gemiste servicedatums** — na livegang van de fix: klanten met een afgeronde
+      servicebeurt (type 1/7) zonder bijgewerkte laatsteDatum (13-09: 40 klanten, vooral april–mei)
+      herstellen. Eerst overzicht tonen, dan pas schrijven.
+- [ ] **Jaarplanner serviceklanten (groot traject)** — concept + preview goedgekeurd 13 september 2026.
+      Besluiten: speelruimte instelbaar via Instellingen → Planning (start: halfjaarlijks ±3 wk,
+      jaarlijks ±6 wk, 2/3-jaarlijks ±2 mnd); periode kiesbaar (3/6/12 mnd of van–tot, standaard 6);
+      ankerdatum/voorkeurweek = zachte wens + vinkje "vaste afspraak"; seizoen volgt uit historie.
+      Fases: 0 datums uit Outsmart importeren (Thomas checkt export) · 1 instellingen + vinkje ·
+      2 jaarverdeling met goedkeuren (geplande maand, contractdatum blijft) · 3 autoplanner per maand
+      gebruikt de geplande maand en maakt regiodagen. Let op: huidige autoplanner telt cumulatief.
 - [x] **"Slimme dagplanning" heet nu "Route"** — 13 september 2026: route-icoon; de route wordt direct
       berekend bij het kiezen van een monteur, datum of via de knop per dag (`_dpAutoBereken`).
       "Bereken tijden" heet nu "Opnieuw berekenen". Tijden overnemen blijft een bewuste stap.

@@ -4486,6 +4486,8 @@ function fsWerkbonStatusNaarPlanning(planningId, werkbonStatus, afrondReden) {
     var idx = APP.opdrachten.findIndex(function(x){ return String(x.id)===String(o.id); });
     if(idx>-1) APP.opdrachten[idx] = o;
     dbSaveItem('opdrachten', o.id, o);
+    // Afgerond door de monteur: serviceklant ook bijwerken (deze route sloeg dat over)
+    if(nieuwe === 'afgehandeld') _skNaServicebeurt(o, true);
     log('OK','FS','Terugkoppeling: opdracht '+o.id+' → '+nieuwe+(subreden?(' ('+subreden+')'):''));
   } catch(e){ log('WARN','FS','Terugkoppeling mislukt: '+e.message); }
 }
@@ -16947,6 +16949,35 @@ function zetOpdrachtStatus(id, status, naKlaar) {
   _zetOpdrachtStatusDoor(o, status, false, naKlaar);
 }
 
+// Werkt de serviceklant bij na een afgeronde servicebeurt: laatsteDatum = datum van de opdracht,
+// volgendeDatum opnieuw berekend. Gedeeld door de planner (statuswijziging) en de monteur (werkbon
+// afronden → fsWerkbonStatusNaarPlanning), zodat geen van beide routes de klant overslaat.
+// Alleen vooruit: een later afgeronde, óúdere beurt overschrijft niets. stil: geen melding.
+function _skNaServicebeurt(o, stil) {
+  if (!o || !o.skId || !o.datum) return;
+  var _serviceTypenInst = (APP.planningInst&&APP.planningInst.serviceTypes&&APP.planningInst.serviceTypes.length)
+    ? APP.planningInst.serviceTypes
+    : ['servicebeurt'];
+  if (_serviceTypenInst.indexOf(String(o.type||'').toLowerCase()) < 0 && _serviceTypenInst.indexOf(o.type) < 0) return;
+  var sk = (APP.serviceklanten||[]).find(function(k){ return String(k.id)===String(o.skId); });
+  if (!sk) return;
+  if (sk.laatsteDatum && o.datum < sk.laatsteDatum) return;   // oudere beurt: niets overschrijven
+  if (sk.status !== 'passief' && !sk.contractOpgezegd) {
+    sk.laatsteDatum  = o.datum;
+    sk.volgendeDatum = berekenVolgend(o.datum, sk.contractType || sk.contractId, sk);
+    dbSaveItem('serviceklanten', sk.id, sk);
+    // Geen pop-up: de volgende beurt wordt ingepland via de auto-planner (optimale route + tijd).
+    if(!stil && sk.volgendeDatum) {
+      setTimeout(function(){ toast('Volgende beurt berekend op '+fmtD(sk.volgendeDatum)+' — in te plannen via auto-planner','info'); }, 400);
+    }
+  } else {
+    // Contract opgezegd/passief — laatste beurt afgehandeld, geen vervolg inplannen
+    sk.laatsteDatum = o.datum;
+    dbSaveItem('serviceklanten', sk.id, sk);
+    if(!stil) setTimeout(function(){ toast('Contract opgezegd — geen vervolgbeurt ingepland','info'); }, 400);
+  }
+}
+
 function _zetOpdrachtStatusDoor(o, status, forceerHeropen, naKlaar) {
   o.status = status;
   dbSaveItem('opdrachten', o.id, o);
@@ -16969,30 +17000,9 @@ function _zetOpdrachtStatusDoor(o, status, forceerHeropen, naKlaar) {
       fsWerkbonIntrekken(o.werkbonId, o);
     }
   }
-  // Update servicehistorie: alleen bij Servicebeurt type EN afgehandeld
-  if (status === 'afgehandeld' && o.skId) {
-    var _serviceTypenInst = (APP.planningInst&&APP.planningInst.serviceTypes&&APP.planningInst.serviceTypes.length)
-      ? APP.planningInst.serviceTypes
-      : ['servicebeurt'];
-    if (_serviceTypenInst.indexOf(String(o.type||'').toLowerCase()) >= 0 || _serviceTypenInst.indexOf(o.type) >= 0) {
-      var sk = APP.serviceklanten.find(function(k){ return String(k.id)===String(o.skId); });
-      if (sk && sk.status !== 'passief' && !sk.contractOpgezegd) {
-        sk.laatsteDatum  = o.datum;
-        sk.volgendeDatum = berekenVolgend(o.datum, sk.contractType || sk.contractId, sk);
-        dbSaveItem('serviceklanten', sk.id, sk);
-        // Volgende beurtdatum is berekend en vastgelegd. Geen pop-up: de
-        // volgende beurt wordt ingepland via de auto-planner (optimale route + tijd).
-        if(sk.volgendeDatum) {
-          setTimeout(function(){ toast('Volgende beurt berekend op '+fmtD(sk.volgendeDatum)+' — in te plannen via auto-planner','info'); }, 400);
-        }
-      } else if (sk && (sk.status==='passief' || sk.contractOpgezegd)) {
-        // Contract opgezegd/passief — laatste beurt afgehandeld, geen vervolg inplannen
-        sk.laatsteDatum = o.datum;
-        dbSaveItem('serviceklanten', sk.id, sk);
-        setTimeout(function(){ toast('Contract opgezegd — geen vervolgbeurt ingepland','info'); }, 400);
-      }
-    }
-  }
+  // Servicehistorie bijwerken (alleen servicetypes). Ook bij 'verwerkt', voor wie direct
+  // administratief afsluit; dubbel aanroepen kan geen kwaad (alleen vooruit).
+  if (status === 'afgehandeld' || status === 'verwerkt') _skNaServicebeurt(o, false);
   var _statusLabels = { klaargezet:'Klaargezet', gereserveerd:'Gereserveerd', ingepland:'Ingepland', actie:'Actie vereist', afgehandeld:'Afgehandeld', verwerkt:'Verwerkt' };
   toast('Status bijgewerkt: '+(_statusLabels[status]||status), 'success');
   if (APP.activePage === 'planning') renderPlanning();
