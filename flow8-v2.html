@@ -9115,7 +9115,6 @@ function renderServiceklanten() {
   h+='<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
   h+='<button class="btn btn-ghost btn-sm" id="sk-jaarplanner-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Jaarplanning</button>';
   h+='<button class="btn btn-ghost btn-sm" id="sk-snelinvoer-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg> Datums invoeren</button>';
-  h+='<button class="btn btn-ghost btn-sm" id="sk-autoplanner-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg> Auto-plannen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-export-btn">'+ICO.download+' Export</button>';
   h+='</div></div>';
@@ -9250,8 +9249,6 @@ function renderServiceklanten() {
   if(jaarplanBtn) jaarplanBtn.addEventListener('click', openJaarplanner);
   var snelinvoerBtn = el.querySelector('#sk-snelinvoer-btn');
   if(snelinvoerBtn) snelinvoerBtn.addEventListener('click', openSnelinvoerDatums);
-  var autoplanBtn = el.querySelector('#sk-autoplanner-btn');
-  if(autoplanBtn) autoplanBtn.addEventListener('click', openAutoPlanner);
   el.querySelectorAll('.sk-del-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();verwijderSk(b.dataset.id);});});
   el.querySelectorAll('.sk-act-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();reactiverenSk(b.dataset.id);});});
   el.querySelectorAll('.pg-btn[data-pg]').forEach(function(b){b.addEventListener('click',function(){_skPage=parseInt(b.dataset.pg);renderServiceklanten();});});
@@ -13845,9 +13842,96 @@ function _jpVastleggen(){
     if(!aantal){ toast('Niets om vast te leggen','warning'); return; }
     firebase.database().ref().update(updates).then(function(){
       toast(aantal+' klanten ingepland in hun maand','success');
-      closeModal();
       if(APP.activePage==='serviceklanten') renderServiceklanten();
+      _jpRenderStap3(res.maanden[0]);   // direct door naar dagen inplannen
     }).catch(function(err){ toast('Vastleggen mislukt: '+(err.message||err),'error'); });
+  });
+}
+
+// Maanden waarvoor een verdeling is vastgelegd, met het aantal klanten per maand.
+function _jpMaandenMetPlan(){
+  var per = {};
+  (APP.serviceklanten||[]).forEach(function(k){
+    if(k.status === 'passief' || !k.planMaand) return;
+    per[k.planMaand] = (per[k.planMaand] || 0) + 1;
+  });
+  return per;
+}
+
+// ── Scherm 3: dagen en routes voor één maand ──
+// De verdeling zegt in wélke maand een beurt valt; deze stap maakt er dagen, banen en routes
+// van. Dat rekenwerk bestond al voor de oude auto-planner (_apStartBerekening); hier vullen we
+// alleen de klantenlijst en de instellingen en laten we die kern zijn werk doen.
+function _jpRenderStap3(voorkeurMaand){
+  var per = _jpMaandenMetPlan();
+  var maanden = Object.keys(per).sort();
+  if(!maanden.length){
+    toast('Leg eerst een verdeling vast — dan kun je per maand de dagen inplannen','warning');
+    return;
+  }
+  var gekozen = (voorkeurMaand && per[voorkeurMaand]) ? voorkeurMaand : maanden[0];
+
+  var b = '';
+  b += '<div style="display:flex;gap:0;margin-bottom:16px;background:var(--surface2);border-radius:10px;padding:3px">';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green)">✓ Periode</div>';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green)">✓ Voorstel</div>';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent);color:#fff">3. Dagen</div>';
+  b += '</div>';
+
+  b += '<div class="inst-plan-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+  b += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.kalender+' Maand</div>';
+  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Welke maand uit de vastgelegde verdeling wil je inplannen?</div>';
+  b += '<select class="input" id="jp3-maand">';
+  maanden.forEach(function(m){
+    b += '<option value="'+m+'"'+(m===gekozen?' selected':'')+'>'+_jpMaandLabel(m)+' — '+per[m]+' klanten</option>';
+  });
+  b += '</select><div id="jp3-info" style="font-size:12px;color:var(--muted);margin-top:10px"></div></div>';
+
+  b += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.clock+' Werkdag</div>';
+  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Maximaal aantal uren per dag (inclusief reistijd) en de starttijd.</div>';
+  b += '<div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">';
+  b += fg('Max uren','<input type="number" class="input" id="jp3-maxuren" value="'+_apMaxUren+'" min="4" max="10" style="width:80px">');
+  b += fg('Starttijd','<select class="input" id="jp3-starttijd" style="width:90px"><option value="07:00">07:00</option><option value="07:30">07:30</option><option value="08:00" selected>08:00</option><option value="08:30">08:30</option><option value="09:00">09:00</option></select>');
+  b += fg('Max monteurs/dag','<input type="number" class="input" id="jp3-maxmonteurs" min="1" max="20" step="1" placeholder="auto" style="width:90px">');
+  b += '</div>';
+  b += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Leeg = de volledige beschikbaarheid van die dag gebruiken. Opdrachten krijgen nog geen vaste monteur; die wijs je in de planning toe.</div>';
+  b += '</div></div>';
+
+  var f = '<button class="btn btn-ghost" id="jp3-terug">← Voorstel</button>'
+        + '<button class="btn btn-ghost" id="jp3-sluit">Sluiten</button>'
+        + '<button class="btn btn-primary" id="jp3-start">Dagen berekenen →</button>';
+  openModal('Jaarplanning — dagen inplannen', b, f, true);
+
+  function infoBijwerken(){
+    var m = document.getElementById('jp3-maand').value;
+    _apMaand = m;
+    var lijst = _jpKlantenVanMaand(m);
+    var dup = _apFilterDuplicaten(lijst);
+    var el = document.getElementById('jp3-info');
+    if(el) el.innerHTML = dup.actief.length+' klanten in te plannen'
+      + (dup.overgeslagen ? ' <span style="color:var(--orange-t)">('+dup.overgeslagen+' al ingepland, worden overgeslagen)</span>' : '');
+    return dup.actief;
+  }
+  infoBijwerken();
+  document.getElementById('jp3-maand').addEventListener('change', infoBijwerken);
+  document.getElementById('jp3-terug').addEventListener('click', function(){ if(_jpResultaat) _jpRenderStap2(); else _jpRenderStap1(); });
+  document.getElementById('jp3-sluit').addEventListener('click', closeModal);
+  document.getElementById('jp3-start').addEventListener('click', function(){
+    var lijst = infoBijwerken();
+    if(!lijst.length){ toast('Geen klanten om in te plannen in deze maand','warning'); return; }
+    _apMaxUren = parseInt(document.getElementById('jp3-maxuren').value,10) || 7;
+    _apStarttijd = document.getElementById('jp3-starttijd').value || '08:00';
+    var mm = document.getElementById('jp3-maxmonteurs');
+    _apMaxMonteurs = (mm && mm.value !== '') ? Math.max(1, parseInt(mm.value,10) || 1) : null;
+    _apKlanten = lijst;
+    _apStartBerekening();     // rekent dagen, banen en routes; toont daarna het voorstel
+  });
+}
+
+// Klanten die volgens de vastgelegde verdeling in deze maand vallen.
+function _jpKlantenVanMaand(maand){
+  return (APP.serviceklanten||[]).filter(function(k){
+    return k.status !== 'passief' && !k.contractOpgezegd && k.planMaand === maand;
   });
 }
 
@@ -13895,9 +13979,14 @@ function _jpRenderStap1(){
   b += '<div style="font-size:11px;color:var(--muted)">'+zonderDatum+' klanten hebben nog geen laatste beurt. Zonder vinkje blijven ze buiten de verdeling.</div></div></label>';
   b += '</div></div>';
 
-  var f = '<button class="btn btn-ghost" id="jp-cancel">Annuleren</button><button class="btn btn-primary" id="jp-bereken">Berekenen →</button>';
+  var alGepland = Object.keys(_jpMaandenMetPlan()).length;
+  var f = '<button class="btn btn-ghost" id="jp-cancel">Annuleren</button>'
+        + (alGepland ? '<button class="btn btn-ghost" id="jp-naar-dagen">Dagen inplannen →</button>' : '')
+        + '<button class="btn btn-primary" id="jp-bereken">Berekenen →</button>';
   openModal('Jaarplanning', b, f, true);
   document.getElementById('jp-cancel').addEventListener('click', closeModal);
+  var naarDagen = document.getElementById('jp-naar-dagen');
+  if(naarDagen) naarDagen.addEventListener('click', function(){ _jpRenderStap3(null); });
   document.querySelectorAll('.jp-snel').forEach(function(btn){
     btn.addEventListener('click', function(){ document.getElementById('jp-maanden').value = btn.dataset.m; });
   });
@@ -13993,118 +14082,20 @@ function _jpRenderStap2(){
 
   var f = '<button class="btn btn-ghost" id="jp-terug">← Periode</button>'
         + '<button class="btn btn-ghost" id="jp-sluit">Sluiten</button>'
+        + (Object.keys(_jpMaandenMetPlan()).length ? '<button class="btn btn-ghost" id="jp-dagen">Dagen inplannen →</button>' : '')
         + '<button class="btn btn-primary" id="jp-vastleggen">Verdeling vastleggen</button>';
   openModal('Jaarplanning — voorstel', b, f, true);
   document.getElementById('jp-terug').addEventListener('click', _jpRenderStap1);
   document.getElementById('jp-sluit').addEventListener('click', closeModal);
   document.getElementById('jp-vastleggen').addEventListener('click', _jpVastleggen);
+  var jpDagenBtn = document.getElementById('jp-dagen');
+  if(jpDagenBtn) jpDagenBtn.addEventListener('click', function(){ _jpRenderStap3(res.maanden[0]); });
 }
 
-function openAutoPlanner(){
-  var nu=new Date(); _apMaand=nu.getFullYear()+'-'+(nu.getMonth()+2<10?'0':'')+(nu.getMonth()+2);
-  if(nu.getMonth()+2>12) _apMaand=(nu.getFullYear()+1)+'-01';
-  _apStap=1; _apResultaat=[];
-  _apRenderStap1();
-}
-
-function _apRenderStap1(){
-  _apStap=1;
-  var planRollen=APP.planningRollen||['monteur','extern'];
-  var monteurs=APP.medewerkers.filter(function(m){return m.status!=='inactief'&&planRollen.indexOf(m.rol)>=0;});
-  // Bereken openstaande beurten voor de gekozen maand
-  var servicetypes=(APP.planningInst&&APP.planningInst.serviceTypes&&APP.planningInst.serviceTypes.length)?APP.planningInst.serviceTypes:['servicebeurt'];
-  var maandStr=_apMaand;
-  var klantenRuw=APP.serviceklanten.filter(function(k){
-    if(k.status==='passief'||!k.volgendeDatum) return false;
-    return k.volgendeDatum.slice(0,7)<=maandStr;
-  });
-  var _apDup=_apFilterDuplicaten(klantenRuw);
-  var klanten=_apDup.actief;
-  var klantenOvergeslagen=_apDup.overgeslagen;
-  _apKlanten=klanten;
-
-  // Maand opties
-  var maandOpts='';
-  for(var mi=0;mi<12;mi++){
-    var md=new Date(new Date().getFullYear(),new Date().getMonth()+mi,1);
-    var mv=md.getFullYear()+'-'+(md.getMonth()+1<10?'0':'')+(md.getMonth()+1);
-    maandOpts+='<option value="'+mv+'"'+(mv===_apMaand?' selected':'')+'>'+['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][md.getMonth()]+' '+md.getFullYear()+'</option>';
-  }
-
-  var b='';
-  // Stappen indicator
-  b+='<div style="display:flex;gap:0;margin-bottom:20px;background:var(--surface2);border-radius:10px;padding:3px">';
-  b+='<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent);color:#fff">1. Configuratie</div>';
-  b+='<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted)">2. Berekenen</div>';
-  b+='<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted)">3. Voorstel</div>';
-  b+='</div>';
-
-  b+='<div class="inst-plan-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
-  // Periode
-  b+='<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.kalender+' Periode</div>';
-  b+='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Welke maand wil je inplannen?</div>';
-  b+='<select class="input" id="ap-maand">'+maandOpts+'</select></div>';
-  // Max uren
-  b+='<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.clock+' Werkdag limiet</div>';
-  b+='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Max werkuren per dag (incl. reistijd)</div>';
-  b+='<div style="display:flex;gap:12px;align-items:end">';
-  b+=fg('Max uren','<input type="number" class="input" id="ap-maxuren" value="'+_apMaxUren+'" min="4" max="10" style="width:80px">');
-  b+=fg('Starttijd','<select class="input" id="ap-starttijd" style="width:90px"><option value="07:00">07:00</option><option value="07:30">07:30</option><option value="08:00" selected>08:00</option><option value="08:30">08:30</option><option value="09:00">09:00</option></select>');
-  b+='</div></div>';
-  // Monteurs / capaciteit
-  b+='<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.users+' Capaciteit <span style="font-weight:500;font-size:12px;color:var(--muted)">(automatisch)</span></div>';
-  b+='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">De planner gebruikt per dag het aantal beschikbare monteurs (op basis van verlof en verzuim). Opdrachten worden zonder vaste monteur aangemaakt — die wijs je later in de planning toe.</div>';
-  b+='<label style="display:flex;align-items:center;gap:8px;font-size:13px">Max. monteurs per dag <input class="input" type="number" id="ap-maxmonteurs" min="1" max="20" step="1" placeholder="auto" style="width:80px"></label>';
-  b+='<div style="font-size:11px;color:var(--muted);margin-top:6px">Leeg = volledige beschikbaarheid gebruiken. Een getal stelt een bovengrens per dag in.</div>';
-  b+='</div>';
-  // Opdrachten info
-  b+='<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.clipboard+' Opdrachten</div>';
-  b+='<div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="ap-klant-info">'+klanten.length+' openstaande servicebeurten'+(klantenOvergeslagen?' <span style="color:var(--orange)">('+klantenOvergeslagen+' al gepland, overgeslagen)</span>':'')+'</div>';
-  var totDuur=klanten.reduce(function(s,k){return s+(k.duurUren||1.5);},0);
-  b+='<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:8px">';
-  b+='<span style="font-size:28px;font-weight:800;color:var(--accent)">'+klanten.length+'</span>';
-  b+='<div><div style="font-size:13px;font-weight:600">Servicebeurten</div>';
-  b+='<div style="font-size:11px;color:var(--muted)">Totaal ~'+Math.round(totDuur)+'u werkduur</div></div></div>';
-  // Klanten met voorkeuren
-  var metVoorkeur=klanten.filter(function(k){return k.voorkeurDag||k.voorkeurWeek;});
-  if(metVoorkeur.length){
-    b+='<div style="margin-top:10px;font-size:12px;color:var(--muted)">'+metVoorkeur.length+' klant'+(metVoorkeur.length===1?'':'en')+' met voorkeurdag/-week</div>';
-  }
-  b+='</div></div>';
-
-  var f='<button class="btn btn-ghost" id="ap-cancel">Annuleren</button>';
-  f+='<button class="btn btn-primary" id="ap-start">Berekenen →</button>';
-  openModal('Auto-planner',b,f,true);
-
-  document.getElementById('ap-cancel').addEventListener('click',closeModal);
-  document.getElementById('ap-start').addEventListener('click',function(){
-    _apMaand=document.getElementById('ap-maand').value;
-    _apMaxUren=parseInt(document.getElementById('ap-maxuren').value)||7;
-    var _mmEl=document.getElementById('ap-maxmonteurs');
-    _apMaxMonteurs=(_mmEl&&_mmEl.value!=='')?(parseInt(_mmEl.value)||null):null;
-    if(_apMaxMonteurs!=null&&_apMaxMonteurs<1)_apMaxMonteurs=1;
-    _apStarttijd=document.getElementById('ap-starttijd')?document.getElementById('ap-starttijd').value:'08:00';
-    // Definitieve herfiltering: garandeer dat maand, klantenset en duplicaatfilter synchroon zijn
-    var _ruwDef=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&k.volgendeDatum&&k.volgendeDatum.slice(0,7)<=_apMaand;});
-    var _dfDef=_apFilterDuplicaten(_ruwDef);
-    _apKlanten=_dfDef.actief;
-    if(!_apKlanten.length){
-      if(_dfDef.overgeslagen){ toast('Alle '+_dfDef.overgeslagen+' beurten staan al gepland — niets om in te plannen','warning'); }
-      else { toast('Geen servicebeurten gevonden','warning'); }
-      return;
-    }
-    _apStartBerekening();
-  });
-  var apMaandSel=document.getElementById('ap-maand');
-  if(apMaandSel) apMaandSel.addEventListener('change',function(){
-    _apMaand=this.value;
-    var _ruw=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&k.volgendeDatum&&k.volgendeDatum.slice(0,7)<=_apMaand;});
-    var _df=_apFilterDuplicaten(_ruw);
-    _apKlanten=_df.actief;
-    var info=document.getElementById('ap-klant-info');
-    if(info) info.textContent=_apKlanten.length+' openstaande servicebeurten'+(_df.overgeslagen?' ('+_df.overgeslagen+' al gepland, overgeslagen)':'');
-  });
-}
+// De oude auto-planner (maand kiezen → klanten van die maand) is vervangen door de
+// jaarplanner: die verdeelt eerst over maanden (planMaand) en plant daarna per maand de dagen.
+// De rekenkern hieronder (_apStartBerekening → _apRenderStap3 → _apAanmaken) is gebleven en
+// wordt nu vanuit _jpRenderStap3 gevoed.
 
 function _apStartBerekening(){
   // Zorg dat Google Maps API geladen is
@@ -14197,6 +14188,18 @@ function _apStartBerekening(){
     // ── Slots aanmaken: banen per dag op basis van beschikbaarheid ──
     // Elke beschikbare dag krijgt N banen (N = beschikbare monteurs die dag,
     // eventueel begrensd door _apMaxMonteurs). Banen zijn naamloos (baanIndex 1..N).
+    // Uren die op een dag al gepland staan (servicebeurten die nog open zijn): die gaan van de
+    // capaciteit af, verdeeld over de banen van die dag. Zonder deze correctie begint elke dag
+    // leeg en plant de app te veel op dagen waar al werk staat.
+    var _apServiceTypes=(APP.planningInst&&APP.planningInst.serviceTypes&&APP.planningInst.serviceTypes.length)
+      ? APP.planningInst.serviceTypes : ['servicebeurt'];
+    var bezetPerDag={};
+    (APP.opdrachten||[]).forEach(function(o){
+      if(!o.datum || ['afgehandeld','verwerkt'].indexOf(o.status)>=0) return;
+      if(_apServiceTypes.indexOf(String(o.type))<0) return;
+      bezetPerDag[o.datum]=(bezetPerDag[o.datum]||0)+((parseFloat(o.duurUren)||1.5)*(parseInt(o.aantalMonteurs,10)||1));
+    });
+
     var slots=[];
     var dagenMetCapaciteit=0;
     beschikbareDagen.forEach(function(dag){
@@ -14204,14 +14207,15 @@ function _apStartBerekening(){
       if(_apMaxMonteurs!=null) beschikb=Math.min(beschikb, _apMaxMonteurs);
       if(beschikb<1) return; // geen capaciteit deze dag (iedereen afwezig)
       dagenMetCapaciteit++;
+      var reedsPerBaan=(bezetPerDag[dag]||0)/beschikb;
       for(var bi=1; bi<=beschikb; bi++){
-        slots.push({datum:dag, baanIndex:bi, monteurId:null, klanten:[], totDuur:0});
+        slots.push({datum:dag, baanIndex:bi, monteurId:null, klanten:[], totDuur:reedsPerBaan, reeds:reedsPerBaan});
       }
     });
 
     // Track totale uren per baan voor balancering (sleutel: datum|baanIndex)
     var baanUren={};
-    slots.forEach(function(s){ baanUren[s.datum+'|'+s.baanIndex]=0; });
+    slots.forEach(function(s){ baanUren[s.datum+'|'+s.baanIndex]=s.reeds||0; });
 
     // ── Sorteer klanten: voorkeurdag > voorkeurweek > rest ──
     var gesorteerd=_apKlanten.slice().sort(function(a,b){
@@ -14551,7 +14555,7 @@ function _apRenderStap3(){
   f+='<button class="btn btn-primary" id="ap-aanmaken" style="background:var(--green)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Aanmaken in planning</button>';
   document.getElementById('modal-body').innerHTML=b;
   document.getElementById('modal-footer').innerHTML=f;
-  document.getElementById('ap-terug').addEventListener('click',function(){_apRenderStap1();});
+  document.getElementById('ap-terug').addEventListener('click',function(){_jpRenderStap3(_apMaand);});
   document.getElementById('ap-opnieuw').addEventListener('click',function(){_apStartBerekening();});
   document.getElementById('ap-aanmaken').addEventListener('click',_apAanmaken);
   document.querySelectorAll('.ap-dag-header').forEach(function(hdr){

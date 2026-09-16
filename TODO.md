@@ -34,7 +34,7 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Eenmalige reparatie gemiste servicedatums** — uitgevoerd 16 september 2026: 40 klanten met een
       afgeronde servicebeurt (april/mei/juli 2026) kregen laatsteDatum + volgendeDatum. Gecontroleerd:
       40/40 correct. Klanten met volgendeDatum: 255 → 295; nog 799 actieve klanten zonder datum (Outsmart).
-- [ ] **Jaarplanner serviceklanten (groot traject)** — concept + preview goedgekeurd 13 september 2026.
+- [x] **Jaarplanner serviceklanten (groot traject)** — KLAAR 16-09; oude auto-planner vervallen. — concept + preview goedgekeurd 13 september 2026.
       Besluiten: speelruimte instelbaar via Instellingen → Planning (start: halfjaarlijks ±3 wk,
       jaarlijks ±6 wk, 2/3-jaarlijks ±2 mnd); periode kiesbaar (3/6/12 mnd of van–tot, standaard 6);
       ankerdatum/voorkeurweek = zachte wens + vinkje "vaste afspraak"; seizoen volgt uit historie.
@@ -43,8 +43,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       1 instellingen + vinkje: KLAAR 16-09 (speelruimte per interval + standaardperiode, vinkje "vaste afspraak") ·
       2a jaarverdeling berekenen + voorstelscherm: KLAAR 16-09 (periode, achterstallig, klanten zonder
       datum, bestaande planning telt mee) · 2b vastleggen: KLAAR 16-09 (planMaand + bron/datum per klant,
-      contractdatum blijft) · 3 autoplanner per maand
-      gebruikt de geplande maand en maakt regiodagen. Let op: huidige autoplanner telt cumulatief.
+      contractdatum blijft) · 3a dagen en routes per maand: KLAAR 16-09 (stap 3 voedt de bestaande
+      rekenkern met de klanten van de gekozen maand; duplicaatcheck slaat al ingeplande over) ·
+      3b opruimen: KLAAR 16-09 (knop "Auto-plannen" en de oude maandkeuze verwijderd; dagcapaciteit
+      houdt nu rekening met uren die al op die dag staan).
 - [x] **"Slimme dagplanning" heet nu "Route"** — 13 september 2026: route-icoon; de route wordt direct
       berekend bij het kiezen van een monteur, datum of via de knop per dag (`_dpAutoBereken`).
       "Bereken tijden" heet nu "Opnieuw berekenen". Tijden overnemen blijft een bewuste stap.
