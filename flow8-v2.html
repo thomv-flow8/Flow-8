@@ -9382,7 +9382,13 @@ function openSkModal(id) {
     +'<option value="do"'+(k.voorkeurDag==='do'?' selected':'')+'>Donderdag</option>'
     +'<option value="vr"'+(k.voorkeurDag==='vr'?' selected':'')+'>Vrijdag</option>'
     +'</select>');
-  b+='</div></div>';
+  b+='</div>';
+  b+='<label style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);cursor:pointer">'
+    +'<input type="checkbox" id="sk-planvast"'+(k.planVast?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0">'
+    +'<div><div style="font-size:13px;font-weight:600">Vaste afspraak</div>'
+    +'<div style="font-size:11px;color:var(--muted)">De jaarplanner verschuift deze klant nooit naar een andere maand.</div></div>'
+    +'</label>';
+  b+='</div>';
   var f='<button class="btn btn-ghost" id="skmod-cancel">Annuleren</button><button class="btn btn-primary" id="skmod-save">Opslaan</button>';
   openModal('Serviceklant bewerken',b,f);
   bindAutoGrow(document.getElementById('sk-wo'));
@@ -9411,6 +9417,7 @@ function saveSk(id) {
     planningAnker:(document.getElementById('sk-anker')||{value:''}).value||k.planningAnker||null,
     voorkeurWeek:(document.getElementById('sk-week')||{value:''}).value ? parseInt(document.getElementById('sk-week').value)||null : (k.voorkeurWeek||null),
     voorkeurDag:(document.getElementById('sk-dag')||{value:''}).value||k.voorkeurDag||null,
+    planVast: document.getElementById('sk-planvast') ? !!document.getElementById('sk-planvast').checked : !!k.planVast,
   });
   data.volgendeDatum = berekenVolgend(laatste, ct, data);
   var i=APP.serviceklanten.findIndex(function(x){return String(x.id)===String(id);});
@@ -30070,6 +30077,23 @@ function _rgBewaar(deel) {
     .catch(function(e){ toast('Opslaan mislukt: '+e.message,'error'); });
 }
 
+// ── Jaarplanner: speelruimte en periode (Instellingen → Planning) ──
+// Speelruimte = hoeveel dagen een servicebeurt eerder of later mag vallen dan de vervaldatum,
+// zodat drukke maanden verdeeld kunnen worden. Per contractinterval (in maanden).
+var SPEELRUIMTE_STANDAARD = { 6:21, 12:42, 24:61, 36:61 };
+function getSpeelruimteDagen(intervalMaanden){
+  var i = parseInt(intervalMaanden) || 12;
+  var sleutel = (i <= 6) ? 6 : (i <= 12) ? 12 : (i <= 24) ? 24 : 36;
+  var ingesteld = ((APP.planningInst||{}).speelruimte || {})[sleutel];
+  var v = parseInt(ingesteld);
+  return (!isNaN(v) && v >= 0) ? v : SPEELRUIMTE_STANDAARD[sleutel];
+}
+// Standaardperiode van de jaarplanner, in maanden vooruit.
+function getJaarplanPeriode(){
+  var m = parseInt((APP.planningInst||{}).jaarplanPeriode);
+  return (m >= 1 && m <= 24) ? m : 6;
+}
+
 function renderInstPlanning(el) {
   var planRollen      = APP.planningRollen || ['monteur','extern'];
   var beschikbRollen  = APP.beschikbaarheidRollen || ['monteur'];
@@ -30186,7 +30210,21 @@ function renderInstPlanning(el) {
   pb += '<span style="font-size:13px;color:var(--muted)">maand(en)</span>';
   pb += '<button class="btn btn-primary btn-sm" id="plan-marge-save">Opslaan</button></div>';
 
-  // 3c. Beschikbaarheid weken vooruit
+  // 3c. Speelruimte jaarplanner
+  pb += sectieKop('Speelruimte jaarplanner','Hoeveel mag een servicebeurt schuiven ten opzichte van de vervaldatum? Daarmee verdeelt de jaarplanner drukke maanden. Klanten met een ankerdatum of voorkeurweek schuiven minder snel; een klant met "vaste afspraak" schuift nooit.');
+  [[6,'Halfjaarlijks (interval 6 maanden)'],[12,'Jaarlijks (interval 12 maanden)'],[24,'Eens per 2 jaar'],[36,'Eens per 3 jaar of langer']].forEach(function(r){
+    pb += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
+    pb += '<span style="font-size:13px;min-width:210px">'+r[1]+'</span>';
+    pb += '<input type="number" class="input sp-dagen" data-interval="'+r[0]+'" value="'+getSpeelruimteDagen(r[0])+'" min="0" max="180" step="1" style="width:80px">';
+    pb += '<span style="font-size:13px;color:var(--muted)">dagen eerder of later</span></div>';
+  });
+  pb += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">';
+  pb += '<span style="font-size:13px;min-width:210px">Standaardperiode</span>';
+  pb += '<input type="number" class="input" id="jp-periode" value="'+getJaarplanPeriode()+'" min="1" max="24" step="1" style="width:80px">';
+  pb += '<span style="font-size:13px;color:var(--muted)">maanden vooruit</span></div>';
+  pb += '<button class="btn btn-primary btn-sm" id="speelruimte-save" style="margin-bottom:18px">Opslaan</button>';
+
+  // 3d. Beschikbaarheid weken vooruit
   var beschWeken = (APP.planningInst && APP.planningInst.beschikbaarheidWeken) || 3;
   pb += sectieKop('Beschikbaarheidsoverzicht','Aantal weken vooruit dat het beschikbaarheidsoverzicht toont bij "Opnieuw inplannen" (eerstvolgende mogelijkheden).');
   pb += '<div style="display:flex;align-items:center;gap:8px">';
@@ -30295,6 +30333,24 @@ function renderInstPlanning(el) {
     APP.planningInst.beschikbaarheidWeken = w;
     FB.ref(dbPath('instellingen','planningInst','beschikbaarheidWeken')).set(w);
     toast('Beschikbaarheidsoverzicht: '+w+' weken vooruit','success');
+  });
+
+  // Speelruimte jaarplanner opslaan
+  var spSaveBtn = el.querySelector('#speelruimte-save');
+  if(spSaveBtn) spSaveBtn.addEventListener('click', function(){
+    var sp = {};
+    el.querySelectorAll('.sp-dagen').forEach(function(inp){
+      var d = parseInt(inp.value); if(isNaN(d) || d < 0) d = 0; if(d > 180) d = 180;
+      sp[inp.dataset.interval] = d;
+    });
+    var per = parseInt(document.getElementById('jp-periode').value) || 6;
+    if(per < 1) per = 1; if(per > 24) per = 24;
+    if(!APP.planningInst) APP.planningInst = {};
+    APP.planningInst.speelruimte = sp;
+    APP.planningInst.jaarplanPeriode = per;
+    FB.ref(dbPath('instellingen','planningInst','speelruimte')).set(sp);
+    FB.ref(dbPath('instellingen','planningInst','jaarplanPeriode')).set(per);
+    toast('Speelruimte opgeslagen','success');
   });
 
   // Reistijd-bereik en bewaartermijn opslaan
