@@ -13816,6 +13816,41 @@ function _jpBerekenVerdeling(){
   return _jpResultaat;
 }
 
+// Legt de verdeling vast: per serviceklant de geplande maand (planMaand). De contractdatum
+// (volgendeDatum) blijft staan, zodat altijd zichtbaar blijft wanneer de beurt eigenlijk viel.
+// De dagplanner gebruikt planMaand straks om per maand dagen en routes te maken.
+function _jpVastleggen(){
+  var res = _jpResultaat;
+  if(!res || !res.items.length){ toast('Geen voorstel om vast te leggen','warning'); return; }
+  var vandaag = vandaagISO();
+  var vraag = res.items.length+' klanten krijgen een geplande maand in de periode '
+    + _jpMaandLabel(res.maanden[0])+' t/m '+_jpMaandLabel(res.maanden[res.maanden.length-1])+'. '
+    + (res.verschoven.length ? res.verschoven.length+' daarvan schuiven naar een andere maand. ' : '')
+    + 'De contractdatums blijven ongewijzigd en er worden nog geen opdrachten aangemaakt.';
+  bevestigActie('Verdeling vastleggen', vraag, function(){
+    var updates = {}, aantal = 0;
+    res.items.forEach(function(x){
+      if(!x.nieuweMaand || !x.klant || x.klant.id == null) return;
+      var id = String(x.klant.id);
+      updates[dbPath('serviceklanten', id, 'planMaand')]     = x.nieuweMaand;
+      updates[dbPath('serviceklanten', id, 'planMaandBron')]  = 'jaarplanner';
+      updates[dbPath('serviceklanten', id, 'planMaandOp')]    = vandaag;
+      var i = (APP.serviceklanten||[]).findIndex(function(k){ return String(k.id)===id; });
+      if(i > -1){
+        APP.serviceklanten[i] = Object.assign({}, APP.serviceklanten[i],
+          { planMaand: x.nieuweMaand, planMaandBron: 'jaarplanner', planMaandOp: vandaag });
+      }
+      aantal++;
+    });
+    if(!aantal){ toast('Niets om vast te leggen','warning'); return; }
+    firebase.database().ref().update(updates).then(function(){
+      toast(aantal+' klanten ingepland in hun maand','success');
+      closeModal();
+      if(APP.activePage==='serviceklanten') renderServiceklanten();
+    }).catch(function(err){ toast('Vastleggen mislukt: '+(err.message||err),'error'); });
+  });
+}
+
 // ── Scherm 1: periode en opties ──
 function openJaarplanner(){
   var nu = new Date();
@@ -13917,6 +13952,8 @@ function _jpRenderStap2(){
   b += kpi('Ankerdatum / voorkeurweek', (res.voorkeurTotaal - res.voorkeurVerschoven)+' / '+res.voorkeurTotaal, 'blijft in eigen maand');
   if(res.achterstallig) b += kpi('Achterstallig', String(res.achterstallig), 'ingepland in '+_jpMaandLabel(res.maanden[0]), 'var(--orange-t)');
   if(res.zonderDatum) b += kpi('Zonder datum meeverdeeld', String(res.zonderDatum), 'gelijkmatig over de periode');
+  var alVast = res.items.filter(function(x){ return x.klant && x.klant.planMaand; }).length;
+  if(alVast) b += kpi('Eerder vastgelegd', String(alVast), 'wordt overschreven door dit voorstel');
   b += '</div>';
 
   b += '<div class="inst-plan-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
@@ -13952,12 +13989,15 @@ function _jpRenderStap2(){
     b += '</div>';
   }
 
-  b += '<div style="font-size:12px;color:var(--muted);margin-top:14px">Dit is een voorstel. Er is nog niets opgeslagen en er zijn nog geen opdrachten aangemaakt.</div>';
+  b += '<div style="font-size:12px;color:var(--muted);margin-top:14px">Dit is een voorstel. Met <strong>Verdeling vastleggen</strong> krijgt elke klant zijn geplande maand; de contractdatums blijven staan en er worden nog geen opdrachten aangemaakt.</div>';
 
-  var f = '<button class="btn btn-ghost" id="jp-terug">← Periode</button><button class="btn btn-ghost" id="jp-sluit">Sluiten</button>';
+  var f = '<button class="btn btn-ghost" id="jp-terug">← Periode</button>'
+        + '<button class="btn btn-ghost" id="jp-sluit">Sluiten</button>'
+        + '<button class="btn btn-primary" id="jp-vastleggen">Verdeling vastleggen</button>';
   openModal('Jaarplanning — voorstel', b, f, true);
   document.getElementById('jp-terug').addEventListener('click', _jpRenderStap1);
   document.getElementById('jp-sluit').addEventListener('click', closeModal);
+  document.getElementById('jp-vastleggen').addEventListener('click', _jpVastleggen);
 }
 
 function openAutoPlanner(){
