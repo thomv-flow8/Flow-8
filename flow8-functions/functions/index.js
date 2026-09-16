@@ -239,6 +239,8 @@ exports.verstuurMail = onRequest(
       const profiel = profSnap.val();
       const bedrijfId = profiel.bedrijfId;
       if (!bedrijfId) { res.status(403).json({ error: 'Geen bedrijf gekoppeld aan profiel' }); return; }
+      // Gedeactiveerd account met een nog geldig token mag niet meer mailen.
+      if (profiel.actief !== true) { res.status(403).json({ error: 'Account is niet actief' }); return; }
 
       // ── 3. Payload valideren ──
       const { aan, cc, onderwerp, body, bijlage, ref } = req.body || {};
@@ -253,10 +255,11 @@ exports.verstuurMail = onRequest(
       }
 
       // ── 4. Versturen via Resend ──
-      // Naast de platte tekst (text, als fallback) ook een HTML-versie met de
-      // Flow8-huisstijl. De bedrijfsgegevens komen uit de payload (bedrijf),
-      // meegestuurd door de app.
-      const bedrijf = (req.body && req.body.bedrijf) || {};
+      // Naast de platte tekst (text, als fallback) ook een HTML-versie met de Flow8-huisstijl.
+      // De bedrijfsgegevens komen van de server, niet uit de payload: anders kan een ingelogde
+      // gebruiker via de console een mail opmaken namens een ander bedrijf.
+      const bgSnap = await admin.database().ref('flow8/bedrijven/' + bedrijfId + '/instellingen/bedrijf').get();
+      const bedrijf = bgSnap.exists() ? (bgSnap.val() || {}) : {};
       const onderwerpStr = String(onderwerp || '').slice(0, 300);
       const bodyStr = String(body || '');
       const payload = {

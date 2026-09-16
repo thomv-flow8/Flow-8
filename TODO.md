@@ -53,8 +53,9 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       Daarna: na slepen pas doorrekenen na ~1 s pauze (één Google-aanvraag), verouderde antwoorden
       genegeerd (`_dpRouteVersie`), "Tijden overnemen" geblokkeerd zolang de tijden niet kloppen, en
       "Opnieuw berekenen" alleen zichtbaar als er geen geldige route is.
-- [ ] **Oude route-wizard ("Route optimalisatie") is onbereikbaar** — `openRouteWizard` wordt alleen via
-      `.plan-route-dag`-knoppen geopend, die nergens meer getoond worden. Opruimen of bewust terugzetten.
+- [x] **Oude route-wizard opgeruimd** — 16 september 2026: 469 regels verwijderd (openRouteWizard,
+      _renderRWStap1/2, _genRouteVoorstel, _rwKalenderHtml, postcodeNummer, _optimaliseerPostcode) plus
+      de knopkoppeling. minToTijd is behouden. Route-optimalisatie zit in Route en in de jaarplanner.
 - [x] **Namenarchief verwijderde medewerkers** — 13 september 2026: `medewerkersArchief` (naam, rol,
       datum) wordt bij verwijderen gevuld; planning, paneel, lijst en werkbon-uren tonen "Naam · verwijderd".
       Eenmalig aangevuld: `mo043vnte2ar` = Perry Windt (oud record), `mqyu6fdxzfzk` = Jonny Visser.
@@ -114,11 +115,9 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [ ] **`zetGebruikersClaim`: live-versie niet geverifieerd** — gedeployed op 11 augustus 2026, los van
       `verstuurMail`. Niet zeker dat die gelijk is aan de repo. Deploy daarom voorlopig per functie
       (`--only functions:verstuurMail`) tot dit is gecontroleerd.
-- [ ] **`verstuurMail`: controleer `actief`** — een gedeactiveerde gebruiker met een nog geldig
-      token kan nu mailen.
-- [ ] **`verstuurMail`: bedrijfsgegevens server-side** — naam, logo en kleur komen nu uit de
-      payload van de app. Lees ze uit `flow8/bedrijven/{bedrijfId}/instellingen/bedrijf`, anders kan
-      een ingelogde gebruiker via de console een mail opmaken namens een ander bedrijf.
+- [x] **`verstuurMail`: controleert `actief`** — 16 september 2026 (nog deployen).
+- [x] **`verstuurMail`: bedrijfsgegevens server-side** — 16 september 2026: gelezen uit
+      `flow8/bedrijven/{bedrijfId}/instellingen/bedrijf` i.p.v. de payload (nog deployen).
 - [x] **Commentaar `index.js` regel 4** — rechtgezet op 13 september 2026 (`flow8/bedrijven/{bedrijfId}/mailLog`).
 
 ## Config / verificatie (niet puur code)
