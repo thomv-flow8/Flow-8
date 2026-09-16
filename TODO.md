@@ -31,9 +31,9 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Serviceklant niet bijgewerkt na afronden door monteur** — 13 september 2026: de monteur-route
       (`fsWerkbonStatusNaarPlanning`) werkte laatsteDatum/volgendeDatum niet bij; nu via gedeelde
       `_skNaServicebeurt` (alleen vooruit, ook bij 'verwerkt').
-- [ ] **Eenmalige reparatie gemiste servicedatums** — na livegang van de fix: klanten met een afgeronde
-      servicebeurt (type 1/7) zonder bijgewerkte laatsteDatum (13-09: 40 klanten, vooral april–mei)
-      herstellen. Eerst overzicht tonen, dan pas schrijven.
+- [x] **Eenmalige reparatie gemiste servicedatums** — uitgevoerd 16 september 2026: 40 klanten met een
+      afgeronde servicebeurt (april/mei/juli 2026) kregen laatsteDatum + volgendeDatum. Gecontroleerd:
+      40/40 correct. Klanten met volgendeDatum: 255 → 295; nog 799 actieve klanten zonder datum (Outsmart).
 - [ ] **Jaarplanner serviceklanten (groot traject)** — concept + preview goedgekeurd 13 september 2026.
       Besluiten: speelruimte instelbaar via Instellingen → Planning (start: halfjaarlijks ±3 wk,
       jaarlijks ±6 wk, 2/3-jaarlijks ±2 mnd); periode kiesbaar (3/6/12 mnd of van–tot, standaard 6);
@@ -73,8 +73,9 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **Percentages op de ring ook op andere rapportagepagina's?** — besloten 13 september 2026: niet nodig.
 - [x] **Verzuimrecords van verwijderde medewerkers** — besloten 13 september 2026: bewaren. Ze staan in
       de RTDB en tellen nergens meer mee.
-- [ ] **Assemblage-mail: klantnaam leeg** — onderwerp "Assemblage ASSEM-3 —" en aanhef "Beste ,"
-      (gezien op 13 september 2026). Uitzoeken waar de klantnaam in dat sjabloon vandaan komt.
+- [x] **Assemblage-mail: klantnaam leeg** — opgelost op 13 september 2026: werkorder-mail gebruikt nu
+      _woKlantKort (ook "T.b.v. voorraad") en de standaard contactpersoon; _mailTekstOpschonen haalt
+      een losse streep en "Beste ," weg in werkorder-, werkbon- en planningsmails.
 
 ## Grote trajecten (elk een eigen analyse-sessie; op business-prioriteit kiezen)
 - [ ] **Offline upload veldwerk** — foto's lokaal bufferen en uploaden zodra er netwerk is.
