@@ -107,16 +107,23 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [ ] **Verzuim optie D** — gevoelig deel echt afschermen voor volledige AVG-dekking (relevant
       voorbij de testfase). Nu kan elk actief lid van een bedrijf via de RTDB-rules alle
       verzuimrecords lezen; alleen schrijven is afgeschermd.
-- [ ] **Eigen profiel-email is zelf te wijzigen** (gevonden 21 september 2026) — onder
-      `flow8/gebruikers/$uid` mag de gebruiker zijn eigen record schrijven; alleen rol, actief en
-      bedrijfId liggen vast. `zetGebruikersClaim` zoekt de medId op via dat e-mailadres, dus een
-      monteur kan zich de medId van een collega geven: verlof en overuren namens die collega, en diens
-      werkbonnen met het eigen-recht. Dezelfde route loopt via `medewerkers/$id/email`. Fix (fase B):
-      beide e-mailvelden alleen door een beheerder laten wijzigen — de app schrijft na het aanmaken van
-      een profiel nooit meer naar dat veld, dus vastzetten breekt niets.
-- [ ] **RTDB `$overig` schrijfbaar voor elk actief lid** — onder meer `medewerkers`, `planning` en
-      `mailLog`. Een monteur kan zo bijvoorbeeld het e-mailadres van een collega op het zijne zetten,
-      waarna `zetGebruikersClaim` hem diens `medId` geeft. Hoort bij rules fase 2: per-module rechten.
+- [x] **E-mailadressen vastgezet (rechtenverhoging)** — gevonden en opgelost op 21 september 2026.
+      Een gebruiker mocht zijn eigen profiel-e-mail wijzigen, en elk actief lid dat van een medewerker;
+      `zetGebruikersClaim` leidt de medId van dat adres af, dus daarmee kon een monteur de medId van
+      een collega krijgen (verlof/overuren namens die collega, diens werkbonnen met het eigen-recht).
+      Opgelost in de `.write`-regels, niet in `.validate`: validate draait niet bij een verwijdering, dus
+      wissen-en-opnieuw-zetten zou het gat openhouden. Daarom mag `admin` alles, mag een ander actief lid
+      een medewerker aanmaken en wijzigen zolang het e-mailveld gelijk blijft, en mag alleen een admin een
+      medewerkerrecord verwijderen (anders: verwijderen + opnieuw aanmaken onder hetzelfde id).
+      Getest in de Rules Playground, zes scenario's: eigen e-mail wijzigen, medewerker-e-mail wijzigen en
+      medewerker verwijderen als monteur = geweigerd; eigen naam wijzigen, telefoonnummer van een
+      medewerker wijzigen en e-mail wijzigen als admin = toegestaan.
+- [ ] **RTDB `$overig` schrijfbaar voor elk actief lid** — onder meer `planning`, `serviceklanten`
+      en `mailLog`. De rechtenverhoging is hiermee weg (zie hierboven); wat rest is integriteit: een
+      monteur kan gegevens van collega's of het maillog aanpassen. `medewerkers` valt sinds
+      21 september 2026 niet meer onder `$overig` maar heeft een eigen regel. Hoort bij rules fase 2:
+      per-module rechten, en daar hoort ook een platte claim (`mwRecht`) bij zodat niet-admins met
+      schrijfrecht op Medewerkers weer kunnen verwijderen.
 - [ ] **Werkbon-subcollecties** — `get`/`list` op uren, foto's en documenten controleert geen
       toewijzing: een eigen-recht-gebruiker kan die van elke bon binnen het eigen bedrijf lezen als
       hij het bon-id kent.
