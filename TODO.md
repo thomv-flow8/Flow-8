@@ -4,6 +4,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 `flow8-werklijst-fase2.md`. Elk groot traject: eerst Analyse → Gevolgen → Oplossing, dan pas bouwen.
 
 ## Praktisch / eerst doen
+- [ ] **Cloud Functions naar Node 22 vóór 30 oktober 2026** — de deploy van 21 september waarschuwde:
+      Node 20 is uitgefaseerd op 30 april 2026 en wordt op 30 oktober 2026 uitgezet. Daarna kan er niets
+      meer gedeployd worden zonder eerst te upgraden — dus ook de MAIL_FROM-wijziging voor Resend niet.
+      Aanpassen in `functions/package.json` (engines.node) en opnieuw deployen; beide functies eerst testen.
 - [x] **Publiceren naar GitHub Pages** — gecontroleerd op 10 september 2026: de versie op GitHub is
       gelijk aan het canonieke bestand.
 - [x] **Firebase Authorized domains** — gecontroleerd op 13 september 2026 via de publieke Auth-config:
@@ -103,6 +107,13 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [ ] **Verzuim optie D** — gevoelig deel echt afschermen voor volledige AVG-dekking (relevant
       voorbij de testfase). Nu kan elk actief lid van een bedrijf via de RTDB-rules alle
       verzuimrecords lezen; alleen schrijven is afgeschermd.
+- [ ] **Eigen profiel-email is zelf te wijzigen** (gevonden 21 september 2026) — onder
+      `flow8/gebruikers/$uid` mag de gebruiker zijn eigen record schrijven; alleen rol, actief en
+      bedrijfId liggen vast. `zetGebruikersClaim` zoekt de medId op via dat e-mailadres, dus een
+      monteur kan zich de medId van een collega geven: verlof en overuren namens die collega, en diens
+      werkbonnen met het eigen-recht. Dezelfde route loopt via `medewerkers/$id/email`. Fix (fase B):
+      beide e-mailvelden alleen door een beheerder laten wijzigen — de app schrijft na het aanmaken van
+      een profiel nooit meer naar dat veld, dus vastzetten breekt niets.
 - [ ] **RTDB `$overig` schrijfbaar voor elk actief lid** — onder meer `medewerkers`, `planning` en
       `mailLog`. Een monteur kan zo bijvoorbeeld het e-mailadres van een collega op het zijne zetten,
       waarna `zetGebruikersClaim` hem diens `medId` geeft. Hoort bij rules fase 2: per-module rechten.
@@ -110,11 +121,13 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       toewijzing: een eigen-recht-gebruiker kan die van elke bon binnen het eigen bedrijf lezen als
       hij het bon-id kent.
 - [x] **Firebase-rules in de repo** — staan sinds 10 september 2026 in `flow8-functions/`.
-- [ ] **Rules koppelen aan `firebase.json`** — pas als zeker is dat de repo-versie gelijk is aan de
-      live-versie; anders kan een deploy de live-rules overschrijven met een oudere versie.
-- [ ] **`zetGebruikersClaim`: live-versie niet geverifieerd** — gedeployed op 11 augustus 2026, los van
-      `verstuurMail`. Niet zeker dat die gelijk is aan de repo. Deploy daarom voorlopig per functie
-      (`--only functions:verstuurMail`) tot dit is gecontroleerd.
+- [x] **Rules gekoppeld aan `firebase.json`** — 21 september 2026: de live-rules opgehaald en
+      vergeleken (RTDB via `firebase database:get "/.settings/rules"`, Firestore en Storage uit de
+      Console). Alle drie identiek aan de repo, daarna gekoppeld. **De repo is nu de bron** — rules
+      niet meer in de Console wijzigen, want een deploy overschrijft ze.
+- [x] **`zetGebruikersClaim`: live-versie geverifieerd** — 21 september 2026: de live functie geeft
+      alle negen v5-velden terug (bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht,
+      vzRecht), dus gelijk aan de repo. Daarna gericht opnieuw gedeployd om dat vast te zetten.
 - [x] **`verstuurMail`: controleert `actief`** — 16 september 2026 (nog deployen).
 - [x] **`verstuurMail`: bedrijfsgegevens server-side** — 16 september 2026: gelezen uit
       `flow8/bedrijven/{bedrijfId}/instellingen/bedrijf` i.p.v. de payload (nog deployen).

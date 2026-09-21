@@ -77,9 +77,13 @@ Thomas keurt elke stap goed; presenteer opties en analyse, laat Thomas beslissen
   (niet in git). Zet nooit een sleutel in code of repo.
 - Deployen: `cd flow8-functions && firebase deploy --only functions`. Dat staat los van de
   Pages-push en is direct live — alleen na akkoord van Thomas.
-- Rules: `database.rules.json`, `firestore.rules` en `storage.rules` in `flow8-functions/` zijn een
-  kopie van de live-rules uit de Firebase Console (stand 10 september 2026). Ze zijn **nog niet**
-  gekoppeld aan `firebase.json`. Wijzig je rules, houd Console en repo dan gelijk.
+- Rules: `database.rules.json`, `firestore.rules` en `storage.rules` in `flow8-functions/` zijn
+  sinds 21 september 2026 gekoppeld aan `firebase.json`; op die datum is vastgesteld dat ze
+  identiek waren aan de live-versie. **De repo is nu de bron — wijzig rules hier, niet in de
+  Console**, want een deploy overschrijft de Console-versie. Deployen:
+  `firebase deploy --only database,firestore:rules,storage` (eerst met `--dry-run`).
+  Live RTDB-rules teruglezen kan met `firebase database:get "/.settings/rules"`; voor Firestore en
+  Storage bestaat geen CLI-commando — die moeten uit de Console gekopieerd worden.
 
 ## Designtokens (huisstijl — gebruik deze, geen losse waarden)
 
