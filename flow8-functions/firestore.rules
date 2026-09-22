@@ -20,10 +20,14 @@ service cloud.firestore {
     //            specifieke andermans bon wordt geblokkeerd).
     //   - list : een query — toegestaan op de token-vlaggen; de client filtert op
     //            de eigen medId (array-contains), wat de app al doet.
-    // Restrisico (bewust geaccepteerd, optie 1): een eigen-recht-gebruiker zou via een
-    // eigen query bonnen binnen zijn EIGEN bedrijf kunnen oplijsten. Cross-bedrijf
-    // blijft dicht (niveau 1) en gerichte get op een andermans bon blijft dicht.
-    // Later te verscherpen met query-constraint-checks (optie 2).
+    // Dat een eigen-recht-gebruiker zo bonnen binnen zijn EIGEN bedrijf kan oplijsten is
+    // een bewuste keuze (22 september 2026): het pompregister toont de werkbonhistorie van
+    // een pomp of object, en juist bij een storing moet een monteur kunnen zien wat een
+    // collega er eerder aan gedaan heeft. Die queries filteren op objectId/debId/skId/pompIds,
+    // niet op monteur, en zouden omvallen bij een strengere list-regel.
+    // Cross-bedrijf blijft dicht (niveau 1) en een gerichte get op een andermans bon ook.
+    // Wil je dit ooit tóch dichtzetten, doe het dan via een Cloud Function die de historie
+    // server-side samenvat — niet door de list-regel aan te scherpen.
     // ─────────────────────────────────────────────────────────────────────────
 
     function isActiefBedrijf(bedrijfId) {
@@ -74,14 +78,16 @@ service cloud.firestore {
         && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(resource.data)) );
 
       // Subcollecties (uren, fotos, documenten, ...) erven de toegang van de bon.
-      // get op de bovenliggende bon met dezelfde get/list-splitsing.
+      // Hier hoeft get en list NIET gesplitst te worden: het bon-id staat in het pad, dus
+      // de toewijzing is ook bij een query te controleren via get() op de bovenliggende bon.
+      // Dat kost één extra document-read per aanvraag. De app haalt bij elke subcollectie
+      // toch al de bon zelf op (openWerkbonVanuitPlanning, genereerWerkbonPDF), en die get
+      // is al even streng — dit sluit alleen de achterdeur voor wie een bon-id raadt.
       match /{subcollectie}/{docId} {
         function bon() {
           return get(/databases/$(database)/documents/bedrijven/$(bedrijfId)/werkbonnen/$(werkbonId)).data;
         }
-        allow get, list: if isActiefBedrijf(bedrijfId)
-          && ( magAlleBonnen() || magEigenBonnen() );
-        allow write: if isActiefBedrijf(bedrijfId)
+        allow get, list, write: if isActiefBedrijf(bedrijfId)
           && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(bon())) );
       }
     }

@@ -102,8 +102,13 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [ ] **H12** — credits/licenties, server-side (het grote licentie-traject).
 
 ## Klein / security-hardening
-- [ ] **Werkbon list-query waterdicht** — een monteur kan via de console bon-*titels* binnen eigen
-      bedrijf oplijsten (get + cross-bedrijf blijven dicht). Verscherping, geen gat.
+- [x] **Werkbon list-query blijft bewust open** — besloten 22 september 2026. Het pompregister toont
+      de werkbonhistorie van een pomp of object via queries op objectId/debId/skId/pompIds; die filteren
+      niet op monteur. Bij een storing moet een monteur juist de volledige historie van een klant kunnen
+      zien, dus een strengere list-regel zou functionaliteit kosten om een lek te dichten dat binnen het
+      eigen bedrijf blijft. Cross-bedrijf en een gerichte get op een andermans bon blijven dicht.
+      Ooit tóch afschermen: via een Cloud Function die de historie server-side samenvat, niet via de
+      list-regel. Vastgelegd in de koptekst van `firestore.rules`.
 - [ ] **Verzuim optie D** — gevoelig deel echt afschermen voor volledige AVG-dekking (relevant
       voorbij de testfase). Nu kan elk actief lid van een bedrijf via de RTDB-rules alle
       verzuimrecords lezen; alleen schrijven is afgeschermd.
@@ -124,9 +129,11 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       21 september 2026 niet meer onder `$overig` maar heeft een eigen regel. Hoort bij rules fase 2:
       per-module rechten, en daar hoort ook een platte claim (`mwRecht`) bij zodat niet-admins met
       schrijfrecht op Medewerkers weer kunnen verwijderen.
-- [ ] **Werkbon-subcollecties** — `get`/`list` op uren, foto's en documenten controleert geen
-      toewijzing: een eigen-recht-gebruiker kan die van elke bon binnen het eigen bedrijf lezen als
-      hij het bon-id kent.
+- [x] **Werkbon-subcollecties** — opgelost op 22 september 2026: `get`, `list` én `write` op uren,
+      foto's en documenten controleren nu de toewijzing van de bovenliggende bon. Dat kan hier wél bij een
+      query, want het bon-id staat in het pad. Breekt niets: beide leesplekken in de app halen in dezelfde
+      aanroep ook de bon zelf op (openWerkbonVanuitPlanning, genereerWerkbonPDF) en díé get was al streng.
+      Het is dezelfde uitdrukking die bij `write` al live stond.
 - [x] **Firebase-rules in de repo** — staan sinds 10 september 2026 in `flow8-functions/`.
 - [x] **Rules gekoppeld aan `firebase.json`** — 21 september 2026: de live-rules opgehaald en
       vergeleken (RTDB via `firebase database:get "/.settings/rules"`, Firestore en Storage uit de
