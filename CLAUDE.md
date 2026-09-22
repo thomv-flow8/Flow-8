@@ -84,6 +84,16 @@ Thomas keurt elke stap goed; presenteer opties en analyse, laat Thomas beslissen
   `firebase deploy --only database,firestore:rules,storage` (eerst met `--dry-run`).
   Live RTDB-rules teruglezen kan met `firebase database:get "/.settings/rules"`; voor Firestore en
   Storage bestaat geen CLI-commando — die moeten uit de Console gekopieerd worden.
+- **Rules testen**: er staat geen Java op deze machine, dus de emulator valt af. Testen gebeurt in de
+  **Rules Playground** van de Console (die simuleert, en schrijft niets). Twee valkuilen: het Data-veld
+  wil een JSON-**object**, een losse string geeft "Failed to parse payload" — gebruik dus `update` op
+  het bovenliggende record met `{"veld":"waarde"}`, niet `set` op het veld zelf. En gebruik nooit `set` op
+  een heel record: dan wist je de andere velden en krijg je rood om de verkeerde reden. Verwijderen
+  test je met `delete` en een leeg Data-veld.
+- **`.validate` draait niet bij een verwijdering.** Een veld dat niet gewijzigd mág worden, kun je dus
+  niet met `.validate` beschermen — wissen-en-opnieuw-zetten omzeilt het. Zet zulke controles in de
+  `.write`-regel, op het niveau waar het schrijfrecht wordt verleend; dieper kun je in RTDB niets meer
+  intrekken, want rechten cascaderen naar beneden.
 
 ## Designtokens (huisstijl — gebruik deze, geen losse waarden)
 
