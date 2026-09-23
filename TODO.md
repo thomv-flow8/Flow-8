@@ -103,8 +103,18 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       een losse streep en "Beste ," weg in werkorder-, werkbon- en planningsmails.
 
 ## Grote trajecten (elk een eigen analyse-sessie; op business-prioriteit kiezen)
-- [ ] **Offline upload veldwerk** — foto's lokaal bufferen en uploaden zodra er netwerk is.
-      *Meest afgebakend en concrete pijn voor monteurs — goede eerste keuze.*
+- [ ] **Offline upload veldwerk** — de queue zelf bestaat al: `flow8-fotoqueue` in IndexedDB, met een
+      flush op het online-event en elke 30 seconden. Werkbon-foto's gebruiken hem goed. Wat resteert:
+      - [x] **A. Werkorder-foto's** — 23 september 2026. Ze stonden in dezelfde queue met
+        `werkbonId: WO_<id>`, en de generieke flush schreef ze weg naar `werkbonnen/WO_<id>/fotos` —
+        een werkbon die niet bestaat. De foto kwam dan wel in Storage maar de werkorder raakte de
+        verwijzing kwijt; voor een monteur weigerde de rule het zelfs, waarna het item elke 30 seconden
+        opnieuw werd geprobeerd. Nu een eigen route (`_fqWerkorderFoto`) die de URL in de werkorder zet,
+        of die nu open staat of niet, en het item opruimt als de werkorder verdwenen is. 12 tests.
+      - [ ] **B. Checklist-foto's** (rond regel 3928) gaan nog rechtstreeks naar Storage. Ze horen bij de
+        werkbon en worden dus in het veld gemaakt: zonder bereik verdwijnen ze met een toast.
+      - [ ] **C. Opschonen** — de queue kijkt op drie plekken naar `navigator.onLine` in plaats van
+        `_fbVerbonden` (`.info/connected`), heeft geen pogingenteller, en laat niet zien wat er klemzit.
 - [ ] **Goedkeuring stap B** — meerdere verplichte goedkeurders met tussenstatus. Raakt vier
       modules en ~49 plekken met `goedgekeurd`. Groot; lagere prioriteit; eerst concept + statusmodel.
 - [ ] **Maillog fase 3** — Resend delivery-status via webhook + geplande/automatische mails

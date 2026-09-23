@@ -4909,6 +4909,10 @@ function flushFotoQueue(){
     var keten = Promise.resolve();
     items.forEach(function(it){
       keten = keten.then(function(){
+        // Werkorder-foto's horen in de werkorder zelf, niet in een werkbon-subcollectie.
+        // Ze staan in dezelfde queue met werkbonId 'WO_<id>'; zonder deze aftakking
+        // schreef de flush ze naar werkbonnen/WO_<id>/fotos — een bon die niet bestaat.
+        if(it._woId) return _fqWerkorderFoto(it).catch(function(){ /* blijft in queue */ });
         return storageUpload(it.pad, it.blob).then(function(url){
           // URL in Firestore zetten, dan lokaal verwijderen
           return fsFotoToevoegen(it.werkbonId, { url:url, naam:it.naam||'foto' }).then(function(fsId){
@@ -4929,6 +4933,39 @@ function flushFotoQueue(){
     });
     return keten;
   }).then(function(){ _fqBezig = false; _updateFqBanner(); }).catch(function(){ _fqBezig = false; });
+}
+
+// Eén werkorder-foto afhandelen: uploaden, de URL in de werkorder zetten en het lokale
+// item opruimen. Zowel de directe poging bij het toevoegen als de latere flush lopen hier
+// langs, zodat een foto die zonder bereik is gemaakt alsnog bij zijn werkorder komt.
+// Staat de werkorder open, dan gaat het via de detailstate (die bewaart met debounce);
+// staat hij dicht, dan wordt het document zelf bijgewerkt.
+function _fqWerkorderFoto(item){
+  return storageUpload(item.pad, item.blob).then(function(url){
+    var scope = item._woScope || 'v';
+    function zetUrl(antwoorden){
+      var data = _woScopeData(antwoorden, scope);
+      data._fotos = Array.isArray(data._fotos) ? data._fotos : [];
+      var idx = data._fotos.findIndex(function(f){ return f && f._localId===item.id; });
+      if(idx>=0) data._fotos[idx] = { url:url, naam:item.naam };
+      else data._fotos.push({ url:url, naam:item.naam });
+      return antwoorden;
+    }
+    var st = _woDetailState;
+    if(st && String(st.id)===String(item._woId)){
+      zetUrl(st.antwoorden);
+      _woBewaarAntwoorden();
+      if(typeof _woRenderDetail==='function') _woRenderDetail();
+      return _fqVerwijderen(item.id);
+    }
+    return fsWerkorderOphalen(item._woId).then(function(wo){
+      // Werkorder bestaat niet meer: het item weghalen, anders blijft het eeuwig terugkomen.
+      // Het bestand staat dan wel in Storage, maar er is niets meer om het aan te hangen.
+      if(!wo) return _fqVerwijderen(item.id);
+      return fsWerkorderBijwerken(item._woId, { velden: _fsSchoon(zetUrl(wo.velden || {})) })
+        .then(function(){ return _fqVerwijderen(item.id); });
+    });
+  });
 }
 
 // Toon in de offline-banner ook het aantal foto's dat nog wacht.
@@ -34500,28 +34537,13 @@ function _woFotosToevoegen(scope, files){
           var localUrl = URL.createObjectURL(comp);
           data._fotos.push({ _localId:localId, url:localUrl, naam:file.name, _pending:true });
           _woBewaarAntwoorden(); _woRenderDetail();
-          // Directe upload-poging
-          _woFlushFoto(item, scope);
+          // Directe upload-poging; lukt het niet, dan blijft het item in de queue
+          // en pikt flushFotoQueue het later op.
+          _fqWerkorderFoto(item).catch(function(){});
         });
       });
     }).catch(function(e){ toast('Foto verwerken mislukt: '+(e.message||e),'error'); });
   });
-}
-
-// Upload één werkorder-foto en vervang de pending-versie door de definitieve URL.
-function _woFlushFoto(item, scope){
-  if(!navigator.onLine) return; // blijft in queue; latere flush pikt 'm op
-  storageUpload(item.pad, item.blob).then(function(url){
-    if(typeof _fqVerwijderen==='function') _fqVerwijderen(item.id);
-    var st = _woDetailState;
-    if(st && String(st.id)===String(item._woId)){
-      var data = _woScopeData(st.antwoorden, scope);
-      var arr = Array.isArray(data._fotos)?data._fotos:[];
-      var idx = arr.findIndex(function(f){ return f._localId===item.id; });
-      if(idx>=0){ arr[idx] = { url:url, naam:item.naam }; }
-      _woBewaarAntwoorden(); _woRenderDetail();
-    }
-  }).catch(function(){ /* blijft pending in queue */ });
 }
 
 function _woWijzigStatus(nieuweKey){
