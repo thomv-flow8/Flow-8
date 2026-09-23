@@ -2576,11 +2576,15 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   if(typeof _fqLijst==='function'){
     _fqLijst(werkbonId).then(function(items){
       if(!items.length) return;
+      var clWacht = false;
       items.forEach(function(it){
+        // Checklist-foto's horen in hun eigen vraag, niet in de fotosectie van de bon.
+        if(it._clVeldId){ _clVoorbeeldUrl(it.id, it.blob); clWacht = true; return; }
         if(state.fotos.some(function(f){ return f._localId===it.id; })) return;
         try { state.fotos.push({ _localId:it.id, id:it.id, url:URL.createObjectURL(it.blob), naam:it.naam, _pending:true }); } catch(e){}
       });
       _wbRenderFotos(state); _wbUpdateBadge('foto', state.fotos.length);
+      if(clWacht && typeof _wbRenderChecklists==='function') _wbRenderChecklists(state);
       if(typeof flushFotoQueue==='function') flushFotoQueue();
     }).catch(function(){});
   }
@@ -3769,7 +3773,12 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
       var fotos = Array.isArray(waarde) ? waarde : [];
       h += '<div class="cl-foto-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
       fotos.forEach(function(f,fi){
-        h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222"><img src="'+esc(f.url)+'" style="width:100%;height:100%;object-fit:cover">';
+        // Een foto die nog op verbinding wacht heeft geen URL in de werkbon staan; de
+        // voorbeeldweergave komt uit de lokale queue en bestaat alleen op dit apparaat.
+        var bron = f._pending ? _clVoorbeeldUrl(f._localId) : f.url;
+        h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222">';
+        if(bron) h += '<img src="'+esc(bron)+'" style="width:100%;height:100%;object-fit:cover'+(f._pending?';opacity:.6':'')+'">';
+        if(f._pending) h += '<span title="Wacht op verbinding" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
         if(bewerkbaar) h += '<button type="button" class="cl-foto-verwijder" data-ci="'+ci+'" data-vi="'+vi+'" data-fi="'+fi+'" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;line-height:1">\u00d7</button>';
         h += '</div>';
       });
@@ -3919,22 +3928,34 @@ function _wbBindChecklistVelden(state){
       var cl = state.wb.checklists[ci], veld = cl.velden[vi];
       if(!cl.antwoorden) cl.antwoorden={};
       if(!Array.isArray(cl.antwoorden[veld.id])) cl.antwoorden[veld.id]=[];
-      toast('Foto\u2019s uploaden\u2026','info');
+      // Eerst lokaal bufferen, dan pas uploaden: zonder bereik blijft de foto bewaard en
+      // gaat hij alsnog weg zodra er verbinding is. In de werkbon komt een plaatshouder.
+      var nieuweItems = [];
       var keten = Promise.resolve();
       files.forEach(function(file){
         keten = keten.then(function(){
           return comprimeerFotoVoorUpload(file).then(function(comp){
+            var localId = 'clf_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
             var pad = 'werkbonnen/'+state.werkbonId+'/checklist/'+veld.id+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.jpg';
-            return storageUpload(pad, comp).then(function(url){ cl.antwoorden[veld.id].push({ url:url }); });
+            var item = { id:localId, werkbonId:state.werkbonId, pad:pad, naam:file.name||'foto', blob:comp,
+                         toegevoegd:Date.now(), _clVeldId:veld.id, _clTemplateId:(cl.templateId!=null?cl.templateId:null), _clIndex:ci };
+            return _fqToevoegen(item).then(function(){
+              _clVoorbeeldUrl(localId, comp);
+              cl.antwoorden[veld.id].push({ _localId:localId, _pending:true, naam:file.name||'foto' });
+              nieuweItems.push(item);
+            });
           }).catch(function(e){ toast('Foto mislukt: '+(e.message||e),'error'); });
         });
       });
       keten.then(function(){
         inp.value='';
-        fsWerkbonBijwerken(state.werkbonId, { checklists: state.wb.checklists }).then(function(){
-          toast('Foto\u2019s toegevoegd','success');
-          _wbRenderChecklists(state);
-        }).catch(function(e){ toast('Opslaan mislukt: '+(e.message||e),'error'); });
+        _wbRenderChecklists(state);   // direct tonen, ook zonder verbinding
+        _updateFqBanner();
+        // De plaatshouder eerst wegschrijven, dan pas uploaden. Firestore houdt de volgorde
+        // van schrijfacties op hetzelfde document aan, dus de echte URL komt er altijd ná.
+        fsWerkbonBijwerken(state.werkbonId, { checklists: state.wb.checklists })
+          .catch(function(e){ toast('Opslaan mislukt: '+(e.message||e),'error'); });
+        nieuweItems.forEach(function(it){ _fqChecklistFoto(it).catch(function(){ /* blijft in queue */ }); });
       });
     });
   });
@@ -3945,9 +3966,14 @@ function _wbBindChecklistVelden(state){
       var lijst = cl.antwoorden && cl.antwoorden[veld.id];
       if(!Array.isArray(lijst)) return;
       var verwijderd = lijst.splice(fi,1)[0];
+      // Wachtte hij nog op upload, dan ook het lokale item weg — anders duikt de foto
+      // later alsnog op bij de eerstvolgende flush.
+      if(verwijderd && verwijderd._pending && verwijderd._localId){
+        _fqVerwijderen(verwijderd._localId).then(_updateFqBanner).catch(function(){});
+      }
+      _wbRenderChecklists(state);
       fsWerkbonBijwerken(state.werkbonId, { checklists: state.wb.checklists }).then(function(){
         if(verwijderd && verwijderd.url) storageVerwijder(verwijderd.url);
-        _wbRenderChecklists(state);
       }).catch(function(e){ toast('Mislukt: '+(e.message||e),'error'); });
     });
   });
@@ -4913,6 +4939,8 @@ function flushFotoQueue(){
         // Ze staan in dezelfde queue met werkbonId 'WO_<id>'; zonder deze aftakking
         // schreef de flush ze naar werkbonnen/WO_<id>/fotos — een bon die niet bestaat.
         if(it._woId) return _fqWerkorderFoto(it).catch(function(){ /* blijft in queue */ });
+        // Checklist-foto's staan in het werkbon-document, niet in de fotos-subcollectie.
+        if(it._clVeldId) return _fqChecklistFoto(it).catch(function(){ /* blijft in queue */ });
         return storageUpload(it.pad, it.blob).then(function(url){
           // URL in Firestore zetten, dan lokaal verwijderen
           return fsFotoToevoegen(it.werkbonId, { url:url, naam:it.naam||'foto' }).then(function(fsId){
@@ -4963,6 +4991,56 @@ function _fqWerkorderFoto(item){
       // Het bestand staat dan wel in Storage, maar er is niets meer om het aan te hangen.
       if(!wo) return _fqVerwijderen(item.id);
       return fsWerkorderBijwerken(item._woId, { velden: _fsSchoon(zetUrl(wo.velden || {})) })
+        .then(function(){ return _fqVerwijderen(item.id); });
+    });
+  });
+}
+
+// Blob-URL's van checklist-foto's die nog wachten, per lokaal id. Alleen voor de weergave
+// in dít tabblad: in de werkbon staat een plaatshouder zónder URL, zodat er nooit een dood
+// blob:-adres naar de telefoon van een collega synchroniseert.
+var _clVoorbeeldUrls = {};
+function _clVoorbeeldUrl(localId, blob){
+  if(blob && !_clVoorbeeldUrls[localId]){
+    try { _clVoorbeeldUrls[localId] = URL.createObjectURL(blob); } catch(e){}
+  }
+  return _clVoorbeeldUrls[localId] || '';
+}
+
+// Eén checklist-foto afhandelen: uploaden en de plaatshouder in de werkbon vervangen door
+// de echte URL. Checklist-antwoorden staan ín het werkbon-document (anders dan de losse
+// foto's, die een subcollectie hebben), dus hier wordt de hele checklists-array bijgewerkt.
+function _fqChecklistFoto(item){
+  return storageUpload(item.pad, item.blob).then(function(url){
+    function zetUrl(checklists){
+      var lijst = Array.isArray(checklists) ? checklists : [];
+      var cl = null;
+      if(item._clTemplateId!=null){
+        cl = lijst.find(function(c){ return c && String(c.templateId)===String(item._clTemplateId); });
+      }
+      if(!cl) cl = lijst[item._clIndex];
+      if(!cl) return null;   // checklist is van de bon gehaald
+      cl.antwoorden = cl.antwoorden || {};
+      var arr = Array.isArray(cl.antwoorden[item._clVeldId]) ? cl.antwoorden[item._clVeldId] : [];
+      var idx = arr.findIndex(function(f){ return f && f._localId===item.id; });
+      if(idx>=0) arr[idx] = { url:url, naam:item.naam };
+      else arr.push({ url:url, naam:item.naam });
+      cl.antwoorden[item._clVeldId] = arr;
+      return lijst;
+    }
+    var st = window._wbHuidigState;
+    if(window._wbHuidigeWb && String(window._wbHuidigeWb.id)===String(item.werkbonId) && st && st.wb && zetUrl(st.wb.checklists)){
+      return fsWerkbonBijwerken(item.werkbonId, { checklists: st.wb.checklists }).then(function(){
+        if(typeof _wbRenderChecklists==='function') _wbRenderChecklists(st);
+        return _fqVerwijderen(item.id);
+      });
+    }
+    return fsWerkbonOphalen(item.werkbonId).then(function(wb){
+      // Werkbon of checklist bestaat niet meer: item weghalen, anders blijft het terugkomen.
+      if(!wb) return _fqVerwijderen(item.id);
+      var nieuw = zetUrl(wb.checklists || []);
+      if(!nieuw) return _fqVerwijderen(item.id);
+      return fsWerkbonBijwerken(item.werkbonId, { checklists: nieuw })
         .then(function(){ return _fqVerwijderen(item.id); });
     });
   });

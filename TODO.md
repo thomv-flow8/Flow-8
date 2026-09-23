@@ -111,8 +111,14 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
         verwijzing kwijt; voor een monteur weigerde de rule het zelfs, waarna het item elke 30 seconden
         opnieuw werd geprobeerd. Nu een eigen route (`_fqWerkorderFoto`) die de URL in de werkorder zet,
         of die nu open staat of niet, en het item opruimt als de werkorder verdwenen is. 12 tests.
-      - [ ] **B. Checklist-foto's** (rond regel 3928) gaan nog rechtstreeks naar Storage. Ze horen bij de
-        werkbon en worden dus in het veld gemaakt: zonder bereik verdwijnen ze met een toast.
+      - [x] **B. Checklist-foto's** — 23 september 2026. Gingen rechtstreeks naar Storage, dus zonder
+        bereik verdwenen ze met een toast. Nu eerst de queue in. In de werkbon komt een **plaatshouder
+        zonder URL** (`{_localId, _pending, naam}`) in plaats van een `blob:`-adres: dat laatste bestaat
+        alleen in dat ene tabblad en zou bij een collega een gebroken plaatje geven. De voorbeeldweergave
+        komt uit de lokale queue, het tegeltje toont een klokje, en `_fqChecklistFoto` zet na de upload de
+        echte URL op zijn plaats — werkbon open of dicht. Checklist herkend op templateId met de index als
+        terugval; verdwenen werkbon of checklist ruimt het item op. Verwijdert de monteur een wachtende
+        foto, dan gaat het queue-item mee. 12 tests.
       - [ ] **C. Opschonen** — de queue kijkt op drie plekken naar `navigator.onLine` in plaats van
         `_fbVerbonden` (`.info/connected`), heeft geen pogingenteller, en laat niet zien wat er klemzit.
 - [ ] **Goedkeuring stap B** — meerdere verplichte goedkeurders met tussenstatus. Raakt vier
