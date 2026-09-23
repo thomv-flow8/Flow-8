@@ -4,10 +4,12 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 `flow8-werklijst-fase2.md`. Elk groot traject: eerst Analyse → Gevolgen → Oplossing, dan pas bouwen.
 
 ## Praktisch / eerst doen
-- [ ] **Cloud Functions naar Node 22 vóór 30 oktober 2026** — de deploy van 21 september waarschuwde:
-      Node 20 is uitgefaseerd op 30 april 2026 en wordt op 30 oktober 2026 uitgezet. Daarna kan er niets
-      meer gedeployd worden zonder eerst te upgraden — dus ook de MAIL_FROM-wijziging voor Resend niet.
-      Aanpassen in `functions/package.json` (engines.node) en opnieuw deployen; beide functies eerst testen.
+- [x] **Cloud Functions op Node 22** — gedaan op 23 september 2026, ruim vóór de uitzetdatum van
+      30 oktober. Alleen `engines.node` in `functions/package.json` gewijzigd; firebase-admin (12.7.0) en
+      firebase-functions (6.6.0) zijn bewust niet meegegaan, zodat een probleem niet op twee oorzaken
+      kon wijzen. Resend loopt via `fetch` op de REST-API, geen pakket, dus daar veranderde niets.
+      Beide functies opnieuw gebouwd en getest: inloggen (zetGebruikersClaim) en een mail versturen
+      (verstuurMail, inclusief secret en afzender).
 - [x] **Publiceren naar GitHub Pages** — gecontroleerd op 10 september 2026: de versie op GitHub is
       gelijk aan het canonieke bestand.
 - [x] **Firebase Authorized domains** — gecontroleerd op 13 september 2026 via de publieke Auth-config:

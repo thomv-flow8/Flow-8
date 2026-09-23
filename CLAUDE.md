@@ -66,7 +66,8 @@ Thomas keurt elke stap goed; presenteer opties en analyse, laat Thomas beslissen
 
 ## Cloud Functions (`flow8-functions/`)
 
-- Firebase-project `flow8-715de`, regio `europe-west1`, Node 20. Code: `flow8-functions/functions/index.js`.
+- Firebase-project `flow8-715de`, regio `europe-west1`, Node 22 (sinds 23 september 2026; Node 20
+  werd op 30 oktober 2026 uitgezet). Code: `flow8-functions/functions/index.js`.
 - `verstuurMail` — verstuurt mail via Resend met de huisstijl-wrapper `bouwMailHtml()`; logt naar
   `flow8/bedrijven/{bedrijfId}/mailLog`.
 - `zetGebruikersClaim` — zet de custom claims op het token: `bedrijfId rol actief medId`, `rch`
