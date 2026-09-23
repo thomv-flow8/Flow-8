@@ -20189,29 +20189,15 @@ async function verstuurMailDirect(payload) {
         + 'Verstuur de bon zonder foto\u2019s, of verwijder een paar foto\u2019s en probeer opnieuw.');
     }
   }
-  // Bedrijfsgegevens meesturen zodat de Cloud Function de huisstijl-header/footer
-  // kan vullen (logo, naam, adres, contact). Eén plek — geldt voor alle mails.
-  var _bg = APP.bedrijfGegevens || {};
-  var payloadMetHuisstijl = Object.assign({}, payload, {
-    bedrijf: {
-      naam:     _bg.naam || '',
-      logo:     _bg.logo || '',
-      adres:    _bg.adres || '',
-      postcode: _bg.postcode || '',
-      plaats:   _bg.plaats || '',
-      telefoon: _bg.telefoon || '',
-      email:    _bg.email || '',
-      website:  _bg.website || '',
-      mailKleur: _bg.mailKleur || '',
-      logoBreedte: _bg.logoBreedte || null,
-      logoHoogte:  _bg.logoHoogte || null
-    }
-  });
+  // De huisstijl (logo, naam, adres, contact) haalt de Cloud Function zelf uit de
+  // database bij het bedrijf van de ingelogde gebruiker. Meesturen vanuit de app heeft
+  // geen zin meer — dat werd genegeerd, zodat niemand via de console een mail kan
+  // opmaken namens een ander bedrijf.
   var token = await user.getIdToken();
   var resp = await fetch(MAIL_FUNCTIE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-    body: JSON.stringify(payloadMetHuisstijl)
+    body: JSON.stringify(payload)
   });
   var data = null; try { data = await resp.json(); } catch(e) {}
   if(!resp.ok) throw new Error((data && data.error) || ('HTTP ' + resp.status));

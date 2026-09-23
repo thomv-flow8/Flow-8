@@ -156,9 +156,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [x] **`zetGebruikersClaim`: live-versie geverifieerd** — 21 september 2026: de live functie geeft
       alle negen v5-velden terug (bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht,
       vzRecht), dus gelijk aan de repo. Daarna gericht opnieuw gedeployd om dat vast te zetten.
-- [x] **`verstuurMail`: controleert `actief`** — 16 september 2026 (nog deployen).
-- [x] **`verstuurMail`: bedrijfsgegevens server-side** — 16 september 2026: gelezen uit
-      `flow8/bedrijven/{bedrijfId}/instellingen/bedrijf` i.p.v. de payload (nog deployen).
+- [x] **`verstuurMail`: controleert `actief`** — 16 september 2026, gedeployd op 16 september.
+- [x] **`verstuurMail`: bedrijfsgegevens server-side** — 16 september 2026, gedeployd: gelezen uit
+      `flow8/bedrijven/{bedrijfId}/instellingen/bedrijf` i.p.v. de payload. De app stuurde het blok daarna
+      nog wel mee; dat is op 23 september 2026 uit `verstuurMailDirect` gehaald.
 - [x] **Commentaar `index.js` regel 4** — rechtgezet op 13 september 2026 (`flow8/bedrijven/{bedrijfId}/mailLog`).
 
 ## Config / verificatie (niet puur code)
