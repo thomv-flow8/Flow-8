@@ -25,9 +25,21 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       afmetingen (max 220×64px, ook goed in Outlook). De kaartmarker behoudt nu de verhouding.
 - [x] **Homa-logo opnieuw uploaden + testmail** — gedaan en goedgekeurd op 13 september 2026 (mail,
       kaart en werkbon-PDF). Andere bedrijven: logo één keer opnieuw uploaden voor de nieuwe weergave.
-- [ ] **Resend: eigen domein verifiëren + `MAIL_FROM` aanpassen** — nu staat live het testadres
+- [ ] **Resend: eigen domein verifiëren + `MAIL_FROM` aanpassen** — nu staat live nog het testadres
       `onboarding@resend.dev`, dat alleen naar het eigen Resend-adres mailt. Voorwaarde vóór mails
-      naar echte klanten. Daarna `MAIL_FROM` in `functions/.env` aanpassen en `verstuurMail` deployen.
+      naar echte klanten. Gekozen model (23 september 2026): **één Flow8-domein voor alle bedrijven**,
+      met de bedrijfsnaam als afzendernaam ervoor. Te claimen domein: `flow-8.nl`.
+      Stappen die nog open staan: domein claimen → in Resend toevoegen → SPF/DKIM bij de registrar →
+      `MAIL_FROM` in `functions/.env` omzetten → `verstuurMail` deployen → testen met een ontvanger
+      buiten het eigen domein. Aan de code hoeft dan niets meer te gebeuren.
+      Later mogelijk: een veld `mailAfzender` per bedrijf voor klanten die hun eigen domein verifiëren.
+- [x] **Afzendernaam en antwoordadres in de mail** — 23 september 2026, gedeployd. Het adres komt uit
+      `MAIL_FROM`, de naam ervoor uit `instellingen/bedrijf/naam`, dus de ontvanger leest de naam van het
+      bedrijf en niet Flow8. Nieuw is `reply_to`: het algemene adres van het bedrijf, met de verzender als
+      terugval — daarvóór kwam een antwoord van een klant nergens uit. Beide velden gaan door
+      `_headerVeilig`: zonder dat kon een bedrijfsnaam met een regeleinde een extra header (bcc) toevoegen.
+      Dertien tests op de helpers, inclusief injectiegevallen. Nog te testen in de praktijk door Thomas,
+      samen met de domeinomzetting.
 - [x] **Planning dagweergave toonde niet alle opdrachten** — opgelost op 13 september 2026. Opdrachten
       zonder starttijd (163 van 732) vielen weg; nu een rij "Zonder tijd", een kolom "Niet toegewezen",
       een meerekkend rooster en een teller.

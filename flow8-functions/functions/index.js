@@ -48,6 +48,42 @@ function _geldigeKleur(hex) {
   return /^#[0-9a-fA-F]{6}$/.test(h) ? h : MAIL_ACCENT_DEFAULT;
 }
 
+// Tekst die in een mailheader belandt: regeleindes en aanhalingstekens eruit.
+// Zonder dit kan een bedrijfsnaam met een regeleinde er een extra header (bijv. bcc)
+// achteraan plakken — de naam komt uit de database en is dus niet per definitie braaf.
+function _headerVeilig(tekst) {
+  return String(tekst == null ? '' : tekst)
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/["<>]/g, '')
+    .trim()
+    .slice(0, 78);
+}
+
+// Afzender: het ADRES komt uit MAIL_FROM (het geverifieerde domein), de NAAM ervoor
+// uit de bedrijfsgegevens. Zo leest de ontvanger "Homa Pompen B.V." in plaats van Flow8,
+// terwijl er maar één domein geverifieerd hoeft te zijn. De naam staat tussen
+// aanhalingstekens, want punten en komma's (B.V.) horen in een display-name geciteerd.
+function _mailAfzender(bedrijf) {
+  const basis = String(MAIL_FROM.value() || '').trim();
+  const gevonden = basis.match(/<([^>]+)>\s*$/);
+  const adres = (gevonden ? gevonden[1] : basis).trim();
+  const naam = _headerVeilig((bedrijf || {}).naam);
+  if (!naam || !adres) return basis;
+  return '"' + naam + '" <' + adres + '>';
+}
+
+// Antwoordadres: het algemene adres van het bedrijf, met de verzender als terugval.
+// Zonder reply_to komt een antwoord van een klant op het Flow8-adres terecht en dus
+// nergens. Alleen een adres dat er als adres uitziet wordt doorgegeven.
+function _mailAntwoordAdres(bedrijf, verzenderEmail) {
+  const kandidaten = [(bedrijf || {}).email, verzenderEmail];
+  for (const kandidaat of kandidaten) {
+    const adres = String(kandidaat == null ? '' : kandidaat).replace(/[\r\n\t]+/g, '').trim();
+    if (/^[^\s@,;<>]+@[^\s@,;<>]+\.[a-zA-Z]{2,}$/.test(adres)) return adres;
+  }
+  return null;
+}
+
 function _esc(str) {
   return String(str == null ? '' : str)
     .replace(/&/g, '&amp;')
@@ -263,12 +299,14 @@ exports.verstuurMail = onRequest(
       const onderwerpStr = String(onderwerp || '').slice(0, 300);
       const bodyStr = String(body || '');
       const payload = {
-        from: MAIL_FROM.value(),
+        from: _mailAfzender(bedrijf),
         to: aan,
         subject: onderwerpStr,
         text: bodyStr,
         html: bouwMailHtml(bedrijf, onderwerpStr, bodyStr),
       };
+      const antwoordAdres = _mailAntwoordAdres(bedrijf, profiel.email || decoded.email);
+      if (antwoordAdres) payload.reply_to = antwoordAdres;
       if (Array.isArray(cc) && cc.length) payload.cc = cc;
       if (bijlage && bijlage.inhoudBase64) {
         payload.attachments = [{ filename: bijlage.bestandsnaam || 'bijlage.pdf', content: bijlage.inhoudBase64 }];
