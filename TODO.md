@@ -114,6 +114,19 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       immers net zo goed verloren als de timer die hem moest vrijgeven. 9 tests, inclusief het
       bevriesscenario.
 
+- [x] **Rode strook achter de statusbalk (iPhone)** — 24 september 2026. Na de herstelfix bleef er nog
+      een tweede, tekstloze rode band bovenaan staan. De offline-balk stond op `top:0` zonder rekening te
+      houden met de veilige zone, terwijl de topbar dat al wél deed (`--safe-top`). De balk schilderde zijn
+      rood dus óók in de strook achter klok en batterij, en iOS tekent die laag niet altijd opnieuw als
+      het element eronder verdwijnt. Nu `top:var(--safe-top,0px)`: geen rood meer in die strook, en de
+      tekst zit niet langer deels achter de klok. Op een toestel zonder notch verandert er niets.
+- [x] **Werkorder-foto's aanklikken om te bekijken** — 24 september 2026, op verzoek. Werkbonnen hadden
+      dit al; werkorders niet. Hergebruikt de bestaande `openFotoViewer`, en geeft alle foto's van díé
+      sectie mee zodat je kunt doorbladeren. De startpositie wordt geteld binnen de foto's die echt een
+      afbeelding hebben, zodat een wachtende foto zonder url de telling niet verschuift. 7 tests.
+      Checklist-foto's in een werkbon kregen dezelfde behandeling (5 tests): daar komt de bron van een
+      wachtende foto uit de lokale voorbeeldweergave, want in de werkbon staat alleen een plaatshouder.
+
 ## Grote trajecten (elk een eigen analyse-sessie; op business-prioriteit kiezen)
 - [ ] **Offline upload veldwerk** — de queue zelf bestaat al: `flow8-fotoqueue` in IndexedDB, met een
       flush op het online-event en elke 30 seconden. Werkbon-foto's gebruiken hem goed. Wat resteert:

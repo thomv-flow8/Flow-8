@@ -1162,7 +1162,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   </nav>
   <div id="main">
     <!-- Offline / geen verbinding banner -->
-    <div id="offline-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#ef4444;color:#fff;padding:8px 16px;font-size:13px;font-weight:600;text-align:center;align-items:center;justify-content:center;gap:8px">
+    <div id="offline-banner" style="display:none;position:fixed;top:var(--safe-top,0px);left:0;right:0;z-index:9999;background:#ef4444;color:#fff;padding:8px 16px;font-size:13px;font-weight:600;text-align:center;align-items:center;justify-content:center;gap:8px">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
       <span id="offline-banner-tekst">Geen verbinding — bekijken werkt nog, opslaan is gepauzeerd</span>
       <button id="offline-herverbind" style="margin-left:8px;padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">Opnieuw proberen</button>
@@ -3777,7 +3777,7 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
         // voorbeeldweergave komt uit de lokale queue en bestaat alleen op dit apparaat.
         var bron = f._pending ? _clVoorbeeldUrl(f._localId) : f.url;
         h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222">';
-        if(bron) h += '<img src="'+esc(bron)+'" style="width:100%;height:100%;object-fit:cover'+(f._pending?';opacity:.6':'')+'">';
+        if(bron) h += '<img class="cl-foto-thumb" data-ci="'+ci+'" data-vi="'+vi+'" data-fi="'+fi+'" src="'+esc(bron)+'" style="width:100%;height:100%;object-fit:cover;cursor:pointer'+(f._pending?';opacity:.6':'')+'">';
         if(f._pending) h += '<span title="Wacht op verbinding" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
         if(bewerkbaar) h += '<button type="button" class="cl-foto-verwijder" data-ci="'+ci+'" data-vi="'+vi+'" data-fi="'+fi+'" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;line-height:1">\u00d7</button>';
         h += '</div>';
@@ -3957,6 +3957,21 @@ function _wbBindChecklistVelden(state){
           .catch(function(e){ toast('Opslaan mislukt: '+(e.message||e),'error'); });
         nieuweItems.forEach(function(it){ _fqChecklistFoto(it).catch(function(){ /* blijft in queue */ }); });
       });
+    });
+  });
+  wrap.querySelectorAll('.cl-foto-thumb').forEach(function(img){
+    img.addEventListener('click', function(){
+      var ci=+img.dataset.ci, vi=+img.dataset.vi, fi=+img.dataset.fi;
+      var cl = state.wb.checklists[ci]; if(!cl) return;
+      var veld = cl.velden && cl.velden[vi]; if(!veld) return;
+      var lijst = (cl.antwoorden && Array.isArray(cl.antwoorden[veld.id])) ? cl.antwoorden[veld.id] : [];
+      // Een foto die nog op verbinding wacht heeft geen URL in de werkbon staan; daarvoor is
+      // er alleen de lokale voorbeeldweergave uit de queue.
+      function bronVan(f){ return f && (f._pending ? _clVoorbeeldUrl(f._localId) : f.url); }
+      var urls = lijst.map(bronVan).filter(Boolean);
+      var pos = lijst.slice(0, fi).filter(bronVan).length;
+      if(typeof openFotoViewer==='function') openFotoViewer(urls, pos);
+      else window.open(img.src, '_blank');
     });
   });
   wrap.querySelectorAll('.cl-foto-verwijder').forEach(function(b){
@@ -33910,7 +33925,8 @@ function _woFotoSectieHtml(scope, data){
   h += '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Foto\'s'+(fotos.length?(' ('+fotos.length+')'):'')+'</div>';
   h += '<div class="wox-foto-grid" data-scope="'+esc(scope)+'" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   fotos.forEach(function(f, fi){
-    h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222"><img src="'+esc(f.url)+'" style="width:100%;height:100%;object-fit:cover'+(f._pending?';opacity:.6':'')+'">';
+    h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222">'
+      + '<img class="wox-foto-thumb" data-scope="'+esc(scope)+'" data-fi="'+fi+'" src="'+esc(f.url)+'" style="width:100%;height:100%;object-fit:cover;cursor:pointer'+(f._pending?';opacity:.6':'')+'">';
     if(f._pending) h += '<span style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
     if(_woDetailState.bewerkbaar) h += '<button type="button" class="wox-foto-del" data-scope="'+esc(scope)+'" data-fi="'+fi+'" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;line-height:1">\u00d7</button>';
     h += '</div>';
@@ -34395,6 +34411,19 @@ function _woBindDetail(fullscreen){
       var files = Array.prototype.slice.call(inp.files||[]);
       if(files.length) _woFotosToevoegen(inp.dataset.scope, files);
       inp.value='';
+    });
+  });
+  root.querySelectorAll('.wox-foto-thumb').forEach(function(img){
+    img.addEventListener('click', function(){
+      // Alle foto's van déze sectie meegeven, zodat je in de viewer kunt doorbladeren.
+      var data = _woScopeData(st.antwoorden, img.dataset.scope);
+      var lijst = Array.isArray(data._fotos) ? data._fotos : [];
+      var urls = lijst.map(function(f){ return f && f.url; }).filter(Boolean);
+      // De positie tellen binnen de foto's die daadwerkelijk een afbeelding hebben: een
+      // foto die nog op upload wacht kan er (straks) zonder url in staan.
+      var pos = lijst.slice(0, +img.dataset.fi).filter(function(f){ return f && f.url; }).length;
+      if(typeof openFotoViewer==='function') openFotoViewer(urls, pos);
+      else window.open(img.src, '_blank');
     });
   });
   root.querySelectorAll('.wox-foto-del').forEach(function(bt){
