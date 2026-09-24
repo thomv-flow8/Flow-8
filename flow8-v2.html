@@ -4923,40 +4923,57 @@ function _fqLijst(werkbonId){
   });
 }
 
-// Aantal wachtende foto's (voor badge/teller).
-function _fqAantal(werkbonId){ return _fqLijst(werkbonId).then(function(l){ return l.length; }); }
+// Na zoveel mislukte pogingen laat de automatische flush een item met rust. Anders loopt
+// de app er elke 30 seconden tegenaan zonder dat iemand ziet dat er iets klemzit.
+var _FQ_MAX_POGINGEN = 10;
 
-// Verwerk de queue: probeer elke wachtende foto te uploaden.
-// Veilig om vaak aan te roepen; draait niet dubbel.
-function flushFotoQueue(){
-  if(_fqBezig || !navigator.onLine) return Promise.resolve();
+// Eén losse werkbon-foto: uploaden, in de fotos-subcollectie zetten en lokaal opruimen.
+// Staat de werkbon open, dan wordt de wachtende versie in beeld vervangen.
+function _fqWerkbonFoto(it){
+  return storageUpload(it.pad, it.blob).then(function(url){
+    return fsFotoToevoegen(it.werkbonId, { url:url, naam:it.naam||'foto' }).then(function(fsId){
+      return _fqVerwijderen(it.id).then(function(){
+        if(window._wbHuidigeWb && String(window._wbHuidigeWb.id)===String(it.werkbonId) && window._wbHuidigState){
+          var st = window._wbHuidigState;
+          var idx = st.fotos.findIndex(function(f){ return f._localId===it.id; });
+          if(idx>=0){ st.fotos[idx] = { id:fsId, url:url, naam:it.naam }; }
+          else { st.fotos.push({ id:fsId, url:url, naam:it.naam }); }
+          if(typeof _wbRenderFotos==='function'){ _wbRenderFotos(st); _wbUpdateBadge('foto', st.fotos.length); }
+        }
+      });
+    });
+  });
+}
+
+// Een mislukte poging tellen en onthouden waaróp het misging, zodat een item dat
+// structureel faalt zichzelf uit de automatische ronde haalt in plaats van te blijven malen.
+function _fqPogingMislukt(item, fout){
+  item.pogingen = (item.pogingen||0) + 1;
+  item.laatsteFout = String((fout && (fout.code || fout.message)) || 'onbekend').slice(0,200);
+  return _fqToevoegen(item).catch(function(){});
+}
+
+// Verwerk de queue: probeer elke wachtende foto te uploaden. Veilig om vaak aan te roepen;
+// draait niet dubbel. Kijkt naar _fbVerbonden (.info/connected) en NIET naar navigator.onLine:
+// die blijft op iOS hangen en zou hier zorgen voor uploads in het niets, of juist voor wachten
+// terwijl de verbinding er allang weer is.
+// forceerVastgelopen: ook de items meenemen die de pogingengrens hebben gehaald.
+function flushFotoQueue(forceerVastgelopen){
+  if(_fqBezig || !_fbVerbonden) return Promise.resolve();
   _fqBezig = true;
   return _fqLijst().then(function(items){
     var keten = Promise.resolve();
     items.forEach(function(it){
+      if(forceerVastgelopen) it.pogingen = 0;
+      if((it.pogingen||0) >= _FQ_MAX_POGINGEN) return;   // vastgelopen; wacht op een tik
       keten = keten.then(function(){
-        // Werkorder-foto's horen in de werkorder zelf, niet in een werkbon-subcollectie.
-        // Ze staan in dezelfde queue met werkbonId 'WO_<id>'; zonder deze aftakking
-        // schreef de flush ze naar werkbonnen/WO_<id>/fotos — een bon die niet bestaat.
-        if(it._woId) return _fqWerkorderFoto(it).catch(function(){ /* blijft in queue */ });
-        // Checklist-foto's staan in het werkbon-document, niet in de fotos-subcollectie.
-        if(it._clVeldId) return _fqChecklistFoto(it).catch(function(){ /* blijft in queue */ });
-        return storageUpload(it.pad, it.blob).then(function(url){
-          // URL in Firestore zetten, dan lokaal verwijderen
-          return fsFotoToevoegen(it.werkbonId, { url:url, naam:it.naam||'foto' }).then(function(fsId){
-            return _fqVerwijderen(it.id).then(function(){
-              // UI bijwerken als deze werkbon nu open is
-              if(window._wbHuidigeWb && String(window._wbHuidigeWb.id)===String(it.werkbonId) && window._wbHuidigState){
-                var st = window._wbHuidigState;
-                // vervang het lokale item in state.fotos door de geüploade versie
-                var idx = st.fotos.findIndex(function(f){ return f._localId===it.id; });
-                if(idx>=0){ st.fotos[idx] = { id:fsId, url:url, naam:it.naam }; }
-                else { st.fotos.push({ id:fsId, url:url, naam:it.naam }); }
-                if(typeof _wbRenderFotos==='function'){ _wbRenderFotos(st); _wbUpdateBadge('foto', st.fotos.length); }
-              }
-            });
-          });
-        }).catch(function(e){ /* upload mislukt (offline/fout) — blijft in queue */ });
+        // Elke soort heeft zijn eigen bestemming: een werkorder-foto hoort in de werkorder,
+        // een checklist-foto in het werkbon-document, een losse foto in de fotos-subcollectie.
+        var stap;
+        if(it._woId)          stap = _fqWerkorderFoto(it);
+        else if(it._clVeldId) stap = _fqChecklistFoto(it);
+        else                  stap = _fqWerkbonFoto(it);
+        return stap.catch(function(e){ return _fqPogingMislukt(it, e); });
       });
     });
     return keten;
@@ -5046,11 +5063,27 @@ function _fqChecklistFoto(item){
   });
 }
 
-// Toon in de offline-banner ook het aantal foto's dat nog wacht.
+// Het pilletje onderin beeld: hoeveel foto's er wachten, of — in het rood — dat er iets
+// klemzit. Een tik daarop probeert de vastgelopen items opnieuw; zonder die uitweg zou een
+// foto onzichtbaar blijven hangen.
 function _updateFqBanner(){
-  _fqAantal().then(function(n){
+  _fqLijst().then(function(items){
     var el = document.getElementById('fq-teller');
-    if(el){ el.textContent = n>0 ? (n+' foto'+(n===1?'':'\'s')+' wacht op upload') : ''; el.style.display = n>0?'':'none'; }
+    if(!el) return;
+    var n = items.length;
+    if(!n){ el.style.display='none'; el.textContent=''; return; }
+    var vast = items.filter(function(i){ return (i.pogingen||0) >= _FQ_MAX_POGINGEN; }).length;
+    el.style.display = '';
+    if(vast){
+      el.style.background = 'var(--red,#ef4444)';
+      el.style.cursor = 'pointer';
+      el.textContent = (vast===1 ? '1 foto komt niet weg' : vast+' foto\'s komen niet weg')
+        + ' — tik om opnieuw te proberen';
+    } else {
+      el.style.background = 'var(--orange,#f59e0b)';
+      el.style.cursor = '';
+      el.textContent = (n===1 ? '1 foto wacht' : n+' foto\'s wachten') + ' op upload';
+    }
   }).catch(function(){});
 }
 
@@ -5082,6 +5115,10 @@ function zetOfflineBanner(verbonden) {
     banner.style.display = 'none';
     _pendingWrites = 0;
     if (typeof _herstelStop === 'function') _herstelStop();
+    // Verbinding terug: wachtende foto's meteen wegwerken. Dit is het juiste moment,
+    // want .info/connected weet of er écht een verbinding is — het online-event van de
+    // browser zegt alleen dat er een netwerkkaart actief is.
+    if (typeof flushFotoQueue === 'function') flushFotoQueue();
     return;
   }
   banner.style.display = 'flex';
@@ -31305,8 +31342,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof probeerHerverbinden === 'function') probeerHerverbinden();
   });
   // Offline foto-queue: verwerk zodra er verbinding is, periodiek, en bij opstart
-  window.addEventListener('online', function(){ if(typeof flushFotoQueue==='function') flushFotoQueue(); });
-  setInterval(function(){ if(typeof flushFotoQueue==='function' && navigator.onLine) flushFotoQueue(); }, 30000);
+  // Het online-event van de browser trapt hier niets meer af: dat loopt nu via
+  // zetOfflineBanner, zodra .info/connected bevestigt dat er echt verbinding is.
+  setInterval(function(){ if(typeof flushFotoQueue==='function' && _fbVerbonden) flushFotoQueue(); }, 30000);
+  var fqTeller = document.getElementById('fq-teller');
+  if(fqTeller) fqTeller.addEventListener('click', function(){
+    if(typeof flushFotoQueue==='function') flushFotoQueue(true);
+  });
   if(typeof flushFotoQueue==='function') setTimeout(flushFotoQueue, 3000);
   if(typeof _updateFqBanner==='function') setTimeout(_updateFqBanner, 3500);
   // ═══════════════════════════════════════════════════════════════

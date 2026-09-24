@@ -119,8 +119,23 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
         echte URL op zijn plaats — werkbon open of dicht. Checklist herkend op templateId met de index als
         terugval; verdwenen werkbon of checklist ruimt het item op. Verwijdert de monteur een wachtende
         foto, dan gaat het queue-item mee. 12 tests.
-      - [ ] **C. Opschonen** — de queue kijkt op drie plekken naar `navigator.onLine` in plaats van
-        `_fbVerbonden` (`.info/connected`), heeft geen pogingenteller, en laat niet zien wat er klemzit.
+      - [x] **C1. Eén bron voor de verbinding** — 24 september 2026. De queue keek naar
+        `navigator.onLine`, terwijl de rest van de app `.info/connected` gebruikt via `_fbVerbonden` — precies
+        omdat die eerste op iOS blijft hangen na vliegtuigmodus. De flush wordt nu afgetrapt vanuit
+        `zetOfflineBanner` zodra de verbinding echt terug is; het `online`-event van de browser doet niets
+        meer. De interval van 30 seconden kijkt ook naar `_fbVerbonden`.
+      - [x] **C2. Pogingenteller** — 24 september 2026. Elk item telt mislukte pogingen en onthoudt de
+        laatste fout; na 10 laat de automatische flush het met rust, zodat er niet elke 30 seconden
+        zinloos verkeer is. Het pilletje onderin wordt dan rood ("1 foto komt niet weg — tik om opnieuw
+        te proberen"); een tik zet de teller terug en probeert het meteen. De drie routes zitten nu in
+        `_fqWerkbonFoto` / `_fqWerkorderFoto` / `_fqChecklistFoto`, met `flushFotoQueue` als dunne verdeler.
+        11 tests. (`_fqAantal` verviel en is verwijderd.)
+      - [ ] **C3. Werkorder-foto's een plaatshouder geven** — daar staat nog een `blob:`-adres in het
+        document, wat bij de checklist bewust is vermeden: dat adres bestaat alleen in het tabblad dat
+        het maakte, dus een collega ziet een gebroken plaatje. Raakt toevoegen, weergeven en de flush
+        in de werkordercode. Geen storing, wel inconsistent.
+      - [ ] **Los randje**: de retry in `dbSaveItem` (rond regel 5345) kijkt óók naar `navigator.onLine`.
+        Zelfde bezwaar als C1, maar buiten de fotoqueue.
 - [ ] **Goedkeuring stap B** — meerdere verplichte goedkeurders met tussenstatus. Raakt vier
       modules en ~49 plekken met `goedgekeurd`. Groot; lagere prioriteit; eerst concept + statusmodel.
 - [ ] **Maillog fase 3** — Resend delivery-status via webhook + geplande/automatische mails
