@@ -102,6 +102,18 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       _woKlantKort (ook "T.b.v. voorraad") en de standaard contactpersoon; _mailTekstOpschonen haalt
       een losse streep en "Beste ," weg in werkorder-, werkbon- en planningsmails.
 
+- [x] **Rode offline-balk bleef staan op iPhone** — gevonden bij het testen van de fotoqueue op
+      24 september 2026, opgelost dezelfde dag. Desktop had er geen last van. Oorzaak: `forceerHerverbinding`
+      zette de database offline en 300 ms later weer online. iOS bevriest JavaScript zodra je de app
+      verlaat — precies wat je doet om vliegtuigmodus om te zetten — en gebeurde dat tussen die twee
+      stappen, dan bleef de database bewust offline én bleef `_herverbindBezig` op `true` staan, waardoor
+      elke volgende poging meteen terugkeerde. Alleen een herlaadactie hielp nog.
+      Opgelost met drie dingen: `goOnline()` (idempotent) als eerste stap in zowel `probeerHerverbinden`
+      als `forceerHerverbinding`, `goOnline()` ook in de foutafhandeling, en een **tijdstempel** in plaats
+      van een vangnet-timer om een klemmende vlag te herkennen — een timer gaat bij het bevriezen
+      immers net zo goed verloren als de timer die hem moest vrijgeven. 9 tests, inclusief het
+      bevriesscenario.
+
 ## Grote trajecten (elk een eigen analyse-sessie; op business-prioriteit kiezen)
 - [ ] **Offline upload veldwerk** — de queue zelf bestaat al: `flow8-fotoqueue` in IndexedDB, met een
       flush op het online-event en elke 30 seconden. Werkbon-foto's gebruiken hem goed. Wat resteert:

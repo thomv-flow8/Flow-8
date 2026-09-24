@@ -5136,16 +5136,39 @@ function zetOfflineBanner(verbonden) {
 // de banner staan tot je de pagina herlaadt. Een korte goOffline/goOnline dwingt een
 // nieuwe verbinding af.
 var _herverbindBezig = false;
+var _herverbindSinds = 0;
+
+// goOnline() is idempotent: hem aanroepen terwijl de verbinding al staat verandert niets.
+// Hem NIET aanroepen terwijl een eerdere poging halverwege is blijven steken, laat de
+// database juist bewust offline staan. Daarom overal eerst dit.
+function _zetDatabaseOnline() {
+  try { firebase.database().goOnline(); } catch(e) {}
+}
+
+// Een korte goOffline/goOnline dwingt een nieuwe websocket af.
+//
+// Let op de volgorde en de tijdstempel: iOS bevriest JavaScript zodra je de app verlaat, en
+// dat is precies wat je doet om vliegtuigmodus aan of uit te zetten. Wordt de pagina
+// bevroren tussen goOffline() en de goOnline() 300 ms later, dan staat de database
+// bewust offline én blijft _herverbindBezig op true hangen — waarna elke volgende poging
+// meteen terugkeert en de verbinding nooit meer terugkomt. Op desktop gebeurt dat niet,
+// want daar bevriest niets; op de telefoon bleef de rode balk erdoor staan.
 function forceerHerverbinding() {
-  if (_herverbindBezig) return;
+  // Eerst een offline-stand opheffen die is blijven hangen.
+  _zetDatabaseOnline();
+  // Een vlag die ouder is dan acht seconden is blijven hangen, niet 'bezig'. Bewust een
+  // tijdstempel en geen vangnet-timer: een timer gaat bij het bevriezen net zo goed verloren
+  // als de timer die hem moest vrijgeven, een tijdstempel overleeft het wel.
+  if (_herverbindBezig && (Date.now() - _herverbindSinds) < 8000) return;
   _herverbindBezig = true;
+  _herverbindSinds = Date.now();
   try {
     firebase.database().goOffline();
     setTimeout(function(){
-      try { firebase.database().goOnline(); } catch(e){}
+      _zetDatabaseOnline();
       setTimeout(function(){ _herverbindBezig = false; }, 2000);
     }, 300);
-  } catch(e) { _herverbindBezig = false; }
+  } catch(e) { _zetDatabaseOnline(); _herverbindBezig = false; }
 }
 
 try {
@@ -5178,6 +5201,9 @@ var _herstelPoging = 0;
 var _HERSTEL_PAUZES = [5000, 10000, 20000, 30000];
 
 function probeerHerverbinden(){
+  // Ook als we denken verbonden te zijn: een vorige poging kan de database offline hebben
+  // achtergelaten. Dit is het moment waarop de gebruiker terugkeert naar de app.
+  _zetDatabaseOnline();
   if(_fbVerbonden){ _herstelStop(); return; }
   forceerHerverbinding();
   _herstelPlan();
