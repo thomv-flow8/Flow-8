@@ -114,12 +114,16 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       immers net zo goed verloren als de timer die hem moest vrijgeven. 9 tests, inclusief het
       bevriesscenario.
 
-- [x] **Rode strook achter de statusbalk (iPhone)** — 24 september 2026. Na de herstelfix bleef er nog
-      een tweede, tekstloze rode band bovenaan staan. De offline-balk stond op `top:0` zonder rekening te
-      houden met de veilige zone, terwijl de topbar dat al wél deed (`--safe-top`). De balk schilderde zijn
-      rood dus óók in de strook achter klok en batterij, en iOS tekent die laag niet altijd opnieuw als
-      het element eronder verdwijnt. Nu `top:var(--safe-top,0px)`: geen rood meer in die strook, en de
-      tekst zit niet langer deels achter de klok. Op een toestel zonder notch verandert er niets.
+- [x] **Rode strook bovenaan bleef staan (iPhone, Safari)** — 24 september 2026, in twee stappen.
+      Eerste verklaring was mis: de balk zou zijn rood in de veilige zone achter klok en batterij
+      schilderen, dus is hij onder `--safe-top` gezet. Dat hielp niet, en achteraf logisch — in Safari is
+      die zone nul; alleen als geïnstalleerde app heeft hij hoogte. (De wijziging is blijven staan: voor
+      wie de app wél vanaf het beginscherm gebruikt is het correct.)
+      Werkelijke oorzaak: Safari kleurt zijn **eigen bovenrand** naar de kleur van de pagina, en dat
+      verversen gebeurt niet betrouwbaar. Zolang de rode balk de bovenrand raakte, bleef die rand rood
+      nadat de balk zelf al weg was. Oplossing: de balk zweeft nu, met 8px ruimte rondom en afgeronde
+      hoeken, zodat de bovenste pixels altijd de donkere app-achtergrond zijn. Preview vooraf beoordeeld.
+      In de app is maar één rood element, dus een tweede boosdoener was uitgesloten.
 - [x] **Werkorder-foto's aanklikken om te bekijken** — 24 september 2026, op verzoek. Werkbonnen hadden
       dit al; werkorders niet. Hergebruikt de bestaande `openFotoViewer`, en geeft alle foto's van díé
       sectie mee zodat je kunt doorbladeren. De startpositie wordt geteld binnen de foto's die echt een
