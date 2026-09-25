@@ -131,6 +131,18 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       Checklist-foto's in een werkbon kregen dezelfde behandeling (5 tests): daar komt de bron van een
       wachtende foto uit de lokale voorbeeldweergave, want in de werkbon staat alleen een plaatshouder.
 
+- [x] **Checklist-fotoveld als volwaardige kaart** — 25 september 2026, op verzoek. Het veld toonde een
+      kale tegel van 64px; nu dezelfde kaart als de sectie Foto’s, met de bestaande stijlklassen
+      (`wbx-foto-item` e.v.): thumbnail die de viewer opent, "Foto N", tekenknop, kruisje **met
+      bevestiging** (die ontbrak) en een bijschriftveld dat zichzelf na 700 ms opslaat in het
+      checklistantwoord (`{url, naam, bijschrift}`). Een wachtende foto toont het wolkje én
+      "wacht op upload" in het label; de tekenknop is dan verborgen, want de overlay stuurt het
+      resultaat meteen naar Storage en heeft een bestaande URL nodig.
+      `_wbFotoTekenOverlay` heeft daarvoor een derde, optionele parameter gekregen
+      (`{bewaarUrl, naOpslaan}`): zonder die parameter werkt hij als vanouds op het fotorecord in
+      Firestore, met die parameter schrijft de checklist zijn eigen antwoord weg. Preview vooraf
+      beoordeeld.
+
 ## Grote trajecten (elk een eigen analyse-sessie; op business-prioriteit kiezen)
 - [ ] **Offline upload veldwerk** — de queue zelf bestaat al: `flow8-fotoqueue` in IndexedDB, met een
       flush op het online-event en elke 30 seconden. Werkbon-foto's gebruiken hem goed. Wat resteert:

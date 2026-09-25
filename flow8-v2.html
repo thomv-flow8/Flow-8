@@ -3771,15 +3771,28 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
       h += '<input type="time" class="input cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+' style="max-width:160px">';
     } else if(v.type==='foto'){
       var fotos = Array.isArray(waarde) ? waarde : [];
-      h += '<div class="cl-foto-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
+      h += '<div class="cl-foto-grid" style="margin-bottom:8px">';
       fotos.forEach(function(f,fi){
-        // Een foto die nog op verbinding wacht heeft geen URL in de werkbon staan; de
-        // voorbeeldweergave komt uit de lokale queue en bestaat alleen op dit apparaat.
+        // Zelfde kaart als in de sectie Foto's (wbx-*), zodat een foto in een checklist
+        // ook een bijschrift en een tekenknop heeft. Een foto die nog op verbinding wacht
+        // heeft geen URL in de werkbon staan; de voorbeeldweergave komt uit de lokale
+        // queue en bestaat alleen op dit apparaat.
         var bron = f._pending ? _clVoorbeeldUrl(f._localId) : f.url;
-        h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222">';
-        if(bron) h += '<img class="cl-foto-thumb" data-ci="'+ci+'" data-vi="'+vi+'" data-fi="'+fi+'" src="'+esc(bron)+'" style="width:100%;height:100%;object-fit:cover;cursor:pointer'+(f._pending?';opacity:.6':'')+'">';
-        if(f._pending) h += '<span title="Wacht op verbinding" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
-        if(bewerkbaar) h += '<button type="button" class="cl-foto-verwijder" data-ci="'+ci+'" data-vi="'+vi+'" data-fi="'+fi+'" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;line-height:1">\u00d7</button>';
+        var dset = ' data-ci="'+ci+'" data-vi="'+vi+'" data-fi="'+fi+'"';
+        h += '<div class="wbx-foto-item">';
+        h += '<div class="wbx-ftop">';
+        h += '<div class="wbx-fthumb cl-foto-thumb'+(f._pending?' wbx-fpending':'')+'"'+dset+'>';
+        if(bron) h += '<img src="'+esc(bron)+'">';
+        if(f._pending) h += '<span class="wbx-fpending-badge" title="Wacht op upload — wordt verstuurd zodra er verbinding is"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
+        h += '</div>';
+        h += '<div class="wbx-fnum">Foto '+(fi+1)+(f._pending?' \u00b7 wacht op upload':'')+'</div>';
+        // Tekenen kan pas als de foto echt geüpload is: de overlay stuurt het resultaat
+        // meteen naar Storage en heeft dus een bestaande URL nodig.
+        if(bewerkbaar && !f._pending) h += '<button type="button" class="wbx-ftekenbtn cl-foto-teken"'+dset+' title="Tekenen op foto"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>';
+        if(bewerkbaar) h += '<button type="button" class="wbx-fdelbtn cl-foto-verwijder"'+dset+'>\u00d7</button>';
+        h += '</div>';
+        if(bewerkbaar) h += '<textarea class="wbx-fcap cl-foto-cap"'+dset+' rows="2" placeholder="Bijschrift (optioneel)\u2026">'+esc(f.bijschrift||'')+'</textarea>';
+        else if(f.bijschrift) h += '<div style="font-size:13px;color:var(--muted)">'+esc(f.bijschrift)+'</div>';
         h += '</div>';
       });
       h += '</div>';
@@ -3971,7 +3984,37 @@ function _wbBindChecklistVelden(state){
       var urls = lijst.map(bronVan).filter(Boolean);
       var pos = lijst.slice(0, fi).filter(bronVan).length;
       if(typeof openFotoViewer==='function') openFotoViewer(urls, pos);
-      else window.open(img.src, '_blank');
+      else if(urls[pos]) window.open(urls[pos], '_blank');
+    });
+  });
+  // Bijschrift per foto, met dezelfde vertraging als in de sectie Foto's.
+  wrap.querySelectorAll('.cl-foto-cap').forEach(function(ta){
+    var _t=null;
+    ta.addEventListener('input', function(){
+      if(_t) clearTimeout(_t);
+      _t = setTimeout(function(){
+        var f = _clFotoVan(state, ta.dataset);
+        if(!f) return;
+        f.bijschrift = ta.value;
+        fsWerkbonBijwerken(state.werkbonId, { checklists: state.wb.checklists })
+          .catch(function(e){ console.warn('Bijschrift opslaan:', e); });
+      }, 700);
+    });
+  });
+  wrap.querySelectorAll('.cl-foto-teken').forEach(function(b){
+    b.addEventListener('click', function(e){
+      e.stopPropagation();
+      var f = _clFotoVan(state, b.dataset);
+      if(!f || !f.url) return;
+      // De overlay is gedeeld met de sectie Foto's; alleen het wegschrijven verschilt,
+      // want een checklistfoto heeft geen eigen record in Firestore.
+      _wbFotoTekenOverlay(state, f, {
+        bewaarUrl: function(url){
+          f.url = url;
+          return fsWerkbonBijwerken(state.werkbonId, { checklists: state.wb.checklists });
+        },
+        naOpslaan: function(){ _wbRenderChecklists(state); },
+      });
     });
   });
   wrap.querySelectorAll('.cl-foto-verwijder').forEach(function(b){
@@ -3980,16 +4023,18 @@ function _wbBindChecklistVelden(state){
       var cl = state.wb.checklists[ci], veld = cl.velden[vi];
       var lijst = cl.antwoorden && cl.antwoorden[veld.id];
       if(!Array.isArray(lijst)) return;
-      var verwijderd = lijst.splice(fi,1)[0];
-      // Wachtte hij nog op upload, dan ook het lokale item weg — anders duikt de foto
-      // later alsnog op bij de eerstvolgende flush.
-      if(verwijderd && verwijderd._pending && verwijderd._localId){
-        _fqVerwijderen(verwijderd._localId).then(_updateFqBanner).catch(function(){});
-      }
-      _wbRenderChecklists(state);
-      fsWerkbonBijwerken(state.werkbonId, { checklists: state.wb.checklists }).then(function(){
-        if(verwijderd && verwijderd.url) storageVerwijder(verwijderd.url);
-      }).catch(function(e){ toast('Mislukt: '+(e.message||e),'error'); });
+      bevestigActie('Foto verwijderen','Deze foto verwijderen?', function(){
+        var verwijderd = lijst.splice(fi,1)[0];
+        // Wachtte hij nog op upload, dan ook het lokale item weg — anders duikt de foto
+        // later alsnog op bij de eerstvolgende flush.
+        if(verwijderd && verwijderd._pending && verwijderd._localId){
+          _fqVerwijderen(verwijderd._localId).then(_updateFqBanner).catch(function(){});
+        }
+        _wbRenderChecklists(state);
+        fsWerkbonBijwerken(state.werkbonId, { checklists: state.wb.checklists }).then(function(){
+          if(verwijderd && verwijderd.url) storageVerwijder(verwijderd.url);
+        }).catch(function(e){ toast('Mislukt: '+(e.message||e),'error'); });
+      });
     });
   });
 
@@ -4137,7 +4182,10 @@ function _wbTekenOverlay(bestaand, onKlaar){
 
 // Teken-op-foto overlay: bestaande werkbon-foto als achtergrond, met kleurkiezer + ongedaan maken + wissen.
 // Slaat op door de ORIGINELE foto te vervangen (bevestiging vooraf, want destructief).
-function _wbFotoTekenOverlay(state, foto){
+// opties (optioneel): { bewaarUrl(url) -> Promise, naOpslaan() }. Zonder opties gedraagt
+// de overlay zich als vanouds en werkt hij het fotorecord in Firestore bij. Checklistfoto's
+// hebben zo'n record niet en geven daarom hun eigen manier van bewaren mee.
+function _wbFotoTekenOverlay(state, foto, opties){
   var ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:16px';
   var kleuren = [ {k:'#ef4444',naam:'Rood'}, {k:'#f59e0b',naam:'Geel'}, {k:'#3b82f6',naam:'Blauw'}, {k:'#ffffff',naam:'Wit'}, {k:'#111111',naam:'Zwart'} ];
@@ -4237,14 +4285,20 @@ function _wbFotoTekenOverlay(state, foto){
           var pad = 'werkbonnen/'+state.werkbonId+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.jpg';
           return storageUpload(pad, comp);
         }).then(function(url){
-          return fsFotoBijwerken(state.werkbonId, foto.id, { url:url }).then(function(){ return url; });
+          var bewaren = (opties && typeof opties.bewaarUrl==='function')
+            ? opties.bewaarUrl(url)
+            : fsFotoBijwerken(state.werkbonId, foto.id, { url:url });
+          return Promise.resolve(bewaren).then(function(){ return url; });
         }).then(function(url){
           foto.url = url;
-          var f = state.fotos.find(function(x){ return x.id===foto.id; });
-          if(f) f.url = url;
+          if(!opties){
+            var f = state.fotos.find(function(x){ return x.id===foto.id; });
+            if(f) f.url = url;
+          }
           storageVerwijder(oudeUrl);
           sluit();
-          _wbRenderFotos(state);
+          if(opties && typeof opties.naOpslaan==='function') opties.naOpslaan();
+          else _wbRenderFotos(state);
           toast('Foto bijgewerkt','success');
         }).catch(function(e){ toast('Mislukt: '+(e.message||e),'error'); });
       }, 'image/jpeg', 0.9);
@@ -5052,6 +5106,16 @@ function _fqWerkorderFoto(item){
         .then(function(){ return _fqVerwijderen(item.id); });
     });
   });
+}
+
+// De foto achter een data-ci/vi/fi-verwijzing opzoeken in de checklists van een werkbon.
+function _clFotoVan(state, dset){
+  var cl = state && state.wb && state.wb.checklists && state.wb.checklists[+dset.ci];
+  if(!cl) return null;
+  var veld = cl.velden && cl.velden[+dset.vi];
+  if(!veld || !cl.antwoorden) return null;
+  var arr = cl.antwoorden[veld.id];
+  return Array.isArray(arr) ? (arr[+dset.fi] || null) : null;
 }
 
 // Blob-URL's van checklist-foto's die nog wachten, per lokaal id. Alleen voor de weergave
