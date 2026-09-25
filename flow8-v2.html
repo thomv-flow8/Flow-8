@@ -4945,7 +4945,7 @@ var _FQ_MAX_POGINGEN = 10;
 // Eén losse werkbon-foto: uploaden, in de fotos-subcollectie zetten en lokaal opruimen.
 // Staat de werkbon open, dan wordt de wachtende versie in beeld vervangen.
 function _fqWerkbonFoto(it){
-  return storageUpload(it.pad, it.blob).then(function(url){
+  return _fqUploadEenmalig(it).then(function(url){
     return fsFotoToevoegen(it.werkbonId, { url:url, naam:it.naam||'foto' }).then(function(fsId){
       return _fqVerwijderen(it.id).then(function(){
         if(window._wbHuidigeWb && String(window._wbHuidigeWb.id)===String(it.werkbonId) && window._wbHuidigState){
@@ -5000,15 +5000,41 @@ function flushFotoQueue(forceerVastgelopen){
 // langs, zodat een foto die zonder bereik is gemaakt alsnog bij zijn werkorder komt.
 // Staat de werkorder open, dan gaat het via de detailstate (die bewaart met debounce);
 // staat hij dicht, dan wordt het document zelf bijgewerkt.
-function _fqWerkorderFoto(item){
+// Uploadt het bestand, of hergebruikt de URL van een eerder geslaagde poging. Het item wordt
+// pas uit de wachtrij gehaald als Firestore de verwijzing heeft bevestigd, en die bevestiging
+// kan bij een net herstelde verbinding seconden duren. Loopt de flush van 30 seconden er dan
+// doorheen, dan werd dezelfde foto een tweede keer geüpload. Nu onthoudt het item zijn URL.
+function _fqUploadEenmalig(item){
+  if(item.url) return Promise.resolve(item.url);
   return storageUpload(item.pad, item.blob).then(function(url){
+    item.url = url;
+    return _fqToevoegen(item).catch(function(){}).then(function(){ return url; });
+  });
+}
+
+// Zet de definitieve URL op de juiste plek in een fotolijst. Idempotent: staat de foto er al,
+// herkend aan het lokale id óf aan dezelfde URL, dan verandert er niets. Zonder die tweede
+// controle plakte een herhaalde ronde de foto er nog een keer achteraan — dat waren de
+// dubbele foto's. Alleen als hij echt nergens staat wordt hij toegevoegd, zodat een foto
+// nooit verloren gaat als het scherm intussen opnieuw is opgebouwd.
+function _fqZetFotoUrl(lijst, item, url){
+  if(!Array.isArray(lijst)) return;
+  var idx = lijst.findIndex(function(f){ return f && f._localId===item.id; });
+  if(idx < 0) idx = lijst.findIndex(function(f){ return f && f.url===url; });
+  if(idx < 0){ lijst.push({ url:url, naam:item.naam }); return; }
+  var nieuw = Object.assign({}, lijst[idx], { url:url, naam:item.naam });
+  delete nieuw._localId;
+  delete nieuw._pending;
+  lijst[idx] = nieuw;
+}
+
+function _fqWerkorderFoto(item){
+  return _fqUploadEenmalig(item).then(function(url){
     var scope = item._woScope || 'v';
     function zetUrl(antwoorden){
       var data = _woScopeData(antwoorden, scope);
       data._fotos = Array.isArray(data._fotos) ? data._fotos : [];
-      var idx = data._fotos.findIndex(function(f){ return f && f._localId===item.id; });
-      if(idx>=0) data._fotos[idx] = { url:url, naam:item.naam };
-      else data._fotos.push({ url:url, naam:item.naam });
+      _fqZetFotoUrl(data._fotos, item, url);
       return antwoorden;
     }
     var st = _woDetailState;
@@ -5043,7 +5069,7 @@ function _clVoorbeeldUrl(localId, blob){
 // de echte URL. Checklist-antwoorden staan ín het werkbon-document (anders dan de losse
 // foto's, die een subcollectie hebben), dus hier wordt de hele checklists-array bijgewerkt.
 function _fqChecklistFoto(item){
-  return storageUpload(item.pad, item.blob).then(function(url){
+  return _fqUploadEenmalig(item).then(function(url){
     function zetUrl(checklists){
       var lijst = Array.isArray(checklists) ? checklists : [];
       var cl = null;
@@ -5054,9 +5080,7 @@ function _fqChecklistFoto(item){
       if(!cl) return null;   // checklist is van de bon gehaald
       cl.antwoorden = cl.antwoorden || {};
       var arr = Array.isArray(cl.antwoorden[item._clVeldId]) ? cl.antwoorden[item._clVeldId] : [];
-      var idx = arr.findIndex(function(f){ return f && f._localId===item.id; });
-      if(idx>=0) arr[idx] = { url:url, naam:item.naam };
-      else arr.push({ url:url, naam:item.naam });
+      _fqZetFotoUrl(arr, item, url);
       cl.antwoorden[item._clVeldId] = arr;
       return lijst;
     }
@@ -34712,6 +34736,7 @@ function _woFotosToevoegen(scope, files){
           var localUrl = URL.createObjectURL(comp);
           data._fotos.push({ _localId:localId, url:localUrl, naam:file.name, _pending:true });
           _woBewaarAntwoorden(); _woRenderDetail();
+          if(typeof _updateFqBanner==='function') _updateFqBanner();
           // Directe upload-poging; lukt het niet, dan blijft het item in de queue
           // en pikt flushFotoQueue het later op.
           _fqWerkorderFoto(item).catch(function(){});

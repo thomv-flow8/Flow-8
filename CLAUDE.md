@@ -130,8 +130,9 @@ altijd beide.
 ## Domeinmodellen (kort)
 
 - **Planning-status** (Outsmart-model, live): nieuw = `ingepland`; `klaargezet` = vrijgeven aan
-  monteur (werkbon zichtbaar). Inplannen wijzigt de status niet. `spoed` staat nog ín het
-  statusmodel maar hoort een aparte prioriteitsvlag te worden (zie TODO).
+  monteur (werkbon zichtbaar). Inplannen wijzigt de status niet. **Spoed is géén status maar een
+  losse vlag** (`o.spoed`): gebruik altijd `_isSpoed(o)`, die ook oude records met `status==='spoed'`
+  nog herkent. Zo kan een opdracht tegelijk `ingepland` én spoed zijn — urgentie is geen fase.
 - **Monteur-rechten**: monteurs dienen Overuren/Onkosten/Verlof zelf in (write, eigen records);
   bewerkbaar zolang de status `aangevraagd` is (afgedwongen in de RTDB-rules), daarna read-only. Verzuim: alleen eigen data
   bekijken. Rechten zijn status-afhankelijk, niet alleen module aan/uit.

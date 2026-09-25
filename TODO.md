@@ -159,6 +159,19 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
         te proberen"); een tik zet de teller terug en probeert het meteen. De drie routes zitten nu in
         `_fqWerkbonFoto` / `_fqWerkorderFoto` / `_fqChecklistFoto`, met `flushFotoQueue` als dunne verdeler.
         11 tests. (`_fqAantal` verviel en is verwijderd.)
+      - [x] **Dubbele foto's na herstel van de verbinding** — gevonden bij Thomas' test op
+        25 september 2026. Bij werkorders en checklists staan de foto's ín het document, en de flush
+        zocht de wachtende foto alleen op `_localId`; vond hij die niet, dan plakte hij er een nieuwe
+        achteraan. Het item werd pas uit de wachtrij gehaald ná bevestiging door Firestore, en die kan
+        bij een net herstelde verbinding seconden duren — liep de ronde van 30 seconden er intussen
+        doorheen, dan werd dezelfde foto opnieuw geüpload en toegevoegd.
+        Opgelost met twee gedeelde helpers: `_fqUploadEenmalig` bewaart de URL op het wachtrij-item, zodat
+        een bestand nooit twee keer naar Storage gaat, en `_fqZetFotoUrl` herkent een foto ook aan zijn
+        URL en voegt alleen toe als hij écht nergens staat (bijschrift blijft behouden). Ook de losse
+        werkbon-foto loopt nu via dezelfde upload-helper. 10 tests; de zes bestaande suites bijgewerkt
+        en allemaal groen.
+      - [x] **"Wacht op upload" ontbrak bij werkorders** — 25 september 2026: `_woFotosToevoegen` riep
+        `_updateFqBanner()` niet aan, de andere twee wel.
       - [ ] **C3. Werkorder-foto's een plaatshouder geven** — daar staat nog een `blob:`-adres in het
         document, wat bij de checklist bewust is vermeden: dat adres bestaat alleen in het tabblad dat
         het maakte, dus een collega ziet een gebroken plaatje. Raakt toevoegen, weergeven en de flush
@@ -169,9 +182,11 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       modules en ~49 plekken met `goedgekeurd`. Groot; lagere prioriteit; eerst concept + statusmodel.
 - [ ] **Maillog fase 3** — Resend delivery-status via webhook + geplande/automatische mails
       (status-change triggers). Vereist uitbreiding van `flow8-functions/`.
-- [ ] **Spoed als prioriteitsvlag** — `spoed` uit het statusmodel halen en als aparte
-      prioriteit/eigenschap maken, zodat een opdracht tegelijk bv. `ingepland` én `spoed` kan zijn.
-      Urgentie ≠ fase. **Niet** samenvoegen met werkbonnen-integratie — apart afhandelen.
+- [x] **Spoed als prioriteitsvlag** — bij controle op 24 september 2026 bleek dit al gedaan; de lijst
+      liep achter. Er is een losse vlag `o.spoed` met helper `_isSpoed()`, die oude records met
+      `status==='spoed'` nog herkent; een rode badge náást de statusbadge; een knop "Spoed" in het
+      opdrachtpaneel; en bij bewerken wordt een oude spoed-status omgezet naar `ingepland`. Ook de
+      teller in de filterbalk telt via `_isSpoed()`, dus niet op status.
 - [ ] **Punt 4B** — aanvullend/optioneel contracttype structureel (datamodel + migratie).
 - [ ] **H12** — credits/licenties, server-side (het grote licentie-traject).
 
