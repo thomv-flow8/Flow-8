@@ -3968,7 +3968,7 @@ function _wbBindChecklistVelden(state){
         // van schrijfacties op hetzelfde document aan, dus de echte URL komt er altijd ná.
         fsWerkbonBijwerken(state.werkbonId, { checklists: state.wb.checklists })
           .catch(function(e){ toast('Opslaan mislukt: '+(e.message||e),'error'); });
-        nieuweItems.forEach(function(it){ _fqChecklistFoto(it).catch(function(){ /* blijft in queue */ }); });
+        nieuweItems.forEach(function(it){ _fqVerwerkItem(it).catch(function(){ /* blijft in queue */ }); });
       });
     });
   });
@@ -5022,6 +5022,28 @@ function _fqPogingMislukt(item, fout){
   return _fqToevoegen(item).catch(function(){});
 }
 
+// Eén wachtrij-item mag maar door één route tegelijk worden opgepakt. Er zijn er twee: de
+// directe poging bij het toevoegen, en de flush. Een uploadtaak van Firebase faalt zonder
+// verbinding niet meteen maar blijft tot tien minuten opnieuw proberen, dus die eerste poging
+// leeft nog als de verbinding terugkomt en de flush begint. Zonder deze grendel liepen beide
+// uploads naar hetzelfde pad in Storage; dat levert twee download-tokens op, dus twee URL's
+// voor één bestand — twee foto's in beeld, waarvan de eerste een dood token had.
+// Wie als tweede aanklopt krijgt de belofte van de eerste terug en wacht dus gewoon mee.
+var _fqInBehandeling = {};
+function _fqVerwerkItem(it){
+  if(_fqInBehandeling[it.id]) return _fqInBehandeling[it.id];
+  // Elke soort heeft zijn eigen bestemming: een werkorder-foto hoort in de werkorder,
+  // een checklist-foto in het werkbon-document, een losse foto in de fotos-subcollectie.
+  var stap;
+  if(it._woId)          stap = _fqWerkorderFoto(it);
+  else if(it._clVeldId) stap = _fqChecklistFoto(it);
+  else                  stap = _fqWerkbonFoto(it);
+  var klaar = function(){ delete _fqInBehandeling[it.id]; };
+  _fqInBehandeling[it.id] = stap.then(function(r){ klaar(); return r; },
+                                      function(e){ klaar(); throw e; });
+  return _fqInBehandeling[it.id];
+}
+
 // Verwerk de queue: probeer elke wachtende foto te uploaden. Veilig om vaak aan te roepen;
 // draait niet dubbel. Kijkt naar _fbVerbonden (.info/connected) en NIET naar navigator.onLine:
 // die blijft op iOS hangen en zou hier zorgen voor uploads in het niets, of juist voor wachten
@@ -5036,13 +5058,7 @@ function flushFotoQueue(forceerVastgelopen){
       if(forceerVastgelopen) it.pogingen = 0;
       if((it.pogingen||0) >= _FQ_MAX_POGINGEN) return;   // vastgelopen; wacht op een tik
       keten = keten.then(function(){
-        // Elke soort heeft zijn eigen bestemming: een werkorder-foto hoort in de werkorder,
-        // een checklist-foto in het werkbon-document, een losse foto in de fotos-subcollectie.
-        var stap;
-        if(it._woId)          stap = _fqWerkorderFoto(it);
-        else if(it._clVeldId) stap = _fqChecklistFoto(it);
-        else                  stap = _fqWerkbonFoto(it);
-        return stap.catch(function(e){ return _fqPogingMislukt(it, e); });
+        return _fqVerwerkItem(it).catch(function(e){ return _fqPogingMislukt(it, e); });
       });
     });
     return keten;
@@ -5071,10 +5087,18 @@ function _fqUploadEenmalig(item){
 // controle plakte een herhaalde ronde de foto er nog een keer achteraan — dat waren de
 // dubbele foto's. Alleen als hij echt nergens staat wordt hij toegevoegd, zodat een foto
 // nooit verloren gaat als het scherm intussen opnieuw is opgebouwd.
+// Twee URL's naar hetzelfde bestand in Storage zijn niet tekenreeks-gelijk: bij elke upload
+// geeft Firebase een nieuw downloadtoken en maakt het vorige ongeldig. Vergelijken doen we
+// daarom op het pad, zonder de parameters erachter.
+function _fqZelfdeBestand(a, b){
+  if(!a || !b) return false;
+  return String(a).split('?')[0] === String(b).split('?')[0];
+}
+
 function _fqZetFotoUrl(lijst, item, url){
   if(!Array.isArray(lijst)) return;
   var idx = lijst.findIndex(function(f){ return f && f._localId===item.id; });
-  if(idx < 0) idx = lijst.findIndex(function(f){ return f && f.url===url; });
+  if(idx < 0) idx = lijst.findIndex(function(f){ return f && _fqZelfdeBestand(f.url, url); });
   if(idx < 0){ lijst.push({ url:url, naam:item.naam }); return; }
   var nieuw = Object.assign({}, lijst[idx], { url:url, naam:item.naam });
   delete nieuw._localId;
@@ -34803,7 +34827,7 @@ function _woFotosToevoegen(scope, files){
           if(typeof _updateFqBanner==='function') _updateFqBanner();
           // Directe upload-poging; lukt het niet, dan blijft het item in de queue
           // en pikt flushFotoQueue het later op.
-          _fqWerkorderFoto(item).catch(function(){});
+          _fqVerwerkItem(item).catch(function(){});
         });
       });
     }).catch(function(e){ toast('Foto verwerken mislukt: '+(e.message||e),'error'); });

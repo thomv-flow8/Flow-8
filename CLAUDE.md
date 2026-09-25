@@ -147,6 +147,12 @@ altijd beide.
   download-vangnet.
 - Canvas-geheugen op iOS: zet canvas op 0×0 om écht vrij te geven (`remove()` alleen is te weinig).
 - Offline: gebruik Firebase `.info/connected`, niet `navigator.onLine`.
+- Een Storage-upload **faalt niet** als er geen verbinding is: de taak blijft tot tien minuten
+  opnieuw proberen. Reken er dus niet op dat een mislukte poging zich meldt — een tweede route
+  naar hetzelfde bestand loopt anders zonder dat je het merkt (grendel: `_fqVerwerkItem`).
+- **Opnieuw uploaden naar hetzelfde pad geeft een nieuw downloadtoken** en maakt de vorige URL
+  ongeldig. Twee URL's naar één bestand zijn dus niet tekenreeks-gelijk; vergelijk op het pad
+  vóór de `?` (`_fqZelfdeBestand`).
 - Multi-tenant AVG: adres-lookups geven `null` voor onbekende tenants, nooit een default.
 
 ---

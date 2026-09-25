@@ -184,6 +184,21 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
         en allemaal groen.
       - [x] **"Wacht op upload" ontbrak bij werkorders** — 25 september 2026: `_woFotosToevoegen` riep
         `_updateFqBanner()` niet aan, de andere twee wel.
+      - [x] **Dubbele foto's, de echte oorzaak** — 25 september 2026. De eerste reparatie (idempotent
+        bijwerken) hielp op desktop maar niet in Safari op de iPhone. De consolegegevens wezen het aan:
+        beide foto's hadden **hetzelfde bestandspad in Storage, maar een ander downloadtoken**. Het
+        bestand was dus twee keer geüpload, en omdat Firebase bij elke upload een nieuw token geeft en
+        het vorige ongeldig maakt, kreeg de eerste foto een vraagteken.
+        Twee aannames klopten niet. Een uploadtaak faalt zonder verbinding **niet** meteen maar blijft
+        tot tien minuten opnieuw proberen, dus de directe poging van bij het toevoegen leefde nog toen
+        de flush begon — twee routes, één item. En de dubbelcheck op URL zag die twee als verschillende
+        foto's, want de tokens verschilden. Op desktop viel het niet op omdat DevTools de aanvraag
+        meteen afbreekt.
+        Opgelost met `_fqVerwerkItem`: een grendel per wachtrij-item, waarbij de tweede aanklopper de
+        belofte van de eerste terugkrijgt in plaats van zelf te beginnen. Plus `_fqZelfdeBestand`, dat
+        URL's op hun pad vergelijkt en de parameters negeert — het vangnet als er ooit tóch twee
+        uploads doorheen glippen, bijvoorbeeld vanuit twee tabbladen. 12 tests; de acht andere suites
+        meegetrokken en groen.
       - [ ] **C3. Werkorder-foto's een plaatshouder geven** — daar staat nog een `blob:`-adres in het
         document, wat bij de checklist bewust is vermeden: dat adres bestaat alleen in het tabblad dat
         het maakte, dus een collega ziet een gebroken plaatje. Raakt toevoegen, weergeven en de flush
