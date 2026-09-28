@@ -2106,3 +2106,67 @@ handje van header-rijen, zonder de klikbare rijen te raken. Brede regel bewust b
   `_afmelden()`, aangeroepen op élke tak. De guard `if (_pendingWrites > 0)` blijft staan, want
   `zetOfflineBanner()` zet de teller bij herstel van de verbinding op 0 — een in-flight schrijfactie
   die daarna resolvet mag hem niet negatief maken.
+
+---
+
+# Verzuim optie D: vrije tekst afgeschermd — 28 september 2026
+
+`flow8-v2.html` · JS-syntax ✓. Rules + Cloud Function gedeployd door Thomas. Punt 6 van de lijst dicht.
+
+**Het probleem.** Verzuimdossiers bevatten bijzondere persoonsgegevens, maar elk actief lid van een
+bedrijf kon ze lezen: het `.read` staat één keer op `flow8/bedrijven/$bedrijfId` en **cascadeert naar
+alles eronder** — in RTDB is dat dieper niet meer in te trekken.
+
+**Waarom niet het hele record afschermen.** `APP.verzuim` wordt op zestien plekken gelezen: dashboard
+("Afwezig vandaag"), planning week én dag (de rode Ziek-badge), route, beschikbaarheidscheck,
+medewerkerspaneel en vier rapportagepagina's. Een planner die niet mag inzien moet nog steeds zien
+*dát* iemand er niet is, anders plant hij een zieke monteur in. De vraag was dus niet "wie mag verzuim
+zien" maar **"wie mag zien waaróm iemand er niet is"**.
+
+**De oplossing.** Alleen `omschrijving` en `notitie` naar `flow8/verzuimDetail/{bedrijfId}/{verzuimId}`.
+Die tak hangt bewust **buiten** `flow8/bedrijven` — eronder zou het cascaderende `.read` er gewoon
+overheen lopen. Het record houdt medId, van, tot, type, status en uren. `type` blijft zichtbaar
+(besloten met Thomas): de planningbadge toont hem, en de vrije tekst is waar een diagnose in belandt.
+
+**De les van dit traject: de Rules Playground draagt GEEN custom claims.** De rule leunde eerst op een
+nieuwe claim `vzInzage`. In de Playground werd zelfs de admin geweigerd. Aangetoond met een
+controletest op de bestaande, al maanden live draaiende `vzRecht`-rule — óók rood voor een admin. Dus:
+**elke RTDB-rule die op `auth.token.*` leunt is in dit project ontestbaar** (en een emulator kan niet,
+want geen Java). Dat geldt dus ook voor de bestaande `ouRecht`/`okRecht`/`vlRecht`/`vzRecht`-rules —
+die zijn nooit echt getest.
+Rule omgezet naar een rechtstreekse opzoeking: rol `admin`, óf
+`bedrijven/$bedrijfId/rollen/{rol}/rechten/verzuim/inzageAlle === true`. Drie voordelen: testbaar,
+het intrekken van het I-vinkje werkt **direct** in plaats van pas na een tokenrefresh (tot een uur),
+en app en rules delen letterlijk één bron met `magVerzuimInzageAlle()`.
+Vier Playground-tests groen: admin lezen ✓ / monteur lezen ✗ / admin schrijven ✓ / monteur schrijven ✗.
+
+**De claim `vzInzage` is wél gedeployd maar wordt nergens gebruikt.** Onschadelijk — geen rule leest
+hem. Bewust laten staan: aan de Firestore-kant werken geneste claims wél, dus als daar ooit iets moet
+worden afgeschermd ligt hij klaar.
+
+**Grens = `inzageAlle`, niet schrijfrecht.** Eerst geadviseerd om schrijfrecht mee te laten tellen
+(tegen write-only velden), maar de app documenteert in de rechtenmatrix al expliciet: *"gewoon lees- of
+schrijfrecht geeft hier géén inzage in andermans dossiers"*. Advies ingetrokken — een bestaande,
+bewuste keuze niet stilletjes verruimen. Moot bovendien: in de matrix van Homa heeft **geen enkele rol**
+`S` of `I` op verzuim, alleen admin via het sterretje.
+
+**App.** `verzuimDetailPad()` (geeft `null` bij een onbekende tenant, nooit een geraden pad),
+`verzuimTekst()` met terugval op de oude velden in het record, en `laadVerzuimDetail()` die zonder
+inzagerecht niets opvraagt — anders alleen een geweigerde aanvraag terwijl er niets mis is. Het
+formulier toont de tekstvelden alleen aan wie ze mag zien: anders zou iemand blind bestaande tekst
+leegschrijven. Opslaan schrijft de tekst naar de nieuwe tak en zet de oude velden op `null`, dus elk
+bewerkt record migreert zichzelf.
+
+**Bijvangst:** de verzuimexport schreef `v.reden` weg — een veld dat niet in het model bestaat, dus die
+kolom was altijd leeg. Exact dezelfde fout als de verlofexport (`v.omschrijving`) van dezelfde dag.
+
+**Geen migratie gebouwd.** Van acht registraties had er één een omschrijving/notitie, van een
+medewerker die al uit dienst is; die twee velden met de hand verwijderd, record laten staan conform de
+beslissing van 13 september. Voor nul records een migratie bouwen die bij elke start langs de lijst
+loopt, is ballast. Dat record stond nog op `status: actief` zonder hersteldatum — nagelopen en zonder
+effect: overzicht filtert op `_medBestaat`, dashboard op `_medInDienst`, rapportage telt per actieve
+medewerker.
+
+**Open gelaten:** een medewerker met `E` ziet zijn eigen dossier zónder de vrije tekst. Bewuste keuze —
+die tekst is door HR *over* hem geschreven, hij kan zelf geen verzuim registreren. Wil je dat later
+wél, dan moet `medId` mee in de detail-node en de rule naast inzage ook het eigen record toestaan.

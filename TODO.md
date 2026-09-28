@@ -240,7 +240,7 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       eigen bedrijf blijft. Cross-bedrijf en een gerichte get op een andermans bon blijven dicht.
       Ooit tóch afschermen: via een Cloud Function die de historie server-side samenvat, niet via de
       list-regel. Vastgelegd in de koptekst van `firestore.rules`.
-- [ ] **Verzuim optie D** — IN UITVOERING sinds 28 september 2026. Gevoelig deel afschermen voor
+- [x] **Verzuim optie D — AFGEROND op 28 september 2026.** Gevoelig deel afgeschermd voor
       volledige AVG-dekking. Gekozen aanpak: niet het hele record afschermen (de planning, het
       dashboard, de route en vier rapportagepagina's lezen verzuim om te tonen dát iemand er niet
       is — blokkeren breekt die), maar alléén de vrije tekst. `omschrijving` en `notitie` gaan naar
@@ -262,9 +262,17 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
         alleen aan wie ze mag zien — anders zou iemand blind bestaande tekst leegschrijven.
         Opslaan, zoekfilter, rij, zijpaneel, export en verwijderen om. Export schreef `v.reden` weg,
         een veld dat niet bestaat, dus die kolom was altijd leeg — nu de echte omschrijving.
-      - [ ] **4. Migratie** — bestaande `omschrijving`/`notitie` verplaatsen en uit het record
-        wissen. Enige onomkeerbare stap; pas doen na een export als vangnet. Tot die tijd blijft de
-        terugval in `verzuimTekst()` alles tonen, dus er is geen haast.
+      - [x] **4. Migratie — NIET gebouwd, bleek onnodig.** Van de acht bestaande registraties had er
+        precies één een omschrijving en notitie, van een medewerker die al uit dienst is. Die twee
+        velden zijn met de hand uit het record gehaald; het record blijft staan (conform de eerdere
+        beslissing van 13 september om verzuimrecords van verwijderde medewerkers te bewaren).
+        Een automatische migratie bouwen voor nul records zou ballast zijn die bij elke start van de
+        app langs de verzuimlijst loopt. De terugval in `verzuimTekst()` blijft staan en vangt een
+        eventueel oud record alsnog op; bewerken-en-opslaan verhuist het dan vanzelf.
+      - [x] **Stale status gecontroleerd** — dat ene record stond nog op `status: actief` zonder
+        hersteldatum. Nagelopen: dat heeft nergens effect. Het verzuimoverzicht filtert op
+        `_medBestaat`, het dashboard op `_medInDienst`, en de rapportage telt per actieve
+        medewerker. Bevestigt de beslissing van 13 september: ze tellen nergens meer mee.
       - [ ] **Later mogelijk**: eigen dossier. Nu ziet een medewerker met `E` zijn eigen verzuim
         zónder de vrije tekst. Wil je dat wél, dan moet `medId` mee in de detail-node en de rule
         naast inzage ook het eigen record toestaan.
