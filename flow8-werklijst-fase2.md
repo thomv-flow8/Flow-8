@@ -2065,3 +2065,44 @@ handje van header-rijen, zonder de klikbare rijen te raken. Brede regel bewust b
   + Artikel blijven achter `kanSchrijven`.
 - **Import-icoon rechtgezet**: dat was `ICO.download` (pijl omlaag), naast een Export met hetzelfde
   icoon zouden er twee identieke pijlen staan die het tegenovergestelde betekenen. Nu `ICO.upload`.
+
+---
+
+# C3 + losse randjes: offline upload veldwerk afgerond — 28 september 2026
+
+`flow8-v2.html` · JS-syntax ✓. Hiermee is het hele traject **Offline upload veldwerk** klaar.
+
+- **C3 — werkorder-foto's een plaatshouder geven.** `_woFotosToevoegen` zette
+  `{_localId, url:blob:…, naam, _pending}` in het document, en `_woBewaarAntwoorden()` schreef dat
+  direct naar Firestore. Een `blob:`-adres leeft alleen in het tabblad dat het aanmaakte, dus een
+  collega — of jijzelf na een herstart — kreeg een gebroken plaatje tot de upload rond was. Nu
+  `{_localId, _pending, naam}` **zonder URL**, zoals bij de checklist-foto's.
+- **Eén voorbeeld-map.** `_clVoorbeeldUrls`/`_clVoorbeeldUrl` waren nooit checklist-specifiek, alleen
+  zo genoemd. Hernoemd naar `_fqVoorbeeldUrls`/`_fqVoorbeeldUrl` en door beide gebruikt. Een tweede
+  kopie voor werkorders zou precies het duplicaat zijn dat later uiteen loopt.
+- **Geen kapot plaatje.** Ontbreekt het lokale voorbeeld (ander toestel/tabblad), dan een leeg tegeltje
+  met camera-icoon + klokje in plaats van een gebroken `<img>`.
+- **Herstel bij heropenen.** `_woOpenDetail` leest `_fqLijst('WO_'+id)` en registreert de voorbeelden
+  opnieuw. Zonder dat bleef een wachtende foto na een app-herstart een leeg tegeltje, want het
+  blob:-adres van vóór de herstart bestaat niet meer. De werkbon deed dit al (regel ~2577).
+- **Fotoviewer** gebruikt dezelfde bron-logica, zodat de positie klopt als er een foto zonder URL
+  tussen staat. De klik-handler bond al op `.wox-foto-thumb`, die er bij een ontbrekend voorbeeld
+  niet is — een plaatshouder zonder voorbeeld is dus gewoon niet klikbaar.
+- **Geen migratie nodig:** bestaande records met een `blob:`-URL genezen vanzelf zodra hun
+  wachtrij-item wegschrijft (`_fqZetFotoUrl` matcht op `_localId`), en tonen tot die tijd het tegeltje.
+- **Niet aangeraakt:** de lósse werkbon-foto's (regel ~3422) pushen óók een blob:-URL, maar die gaan
+  naar een Firestore-**subcollectie** met alleen de echte URL — het blob:-adres blijft in
+  `state.fotos` in het geheugen en bereikt de database nooit. Daar speelt het probleem dus niet.
+
+- **`navigator.onLine` definitief weg.** De retry in `dbSaveItem` keek er nog naar; nu `_fbVerbonden`
+  (.info/connected), zelfde reden als bij C1: op iOS blijft `navigator.onLine` na vliegtuigmodus-uit
+  hangen. De vier resterende treffers in het bestand zijn allemaal comments die uitleggen waaróm hij
+  er niet meer staat.
+- **`_pendingWrites` sluitend gemaakt** (gevonden bij het bovenstaande). Twee kanten: een mislukte
+  schrijfactie meldde zich **nooit** af — en omdat de `.catch` de retry teruggeeft, telde elke poging
+  er nog eens bij op — terwijl een geslaagde schrijfactie die zich níet had aangemeld (online
+  geschreven) zich juist **wél** afmeldde, dus andermans telling verlaagde. De offline-balk kon zo
+  zowel te veel als te weinig wachtende wijzigingen melden. Nu een `_teltMee`-vlag per aanroep met één
+  `_afmelden()`, aangeroepen op élke tak. De guard `if (_pendingWrites > 0)` blijft staan, want
+  `zetOfflineBanner()` zet de teller bij herstel van de verbinding op 0 — een in-flight schrijfactie
+  die daarna resolvet mag hem niet negatief maken.

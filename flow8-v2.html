@@ -2581,7 +2581,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
       var clWacht = false;
       items.forEach(function(it){
         // Checklist-foto's horen in hun eigen vraag, niet in de fotosectie van de bon.
-        if(it._clVeldId){ _clVoorbeeldUrl(it.id, it.blob); clWacht = true; return; }
+        if(it._clVeldId){ _fqVoorbeeldUrl(it.id, it.blob); clWacht = true; return; }
         if(state.fotos.some(function(f){ return f._localId===it.id; })) return;
         try { state.fotos.push({ _localId:it.id, id:it.id, url:URL.createObjectURL(it.blob), naam:it.naam, _pending:true }); } catch(e){}
       });
@@ -3779,7 +3779,7 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
         // ook een bijschrift en een tekenknop heeft. Een foto die nog op verbinding wacht
         // heeft geen URL in de werkbon staan; de voorbeeldweergave komt uit de lokale
         // queue en bestaat alleen op dit apparaat.
-        var bron = f._pending ? _clVoorbeeldUrl(f._localId) : f.url;
+        var bron = f._pending ? _fqVoorbeeldUrl(f._localId) : f.url;
         var dset = ' data-ci="'+ci+'" data-vi="'+vi+'" data-fi="'+fi+'"';
         h += '<div class="wbx-foto-item">';
         h += '<div class="wbx-ftop">';
@@ -3955,7 +3955,7 @@ function _wbBindChecklistVelden(state){
             var item = { id:localId, werkbonId:state.werkbonId, pad:pad, naam:file.name||'foto', blob:comp,
                          toegevoegd:Date.now(), _clVeldId:veld.id, _clTemplateId:(cl.templateId!=null?cl.templateId:null), _clIndex:ci };
             return _fqToevoegen(item).then(function(){
-              _clVoorbeeldUrl(localId, comp);
+              _fqVoorbeeldUrl(localId, comp);
               cl.antwoorden[veld.id].push({ _localId:localId, _pending:true, naam:file.name||'foto' });
               nieuweItems.push(item);
             });
@@ -3982,7 +3982,7 @@ function _wbBindChecklistVelden(state){
       var lijst = (cl.antwoorden && Array.isArray(cl.antwoorden[veld.id])) ? cl.antwoorden[veld.id] : [];
       // Een foto die nog op verbinding wacht heeft geen URL in de werkbon staan; daarvoor is
       // er alleen de lokale voorbeeldweergave uit de queue.
-      function bronVan(f){ return f && (f._pending ? _clVoorbeeldUrl(f._localId) : f.url); }
+      function bronVan(f){ return f && (f._pending ? _fqVoorbeeldUrl(f._localId) : f.url); }
       var urls = lijst.map(bronVan).filter(Boolean);
       var pos = lijst.slice(0, fi).filter(bronVan).length;
       if(typeof openFotoViewer==='function') openFotoViewer(urls, pos);
@@ -5155,15 +5155,16 @@ function _clFotoVan(state, dset){
   return Array.isArray(arr) ? (arr[+dset.fi] || null) : null;
 }
 
-// Blob-URL's van checklist-foto's die nog wachten, per lokaal id. Alleen voor de weergave
-// in dít tabblad: in de werkbon staat een plaatshouder zónder URL, zodat er nooit een dood
-// blob:-adres naar de telefoon van een collega synchroniseert.
-var _clVoorbeeldUrls = {};
-function _clVoorbeeldUrl(localId, blob){
-  if(blob && !_clVoorbeeldUrls[localId]){
-    try { _clVoorbeeldUrls[localId] = URL.createObjectURL(blob); } catch(e){}
+// Blob-URL's van foto's die nog op upload wachten, per lokaal id. Alleen voor de weergave
+// in dít tabblad: in het document staat een plaatshouder zónder URL, zodat er nooit een dood
+// blob:-adres naar de telefoon van een collega synchroniseert. Gebruikt door zowel de
+// checklist-foto's als de werkorder-foto's — één mechanisme, geen tweede kopie.
+var _fqVoorbeeldUrls = {};
+function _fqVoorbeeldUrl(localId, blob){
+  if(blob && !_fqVoorbeeldUrls[localId]){
+    try { _fqVoorbeeldUrls[localId] = URL.createObjectURL(blob); } catch(e){}
   }
-  return _clVoorbeeldUrls[localId] || '';
+  return _fqVoorbeeldUrls[localId] || '';
 }
 
 // Eén checklist-foto afhandelen: uploaden en de plaatshouder in de werkbon vervangen door
@@ -5497,15 +5498,28 @@ function dbSaveItem(key, id, data, _retries) {
   log('INFO', 'DB', 'Opslaan: ' + path);
   // Reistijdcache van de betrokken monteur/dag ongeldig maken (zie invalideerReistijden).
   if (key === 'opdrachten') invalideerReistijden(data);
-  if (!_fbVerbonden) { _pendingWrites++; _updateOfflineBanner(); }
+  var _teltMee = false;
+  if (!_fbVerbonden) { _pendingWrites++; _teltMee = true; _updateOfflineBanner(); }
+  // Precies één keer afmelden, ongeacht via welke tak we vertrekken. De guard op > 0 blijft
+  // staan omdat zetOfflineBanner() de teller bij herstel van de verbinding op 0 zet.
+  function _afmelden(){
+    if (!_teltMee) return;
+    _teltMee = false;
+    if (_pendingWrites > 0) _pendingWrites--;
+    _updateOfflineBanner();
+  }
   return FB.ref(path).set(data)
     .then(function() {
       log('OK', 'DB', 'Opgeslagen: ' + path);
-      if (_pendingWrites > 0) { _pendingWrites--; _updateOfflineBanner(); }
+      _afmelden();
     })
     .catch(function(e) {
-      // Automatisch opnieuw proberen bij netwerkstoringen (max 2x)
-      if (_retries < 2 && navigator.onLine) {
+      // Deze poging telt niet meer mee; een nieuwe poging meldt zich zelf weer aan.
+      _afmelden();
+      // Automatisch opnieuw proberen bij netwerkstoringen (max 2x). Kijkt naar
+      // _fbVerbonden (.info/connected) en niet naar navigator.onLine: die blijft op iOS
+      // na vliegtuigmodus-uit hangen, dezelfde reden als bij de fotoqueue (C1).
+      if (_retries < 2 && _fbVerbonden) {
         log('WARN', 'DB', 'Opslaan mislukt, poging ' + (_retries+2) + '/3: ' + path);
         return new Promise(function(resolve) { setTimeout(resolve, 1000 * (_retries + 1)); })
           .then(function() { return dbSaveItem(key, id, data, _retries + 1); });
@@ -33673,6 +33687,19 @@ function _woOpenDetail(id) {
         openBlok: 0,
       };
       _woRenderDetail();
+      // Wachtende foto's uit de queue: hun blob:-adres leeft niet langer dan het tabblad,
+      // dus na een herstart moeten de voorbeelden opnieuw worden geregistreerd. Zonder dit
+      // toont een nog niet verstuurde foto een leeg tegeltje.
+      if(typeof _fqLijst==='function'){
+        _fqLijst('WO_'+id).then(function(items){
+          var nieuw = false;
+          items.forEach(function(it){
+            if(it.blob && !_fqVoorbeeldUrls[it.id]){ _fqVoorbeeldUrl(it.id, it.blob); nieuw = true; }
+          });
+          if(nieuw && _woDetailState && String(_woDetailState.id)===String(id)) _woRenderDetail();
+          if(items.length && typeof flushFotoQueue==='function') flushFotoQueue();
+        }).catch(function(){});
+      }
     });
   }).catch(function(e){ toast('Openen mislukt: '+(e.message||e),'error'); });
 }
@@ -34072,9 +34099,14 @@ function _woFotoSectieHtml(scope, data){
   h += '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Foto\'s'+(fotos.length?(' ('+fotos.length+')'):'')+'</div>';
   h += '<div class="wox-foto-grid" data-scope="'+esc(scope)+'" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
   fotos.forEach(function(f, fi){
-    h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222">'
-      + '<img class="wox-foto-thumb" data-scope="'+esc(scope)+'" data-fi="'+fi+'" src="'+esc(f.url)+'" style="width:100%;height:100%;object-fit:cover;cursor:pointer'+(f._pending?';opacity:.6':'')+'">';
-    if(f._pending) h += '<span style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
+    // Een foto die nog op upload wacht heeft geen URL in de werkorder staan; de
+    // voorbeeldweergave komt uit de lokale queue en bestaat alleen op dit apparaat.
+    // Ontbreekt die (ander toestel, ander tabblad), dan een leeg vlak i.p.v. een kapot plaatje.
+    var bron = f._pending ? _fqVoorbeeldUrl(f._localId) : f.url;
+    h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222">';
+    if(bron) h += '<img class="wox-foto-thumb" data-scope="'+esc(scope)+'" data-fi="'+fi+'" src="'+esc(bron)+'" style="width:100%;height:100%;object-fit:cover;cursor:pointer'+(f._pending?';opacity:.6':'')+'">';
+    else h += '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
+    if(f._pending) h += '<span title="Wacht op upload — wordt verstuurd zodra er verbinding is" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
     if(_woDetailState.bewerkbaar) h += '<button type="button" class="wox-foto-del" data-scope="'+esc(scope)+'" data-fi="'+fi+'" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;line-height:1">\u00d7</button>';
     h += '</div>';
   });
@@ -34565,10 +34597,12 @@ function _woBindDetail(fullscreen){
       // Alle foto's van déze sectie meegeven, zodat je in de viewer kunt doorbladeren.
       var data = _woScopeData(st.antwoorden, img.dataset.scope);
       var lijst = Array.isArray(data._fotos) ? data._fotos : [];
-      var urls = lijst.map(function(f){ return f && f.url; }).filter(Boolean);
-      // De positie tellen binnen de foto's die daadwerkelijk een afbeelding hebben: een
-      // foto die nog op upload wacht kan er (straks) zonder url in staan.
-      var pos = lijst.slice(0, +img.dataset.fi).filter(function(f){ return f && f.url; }).length;
+      // Zelfde bron-logica als bij het tekenen van de tegels: een wachtende foto heeft geen
+      // URL, alleen een lokaal voorbeeld. De positie telt binnen de foto's die daadwerkelijk
+      // een afbeelding hebben, zodat de viewer niet op de verkeerde foto opent.
+      var bronVan = function(f){ return f && (f._pending ? _fqVoorbeeldUrl(f._localId) : f.url); };
+      var urls = lijst.map(bronVan).filter(Boolean);
+      var pos = lijst.slice(0, +img.dataset.fi).filter(function(f){ return !!bronVan(f); }).length;
       if(typeof openFotoViewer==='function') openFotoViewer(urls, pos);
       else window.open(img.src, '_blank');
     });
@@ -34856,8 +34890,12 @@ function _woFotosToevoegen(scope, files){
         // In offline-queue bufferen (hergebruik werkbon-queue met werkbonId = werkorder-id)
         var item = { id:localId, werkbonId:'WO_'+st.id, pad:pad, naam:file.name||'foto', blob:comp, toegevoegd:Date.now(), _woScope:scope, _woId:st.id };
         return (typeof _fqToevoegen==='function' ? _fqToevoegen(item) : Promise.resolve()).then(function(){
-          var localUrl = URL.createObjectURL(comp);
-          data._fotos.push({ _localId:localId, url:localUrl, naam:file.name, _pending:true });
+          // Plaatshouder zónder URL, net als bij de checklist-foto's. Hier stond eerder een
+          // blob:-adres in het document; dat bestaat alleen in het tabblad dat het aanmaakte,
+          // dus een collega (of jijzelf na een herstart) kreeg een gebroken plaatje. De
+          // voorbeeldweergave komt uit de lokale queue; _fqZetFotoUrl vult straks de echte URL.
+          _fqVoorbeeldUrl(localId, comp);
+          data._fotos.push({ _localId:localId, _pending:true, naam:file.name||'foto' });
           _woBewaarAntwoorden(); _woRenderDetail();
           if(typeof _updateFqBanner==='function') _updateFqBanner();
           // Directe upload-poging; lukt het niet, dan blijft het item in de queue

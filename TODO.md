@@ -144,8 +144,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       beoordeeld.
 
 ## Grote trajecten (elk een eigen analyse-sessie; op business-prioriteit kiezen)
-- [ ] **Offline upload veldwerk** — de queue zelf bestaat al: `flow8-fotoqueue` in IndexedDB, met een
-      flush op het online-event en elke 30 seconden. Werkbon-foto's gebruiken hem goed. Wat resteert:
+- [x] **Offline upload veldwerk — VOLLEDIG AFGEROND op 28 september 2026.** De queue zelf bestond al:
+      `flow8-fotoqueue` in IndexedDB, met een flush zodra de verbinding terug is en elke 30 seconden.
+      Werkbon-, werkorder- en checklist-foto's lopen er nu alle drie goed doorheen. Hieronder het
+      volledige verloop, inclusief de twee dubbele-foto-oorzaken die pas bij het testen boven water kwamen:
       - [x] **A. Werkorder-foto's** — 23 september 2026. Ze stonden in dezelfde queue met
         `werkbonId: WO_<id>`, en de generieke flush schreef ze weg naar `werkbonnen/WO_<id>/fotos` —
         een werkbon die niet bestaat. De foto kwam dan wel in Storage maar de werkorder raakte de
@@ -199,12 +201,25 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
         URL's op hun pad vergelijkt en de parameters negeert — het vangnet als er ooit tóch twee
         uploads doorheen glippen, bijvoorbeeld vanuit twee tabbladen. 12 tests; de acht andere suites
         meegetrokken en groen.
-      - [ ] **C3. Werkorder-foto's een plaatshouder geven** — daar staat nog een `blob:`-adres in het
-        document, wat bij de checklist bewust is vermeden: dat adres bestaat alleen in het tabblad dat
-        het maakte, dus een collega ziet een gebroken plaatje. Raakt toevoegen, weergeven en de flush
-        in de werkordercode. Geen storing, wel inconsistent.
-      - [ ] **Los randje**: de retry in `dbSaveItem` (rond regel 5345) kijkt óók naar `navigator.onLine`.
-        Zelfde bezwaar als C1, maar buiten de fotoqueue.
+      - [x] **C3. Werkorder-foto's een plaatshouder geven** — 28 september 2026. Er stond een
+        `blob:`-adres in het document; dat bestaat alleen in het tabblad dat het maakte, dus een
+        collega zag een gebroken plaatje. Nu dezelfde plaatshouder als bij de checklist
+        (`{_localId, _pending, naam}`, zonder URL) en de voorbeeldweergave uit de lokale queue.
+        De map `_clVoorbeeldUrls`/`_clVoorbeeldUrl` was niet checklist-specifiek en heet nu
+        `_fqVoorbeeldUrls`/`_fqVoorbeeldUrl` — één mechanisme voor beide, geen tweede kopie.
+        Ontbreekt het voorbeeld (ander toestel), dan een leeg tegeltje met camera-icoon in plaats
+        van een kapot plaatje. `_woOpenDetail` registreert de voorbeelden opnieuw uit de queue,
+        anders bleef een tegeltje na een herstart leeg; de werkbon deed dat al. De fotoviewer
+        gebruikt dezelfde bron-logica, zodat de positie blijft kloppen. Oude records met een
+        `blob:`-URL genezen vanzelf zodra hun wachtrij-item wegschrijft.
+      - [x] **Los randje** — 28 september 2026: de retry in `dbSaveItem` kijkt nu naar
+        `_fbVerbonden` in plaats van `navigator.onLine`. Daarmee is `navigator.onLine` nergens in
+        de app meer in gebruik (alleen nog in toelichtende comments).
+      - [x] **Teller wachtende wijzigingen sluitend** — 28 september 2026, gevonden bij het losse
+        randje. `_pendingWrites` werd bij een mislukte schrijfactie nooit verlaagd (en elke retry
+        telde er nog eens bij op), terwijl een geslaagde schrijfactie die níet had opgehoogd de
+        teller juist wél verlaagde. De offline-balk kon dus wijzigingen melden die er niet waren,
+        of er te weinig. Nu meldt elke aanroep precies af waarvoor hij zich heeft aangemeld.
 - [ ] **Goedkeuring stap B** — meerdere verplichte goedkeurders met tussenstatus. Raakt vier
       modules en ~49 plekken met `goedgekeurd`. Groot; lagere prioriteit; eerst concept + statusmodel.
 - [ ] **Maillog fase 3** — Resend delivery-status via webhook + geplande/automatische mails
