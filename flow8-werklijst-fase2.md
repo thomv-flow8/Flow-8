@@ -2227,3 +2227,7 @@ vinkjes zet werkt het mee — er hoeft geen regel voor aangepast te worden.
 **Assertie in het wijzigscript** die de zeven open sleutels bewaakt, zodat ze niet per ongeluk alsnog
 worden dichtgezet. Diezelfde assertie sloeg eerst aan op de bestaande `verzuim`-regel omdat de
 controle te breed stond — het bestand bleef toen ongewijzigd, zoals bedoeld.
+
+**In de praktijk geverifieerd** (Thomas, 28 september 2026): een monteur heeft een werkbon afgerond
+en gemaild — dat raakt `opdrachten`, `serviceklanten` en `mailLog` in één handeling, en werkte.
+Agenda en Register hebben inmiddels hun `S`-vinkjes gekregen in de rollenmatrix.
