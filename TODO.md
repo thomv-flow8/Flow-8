@@ -287,12 +287,41 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       Getest in de Rules Playground, zes scenario's: eigen e-mail wijzigen, medewerker-e-mail wijzigen en
       medewerker verwijderen als monteur = geweigerd; eigen naam wijzigen, telefoonnummer van een
       medewerker wijzigen en e-mail wijzigen als admin = toegestaan.
-- [ ] **RTDB `$overig` schrijfbaar voor elk actief lid** — onder meer `planning`, `serviceklanten`
-      en `mailLog`. De rechtenverhoging is hiermee weg (zie hierboven); wat rest is integriteit: een
-      monteur kan gegevens van collega's of het maillog aanpassen. `medewerkers` valt sinds
-      21 september 2026 niet meer onder `$overig` maar heeft een eigen regel. Hoort bij rules fase 2:
-      per-module rechten, en daar hoort ook een platte claim (`mwRecht`) bij zodat niet-admins met
-      schrijfrecht op Medewerkers weer kunnen verwijderen.
+- [x] **RTDB `$overig` afgepeld — 28 september 2026, gedeployd.** Zes sleutels uit `$overig` gehaald
+      en elk achter het recht gezet dat de app er feitelijk voor gebruikt, rechtstreeks uit de
+      rollenmatrix gelezen (geen claims — zie de verzuim-sessie: die zijn in de Playground ontestbaar):
+      `medewerkersArchief` en `mailTemplates` → admin · `agenda` → agenda-`S` · `storingsdienst` →
+      storingsdienst-`S` · `verlofMutaties` → verlof-`S` **of** overuren-`S` · `mailLog` →
+      **append-only** (iedereen mag toevoegen, alleen admin mag wijzigen of verwijderen).
+      Zes Playground-tests groen, inclusief één die bewijst dat `opdrachten` open blijft.
+      **Bewust open gelaten**, elk met een achtergrondroute of een schrijver uit een andere module:
+      - `opdrachten` — de monteur schrijft erin bij het afronden van een werkbon
+        ([flow8-v2.html:4585](flow8-v2.html:4585)) en het kaartoverzicht schrijft gevonden coördinaten
+        terug (regel ~26124), dus iedereen die de kaart opent schrijft.
+      - `serviceklanten` — diezelfde afrond-route werkt de laatste beurtdatum bij.
+      - `wp_pompen` / `pr_objecten` — het opslaan van een debiteur registreert een pomp
+        ([flow8-v2.html:11414](flow8-v2.html:11414)), dus administratie en verkoop schrijven hier met
+        hún debiteuren-recht. Register-`S` eisen zou debiteurenbeheer breken.
+      - `mailLog` kon om dezelfde reden niet achter klantmails-`S`: de werkbonmail loopt via
+        `_wbVerstuurMail` → `openMailVerzendModal` → `logVerzondenMail`, en de monteur heeft géén
+        klantmails-recht. Vandaar append-only in plaats van een module-recht.
+      - `notificaties` — je schrijft per definitie in de lijst van een ánder.
+      - `meta` — administratief, o.a. de jaarlijkse verlofbijschrijving.
+      **`$overig` blijft staan als vangnet.** Op weigeren zetten zou elke nieuwe sleutel die we later
+      toevoegen stilletjes breken. Prijs: een nieuwe gevoelige sleutel staat standaard open — bij het
+      toevoegen van een sleutel dus bewust beslissen of hij een eigen regel nodig heeft.
+- [ ] **Per-veld rechten op `opdrachten` en `serviceklanten`** — de helft van de oorspronkelijke zorg
+      blijft staan: een monteur kan daar meer wijzigen dan alleen wat hij nodig heeft. Dichtzetten kan
+      alleen per veld (bijvoorbeeld wel `status`, niet klant of datum), en dat is een eigen traject.
+- [ ] **Bestaande claim-rules zijn nooit getest** — `overuren`, `onkosten`, `verlof` en `verzuim`
+      leunen op `auth.token.ouRecht/okRecht/vlRecht/vzRecht`. Op 28 september 2026 bleek dat de Rules
+      Playground **geen custom claims draagt**: ook een admin wordt daar geweigerd. Die vier regels
+      zijn dus nooit echt geverifieerd. Omzetten naar een rechtstreekse opzoeking in de rollenmatrix
+      maakt ze testbaar én laat het intrekken van een recht meteen werken in plaats van pas na een
+      tokenrefresh. Zelfde patroon als bij `verzuimDetail` en de zes sleutels hierboven.
+- [ ] **`mwRecht`** — hoorde bij dit punt en blijft open: niet-admins met schrijfrecht op Medewerkers
+      kunnen nog steeds niet verwijderen. Los op met dezelfde rollenmatrix-opzoeking, dan is er geen
+      claim voor nodig.
 - [x] **Werkbon-subcollecties** — opgelost op 22 september 2026: `get`, `list` én `write` op uren,
       foto's en documenten controleren nu de toewijzing van de bovenliggende bon. Dat kan hier wél bij een
       query, want het bon-id staat in het pad. Breekt niets: beide leesplekken in de app halen in dezelfde

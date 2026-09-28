@@ -83,6 +83,27 @@
               ".validate": "newData.hasChildren(['ts'])"
             }
           },
+          "medewerkersArchief": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
+          },
+          "mailTemplates": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
+          },
+          "agenda": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/agenda/schrijven').val() === true )"
+          },
+          "storingsdienst": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/storingsdienst/schrijven').val() === true )"
+          },
+          "verlofMutaties": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/verlof/schrijven').val() === true || root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/overuren/schrijven').val() === true )"
+          },
+          "mailLog": {
+            ".write": false,
+            "$mailId": {
+              ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || (!data.exists() && newData.exists()) )"
+            }
+          },
           "$overig": {
             ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true"
           },

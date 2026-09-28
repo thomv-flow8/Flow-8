@@ -2170,3 +2170,60 @@ medewerker.
 **Open gelaten:** een medewerker met `E` ziet zijn eigen dossier zónder de vrije tekst. Bewuste keuze —
 die tekst is door HR *over* hem geschreven, hij kan zelf geen verzuim registreren. Wil je dat later
 wél, dan moet `medId` mee in de detail-node en de rule naast inzage ook het eigen record toestaan.
+
+---
+
+# RTDB `$overig` afgepeld — 28 september 2026
+
+Rules gedeployd door Thomas. Punt 7 van de lijst grotendeels dicht; drie vervolgpunten genoteerd.
+
+**Het probleem.** `$overig` onder `bedrijven/$bedrijfId` gaf elk actief lid schrijfrecht op dertien
+sleutels: `opdrachten`, `serviceklanten`, `debiteuren`, `agenda`, `mailLog`, `verlofMutaties`,
+`medewerkersArchief`, `mailTemplates`, `storingsdienst`, `wp_pompen`, `pr_objecten`, `notificaties`
+en `meta`.
+
+**Twee keer teruggekomen op mijn eigen voorstel — beide keren omdat ik de live matrix niet had
+gelezen.** Thomas vroeg door ("heb je wel goed naar de rollenmodule gekeken?") en dat was terecht:
+
+1. Eerste tabel was op de **standaardrollen** gebaseerd. Die geven de monteur `schrijven` op verlof;
+   `verlofMutaties` achter verlof-`S` zetten zou dus niets beschermen — juist de aanvrager heeft dat
+   recht. In de live matrix van Homa heeft alleen administratie `S` op verlof, dus daar klopt het wél.
+   De live matrix wijkt af van de standaard, onder meer doordat een migratie `verzuim.schrijven` bij
+   elke rol hard op `false` zet (flow8-v2.html ~6011).
+2. Daarna bleek dat het **goedkeuren van overuren met compensatie** óók een verlofmutatie schrijft
+   (~18289). De planner heeft `S` op overuren maar niet op verlof, dus verlof-`S` alleen zou hem
+   blokkeren. Regel werd verlof-`S` **of** overuren-`S`.
+
+**Les: een sleutel hoort niet netjes bij één module.** De echte schrijvers vind je alleen door de
+aanroepketen te volgen, niet door de naam van de sleutel naast de modulelijst te leggen.
+
+**Dichtgezet** (alle met een rechtstreekse opzoeking in `rollen/{rol}/rechten/{module}/schrijven`,
+géén claims):
+`medewerkersArchief` → admin · `mailTemplates` → admin · `agenda` → agenda-`S` ·
+`storingsdienst` → storingsdienst-`S` · `verlofMutaties` → verlof-`S` of overuren-`S` ·
+`mailLog` → **append-only**.
+
+**`mailLog` append-only is de mooiste uitkomst van deze ronde.** Klantmails-`S` eisen kon niet: de
+werkbonmail loopt via `_wbVerstuurMail` → `openMailVerzendModal` → `logVerzondenMail`, en de monteur
+heeft géén klantmails-recht. Hij zou de mail nog wel versturen maar een misleidende toast "Opslaan
+mislukt — check je verbinding" krijgen en het logrecord verliezen. Append-only (`!data.exists()`)
+dicht precies de zorg uit de lijst — een monteur kan het maillog niet meer *aanpassen* — zonder iets
+in de weg te zitten. Dat is ook wat een auditspoor hoort te zijn.
+
+**Bewust open gelaten**, met de reden erbij: `opdrachten` (monteur schrijft bij afronden ~4585; het
+kaartoverzicht schrijft geocode-resultaten terug ~26124, dus iedereen die de kaart opent schrijft),
+`serviceklanten` (zelfde afrond-route), `wp_pompen`/`pr_objecten` (het opslaan van een debiteur
+registreert een pomp, ~11414 — Register-`S` eisen zou debiteurenbeheer voor administratie en verkoop
+breken), `notificaties` (je schrijft per definitie bij een ánder) en `meta`.
+
+**`$overig` blijft staan als vangnet.** Op `false` zetten zou elke later toegevoegde sleutel stil
+breken. Prijs: een nieuwe gevoelige sleutel staat standaard open, dus bij het toevoegen van een
+sleutel bewust beslissen of hij een eigen regel nodig heeft.
+
+**Bijvangst: Agenda en Register hadden bij geen enkele rol `S`.** Opgemerkt bij het nalopen van de
+matrix; volgens Thomas vergeten bij het inrichten. De rules lezen de matrix live, dus zodra hij de
+vinkjes zet werkt het mee — er hoeft geen regel voor aangepast te worden.
+
+**Assertie in het wijzigscript** die de zeven open sleutels bewaakt, zodat ze niet per ongeluk alsnog
+worden dichtgezet. Diezelfde assertie sloeg eerst aan op de bestaande `verzuim`-regel omdat de
+controle te breed stond — het bestand bleef toen ongewijzigd, zoals bedoeld.
