@@ -2278,3 +2278,45 @@ respectievelijk `kanGoedkeuren` — een monteur krijgt hem nooit te zien. Regel 
 
 **Bijvangst voor de toekomst:** het intrekken van een recht in de rollenmatrix werkt nu **direct**
 in plaats van pas bij de volgende tokenrefresh (tot een uur).
+
+---
+
+# Eigen aanvraag intrekken + een stille bug bij onkosten — 28 september 2026
+
+Rules gedeployd door Thomas. Vervolg op de claim-omzetting van dezelfde dag.
+
+**Aanleiding.** Bij de praktijktest van de omgezette regels viel Thomas op dat de drie HR-modules
+zich verschillend gedragen. Nagelopen, en het was nog schever dan gedacht:
+
+| Module | Eigen aanvraag bewerken | Eigen aanvraag intrekken |
+|---|---|---|
+| Verlof | kan **niemand**, ook geen admin | alleen met schrijfrecht |
+| Overuren | ja, zolang `aangevraagd` | nee |
+| Onkosten | ja, zolang `aangevraagd` | **knop wel, werkte niet** |
+
+**De bug bij onkosten.** Het paneel toont de eigenaar een Verwijderen-knop (`_okMagBewerken`, met
+het commentaar "zelfde slot-logica als overuren"), maar de RTDB-regel weigerde dat verwijderen.
+En `dbRemove` vangt de fout op met **alleen een logregel, geen toast** — terwijl de app het record
+al uit `APP.onkosten` had gefilterd. De monteur zag zijn post verdwijnen en bij de volgende keer
+laden stond hij er weer. Stille datainconsistentie, maandenlang onzichtbaar. Dít is waarom een
+falende schrijfactie zich hoort te melden.
+
+**De regelvorm.** De eigenaarscontrole stond hard op `newData`; bij een delete bestaat die niet,
+dus de controle faalde altijd. Nu: **elke kant die bestaat moet van mij zijn én op `aangevraagd`
+staan.** Eén vorm dekt alle drie de gevallen — aanmaken (alleen newData), bewerken (allebei),
+intrekken (alleen data) — en sluit meteen uit dat je een record naar of van een collega overzet.
+
+**`( newData.exists() || data.exists() )` toegevoegd.** Zonder die voorwaarde slaagt een delete op
+een leeg pad. Op zich onschadelijk, maar het maakt de Playground onbetrouwbaar: een typefout in een
+sleutel geeft dan groen. Dat ging tijdens deze sessie precies één keer mis — twee tests kwamen groen
+terug omdat de sleutels niet bestonden, wat eruitzag als een gat in de regel. **Les: bij een
+delete-test altijd eerst controleren dat het record echt bestaat, en de regel zo schrijven dat een
+leeg pad rood geeft.**
+
+**Zeven Playground-tests**, met een echte monteur-uid en echte records: eigen openstaande aanvraag
+intrekken ✓ · getekende aanvraag intrekken ✗ · andermans verlof intrekken ✗ · leeg pad ✗ ·
+aanmaken voor jezelf ✓ · aanmaken voor een collega ✗ · aanmaken met status `goedgekeurd` ✗.
+
+**Nog te doen in de app** (rules staan het al toe): `dbRemove` een foutmelding geven, intrekken-knop
+bij verlof en overuren, en verlof überhaupt bewerkbaar maken — dat laatste bestaat niet, `submitVerlof`
+maakt altijd een nieuw record. `CLAUDE.md` beweert van wel; dat beschrijft de bedoeling, niet de bouw.
