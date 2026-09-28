@@ -5483,6 +5483,17 @@ function dbPath() {
 }
 var _pendingWrites = 0;
 
+// Een geweigerde schrijfactie kwam er altijd uit als "check je verbinding", ook als het
+// in werkelijkheid om rechten ging. Dat heeft een bug bij onkosten maandenlang verborgen
+// gehouden: de verwijderknop stond er, de rule weigerde, en niemand zag waarom.
+function _dbFoutTekst(e, werkwoord){
+  var code = String((e && (e.code || e.message)) || '').toUpperCase();
+  if(code.indexOf('PERMISSION') >= 0 || code.indexOf('DENIED') >= 0) {
+    return 'Geen rechten om dit te ' + werkwoord;
+  }
+  return werkwoord.charAt(0).toUpperCase() + werkwoord.slice(1) + ' mislukt — check je verbinding';
+}
+
 function dbSaveItem(key, id, data, _retries) {
   if (!APP.bedrijfId) { log('ERROR', 'DB', 'Geen bedrijfId bij saveItem ' + key); return Promise.reject('no bedrijfId'); }
   _retries = _retries || 0;
@@ -5525,7 +5536,7 @@ function dbSaveItem(key, id, data, _retries) {
           .then(function() { return dbSaveItem(key, id, data, _retries + 1); });
       }
       log('ERROR', 'DB', 'Fout bij opslaan: ' + path, { code: e.code, msg: e.message });
-      toast('Opslaan mislukt — check je verbinding', 'error');
+      toast(_dbFoutTekst(e, 'op te slaan'), 'error');
     });
 }
 function dbRemove(key, id) {
@@ -5535,7 +5546,12 @@ function dbRemove(key, id) {
   if (key === 'opdrachten') invalideerReistijdenVoorId(id);
   return FB.ref(path).remove()
     .then(function() { log('OK', 'DB', 'Verwijderd: ' + path); })
-    .catch(function(e) { log('ERROR', 'DB', 'Fout bij verwijderen: ' + path, { msg: e.message }); });
+    .catch(function(e) {
+      // Faalde hiervoor geruisloos: alleen een logregel. De app had het record dan al uit
+      // zijn lijst gehaald, dus het leek gelukt tot de volgende keer laden.
+      log('ERROR', 'DB', 'Fout bij verwijderen: ' + path, { code: e.code, msg: e.message });
+      toast(_dbFoutTekst(e, 'verwijderen'), 'error');
+    });
 }
 function dbLoad(key, appKey) {
   return new Promise(function(resolve) {
@@ -12127,7 +12143,13 @@ function renderVerlof(){
     } else {
       h += '<div class="table-wrap"><table><thead><tr>';
       h += '<th>Van</th><th>T/m</th><th>Uren · dagen</th><th>Type</th><th>Status</th>';
-      if(isAdmin()||magSchrijven('verlof')) h += '<th style="width:120px"></th>';
+      // De actiekolom hoort er ook te staan als de eigenaar zelf nog iets mag: zijn eigen
+      // aanvraag bewerken of intrekken zolang die niet getekend is.
+      var _vlBeheer = isAdmin() || magSchrijven('verlof');
+      var _vlEigenActie = items.some(function(v){
+        return String(v.medId)===String(mijnId) && v.status==='aangevraagd';
+      });
+      if(_vlBeheer || _vlEigenActie) h += '<th style="width:150px"></th>';
       h += '</tr></thead><tbody>';
       items.forEach(function(v){
         h += '<tr data-id="'+v.id+'">';
@@ -12154,7 +12176,7 @@ function renderVerlof(){
            + (v.beoordeeldOp ? ' \u00b7 '+fmtDk(v.beoordeeldOp) : '') + '</div>';
       }
       h += '</td>';
-        if(isAdmin()||magSchrijven('verlof')){
+        if(_vlBeheer || _vlEigenActie){
           h += '<td style="white-space:nowrap">';
           if(v.status==='aangevraagd'){
             // Alleen de ingestelde goedkeurder van deze medewerker (of admin) tekent.
@@ -12165,7 +12187,14 @@ function renderVerlof(){
               h += '<span style="font-size:11px;color:var(--muted)">Wacht op '+esc(_gkV?(_gkV.voornaam||''):'beheerder')+'</span> ';
             }
           }
-          h += '<button class="btn btn-ghost btn-sm btn-icon vl-del" data-id="'+v.id+'" style="color:var(--red)">'+ICO.trash+'</button></td>';
+          if(_vlBeheer){
+            h += '<button class="btn btn-ghost btn-sm btn-icon vl-del" data-id="'+v.id+'" style="color:var(--red)">'+ICO.trash+'</button>';
+          } else if(String(v.medId)===String(mijnId) && v.status==='aangevraagd'){
+            // Eigen, nog niet getekende aanvraag: wijzigen of terugtrekken.
+            h += '<button class="btn btn-ghost btn-sm vl-eigen-edit" data-id="'+v.id+'" style="font-size:11px">'+ICO.edit+' Wijzig</button>';
+            h += '<button class="btn btn-ghost btn-sm vl-eigen-intrek" data-id="'+v.id+'" style="font-size:11px;color:var(--red)">Intrekken</button>';
+          }
+          h += '</td>';
         }
         h += '</tr>';
       });
@@ -12211,6 +12240,13 @@ function renderVerlof(){
   });
   el.querySelectorAll('.vl-gk').forEach(function(b){b.addEventListener('click',function(){keurVerlof(b.dataset.id,b.dataset.ok==='1');});});
   el.querySelectorAll('.vl-del').forEach(function(b){b.addEventListener('click',function(){verwijderVerlof(b.dataset.id);});});
+  el.querySelectorAll('.vl-eigen-edit').forEach(function(b){b.addEventListener('click',function(){openVerlofModal(null, b.dataset.id);});});
+  el.querySelectorAll('.vl-eigen-intrek').forEach(function(b){b.addEventListener('click',function(){
+    var v = APP.verlof.find(function(x){return String(x.id)===String(b.dataset.id);}); if(!v) return;
+    bevestigActie('Aanvraag intrekken','Weet je zeker dat je je verlofaanvraag van '+fmtD(v.van)+' wilt intrekken?',function(){
+      verwijderVerlof(b.dataset.id);
+    });
+  });});
 }
 
 // Bereken netto verlofuren rekening houdend met pauzes
@@ -12249,45 +12285,53 @@ function berekenVerlofDagen(vanDatum, totDatum, tijdVan, tijdTot) {
   return Math.round((nettoMin / (urenPerDag * 60)) * 10) / 10;
 }
 
-function openVerlofModal(voorMedId){
+// bestaandId vult het formulier met een bestaande aanvraag; submitVerlof werkt die dan bij
+// in plaats van een nieuwe aan te maken. Alleen zinvol zolang de status 'aangevraagd' is:
+// daarna is er al afgeboekt op het saldo en zit de aanvraag op slot (ook in de RTDB-rules).
+function openVerlofModal(voorMedId, bestaandId){
+  var _vBest = bestaandId ? (APP.verlof.find(function(x){return String(x.id)===String(bestaandId);}) || null) : null;
+  if(bestaandId && !_vBest){ toast('Aanvraag niet gevonden','error'); return; }
+  if(_vBest && _vBest.status!=='aangevraagd'){ toast('Alleen een aanvraag die nog niet is beoordeeld kan worden gewijzigd','error'); return; }
   var medOpts=APP.medewerkers.filter(function(m){return m.status!=='inactief';}).map(function(m){return [m.id,m.voornaam+' '+m.achternaam];});
   var mijnId=getMijnMedId();
-  var voorgeselecteerd = voorMedId || mijnId;
+  var voorgeselecteerd = (_vBest && _vBest.medId) || voorMedId || mijnId;
   var b='<div class="form-grid">';
   b+=fgf('Medewerker',fsel('vl-med',medOpts,voorgeselecteerd));
-  b+=fg('Van datum',finp('vl-van','date','',''));
-  b+=fg('Tot datum',finp('vl-tot','date','',''));
-  b+=fg('Type',fsel('vl-type',[['Vakantie','Vakantie'],['Bijzonder verlof','Bijzonder verlof'],['Onbetaald verlof','Onbetaald verlof'],['ATV','ATV']],'Vakantie'));
+  b+=fg('Van datum',finp('vl-van','date',(_vBest&&_vBest.van)||'',''));
+  b+=fg('Tot datum',finp('vl-tot','date',(_vBest&&_vBest.tot)||'',''));
+  b+=fg('Type',fsel('vl-type',[['Vakantie','Vakantie'],['Bijzonder verlof','Bijzonder verlof'],['Onbetaald verlof','Onbetaald verlof'],['ATV','ATV']],(_vBest&&_vBest.type)||'Vakantie'));
   // Hele dag checkbox
   b+='<div style="grid-column:1/-1;margin-top:4px">';
   b+='<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">';
-  b+='<input type="checkbox" id="vl-hele-dag" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">';
+  b+='<input type="checkbox" id="vl-hele-dag"'+((_vBest&&_vBest.gedeeltelijk)?'':' checked')+' style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">';
   b+='<div><div style="font-size:13px;font-weight:600">Hele dag</div>';
   b+='<div style="font-size:11px;color:var(--muted)">Deselecteer voor gedeeltelijk verlof met tijdstip</div></div>';
   b+='</label></div>';
   // Tijdstip velden (voor gedeeltelijk verlof)
-  b+='<div id="vl-tijd-blok" style="display:none;grid-column:1/-1">';
+  b+='<div id="vl-tijd-blok" style="display:'+((_vBest&&_vBest.gedeeltelijk)?'block':'none')+';grid-column:1/-1">';
   b+='<div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Tijdstip</div>';
   b+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
   b+=fg('Van tijd', '<select class="input" id="vl-tijd-van">'+[...Array(37)].map(function(_,i){
     var h=Math.floor(i/4)+8; var m=(i%4)*15;
     var val=('0'+h).slice(-2)+':'+('0'+m).slice(-2);
-    return '<option value="'+val+'"'+(val==='08:00'?' selected':'')+'>'+val+'</option>';
+    var _sel = (_vBest&&_vBest.tijdVan) ? _vBest.tijdVan : '08:00';
+    return '<option value="'+val+'"'+(val===_sel?' selected':'')+'>'+val+'</option>';
   }).join('')+'</select>');
   b+=fg('Tot tijd', '<select class="input" id="vl-tijd-tot">'+[...Array(37)].map(function(_,i){
     var h=Math.floor(i/4)+8; var m=(i%4)*15;
     var val=('0'+h).slice(-2)+':'+('0'+m).slice(-2);
-    return '<option value="'+val+'"'+(val==='17:00'?' selected':'')+'>'+val+'</option>';
+    var _sel = (_vBest&&_vBest.tijdTot) ? _vBest.tijdTot : '17:00';
+    return '<option value="'+val+'"'+(val===_sel?' selected':'')+'>'+val+'</option>';
   }).join('')+'</select>');
   b+='</div>';
   b+='</div>';
   b+='<div id="vl-dagen-preview" style="grid-column:1/-1;font-size:13px;color:var(--accent);font-weight:600;padding:10px 12px;background:rgba(74,108,247,.08);border-radius:8px;margin-top:4px"></div>';
-  b+=fgf('Opmerking',finp('vl-opm','text','','Optioneel'));
+  b+=fgf('Opmerking',finp('vl-opm','text',(_vBest&&_vBest.opmerking)||'','Optioneel'));
   b+='</div>';
-  var f='<button class="btn btn-ghost" id="vmod-cancel">Annuleren</button><button class="btn btn-primary" id="vmod-save">Indienen</button>';
-  openModal('Verlof aanvragen',b,f);
+  var f='<button class="btn btn-ghost" id="vmod-cancel">Annuleren</button><button class="btn btn-primary" id="vmod-save">'+(_vBest?'Opslaan':'Indienen')+'</button>';
+  openModal(_vBest?'Verlofaanvraag wijzigen':'Verlof aanvragen',b,f);
   document.getElementById('vmod-cancel').addEventListener('click',closeModal);
-  document.getElementById('vmod-save').addEventListener('click',submitVerlof);
+  document.getElementById('vmod-save').addEventListener('click',function(){ submitVerlof(bestaandId||null); });
 
   // Toon/verberg tijdblok bij gedeeltelijke dag
   function updateTijdBlok() {
@@ -12332,6 +12376,7 @@ function openVerlofModal(voorMedId){
     var el2 = document.getElementById(id);
     if(el2) el2.addEventListener('change', updateDagenPreview);
   });
+  if(_vBest) updateDagenPreview();
   // Standaard tot-tijd is 16:30 (al ingesteld via selected in opties)
 }
 
@@ -12361,7 +12406,11 @@ function berekenGedeeltelijkVerlofUren(med, datumStr, tijdVan, tijdTot) {
   return Math.round((brutMin - pauzeMin) / 60 * 10) / 10;
 }
 
-function submitVerlof(){
+function submitVerlof(bestaandId){
+  var _vOud = bestaandId ? (APP.verlof.find(function(x){return String(x.id)===String(bestaandId);}) || null) : null;
+  if(bestaandId && !_vOud){ toast('Aanvraag niet gevonden','error'); return; }
+  // Vangnet: na beoordelen is er afgeboekt op het saldo, dus wijzigen mag dan niet meer.
+  if(_vOud && _vOud.status!=='aangevraagd'){ toast('Deze aanvraag is al beoordeeld','error'); return; }
   var medId=document.getElementById('vl-med').value;
   var van=document.getElementById('vl-van').value;
   var tot=document.getElementById('vl-tot').value;
@@ -12393,17 +12442,23 @@ function submitVerlof(){
   }
   // Werkdagen in de periode (voor weergave)
   var werkdagen = berekenVerlofDagen(van, tot, null, null);
-  var data={id:uid(),medId:medId,van:van,tot:tot,tijdVan:tijdVan||null,tijdTot:tijdTot||null,
+  var data={id:(_vOud?_vOud.id:uid()),medId:medId,van:van,tot:tot,tijdVan:tijdVan||null,tijdTot:tijdTot||null,
     gedeeltelijk:!!(tijdVan&&tijdTot&&dagen<1.0),dagen:dagen,uren:uren,werkdagen:werkdagen,
     type:document.getElementById('vl-type').value,
     opmerking:document.getElementById('vl-opm').value.trim(),
-    status:'aangevraagd',aangevraagdOp:vandaagISO()};
-  APP.verlof.push(data); dbSaveItem('verlof',data.id,data); closeModal(); renderVerlof();
+    status:'aangevraagd',aangevraagdOp:(_vOud&&_vOud.aangevraagdOp)||vandaagISO()};
+  if(_vOud){
+    var _vIdx = APP.verlof.findIndex(function(x){return String(x.id)===String(_vOud.id);});
+    if(_vIdx>-1) APP.verlof[_vIdx] = data;
+  } else {
+    APP.verlof.push(data);
+  }
+  dbSaveItem('verlof',data.id,data); closeModal(); renderVerlof();
   // Melding naar wie er daadwerkelijk moet tekenen. Voorheen ging dit naar iedereen met
   // schrijfrecht op verlof, waardoor de aanvraag bij mensen belandde die er niets mee
   // konden. Is er geen goedkeurder ingesteld, dan vallen we terug op de beheerders —
   // anders blijft de aanvraag onopgemerkt liggen.
-  if(typeof stuurNotificatie==='function') {
+  if(typeof stuurNotificatie==='function' && !_vOud) {
     var _aanvrager = getMed(medId);
     var _naam = _aanvrager ? (_aanvrager.voornaam||'')+' '+(_aanvrager.achternaam||'') : '';
     var _tekst = _naam + ' heeft verlof aangevraagd voor ' + fmtD(van);
@@ -12420,7 +12475,7 @@ function submitVerlof(){
       if(String(m.id)!==String(medId)) stuurNotificatie(m.id,'verlof','Nieuwe verlofaanvraag',_tekst,'verlof');
     });
   }
-  toast('Verlofaanvraag ingediend','success');
+  toast(_vOud?'Verlofaanvraag bijgewerkt':'Verlofaanvraag ingediend','success');
 }
 
 function keurVerlof(id,goed){
@@ -18374,6 +18429,9 @@ function openOverurenPanel(id) {
   }
   if(kanGoedkeuren && o.status!=='uitbetaald'){
     h += '<button class="btn btn-ghost" id="op-del" style="justify-content:center;color:var(--red)">'+ICO.trash+' Verwijderen</button>';
+  } else if(String(o.medId)===String(getMijnMedId()) && o.status==='aangevraagd'){
+    // Eigen, nog niet getekende aanvraag terugtrekken — zelfde grens als bewerken hierboven.
+    h += '<button class="btn btn-ghost" id="op-intrek" style="justify-content:center;color:var(--red)">'+ICO.trash+' Intrekken</button>';
   }
   h += '</div>';
 
@@ -18389,6 +18447,11 @@ function openOverurenPanel(id) {
     });
   });
   var eB=pb.querySelector('#op-edit'); if(eB) eB.addEventListener('click',function(){closePanel();openOverurenModal(id);});
+  var iB=pb.querySelector('#op-intrek'); if(iB) iB.addEventListener('click',function(){
+    bevestigActie('Aanvraag intrekken','Weet je zeker dat je deze overurenaanvraag wilt intrekken?',function(){
+      closePanel(); _verwijderOveruren(id);
+    });
+  });
   var dB=pb.querySelector('#op-del');  if(dB) dB.addEventListener('click',function(){
     var o2=APP.overuren.find(function(x){return String(x.id)===String(id);}); if(!o2) return;
     var waarschuwing = o2.status==='gecompenseerd'

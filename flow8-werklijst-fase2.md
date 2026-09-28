@@ -2320,3 +2320,42 @@ aanmaken voor jezelf ✓ · aanmaken voor een collega ✗ · aanmaken met status
 **Nog te doen in de app** (rules staan het al toe): `dbRemove` een foutmelding geven, intrekken-knop
 bij verlof en overuren, en verlof überhaupt bewerkbaar maken — dat laatste bestaat niet, `submitVerlof`
 maakt altijd een nieuw record. `CLAUDE.md` beweert van wel; dat beschrijft de bedoeling, niet de bouw.
+
+---
+
+# Verlof bewerkbaar, intrekken-knoppen en een sprekende foutmelding — 28 september 2026
+
+`flow8-v2.html` · JS-syntax ✓. Sluit aan op de rules-wijziging van dezelfde dag: die stond intrekken
+al toe, maar de app bood het nergens aan.
+
+**1. `dbRemove` faalde geruisloos.** Alleen een logregel, geen toast — terwijl de app het record al
+uit `APP.x` had gefilterd. Het leek dus gelukt tot de volgende keer laden. Dit is wat de
+onkosten-bug maandenlang verborgen hield. Nieuwe helper `_dbFoutTekst(e, werkwoord)` kijkt naar de
+foutcode: bij PERMISSION_DENIED "Geen rechten om dit te …", anders "… mislukt — check je
+verbinding". Ook `dbSaveItem` gebruikt hem: die riep bij een **geweigerde** schrijfactie altijd
+"check je verbinding", wat de zoektocht precies de verkeerde kant op stuurt.
+
+**2. Intrekken-knop.** Verlof in de rij, overuren in het paneel, allebei alleen voor de eigenaar
+zolang de status `aangevraagd` is, met een bevestigingsvraag. Onkosten had hem al (en werkt nu pas
+echt). Voor verlof moest de hele actiekolom mee: die stond achter `isAdmin() || magSchrijven`, dus
+een monteur kreeg niet eens een `<td>`. Nu een groepsvlag `_vlEigenActie` — bestaat er in deze groep
+een eigen openstaande aanvraag, dan verschijnt de kolom.
+
+**3. Verlof bewerkbaar.** Bestond helemaal niet: `openVerlofModal()` kende geen id-parameter en
+`submitVerlof` maakte altijd `id:uid()`. Nu `openVerlofModal(voorMedId, bestaandId)` dat datums,
+type, hele-dag/tijdstip en opmerking inleest, en `submitVerlof(bestaandId)` dat bijwerkt. Titel en
+knop wisselen naar "Verlofaanvraag wijzigen" / "Opslaan", en er gaat géén nieuwe-aanvraag-melding
+uit bij een wijziging — de goedkeurder wist er al van.
+
+**Het saldo bleek geen risico**, tegen mijn eigen inschatting vooraf in. Het verlofsaldo wordt pas
+bij goedkeuren afgeboekt (`keurVerlof`), dus een aanvraag met status `aangevraagd` heeft nog geen
+saldo-effect en wijzigen kan geen dubbele boeking veroorzaken. Wel twee vangnetten die op status
+controleren — in `openVerlofModal` én in `submitVerlof` — zodat een andere route er niet omheen kan.
+
+**Valkuil onderweg:** de opslaan-knop hing als `addEventListener('click', submitVerlof)` aan de
+functie. Dat was onschadelijk zolang die geen parameters had, maar met `submitVerlof(bestaandId)`
+zou het klik-event als id binnenkomen. Vervangen door een wrapper.
+
+**Nieuw punt genoteerd:** de app haalt een record uit `APP.x` vóór `dbRemove`. Mislukt de
+verwijdering, dan meldt hij dat nu wel, maar de rij blijft uit beeld tot je herlaadt. Netter is
+opruimen ná bevestiging. Raakt alle modules.

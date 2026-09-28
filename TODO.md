@@ -323,21 +323,30 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       typefout in een sleutel gaf groen. Dat is precies één keer misgegaan tijdens het testen.
       Zeven tests groen: eigen aanvraag intrekken ✓, getekende aanvraag ✗, andermans aanvraag ✗,
       leeg pad ✗.
-- [ ] **Verlof bewerkbaar maken + intrekken-knoppen** — de rules staan het nu toe, de app biedt het
-      nog niet aan. Drie dingen, in deze volgorde:
-      1. **`dbRemove` een foutmelding geven** — faalt nu stil (alleen een logregel, geen toast). Dat
-         hield de onkosten-bug hierboven maandenlang verborgen en kan elke module treffen. Klein,
-         staat los, doe dit eerst.
-      2. **Intrekken-knop bij verlof en overuren** voor de eigenaar zolang de status `aangevraagd`
-         is. Bij onkosten staat hij er al (en werkt nu). Overuren toont hem alleen aan een
-         goedkeurder; verlof alleen aan wie schrijfrecht heeft.
-      3. **Verlof bewerkbaar maken.** `openVerlofModal()` kent geen id-parameter en `submitVerlof`
-         maakt altijd een nieuw record — verlof is dus door **niemand** te bewerken, ook niet door
-         een admin. Overuren en onkosten hebben dat wel (`_ouMagBewerken` / `_okMagBewerken`:
-         eigen record + status `aangevraagd`). Meeste zorg nodig: het formulier rekent saldo's uit,
-         dus een gewijzigde aanvraag mag geen dubbele af- of terugboeking veroorzaken.
-      Let op: `CLAUDE.md` beweert dat verlof bewerkbaar is zolang de status `aangevraagd` is. Dat
-      beschrijft de bedoeling, niet wat er gebouwd is — rechtzetten zodra 3 af is.
+- [x] **Verlof bewerkbaar + intrekken-knoppen — 28 september 2026.** De rules stonden het al toe,
+      de app bood het niet aan. Drie dingen gedaan:
+      1. **`dbRemove` meldt nu een fout.** Faalde hiervoor geruisloos (alleen een logregel), terwijl
+         de app het record al uit zijn lijst had gehaald — het leek dus gelukt tot de volgende keer
+         laden. Nieuwe helper `_dbFoutTekst()` vertaalt de fout: bij PERMISSION_DENIED "Geen rechten
+         om dit te verwijderen", anders "check je verbinding". Ook `dbSaveItem` gebruikt hem nu — die
+         riep bij een geweigerde schrijfactie altijd "check je verbinding", wat precies de verkeerde
+         kant op wijst.
+      2. **Intrekken-knop** bij verlof (in de rij) en overuren (in het paneel), voor de eigenaar
+         zolang de status `aangevraagd` is, met een bevestigingsvraag. Bij onkosten stond hij er al.
+      3. **Verlof bewerkbaar.** `openVerlofModal(voorMedId, bestaandId)` leest een bestaande aanvraag
+         in (datums, type, hele dag of tijdstip, opmerking) en `submitVerlof(bestaandId)` werkt die bij
+         in plaats van een nieuwe aan te maken. Titel en knop worden "Verlofaanvraag wijzigen" /
+         "Opslaan", en er gaat géén nieuwe-aanvraag-melding uit bij een wijziging.
+      **Saldo bleek geen risico:** het verlofsaldo wordt pas bij goedkeuren afgeboekt (`keurVerlof`),
+      dus een aanvraag met status `aangevraagd` heeft nog geen saldo-effect. Wijzigen kan daarom geen
+      dubbele af- of terugboeking veroorzaken. Twee vangnetten die op status controleren, in
+      `openVerlofModal` én `submitVerlof`, zodat een andere route er ook niet omheen kan.
+      De zin in `CLAUDE.md` over bewerkbaar zolang `aangevraagd` klopt hiermee alsnog — niets te
+      corrigeren, de bouw heeft de documentatie ingehaald.
+- [ ] **Lokale staat loopt uit de pas bij een mislukte verwijdering** — de app haalt het record uit
+      `APP.x` vóór `dbRemove`. Mislukt de verwijdering, dan meldt hij dat nu wel, maar de rij blijft
+      uit beeld tot je herlaadt. Netter: pas opruimen ná bevestiging, of terugzetten bij een fout.
+      Raakt alle modules; klein maar op veel plekken.
 - [ ] **Per-veld rechten op `opdrachten` en `serviceklanten`** — de helft van de oorspronkelijke zorg
       blijft staan: een monteur kan daar meer wijzigen dan alleen wat hij nodig heeft. Dichtzetten kan
       alleen per veld (bijvoorbeeld wel `status`, niet klant of datum), en dat is een eigen traject.
