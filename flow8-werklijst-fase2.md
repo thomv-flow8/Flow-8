@@ -2231,3 +2231,50 @@ controle te breed stond — het bestand bleef toen ongewijzigd, zoals bedoeld.
 **In de praktijk geverifieerd** (Thomas, 28 september 2026): een monteur heeft een werkbon afgerond
 en gemaild — dat raakt `opdrachten`, `serviceklanten` en `mailLog` in één handeling, en werkte.
 Agenda en Register hebben inmiddels hun `S`-vinkjes gekregen in de rollenmatrix.
+
+---
+
+# Claim-rules omgezet naar de rollenmatrix — 28 september 2026
+
+Rules gedeployd door Thomas. Hiermee gebruiken de RTDB-rules **geen enkele custom claim** meer.
+
+**Aanleiding.** Bij het verzuim-traject bleek dat de Rules Playground geen custom claims draagt —
+ook een admin wordt daar geweigerd. De vier HR-regels (`overuren`, `onkosten`, `verlof`, `verzuim`)
+leunden op `auth.token.ouRecht/okRecht/vlRecht/vzRecht` en waren dus nooit geverifieerd.
+
+**In twee fasen aangepakt.** Fase A: 1-op-1 vertalen zonder gedragswijziging, dan testen. Fase B:
+repareren wat de tests blootleggen. Bewust in die volgorde — bij een afwijking weet je anders niet
+of het aan de vertaling ligt of aan de reparatie. **Fase B bleek niet nodig.**
+
+**Het knelpunt was `auth.token.medId`.** Die claim leidt de Cloud Function af door het e-mailadres
+van de gebruiker te matchen met een medewerker. De rule doet dat nu zelf: van het `medId` in het
+record naar `medewerkers/{medId}/email`, lowercase vergeleken met `gebruikers/{uid}/email`, met
+`isString()`-guards ertussen. Dat is alleen veilig omdát het e-mailveld op 21 september is
+vastgezet — die fix maakt deze aanpak mogelijk.
+
+**De voor de hand liggende route viel af.** Er bestaat een `bedrijven/{bedrijfId}/gebruikers/{uid}`
+met een `medId`-veld, gezet bij het inloggen (~6993). Maar de schrijfregel daar is **admin-only**:
+een monteur kan zijn eigen record niet eens aanmaken. Precies voor de gebruikers die we nodig hebben
+is dat veld dus onbetrouwbaar. Dat is ook een latent lek in de app: die schrijfpoging faalt stil.
+
+**Vertaaldetails.** `letterVoor()` in de Cloud Function geeft 's' bij admin, `schrijven` **of**
+`beheren`, dus de rule controleert alle drie. De 'e'-tak kon vereenvoudigd worden tot `eigen ===
+true`: de `||` vangt 's' al af, dus het resultaat is identiek.
+
+**Zes Playground-tests met een echte monteur-uid.** Eigen overuur indienen ✓ · voor een collega
+schrijven ✗ · met status `goedgekeurd` schrijven ✗ · verzuim ✗ · eigen verlof indienen ✓ ·
+eigen aanvraag verwijderen ✗. Test 1 bewees meteen de hele keten, inclusief dat de **sleutel** van
+een medewerkersrecord gelijk is aan het `id`-veld — anders had het pad niet geresolveerd.
+
+**De open vraag bleek geen bug.** Een `eigen`-gebruiker kan zijn eigen aanvraag niet verwijderen:
+bij een delete bestaat `newData` niet, dus `newData.child('medId')` is null en de eigenaarscontrole
+faalt. Dat leek strijdig met de notitie "bewerkbaar zolang de status aangevraagd is", maar dat gaat
+over *bewerken*, en dat kan wél. De verwijderknop zit in de app achter `magSchrijven('verlof')`
+respectievelijk `kanGoedkeuren` — een monteur krijgt hem nooit te zien. Regel en UI zijn het eens.
+
+**Claims die overblijven.** Firestore en Storage gebruiken nog `bedrijfId`, `actief`, `medId` en
+`rch.werkbonnen`; daar werken geneste claims wél. `ouRecht`, `okRecht`, `vlRecht`, `vzRecht` en
+`vzInzage` zijn nergens meer in gebruik — bewust laten staan als vangnet, opruimen kan later.
+
+**Bijvangst voor de toekomst:** het intrekken van een recht in de rollenmatrix werkt nu **direct**
+in plaats van pas bij de volgende tokenrefresh (tot een uur).

@@ -313,12 +313,32 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [ ] **Per-veld rechten op `opdrachten` en `serviceklanten`** — de helft van de oorspronkelijke zorg
       blijft staan: een monteur kan daar meer wijzigen dan alleen wat hij nodig heeft. Dichtzetten kan
       alleen per veld (bijvoorbeeld wel `status`, niet klant of datum), en dat is een eigen traject.
-- [ ] **Bestaande claim-rules zijn nooit getest** — `overuren`, `onkosten`, `verlof` en `verzuim`
-      leunen op `auth.token.ouRecht/okRecht/vlRecht/vzRecht`. Op 28 september 2026 bleek dat de Rules
-      Playground **geen custom claims draagt**: ook een admin wordt daar geweigerd. Die vier regels
-      zijn dus nooit echt geverifieerd. Omzetten naar een rechtstreekse opzoeking in de rollenmatrix
-      maakt ze testbaar én laat het intrekken van een recht meteen werken in plaats van pas na een
-      tokenrefresh. Zelfde patroon als bij `verzuimDetail` en de zes sleutels hierboven.
+- [x] **Claim-rules omgezet en voor het eerst getest — 28 september 2026, gedeployd.** `overuren`,
+      `onkosten`, `verlof` en `verzuim` leunden op `auth.token.ouRecht/okRecht/vlRecht/vzRecht` en
+      waren daarmee ontestbaar: de Rules Playground draagt geen custom claims, dus ook een admin werd
+      daar geweigerd. Nu een rechtstreekse opzoeking in de rollenmatrix, **1-op-1 vertaald zonder
+      gedragswijziging** — bewust in twee fasen, zodat een afwijking niet aan vertaling én reparatie
+      tegelijk kon liggen.
+      - **`auth.token.medId` vervangen door dezelfde afleiding die de Cloud Function doet:** van het
+        `medId` in het record naar `medewerkers/{medId}/email`, vergeleken (lowercase, met
+        `isString()`-guards) met `gebruikers/{uid}/email`. Veilig omdát het e-mailveld op
+        21 september 2026 is vastgezet — precies omdat medId eruit wordt afgeleid.
+      - **De voor de hand liggende route viel af:** `bedrijven/{bedrijfId}/gebruikers/{uid}/medId`
+        wordt bij het inloggen gezet (flow8-v2.html ~6993), maar dat knooppunt is **admin-only
+        schrijfbaar** — een monteur kan zijn eigen record daar niet eens aanmaken. Juist voor de
+        gebruikers die we nodig hebben is dat veld dus onbetrouwbaar.
+      - **Zes Playground-tests**, met een echte monteur-uid: eigen overuur/verlof indienen ✓,
+        voor een collega schrijven ✗, buiten status `aangevraagd` schrijven ✗, verzuim ✗.
+      - **Open vraag beantwoord: géén bug.** Een `eigen`-gebruiker kan zijn eigen aanvraag niet
+        verwijderen (bij een delete bestaat `newData` niet, dus de eigenaarscontrole faalt). Dat
+        leek strijdig met "bewerkbaar zolang de status aangevraagd is", maar dat gaat over
+        *bewerken* — en dat kan wél. De verwijderknop zit in de app achter `magSchrijven('verlof')`
+        respectievelijk `kanGoedkeuren`, dus een monteur krijgt hem nooit te zien. Regel en UI zijn
+        het eens; er viel niets te repareren.
+      - **De RTDB-rules gebruiken nu nul claims.** Firestore en Storage gebruiken nog wel
+        `bedrijfId`, `actief`, `medId` en `rch.werkbonnen` — daar werken claims prima.
+        `ouRecht`, `okRecht`, `vlRecht`, `vzRecht` en `vzInzage` zijn daarmee nergens meer in
+        gebruik. Bewust laten staan als vangnet; opruimen kan als dit een paar weken goed draait.
 - [ ] **`mwRecht`** — hoorde bij dit punt en blijft open: niet-admins met schrijfrecht op Medewerkers
       kunnen nog steeds niet verwijderen. Los op met dezelfde rollenmatrix-opzoeking, dan is er geen
       claim voor nodig.
