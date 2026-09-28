@@ -2021,3 +2021,47 @@ handje van header-rijen, zonder de klikbare rijen te raken. Brede regel bewust b
 - **Mechaniek:** per opdracht `o._mailStatus` in de stats-loop (op de enrichSortVelden-KOPIEËN, dus geen
   Firebase-vervuiling); `_mailStatusFilter`-state; `opdrachtenMaand` gefilterd ná de stats (pillen tonen
   altijd de volledige maand-tellingen). Bulk-mail/selecteren werkt nu op de gefilterde selectie.
+
+---
+
+# Typekleur op de werkbon, volledig adres, verdwenen opmerkingen — 28 september 2026
+
+`flow8-v2.html` · JS-syntax ✓. Gevonden door Thomas bij het testen op de live-versie.
+
+- **`_otVanType()` naast `getOpdrachttype()`** — het verschil is niet vanzelfsprekend, vandaar hier
+  vastgelegd. `getOpdrachttype(id)` matcht **alleen op `t.id`** en is bedoeld voor de planning, waar
+  `o.type` altijd een id is. Werkbonnen bewaren hun type als **`typeWerk`**, en daar staat niet altijd
+  een id in — soms een code, soms een numerieke index. `opdrachtTypeLabel()` ving dat al soepel op,
+  maar gaf alleen het label terug, dus voor een kleur was er niets. `_otVanType()` doet die soepele
+  opzoeking (id → code → 1-based index) en geeft **label, kleur én icoon** terug; `opdrachtTypeLabel()`
+  is nu een schilletje daaromheen, zodat er één bron is. Zonder die soepelheid waren oudere bonnen op
+  grijs uitgekomen. Lege sleutel valt meteen terug (guard tegen `'' === ''`).
+- **Kleur per opdrachttype op de werkbonkaart** — strook van 4px links + het typelabel in de typekleur,
+  met het type-icoon ervoor. **Bewuste rolverdeling, overgenomen van de planningkaart: rand = type,
+  badge = status.** Kleur betekende op deze kaart al status (stip + badge); zonder die verdeling zou
+  kleur twee dingen tegelijk zeggen. Geldt voor de openstaande lijst, het archief en de
+  werkbonhistorie bij een pomp of object.
+- **Adres en klantnaam volledig in de planning** — de boosdoener was `max-width:140px` op beide velden
+  in de weekweergave (en nowrap op het adres in de dagweergave). De tabel is `table-layout:fixed` met
+  kolommen van ~17%, dus op een breed scherm is de kolom véél breder dan 140px en werd er nodeloos
+  afgekapt. Nu `word-break:break-word`; kolombreedtes ongemoeid, kaarten worden wel hoger.
+- **Verlof: `opmerking` was een schrijf-alleen veld** — het aanvraagformulier sloeg hem netjes op, maar
+  geen enkele render toonde hem. Staat nu onder het type in de rij. De CSV-export exporteerde
+  `v.omschrijving`, een veld dat bij verlof **niet bestaat**, dus die kolom was altijd leeg → nu
+  `v.opmerking`.
+- **Verzuim: omschrijving in de rij** — stond wel in het zijpaneel, maar niet in de tabel, waardoor hij
+  weg leek als je nooit op de regel klikte.
+
+# Exportknop bij Materialen — 28 september 2026
+
+- **Materialen was de enige module zonder Export.** Toegevoegd in exact dezelfde vorm als elders
+  (`btn btn-ghost btn-sm hide-mobile`, `ICO.download`, links van de primaire knop, via `csvExport()` →
+  xlsx met CSV-terugval). Kolommen: Code, Omschrijving, EAN, Eenheid, Stuksprijs, BTW %, Zichtbaar op
+  werkbon, Notitie, Documenten (aantal).
+- **Exporteert de gefilterde lijst in de huidige sorteervolgorde**, niet alleen het zichtbare deel: de
+  tabel toont maar `_MAT_LIMIET` rijen, dus het zichtbare deel wegschrijven zou de export juist
+  uithollen bij een grote artikellijst. Zonder zoekterm is dat gewoon alles. Zo doet Serviceklanten het ook.
+- **Zichtbaar voor iedereen met leesrecht** op de module, zoals bij de andere modules; Import en
+  + Artikel blijven achter `kanSchrijven`.
+- **Import-icoon rechtgezet**: dat was `ICO.download` (pijl omlaag), naast een Export met hetzelfde
+  icoon zouden er twee identieke pijlen staan die het tegenovergestelde betekenen. Nu `ICO.upload`.

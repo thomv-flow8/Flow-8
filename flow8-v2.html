@@ -21857,8 +21857,9 @@ function renderMaterialen() {
     h += '<input type="text" class="input" id="mat-zoek" placeholder="Zoek op code of omschrijving…" value="'+esc(_matZoek)+'" style="max-width:260px">';
 
     h += '<div style="flex:1"></div>';
+    h += '<button class="btn btn-ghost btn-sm hide-mobile" id="mat-export-btn">'+ICO.download+' Export</button>';
     if(kanSchrijven){
-      h += '<button class="btn btn-ghost btn-sm hide-mobile" id="mat-import">'+ICO.download+' Import</button>';
+      h += '<button class="btn btn-ghost btn-sm hide-mobile" id="mat-import">'+ICO.upload+' Import</button>';
       h += '<button class="btn btn-primary btn-sm" id="mat-add">+ Artikel</button>';
     }
     h += '</div>';
@@ -21920,6 +21921,18 @@ function renderMaterialen() {
     });
     ['mat-add','mat-add-empty'].forEach(function(id){ var b=document.getElementById(id); if(b) b.addEventListener('click', function(){ _openArtikelEditor(null); }); });
     var impBtn = document.getElementById('mat-import'); if(impBtn) impBtn.addEventListener('click', _openArtikelImport);
+    var matExpBtn = document.getElementById('mat-export-btn'); if(matExpBtn) matExpBtn.addEventListener('click', function(){
+      var _huidig = _matZoek.trim().toLowerCase();
+      var _bron = !_huidig ? artikelen : artikelen.filter(function(a){
+        return (a.code||'').toLowerCase().indexOf(_huidig)>=0 || (a.omschrijving||'').toLowerCase().indexOf(_huidig)>=0 || (a.ean||'').toLowerCase().indexOf(_huidig)>=0;
+      });
+      var rows = _matSorteer(_bron).map(function(a){
+        return [a.code||'', a.omschrijving||'', a.ean||'', a.eenheid||'stuk',
+                (Number(a.stuksprijs)||0).toFixed(2), a.btw!=null?a.btw:'',
+                a.zichtbaarWerkbon===false?'Nee':'Ja', a.notitie||'', _matArtikelDocs(a).length];
+      });
+      csvExport(['Code','Omschrijving','EAN','Eenheid','Stuksprijs (€)','BTW %','Zichtbaar op werkbon','Notitie','Documenten'], rows, 'artikelen');
+    });
     _matBindRijen(artikelen, kanSchrijven);
     _matBindSortSelectie(artikelen, kanSchrijven);
   }).catch(function(e){
