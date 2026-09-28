@@ -356,6 +356,13 @@ exports.verstuurMail = onRequest(
 //   top-level strings op het token:
 //     ouRecht (overuren), okRecht (onkosten), vlRecht (verlof), vzRecht (verzuim)
 //   met dezelfde 's'/'e'/'g'-codering.
+//   vzInzage : apart van vzRecht, want inzage in verzuim is een EIGEN recht in de
+//         rechtenmatrix (het vinkje 'I' = rechten.verzuim.inzageAlle). Verzuimdossiers
+//         bevatten bijzondere persoonsgegevens, dus lees- of schrijfrecht geeft hier
+//         bewust géén inzage in andermans dossier — alleen 'I' doet dat. 'a' = alle
+//         dossiers, 'g' = geen. Spiegelt magVerzuimInzageAlle() in de app; die twee
+//         moeten exact hetzelfde zeggen, anders krijg je lege schermen of geweigerde
+//         acties die niemand kan verklaren.
 //
 // Waarom hybride: Firestore-rules kunnen token.rch.werkbonnen lezen; RTDB-rules
 // kunnen dat NIET (geen geneste claim-toegang), maar wel token.ouRecht. Zo werkt
@@ -415,6 +422,7 @@ exports.zetGebruikersClaim = onRequest(
 
       const rch = {};
       let ouRecht = 'g', okRecht = 'g', vlRecht = 'g', vzRecht = 'g';
+      let vzInzage = 'g';
       if (rol) {
         const rolSnap = await admin.database()
           .ref('flow8/bedrijven/' + bedrijfId + '/rollen/' + rol + '/rechten').get();
@@ -436,6 +444,10 @@ exports.zetGebruikersClaim = onRequest(
         okRecht = isAdmin ? 's' : letterVoor(rechten.onkosten, false);
         vlRecht = isAdmin ? 's' : letterVoor(rechten.verlof, false);
         vzRecht = isAdmin ? 's' : letterVoor(rechten.verzuim, false);
+
+        // Inzage in verzuim staat los van schrijfrecht: alleen admin of het vinkje 'I'.
+        // Zelfde formule als magVerzuimInzageAlle() in de app.
+        vzInzage = (isAdmin || (rechten.verzuim && rechten.verzuim.inzageAlle === true)) ? 'a' : 'g';
       }
 
       // 5. Idempotent
@@ -449,17 +461,18 @@ exports.zetGebruikersClaim = onRequest(
         (decoded.ouRecht || 'g') === ouRecht &&
         (decoded.okRecht || 'g') === okRecht &&
         (decoded.vlRecht || 'g') === vlRecht &&
-        (decoded.vzRecht || 'g') === vzRecht;
+        (decoded.vzRecht || 'g') === vzRecht &&
+        (decoded.vzInzage || 'g') === vzInzage;
       if (gelijk) {
-        res.json({ ok: true, gewijzigd: false, claim: { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht } });
+        res.json({ ok: true, gewijzigd: false, claim: { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage } });
         return;
       }
 
       // 6. Claim zetten
       await admin.auth().setCustomUserClaims(decoded.uid, {
-        bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht,
+        bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage,
       });
-      res.json({ ok: true, gewijzigd: true, claim: { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht } });
+      res.json({ ok: true, gewijzigd: true, claim: { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage } });
     } catch (e) {
       const boodschap = (e && e.code === 'auth/id-token-expired')
         ? 'Sessie verlopen — log opnieuw in'

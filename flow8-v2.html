@@ -5458,7 +5458,7 @@ var APP = {
   dataLoaded: false, listeners: {},
   contracten: [], rollen: {}, medewerkers: [], serviceklanten: [], debiteuren: [],
   opdrachten: [], verlof: [], overuren: [], onkosten: [],
-  verzuim: [], agenda: [], storingsdienst: {}, blokkadeDagen: {},
+  verzuim: [], verzuimDetail: {}, agenda: [], storingsdienst: {}, blokkadeDagen: {},
   opdrachttypes: null, mailTemplates: null, planningRollen: ['monteur','extern'], beschikbaarheidRollen: ['monteur'], planningMarge: 1,
   teamInstellingen: { verlofBasis: 25, werkUrenPerDag: 8, werkVan: '08:00', werkTot: '17:00', pauzes: [{van:'09:15',tot:'09:30'},{van:'12:00',tot:'12:30'},{van:'15:00',tot:'15:15'}] },
   bedrijfGegevens: {}, goedkeuringInst: {}, registerInst: {},
@@ -6067,6 +6067,7 @@ async function laadData() {
     dbLoad('overuren',       'overuren'),
     dbLoad('onkosten',       'onkosten'),
     dbLoad('verzuim',        'verzuim'),
+    laadVerzuimDetail(),
     dbLoad('wp_pompen',      'wp_pompen'),
     dbLoad('pr_objecten',    'pr_objecten'),
     dbLoad('mailLog',        'mailLog'),
@@ -6249,6 +6250,49 @@ function magVerzuimInzageAlle() {
   if(isAdmin()) return true;
   var r=getRol();
   return !!(r && r.rechten && r.rechten.verzuim && r.rechten.verzuim.inzageAlle);
+}
+
+// ── Verzuim: de vrije tekst staat apart en afgeschermd ─────────────────────────
+// Omschrijving en notitie bevatten bijzondere persoonsgegevens (ziektegegevens) en
+// staan daarom NIET in het verzuimrecord zelf, maar in flow8/verzuimDetail/{bedrijfId}.
+// Die tak hangt bewust BUITEN flow8/bedrijven: daar staat één breed .read dat naar
+// beneden cascadeert en in RTDB niet meer in te trekken is. De rules daar eisen rol
+// 'admin' of het vinkje 'I' (rechten.verzuim.inzageAlle) — dezelfde bron die
+// magVerzuimInzageAlle() hierboven gebruikt, zodat app en rules niet uiteen lopen.
+// Het verzuimrecord zelf houdt datum, type, status en uren: dat heeft de planning
+// nodig om te zien dát iemand er niet is, zonder te weten waaróm.
+function verzuimDetailPad(id){
+  if(!APP.bedrijfId) return null;   // nooit een pad raden voor een onbekende tenant
+  return 'flow8/verzuimDetail/' + APP.bedrijfId + (id ? '/' + id : '');
+}
+
+// Leest de vrije tekst van één verzuimrecord. Valt terug op de velden in het record
+// zelf, want records van vóór de scheiding hebben ze daar nog staan.
+function verzuimTekst(v){
+  if(!v) return { omschrijving:'', notitie:'' };
+  var d = (APP.verzuimDetail && APP.verzuimDetail[v.id]) || {};
+  return {
+    omschrijving: d.omschrijving || v.omschrijving || '',
+    notitie:      d.notitie      || v.notitie      || ''
+  };
+}
+
+// Zonder inzagerecht niet eens proberen te lezen: dat levert alleen een geweigerde
+// aanvraag op terwijl er niets mis is.
+function laadVerzuimDetail(){
+  APP.verzuimDetail = {};
+  var p = verzuimDetailPad();
+  if(!p || !magVerzuimInzageAlle()) return Promise.resolve({});
+  return FB.ref(p).once('value').then(function(snap){
+    var val = snap.exists() ? snap.val() : null;
+    APP.verzuimDetail = (val && typeof val === 'object') ? val : {};
+    log('OK','DATA','Verzuimdetails geladen: ' + Object.keys(APP.verzuimDetail).length);
+    return APP.verzuimDetail;
+  }).catch(function(e){
+    APP.verzuimDetail = {};
+    log('WARN','DATA','Verzuimdetails niet geladen: ' + (e.message||e));
+    return {};
+  });
 }
 // Filter data op basis van rechten: E=eigen, anders alles
 function filterEigen(lijst, medIdField) {
@@ -18833,7 +18877,7 @@ function renderVerzuim() {
       var q=_vzZoek.toLowerCase();
       var m=getMed(v.medId);
       var naam=m?(m.voornaam+' '+m.achternaam).toLowerCase():'';
-      return naam.includes(q)||(v.omschrijving||'').toLowerCase().includes(q)||(v.type||'').toLowerCase().includes(q);
+      return naam.includes(q)||verzuimTekst(v).omschrijving.toLowerCase().includes(q)||(v.type||'').toLowerCase().includes(q);
     }
     return true;
   });
@@ -18986,7 +19030,8 @@ function renderVerzuim() {
         h += '<tr class="vz-rij" data-id="'+v.id+'" style="cursor:pointer">';
         h += '<td style="white-space:nowrap">'+fmtD(v.van)+'</td>';
         h += '<td>'+typeTag;
-        if(v.omschrijving) h += '<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35;white-space:normal;word-break:break-word">'+esc(v.omschrijving)+'</div>';
+        var _rijT = verzuimTekst(v).omschrijving;
+        if(_rijT) h += '<div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35;white-space:normal;word-break:break-word">'+esc(_rijT)+'</div>';
         h += '</td>';
         h += '<td style="white-space:nowrap">'+(v.tot?fmtD(v.tot):'<span style="color:var(--red)">Nog ziek</span>')+'</td>';
         h += '<td style="font-weight:700;color:'+(duren>42?'var(--orange)':'var(--text)')+'">'+duren+' dag'+(duren===1?'':'en')+'</td>';
@@ -19034,8 +19079,8 @@ function renderVerzuim() {
   var vzPrev=el.querySelector('#vz-prev-jaar'); if(vzPrev) vzPrev.addEventListener('click',function(){_vzJaar--;_vzPage=1;renderVerzuim();});
   var vzNext=el.querySelector('#vz-next-jaar'); if(vzNext) vzNext.addEventListener('click',function(){_vzJaar++;_vzPage=1;renderVerzuim();});
   var vzExpBtn=el.querySelector('#vz-export-btn'); if(vzExpBtn) vzExpBtn.addEventListener('click',function(){
-    var rows=zichtbaarVZ.map(function(v){var m=getMed(v.medId);return[m?m.voornaam+' '+m.achternaam:'',fmtD(v.van),fmtD(v.tot||''),v.reden||'',v.status||'',v.urenZiek||'',v.urenWerk||''];});
-    csvExport(['Medewerker','Van','Tot','Reden','Status','Uren ziek/dag','Uren werkt/dag'],rows,'verzuim_'+jaarStr);
+    var rows=zichtbaarVZ.map(function(v){var m=getMed(v.medId);return[m?m.voornaam+' '+m.achternaam:'',fmtD(v.van),fmtD(v.tot||''),verzuimTekst(v).omschrijving,v.status||'',v.urenZiek||'',v.urenWerk||''];});
+    csvExport(['Medewerker','Van','Tot','Omschrijving','Status','Uren ziek/dag','Uren werkt/dag'],rows,'verzuim_'+jaarStr);
   });
   el.querySelectorAll('.chip[data-vz-filter]').forEach(function(b){b.addEventListener('click',function(){_vzFilter=b.dataset.vzFilter;_vzPage=1;renderVerzuim();});});
   el.querySelectorAll('.vz-rij').forEach(function(r){r.addEventListener('click',function(){openVerzuimPanel(r.dataset.id);});});
@@ -19066,12 +19111,18 @@ function openVerzuimModal(id,prefill){
   b+='</div>';
   b+=fg('Eerste ziektedag',finp('vz-van','date',v.van||vandaagISO(),''));
   b+=fg('Hersteldatum (leeg = nog ziek)',finp('vz-tot','date',v.tot||'',''));
-  b+=fgf('Omschrijving',finp('vz-omschr','text',v.omschrijving||'','Optioneel'));
-  b+=fgf('Notitie (intern)',ftxtAuto('vz-notitie',v.notitie||''));
+  // Wie de vrije tekst niet mag inzien, krijgt de velden ook niet te zien — anders zou
+  // hij blind bestaande tekst overschrijven met leeg.
+  var _vzMagTekst = magVerzuimInzageAlle();
+  if(_vzMagTekst){
+    var _vzT = verzuimTekst(v);
+    b+=fgf('Omschrijving',finp('vz-omschr','text',_vzT.omschrijving,'Optioneel'));
+    b+=fgf('Notitie (intern)',ftxtAuto('vz-notitie',_vzT.notitie));
+  }
   b+='</div>';
   var f='<button class="btn btn-ghost" id="vz-modal-cancel">Annuleren</button><button class="btn btn-primary" id="vz-modal-save">Opslaan</button>';
   openModal(isNew?'Verzuim registreren':'Verzuim bewerken',b,f);
-  bindAutoGrow(document.getElementById('vz-notitie'));
+  if(_vzMagTekst) bindAutoGrow(document.getElementById('vz-notitie'));
   document.getElementById('vz-modal-cancel').addEventListener('click',closeModal);
   document.getElementById('vz-modal-save').addEventListener('click',function(){saveVerzuim(id);});
 
@@ -19105,12 +19156,31 @@ function saveVerzuim(id){
     type:vzType,
     urenZiek: vzType==='gedeeltelijk'&&urenZiekEl ? (parseFloat(urenZiekEl.value)||null) : null,
     urenWerk: vzType==='gedeeltelijk'&&urenWerkEl ? (parseFloat(urenWerkEl.value)||null) : null,
-    omschrijving:document.getElementById('vz-omschr').value.trim(),
-    notitie:document.getElementById('vz-notitie').value.trim(),
     status:tot?'hersteld':(bestaand.status||'actief'),
     aangemaaktOp:bestaand.aangemaaktOp||vandaagISO(),
     door:bestaand.door||(APP.profiel?APP.profiel.naam:''),
   });
+  // De vrije tekst gaat naar de afgeschermde tak, niet in het record. Wie geen inzage
+  // heeft, kreeg de velden niet te zien en laat de bestaande tekst dus met rust.
+  var _omschrEl = document.getElementById('vz-omschr');
+  var _notitieEl = document.getElementById('vz-notitie');
+  if(_omschrEl || _notitieEl){
+    var _tekst = {
+      omschrijving: _omschrEl ? _omschrEl.value.trim() : '',
+      notitie:      _notitieEl ? _notitieEl.value.trim() : ''
+    };
+    APP.verzuimDetail = APP.verzuimDetail || {};
+    APP.verzuimDetail[data.id] = _tekst;
+    var _vdPad = verzuimDetailPad(data.id);
+    if(_vdPad) FB.ref(_vdPad).set(_tekst).catch(function(e){
+      log('ERROR','DB','Verzuimdetail opslaan mislukt: ' + (e.message||e));
+      toast('De omschrijving kon niet worden opgeslagen','error');
+    });
+    // Een record van vóór de scheiding had de tekst nog in het record zelf staan;
+    // die wordt hiermee opgeruimd (null verwijdert de sleutel in de RTDB).
+    data.omschrijving = null;
+    data.notitie = null;
+  }
   if(isNew) APP.verzuim.push(data);
   else{var idx=APP.verzuim.findIndex(function(x){return String(x.id)===String(id);});if(idx>-1)APP.verzuim[idx]=data;}
   dbSaveItem('verzuim',data.id,data);
@@ -19201,8 +19271,9 @@ function openVerzuimPanel(id){
   h+=vv('Geregistreerd door',v.door);
   h+=vv('Op',fmtD(v.aangemaaktOp));
   h+='</div>';
-  if(v.omschrijving)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Omschrijving</div><div style="font-size:13px">'+esc(v.omschrijving)+'</div></div>';
-  if(v.notitie)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Notitie</div><div style="font-size:13px">'+esc(v.notitie)+'</div></div>';
+  var _pT = verzuimTekst(v);
+  if(_pT.omschrijving)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Omschrijving</div><div style="font-size:13px">'+esc(_pT.omschrijving)+'</div></div>';
+  if(_pT.notitie)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Notitie</div><div style="font-size:13px">'+esc(_pT.notitie)+'</div></div>';
   h+='<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px">';
   if(kanBeheren&&(v.status==='actief'||v.status==='langdurig'))h+='<button class="btn btn-primary" id="vzp-herstel" style="justify-content:center">✓ Markeer als hersteld</button>';
   if(kanBeheren&&v.status==='actief'&&duren>42)h+='<button class="btn btn-ghost" id="vzp-lang" style="justify-content:center;color:var(--orange)">⚠ Markeer als langdurig</button>';
@@ -19225,7 +19296,12 @@ function openVerzuimPanel(id){
   var dvB=pb.querySelector('#vzp-del');if(dvB)dvB.addEventListener('click',function(){
     bevestigActie('Verzuim verwijderen','Weet je zeker dat je deze verzuimregistratie wilt verwijderen?',function(){
       APP.verzuim=APP.verzuim.filter(function(x){return String(x.id)!==String(id);});
-      dbRemove('verzuim',id); closePanel(); renderVerzuim(); toast('Verwijderd','success');
+      dbRemove('verzuim',id);
+      // De vrije tekst staat in een eigen tak en zou anders als wees achterblijven.
+      if(APP.verzuimDetail) delete APP.verzuimDetail[id];
+      var _delPad = verzuimDetailPad(id);
+      if(_delPad) FB.ref(_delPad).remove().catch(function(e){ log('WARN','DB','Verzuimdetail verwijderen mislukt: '+(e.message||e)); });
+      closePanel(); renderVerzuim(); toast('Verwijderd','success');
     });
   });
 }

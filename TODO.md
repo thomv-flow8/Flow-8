@@ -240,9 +240,34 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       eigen bedrijf blijft. Cross-bedrijf en een gerichte get op een andermans bon blijven dicht.
       Ooit tóch afschermen: via een Cloud Function die de historie server-side samenvat, niet via de
       list-regel. Vastgelegd in de koptekst van `firestore.rules`.
-- [ ] **Verzuim optie D** — gevoelig deel echt afschermen voor volledige AVG-dekking (relevant
-      voorbij de testfase). Nu kan elk actief lid van een bedrijf via de RTDB-rules alle
-      verzuimrecords lezen; alleen schrijven is afgeschermd.
+- [ ] **Verzuim optie D** — IN UITVOERING sinds 28 september 2026. Gevoelig deel afschermen voor
+      volledige AVG-dekking. Gekozen aanpak: niet het hele record afschermen (de planning, het
+      dashboard, de route en vier rapportagepagina's lezen verzuim om te tonen dát iemand er niet
+      is — blokkeren breekt die), maar alléén de vrije tekst. `omschrijving` en `notitie` gaan naar
+      `flow8/verzuimDetail/{bedrijfId}/{verzuimId}`. Die tak hangt bewust **buiten**
+      `flow8/bedrijven`: daar staat één breed `.read` dat cascadeert en in RTDB niet meer in te
+      trekken is. `type` blijft zichtbaar (besloten met Thomas) omdat de planningbadge hem toont.
+      - [x] **1. Claim `vzInzage`** — gedeployd. Achteraf niet nodig gebleken (zie 2), maar
+        onschadelijk: geen rule gebruikt hem. Eventueel later bruikbaar aan de Firestore-kant.
+      - [x] **2. RTDB-rules** — gedeployd. **Leunt bewust NIET op de claim** maar leest het
+        inzagerecht rechtstreeks: rol `admin`, of `rollen/{rol}/rechten/verzuim/inzageAlle === true`.
+        Reden: de Rules Playground draagt **geen custom claims**, dus elke claim-rule is daar
+        ontestbaar (bewezen met een controletest op de bestaande `vzRecht`-rule — ook rood voor een
+        admin). Bijvangst: het intrekken van het I-vinkje werkt nu direct in plaats van pas na een
+        tokenrefresh, en app en rules delen één bron van waarheid met `magVerzuimInzageAlle()`.
+        Vier Playground-tests groen: admin lezen/schrijven mag, monteur lezen/schrijven niet.
+      - [x] **3. App om** — 28 september 2026. `verzuimDetailPad()`, `verzuimTekst()` (met terugval
+        op de oude velden in het record, zodat niet-gemigreerde records blijven werken) en
+        `laadVerzuimDetail()` (laadt niets zonder inzagerecht). Formulier toont de tekstvelden
+        alleen aan wie ze mag zien — anders zou iemand blind bestaande tekst leegschrijven.
+        Opslaan, zoekfilter, rij, zijpaneel, export en verwijderen om. Export schreef `v.reden` weg,
+        een veld dat niet bestaat, dus die kolom was altijd leeg — nu de echte omschrijving.
+      - [ ] **4. Migratie** — bestaande `omschrijving`/`notitie` verplaatsen en uit het record
+        wissen. Enige onomkeerbare stap; pas doen na een export als vangnet. Tot die tijd blijft de
+        terugval in `verzuimTekst()` alles tonen, dus er is geen haast.
+      - [ ] **Later mogelijk**: eigen dossier. Nu ziet een medewerker met `E` zijn eigen verzuim
+        zónder de vrije tekst. Wil je dat wél, dan moet `medId` mee in de detail-node en de rule
+        naast inzage ook het eigen record toestaan.
 - [x] **E-mailadressen vastgezet (rechtenverhoging)** — gevonden en opgelost op 21 september 2026.
       Een gebruiker mocht zijn eigen profiel-e-mail wijzigen, en elk actief lid dat van een medewerker;
       `zetGebruikersClaim` leidt de medId van dat adres af, dus daarmee kon een monteur de medId van

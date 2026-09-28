@@ -105,6 +105,24 @@
             ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && auth.token.vzRecht === 's'"
           }
         }
+      },
+      "verzuimDetail": {
+        "$bedrijfId": {
+          ".read": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/verzuim/inzageAlle').val() === true )",
+          ".write": false,
+          "$verzuimId": {
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/verzuim/inzageAlle').val() === true )",
+            "omschrijving": {
+              ".validate": "newData.isString() && newData.val().length < 2000"
+            },
+            "notitie": {
+              ".validate": "newData.isString() && newData.val().length < 5000"
+            },
+            "$overig": {
+              ".validate": false
+            }
+          }
+        }
       }
     }
   }
