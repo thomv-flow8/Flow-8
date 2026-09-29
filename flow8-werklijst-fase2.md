@@ -2472,3 +2472,30 @@ meer gebeuren. `focusId` is daarmee overbodig geworden voor dit veld.
 die wordt afgeleid van `tijdVan`. Alle varianten vragen een nieuw veld dat de tijd kan tegenspreken,
 en slepen werkt sowieso niet op de iPhone. Conclusie samen met Thomas: een tijd invullen doet alles
 wat een sleepvolgorde doet en meer — hij komt ook op de werkbon en de klant weet wanneer je komt.
+
+---
+
+# Afgerond werk zonder werkbon zichtbaar bij de klant — 29 september 2026
+
+`flow8-v2.html` · JS-syntax ✓.
+
+**Het probleem.** De historie bij een debiteur werd puur gevuld met `fsWerkbonnenVanDebiteur()` —
+werkbonnen uit Firestore. Een opdracht die is afgehandeld zónder dat er een bon is ingevuld bestaat
+alleen in de RTDB, en was dus nergens terug te zien. Bij het testen gebeurt dat vaak.
+
+**Kleiner dan gedacht: twee plekken, geen vier.** Een opdracht heeft `debId` en `skId`, maar **geen**
+verwijzing naar een object of een pomp — die koppeling loopt uitsluitend via de werkbon. Bij het
+object- en pompregister valt er dus niets toe te voegen. Alleen debiteur en serviceklant.
+
+**De filter dekt twee gevallen in één regel:** opdrachten met status `afgehandeld` of `verwerkt`
+waarvan het `werkbonId` niet voorkomt in de al getoonde bonnen. Dat vangt zowel "helemaal geen bon"
+als "de bon staat nog op concept en valt daarom buiten de lijst". `verwerkt` hoort er expliciet bij:
+dat is de administratieve eindstatus, en zulk werk moet in de historie blijven staan (bevestigd door
+Thomas).
+
+**Weergave:** zelfde regel in dezelfde chronologische lijst, met drie verschillen — "Geen werkbon"
+in plaats van een bonnummer, een grijze statusbadge in plaats van groen, en geen PDF-knop. Klikken
+opent de opdracht via `openOpdrachtPanel()` in plaats van een bon-PDF. De kop telt nu het totaal en
+meldt in de ondertitel hoeveel er zonder bon zijn, anders klopt het getal niet met wat eronder staat.
+
+**Geen extra netwerkverkeer en niets aan het datamodel:** de opdrachten staan al in `APP.opdrachten`.

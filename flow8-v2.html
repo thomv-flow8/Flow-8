@@ -1857,24 +1857,71 @@ function _wbOpenPdf(id, btn){
   if(btn) setTimeout(function(){ btn.disabled=false; btn.style.opacity=''; btn.innerHTML=origineel; }, 2500);
 }
 
+// Afgeronde opdrachten van deze klant waar géén werkbon in de historie bij staat.
+// Twee gevallen in één regel: er is helemaal geen bon gemaakt, óf de bon staat nog op
+// concept en valt daarom buiten de lijst (die toont alleen afgehandeld en verwerkt).
+// Alleen voor debiteur en serviceklant: een opdracht heeft `debId` en `skId`, maar géén
+// verwijzing naar een object of pomp — dat loopt uitsluitend via de werkbon.
+// Leest uit APP.opdrachten, dus geen extra netwerkverkeer.
+function _opdrachtenZonderBon(bron, bronId, bonnen){
+  if(!bronId || (bron !== 'debiteur' && bron !== 'serviceklant')) return [];
+  var bonIds = {};
+  (bonnen||[]).forEach(function(b){ if(b && b.id) bonIds[String(b.id)] = 1; });
+  var skIds = {};
+  if(bron === 'serviceklant'){
+    skIds[String(bronId)] = 1;
+  } else {
+    (APP.serviceklanten||[]).forEach(function(k){
+      if(String(k.debId) === String(bronId)) skIds[String(k.id)] = 1;
+    });
+  }
+  return (APP.opdrachten||[]).filter(function(o){
+    if(!o) return false;
+    if(o.status !== 'afgehandeld' && o.status !== 'verwerkt') return false;
+    if(o.werkbonId && bonIds[String(o.werkbonId)]) return false;   // de bon staat al in de lijst
+    if(bron === 'debiteur' && o.debId && String(o.debId) === String(bronId)) return true;
+    return !!(o.skId && skIds[String(o.skId)]);
+  }).sort(function(a,b){ return (b.datum||'').localeCompare(a.datum||''); });
+}
+
 function _wbHistorieAccordion(containerId, bonnen, bron, bronId, beginOpen){
   var wrap = document.getElementById(containerId); if(!wrap) return;
   var open = !!beginOpen;
+  // Afgeronde opdrachten zonder bon horen er ook in: anders zie je bij de klant niets
+  // terug van werk dat wél is uitgevoerd maar waar geen bon van is ingevuld.
+  var zonderBon = _opdrachtenZonderBon(bron, bronId, bonnen);
+  var items = bonnen.map(function(b){ return { soort:'bon', datum:b.datum||'', b:b }; })
+    .concat(zonderBon.map(function(o){ return { soort:'opdracht', datum:o.datum||'', o:o }; }))
+    .sort(function(a,b){ return (b.datum||'').localeCompare(a.datum||''); });
   // Nieuwste datum voor de samenvatting in de kop
-  var laatste = bonnen.reduce(function(m, b){ return (b.datum||'') > m ? (b.datum||'') : m; }, '');
+  var laatste = items.reduce(function(m, it){ return (it.datum||'') > m ? (it.datum||'') : m; }, '');
   var bronTekst = (bron==='debiteur' || bron==='serviceklant') ? 'deze klant' : (bron==='pomp' ? 'deze pomp' : 'dit object');
   function teken(){
     // Zelfde kop als contactpersonen, locaties, pompen en verzonden mails
     var h = _dpSectieKop('werkbonnen', '<span style="display:inline-flex;flex-shrink:0">'+(ICO.clipboard||'')+'</span>',
-      'Werkbonnen', bonnen.length,
-      laatste ? ('laatste: '+esc(fmtD(laatste))) : (bonnen.length ? '' : 'nog geen afgehandelde werkbonnen'),
+      'Werkbonnen', items.length,
+      (laatste ? ('laatste: '+esc(fmtD(laatste))) : (items.length ? '' : 'nog geen afgerond werk'))
+        + (zonderBon.length ? ((laatste?' · ':'')+zonderBon.length+' zonder werkbon') : ''),
       open, 'wbh-acc-hdr');
-    if(open && !bonnen.length){
-      h+='<div style="font-size:12px;color:var(--muted);padding:10px 0">Er zijn nog geen afgehandelde werkbonnen voor '+bronTekst+'.</div>';
+    if(open && !items.length){
+      h+='<div style="font-size:12px;color:var(--muted);padding:10px 0">Er is nog geen afgerond werk voor '+bronTekst+'.</div>';
     }
-    if(open && bonnen.length){
+    if(open && items.length){
       h+='<div>';
-      bonnen.forEach(function(b){
+      items.forEach(function(_it){
+        // Een afgeronde opdracht zonder bon: zelfde regel, maar grijs, zonder bonnummer en
+        // zonder PDF-knop — en klikken opent de opdracht in plaats van een bon.
+        if(_it.soort === 'opdracht'){
+          var o = _it.o;
+          var _otO = _otVanType(o.type);
+          h+='<div class="wbh-item wbh-opdracht" data-opd="'+esc(o.id)+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-left:4px solid '+_otO.kleur+';border-radius:8px;margin-bottom:6px;cursor:pointer">';
+          h+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(o.datum?fmtD(o.datum):'—')+' · '+esc(_otO.label||'Opdracht')+'</div>';
+          h+='<div style="font-size:11px;color:var(--muted)">Geen werkbon'+(o.plaats?(' · '+esc(o.plaats)):'')+'</div></div>';
+          h+='<span class="wbl-status" style="background:var(--surface);color:var(--muted);border:1px solid var(--border)">'+(o.status==='verwerkt'?'Verwerkt':'Afgehandeld')+'</span>';
+          h+='</div>';
+          return;
+        }
+        var b = _it.b;
         var bonNr = b.bonnummer || (b.planningId?('WB-'+String(b.planningId).slice(-6)):'werkbon');
         var _otH = _otVanType(b.typeWerk);
         h+='<div class="wbh-item" data-id="'+esc(b.id)+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-left:4px solid '+_otH.kleur+';border-radius:8px;margin-bottom:6px;cursor:pointer">';
@@ -1893,6 +1940,10 @@ function _wbHistorieAccordion(containerId, bonnen, bron, bronId, beginOpen){
     wrap.querySelector('.wbh-acc-hdr').addEventListener('click', function(){ open=!open; teken(); });
     wrap.querySelectorAll('.wbh-item').forEach(function(it){
       it.addEventListener('click', function(e){
+        if(it.dataset.opd){
+          if(typeof openOpdrachtPanel==='function') openOpdrachtPanel(it.dataset.opd);
+          return;
+        }
         if(e.target.closest('.wbh-pdf')) return;   // PDF-knop heeft een eigen handler
         var knop = it.querySelector('.wbh-pdf');
         if(knop) knop.click(); else _wbOpenPdf(it.dataset.id, null);
