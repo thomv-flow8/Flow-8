@@ -2560,3 +2560,37 @@ Opgelost met `fetch(request, { cache:'no-cache' })`. Dat betekent niet "niet cac
 navragen bij de server": GitHub Pages stuurt een 304 als er niets veranderd is, dus het kost vrijwel
 niets. `no-store` zou de ruim 2 MB grote HTML elke keer opnieuw downloaden. `CACHE_NAME` naar
 `flow8-v5`, zodat de oude cache één keer wordt opgeruimd.
+
+---
+
+# Mail fase 2, stap 1: huisstijlkleur door de hele mail — 29 september 2026
+
+`flow8-functions/functions/index.js` · Node-syntax ✓. Alleen de Cloud Function; aan de app niets.
+
+**Het probleem.** De accentkleur van een bedrijf werd alléén in de header gebruikt. Alles daaronder
+zat vast op grijsblauw (`#f4f7fa`, `#e2e9f1`, `#1c5f9e`), waardoor de mail in twee helften uiteenviel:
+een gekleurde kop en een neutrale rest.
+
+**Niet gedaan wat "rijkere sjablonen" suggereert.** Het gegevensblok stond al goed: gestapeld, klein
+hoofdletterlabel boven de waarde. Dat stapelen is een bewuste keuze (lange waarden als adres of
+werkomschrijving worden in een smalle kolom geperst), dus dat is met rust gelaten.
+
+**Wat er wel is gedaan.** Vier kleuren afgeleid van de accentkleur, server-side uitgerekend tot vaste
+hex-waarden omdat e-mail geen CSS-kleurfuncties kent:
+`_metWit(kl, 0.94)` vlak · `0.80` rand · `0.86` scheidingslijntjes · `_tekstOpWit(kl)` letterkleur.
+Toegepast op het gegevensblok (plus een accentrand van 4px links), de bolletjes bij opsommingen, de
+links in de body en de footer. `_bodyNaarHtml()` en `_inline()` krijgen de kleur nu mee.
+
+**`_tekstOpWit()` is de tegenhanger van `_leesbareTekst()`.** Die laatste kiest witte of donkere tekst
+óp de accentkleur; deze donkert de accentkleur af tot hij leesbaar is áls tekst op wit. Nodig omdat
+een bedrijf een lichte kleur kan kiezen — geel is prima als vlak, maar onleesbaar als letterkleur.
+
+**Randgevallen nagerekend** met een los testscript (kleurtest.js in de scratchpad): donkerblauw,
+Flow8-blauw, fel geel, lichtgroen, bijna wit, zwart en een ongeldige waarde. Alle letterkleuren komen
+op luminantie ≤ 0,44 uit en geen enkel vlak wordt te donker voor donkere tekst. Bij de standaardkleur
+verandert er praktisch niets (#f1f3f5 tegen het oude #f4f7fa), dus bedrijven zonder ingestelde kleur
+zien geen verschil.
+
+**Geen afbeeldingen gebruikt** — alleen kleur en randen, dus dit werkt gegarandeerd in elke
+mailclient, ook Outlook. Iconen (stap 2) zijn bewust uitgesteld tot dit in de preview is beoordeeld:
+in e-mail moeten dat PNG's op een publieke URL zijn, en veel clients blokkeren afbeeldingen.

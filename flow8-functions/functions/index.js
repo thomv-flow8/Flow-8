@@ -51,6 +51,40 @@ function _geldigeKleur(hex) {
   return /^#[0-9a-fA-F]{6}$/.test(h) ? h : MAIL_ACCENT_DEFAULT;
 }
 
+// ── Kleuren afleiden van de accentkleur ────────────────────────────────────
+// E-mail kent geen CSS-kleurfuncties, dus alles wordt hier server-side uitgerekend
+// tot vaste hex-waarden.
+function _hexNaarRgb(hex) {
+  let h = String(hex || '').replace('#', '');
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) h = MAIL_ACCENT_DEFAULT.replace('#', '');
+  return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
+}
+function _rgbNaarHex(r, g, b) {
+  const f = (n) => ('0' + Math.max(0, Math.min(255, Math.round(n))).toString(16)).slice(-2);
+  return '#' + f(r) + f(g) + f(b);
+}
+// Mengt de accentkleur met wit. deel = 0 geeft de kleur zelf, 1 geeft wit.
+// Zo krijgt elk bedrijf een vlak en een randlijn in zijn eigen kleur, zonder dat het schreeuwt.
+function _metWit(hex, deel) {
+  const [r, g, b] = _hexNaarRgb(hex);
+  return _rgbNaarHex(r + (255-r)*deel, g + (255-g)*deel, b + (255-b)*deel);
+}
+// Donkert de accentkleur af tot hij leesbaar is als tekst op wit. Nodig omdat een bedrijf
+// een lichte kleur kan kiezen (geel, lichtgroen) — die is prima als vlak, maar onleesbaar
+// als letterkleur. Tegenhanger van _leesbareTekst(), dat de andere kant op werkt.
+function _tekstOpWit(hex) {
+  let [r, g, b] = _hexNaarRgb(hex);
+  let lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+  let ronde = 0;
+  while (lum > 0.45 && ronde < 12) {
+    r *= 0.85; g *= 0.85; b *= 0.85;
+    lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+    ronde++;
+  }
+  return _rgbNaarHex(r, g, b);
+}
+
 // Tekst die in een mailheader belandt: regeleindes en aanhalingstekens eruit.
 // Zonder dit kan een bedrijfsnaam met een regeleinde er een extra header (bijv. bcc)
 // achteraan plakken — de naam komt uit de database en is dus niet per definitie braaf.
@@ -101,13 +135,14 @@ function _esc(str) {
 //   **vet**        → <strong>
 //   *cursief*      → <em>
 //   [tekst](url)   → <a href> (alleen http/https/mailto/tel toegestaan)
-function _inline(str) {
+function _inline(str, linkKleur) {
+  const _lk = linkKleur || _tekstOpWit(MAIL_ACCENT_DEFAULT);
   let h = _esc(str);
   // Links eerst (voordat * / ** de haakjesinhoud raken). URL wordt gevalideerd.
   h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, tekst, url){
     const schoon = String(url).trim();
     if (!/^(https?:\/\/|mailto:|tel:)/i.test(schoon)) return tekst; // onveilig → alleen de tekst
-    return '<a href="' + schoon.replace(/"/g,'%22') + '" style="color:#1c5f9e;font-weight:600;text-decoration:underline;">' + tekst + '</a>';
+    return '<a href="' + schoon.replace(/"/g,'%22') + '" style="color:' + _lk + ';font-weight:600;text-decoration:underline;">' + tekst + '</a>';
   });
   // Vet vóór cursief (** moet niet als twee losse * gezien worden)
   h = h.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#16202e;">$1</strong>');
@@ -118,7 +153,15 @@ function _inline(str) {
 // Zet de platte-tekst-body om naar HTML-blokken.
 // Regels van de vorm "Label: waarde" die direct op elkaar volgen, worden samen
 // als één uitgelijnd gegevensblok gerenderd. Overige tekst wordt alinea's.
-function _bodyNaarHtml(body) {
+// `accent` is de huisstijlkleur van het bedrijf. Stond hiervoor niet in deze functie,
+// waardoor alles onder de header vastzat op grijsblauw en de mail in twee helften uiteenviel:
+// een gekleurde kop en een neutrale rest.
+function _bodyNaarHtml(body, accent) {
+  const kl = _geldigeKleur(accent);
+  const klTekst  = _tekstOpWit(kl);      // leesbaar als letterkleur op wit
+  const klVlak   = _metWit(kl, 0.94);    // zachte achtergrond voor het gegevensblok
+  const klRand   = _metWit(kl, 0.80);    // randlijn eromheen
+  const klLijn   = _metWit(kl, 0.86);    // scheidingslijntjes binnen het blok
   const regels = String(body || '').replace(/\r\n/g, '\n').split('\n');
   let html = '';
   let i = 0;
@@ -137,7 +180,7 @@ function _bodyNaarHtml(body) {
     // Kop:  "# Tekst"  → tussentitel
     if (/^#\s+/.test(regel)) {
       html += '<div style="font-size:16px;font-weight:800;color:#16202e;margin:24px 0 8px;">'
-           +  _inline(regel.replace(/^#\s+/, '')) + '</div>';
+           +  _inline(regel.replace(/^#\s+/, ''), klTekst) + '</div>';
       i++;
       continue;
     }
@@ -151,8 +194,8 @@ function _bodyNaarHtml(body) {
       }
       html += '<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tbody>';
       items.forEach(function(it){
-        html += '<tr><td style="vertical-align:top;padding:0 10px 8px 0;color:#1c5f9e;font-weight:800;font-size:15px;line-height:1.6;">&bull;</td>'
-             +  '<td style="vertical-align:top;padding:0 0 8px;font-size:15px;line-height:1.6;color:#3a4453;">' + _inline(it) + '</td></tr>';
+        html += '<tr><td style="vertical-align:top;padding:0 10px 8px 0;color:' + klTekst + ';font-weight:800;font-size:15px;line-height:1.6;">&bull;</td>'
+             +  '<td style="vertical-align:top;padding:0 0 8px;font-size:15px;line-height:1.6;color:#3a4453;">' + _inline(it, klTekst) + '</td></tr>';
       });
       html += '</tbody></table>';
       continue;
@@ -170,11 +213,11 @@ function _bodyNaarHtml(body) {
       // betrouwbaar op elk toestel (geen media-query nodig, die stript Gmail toch)
       // en voorkomt dat lange waarden (adres, werkomschrijving) in een smalle kolom
       // worden geperst.
-      html += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7fa;border:1px solid #e2e9f1;border-radius:12px;margin:4px 0 24px;"><tr><td style="padding:20px 22px;">';
+      html += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + klVlak + ';border:1px solid ' + klRand + ';border-left:4px solid ' + klTekst + ';border-radius:12px;margin:4px 0 24px;"><tr><td style="padding:20px 22px;">';
       rijen.forEach(function(r, idx){
-        if (idx > 0) html += '<div style="height:1px;background:#e2e9f1;margin:14px 0;"></div>';
+        if (idx > 0) html += '<div style="height:1px;background:' + klLijn + ';margin:14px 0;"></div>';
         html += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#8b96a6;font-weight:700;">' + _esc(r.label) + '</div>';
-        html += '<div style="font-size:15px;color:#16202e;font-weight:600;margin-top:3px;line-height:1.45;">' + _inline(r.waarde) + '</div>';
+        html += '<div style="font-size:15px;color:#16202e;font-weight:600;margin-top:3px;line-height:1.45;">' + _inline(r.waarde, klTekst) + '</div>';
       });
       html += '</td></tr></table>';
       continue;
@@ -185,7 +228,7 @@ function _bodyNaarHtml(body) {
     const alinea = [];
     while (i < regels.length && regels[i].trim() !== '' && !labelRe.test(regels[i])
            && !/^#\s+/.test(regels[i]) && !/^-\s+/.test(regels[i])) {
-      alinea.push(_inline(regels[i]));
+      alinea.push(_inline(regels[i], klTekst));
       i++;
     }
     html += '<p style="margin:0 0 20px;font-size:15px;line-height:1.72;color:#3a4453;">'
@@ -243,12 +286,12 @@ function bouwMailHtml(gegevens, onderwerp, bodyTekst, label) {
 // titel
 '<tr><td style="padding:36px 32px 8px;"><h1 style="margin:0;font-size:18px;line-height:1.35;color:#16202e;font-weight:700;letter-spacing:-.2px;">' + _esc(onderwerp) + '</h1></td></tr>' +
 // body
-'<tr><td style="padding:22px 32px 8px;">' + _bodyNaarHtml(bodyTekst) + '</td></tr>' +
+'<tr><td style="padding:22px 32px 8px;">' + _bodyNaarHtml(bodyTekst, accent) + '</td></tr>' +
 // Logo in het witte deel, onder de ondertekening (als er een publieke URL is).
 (logoFooter ? '<tr><td style="padding:6px 32px 0;">' + logoFooter + '</td></tr>' : '') +
 '<tr><td style="padding:20px 32px 0;"></td></tr>' +
 // footer
-'<tr><td style="background:#f4f7fa;padding:26px 32px;border-top:1px solid #e2e9f1;">' +
+'<tr><td style="background:' + _metWit(accent, 0.94) + ';padding:26px 32px;border-top:1px solid ' + _metWit(accent, 0.80) + ';">' +
 '<div style="font-size:13px;font-weight:700;color:#16202e;">' + naam + '</div>' +
 (adresregel ? '<div style="font-size:12px;color:#8b96a6;margin-top:3px;line-height:1.5;">' + _esc(adresregel) + '</div>' : '') +
 (contactregel ? '<div style="font-size:12px;color:#8b96a6;margin-top:2px;line-height:1.5;">' + contactregel + '</div>' : '') +
