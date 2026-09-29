@@ -84,7 +84,7 @@
             }
           },
           "medewerkersArchief": {
-            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
+            ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/medewerkers/schrijven').val() === true )"
           },
           "mailTemplates": {
             ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'"
