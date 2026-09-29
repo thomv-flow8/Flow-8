@@ -171,6 +171,24 @@ function _bodyNaarHtml(body, accent) {
   // aan het eind staat (dan is het een kop, bijv. "Werkzaamheden:").
   const labelRe = /^([A-Za-zÀ-ÿ0-9 .\/'-]{2,40}):\s*(\S.*)$/;
 
+  // Een kale URL matcht het label-patroon ook: 'https' + dubbele punt + '//www...'.
+  // Dat leverde een gegevensrij op met "HTTPS" als label. In markdown-vorm,
+  // [tekst](https://...), gaat het wel goed — die wordt eerder afgevangen door _inline.
+  function _isGegevensRegel(r) {
+    const mm = String(r).match(labelRe);
+    if (!mm) return false;
+    return !/^(https?|mailto|tel|ftp)$/i.test(mm[1].trim());
+  }
+
+  // Begint op deze positie een gegevensblok? Zowel de blok-tak als de alinea-lus hieronder
+  // gebruiken deze ene controle. Toen die twee uit elkaar liepen — de blok-tak eiste twee
+  // regels, de alinea-lus weigerde nog elke label-regel — viel een losse "Let op:"-regel
+  // tussen wal en schip: geen blok, geen alinea, en de teller schoof niet op. Dat is een
+  // oneindige lus, en in een Cloud Function een vastloper.
+  function _startBlok(idx) {
+    return idx + 1 < regels.length && _isGegevensRegel(regels[idx]) && _isGegevensRegel(regels[idx + 1]);
+  }
+
   while (i < regels.length) {
     const regel = regels[i];
 
@@ -201,10 +219,15 @@ function _bodyNaarHtml(body, accent) {
       continue;
     }
 
-    // Start van een gegevensblok?
-    if (labelRe.test(regel)) {
+    // Start van een gegevensblok? Pas vanaf TWEE opeenvolgende regels. Een echt blok heeft
+    // altijd meerdere rijen (Datum, Tijdstip, Adres...), terwijl een losse zin als
+    // "Let op: de installatie moet bereikbaar zijn" of "Bel ons op: 0183 - 123456" ook aan
+    // het patroon voldoet maar gewoon een zin is. Die viel hiervoor in een gegevensblok.
+    // Zo hoeft er geen lijst met toegestane labels te worden bijgehouden, en blijft het
+    // uitlegbaar: twee onder elkaar is een blok, één is een zin.
+    if (_startBlok(i)) {
       const rijen = [];
-      while (i < regels.length && labelRe.test(regels[i])) {
+      while (i < regels.length && _isGegevensRegel(regels[i])) {
         const m = regels[i].match(labelRe);
         rijen.push({ label: m[1].trim(), waarde: m[2].trim() });
         i++;
@@ -226,7 +249,7 @@ function _bodyNaarHtml(body, accent) {
     // Anders: gewone alinea (verzamel opeenvolgende niet-lege regels die geen
     // label, kop of lijst zijn)
     const alinea = [];
-    while (i < regels.length && regels[i].trim() !== '' && !labelRe.test(regels[i])
+    while (i < regels.length && regels[i].trim() !== '' && !_startBlok(i)
            && !/^#\s+/.test(regels[i]) && !/^-\s+/.test(regels[i])) {
       alinea.push(_inline(regels[i], klTekst));
       i++;

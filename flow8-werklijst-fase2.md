@@ -2594,3 +2594,32 @@ zien geen verschil.
 **Geen afbeeldingen gebruikt** — alleen kleur en randen, dus dit werkt gegarandeerd in elke
 mailclient, ook Outlook. Iconen (stap 2) zijn bewust uitgesteld tot dit in de preview is beoordeeld:
 in e-mail moeten dat PNG's op een publieke URL zijn, en veel clients blokkeren afbeeldingen.
+
+**Blokherkenning aangescherpt** (zelfde dag, na een vraag van Thomas: "hoe weet de template dat die
+regels in een blok moeten?"). Er is geen lijst met bekende labels — de wrapper kijkt naar de vórm
+van een regel: 2–40 tekens, dubbele punt, niet-lege waarde. Dat pakte te ruim:
+`Let op: de installatie moet bereikbaar zijn` en `Bel ons op: 0183 - 123456` werden gegevensrijen,
+en een kale URL op een eigen regel werd een rij met label "HTTPS" (`https` + `:` + `//www...`).
+
+Opgelost zonder lijst met toegestane labels, want die moet je onderhouden en hij breekt zodra een
+ander bedrijf een eigen veld gebruikt. In plaats daarvan: **een blok begint pas vanaf twee
+opeenvolgende gegevensregels.** Een echt blok heeft altijd meerdere rijen; een losse "Let op:"-zin
+staat op zichzelf. Plus `https`/`mailto`/`tel`/`ftp` worden nooit een label.
+
+**De test ving een oneindige lus af die de preview nooit had laten zien.** Eerste versie: de blok-tak
+eiste twee regels, maar de alinea-lus weigerde nog steeds élke label-regel. Een losse `Let op:`-regel
+viel daardoor tussen wal en schip — geen blok, geen alinea — en `i` schoof niet op. Resultaat:
+`RangeError: Invalid string length`, oftewel een vastloper in de Cloud Function bij elke mail met
+zo'n zin erin. Visueel niet te zien, want de mail kwam nooit af.
+Opgelost met één gedeelde `_startBlok(idx)` die beide takken gebruiken, zodat ze per definitie
+hetzelfde besluiten. **Les: bij een lus met meerdere uitgangen moet elke tak dezelfde voorwaarde
+gebruiken, anders ontstaat er een gat waarin de teller blijft hangen.**
+
+Negen gevallen getest tegen de échte `_bodyNaarHtml` (bloktest.js in de scratchpad): blok van vier en
+van twee rijen ✓, losse "Let op:"- en "Bel ons op:"-zin ✗, kale URL ✗, URL tussen twee rijen ✗
+(breekt het blok in twee losse regels — bewust, het alternatief verplaatst tekst), losse
+gegevensregel ✗, label zonder waarde ✗, opsomming ✗.
+
+**Preview vóór de deploy**, met de echte functies uit beide versies naast elkaar
+(mailpreview.js). Dat was op aandringen van Thomas: ik had stap 1 meteen gecommit zonder eerst iets
+te laten zien, terwijl de werkwijze een preview voorschrijft bij visuele wijzigingen.
