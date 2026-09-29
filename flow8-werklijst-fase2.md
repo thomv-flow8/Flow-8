@@ -2549,3 +2549,14 @@ Vervangen door `geocodeMetCache()`, de helper die de rest van de app ook gebruik
 een geocode-aanroep per berekening, want het bedrijfsadres zit dan in de cache.
 **Les:** de `try` met logregel was bedoeld als vangnet, maar wees binnen één klik de echte oorzaak
 aan. Bij een stille fout in een async-callback is een logregel meer waard dan code lezen.
+
+**Service worker: na een deploy bleef de oude versie hangen.** Opgevallen doordat de fix hierboven
+niet aankwam — het log bleef `Can't find variable: geocoder` melden terwijl dat woord alleen nog in
+een commentaarregel stond. De HTML wordt network-first opgehaald, maar een gewone `fetch()` mag uit
+de **browsercache** putten; die gaf de vorige versie terug zonder het netwerk te raadplegen, en de
+service worker sloeg die oude versie vervolgens óók nog op. Daardoor was na elke deploy een harde
+verversing nodig, terwijl "network-first" precies het tegenovergestelde suggereert.
+Opgelost met `fetch(request, { cache:'no-cache' })`. Dat betekent niet "niet cachen" maar "altijd
+navragen bij de server": GitHub Pages stuurt een 304 als er niets veranderd is, dus het kost vrijwel
+niets. `no-store` zou de ruim 2 MB grote HTML elke keer opnieuw downloaden. `CACHE_NAME` naar
+`flow8-v5`, zodat de oude cache één keer wordt opgeruimd.

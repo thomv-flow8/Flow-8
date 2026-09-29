@@ -1,5 +1,5 @@
 // Flow8 Service Worker
-const CACHE_NAME = 'flow8-v4';
+const CACHE_NAME = 'flow8-v5';
 const OFFLINE_URL = '/Flow-8/flow8-v2.html';
 
 // Bestanden om te cachen bij installatie
@@ -53,10 +53,17 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // App shell (HTML): network-first zodat updates direct beschikbaar zijn
+  // App shell (HTML): network-first zodat updates direct beschikbaar zijn.
+  // `cache:'no-cache'` is hier essentieel: een gewone fetch() mag uit de browsercache putten,
+  // en die gaf op GitHub Pages de vorige versie terug zonder het netwerk te raadplegen — de
+  // service worker sloeg die oude versie vervolgens óók nog eens op. Gevolg: na een deploy
+  // bleef je de oude app zien tot je hard verversde, terwijl "network-first" suggereert van niet.
+  // 'no-cache' betekent niet "niet cachen" maar "altijd navragen bij de server": die stuurt een
+  // 304 als er niets veranderd is, dus het kost bijna niets. 'no-store' zou de hele HTML
+  // (ruim 2 MB) elke keer opnieuw downloaden.
   if(url.includes('flow8-v2.html') || url.endsWith('/') || url.endsWith('/Flow-8/')) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: 'no-cache' })
         .then(function(response) {
           if(response && response.status === 200) {
             var clone = response.clone();
