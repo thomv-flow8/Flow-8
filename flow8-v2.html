@@ -6287,6 +6287,28 @@ function magVerzuimInzageAlle() {
 // magVerzuimInzageAlle() hierboven gebruikt, zodat app en rules niet uiteen lopen.
 // Het verzuimrecord zelf houdt datum, type, status en uren: dat heeft de planning
 // nodig om te zien dát iemand er niet is, zonder te weten waaróm.
+// Was deze medewerker ziek op deze dag? Kijkt naar de PERIODE, niet naar de status: een
+// afgesloten ziekmelding hoort in de planning van die week gewoon zichtbaar te blijven,
+// anders klopt je historie niet meer zodra iemand hersteld is gemeld.
+// `tot` is de hersteldatum — de eerste dag dat iemand weer werkt — dus die dag telt niet
+// meer mee. Zo rekent de rapportage al (`dagVoor(tot)`); de planning deed het inclusief en
+// gaf daardoor één ziektedag te veel.
+// Geeft het verzuimrecord terug (de aanroeper heeft type en status nodig voor het label),
+// of null.
+function verzuimOpDag(medId, dag){
+  if(!medId || !dag) return null;
+  var lijst = APP.verzuim || [];
+  for(var i=0; i<lijst.length; i++){
+    var v = lijst[i];
+    if(!v || !v.van) continue;
+    if(String(v.medId) !== String(medId)) continue;
+    if(dag < v.van) continue;
+    if(v.tot && dag >= v.tot) continue;   // hersteldatum = eerste werkdag, telt niet mee
+    return v;
+  }
+  return null;
+}
+
 function verzuimDetailPad(id){
   if(!APP.bedrijfId) return null;   // nooit een pad raden voor een onbekende tenant
   return 'flow8/verzuimDetail/' + APP.bedrijfId + (id ? '/' + id : '');
@@ -8368,7 +8390,7 @@ function renderDashboard() {
   var _dsAfwezig = !_dsIsWerkdag ? 0 : APP.medewerkers.filter(function(m){
     if(m.status === 'inactief') return false;
     return APP.verlof.some(function(v){ return String(v.medId)===String(m.id) && v.status==='goedgekeurd' && (v.van||'')<=vandaag && (v.tot||v.van||'')>=vandaag; })
-      || APP.verzuim.some(function(v){ return String(v.medId)===String(m.id) && (v.status==='actief'||v.status==='langdurig') && (v.van||'')<=vandaag && (!v.tot||v.tot>=vandaag); });
+      || !!verzuimOpDag(m.id, vandaag);
   }).length;
   var _dsAgenda = (typeof agAfsprakenOp==='function' ? agAfsprakenOp(vandaag).filter(function(a){ return !a.isStoringsdienst && !a.isVerlof && !a.isBlokkade; }).length : 0);
   h += '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
@@ -8561,7 +8583,7 @@ function renderDashboard() {
   var _dagNr = new Date(vandaag+'T00:00:00').getDay(); // 0=zo, 6=za
   var _isWerkdag = _dagNr > 0 && _dagNr < 6;
   var verlofVandaag  = _isWerkdag ? APP.verlof.filter(function(v){return v.status==='goedgekeurd'&&v.van<=vandaag&&(v.tot||v.van)>=vandaag&&_medInDienst(v.medId);}) : [];
-  var verzuimVandaag = _isWerkdag ? APP.verzuim.filter(function(v){return (v.status==='actief'||v.status==='langdurig')&&v.van<=vandaag&&(!v.tot||v.tot>=vandaag)&&_medInDienst(v.medId);}) : [];
+  var verzuimVandaag = _isWerkdag ? APP.verzuim.filter(function(v){return _medInDienst(v.medId) && verzuimOpDag(v.medId, vandaag) === v;}) : [];
   var afwezig = verlofVandaag.map(function(v){
     var m=getMed(v.medId);
     return{med:m, reden: verlofRedenLabel(v)};
@@ -15082,6 +15104,53 @@ function minToTijd(min) {
 // postcodeNummer, _optimaliseerPostcode) is verwijderd: er was geen knop meer die hem opende,
 // en route-optimalisatie zit nu in Route (dagplanning) en in de jaarplanner.
 
+// Eén zoekvergelijking voor alle drie de weergaven. Stond eerst alleen in renderPlanLijst,
+// waardoor zoeken in de week- en dagweergave niets deed: die lezen APP.opdrachten rechtstreeks.
+// Sorteert opdrachten op begintijd, met die zonder tijd onderaan. De oude vergelijking
+// (`(a.tijdVan||'')>(b.tijdVan||'')?1:-1`) gaf bij gelijke waarden -1 — dus niet stabiel —
+// en zette lege tijden juist bovenaan, waardoor de eerste afspraak van de dag niet bovenaan stond.
+function _planSorteerOpTijd(a, b){
+  var ta = (a && a.tijdVan) ? String(a.tijdVan) : '';
+  var tb = (b && b.tijdVan) ? String(b.tijdVan) : '';
+  if(!ta && !tb) return 0;   // allebei zonder tijd: onderlinge volgorde ongemoeid laten
+  if(!ta) return 1;          // zonder tijd naar onderen
+  if(!tb) return -1;
+  return ta < tb ? -1 : (ta > tb ? 1 : 0);
+}
+
+function _planZoekMatch(o){
+  if(!_planZoek) return true;
+  var q = _planZoek.toLowerCase();
+  var monteur = o.monteurId ? getMed(o.monteurId) : null;
+  var monteurNaam = monteur ? (monteur.voornaam+' '+monteur.achternaam).toLowerCase() : '';
+  return (o.klantNaam||'').toLowerCase().includes(q)
+      || (o.externNummer||'').toLowerCase().includes(q)
+      || (o.adres||'').toLowerCase().includes(q)
+      || (o.postcode||'').toLowerCase().includes(q)
+      || (o.plaats||'').toLowerCase().includes(q)
+      || monteurNaam.includes(q)
+      || (o.notitie||'').toLowerCase().includes(q)
+      || (o.pomptype||'').toLowerCase().includes(q);
+}
+
+// Alleen het resultaatgedeelte opnieuw opbouwen. Bij zoeken hertekende de hele pagina,
+// inclusief het zoekveld zelf — en toetsaanslagen die binnenkwamen terwijl die render liep
+// belandden in een veld dat net was vervangen. Die tekens raakten dan zoek, waardoor de
+// laatste letters bleven staan. De toolbar blijft nu staan, dus dat kan niet meer.
+// De statistieken en filterchips zitten ín renderPlanLijst en lopen dus gewoon mee.
+function _planHertekenInhoud(){
+  var pc = document.getElementById('plan-content');
+  if(!pc){ renderPlanning(); return; }
+  var planningRollen = APP.planningRollen || ['monteur','extern'];
+  var monteurs = APP.medewerkers.filter(function(m){
+    return m.status !== 'inactief' && planningRollen.indexOf(m.rol) >= 0;
+  });
+  if (_planView === 'lijst')      pc.innerHTML = renderPlanLijst(monteurs);
+  else if (_planView === 'week')  pc.innerHTML = renderPlanWeek(monteurs);
+  else if (_planView === 'dag')   pc.innerHTML = renderPlanDag(monteurs);
+  bindPlanningEvents();
+}
+
 function renderPlanning() {
   var _tPlan = _tik();
   _PERF._planN = (_PERF._planN || 0) + 1;
@@ -15176,7 +15245,8 @@ function renderPlanning() {
   if(zoekInput) zoekInput.addEventListener('input', function(e){
     _planZoek=e.target.value;
     _planPage=1;
-    debounceRender('plan', renderPlanning, 'plan-zoek');
+    // Geen focusId meer nodig: het zoekveld staat buiten het hertekende deel en blijft staan.
+    debounceRender('plan', _planHertekenInhoud, null, 180);
   });
   // Update periode label
   var lbl = document.getElementById('plan-periode-label');
@@ -15397,21 +15467,7 @@ function renderPlanLijst(monteurs) {
     if (_planStatusFilter === 'spoed') { if(!_isSpoed(o)) return false; }
     else if (_planStatusFilter && o.status !== _planStatusFilter) return false;
     if (_planActieFilter && (o.status !== 'actie' || (o.actietype||'') !== _planActieFilter)) return false;
-    if (_planZoek) {
-      var q = _planZoek.toLowerCase();
-      var monteur = o.monteurId ? getMed(o.monteurId) : null;
-      var monteurNaam = monteur ? (monteur.voornaam+' '+monteur.achternaam).toLowerCase() : '';
-      if (!(
-        (o.klantNaam||'').toLowerCase().includes(q) ||
-        (o.externNummer||'').toLowerCase().includes(q) ||
-        (o.adres||'').toLowerCase().includes(q) ||
-        (o.postcode||'').toLowerCase().includes(q) ||
-        (o.plaats||'').toLowerCase().includes(q) ||
-        monteurNaam.includes(q) ||
-        (o.notitie||'').toLowerCase().includes(q) ||
-        (o.pomptype||'').toLowerCase().includes(q)
-      )) return false;
-    }
+    if (!_planZoekMatch(o)) return false;
     if (!o.datum) return true;
     return o.datum >= bereik.van && o.datum <= bereik.tot;
   });
@@ -15430,11 +15486,7 @@ function renderPlanLijst(monteurs) {
   // zodat alle badge-tellingen kloppen ongeacht welk filter actief is.
   var _statBron = APP.opdrachten.filter(function(o){
     if (_planFilter !== 'alle' && String(o.monteurId) !== _planFilter) return false;
-    if (_planZoek) {
-      var q = _planZoek.toLowerCase();
-      var hay = (o.klantNaam||'')+' '+(o.adres||'')+' '+(o.plaats||'')+' '+(o.postcode||'');
-      if (hay.toLowerCase().indexOf(q) < 0) return false;
-    }
+    if (!_planZoekMatch(o)) return false;
     if (!o.datum) return true;
     return o.datum >= bereik.van && o.datum <= bereik.tot;
   });
@@ -16073,8 +16125,9 @@ function renderPlanWeek(monteurs) {
     dagen.forEach(function(dag) {
       var isVandaag = dag === nu;
       var dagOps = APP.opdrachten.filter(function(o){
+        if(!_planZoekMatch(o)) return false;
         return o.datum===dag && (String(o.monteurId)===String(m.id) || (Array.isArray(o.monteurIds) && o.monteurIds.map(String).indexOf(String(m.id))>=0));
-      }).sort(function(a,b){return (a.tijdVan||'')>(b.tijdVan||'')?1:-1;});
+      }).sort(_planSorteerOpTijd);
 
       var opVerlofDag = APP.verlof.filter(function(v){
         return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&dag>=v.van&&dag<=(v.tot||v.van);
@@ -16085,9 +16138,8 @@ function renderPlanWeek(monteurs) {
         var tijdTxt = (vl.gedeeltelijk && vl.tijdVan) ? ' '+vl.tijdVan+(vl.tijdTot?'–'+vl.tijdTot:'') : '';
         verlofBadge = '<div style="background:var(--orange);border-radius:4px;padding:4px 7px;font-size:10px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:4px"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof'+esc(tijdTxt)+'</div>';
       }
-      var opVerzuimDag = APP.verzuim.filter(function(v){
-        return String(v.medId)===String(m.id)&&(v.status==='actief'||v.status==='langdurig')&&dag>=v.van&&(!v.tot||dag<=v.tot);
-      });
+      var _vzDag = verzuimOpDag(m.id, dag);
+      var opVerzuimDag = _vzDag ? [_vzDag] : [];
       var ziekBadge = '';
       if(opVerzuimDag.length) {
         var vz = opVerzuimDag[0];
@@ -16130,7 +16182,7 @@ function renderPlanWeek(monteurs) {
 
   // Niet-toegewezen rij
   var nietToegewezen = APP.opdrachten.filter(function(o){
-    return !o.monteurId && dagen.indexOf(o.datum) >= 0;
+    return !o.monteurId && dagen.indexOf(o.datum) >= 0 && _planZoekMatch(o);
   });
   if(nietToegewezen.length > 0 || _planFilter === 'alle') {
     h += '<tr><td style="background:var(--surface2);padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--border)">';
@@ -16138,7 +16190,7 @@ function renderPlanWeek(monteurs) {
     h += '<div style="font-size:12px;font-weight:600;color:var(--muted)">Niet toegewezen</div></div></td>';
 
     dagen.forEach(function(dag){
-      var dagOps = APP.opdrachten.filter(function(o){ return o.datum===dag && !o.monteurId; });
+      var dagOps = APP.opdrachten.filter(function(o){ return o.datum===dag && !o.monteurId && _planZoekMatch(o); });
       h += '<td class="week-drop-cell" data-dag="'+dag+'" data-monteur="" style="padding:4px;vertical-align:top;border-left:1px solid var(--border);border-bottom:1px solid var(--border);min-height:60px;background:var(--surface)">';
       dagOps.forEach(function(o){
         var ot = getOpdrachttype(o.type);
@@ -16168,6 +16220,7 @@ function renderPlanWeek(monteurs) {
     };
     var _nipWeek = APP.opdrachten.filter(function(o){
       if(dagen.indexOf(o.datum) < 0) return false;
+      if(!_planZoekMatch(o)) return false;
       var ids = _idsVan(o);
       return ids.length > 0 && !ids.some(function(x){ return _zichtbaarIds.indexOf(x) >= 0; });
     });
@@ -16217,7 +16270,7 @@ function renderPlanDag(monteurs) {
   }
 
   // Opdrachten van deze dag, per kolom: elke monteur + (bij "Alle monteurs") "Niet toegewezen"
-  var dagAlle = APP.opdrachten.filter(function(o){ return o.datum === _planDatum; })
+  var dagAlle = APP.opdrachten.filter(function(o){ return o.datum === _planDatum && _planZoekMatch(o); })
     .sort(function(a,b){ return (a.tijdVan||'') > (b.tijdVan||'') ? 1 : -1; });
   var kolommen = zichtbareMonteurs.map(function(m){
     return { m: m, ops: dagAlle.filter(function(o){ return _monteurIdsVan(o).indexOf(String(m.id)) >= 0; }) };
@@ -16310,7 +16363,7 @@ function renderPlanDag(monteurs) {
 
       // Verlof/ziek voor deze monteur op deze dag — tonen in het tijdsblok
       var _vDag = m && APP.verlof.find(function(v){ return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&_planDatum>=(v.van||'')&&_planDatum<=(v.tot||v.van||''); });
-      var _zDag = m && APP.verzuim.find(function(v){ return String(v.medId)===String(m.id)&&(v.status==='actief'||v.status==='langdurig')&&_planDatum>=(v.van||'')&&(!v.tot||_planDatum<=v.tot); });
+      var _zDag = m && verzuimOpDag(m.id, _planDatum);
       // Bepaal of dit uur binnen een (gedeeltelijk) verlof/ziek-tijdvak valt
       function _uurInVak(item){
         if(!item) return false;
@@ -16732,9 +16785,7 @@ function openOpdrachtModal(id, prefill) {
      var isChecked = huidigeMonteurs.indexOf(String(m.id)) >= 0;
      var opdrachtTijdVanModal = o.tijdVan || null;
      var verlofWaarschuwing = checkVerlofBeschikbaar(m.id, _opDatum, opdrachtTijdVanModal);
-     var opVerzuim = APP.verzuim.some(function(v){
-       return String(v.medId)===String(m.id) && (v.status==='actief'||v.status==='langdurig') && v.van<=_opDatum && (!v.tot||v.tot>=_opDatum);
-     });
+     var opVerzuim = !!verzuimOpDag(m.id, _opDatum);
      var waarschuwing = verlofWaarschuwing || (opVerzuim ? '<svg width=\"9\" height=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\" style=\"vertical-align:middle\"><path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z\"/></svg> Ziek' : '');
      var kl = medKleur(m);
      var borderKl = isChecked ? kl : waarschuwing ? 'var(--orange)' : 'var(--border)';
@@ -17196,9 +17247,7 @@ function openOpdrachtModal(id, prefill) {
       if(!hiddenInp) return;
       var medId = btn.dataset.id;
       var verlofW = checkVerlofBeschikbaar(medId, nieuweDatum, opdrachtTijdVanNw);
-      var opVerzuim = APP.verzuim.some(function(v){
-        return String(v.medId)===String(medId) && (v.status==='actief'||v.status==='langdurig') && v.van<=nieuweDatum && (!v.tot||v.tot>=nieuweDatum);
-      });
+      var opVerzuim = !!verzuimOpDag(medId, nieuweDatum);
       var waarschuwing = verlofW || (opVerzuim ? '<svg width=\"9\" height=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\" style=\"vertical-align:middle\"><path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z\"/></svg> Ziek' : '');
       var isSelected = hiddenInp.dataset.checked === '1';
       btn.style.borderColor = isSelected ? 'var(--accent)' : waarschuwing ? 'var(--orange)' : 'var(--border)';

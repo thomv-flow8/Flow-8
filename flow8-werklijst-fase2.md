@@ -2431,3 +2431,44 @@ verlengd met de volgende tak. Precies waarvoor die assertie er is.
 
 Vier Playground-tests: eigen profiel ✓ · andermans e-mail ✗ · zonder e-mailveld ✗ · administratie
 voor een ander ✓.
+
+---
+
+# Planning: verzuimhistorie, sortering en zoeken — 29 september 2026
+
+Drie punten die Thomas bij het testen vond. `flow8-v2.html` · JS-syntax ✓.
+
+**1. Verzuim verdween uit de planning zodra iemand hersteld was.** Vijf plekken filterden op
+`status === 'actief' || 'langdurig'`, dus een afgesloten ziekmelding was ook weg uit weken die al
+geweest waren — je planninghistorie klopte dan niet meer. Nieuwe helper `verzuimOpDag(medId, dag)`
+kijkt naar de **periode**, niet naar de status. Toegepast op zes datum-gebaseerde plekken: de teller
+en de lijst "Afwezig vandaag", de week- en dagweergave, en de waarschuwingen bij het inplannen en
+verplaatsen van een opdracht. De vijf plekken die echt over "loopt er nú een ziekmelding" gaan
+(knop Hersteld melden, waarschuwing bij het verwijderen van een medewerker, sortering in het
+verzuimoverzicht) kijken bewust nog steeds naar de status.
+
+**Daarbij een dag-teloverschrijding rechtgezet.** De code kende twee opvattingen van `tot`: de
+rapportage rekent met `dagVoor(tot)`, de planning deed `dag <= tot`. Thomas bevestigde de bedoeling:
+**de hersteldatum is de eerste dag dat iemand weer werkt**, dus die dag telt niet mee. De planning
+toonde één ziektedag te veel.
+
+**2. Sortering in de weekweergave.** De vergelijking `(a.tijdVan||'')>(b.tijdVan||'')?1:-1` gaf bij
+gelijke waarden -1 (niet stabiel) en zette opdrachten **zonder** tijd juist bovenaan. Nu
+`_planSorteerOpTijd`: op tijd oplopend, zonder tijd onderaan.
+
+**3. Zoeken in de planning.** Twee losse fouten.
+De week- en dagweergave lazen `APP.opdrachten` rechtstreeks en negeerden de zoekterm volledig —
+alleen de lijst filterde. Eén gedeelde `_planZoekMatch(o)` gemaakt en overal toegepast. De
+statistiekteller gebruikte bovendien een smallere variant (alleen klant, adres, postcode, plaats),
+waardoor de tellingen niet strookten met de lijst eronder.
+En de verdwijnende tekens: bij elke toetsaanslag werd de **hele** pagina opnieuw opgebouwd, inclusief
+het zoekveld. Toetsen die binnenkwamen terwijl die render liep werden afgeleverd tussen het
+vervangen van het veld en het herstellen van de focus — en raakten zoek, inclusief hun
+`_planZoek`-update. Vandaar dat de laatste tekens bleven staan. Nu wordt alleen `#plan-content`
+hertekend (die container bestond al); de toolbar met het zoekveld blijft staan, dus dat kan niet
+meer gebeuren. `focusId` is daarmee overbodig geworden voor dit veld.
+
+**Drag & drop om opdrachten te herordenen: besloten niet te bouwen.** Er is geen opgeslagen volgorde;
+die wordt afgeleid van `tijdVan`. Alle varianten vragen een nieuw veld dat de tijd kan tegenspreken,
+en slepen werkt sowieso niet op de iPhone. Conclusie samen met Thomas: een tijd invullen doet alles
+wat een sleepvolgorde doet en meer — hij komt ook op de werkbon en de klant weet wanneer je komt.
