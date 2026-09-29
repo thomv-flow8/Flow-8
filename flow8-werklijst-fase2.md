@@ -2392,3 +2392,12 @@ opnieuw via `toonPagina(APP.activePage)`. Generiek, in plaats van op tien aanroe
 **Juist ook nodig voor de sleutels mét listener** (`opdrachten`, `medewerkers`, `agenda`): die
 herstellen niet vanzelf, want een listener vuurt alleen bij een serverwijziging — en die is er bij
 een geweigerde verwijdering nooit geweest. Dat is contra-intuïtief genoeg om hier vast te leggen.
+
+**Direct daarna rechtgezet:** `medewerkersArchief` stond sinds 28 september op admin-only. Dat klopte
+toen — alleen een admin kon een medewerker verwijderen. Door de wijziging hierboven ging verwijderen
+open voor medewerkers-`S`, en daarmee was de combinatie stuk: `verwijderMed` bewaart eerst de naam in
+het archief en verwijdert dán de medewerker, dus voor administratie zou stap 1 falen en stap 2 slagen
+— medewerker weg, naam weg, oude opdrachten en uren naamloos. Het archief volgt nu hetzelfde recht als
+het verwijderen. Getest: administratie schrijft in het archief ✓.
+**Patroon om te onthouden:** zet je een recht open, loop dan na welke andere nodes diezelfde handeling
+aanraakt. Een handeling in de app is zelden één schrijfactie.
