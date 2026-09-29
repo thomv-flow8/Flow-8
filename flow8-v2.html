@@ -107,6 +107,13 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 .modal.modal-xl{width:min(1180px,96vw)}
 /* In de xl-modal vult de body-inhoud de hoogte; de linkerkolom scrollt intern i.p.v. de hele body. */
 .modal.modal-xl .modal-body{display:flex;flex-direction:column;overflow:hidden}
+/* Template-editor: formulier links, live preview rechts. Onder 900px onder elkaar,
+   zodat de preview op mobiel ónder het formulier staat in plaats van ernaast.
+   Scrollt zelf: de xl-modal zet zijn body op overflow:hidden (voor de dagplanning met
+   kaart), dus zonder eigen scroll zou dit grid worden afgekapt. */
+.tpl-editor-grid{display:grid;grid-template-columns:1fr 520px;gap:18px;align-items:start;flex:1;min-height:0;overflow:auto}
+.tpl-editor-grid .tpl-preview-kol{position:sticky;top:0}
+@media(max-width:900px){.tpl-editor-grid{grid-template-columns:1fr}.tpl-editor-grid .tpl-preview-kol{position:static}}
 /* Dagplanning: lijst links, kaart rechts. Onder 920px stapelt hij (kaart onder lijst). */
 .dp-split{display:flex;gap:16px;flex:1;min-height:0}
 .dp-col-lijst{flex:0 0 44%;display:flex;flex-direction:column;min-height:0}
@@ -27896,6 +27903,48 @@ function openMailTemplateNieuw() {
   });
 }
 
+// Voorbeeldwaarden voor de preview. Zonder deze zie je letterlijk {klantNaam} staan en
+// kun je niet beoordelen of de regelafstand en het gegevensblok kloppen.
+var MAIL_PREVIEW_VOORBEELD = {
+  klantNaam:'Aquafix Milieu B.V.', contactpersoon:'de heer Jansen',
+  datum:'12-10-2026', tijdVan:'08:30', tijdTot:'10:00',
+  adres:'Pr. Marijkelaan 227', postcode:'3707 BB', plaats:'Zeist',
+  monteur:'Jimmy ten Berg', type:'Servicebeurt',
+  werkomschrijving:'Jaarlijkse servicebeurt pompinstallatie',
+  repNummer:'REP-2026-041', pompType:'Grundfos SEG.40', serienummer:'98A7-2231',
+  klantAdres:'Pr. Marijkelaan 227, 3707 BB Zeist', uitvoerder:'Jimmy ten Berg',
+  storingsmelding:'Pomp slaat onregelmatig aan', meetwaarden:'Isolatieweerstand 12 MOhm',
+  bevindingen:'Vlotter vervuild, waaier licht versleten',
+  geschatteUren:'2,5', onderdelen:'Vlotterschakelaar, afdichtingsset',
+  bedrijfNaam:(APP.bedrijfGegevens&&APP.bedrijfGegevens.naam)||'', bedrijfTel:(APP.bedrijfGegevens&&APP.bedrijfGegevens.telefoon)||'',
+  bedrijfEmail:(APP.bedrijfGegevens&&APP.bedrijfGegevens.email)||''
+};
+
+// Vervangt de plaatshouders door voorbeeldwaarden. Wat niet in de lijst staat blijft staan,
+// zodat een typefout in een plaatshouder juist zichtbaar wordt in plaats van te verdwijnen.
+function _mailPreviewVul(tekst){
+  return String(tekst||'').replace(/\{([a-zA-Z0-9_]+)\}/g, function(heel, naam){
+    return MAIL_PREVIEW_VOORBEELD[naam] != null ? MAIL_PREVIEW_VOORBEELD[naam] : heel;
+  });
+}
+
+// Haalt de opgemaakte HTML op bij de Cloud Function. Die bouwt hem met dezelfde
+// `bouwMailHtml()` als bij een echte verzending en met de bedrijfsgegevens van de server,
+// dus dit is letterlijk wat de klant zou krijgen. Verstuurt niets en logt niets.
+async function _mailPreviewHtml(onderwerp, body){
+  var user = firebase.auth().currentUser;
+  if(!user) throw new Error('Niet ingelogd');
+  var token = await user.getIdToken();
+  var resp = await fetch(MAIL_FUNCTIE_URL, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+    body: JSON.stringify({ preview:true, onderwerp:onderwerp, body:body })
+  });
+  var data = null; try { data = await resp.json(); } catch(e) {}
+  if(!resp.ok || !data || !data.html) throw new Error((data && data.error) || ('HTTP '+resp.status));
+  return data;
+}
+
 function openMailTemplateEditor(tplId) {
   var tpl = getMailTemplates()[tplId]; if(!tpl) return;
   var isWp = tpl.categorie === 'werkplaats';
@@ -27904,7 +27953,11 @@ function openMailTemplateEditor(tplId) {
   var varsWpAanbieding = '{repNummer} {pompType} {serienummer} {klantNaam} {klantAdres} {uitvoerder} {datum} {storingsmelding} {meetwaarden} {bevindingen} {geschatteUren} {onderdelen}';
   var varsStr = isWp ? (tplId==='wp_ontvangst' ? varsWpOntvangst : varsWpAanbieding) : varsPlanning;
 
-  var b = '<div class="form-grid">';
+  // Twee kolommen op een breed scherm, onder elkaar op een smal scherm. De preview staat
+  // dus op mobiel onder het formulier in plaats van ernaast.
+  var b = '<div class="tpl-editor-grid">';
+  b += '<div>';
+  b += '<div class="form-grid">';
   b += fgf('Naam template', finp('tpl-naam','text',tpl.naam,''));
   b += fgf('Onderwerp', finp('tpl-onderwerp','text',tpl.onderwerp,''));
   b += '</div>';
@@ -27934,15 +27987,67 @@ function openMailTemplateEditor(tplId) {
      + '<code style="background:var(--surface2);padding:1px 5px;border-radius:4px">[tekst](https://...)</code>. '
      + 'Regels als <code style="background:var(--surface2);padding:1px 5px;border-radius:4px">Label: waarde</code> worden een net gegevensblok.'
      + '</div>';
+  b += '</div>';   // sluit de linkerkolom
+
+  // Rechterkolom: de preview. De iframe staat in een sandbox zonder rechten — de inhoud is
+  // weliswaar je eigen tekst, maar hij wordt als HTML uitgevoerd en dan is dichtzetten de
+  // enige verstandige stand.
+  b += '<div class="tpl-preview-kol">';
+  b += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">';
+  b += '<label style="font-size:12px;color:var(--muted);font-weight:600">Voorbeeld</label>';
+  b += '<span id="tpl-preview-status" style="font-size:11px;color:var(--muted)"></span>';
+  b += '</div>';
+  b += '<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#e9ecf1">';
+  b += '<iframe id="tpl-preview" sandbox="" title="Voorbeeld van de mail" style="width:100%;height:520px;border:0;display:block"></iframe>';
+  b += '</div>';
+  b += '<div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6">Met voorbeeldgegevens ingevuld. De opmaak komt van de server, dus dit is wat de klant krijgt.</div>';
+  b += '</div>';
+  b += '</div>';   // sluit het grid
 
   var f = '<button class="btn btn-ghost" id="tpl-cancel">Annuleren</button><button class="btn btn-primary" id="tpl-save">Opslaan</button>';
-  openModal('Template bewerken — '+esc(tpl.naam), b, f);
+  openModal('Template bewerken — '+esc(tpl.naam), b, f, false, true);
 
   document.getElementById('tpl-cancel').addEventListener('click', closeModal);
+
+  // ── Preview bijwerken ──
+  // Ruim debouncen: elke verversing is een aanroep van de Cloud Function, en tijdens het
+  // typen wil je daar niet bij elke toetsaanslag een te doen.
+  var _tplPrevTimer = null, _tplPrevTeller = 0;
+  function _tplPreviewNu(){
+    var iframe = document.getElementById('tpl-preview');
+    var statusEl = document.getElementById('tpl-preview-status');
+    var ondEl = document.getElementById('tpl-onderwerp');
+    var bodyEl = document.getElementById('tpl-body');
+    if(!iframe || !ondEl || !bodyEl) return;
+    var beurt = ++_tplPrevTeller;
+    if(statusEl) statusEl.textContent = 'bijwerken…';
+    _mailPreviewHtml(_mailPreviewVul(ondEl.value), _mailPreviewVul(bodyEl.value)).then(function(data){
+      if(beurt !== _tplPrevTeller) return;   // een nieuwere aanvraag is al onderweg
+      var el2 = document.getElementById('tpl-preview');
+      if(el2) el2.srcdoc = data.html;
+      var st2 = document.getElementById('tpl-preview-status');
+      if(st2) st2.textContent = data.van ? ('van: '+data.van) : '';
+    }).catch(function(e){
+      if(beurt !== _tplPrevTeller) return;
+      var st3 = document.getElementById('tpl-preview-status');
+      if(st3) st3.textContent = 'voorbeeld niet beschikbaar';
+      log('WARN','MAIL','Preview mislukt: '+(e.message||e));
+    });
+  }
+  function _tplPreviewStraks(){
+    if(_tplPrevTimer) clearTimeout(_tplPrevTimer);
+    _tplPrevTimer = setTimeout(_tplPreviewNu, 700);
+  }
+  ['tpl-onderwerp','tpl-body'].forEach(function(id){
+    var elv = document.getElementById(id);
+    if(elv) elv.addEventListener('input', _tplPreviewStraks);
+  });
+  _tplPreviewNu();
 
   // Variabele chips: klik om in te voegen op cursorpositie
   document.querySelectorAll('.tpl-var-chip').forEach(function(chip){
     chip.addEventListener('click', function(){
+      setTimeout(_tplPreviewStraks, 0);   // na het invoegen
       var ta = document.getElementById('tpl-body');
       var v = chip.dataset.var;
       var start = ta.selectionStart;

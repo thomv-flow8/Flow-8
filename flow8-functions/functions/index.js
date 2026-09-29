@@ -1,5 +1,8 @@
 // Flow8 — verstuurMail Cloud Function
 // Verstuurt mails direct via Resend, met optionele PDF-bijlage.
+// Kent daarnaast een preview-modus (`preview: true` in de payload): die bouwt alleen de
+// huisstijl-HTML op en geeft die terug, zonder te versturen of te loggen. Zo kan de
+// template-editor laten zien wat de klant krijgt zonder de wrapper na te bouwen.
 // Beveiliging: alleen ingelogde Flow8-gebruikers met een geldig profiel;
 // elke verzending wordt gelogd naar flow8/bedrijven/{bedrijfId}/mailLog.
 
@@ -277,6 +280,29 @@ exports.verstuurMail = onRequest(
       if (!bedrijfId) { res.status(403).json({ error: 'Geen bedrijf gekoppeld aan profiel' }); return; }
       // Gedeactiveerd account met een nog geldig token mag niet meer mailen.
       if (profiel.actief !== true) { res.status(403).json({ error: 'Account is niet actief' }); return; }
+
+      // ── 2b. Preview: alleen de HTML opbouwen en teruggeven ──
+      // Bewust ná de authenticatie en de actief-check: de huisstijl en de bedrijfsgegevens
+      // zijn bedrijfsgebonden. Bewust vóór de ontvanger-validatie: bij een preview zijn er
+      // geen ontvangers. Raakt Resend niet aan, gebruikt de API-sleutel niet en schrijft
+      // niets naar mailLog — het is puur opmaak teruggeven.
+      // Hierdoor bestaat de wrapper maar één keer: zou de app hem nabouwen voor een preview,
+      // dan lopen die twee na verloop van tijd uiteen en toont de preview iets anders dan
+      // de klant ontvangt.
+      if (req.body && req.body.preview === true) {
+        const bgSnapPrev = await admin.database().ref('flow8/bedrijven/' + bedrijfId + '/instellingen/bedrijf').get();
+        const bedrijfPrev = bgSnapPrev.exists() ? (bgSnapPrev.val() || {}) : {};
+        const onderwerpPrev = String((req.body.onderwerp) || '').slice(0, 300);
+        const bodyPrev = String((req.body.body) || '');
+        res.json({
+          ok: true,
+          preview: true,
+          html: bouwMailHtml(bedrijfPrev, onderwerpPrev, bodyPrev),
+          van: _mailAfzender(bedrijfPrev),
+          replyTo: _mailAntwoordAdres(bedrijfPrev, profiel.email || decoded.email) || null,
+        });
+        return;
+      }
 
       // ── 3. Payload valideren ──
       const { aan, cc, onderwerp, body, bijlage, ref } = req.body || {};
