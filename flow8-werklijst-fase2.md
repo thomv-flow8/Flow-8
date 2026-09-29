@@ -2539,3 +2539,13 @@ ongeacht wanneer of hoe vaak de knop opnieuw wordt opgebouwd. Het route-tekenen 
 `try` met een logregel, zodat een fout daar niet meer alles meesleurt wat erna komt.
 **Patroon:** een handler koppelen aan iets dat later in een async-callback wordt opgebouwd is
 kwetsbaar — delegeer naar een element dat er al is.
+
+**Oorzaak alsnog gevonden, dankzij de logregel die bij deze fix is toegevoegd:**
+`Can't find variable: geocoder`. In de Distance-Matrix-callback werd `geocoder.geocode(...)`
+aangeroepen terwijl die variabele daar niet bestaat — een ReferenceError. Daardoor liep niet alleen
+het koppelen van de Wis-knop niet, maar ook het `fitBounds` dat de kaart op bedrijf én bestemming
+moest inzoomen. Die tweede fout was volledig onzichtbaar.
+Vervangen door `geocodeMetCache()`, de helper die de rest van de app ook gebruikt. Scheelt meteen
+een geocode-aanroep per berekening, want het bedrijfsadres zit dan in de cache.
+**Les:** de `try` met logregel was bedoeld als vangnet, maar wees binnen één klik de echte oorzaak
+aan. Bij een stille fout in een async-callback is een logregel meer waard dan code lezen.

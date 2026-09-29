@@ -27177,8 +27177,12 @@ function renderLocatie() {
         // Kaart aanpassen om beide punten te tonen
         var bounds = new google.maps.LatLngBounds();
         bounds.extend(destLoc);
-        geocoder.geocode({address: bedrijfAdres}, function(bgResults, bgStatus){
-          if(bgStatus==='OK'&&bgResults[0]) bounds.extend(bgResults[0].geometry.location);
+        // Was `geocoder.geocode(...)`, maar die variabele bestaat hier niet — dat gooide een
+        // ReferenceError waardoor dit fitBounds nooit liep én de Wis-knop geen handler kreeg.
+        // geocodeMetCache is de helper die de rest van de app ook gebruikt, mét cache, dus dit
+        // scheelt bovendien een geocode-aanroep per berekening.
+        geocodeMetCache(bedrijfAdres, function(bgCoord){
+          if(bgCoord) bounds.extend({lat:bgCoord.lat, lng:bgCoord.lng});
           _locMap.fitBounds(bounds, {padding:60});
         });
         } catch(e){ log('WARN','KAART','Route tekenen mislukt: '+(e.message||e)); }
