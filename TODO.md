@@ -224,6 +224,13 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       modules en ~49 plekken met `goedgekeurd`. Groot; lagere prioriteit; eerst concept + statusmodel.
 - [ ] **Maillog fase 3** — Resend delivery-status via webhook + geplande/automatische mails
       (status-change triggers). Vereist uitbreiding van `flow8-functions/`.
+      **Wacht op het Resend-domein** (besloten 29 september 2026): zolang `MAIL_FROM` op het
+      testadres staat gaan mails alleen naar het eigen Resend-adres, en valt er geen aflevering
+      terug te koppelen. Fase 1 (loggen), 2a (bij de debiteur) en 2b (centraal overzicht) zijn af;
+      elk record staat nu vast op `status: verzonden`.
+      Twee delen: (1) een webhook-endpoint dat Resend aanroept en de status bijwerkt naar
+      afgeleverd/geopend/mislukt — publiek endpoint, dus signature-check nodig; (2) geplande en
+      automatische mails bij een statuswijziging, waarvoor een periodieke planner nodig is.
 - [x] **Spoed als prioriteitsvlag** — bij controle op 24 september 2026 bleek dit al gedaan; de lijst
       liep achter. Er is een losse vlag `o.spoed` met helper `_isSpoed()`, die oude records met
       `status==='spoed'` nog herkent; een rode badge náást de statusbadge; een knop "Spoed" in het
