@@ -387,11 +387,19 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       uit het e-mailadres wordt afgeleid; zou schrijfrecht ineens álles mogen, dan was die fix weg
       voor administratie, de enige rol met `S`. Alleen de verwijder-tak is opengezet.
       Twee tests: monteur verwijdert een medewerker ✗, administratie ✓.
-- [ ] **Aanmaken van een medewerker staat nog open voor elk actief lid** — de tak
-      `(!data.exists() && newData.exists())` vraagt geen enkel recht. Niets in de app gebruikt dat
-      (alleen het Medewerkers-scherm maakt records aan, en dat zit al achter het recht), dus
-      dichtzetten achter medewerkers-`S` kost waarschijnlijk niets. Bewust blijven liggen: niet
-      stilletjes meegenomen zonder akkoord.
+- [x] **Aanmaken van een medewerker afgeschermd — 29 september 2026.** De tak vroeg geen enkel recht,
+      dus elk actief lid kon een medewerkerrecord aanmaken — ook met **andermans** e-mailadres. Omdat
+      `medId` uit dat adres wordt afgeleid, was dat de laatste route naar iemand anders zijn identiteit;
+      bij wijzigen was die op 21 september al dicht, bij aanmaken niet.
+      **Niet simpelweg achter medewerkers-`S` gezet — dat zou onboarding breken.**
+      `ensureMedewerkerProfiel()` draait bij élke start van de app (flow8-v2.html ~6151) en maakt het
+      eigen profiel aan als er nog geen medewerker met dat e-mailadres bestaat. Zonder dat record is er
+      geen `medId`, en dan kan iemand helemaal geen verlof, uren of onkosten indienen.
+      Daarom niet "wie mag aanmaken" maar **"voor wie mag je aanmaken"**: voor jezelf mag altijd
+      (e-mail gelijk aan `gebruikers/{uid}/email`, met `isString()`-guards en kleine letters), voor een
+      ander alleen met medewerkers-`S`. Daarmee is het e-mailadres bij alle drie de handelingen het
+      scharnierpunt. Vier tests: eigen profiel ✓, andermans e-mail ✗, zonder e-mailveld ✗,
+      administratie voor een ander ✓.
 - [x] **Werkbon-subcollecties** — opgelost op 22 september 2026: `get`, `list` én `write` op uren,
       foto's en documenten controleren nu de toewijzing van de bovenliggende bon. Dat kan hier wél bij een
       query, want het bon-id staat in het pad. Breekt niets: beide leesplekken in de app halen in dezelfde

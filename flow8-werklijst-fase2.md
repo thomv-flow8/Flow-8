@@ -2401,3 +2401,33 @@ het archief en verwijdert dán de medewerker, dus voor administratie zou stap 1 
 het verwijderen. Getest: administratie schrijft in het archief ✓.
 **Patroon om te onthouden:** zet je een recht open, loop dan na welke andere nodes diezelfde handeling
 aanraakt. Een handeling in de app is zelden één schrijfactie.
+
+---
+
+# Aanmaken van een medewerker afgeschermd — 29 september 2026
+
+Alleen `database.rules.json`; aan de app niets.
+
+**Het gat.** De aanmaak-tak van de medewerkers-regel vroeg géén enkel recht. Elk actief lid kon dus
+een medewerkerrecord aanmaken, óók met **andermans** e-mailadres. Omdat `medId` uit dat adres wordt
+afgeleid (`getMijnMedId()`), was dat de laatste open route naar de identiteit van een collega — bij
+*wijzigen* was die op 21 september al dichtgezet, bij *aanmaken* niet.
+
+**Het voorstel "gewoon achter medewerkers-`S`" zou onboarding hebben gebroken.** `ensureMedewerkerProfiel()`
+draait bij élke start van de app (~6151) en maakt het eigen profiel aan als er nog geen medewerker
+met dat e-mailadres bestaat. Een nieuwe monteur zonder medewerkerrecord heeft geen `medId`, en kan
+dan helemaal geen verlof, uren of onkosten indienen. Dat is erger dan de losheid die we wilden
+oplossen.
+
+**De vorm werd daarom niet "wie mag aanmaken" maar "voor wie mag je aanmaken":** voor jezelf altijd
+(e-mail gelijk aan `gebruikers/{uid}/email`, met `isString()`-guards en `toLowerCase()` aan beide
+kanten, zoals in de HR-regels), voor een ander alleen met medewerkers-`S`. Daarmee is het
+e-mailadres bij alle drie de handelingen op deze node het scharnierpunt: aanmaken, wijzigen én
+verwijderen.
+
+**De telling ving een fout af.** Mijn eerste anker was `(!data.exists() && newData.exists())`, en dat
+komt óók voor in de append-only-regel van `mailLog`. Het script telde 2 en schreef niets weg; anker
+verlengd met de volgende tak. Precies waarvoor die assertie er is.
+
+Vier Playground-tests: eigen profiel ✓ · andermans e-mail ✗ · zonder e-mailveld ✗ · administratie
+voor een ander ✓.
