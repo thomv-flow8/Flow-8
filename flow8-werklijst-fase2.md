@@ -2503,3 +2503,39 @@ meldt in de ondertitel hoeveel er zonder bon zijn, anders klopt het getal niet m
 **In de praktijk geverifieerd** (Thomas, 29 september 2026): alle vier de punten van deze ronde
 getest en in orde — verzuimhistorie in de planning, sortering, zoeken in alle drie de weergaven, en
 afgerond werk zonder bon bij de klant.
+
+---
+
+# Mail-preview in de template-editor + Wis-knop op de kaart — 29 september 2026
+
+**Live preview naast de template-editor.** De opmaak van een mail gebeurde pas bij het verzenden, in
+`bouwMailHtml()` in de Cloud Function. Om te zien wat een klant krijgt moest je een echte mail naar
+jezelf sturen.
+
+`verstuurMail` kent nu een **preview-modus** (`preview: true`): bouwt alleen de HTML en geeft die
+terug. Geen Resend-aanroep, geen API-sleutel, geen mailLog-record. Staat bewust **ná** de
+authenticatie en de actief-check (huisstijl en bedrijfsgegevens zijn bedrijfsgebonden) en **vóór** de
+ontvanger-validatie (bij een preview zijn er geen ontvangers).
+
+**Waarom niet nabouwen in de app:** dan bestaat dezelfde opmaak twee keer en lopen die na een paar
+wijzigingen uiteen — dan toont de preview iets anders dan de klant ontvangt, en dat is erger dan geen
+preview. Nu komt de HTML van dezelfde functie die ook echt verstuurt, mét de bedrijfsgegevens van de
+server.
+
+Editor is een xl-modal met twee kolommen; onder 900px stapelt hij. Het grid scrollt zelf, want
+`.modal-xl .modal-body` staat op `overflow:hidden` voor de dagplanning met kaart. Preview in een
+iframe met lege `sandbox` — het is je eigen tekst, maar hij wordt als HTML uitgevoerd.
+Plaatshouders worden gevuld met voorbeeldgegevens; wat niet in die lijst staat blijft staan, zodat
+een typefout in een plaatshouder juist opvalt. Debounce 700ms, en een oud antwoord wordt genegeerd
+als er al een nieuwere aanvraag loopt.
+
+**Wis-knop bij de afstandsberekening deed niets.** De klik-afhandeling werd pas gekoppeld ná het
+tekenen van de route, diep in de Distance-Matrix-callback. Ging daar iets mis, dan stond de
+resultaatbalk er wel (die innerHTML is eerder gezet) maar kreeg de knop nooit een handler — precies
+het gemelde gedrag: de balk zichtbaar, de knop dood.
+Structureel opgelost in plaats van de oorzaak te zoeken: de afhandeling zit nu op de **resultaatbalk**
+en wordt gekoppeld bij het opbouwen van de pagina, dus vóór al het asynchrone werk. Werkt daarmee
+ongeacht wanneer of hoe vaak de knop opnieuw wordt opgebouwd. Het route-tekenen staat nu in een
+`try` met een logregel, zodat een fout daar niet meer alles meesleurt wat erna komt.
+**Patroon:** een handler koppelen aan iets dat later in een async-callback wordt opgebouwd is
+kwetsbaar — delegeer naar een element dat er al is.

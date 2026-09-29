@@ -27157,7 +27157,10 @@ function renderLocatie() {
           +'<span style="color:var(--muted);font-size:11px">vanaf '+esc(bg.naam||bedrijfAdres)+'</span>'
           +'<button id="loc-afstand-wis" class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:11px">✕ Wis</button>'
           +'</div>';
-        // Route tekenen op kaart
+        // Route tekenen op kaart. In een try: gaat hier iets mis (bijvoorbeeld een
+        // Maps-bibliotheek die niet geladen is), dan blijft het bij een route die ontbreekt
+        // en loopt de rest gewoon door. Voorheen sneuvelde daardoor alles wat erna kwam.
+        try {
         var dirService = new google.maps.DirectionsService();
         _afstandRoute = new google.maps.DirectionsRenderer({
           suppressMarkers: true,
@@ -27178,17 +27181,26 @@ function renderLocatie() {
           if(bgStatus==='OK'&&bgResults[0]) bounds.extend(bgResults[0].geometry.location);
           _locMap.fitBounds(bounds, {padding:60});
         });
-        // Wis knop
-        var wisBtn = resultEl.querySelector('#loc-afstand-wis');
-        if(wisBtn) wisBtn.addEventListener('click', function(){
-          if(_afstandMarker){_afstandMarker.setMap(null);_afstandMarker=null;}
-          if(_afstandRoute){_afstandRoute.setMap(null);_afstandRoute=null;}
-          resultEl.style.display='none';
-          invoer.value='';
-        });
+        } catch(e){ log('WARN','KAART','Route tekenen mislukt: '+(e.message||e)); }
+        // De Wis-knop krijgt zijn afhandeling niet hier maar op de balk eromheen,
+        // gekoppeld bij het opbouwen van de pagina (zie _locWisAfstand hieronder).
       });
     });
   }
+  // Wissen van de afstandsberekening. Op de resultaatbalk gekoppeld in plaats van op de
+  // knop zelf: die knop bestaat pas nadat een berekening klaar is, en wordt bij elke nieuwe
+  // berekening opnieuw opgebouwd. Zo werkt hij altijd, ongeacht wanneer hij verschijnt.
+  var resultBalk = el.querySelector('#loc-afstand-resultaat');
+  if(resultBalk) resultBalk.addEventListener('click', function(e){
+    if(!e.target.closest('#loc-afstand-wis')) return;
+    if(_afstandMarker){ _afstandMarker.setMap(null); _afstandMarker=null; }
+    if(_afstandRoute){ _afstandRoute.setMap(null); _afstandRoute=null; }
+    resultBalk.style.display='none';
+    resultBalk.innerHTML='';
+    var inv = el.querySelector('#loc-afstand-input');
+    if(inv) inv.value='';
+  });
+
   var afstandBtn = el.querySelector('#loc-afstand-btn');
   if(afstandBtn) afstandBtn.addEventListener('click', berekenAfstand);
   var afstandInput = el.querySelector('#loc-afstand-input');
