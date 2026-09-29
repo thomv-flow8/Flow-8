@@ -2499,3 +2499,7 @@ opent de opdracht via `openOpdrachtPanel()` in plaats van een bon-PDF. De kop te
 meldt in de ondertitel hoeveel er zonder bon zijn, anders klopt het getal niet met wat eronder staat.
 
 **Geen extra netwerkverkeer en niets aan het datamodel:** de opdrachten staan al in `APP.opdrachten`.
+
+**In de praktijk geverifieerd** (Thomas, 29 september 2026): alle vier de punten van deze ronde
+getest en in orde — verzuimhistorie in de planning, sortering, zoeken in alle drie de weergaven, en
+afgerond werk zonder bon bij de klant.
