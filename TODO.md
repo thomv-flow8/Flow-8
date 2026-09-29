@@ -433,7 +433,27 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       laadt zonder in te loggen (HTTP 200).
 
 ## Optioneel
-- [ ] **Mail fase 2** — rijkere sjablonen met iconen-blok.
+- [x] **Mail fase 2, stap 1 — 29 september 2026, gedeployd en getest.** De huisstijlkleur loopt nu
+      door de hele mail in plaats van alleen de header: gegevensblok met accentrand links, bolletjes,
+      links en footer. Vier tinten server-side afgeleid van de accentkleur, want e-mail kent geen
+      CSS-kleurfuncties. `_tekstOpWit()` donkert een lichte huisstijlkleur af tot hij leesbaar is als
+      letterkleur — tegenhanger van `_leesbareTekst()`. Randgevallen nagerekend van donkerblauw tot
+      fel geel; bij de standaardkleur verandert er praktisch niets.
+      Geen afbeeldingen gebruikt, dus werkt gegarandeerd in Outlook. Het gegevensblok blijft
+      gestapeld — dat was een bewuste keuze voor lange waarden.
+      **Blokherkenning aangescherpt:** een blok begint pas vanaf twee opeenvolgende regels, en
+      `https`/`mailto`/`tel`/`ftp` worden nooit een label. Daarmee zijn `Let op: ...` en
+      `Bel ons op: ...` weer gewone zinnen in plaats van gegevensrijen. Negen gevallen getest tegen
+      de echte `_bodyNaarHtml`; die test ving een oneindige lus af die de preview niet had getoond.
+- [x] **Live preview in de template-editor — 29 september 2026.** Stond niet op de lijst; kwam uit
+      een vergelijking met Outsmart. `verstuurMail` kent een preview-modus die alleen de HTML
+      teruggeeft, zodat de opmaak maar op één plek bestaat en de preview toont wat de klant krijgt.
+- [ ] **Mail fase 2, stap 2 — iconen bij de gegevensrijen** — bewust uitgesteld tot stap 1 in de
+      preview was beoordeeld. Vraag is of het nog nodig is nu de kleur erdoorheen loopt.
+      Let op: in e-mail kan geen SVG (Outlook rendert dat niet), dus het moeten PNG's op een vaste
+      publieke URL worden. Veel clients blokkeren afbeeldingen, dus ze mogen alleen decoratief zijn —
+      het label moet de betekenis dragen. Brengt ook beheer mee: die bestanden moeten ergens
+      permanent staan en gelden voor alle bedrijven.
 - [ ] **PDF-preview iOS** — al opgelost via PDF.js; alleen heropenen als er nog iets hapert.
 - [ ] **Marketing-site (Flow8.nl)** — CTA's koppelen, Contact functioneel (mailto/Formspree),
       Pages-deploy. Staat als `Flow8-website.html` in deze repo.

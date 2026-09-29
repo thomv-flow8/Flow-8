@@ -2623,3 +2623,6 @@ gegevensregel ✗, label zonder waarde ✗, opsomming ✗.
 **Preview vóór de deploy**, met de echte functies uit beide versies naast elkaar
 (mailpreview.js). Dat was op aandringen van Thomas: ik had stap 1 meteen gecommit zonder eerst iets
 te laten zien, terwijl de werkwijze een preview voorschrijft bij visuele wijzigingen.
+
+**In de praktijk geverifieerd** (Thomas, 29 september 2026): gedeployd en getest — de huisstijlkleur
+komt goed door en de aangescherpte blokherkenning doet wat hij moet. Stap 1 is daarmee af.
