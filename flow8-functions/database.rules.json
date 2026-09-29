@@ -74,7 +74,7 @@
           },
           "medewerkers": {
             "$medId": {
-              ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || (!data.exists() && newData.exists()) || (data.exists() && newData.exists() && newData.child('email').val() === data.child('email').val()) )"
+              ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || (!data.exists() && newData.exists()) || (data.exists() && newData.exists() && newData.child('email').val() === data.child('email').val()) || (data.exists() && !newData.exists() && root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/medewerkers/schrijven').val() === true) )"
             }
           },
           "reistijdCache": {

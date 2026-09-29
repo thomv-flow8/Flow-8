@@ -2362,3 +2362,33 @@ opruimen ná bevestiging. Raakt alle modules.
 
 **In de praktijk geverifieerd** (Thomas, 29 september 2026): bewerken en intrekken werken bij verlof
 en overuren, en een goedgekeurde aanvraag toont de knoppen niet.
+
+---
+
+# Twee restjes: mwRecht en de lokale staat na een mislukte verwijdering — 29 september 2026
+
+`flow8-v2.html` + `database.rules.json` · JS-syntax ✓.
+
+**`mwRecht` bleek geen claim nodig te hebben.** De medewerkers-regel liet verwijderen alleen aan een
+admin toe: bij een verwijdering bestaat `newData` niet, dus zowel de aanmaak- als de wijzigtak viel
+af. Toegevoegd: `data.exists() && !newData.exists() && medewerkers/schrijven === true`, gelezen uit
+de rollenmatrix. Daarmee vervalt het oorspronkelijke plan voor een platte claim `mwRecht` — hetzelfde
+patroon als bij de andere regels van 28 september.
+
+**Bewust níet "schrijfrecht mag alles".** De e-mailpin bij wijzigen staat er sinds 21 september omdat
+`medId` uit het e-mailadres wordt afgeleid; wie dat veld kan wijzigen kan de identiteit van een
+collega overnemen. Zou ik medewerkers-`S` ineens volledige toegang geven, dan was die fix weg voor
+administratie — de enige rol met `S`. Alleen de verwijder-tak is opengezet.
+Twee tests: monteur verwijdert ✗, administratie ✓ (rol administratie bestond nog niet en is er
+tijdens het testen bij gemaakt).
+
+**Blijft open:** aanmaken vraagt nog steeds géén recht (`!data.exists() && newData.exists()`). Niets
+in de app leunt daarop, dus dichtzetten kost waarschijnlijk niets — maar niet meegenomen zonder akkoord.
+
+**Lokale staat na een mislukte verwijdering.** De aanroeper haalt het record uit `APP[key]` vóór
+`dbRemove`. Sinds 28 september meldt een mislukking zich wel, maar de rij bleef uit beeld tot je
+herlaadde. `dbRemove` laadt nu bij een fout die ene sleutel opnieuw in en tekent de huidige pagina
+opnieuw via `toonPagina(APP.activePage)`. Generiek, in plaats van op tien aanroepplekken.
+**Juist ook nodig voor de sleutels mét listener** (`opdrachten`, `medewerkers`, `agenda`): die
+herstellen niet vanzelf, want een listener vuurt alleen bij een serverwijziging — en die is er bij
+een geweigerde verwijdering nooit geweest. Dat is contra-intuïtief genoeg om hier vast te leggen.

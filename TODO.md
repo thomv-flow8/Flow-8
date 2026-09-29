@@ -343,10 +343,13 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       `openVerlofModal` én `submitVerlof`, zodat een andere route er ook niet omheen kan.
       De zin in `CLAUDE.md` over bewerkbaar zolang `aangevraagd` klopt hiermee alsnog — niets te
       corrigeren, de bouw heeft de documentatie ingehaald.
-- [ ] **Lokale staat loopt uit de pas bij een mislukte verwijdering** — de app haalt het record uit
-      `APP.x` vóór `dbRemove`. Mislukt de verwijdering, dan meldt hij dat nu wel, maar de rij blijft
-      uit beeld tot je herlaadt. Netter: pas opruimen ná bevestiging, of terugzetten bij een fout.
-      Raakt alle modules; klein maar op veel plekken.
+- [x] **Lokale staat na een mislukte verwijdering — 29 september 2026.** De aanroeper haalt het
+      record uit `APP[key]` vóór `dbRemove`; mislukte dat, dan bleef de rij uit beeld tot je
+      herlaadde. `dbRemove` laadt nu bij een fout die ene sleutel opnieuw in en tekent de huidige
+      pagina met `toonPagina(APP.activePage)`. Generiek opgelost in plaats van op tien aanroepplekken.
+      **Ook nodig voor sleutels mét listener** (`opdrachten`, `medewerkers`, `agenda`): die herstellen
+      juist níet vanzelf, want de listener vuurt alleen bij een serverwijziging — en die is er bij een
+      geweigerde verwijdering nooit geweest.
 - [ ] **Per-veld rechten op `opdrachten` en `serviceklanten`** — de helft van de oorspronkelijke zorg
       blijft staan: een monteur kan daar meer wijzigen dan alleen wat hij nodig heeft. Dichtzetten kan
       alleen per veld (bijvoorbeeld wel `status`, niet klant of datum), en dat is een eigen traject.
@@ -376,9 +379,19 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
         `bedrijfId`, `actief`, `medId` en `rch.werkbonnen` — daar werken claims prima.
         `ouRecht`, `okRecht`, `vlRecht`, `vzRecht` en `vzInzage` zijn daarmee nergens meer in
         gebruik. Bewust laten staan als vangnet; opruimen kan als dit een paar weken goed draait.
-- [ ] **`mwRecht`** — hoorde bij dit punt en blijft open: niet-admins met schrijfrecht op Medewerkers
-      kunnen nog steeds niet verwijderen. Los op met dezelfde rollenmatrix-opzoeking, dan is er geen
-      claim voor nodig.
+- [x] **`mwRecht` — 29 september 2026, opgelost zónder claim.** Verwijderen van een medewerker kon
+      alleen als admin: bij een verwijdering bestaat `newData` niet, dus beide andere takken vielen
+      af. Nu een vierde tak: `data.exists() && !newData.exists() && medewerkers/schrijven === true`,
+      rechtstreeks uit de rollenmatrix. Er is dus geen platte claim `mwRecht` nodig gebleken.
+      **De e-mailpin bij wijzigen blijft staan** — die zit er sinds 21 september 2026 omdat `medId`
+      uit het e-mailadres wordt afgeleid; zou schrijfrecht ineens álles mogen, dan was die fix weg
+      voor administratie, de enige rol met `S`. Alleen de verwijder-tak is opengezet.
+      Twee tests: monteur verwijdert een medewerker ✗, administratie ✓.
+- [ ] **Aanmaken van een medewerker staat nog open voor elk actief lid** — de tak
+      `(!data.exists() && newData.exists())` vraagt geen enkel recht. Niets in de app gebruikt dat
+      (alleen het Medewerkers-scherm maakt records aan, en dat zit al achter het recht), dus
+      dichtzetten achter medewerkers-`S` kost waarschijnlijk niets. Bewust blijven liggen: niet
+      stilletjes meegenomen zonder akkoord.
 - [x] **Werkbon-subcollecties** — opgelost op 22 september 2026: `get`, `list` én `write` op uren,
       foto's en documenten controleren nu de toewijzing van de bovenliggende bon. Dat kan hier wél bij een
       query, want het bon-id staat in het pad. Breekt niets: beide leesplekken in de app halen in dezelfde

@@ -5551,6 +5551,16 @@ function dbRemove(key, id) {
       // zijn lijst gehaald, dus het leek gelukt tot de volgende keer laden.
       log('ERROR', 'DB', 'Fout bij verwijderen: ' + path, { code: e.code, msg: e.message });
       toast(_dbFoutTekst(e, 'verwijderen'), 'error');
+      // De aanroeper haalt het record al uit APP[key] vóór deze aanroep, dus na een mislukking
+      // toont het scherm iets anders dan de database. Die ene sleutel opnieuw inladen en de
+      // huidige pagina hertekenen zet dat recht. Ook nodig voor sleutels mét listener
+      // (opdrachten, medewerkers, agenda): die vuurt alleen bij een serverwijziging, en juist
+      // die is er niet geweest.
+      if (Array.isArray(APP[key]) && typeof dbLoad === 'function') {
+        dbLoad(key, key).then(function(){
+          if (typeof toonPagina === 'function' && APP.activePage) toonPagina(APP.activePage);
+        }).catch(function(){});
+      }
     });
 }
 function dbLoad(key, appKey) {
