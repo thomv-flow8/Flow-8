@@ -2359,3 +2359,6 @@ zou het klik-event als id binnenkomen. Vervangen door een wrapper.
 **Nieuw punt genoteerd:** de app haalt een record uit `APP.x` vóór `dbRemove`. Mislukt de
 verwijdering, dan meldt hij dat nu wel, maar de rij blijft uit beeld tot je herlaadt. Netter is
 opruimen ná bevestiging. Raakt alle modules.
+
+**In de praktijk geverifieerd** (Thomas, 29 september 2026): bewerken en intrekken werken bij verlof
+en overuren, en een goedgekeurde aanvraag toont de knoppen niet.
