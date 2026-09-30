@@ -236,7 +236,24 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       `status==='spoed'` nog herkent; een rode badge náást de statusbadge; een knop "Spoed" in het
       opdrachtpaneel; en bij bewerken wordt een oude spoed-status omgezet naar `ingepland`. Ook de
       teller in de filterbalk telt via `_isSpoed()`, dus niet op status.
-- [ ] **Punt 4B** — aanvullend/optioneel contracttype structureel (datamodel + migratie).
+- [x] **Punt 4B — 30 september 2026, gebouwd en getest.** Contracttypes kennen nu een `soort`:
+      **basis** (A, C, D, E — levert geplande beurten op, een klant heeft er één) of **aanvulling**
+      (bij Homa: B, de 24-uurs storingsdienst, geldt bovenop het basiscontract).
+      Serviceklant krijgt `aanvulling` (één code) in plaats van de vaste vlag `heeftBContract`.
+      **Het inzicht kwam van Thomas:** op de lijst stond "aanvullend contracttype structureel" en ik
+      las dat als "meerdere contracttypes per klant". Het zijn twee soorten dingen, geen lijst van
+      hetzelfde. Eén veld en geen lijst — meer dan één aanvulling wordt rommelig, en een keuzelijst
+      met "geen" bovenaan houdt dat vanzelf zo.
+      **Geen migratie:** `klantAanvulling(k)` leest ook het oude veld, dus 1102 records blijven
+      werken en gaan vanzelf om bij bewerken. Zelfde aanpak als bij `verzuimTekst()`.
+      **Onzichtbaar zonder aanvullingen:** heeft een bedrijf er geen ingericht, dan verdwijnt het
+      hele onderdeel uit de interface.
+      Basiscontract-keuzelijsten filteren aanvullingen eruit; de contract-import schrijft beide
+      kanten bij zodat een import een aanvulling ook kan wéghalen bij een al bewerkte klant.
+      B stond niet meer in de contractenlijst van Homa en is opnieuw aangemaakt, nu als aanvulling.
+- [ ] **Meerdere aanvullingen per klant** — nu kan er één. Als een bedrijf er ooit twee tegelijk
+      nodig heeft, wordt `aanvulling` een lijst. Dat is een migratie plus alle leesplekken; bewust
+      niet vooruitgelopen, want met vinkjes in plaats van een keuzelijst nodig je uit tot rommel.
 - [ ] **H12** — credits/licenties, server-side (het grote licentie-traject).
 
 ## Klein / security-hardening

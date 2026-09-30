@@ -2736,3 +2736,8 @@ met en zonder code, een eigen code (WE · Weekendservice) en de terugval wanneer
 contractenlijst staat.
 **Les: bij HTML-in-strings is uitvoeren de enige echte controle.** Tellen bewijst dat je de juiste
 plek had, de syntaxcheck bewijst dat het JavaScript is — geen van beide zegt iets over het resultaat.
+
+**In de praktijk geverifieerd** (Thomas, 30 september 2026): B aangemaakt als aanvulling, badge met
+"Aanvulling" in de contracttypelijst, keuzelijst bij de serviceklant met B voorgeselecteerd voor
+bestaande klanten, B niet meer te kiezen als basiscontract, en na opslaan staat er `aanvulling: "B"`
+op het record. Punt 4B is daarmee af.
