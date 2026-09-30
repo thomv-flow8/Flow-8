@@ -8066,9 +8066,77 @@ function berekenVerlofUren(med, vanDatum, totDatum) {
 
 
 
-function bContractBadge(klein) {
-  if(klein) return '<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,0.15);color:var(--orange);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;vertical-align:middle;margin-left:4px">B</span>';
-  return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.12);color:var(--orange);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>Contract B · 24u storingsdienst</span>';
+// ── Contractsoort: basis of aanvulling ───────────────────────────────────────
+// Een basiscontract (A, C, D, E) levert geplande beurten op; een klant heeft er precies één.
+// Een aanvulling (bij Homa: B, de 24-uurs storingsdienst) levert geen beurten op maar geldt
+// bovenop het basiscontract. Stond hiervoor als vaste ja/nee-vlag `heeftBContract` op 23
+// plekken in de code — daardoor kon er maar één soort aanvulling bestaan, en die heette B.
+// Ontbreekt `soort` (contracten van vóór deze wijziging), dan is het een basiscontract.
+function contractIsAanvulling(ct){
+  return !!(ct && ct.soort === 'aanvulling');
+}
+function getBasisContracten(){
+  return getContracten().filter(function(c){ return !contractIsAanvulling(c); });
+}
+function getAanvullingen(){
+  return getContracten().filter(contractIsAanvulling);
+}
+// Heeft dit bedrijf überhaupt aanvullingen ingericht? Zo niet, dan blijft het hele onderdeel
+// verborgen — geen keuzelijst, geen filter, geen teller. Voor de meeste bedrijven bestaat
+// de functie dan simpelweg niet.
+function heeftAanvullingen(){
+  return getAanvullingen().length > 0;
+}
+
+// De aanvulling van een serviceklant, of null. Leest óók het oude `heeftBContract`, zodat
+// er geen migratie over 1102 records nodig is: oude records blijven werken en gaan vanzelf
+// om zodra je ze bewerkt. Zelfde aanpak als bij verzuimTekst().
+function klantAanvulling(k){
+  if(!k) return null;
+  if(k.aanvulling) return String(k.aanvulling);
+  return k.heeftBContract ? 'B' : null;
+}
+// Leesbaar label voor een aanvulling. Valt terug op de code als het contracttype (nog) niet
+// bestaat — bij Homa was B ooit uit de contractenlijst verdwenen.
+function aanvullingLabel(code){
+  if(!code) return '';
+  var ct = getContracten().find(function(c){ return String(c.code)===String(code) || String(c.id)===String(code); });
+  return ct ? (ct.code + ' — ' + ct.naam.replace('Contract '+ct.code+' - ','').replace('Contract '+ct.code+' — ','')) : String(code);
+}
+
+// Keuzelijst met de beschikbare aanvullingen. Geeft een lege string als dit bedrijf er geen
+// heeft ingericht — dan verschijnt er niets in het formulier.
+function aanvullingKeuzeHtml(veldId, huidig){
+  var lijst = getAanvullingen();
+  if(!lijst.length) return '';
+  var h = '<div style="padding:10px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">';
+  h += '<div style="font-size:13px;font-weight:600;margin-bottom:6px">Aanvulling</div>';
+  h += '<select class="input" id="'+veldId+'">';
+  h += '<option value="">— Geen —</option>';
+  lijst.forEach(function(c){
+    var gekozen = String(huidig||'') === String(c.code);
+    h += '<option value="'+esc(c.code)+'"'+(gekozen?' selected':'')+'>'+esc(aanvullingLabel(c.code))+'</option>';
+  });
+  h += '</select>';
+  h += '<div style="font-size:11px;color:var(--muted);margin-top:5px">Geldt bovenop het basiscontract.</div>';
+  h += '</div>';
+  return h;
+}
+
+function bContractBadge(klein, code) {
+  // `code` is de code van de aanvulling (bij Homa: B). Ontbreekt hij — oude aanroepen en
+  // records die nog op heeftBContract staan — dan blijft de tekst zoals hij was.
+  var _c = code ? String(code) : 'B';
+  var _ct = getContracten().find(function(c){ return String(c.code)===_c; });
+  // "Contract B — servicewacht" wordt "servicewacht": de code staat er al naast, dus het
+  // voorvoegsel zou hem verdubbelen. Bewust zonder regex — met de code erin moet dat
+  // dynamisch, en dat is hier onnodig foutgevoelig.
+  var _naam = _ct ? String(_ct.naam || '') : '';
+  var _pre = 'Contract ' + _c;
+  if (_naam.indexOf(_pre) === 0) _naam = _naam.slice(_pre.length).replace(/^\s*[—-]\s*/, '');
+  var _vol = _ct ? (_ct.code + ' · ' + _naam) : 'Contract B · 24u storingsdienst';
+  if(klein) return '<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,0.15);color:var(--orange);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;vertical-align:middle;margin-left:4px"'+esc(_c)+'</span>';
+  return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.12);color:var(--orange);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg'+esc(_vol)+'</span>';
 }
 
  function berekenVolgend(laatste, contractId, sk) {
@@ -9580,7 +9648,7 @@ function renderServiceklanten() {
     // Actieve lijst: passieve klanten altijd uitsluiten
     if(k.status==='passief') return false;
     if(_skFilter==='vervallen') return isSkVervallen(k);
-    if(_skFilter==='bcontract') return !!k.heeftBContract;
+    if(_skFilter==='bcontract') return !!klantAanvulling(k);
     if(_skFilter==='extern') return k.uitvoerder==='extern';
     if(_skFilter==='intern') return k.uitvoerder!=='extern';
     // herplannen filter verwijderd (wordt afgehandeld in planning module)
@@ -9614,7 +9682,7 @@ function renderServiceklanten() {
   var actief=APP.serviceklanten.filter(function(k){return k.status!=='passief';}).length;
   var passief=APP.serviceklanten.filter(function(k){return k.status==='passief';}).length;
   var vervallen=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&isSkVervallen(k);}).length;
-  var bContract=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&k.heeftBContract;}).length;
+  var bContract=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&klantAanvulling(k);}).length;
   h+='<div class="stats-grid" style="margin-bottom:16px">';
   h+=statCard('Actief',actief,'#10b981',SVGS.file);
   h+=statCard('Passief',passief,'#6b7694',SVGS.alert);
@@ -9677,7 +9745,7 @@ function renderServiceklanten() {
         case 'contract': {
           var _skCtObj = getContracten().find(function(c){ return c.id===k.contractType||c.code===k.contractType; });
           var _skCtTip = _skCtObj ? (_skCtObj.code + ' — ' + _skCtObj.naam) : (k.contractType||'—');
-          h+='<td data-col="contract"><span class="tag" style="background:'+ctKleur+'22;color:'+ctKleur+';display:inline-flex;align-items:center;gap:3px" title="'+esc(_skCtTip)+'">'+esc(k.contractType||'—')+(k.heeftBContract?bContractBadge(true):'')+'</span></td>';
+          h+='<td data-col="contract"><span class="tag" style="background:'+ctKleur+'22;color:'+ctKleur+';display:inline-flex;align-items:center;gap:3px" title="'+esc(_skCtTip)+'">'+esc(k.contractType||'—')+(k.klantAanvulling(k)?bContractBadge(true, klantAanvulling(k)):'')+'</span></td>';
           break;
         }
         case 'pomptype': h+='<td data-col="pomptype" style="font-size:12px;color:var(--muted)">'+esc(k.pomptype||'—')+'</td>'; break;
@@ -9765,7 +9833,7 @@ function renderServiceklanten() {
   el.querySelector('#sk-import-btn') && void 0;
   var skExpBtn=el.querySelector('#sk-export-btn'); if(skExpBtn) skExpBtn.addEventListener('click',function(){
     var rows=lijst.map(function(k){
-      return[k.debNr||'',k.naam||'',k.adres||'',k.postcode||'',k.plaats||'',k.contactpersoon||'',k.email||'',k.telefoon||'',k.contractType||'',k.heeftBContract?'Ja':'Nee',k.uitvoerder||'intern',fmtD(k.laatsteDatum),fmtD(k.volgendeDatum),k.duurUren||'',k.pomptype||'',k.besturing||'',k.status||'actief'];
+      return[k.debNr||'',k.naam||'',k.adres||'',k.postcode||'',k.plaats||'',k.contactpersoon||'',k.email||'',k.telefoon||'',k.contractType||'',k.klantAanvulling(k)?'Ja':'Nee',k.uitvoerder||'intern',fmtD(k.laatsteDatum),fmtD(k.volgendeDatum),k.duurUren||'',k.pomptype||'',k.besturing||'',k.status||'actief'];
     });
     csvExport(['Deb.nr','Naam','Adres','Postcode','Plaats','Contactpersoon','Email','Telefoon','Contract','Contract B','Uitvoerder','Laatste beurt','Volgende beurt','Duur (u)','Pomptype','Besturing','Status'],rows,'serviceklanten');
   });
@@ -9787,7 +9855,7 @@ function openSkPanel(id, opties) {
   h+=v('Laatste beurt',fmtD(k.laatsteDatum)); h+=v('Volgende beurt',fmtD(k.volgendeDatum));
   h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">Uitvoerder</div><div style="font-size:13px;font-weight:700;margin-top:3px;color:'+(k.uitvoerder==='extern'?'var(--orange)':'var(--green)')+'">'+( k.uitvoerder==='extern'?'Extern / ZZP':'Homa intern')+'</div></div>';
   h+='</div>';
-  if(k.heeftBContract) h+='<div style="margin-bottom:10px">'+bContractBadge(false)+'</div>';
+  if(klantAanvulling(k)) h+='<div style="margin-bottom:10px">'+bContractBadge(false, klantAanvulling(k))+'</div>';
   if(k.duurUren) h += v('Tijdsduur servicebeurt', k.duurUren+' uur');
   if(k.contractOpgezegd) h += '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:2px">CONTRACT OPGEZEGD</div><div style="font-size:13px;color:var(--muted)">per '+fmtD(k.contractOpgezegd)+'</div></div>';
   if(k.werkomschrijving) h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px">Werkomschrijving</div><div style="font-size:13px">'+esc(k.werkomschrijving)+'</div></div>';
@@ -9822,7 +9890,8 @@ function openSkModal(id) {
   // De code is de sleutel, niet het id: de import werkt met codes en de lijstweergave
   // toont contractType rechtstreeks. Bij de standaardcontracten zijn id en code gelijk,
   // maar bij een zelf toegevoegd contract liepen ze uit elkaar.
-  var conOpts = getContracten().map(function(c){ return [c.code, c.code + ' — ' + c.naam.replace('Contract '+c.code+' - ','').replace('Contract '+c.code+' — ','')] });
+  // Alleen basiscontracten: een aanvulling is geen keuze voor het hoofdcontract.
+  var conOpts = getBasisContracten().map(function(c){ return [c.code, c.code + ' — ' + c.naam.replace('Contract '+c.code+' - ','').replace('Contract '+c.code+' — ','')] });
   var _kCt = getContract(k.contractType || k.contractId);
 
   var b='<div class="form-grid">';
@@ -9836,11 +9905,7 @@ function openSkModal(id) {
   // Bewerkbaar: service-specifieke velden
   b+=fg('Contracttype',fsel('sk-con',conOpts,_kCt?_kCt.code:k.contractType));
   b+=fg('Uitvoerder','<select class="input" id="sk-uitvoerder"><option value="intern"'+(k.uitvoerder!=='extern'?' selected':'')+'>Homa intern</option><option value="extern"'+(k.uitvoerder==='extern'?' selected':'')+'>Extern / ZZP</option></select>');
-  b+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">'
-    +'<input type="checkbox" id="sk-bcontract"'+(k.heeftBContract?' checked':'')+' style="width:15px;height:15px;accent-color:var(--orange);flex-shrink:0">'
-    +'<div><div style="font-size:13px;font-weight:600">Contract B — 24-uurs storingsdienst</div>'
-    +'<div style="font-size:11px;color:var(--muted)">Aanvulling op A/C contract</div></div>'
-    +'</div>';
+  b+=aanvullingKeuzeHtml('sk-aanvulling', klantAanvulling(k));
   var _rgS = getRegisterInst();
   b+=fg(esc(_rgS.veld1Label),finp('sk-pt','text',k.pomptype,''));
   b+=fg(esc(_rgS.veld2Label),finp('sk-bs','text',k.besturing,''));
@@ -10081,7 +10146,10 @@ function saveSk(id) {
   var ct=document.getElementById('sk-con').value;
   var data=Object.assign({},k,{
     contractType:ct,
-    heeftBContract: document.getElementById('sk-bcontract') ? document.getElementById('sk-bcontract').checked : !!(k.heeftBContract),
+    // Nieuw veld; het oude heeftBContract wordt niet meer geschreven. klantAanvulling()
+    // leest allebei, dus records die nog niet zijn bewerkt blijven gewoon werken.
+    aanvulling: document.getElementById('sk-aanvulling') ? (document.getElementById('sk-aanvulling').value || null) : (klantAanvulling(k) || null),
+    heeftBContract: null,
     uitvoerder: document.getElementById('sk-uitvoerder') ? document.getElementById('sk-uitvoerder').value : (k.uitvoerder||'intern'),
     pomptype:document.getElementById('sk-pt').value.trim(),
     besturing:document.getElementById('sk-bs').value.trim(),
@@ -10307,7 +10375,7 @@ function renderDebiteuren(){
   lijst = sorteerLijst(lijst, _debSortKey, _debSortDir);
   var totaal=lijst.length,slice=lijst.slice((_debPage-1)*_debPS,_debPage*_debPS);
   var metCtrt=APP.debiteuren.filter(function(d){return APP.serviceklanten.some(function(k){return (d.nr&&k.debNr===d.nr)||k.debId===d.id;});}).length;
-  var metBContract=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&k.heeftBContract;}).length;
+  var metBContract=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&klantAanvulling(k);}).length;
   var el=document.getElementById('content');
 
   var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
@@ -10369,7 +10437,7 @@ function renderDebiteuren(){
             var _ctObj = getContracten().find(function(c){ return c.id===sk.contractType||c.code===sk.contractType; });
             _ctTooltip = _ctObj ? (_ctObj.code + ' — ' + _ctObj.naam) : sk.contractType;
           }
-          h+='<td data-col="servicecontract">'+(sk?'<span class="tag tag-green" style="display:inline-flex;align-items:center;gap:3px" title="'+esc(_ctTooltip)+'">✓ '+esc(sk.contractType)+(sk.heeftBContract?bContractBadge(true):'')+'</span>':'<span class="tag tag-muted">Geen</span>')+'</td>';
+          h+='<td data-col="servicecontract">'+(sk?'<span class="tag tag-green" style="display:inline-flex;align-items:center;gap:3px" title="'+esc(_ctTooltip)+'">✓ '+esc(sk.contractType)+(sk.klantAanvulling(sk)?bContractBadge(true, klantAanvulling(sk)):'')+'</span>':'<span class="tag tag-muted">Geen</span>')+'</td>';
           break;
         }
       }
@@ -10555,7 +10623,7 @@ function openDebPanel(id, opties){
     h+='<div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:4px">✓ Servicecontract</div>';
     h+='<div style="font-size:13px;font-weight:600">'+esc(sk.naam)+'</div>';
     h+='<div style="font-size:12px;color:var(--muted);margin-top:2px">Contract '+esc(sk.contractType)+' · Volgende: '+fmtD(sk.volgendeDatum)+'</div>';
-    if(sk.heeftBContract) h+='<div style="margin-top:8px">'+bContractBadge(false)+'</div>';
+    if(klantAanvulling(sk)) h+='<div style="margin-top:8px">'+bContractBadge(false, klantAanvulling(sk))+'</div>';
     h+='</div>';
   }
   else{h+='<div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--muted)">Geen servicecontract gekoppeld</div>';}
@@ -11028,7 +11096,7 @@ function openDebModal(id){
   // allebei, dus via het contractobject komen we altijd op hetzelfde uit.
   var _dCt = _dSk ? getContract(_dSk.contractType || _dSk.contractId) : null;
   var ctOpts = '<option value="">— Geen —</option>';
-  getContracten().forEach(function(c){
+  getBasisContracten().forEach(function(c){
     var gekozen = _dCt && String(c.id) === String(_dCt.id);
     ctOpts += '<option value="'+esc(c.code)+'"'+(gekozen?' selected':'')+'>'+esc(c.code+' — '+c.naam)+'</option>';
   });
@@ -11119,11 +11187,7 @@ function openDebModal(id){
   b+='<div id="df-sk-velden" style="display:'+(heeftSk?'grid':'none')+';grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">';
   b+=fg('Contracttype','<select class="input" id="df-sk-ct">'+ctOpts+'</select>');
   b+=fg('Uitvoerder','<select class="input" id="df-sk-uitvoerder"><option value="intern"'+((!bestaandeSk0||bestaandeSk0.uitvoerder!=='extern')?' selected':'')+'>Homa intern</option><option value="extern"'+((bestaandeSk0&&bestaandeSk0.uitvoerder==='extern')?' selected':'')+'>Extern / ZZP</option></select>');
-  b+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">'
-    +'<input type="checkbox" id="df-sk-bcontract"'+(bestaandeSk0&&bestaandeSk0.heeftBContract?' checked':'')+' style="width:15px;height:15px;accent-color:var(--orange);flex-shrink:0">'
-    +'<div><div style="font-size:13px;font-weight:600">Contract B — 24-uurs storingsdienst</div>'
-    +'<div style="font-size:11px;color:var(--muted)">Aanvulling op A/C contract · klant heeft recht op 24u service bij storing</div></div>'
-    +'</div>';
+  b+=aanvullingKeuzeHtml('df-sk-aanvulling', klantAanvulling(bestaandeSk0));
   b+=fg('Laatste uitvoeringsdatum',finp('df-sk-ld','date',bestaandeSk0&&bestaandeSk0.laatsteDatum||'',''));
   // Pomp keuze: handmatig of uit register
   // Automatisch register-modus als er pompen in het register staan voor deze debiteur
@@ -11465,7 +11529,9 @@ function saveDeb(id, opties){
     var wo  = document.getElementById('df-sk-wo')   ? document.getElementById('df-sk-wo').value.trim()  : (bestaandeSk&&bestaandeSk.werkomschrijving||'');
     var nt  = document.getElementById('df-sk-nt')   ? document.getElementById('df-sk-nt').value.trim()  : (bestaandeSk&&bestaandeSk.notitie||'');
     var opg = document.getElementById('df-sk-opgezegd') ? document.getElementById('df-sk-opgezegd').value : (bestaandeSk&&bestaandeSk.contractOpgezegd||'');
-    var bContract = document.getElementById('df-sk-bcontract') ? document.getElementById('df-sk-bcontract').checked : !!(bestaandeSk&&bestaandeSk.heeftBContract);
+    var aanvullingKeuze = document.getElementById('df-sk-aanvulling')
+      ? (document.getElementById('df-sk-aanvulling').value || null)
+      : (klantAanvulling(bestaandeSk) || null);
     var uitvoerder = document.getElementById('df-sk-uitvoerder') ? document.getElementById('df-sk-uitvoerder').value : (bestaandeSk&&bestaandeSk.uitvoerder||'intern');
     var planningAnker = (document.getElementById('df-sk-anker')||{value:''}).value||null;
     var voorkeurWeek  = (document.getElementById('df-sk-week')||{value:''}).value ? parseInt(document.getElementById('df-sk-week').value)||null : null;
@@ -11482,7 +11548,8 @@ function saveDeb(id, opties){
       email:            data.email,
       telefoon:         data.telefoon,
       contractType:     ct,
-      heeftBContract:   bContract,
+      aanvulling:       aanvullingKeuze,
+      heeftBContract:   null,
       uitvoerder:       uitvoerder,
       pomptype:         pmp,
       besturing:        bst,
@@ -11600,7 +11667,8 @@ function verwijderDeb(id){
 // ── Contracten importeren (Unit4-abonnementenmodule) ─────────────────────────
 // Een klant kan meerdere contracten hebben (bijv. A12 + B). De B-contracten zijn
 // 24-uurs servicecontracten en worden op de serviceklant als vlag gezet
-// (heeftBContract); het onderhoudscontract (A/C/...) komt in contractType.
+// (sinds 30 september 2026 het veld `aanvulling`, daarvoor de vlag `heeftBContract`);
+// het onderhoudscontract (A/C/...) komt in contractType.
 // Bewuste keuzes: alleen bijwerken (debiteuren zonder serviceklant worden
 // overgeslagen) en bij méér dan één onderhoudscontract per debiteur wordt niets
 // gewijzigd — dat is een conflict dat een mens moet beoordelen.
@@ -11720,7 +11788,7 @@ function _openContractImport(){
       // Klant staat wél in het bestand, maar zonder B-rij terwijl het vinkje aanstaat:
       // het 24-uurscontract is mogelijk beëindigd. Alleen melden, nooit automatisch
       // uitvinken — bij een deellijst zou dat onterecht contracten wissen.
-      if(!d.b && sk.heeftBContract) res.bWeg.push({ nr:nr, naam:sk.naam, sk:sk });
+      if(!d.b && klantAanvulling(sk)) res.bWeg.push({ nr:nr, naam:sk.naam, sk:sk });
       res.bij.push({ sk:sk, code:code, b:d.b });
     });
     return res;
@@ -11767,7 +11835,7 @@ function _openContractImport(){
       a.bij.forEach(function(x){
         var k = x.sk, veranderd = false;
         if(x.code && k.contractType !== x.code){ k.contractType = x.code; veranderd = true; }
-        if(x.b && !k.heeftBContract){ k.heeftBContract = true; veranderd = true; }
+        if(x.b && !klantAanvulling(k)){ k.aanvulling = 'B'; k.heeftBContract = null; veranderd = true; }
         if(veranderd){ dbSaveItem('serviceklanten', k.id, k); gew++; }
       });
       // Nieuwe serviceklanten: gegevens uit de debiteur, contract uit het bestand.
@@ -11786,7 +11854,7 @@ function _openContractImport(){
           email: d.email||'',
           telefoon: d.telefoon||'',
           contractType: x.code||'',
-          heeftBContract: !!x.b,
+          aanvulling:     x.b ? 'B' : null,
           uitvoerder: 'intern',
           pomptype: '',
           besturing: '',
@@ -11849,7 +11917,8 @@ function _openContractImport(){
             bt.addEventListener('click', function(){
               var k = (APP.serviceklanten||[]).find(function(x){ return String(x.id)===String(bt.dataset.id); });
               if(!k) return;
-              k.heeftBContract = false;
+              k.aanvulling = null;
+              k.heeftBContract = null;
               dbSaveItem('serviceklanten', k.id, k);
               bt.outerHTML = '<span style="font-size:11px;color:var(--green);font-weight:600">Uitgevinkt</span>';
               renderDebiteuren();
@@ -15939,7 +16008,7 @@ function renderPlanLijst(monteurs) {
             case 'contract':
               if (_skVoorOp && _skVoorOp.contractType) {
                 var _ct = getContract(_skVoorOp.contractType);
-                h += '<td data-col="contract" style="padding:6px 10px"><span class="tag tag-green" style="font-size:10px;white-space:nowrap;display:inline-flex;align-items:center;gap:3px" title="'+esc(_skVoorOp.naam||'')+'">'+esc(_ct ? _ct.code : _skVoorOp.contractType)+(_skVoorOp.heeftBContract?bContractBadge(true):'')+'</span></td>';
+                h += '<td data-col="contract" style="padding:6px 10px"><span class="tag tag-green" style="font-size:10px;white-space:nowrap;display:inline-flex;align-items:center;gap:3px" title="'+esc(_skVoorOp.naam||'')+'">'+esc(_ct ? _ct.code : _skVoorOp.contractType)+(_skVoorOp.klantAanvulling(_skVoorOp)?bContractBadge(true, klantAanvulling(_skVoorOp)):'')+'</span></td>';
               } else {
                 h += '<td data-col="contract" style="padding:6px 10px"><span style="font-size:11px;color:var(--muted)">—</span></td>';
               }
@@ -16554,7 +16623,7 @@ function openOpdrachtPanel(id) {
     if (klantInfo.contactpersoon) h += '<div style="font-size:13px;font-weight:600;margin-bottom:4px">'+esc(klantInfo.contactpersoon)+'</div>';
     if (klantInfo.telefoon) h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg><a href="tel:'+esc(klantInfo.telefoon)+'" style="font-size:13px;color:var(--accent)">'+esc(klantInfo.telefoon)+'</a></div>';
     if (klantInfo.email) h += '<div style="display:flex;align-items:center;gap:6px"><span style="display:inline-flex;color:var(--muted)">'+ICO.mail+'</span><a href="mailto:'+esc(klantInfo.email)+'" style="font-size:13px;color:var(--accent)">'+esc(klantInfo.email)+'</a></div>';
-    if (klantInfo.heeftBContract) h += '<div style="margin-top:8px">'+bContractBadge(false)+'</div>';
+    if (klantAanvulling(klantInfo)) h += '<div style="margin-top:8px">'+bContractBadge(false, klantAanvulling(klantInfo))+'</div>';
     h += '</div>';
   }
 
@@ -17925,7 +17994,7 @@ function openBatchInplanModal(skIds) {
   klanten.forEach(function(k){
     b += '<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">';
     b += '<span style="font-weight:600">'+esc(k.naam)+'</span>';
-    b += '<span style="color:var(--muted)">'+esc(k.contractType||'')+(k.heeftBContract?' + B':'')+(k.volgendeDatum?' · '+fmtD(k.volgendeDatum):'')+'</span>';
+    b += '<span style="color:var(--muted)">'+esc(k.contractType||'')+(klantAanvulling(k)?' + '+esc(klantAanvulling(k)):'')+(k.volgendeDatum?' · '+fmtD(k.volgendeDatum):'')+'</span>';
     b += '</div>';
   });
   b += '</div></div>';
@@ -28655,7 +28724,7 @@ function renderRapServiceklanten(el) {
   var actief    = APP.serviceklanten.filter(function(k){ return k.status!=='passief'; });
   var passief   = APP.serviceklanten.filter(function(k){ return k.status==='passief'; });
   var vervallen = actief.filter(function(k){ return isSkVervallen(k); });
-  var bcontract = actief.filter(function(k){ return k.heeftBContract; });
+  var bcontract = actief.filter(function(k){ return klantAanvulling(k); });
 
   var h = '<div class="stats-grid" style="margin-bottom:20px">';
   h += statCard('Actief', actief.length, '#10b981', SVGS.file);
@@ -28741,7 +28810,7 @@ function renderRapServiceklanten(el) {
       code:ct.code, kleur:ct.kleur,
       actief: skCt.filter(function(k){ return k.status!=='passief'; }).length,
       vervallen: skCt.filter(function(k){ return k.status!=='passief' && isSkVervallen(k); }).length,
-      contractB: skCt.filter(function(k){ return k.status!=='passief' && k.heeftBContract; }).length,
+      contractB: skCt.filter(function(k){ return k.status!=='passief' && klantAanvulling(k); }).length,
       passief: skCt.filter(function(k){ return k.status==='passief'; }).length
     });
   });
@@ -30150,7 +30219,9 @@ function renderInstContracten(el) {
   contracten.forEach(function(ct){
     h += '<tr>';
     h += '<td style="padding:10px 14px;font-weight:700;font-size:14px"><span class="tag" style="background:'+ct.kleur+'22;color:'+ct.kleur+'">'+esc(ct.code)+'</span></td>';
-    h += '<td style="padding:10px 14px;font-size:13px">'+esc(ct.naam)+'</td>';
+    h += '<td style="padding:10px 14px;font-size:13px">'+esc(ct.naam)
+       + (contractIsAanvulling(ct) ? ' <span class="tag" style="background:rgba(245,158,11,.15);color:var(--orange-t);font-size:10px">Aanvulling</span>' : '')
+       + '</td>';
     h += '<td style="padding:10px 14px;font-size:12px;color:var(--muted)">'+(ct.intervalMaanden?ct.intervalMaanden+' mnd':'Op aanvraag')+'</td>';
     h += '<td style="padding:10px 14px;font-size:12px;color:var(--muted)">'+(ct.aantalMonteurs||1)+' man</td>';
     h += '<td style="padding:10px 14px"><div style="width:24px;height:24px;border-radius:50%;background:'+ct.kleur+'"></div></td>';
@@ -30179,6 +30250,10 @@ function openContractModal(id) {
   var b = '<div class="form-grid">';
   b += fg('Code (bijv. A10)', finp('ct-code','text',ct.code||'',''));
   b += fg('Naam', finp('ct-naam','text',ct.naam||'',''));
+  b += fg('Soort', '<select class="input" id="ct-soort">'
+     + '<option value="basis"'+(ct.soort==='aanvulling'?'':' selected')+'>Basiscontract — levert geplande beurten op</option>'
+     + '<option value="aanvulling"'+(ct.soort==='aanvulling'?' selected':'')+'>Aanvulling — geldt bovenop een basiscontract</option>'
+     + '</select>');
   b += fg('Frequentie/jaar <span style="font-size:11px;color:var(--muted);font-weight:400">(0 = op aanvraag)</span>',
     finp('ct-freq','number',(ct.frequentie!==undefined&&ct.frequentie!==null?ct.frequentie:1),''));
   b += fg('Aantal monteurs <span style="font-size:11px;color:var(--muted);font-weight:400">(per beurt)</span>',
@@ -30217,6 +30292,8 @@ function openContractModal(id) {
       aantalMonteurs:  aantalMonteurs,
       kleur:           document.getElementById('ct-kleur').value,
       werkomschrijving:document.getElementById('ct-werk').value.trim(),
+      // basis of aanvulling; ontbreekt bij contracten van vóór deze wijziging en telt dan als basis
+      soort:           (document.getElementById('ct-soort') && document.getElementById('ct-soort').value === 'aanvulling') ? 'aanvulling' : 'basis',
     };
     if(!APP.contracten||!APP.contracten.length) APP.contracten = getContracten().slice();
     var idx = APP.contracten.findIndex(function(c){return c.id===id;});

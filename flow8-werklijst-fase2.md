@@ -2654,3 +2654,52 @@ was tegengekomen.
 **Wanneer wel:** bij een tweede klant of een vraag over beveiliging. Kies dan een **deny-list** (klant,
 adres, datum, toewijzing mogen niet wijzigen) in plaats van een allow-list — die laatste breekt zodra
 de app later een nieuw veld gaat schrijven.
+
+---
+
+# Punt 4B: contracttypes kennen nu basis en aanvulling — 30 september 2026
+
+`flow8-v2.html` · JS-syntax ✓. **Geen migratie nodig.**
+
+**Het inzicht kwam van Thomas.** Op de lijst stond "aanvullend/optioneel contracttype structureel",
+en ik las dat als "een klant kan meerdere contracttypes hebben". Dat klopte niet. Zijn uitleg: een
+klant heeft A óf C als **basiscontract**, en B is een **aanvulling** — 24-uurs storingsdienst, die
+alleen bovenop een basiscontract kan bestaan. Twee soorten dingen dus, geen lijst van hetzelfde.
+
+**Dat zat al impliciet in de data:** B heeft `frequentie: 0`, `intervalMaanden: 0` en "(icm contract A)"
+in de naam. De code kon er alleen niet op sturen, dus was het een vaste vlag `heeftBContract` op
+23 plekken geworden.
+
+**Het model.** Contracttype krijgt `soort`: `basis` (standaard, ook als het veld ontbreekt) of
+`aanvulling`. Serviceklant krijgt `aanvulling` (één code) in plaats van de boolean. **Eén veld, geen
+lijst** — Thomas: bij hem is het er één, en meer dan één wordt rommelig. Een keuzelijst met "geen"
+bovenaan dwingt dat vanzelf af; vinkjes zouden juist uitnodigen tot die rommel.
+
+**Geen migratie over 1102 records.** `klantAanvulling(k)` leest `k.aanvulling` en valt terug op
+`k.heeftBContract ? 'B' : null`. Oude records blijven werken, een bewerkte klant gaat vanzelf om, en
+opslaan zet het oude veld op `null`. Zelfde aanpak als bij `verzuimTekst()`. Dat haalde de enige
+spannende stap uit dit traject.
+
+**Onzichtbaar zonder aanvullingen.** `aanvullingKeuzeHtml()` geeft een lege string als er geen
+contracttype als aanvulling is gemarkeerd. Voor bedrijven die dit niet gebruiken bestaat het
+onderdeel dan simpelweg niet — geen leeg vakje voor iets wat alleen Homa heeft.
+
+**Basiscontract-keuzelijsten filteren aanvullingen eruit** (`getBasisContracten()`), anders zou B
+straks als hoofdcontract te kiezen zijn zodra hij in de contractenlijst staat.
+
+**De contract-import schrijft nu beide kanten bij.** Die blijft het bestand van Homa lezen (met een
+letterlijke B-kolom), maar zet `aanvulling` in plaats van alleen de oude vlag. Zonder dat kon een
+import een aanvulling niet meer wéghalen bij een klant die al bewerkt was: die heeft `aanvulling`
+staan, en de import zette alleen `heeftBContract` op false — wat de helper dan niet meer leest.
+
+**Twee fouten die het nalopen opleverde:**
+- Eén van de twee identieke badge-regels zat in de planning met variabele `_skVoorOp`, niet `k`.
+  Mijn vervanging van beide tegelijk zette daar een verwijzing neer die niet bestond.
+- In de nieuwe badge-code stond een regex met `' + _c + '` er letterlijk ín in plaats van als
+  waarde. Die matcht nooit, en de badge had "B · Contract B — servicewacht" getoond. Herschreven
+  zonder regex; met een variabele erin moet dat `new RegExp` worden, en dat is hier onnodig
+  foutgevoelig.
+
+**Ook aangetroffen:** B stond niet meer in de contractenlijst van Homa (20 contracten geladen, B niet
+meer bij). Hij staat wel in `STANDAARD_CONTRACTEN`, dus hij is ooit verwijderd. Thomas maakt hem
+opnieuw aan via Instellingen → Contracttypes, nu met soort = aanvulling.
