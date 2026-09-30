@@ -8135,8 +8135,8 @@ function bContractBadge(klein, code) {
   var _pre = 'Contract ' + _c;
   if (_naam.indexOf(_pre) === 0) _naam = _naam.slice(_pre.length).replace(/^\s*[—-]\s*/, '');
   var _vol = _ct ? (_ct.code + ' · ' + _naam) : 'Contract B · 24u storingsdienst';
-  if(klein) return '<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,0.15);color:var(--orange);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;vertical-align:middle;margin-left:4px"'+esc(_c)+'</span>';
-  return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.12);color:var(--orange);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg'+esc(_vol)+'</span>';
+  if(klein) return '<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,0.15);color:var(--orange);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;vertical-align:middle;margin-left:4px">'+esc(_c)+'</span>';
+  return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.12);color:var(--orange);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'+esc(_vol)+'</span>';
 }
 
  function berekenVolgend(laatste, contractId, sk) {

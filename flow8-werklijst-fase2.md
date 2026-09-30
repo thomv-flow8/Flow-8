@@ -2721,3 +2721,18 @@ bij uitvoeren.
 dan het voorafgaande `object.` op in de zoektekst. Doe je dat niet, dan blijft die prefix staan.
 Controle achteraf die dit wél vangt: `grep -n "[a-zA-Z_]\.helperNaam(" bestand` — een helper hoort
 nooit een punt vóór zich te hebben.
+
+**Nog twee keer dezelfde fout gemaakt, en toen pas goed getest.** Bij het generiek maken van de badge
+slokte mijn zoek-en-vervang twee keer een `>` op: `margin-left:4px"'+esc(_c)+'` (de sluithaak van de
+span-tag) en `</svg'+esc(_vol)+'` (die van de svg). Gevolg: de badge in de debiteurenlijst toonde
+alleen een vinkje, zonder de letter. Thomas zag het meteen in de lijstweergave.
+Dat is dezelfde familie als `k.klantAanvulling(k)`: een vervanging die geldige JavaScript oplevert en
+dus door `check.sh` komt, maar kapotte HTML produceert.
+
+**Daarom nu een testscript dat de badge écht uitvoert** (badgetest.js in de scratchpad): het knipt
+`bContractBadge` uit het bestand, draait hem met een nagebootste `getContracten()` en controleert
+dat de span-tags in balans zijn en welke tekst er zichtbaar wordt. Zeven gevallen: klein en groot,
+met en zonder code, een eigen code (WE · Weekendservice) en de terugval wanneer B niet in de
+contractenlijst staat.
+**Les: bij HTML-in-strings is uitvoeren de enige echte controle.** Tellen bewijst dat je de juiste
+plek had, de syntaxcheck bewijst dat het JavaScript is — geen van beide zegt iets over het resultaat.
