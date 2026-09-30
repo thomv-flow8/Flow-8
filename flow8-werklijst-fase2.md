@@ -2703,3 +2703,21 @@ staan, en de import zette alleen `heeftBContract` op false — wat de helper dan
 **Ook aangetroffen:** B stond niet meer in de contractenlijst van Homa (20 contracten geladen, B niet
 meer bij). Hij staat wel in `STANDAARD_CONTRACTEN`, dus hij is ooit verwijderd. Thomas maakt hem
 opnieuw aan via Instellingen → Contracttypes, nu met soort = aanvulling.
+
+**Live-brekende fout gemaakt en hersteld (30 september 2026).** Bij het omzetten van de leesplekken
+begon mijn zoektekst bij `heeftBContract` zónder de `k.` ervoor. Uit `k.heeftBContract` werd daardoor
+`k.klantAanvulling(k)` — een aanroep op het klantobject in plaats van op de functie. Op vier plekken:
+serviceklantenlijst, export, debiteurenlijst en planning.
+Gevolg: een TypeError tijdens het laden van het profiel, waardoor de app uitlogde en Thomas niet meer
+bij Debiteuren en Serviceklanten kon. De `PERMISSION_DENIED`-regels in zijn log waren een gevólg van
+dat uitloggen, niet van de rules.
+
+**Waarom de controles het niet vingen.** De telling ("komt deze tekst precies één keer voor?")
+bevestigt alleen dat je de juiste plek te pakken hebt, niet dat het resultaat klopt. En
+`k.klantAanvulling(k)` is geldige JavaScript, dus `check.sh` kwam er ook doorheen — het breekt pas
+bij uitvoeren.
+
+**Regel voor de volgende keer:** verandert een vervanging een **veld** in een **functieaanroep**, neem
+dan het voorafgaande `object.` op in de zoektekst. Doe je dat niet, dan blijft die prefix staan.
+Controle achteraf die dit wél vangt: `grep -n "[a-zA-Z_]\.helperNaam(" bestand` — een helper hoort
+nooit een punt vóór zich te hebben.
