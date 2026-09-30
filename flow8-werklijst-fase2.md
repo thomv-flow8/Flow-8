@@ -2626,3 +2626,31 @@ te laten zien, terwijl de werkwijze een preview voorschrijft bij visuele wijzigi
 
 **In de praktijk geverifieerd** (Thomas, 29 september 2026): gedeployd en getest — de huisstijlkleur
 komt goed door en de aangescherpte blokherkenning doet wat hij moet. Stap 1 is daarmee af.
+
+---
+
+# Per-veld rechten: besloten niet te doen — 30 september 2026
+
+Ik had dit als volgende klus aangeraden ("de kennis is nu vers"). Thomas vroeg door — *is het nu niet
+goed geregeld in de rechten matrix?* en *monteurs moeten bij een werkbon wel een adres kunnen
+toevoegen of wijzigen* — en op allebei had hij gelijk.
+
+**De matrix regelt het al.** Een monteur heeft geen `S` op Planning en geen `S` op Serviceklanten, en
+de app houdt zich daaraan: het opdrachtformulier met klant, adres en datum zit achter dat recht. Een
+rule zou alleen de database op slot doen tegen iemand die bewust de console opent — binnen zijn eigen
+bedrijf. Dat is de laatste verdedigingslinie, en de eerste staat er al.
+
+**En het zou echt werk breken.** `_wbNieuweBonDialoog` ("Nieuwe werkbon", ~2955) zit **niet** achter
+een recht en maakt een volledig opdrachtrecord aan mét `klantNaam`, `adres`, `postcode`, `plaats`,
+`datum` en `monteurId`. In de code staat er letterlijk bij dat het adres "volgt maar aanpasbaar
+blijft". Precies de velden die ik wilde vastzetten. Binnen twee minuten zoeken gevonden — wat vooral
+zegt dat er meer van die routes zullen zijn.
+
+**Les:** "de kennis is vers, dus nu is het goedkoop" is een zwak argument als het alternatief is dat
+er niets kapot kan. De juiste volgorde is eerst vaststellen wat het oplevert, dan pas wat het kost.
+De gebruiker die er dagelijks mee werkt kende de uitzondering die ik in twee dagen code lezen niet
+was tegengekomen.
+
+**Wanneer wel:** bij een tweede klant of een vraag over beveiliging. Kies dan een **deny-list** (klant,
+adres, datum, toewijzing mogen niet wijzigen) in plaats van een allow-list — die laatste breekt zodra
+de app later een nieuw veld gaat schrijven.

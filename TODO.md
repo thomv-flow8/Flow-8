@@ -357,9 +357,25 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       **Ook nodig voor sleutels mét listener** (`opdrachten`, `medewerkers`, `agenda`): die herstellen
       juist níet vanzelf, want de listener vuurt alleen bij een serverwijziging — en die is er bij een
       geweigerde verwijdering nooit geweest.
-- [ ] **Per-veld rechten op `opdrachten` en `serviceklanten`** — de helft van de oorspronkelijke zorg
-      blijft staan: een monteur kan daar meer wijzigen dan alleen wat hij nodig heeft. Dichtzetten kan
-      alleen per veld (bijvoorbeeld wel `status`, niet klant of datum), en dat is een eigen traject.
+- [ ] **Per-veld rechten op `opdrachten` en `serviceklanten` — BEWUST UITGESTELD, 30 september 2026.**
+      Niet doen tot er een aanleiding is. De afweging, zodat dit niet opnieuw naïef wordt opgepakt:
+      - **De rechtenmatrix regelt het al.** Een monteur heeft geen `S` op Planning en geen `S` op
+        Serviceklanten, en de app houdt zich daaraan — het opdrachtformulier met klant, adres en
+        datum zit achter dat recht. Een rule zou alleen de database zelf op slot doen, voor iemand
+        die bewust om de app heen werkt via de browserconsole. Binnen zijn eigen bedrijf.
+      - **Het breekt echt werk.** "Nieuwe werkbon" (`_wbNieuweBonDialoog`, flow8-v2.html ~2955) zit
+        **niet** achter een recht en maakt een volledig opdrachtrecord aan, mét `klantNaam`, `adres`,
+        `postcode`, `plaats`, `datum` en `monteurId`. In de code staat er letterlijk bij dat het adres
+        "volgt maar aanpasbaar blijft". Had ik die velden op slot gezet, dan kon een monteur geen
+        werkbon meer aanmaken. Gevonden door Thomas, en binnen twee minuten zoeken bevestigd — wat
+        aangeeft dat er meer van zulke routes zullen zijn.
+      - **Op te lossen** door onderscheid te maken tussen aanmaken (alles mag) en wijzigen (alleen
+        `status`, `werkbonId`, `notitie`, `actietype` en de geocode-velden). Maar elke gemiste route
+        breekt stil in het veld, en dat weegt zwaarder dan het gat dat het dicht.
+      - **Dan wél oppakken:** bij een tweede klant, of zodra iemand naar de beveiliging vraagt. Kies
+        dan een korte lijst velden die níet gewijzigd mogen worden (klant, adres, datum, toewijzing)
+        in plaats van een lijst die wél mag — een deny-list breekt niet als de app later een nieuw
+        veld gaat schrijven, een allow-list wel.
 - [x] **Claim-rules omgezet en voor het eerst getest — 28 september 2026, gedeployd.** `overuren`,
       `onkosten`, `verlof` en `verzuim` leunden op `auth.token.ouRecht/okRecht/vlRecht/vzRecht` en
       waren daarmee ontestbaar: de Rules Playground draagt geen custom claims, dus ook een admin werd
