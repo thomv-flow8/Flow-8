@@ -9745,7 +9745,7 @@ function renderServiceklanten() {
         case 'contract': {
           var _skCtObj = getContracten().find(function(c){ return c.id===k.contractType||c.code===k.contractType; });
           var _skCtTip = _skCtObj ? (_skCtObj.code + ' — ' + _skCtObj.naam) : (k.contractType||'—');
-          h+='<td data-col="contract"><span class="tag" style="background:'+ctKleur+'22;color:'+ctKleur+';display:inline-flex;align-items:center;gap:3px" title="'+esc(_skCtTip)+'">'+esc(k.contractType||'—')+(k.klantAanvulling(k)?bContractBadge(true, klantAanvulling(k)):'')+'</span></td>';
+          h+='<td data-col="contract"><span class="tag" style="background:'+ctKleur+'22;color:'+ctKleur+';display:inline-flex;align-items:center;gap:3px" title="'+esc(_skCtTip)+'">'+esc(k.contractType||'—')+(klantAanvulling(k)?bContractBadge(true, klantAanvulling(k)):'')+'</span></td>';
           break;
         }
         case 'pomptype': h+='<td data-col="pomptype" style="font-size:12px;color:var(--muted)">'+esc(k.pomptype||'—')+'</td>'; break;
@@ -9833,7 +9833,7 @@ function renderServiceklanten() {
   el.querySelector('#sk-import-btn') && void 0;
   var skExpBtn=el.querySelector('#sk-export-btn'); if(skExpBtn) skExpBtn.addEventListener('click',function(){
     var rows=lijst.map(function(k){
-      return[k.debNr||'',k.naam||'',k.adres||'',k.postcode||'',k.plaats||'',k.contactpersoon||'',k.email||'',k.telefoon||'',k.contractType||'',k.klantAanvulling(k)?'Ja':'Nee',k.uitvoerder||'intern',fmtD(k.laatsteDatum),fmtD(k.volgendeDatum),k.duurUren||'',k.pomptype||'',k.besturing||'',k.status||'actief'];
+      return[k.debNr||'',k.naam||'',k.adres||'',k.postcode||'',k.plaats||'',k.contactpersoon||'',k.email||'',k.telefoon||'',k.contractType||'',klantAanvulling(k)?'Ja':'Nee',k.uitvoerder||'intern',fmtD(k.laatsteDatum),fmtD(k.volgendeDatum),k.duurUren||'',k.pomptype||'',k.besturing||'',k.status||'actief'];
     });
     csvExport(['Deb.nr','Naam','Adres','Postcode','Plaats','Contactpersoon','Email','Telefoon','Contract','Contract B','Uitvoerder','Laatste beurt','Volgende beurt','Duur (u)','Pomptype','Besturing','Status'],rows,'serviceklanten');
   });
@@ -10437,7 +10437,7 @@ function renderDebiteuren(){
             var _ctObj = getContracten().find(function(c){ return c.id===sk.contractType||c.code===sk.contractType; });
             _ctTooltip = _ctObj ? (_ctObj.code + ' — ' + _ctObj.naam) : sk.contractType;
           }
-          h+='<td data-col="servicecontract">'+(sk?'<span class="tag tag-green" style="display:inline-flex;align-items:center;gap:3px" title="'+esc(_ctTooltip)+'">✓ '+esc(sk.contractType)+(sk.klantAanvulling(sk)?bContractBadge(true, klantAanvulling(sk)):'')+'</span>':'<span class="tag tag-muted">Geen</span>')+'</td>';
+          h+='<td data-col="servicecontract">'+(sk?'<span class="tag tag-green" style="display:inline-flex;align-items:center;gap:3px" title="'+esc(_ctTooltip)+'">✓ '+esc(sk.contractType)+(klantAanvulling(sk)?bContractBadge(true, klantAanvulling(sk)):'')+'</span>':'<span class="tag tag-muted">Geen</span>')+'</td>';
           break;
         }
       }
@@ -16008,7 +16008,7 @@ function renderPlanLijst(monteurs) {
             case 'contract':
               if (_skVoorOp && _skVoorOp.contractType) {
                 var _ct = getContract(_skVoorOp.contractType);
-                h += '<td data-col="contract" style="padding:6px 10px"><span class="tag tag-green" style="font-size:10px;white-space:nowrap;display:inline-flex;align-items:center;gap:3px" title="'+esc(_skVoorOp.naam||'')+'">'+esc(_ct ? _ct.code : _skVoorOp.contractType)+(_skVoorOp.klantAanvulling(_skVoorOp)?bContractBadge(true, klantAanvulling(_skVoorOp)):'')+'</span></td>';
+                h += '<td data-col="contract" style="padding:6px 10px"><span class="tag tag-green" style="font-size:10px;white-space:nowrap;display:inline-flex;align-items:center;gap:3px" title="'+esc(_skVoorOp.naam||'')+'">'+esc(_ct ? _ct.code : _skVoorOp.contractType)+(klantAanvulling(_skVoorOp)?bContractBadge(true, klantAanvulling(_skVoorOp)):'')+'</span></td>';
               } else {
                 h += '<td data-col="contract" style="padding:6px 10px"><span style="font-size:11px;color:var(--muted)">—</span></td>';
               }
