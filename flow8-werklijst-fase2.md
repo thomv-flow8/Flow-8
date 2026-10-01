@@ -2741,3 +2741,50 @@ plek had, de syntaxcheck bewijst dat het JavaScript is — geen van beide zegt i
 "Aanvulling" in de contracttypelijst, keuzelijst bij de serviceklant met B voorgeselecteerd voor
 bestaande klanten, B niet meer te kiezen als basiscontract, en na opslaan staat er `aanvulling: "B"`
 op het record. Punt 4B is daarmee af.
+
+---
+
+## 1 oktober 2026 — verzuimdagen in de snelle weergave + dashboard dat zichzelf bijwerkt
+
+Twee punten uit de praktijk, allebei gemeld met een screenshot.
+
+### 1. De snelle weergave telde kalenderdagen in plaats van werkdagen
+
+In Rapportage → Verzuim gaf de modal bij een medewerker een hoger getal dan de tabel eronder en de
+grafieken: 16 dagen tegen 11 werkdagen. Oorzaak: de modal rekende zelf
+`Math.ceil((tot − van) / 86400000) + 1`, terwijl de rest van de module de helper `telWerkdagen()`
+gebruikt. Die helper slaat weekenden over én sluit de hersteldatum uit, omdat dat de eerste gezonde
+dag is. Bij de melding van 16-09 tot vandaag (01-10) scheelt dat vier weekenddagen en de dag van
+vandaag — precies de twee dingen die Thomas vermoedde.
+
+Beide plekken in de modal (de kopregel en het getal per melding) gebruiken nu `telWerkdagen`. Het
+label is meteen "werkdagen totaal" geworden, zodat zichtbaar is wát er geteld wordt, net als in de
+module. Dit was puur een weergavefout: er is niets aan de opgeslagen verzuimrecords veranderd, en de
+tabel, de cirkeldiagrammen en de CSV-export gebruikten de helper al.
+
+**Getest door de echte code uit te voeren** (vztest.js in de scratchpad): het script knipt
+`telWerkdagen` én de twee nieuwe modalregels letterlijk uit `flow8-v2.html`, zet de datum vast op
+01-10-2026 en draait acht gevallen — het geval uit de screenshot (geeft 11, gelijk aan de tabel),
+één dag ziek, vrijdag ziek en maandag beter, een hele werkweek, alleen het weekend, dezelfde dag
+ziek en beter, een hersteldatum in de toekomst, en een melding zonder begindatum. Daarnaast de
+controle dat de kopregel gelijk is aan de som van de losse meldingen.
+
+### 2. Dashboard liep achter bij een statuswijziging
+
+Het dashboard toonde de status van de opdrachten van vandaag, maar pas na verversen. De oorzaak was
+niet dat de data ontbrak: `dbListen('opdrachten', …)` staat er al en krijgt elke wijziging realtime
+binnen, ook van een ander apparaat en ook wanneer een monteur een werkbon afrondt (die schrijft via
+`fsWerkbonStatusNaarPlanning` terug naar de planning). Alleen hertekende de callback uitsluitend de
+planningpagina — het dashboard stond er niet bij.
+
+De callback hertekent nu ook het dashboard, via `_dashHerteken()`. Drie dingen daarin zijn bewust:
+
+- **Debounce van 300 ms**, want één handeling kan meerdere schrijfacties geven.
+- **Scrollpositie bewaren**, omdat `innerHTML` zetten `#content` op 0 gooit.
+- **`renderDashboard(stil)`**: bij een automatische hertekening slaan we `triggerCountUp()` over.
+  Cijfers die bij elke statuswijziging opnieuw vanaf 0 oplopen, leiden af.
+
+Geen nieuwe databaseverbinding en geen extra verkeer — de luisteraar bestond al. De twee asynchrone
+blokken (werkordertypes en dringende werkorders) lezen uit de cache en controleren of hun element
+nog bestaat, dus die mogen opnieuw draaien. `renderDashboard` wordt elders alleen aangeroepen als
+`R[id]()` zonder argument, dus een gewone paginawissel animeert nog steeds.

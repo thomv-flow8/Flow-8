@@ -6141,7 +6141,10 @@ async function laadData() {
     // dbLoad ernaast zou de hele set een tweede keer over de lijn trekken.
     // (totale duur van deze fase wordt hieronder gemeten)
     dbListen('medewerkers',  'medewerkers',  function(){ if (APP.activePage==='medewerkers') renderMedewerkers(); }),
-    dbListen('opdrachten',   'opdrachten',   function(){ if (APP.activePage==='planning')    renderPlanning();    }),
+    dbListen('opdrachten',   'opdrachten',   function(){
+      if (APP.activePage==='planning')       renderPlanning();
+      else if (APP.activePage==='dashboard') _dashHerteken();
+    }),
     dbListen('agenda',       'agenda',       function(){ if (APP.activePage==='agenda')      renderAgenda();      }),
     dbLoad('serviceklanten', 'serviceklanten'),
     dbLoad('debiteuren',     'debiteuren'),
@@ -8397,7 +8400,26 @@ var ICO = {
   ster:     '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
 };
 
-function renderDashboard() {
+// Hertekent het dashboard na een wijziging in de opdrachten. De luisteraar heeft de data
+// al bijgewerkt; alleen het scherm liep achter. Debounce omdat een handeling (een werkbon
+// afronden) meerdere schrijfacties kan geven, en de scrollpositie bewaren omdat innerHTML
+// zetten die op 0 zet.
+var _dashHertekenTimer = null;
+function _dashHerteken() {
+  if (APP.activePage !== 'dashboard') return;
+  clearTimeout(_dashHertekenTimer);
+  _dashHertekenTimer = setTimeout(function(){
+    if (APP.activePage !== 'dashboard') return;
+    var c = document.getElementById('content');
+    var y = c ? c.scrollTop : 0;
+    renderDashboard(true);
+    if (c) c.scrollTop = y;
+  }, 300);
+}
+
+// 'stil' = automatische hertekening na een statuswijziging. Dan slaan we de count-up-
+// animatie over, want cijfers die bij elke wijziging opnieuw vanaf 0 oplopen leiden af.
+function renderDashboard(stil) {
   var el   = document.getElementById('content');
   var now  = new Date();
   var gr   = now.getHours()<12?'Goedemorgen':now.getHours()<18?'Goedemiddag':'Goedenavond';
@@ -8747,7 +8769,7 @@ function renderDashboard() {
   h += '<div style="font-size:12px;color:var(--muted);padding:4px 0">Dringende werkorders laden\u2026</div>';
   h += '</div>';
   el.innerHTML = h;
-  triggerCountUp();
+  if(!stil) triggerCountUp();
   if(typeof _dashWerkorderTypenVul==='function') _dashWerkorderTypenVul();
   if(typeof _dashDringendVul==='function') _dashDringendVul();
 
@@ -28477,12 +28499,14 @@ function openRapMedPanel(medId, tabNaam) {
 
   } else if(tabNaam==='verzuim') {
     var data4 = filterEigen(APP.verzuim,'medId','verzuim').filter(function(v){return String(v.medId)===String(medId)&&(v.van||'').startsWith(jaarStr);}).sort(function(a,b){return(b.van||'')>(a.van||'')?1:-1;});
-    var totVzDagen = data4.reduce(function(s,v){var tot=v.tot&&v.tot<vandaag?v.tot:vandaag;return s+Math.max(0,Math.ceil((new Date(tot)-new Date(v.van))/86400000)+1);},0);
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data4.length+' meldingen · '+totVzDagen+' dagen totaal in '+jaarStr+'</div>';
+    // Werkdagen, niet kalenderdagen: dezelfde telling als de verzuimmodule en de
+    // rapportagetabel, zodat de snelle weergave geen hoger getal toont dan de lijst.
+    var totVzDagen = data4.reduce(function(s,v){return s+telWerkdagen(v.van, v.tot&&v.tot<=vandaag?v.tot:null);},0);
+    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data4.length+' meldingen · '+totVzDagen+' werkdagen totaal in '+jaarStr+'</div>';
     h += '<div style="display:flex;flex-direction:column;gap:6px">';
     data4.forEach(function(v){
       var stKleur={actief:'var(--red)',langdurig:'var(--orange)',hersteld:'var(--green)'}[v.status]||'var(--muted)';
-      var duur=v.van?Math.max(0,Math.ceil((new Date(v.tot&&v.tot<vandaag?v.tot:vandaag)-new Date(v.van))/86400000)+1):0;
+      var duur=telWerkdagen(v.van, v.tot&&v.tot<=vandaag?v.tot:null);
       var typeLabel={ziek:'Ziek',geoorloofd:'Geoorloofd',ongeoorloofd:'Ongeoorloofd',gedeeltelijk:'Gedeeltelijk'}[v.type]||esc(v.type||'');
       h += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid '+stKleur+'">';
       h += '<div style="display:flex;justify-content:space-between;align-items:center">';
