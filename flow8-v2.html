@@ -15997,10 +15997,12 @@ function renderPlanLijst(monteurs) {
       // Route voor DEZE monteur op DEZE dag: het dagplanning-venster krijgt beide meteen mee,
       // zodat je niet eerst bovenin op een monteur hoeft te filteren. Bij een duo-cluster is dat
       // de cluster-monteur (med) — dezelfde die de reistijd-kolom hierboven al aanhoudt.
+      // Geen margin-left:auto: de td heeft colspan=99 en is dus zo breed als de hele tabel,
+      // waardoor de knop op een smal scherm buiten beeld zou vallen.
       // Niet bij een baan-/niet-toegewezen groep (geen monteur) en niet bij opdrachten zonder
       // datum. Wél op een geblokkeerde dag: staat er werk, dan valt er een route te rijden.
       if(med && kanSchrijven && datum !== '_geen') {
-        h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(datum)+'" data-monteur="'+esc(String(med.id))+'" title="Route van '+esc(med.voornaam+' '+med.achternaam)+' op '+esc(fmtD(datum))+'" style="margin-left:auto;flex-shrink:0;font-size:11px;padding:2px 8px;display:inline-flex;align-items:center;gap:3px">'+_routeIcoon(12)+' Route</button>';
+        h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(datum)+'" data-monteur="'+esc(String(med.id))+'" title="Route van '+esc(med.voornaam+' '+med.achternaam)+' op '+esc(fmtD(datum))+'" style="flex-shrink:0;font-size:11px;padding:2px 8px;display:inline-flex;align-items:center;gap:3px">'+_routeIcoon(12)+' Route</button>';
       }
       h += '</div></td></tr>';
 

@@ -2841,3 +2841,10 @@ aanwezig én gevuld zijn. Die laatste controle is niet overbodig: zonder de klas
 niet gebonden en doet hij niets — een fout die geen enkele syntaxcheck ziet. Daarnaast controleert
 het script dat de dagkop-knop echt weg is, dat de toolbar-knop er nog staat, en dat de SVG nog
 maar op één plek voorkomt.
+
+**Nagekomen, zelfde dag:** de Route-knop in het monteur-bandje stond met `margin-left:auto` rechts
+uitgelijnd. Het bandje zit in een `<td colspan="99">` en is dus zo breed als de héle planningstabel,
+inclusief de kolommen buiten beeld — op een smaller scherm moest je horizontaal scrollen om de knop
+te zien. `margin-left:auto` weggehaald; de knop volgt nu direct op de pil met de werkuren, net zoals
+"+ Opdracht" in de dagkop achter de telling staat. `position:sticky` overwogen en laten vallen: dat
+is gefriemel in een tabelcel voor iets dat met één eigenschap minder verdwijnt.
