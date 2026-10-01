@@ -2867,3 +2867,7 @@ De test is uitgebreid: hij voert nu ook de twee takken uit en controleert dat de
 icoon van de kopie letterlijk gelijk zijn aan die van de echte knop (gelijke opmaak = gelijke
 breedte), dat de kopie onzichtbaar is, geen handler-klasse heeft en voor de schermlezer verborgen
 is.
+
+**In de praktijk geverifieerd** (Thomas, 1 oktober 2026): de Route-knop staat in alle drie de
+weergaven op de juiste plek, opent het dagplanning-venster met de juiste monteur en dag, en de
+iconen in de lijstweergave lijnen uit — ook bij clusters zonder route. Punt afgerond.
