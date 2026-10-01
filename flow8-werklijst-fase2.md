@@ -2788,3 +2788,7 @@ Geen nieuwe databaseverbinding en geen extra verkeer — de luisteraar bestond a
 blokken (werkordertypes en dringende werkorders) lezen uit de cache en controleren of hun element
 nog bestaat, dus die mogen opnieuw draaien. `renderDashboard` wordt elders alleen aangeroepen als
 `R[id]()` zonder argument, dus een gewone paginawissel animeert nog steeds.
+
+**In de praktijk geverifieerd** (Thomas, 1 oktober 2026): het dashboard volgt een statuswijziging nu
+zonder verversen, en de snelle weergave bij verzuim toont hetzelfde aantal werkdagen als de tabel.
+Beide punten zijn af.
