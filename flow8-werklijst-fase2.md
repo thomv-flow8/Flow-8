@@ -2792,3 +2792,52 @@ nog bestaat, dus die mogen opnieuw draaien. `renderDashboard` wordt elders allee
 **In de praktijk geverifieerd** (Thomas, 1 oktober 2026): het dashboard volgt een statuswijziging nu
 zonder verversen, en de snelle weergave bij verzuim toont hetzelfde aantal werkdagen als de tabel.
 Beide punten zijn af.
+
+---
+
+## 1 oktober 2026 — Route-knop per monteur in alle drie de planningweergaven
+
+Thomas werkt veel met de Route-knop, maar de workflow kon korter: de knop stond boven de dág, en
+de monteur werd alleen meegegeven als je bovenin al op één monteur had gefilterd. Stond de filter
+op "alle monteurs", dan opende het dagplanning-venster leeg en moest je de monteur alsnog kiezen.
+
+**Er was geen nieuwe logica nodig.** De handler van `.plan-dagplan-dag` zette al `_dpDatum` en
+`_dpMonteurId`, laadde de opdrachten en berekende de route meteen via `_dpAutoBereken`. Het ging
+dus alleen om knoppen op plekken waar datum én monteur allebei vastliggen:
+
+| weergave | plek | datum | monteur |
+|---|---|---|---|
+| lijst | het monteur-bandje boven een cluster | de dag eromheen | de cluster-monteur |
+| week | onderin de cel, naast "+ opdracht" | de kolom | de rij |
+| dag | de kolomkop | `_planDatum` | de kolom |
+
+**De knop in de dagkop is weggehaald.** Die bracht je naar hetzelfde venster als een monteur-knop,
+alleen één stap minder ver — het dagplanning-venster heeft zelf een monteur-keuzelijst. De
+algemene Route-knop in de toolbar blijft wél staan als ingang zonder monteur.
+
+**Niet overal een knop.** Baan- en niet-toegewezen groepen hebben geen monteur, opdrachten zonder
+datum geen dag, en een monteur zonder werk die dag niets te rijden. Wél op een geblokkeerde dag:
+staat er toch werk, dan valt er een route te rijden. Bij een duo-cluster ("Jimmy + Arjan") wijst de
+knop naar de cluster-monteur — dezelfde die de reistijd-kolom al aanhoudt, zodat een gedeelde klus
+in beide dagroutes meeloopt.
+
+**Afgeweken van de goedgekeurde preview, en waarom.** In de eerste preview stond het weekknopje
+rechtsboven in de cel. Die preview had vereenvoudigde blokjes; in de echte app staat daar al
+`wkStatusBadge` (`position:absolute;top:4px;right:4px`), dus het icoon viel over "Ingepland" heen.
+Tweede preview gemaakt mét de echte `wkStatusBadge`, beide plaatsingen naast elkaar, en pas na
+akkoord gebouwd met de knop onderin — op de regel die er met "+ opdracht" toch al was, dus zonder
+extra hoogte per cel.
+
+**Opgeruimd:** de route-SVG stond vier keer uitgeschreven (toolbar, dagkop, en "Optimaliseer route"
+in het dagplanning-venster). Nu één helper `_routeIcoon(px)`, zodat de lijndikte niet kan gaan
+afwijken. Mobiel verandert er niets: de knoppen hergebruiken de klasse `plan-dagplan-dag`, die in
+de media-query al verborgen wordt.
+
+**Getest door de knoppen écht te genereren** (routetest.js in de scratchpad): het script knipt de
+drie knopregels letterlijk uit het bestand, voert ze uit met mock-waarden en controleert per knop
+dat de tags in balans zijn, dat er geen losse `<` of `>` overblijft (de opgeslokte-sluithaak-fout
+van de contractbadge), en dat `data-datum`, `data-monteur` en de klasse `plan-dagplan-dag`
+aanwezig én gevuld zijn. Die laatste controle is niet overbodig: zonder de klasse wordt de knop
+niet gebonden en doet hij niets — een fout die geen enkele syntaxcheck ziet. Daarnaast controleert
+het script dat de dagkop-knop echt weg is, dat de toolbar-knop er nog staat, en dat de SVG nog
+maar op één plek voorkomt.

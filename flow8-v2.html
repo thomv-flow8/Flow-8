@@ -12980,7 +12980,7 @@ function _renderDagplanning() {
        + ' Opnieuw berekenen</button>';
   }
   b += '<button class="btn btn-ghost btn-sm" id="dp-optimaliseer-btn" style="height:38px;display:inline-flex;align-items:center;gap:6px">'
-     + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 016-6"/><path d="M18 7v8a6 6 0 01-6 6"/></svg>'
+     + _routeIcoon(14)
      + ' Optimaliseer route</button>';
   b += '</div>';
   if(_dpVolgordeGewijzigd) {
@@ -15335,7 +15335,7 @@ function renderPlanning() {
   }
 
   h += '<div style="flex:1"></div>';
-  h += '<button class="btn btn-ghost btn-sm" id="plan-dagplan-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 016-6"/><path d="M18 7v8a6 6 0 01-6 6"/></svg> Route</button>';
+  h += '<button class="btn btn-ghost btn-sm" id="plan-dagplan-btn" style="display:inline-flex;align-items:center;gap:5px">'+_routeIcoon(14)+' Route</button>';
   if (_planView === 'lijst') h += '<button class="btn btn-ghost btn-sm" id="plan-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
   if (_planView === 'lijst') h += '<button class="btn btn-ghost btn-sm hide-mobile" id="plan-export-btn">'+ICO.download+' Export</button>';
   if (magSchrijven('planning') && !_planMob) h += '<button class="btn btn-primary btn-sm" id="plan-add-btn">+ Opdracht</button>';
@@ -15869,7 +15869,6 @@ function renderPlanLijst(monteurs) {
       var prefillDatum = datum;
       var prefillMont = _planFilter !== 'alle' ? _planFilter : '';
       h += '<button class="btn btn-ghost btn-sm plan-add-dag" data-datum="'+esc(prefillDatum)+'" data-monteur="'+esc(prefillMont)+'" style="font-size:11px;padding:2px 8px;margin-left:4px">+ Opdracht</button>';
-      h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(prefillDatum)+'" data-monteur="'+esc(prefillMont)+'" style="font-size:11px;padding:2px 8px;margin-left:2px;display:inline-flex;align-items:center;gap:3px"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 016-6"/><path d="M18 7v8a6 6 0 01-6 6"/></svg> Route</button>';
     }
     // (de beschikbaarheidsbalk hieronder staat in dezelfde kolom; sluiting volgt daarna)
 
@@ -15994,7 +15993,16 @@ function renderPlanLijst(monteurs) {
       h += '<span style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)">';
       h += '<span style="background:var(--surface);padding:1px 7px;border-radius:5px;font-weight:600">'+_mhAantalStr+'</span>';
       h += '<span style="background:var(--surface);padding:1px 7px;border-radius:5px;font-weight:600">'+_mhWerkStr+'</span>';
-      h += '</span></div></td></tr>';
+      h += '</span>';
+      // Route voor DEZE monteur op DEZE dag: het dagplanning-venster krijgt beide meteen mee,
+      // zodat je niet eerst bovenin op een monteur hoeft te filteren. Bij een duo-cluster is dat
+      // de cluster-monteur (med) — dezelfde die de reistijd-kolom hierboven al aanhoudt.
+      // Niet bij een baan-/niet-toegewezen groep (geen monteur) en niet bij opdrachten zonder
+      // datum. Wél op een geblokkeerde dag: staat er werk, dan valt er een route te rijden.
+      if(med && kanSchrijven && datum !== '_geen') {
+        h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(datum)+'" data-monteur="'+esc(String(med.id))+'" title="Route van '+esc(med.voornaam+' '+med.achternaam)+' op '+esc(fmtD(datum))+'" style="margin-left:auto;flex-shrink:0;font-size:11px;padding:2px 8px;display:inline-flex;align-items:center;gap:3px">'+_routeIcoon(12)+' Route</button>';
+      }
+      h += '</div></td></tr>';
 
       // Eerste rij van cluster: monteur header + eerste opdracht
       ops.forEach(function(o, oidx) {
@@ -16226,6 +16234,12 @@ function _planMonteurLabel(id){
   return ((m.voornaam||'')+' '+(m.achternaam||'')).trim() + (m.status === 'inactief' ? ' · inactief' : (rol ? ' · '+rol : ''));
 }
 
+// Het route-icoon (twee punten met een boog) op de gevraagde maat. Stond uitgeschreven
+// in de toolbar en in de dagkop; nu op één plek, zodat de lijndikte overal gelijk blijft.
+function _routeIcoon(px){
+  return '<svg width="'+px+'" height="'+px+'" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a6 6 0 016-6"/><path d="M18 7v8a6 6 0 01-6 6"/></svg>';
+}
+
 function renderPlanWeek(monteurs) {
   var maandag = getMaandagVan(_planDatum);
   var dagen = [];
@@ -16322,7 +16336,14 @@ function renderPlanWeek(monteurs) {
       });
 
       if(magSchrijven('planning')) {
-        h += '<button class="plan-new-dag-btn" data-datum="'+dag+'" data-monteur="'+m.id+'" style="width:100%;margin-top:2px;background:none;border:1px dashed var(--border);border-radius:4px;color:var(--muted);font-size:11px;padding:3px;cursor:pointer;font-family:inherit" title="Toevoegen">+ opdracht</button>';
+        // Onderin de cel, niet rechtsboven: daar zit al de statusbadge van het eerste
+        // opdracht-blokje (wkStatusBadge staat absoluut op top:4px/right:4px).
+        h += '<div style="display:flex;gap:3px;margin-top:2px">';
+        h += '<button class="plan-new-dag-btn" data-datum="'+dag+'" data-monteur="'+m.id+'" style="flex:1;min-width:0;background:none;border:1px dashed var(--border);border-radius:4px;color:var(--muted);font-size:11px;padding:3px;cursor:pointer;font-family:inherit" title="Toevoegen">+ opdracht</button>';
+        if(dagOps.length) {
+          h += '<button class="plan-dagplan-dag" data-datum="'+dag+'" data-monteur="'+m.id+'" title="Route van '+esc(m.voornaam+' '+m.achternaam)+' op '+esc(fmtD(dag))+'" style="flex-shrink:0;background:none;border:1px dashed var(--border);border-radius:4px;color:var(--muted);font-size:11px;padding:3px 7px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center">'+_routeIcoon(11)+'</button>';
+        }
+        h += '</div>';
       }
       h += '</td>';
     });
@@ -16480,6 +16501,8 @@ function renderPlanDag(monteurs) {
     if(k.m){
       h += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+medKleur(k.m)+';color:#fff">'+initials(k.m)+'</div>';
       h += '<span style="font-size:12px;font-weight:600">'+esc(k.m.voornaam+' '+k.m.achternaam)+'</span>';
+      // De dag ligt hier al vast, dus de kolomkop is precies één monteur op één dag.
+      if(magSchrijven('planning') && k.ops.length) h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(_planDatum)+'" data-monteur="'+esc(String(k.m.id))+'" title="Route van '+esc(k.m.voornaam+' '+k.m.achternaam)+' op '+esc(fmtD(_planDatum))+'" style="padding:1px 5px;line-height:1;display:inline-flex;align-items:center">'+_routeIcoon(12)+'</button>';
     } else {
       h += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--border);color:var(--muted)">?</div>';
       h += '<span style="font-size:12px;font-weight:600;color:var(--muted)">'+(k.nietInPlanning ? 'Niet in planning' : 'Niet toegewezen')+'</span>';
