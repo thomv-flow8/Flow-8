@@ -2848,3 +2848,22 @@ inclusief de kolommen buiten beeld — op een smaller scherm moest je horizontaa
 te zien. `margin-left:auto` weggehaald; de knop volgt nu direct op de pil met de werkuren, net zoals
 "+ Opdracht" in de dagkop achter de telling staat. `position:sticky` overwogen en laten vallen: dat
 is gefriemel in een tabelcel voor iets dat met één eigenschap minder verdwijnt.
+
+**En daarna naar links, als icoon.** Achter de pillen schoof de knop mee met de lengte van de
+monteurnaam ("Tjep ter Veer" tegen "Jimmy ten Berg + Arjan van Ooijen"), dus stond hij bij elke
+cluster ergens anders — gemeten in de preview: x = 332, 388 en 400. Nu staat hij helemaal links,
+vóór de avatar, als icoon zonder tekst, net als in de week- en dagweergave.
+
+Het lastige geval is de cluster zonder route (baan-/niet-toegewezen, of opdrachten zonder datum).
+Zonder maatregel schuiven daar de avatar en de naam naar links en lijnt er alsnog niets uit. Er
+staat nu een **onzichtbare kopie van dezelfde knop** (`visibility:hidden` + `aria-hidden`, zonder
+de klasse `plan-dagplan-dag` zodat hij niet gebonden wordt, en `tabindex="-1"`). Eerst met een
+vaste `px`-breedte geprobeerd: die was 2px te smal bij het icoon en 9px te breed bij de
+tekstvariant — onzichtbaar voor het oog, maar in de meting meteen zichtbaar als een avatar op
+x = 99 in plaats van 101. **Les: reserveer ruimte met een kopie van het echte element, nooit met
+een getal** — een getal klopt niet meer zodra het lettertype of de knopstijl verandert.
+
+De test is uitgebreid: hij voert nu ook de twee takken uit en controleert dat de knopstijl en het
+icoon van de kopie letterlijk gelijk zijn aan die van de echte knop (gelijke opmaak = gelijke
+breedte), dat de kopie onzichtbaar is, geen handler-klasse heeft en voor de schermlezer verborgen
+is.

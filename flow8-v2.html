@@ -15988,22 +15988,31 @@ function renderPlanLijst(monteurs) {
       }
       h += '<tr><td colspan="99" style="padding:2px 6px;background:transparent">';
       h += '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:rgba(255,255,255,0.025);border-left:3px solid '+kl+';border-radius:7px">';
+      // Route voor DEZE monteur op DEZE dag: het dagplanning-venster krijgt beide meteen mee,
+      // zodat je niet eerst bovenin op een monteur hoeft te filteren. Bij een duo-cluster is dat
+      // de cluster-monteur (med) — dezelfde die de reistijd-kolom hierboven al aanhoudt.
+      //
+      // Helemaal links, vóór de avatar: achter de naam schoof de knop mee met de lengte
+      // daarvan ("Tjep ter Veer" tegen "Jimmy ten Berg + Arjan van Ooijen"), dus stond hij bij
+      // elke cluster ergens anders. Waar geen route is — een baan-/niet-toegewezen groep heeft
+      // geen monteur, en opdrachten zonder datum geen dag — staat een ONZICHTBARE kopie van
+      // dezelfde knop. Zo lijnen de avatars en namen ook uit. Een vaste px-breedte zou dat niet
+      // doen: die klopt niet meer zodra het lettertype of de knopstijl verandert. Op een
+      // geblokkeerde dag komt de knop er wél: staat er werk, dan valt er een route te rijden.
+      if(kanSchrijven){
+        var _rtStijl = 'flex-shrink:0;padding:3px 7px;line-height:1;display:inline-flex;align-items:center';
+        if(med && datum !== '_geen'){
+          h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(datum)+'" data-monteur="'+esc(String(med.id))+'" title="Route van '+esc(med.voornaam+' '+med.achternaam)+' op '+esc(fmtD(datum))+'" style="'+_rtStijl+'">'+_routeIcoon(13)+'</button>';
+        } else {
+          h += '<span aria-hidden="true" style="visibility:hidden;flex-shrink:0"><button class="btn btn-ghost btn-sm" tabindex="-1" style="'+_rtStijl+'">'+_routeIcoon(13)+'</button></span>';
+        }
+      }
       h += _mhAvatar;
       h += '<span style="font-weight:700;font-size:13px;color:var(--text)">'+_mhNaam+'</span>';
       h += '<span style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)">';
       h += '<span style="background:var(--surface);padding:1px 7px;border-radius:5px;font-weight:600">'+_mhAantalStr+'</span>';
       h += '<span style="background:var(--surface);padding:1px 7px;border-radius:5px;font-weight:600">'+_mhWerkStr+'</span>';
       h += '</span>';
-      // Route voor DEZE monteur op DEZE dag: het dagplanning-venster krijgt beide meteen mee,
-      // zodat je niet eerst bovenin op een monteur hoeft te filteren. Bij een duo-cluster is dat
-      // de cluster-monteur (med) — dezelfde die de reistijd-kolom hierboven al aanhoudt.
-      // Geen margin-left:auto: de td heeft colspan=99 en is dus zo breed als de hele tabel,
-      // waardoor de knop op een smal scherm buiten beeld zou vallen.
-      // Niet bij een baan-/niet-toegewezen groep (geen monteur) en niet bij opdrachten zonder
-      // datum. Wél op een geblokkeerde dag: staat er werk, dan valt er een route te rijden.
-      if(med && kanSchrijven && datum !== '_geen') {
-        h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(datum)+'" data-monteur="'+esc(String(med.id))+'" title="Route van '+esc(med.voornaam+' '+med.achternaam)+' op '+esc(fmtD(datum))+'" style="flex-shrink:0;font-size:11px;padding:2px 8px;display:inline-flex;align-items:center;gap:3px">'+_routeIcoon(12)+' Route</button>';
-      }
       h += '</div></td></tr>';
 
       // Eerste rij van cluster: monteur header + eerste opdracht
