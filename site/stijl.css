@@ -223,3 +223,16 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
   .rekenmodule,.twee{grid-template-columns:1fr}
   .rk-totaal strong{font-size:36px}
 }
+
+/* ── Merkjes ───────────────────────────────────────────────────────────────
+   Voor de sectie over de werkbon op telefoon. Daar is nog geen schone opname
+   van, en een namaakscherm is erger dan geen scherm: deze labels komen uit de
+   bon zelf en geven de sectie textuur zonder iets voor te wenden. */
+.merkjes{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.merkjes span{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--stil);background:var(--vlak);
+  border:1px solid var(--rand);border-radius:var(--pil);padding:7px 13px}
+
+/* Een bijschrift dat bij twee beelden samen hoort in plaats van bij één. */
+figcaption.los{display:block;font-family:'Space Mono',monospace;font-size:11px;
+  letter-spacing:.03em;text-transform:uppercase;color:var(--stil);margin-top:12px}

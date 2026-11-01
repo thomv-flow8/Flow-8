@@ -114,6 +114,32 @@ try {
     throw new Error('ontbrekende verwijzingen:\n     ' + ontbreekt.join('\n     '));
   }
 
+  // ── De opgegeven afmetingen moeten kloppen met het bestand ────────────────
+  // Eerder stond er 2000x1293 bij een beeld van 1972x1150, overgenomen uit een
+  // document in plaats van gemeten. In combinatie met width:100% rekte dat het
+  // beeld vier keer te hoog uit. Sindsdien controleert het script het zelf.
+  const scheef = [];
+  for (const rel of lijst.filter(f => f.endsWith('.html'))) {
+    const html = fs.readFileSync(path.join(BRON, rel), 'utf8');
+    const re = /<(?:img|source)[^>]*?(?:src|srcset)="([^"]+\.(?:webp|png|jpg|jpeg))"[^>]*?width="(\d+)"[^>]*?height="(\d+)"/g;
+    for (const m of html.matchAll(re)) {
+      const vol = path.join(BRON, path.dirname(rel), m[1]);
+      let W, H;
+      try {
+        const uit = require('child_process').execFileSync('sips',
+          ['-g', 'pixelWidth', '-g', 'pixelHeight', vol], { encoding: 'utf8' });
+        W = +/pixelWidth: (\d+)/.exec(uit)[1];
+        H = +/pixelHeight: (\d+)/.exec(uit)[1];
+      } catch (e) { continue; }   // geen sips (niet-macOS): sla de controle over
+      if (W !== +m[2] || H !== +m[3]) {
+        scheef.push(m[1] + ': opgegeven ' + m[2] + '×' + m[3] + ', bestand ' + W + '×' + H);
+      }
+    }
+  }
+  if (scheef.length) {
+    throw new Error('afmetingen kloppen niet met het bestand:\n     ' + scheef.join('\n     '));
+  }
+
   for (const rel of lijst) schrijf(rel, fs.readFileSync(path.join(BRON, rel)));
   schrijf('.htaccess', Buffer.from(HTACCESS));
 

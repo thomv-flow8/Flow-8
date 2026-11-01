@@ -535,3 +535,16 @@ op het aantal gebruikers) en **Vragen** als `<details>`-lijst zonder JavaScript.
 de rekenregels zijn overgenomen van de live site, dus de bedragen komen exact overeen.
 Nog te bouwen: Dashboard · Klanten & rapportage · Team · Werkbon op de telefoon · Zonder
 overtypen aan de slag.
+
+**Bijgewerkt 2 november 2026, tweede ronde:** vier secties erbij — In het veld, Klanten &
+rapportage, Team en Overstappen. Tien secties in totaal; teksten overgenomen van de live site.
+Nieuwe uitsneden uit `rapportage.webp` (verdeling per opdrachttype, opdrachten per maand,
+de tabrij met de teammodules) en `register.webp` (satellietbeeld met de installatie gespeld).
+`tools/bouw-site.js` controleert sinds vandaag ook of de opgegeven afmetingen van elk beeld
+kloppen met het bestand — dat was de fout die het hero-beeld eerder vier keer te hoog uitrekte.
+
+- [ ] **De sectie "In het veld" heeft geen beeld.** Er is geen schone opname van de werkbon op
+      telefoon. Nu opgelost met tekstlabels uit de bon zelf; een namaakscherm zou erger zijn.
+      Dit is de enige sectie die echt om een nieuwe opname vraagt — en het is wel de helft van
+      de belofte "de brug tussen planner en monteur".
+- [ ] Geen sectie voor het **dashboard**: daar is ook geen opname van.
