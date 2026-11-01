@@ -494,3 +494,15 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 ## Styling — afgerond
 Fase 1 (tokens + typografie), 2 (componenten), 3 (details + licht thema), 4 (toegankelijkheid +
 iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor details.
+
+## Gevonden tijdens de verhuizing naar Cloud86 (1 november 2026)
+- [ ] **Twee consolefouten bij het laden van de app** — bestonden al vóór de verhuizing en treden
+      op beide adressen op (vergeleken op `thomv-flow8.github.io` én `app.flow-8.nl`, dus het ligt
+      niet aan de hosting). Ze blokkeren niets zichtbaars, maar ze horen er niet:
+      1. `_herstelPlan` (± regel 5414), aangeroepen vanuit `zetOfflineBanner`: *TypeError: Cannot
+         read properties of undefined (reading 'length')*. Treedt op in een `.on('value')`-callback
+         van de Realtime Database, dus Firebase vangt hem af en meldt hem als "Exception was thrown
+         by user callback".
+      2. Regel ± 32420: *TypeError: Cannot read properties of null (reading 'addEventListener')* in
+         een `DOMContentLoaded`-handler — er wordt een element gezocht dat op dat moment (of op het
+         inlogscherm) niet bestaat.

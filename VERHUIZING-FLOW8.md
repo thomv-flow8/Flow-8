@@ -173,7 +173,7 @@ een uitgeven als het domein naar deze server wijst. Inloggen, de kaart en de PWA
 vóór de DNS-wijziging te controleren — alleen dat de juiste bestanden geserveerd worden, en
 dat is hierboven gebeurd. Voor de marketingsite speelt dit niet; die is volledig getest.
 
-### Ronde 2 — DNS omzetten
+### Ronde 2 — DNS omzetten — GEDAAN (1 nov 2026)
 - [ ] Iedereen laten synchroniseren: online gaan, wachten tot er niets meer in de wachtrij staat.
 - [ ] Bij Strato: A van `@` en `www` naar `45.82.191.90`, AAAA weghalen of omzetten,
       en een A-record `app` naar hetzelfde adres. TTL kort zetten (60) vóór de wijziging.
@@ -182,6 +182,33 @@ dat is hierboven gebeurd. Voor de marketingsite speelt dit niet; die is volledig
 - [ ] Testmail sturen en ontvangen.
 - [ ] Koppen controleren: `curl -I https://app.flow-8.nl/`.
 - [ ] Pas als https bewezen werkt: HSTS aanzetten in beide `.htaccess`-bestanden.
+
+**Wat er bij Strato is gedaan.** De A van `@` op `45.82.191.90` gezet via "eigen IP-adres".
+Strato liet de AAAA daarbij zelf vallen, dus die hoefde niet apart weggehaald te worden. Hij is
+leeg gelaten in plaats van op het IPv6-adres van Cloud86 gezet, omdat dat vanaf deze machine niet
+te testen was (geen IPv6-verbinding); `thnkmusic.com` draait ook zonder AAAA. `www` was al een
+CNAME naar het kale domein en volgde vanzelf. `app` is óók een CNAME naar `flow-8.nl` geworden
+en geen A-record: verandert het IP ooit, dan volgt het subdomein mee.
+
+**Certificaten:** Let's Encrypt, één voor `flow-8.nl` + `www.flow-8.nl` samen en een eigen voor
+`app.flow-8.nl`, geldig tot 30 januari 2027. Plesk waarschuwde vooraf dat `app.flow-8.nl` niet
+resolvebaar zou zijn; dat klopte niet en de uitgifte ging gewoon door. De CNAME was geen probleem.
+
+**De vondst van deze ronde: App Check kende het nieuwe adres niet.** De app gebruikt Firebase App
+Check met reCAPTCHA v3, en zo'n sleutel is gebonden aan een lijst domeinen. `app.flow-8.nl` stond
+daar niet in, dus App Check kreeg geen token en de Realtime Database weigerde de WebSocket.
+**Dit is dus de tweede Firebase-instelling die het nieuwe adres moet kennen, naast Authorized
+domains** — en de enige manier om het te vinden was de app echt op het nieuwe adres openen.
+Opgelost door `app.flow-8.nl` toe te voegen bij de sleutel `6LcdLcos…` in de reCAPTCHA-console.
+
+**Geverifieerd in de browser op het echte adres:** `APP_CHECK.getToken()` geeft een token van 942
+tekens, `.info/connected` staat op true, en de service worker is geregistreerd op
+`https://app.flow-8.nl/sw.js`.
+
+**Twee consolefouten komen NIET van de verhuizing.** `_herstelPlan` (TypeError op een undefined
+`.length`) en een `addEventListener` op null rond regel 32420 treden net zo goed op
+`thomv-flow8.github.io` op. Op beide adressen gemeten vóór de conclusie. Ze staan apart in
+`TODO.md`.
 
 ### Ronde 3 — mail en Resend
 Bewust na de hosting (keuze Thomas), zodat een mailprobleem niet met de verhuizing verward kan
