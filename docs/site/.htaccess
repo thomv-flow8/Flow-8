@@ -1,0 +1,35 @@
+# Flow8 marketingsite (flow-8.nl) — gegenereerd door publiceer.js, niet met de hand aanpassen.
+
+DirectoryIndex index.html
+
+# ── https afdwingen ──
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# ── Compressie ──
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>
+
+# ── Beveiligingskoppen ──
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+  # Ook hier nog geen CSP: de marketingsite is een gebundelde export met een verwijzing naar
+  # React op unpkg.com in een JSON-blok. Of die bij het laden echt opgehaald wordt is van
+  # buitenaf niet met zekerheid te zien, dus eerst Report-Only, dan pas afdwingen.
+
+  # Pas aanzetten als https op Cloud86 bewezen werkt — browsers onthouden dit een jaar:
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# ── Caching ──
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>

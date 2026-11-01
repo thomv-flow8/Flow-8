@@ -1,0 +1,50 @@
+# Flow8 app (app.flow-8.nl) — gegenereerd door publiceer.js, niet met de hand aanpassen.
+
+# De app heet flow8-v2.html, net als op GitHub Pages. Daardoor komt de service worker op beide
+# plekken bij hetzelfde bestand uit. Dit laat / ook gewoon werken.
+DirectoryIndex flow8-v2.html
+
+# ── https afdwingen ──
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# ── Compressie ──
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>
+
+# ── Beveiligingskoppen ──
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # LET OP: geolocation moet (self) zijn — de planning en het kaartoverzicht gebruiken
+  # navigator.geolocation. Op () gezet breekt "mijn locatie" zonder foutmelding.
+  Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=(self), interest-cohort=()"
+
+  # ── Content-Security-Policy: bewust NIET in deze ronde ──
+  # De app praat met Firebase (auth, database, opslag, functions), Google Maps, PDOK en twee
+  # CDN's, draait een web worker voor PDF.js, maakt blob-URL's voor pdf's en zet een verborgen
+  # iframe op flow8-715de.firebaseapp.com neer om in te loggen. Een CSP die daar één regel van
+  # mist breekt stil het inloggen of de kaart. Tijdens een verhuizing is dat niet te scheiden
+  # van een hostingprobleem.
+  # Volgende ronde: eerst Content-Security-Policy-Report-Only, een week de meldingen lezen,
+  # en pas daarna afdwingen.
+
+  # Pas aanzetten als https op Cloud86 bewezen werkt — browsers onthouden dit een jaar:
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# ── Caching ──
+# De app is één bestand van ruim 2 MB. Het moet elke keer gecontroleerd worden — een 304 is
+# goedkoop, opnieuw downloaden niet. De service worker mag NOOIT uit de cache komen, anders
+# houdt een oude versie zichzelf in stand en krijgt niemand nog een update te zien.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+  <Files "sw.js">
+    Header set Cache-Control "no-store, max-age=0"
+  </Files>
+</IfModule>
