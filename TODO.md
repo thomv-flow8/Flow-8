@@ -506,3 +506,25 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       2. Regel ± 32420: *TypeError: Cannot read properties of null (reading 'addEventListener')* in
          een `DOMContentLoaded`-handler — er wordt een element gezocht dat op dat moment (of op het
          inlogscherm) niet bestaat.
+
+## Marketingsite opnieuw opgebouwd (1 november 2026)
+De oude `Flow8-website.html` is een geëxporteerd Claude Artifact: een loader met een gzip-blob,
+waarvan de React-bron niet in de repo zit en het artifact niet meer te vinden is. Daardoor viel
+restylen af en is de site opnieuw opgezet in het eigen patroon: `site/` als bron,
+`tools/bouw-site.js` naar `docs/site/`, met een controle op ontbrekende verwijzingen.
+Richting C (licht) gekozen uit vijf varianten, naar het voorbeeld van raycast.com/keyboard en
+usedropshot.com. Beeldmerk variant D (rechts gesloten liggende 8, geen maskerstip) in `merk/`.
+Lettertypes Instrument Sans + Space Mono, zelf gehost — de huisletters uit CLAUDE.md, niet Geist.
+
+- [ ] **Zeven secties ontbreken nog.** De oude site heeft er elf, de nieuwe vier plus contact.
+      Nog te bouwen: Dashboard · Klanten & rapportage · Team · Werkbon op de telefoon ·
+      Zonder overtypen aan de slag · Kostenberekening · Veelgestelde vragen.
+      Twee daarvan beantwoorden vragen die de koper als eerste stelt (wat kost het, hoe begin ik),
+      dus die wegen zwaarder dan de rest.
+- [ ] **Telefoonnummer en mailadres nakijken.** Er staat nu 06-28702422 (het ViVo-nummer) en
+      info@flow-8.nl (afgeleid uit het domein; er draait Strato-mail, maar of die mailbox bestaat
+      is niet gecontroleerd).
+- [ ] **`publiceer.js` omzetten** zodra de site af is: die bouwt `docs/site/` nu nog uit het oude
+      `Flow8-website.html`, dus live is er niets veranderd.
+- [ ] **Logo D ook in de app zetten** (`flow8-v2.html`, inlogscherm en zijbalk). Zolang dat niet
+      gebeurt, toont elke productopname op de site een ander merk dan de navigatiebalk erboven.
