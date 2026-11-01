@@ -130,15 +130,18 @@ Twee dingen staan er bewust **niet** in:
   zonder foutmelding gebroken.
 
 ### Ronde 1 — Plesk inrichten en testen zonder DNS — GEDAAN (1 nov 2026)
-- [ ] Controleren in Mijn Cloud86 hoeveel websites het pakket nog toelaat. Is het krap, dan
-      `app.flow-8.nl` als subdomein ín de webruimte van `flow-8.nl` zetten — zoals THNK onder
-      ViVo hangt.
-- [ ] `flow-8.nl` toevoegen in Plesk, Git-koppeling naar `thomv-flow8/Flow-8`, tak `main`,
-      modus automatisch. **Document root `/<pad>/docs/site`.**
-- [ ] `app.flow-8.nl` toevoegen. **Document root `/<pad>/docs/app`.**
-- [ ] Is de repo privé: deploy key aanmaken in Plesk en in GitHub zetten (alleen lezen).
-- [ ] Webhook GitHub → Plesk, anders moet je na elke push handmatig op **Pull now** klikken.
-      Die URL bevat een geheim; niet in een commit zetten.
+- [x] Pakket nagekeken: er waren nog drie websites vrij, dus beide sites konden los. Let op:
+      met OK Timmerwerken erbij zit het pakket vol; opwaarderen naar Power kan in minuten.
+- [x] `flow-8.nl` toegevoegd in de webruimte van `vivoproducts.nl`, Git-koppeling naar
+      `thomv-flow8/Flow-8`, tak `main`, modus automatisch, deployment directory `/flow-8.nl`.
+      **Mailservice uitgezet** — de mail loopt bij Strato en Plesk mag zich geen bestemming
+      voor `@flow-8.nl` wanen. Document root daarna op `/flow-8.nl/docs/site`.
+- [x] `app.flow-8.nl` als subdomein toegevoegd met document root `/flow-8.nl/docs/app` —
+      **géén tweede Git-koppeling**. Eén clone, twee sites, dus ze kunnen niet uit de pas lopen.
+- [x] Niet nodig: `thomv-flow8/Flow-8` is openbaar, dus Plesk kloont zonder sleutel.
+- [x] Webhook GitHub → Plesk ingesteld, aflevering met een groen vinkje. Nodig omdat
+      "automatisch" alleen slaat op commits die al ín de Plesk-repository staan: zonder webhook
+      hoort Plesk niet dat er op GitHub iets nieuws is. Die URL bevat een geheim.
 - [x] `app.flow-8.nl` toegevoegd bij Firebase → Authentication → Authorized domains
       (1 nov 2026). `thomv-flow8.github.io` blijft staan zolang Pages draait.
 - [x] **Preferred domain** van `flow-8.nl` op het kale domein gezet, zodat `www` met een 301
