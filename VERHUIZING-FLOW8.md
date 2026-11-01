@@ -170,6 +170,21 @@ worden. Zie het openstaande punt in `TODO.md`.
 - [ ] Op GitHub Pages een afscheidsversie zetten die de service worker afmeldt en doorstuurt
       naar `app.flow-8.nl`, zodat wie de oude app nog heeft staan niet blijft hangen.
 - [ ] Pas daarna GitHub Pages uitzetten.
+- [ ] **Repository overzetten naar de organisatie `Vivoproducts`** en daarna de Git-URL in
+      Plesk bijwerken.
+
+**Waarom de repo-overdracht pas hier staat** (besluit 1 november 2026). Bij een overdracht
+verandert het Pages-adres van `thomv-flow8.github.io/Flow-8/` in
+`vivoproducts.github.io/Flow-8/`, en dat is zolang Pages draait het live adres van de app —
+waar monteurs hem op hun beginscherm hebben staan. Nu overzetten zou de app verplaatsen vóórdat
+Cloud86 klaarstaat, `vivoproducts.github.io` óók bij Firebase → Authorized domains vereisen, en
+twee verhuizingen tegelijk laten lopen. In ronde 4 kost de adreswijziging niets, want dan
+gebruikt niemand dat adres meer.
+
+Voor Cloud86 maakt het eigenaarschap niets uit: Plesk kloont over https uit een openbare
+repository. Gecontroleerd op 1 november 2026: `thomv-flow8/Flow-8` is openbaar en heeft geen
+`.github`-map, dus er hangt ook geen GitHub App aan die bij een overdracht zou afbreken — de
+val waar THNK in liep speelt hier niet.
 
 ---
 
