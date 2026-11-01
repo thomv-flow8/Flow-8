@@ -12,6 +12,13 @@ DOMEIN=${1:-flow-8.nl}
 CLOUD86=45.82.191.90
 OUD_A=217.160.0.138
 
+# Vraag de naamserver van het domein zelf, niet de resolver van deze machine. Anders kijk je
+# naar een cache en meldt het script fouten die er niet zijn — dat gebeurde op 1 november:
+# bij Strato stond alles allang goed terwijl hier nog het oude adres uit de cache kwam.
+AUTH=$(dig +short NS "$DOMEIN" | head -1)
+[ -n "$AUTH" ] && BIJ="@$AUTH" || BIJ=""
+vraag() { dig ${BIJ:+$BIJ} +short "$@"; }
+
 groen() { printf '  \033[32mgoed\033[0m  %s\n' "$1"; }
 rood()  { printf '  \033[31mFOUT\033[0m  %s\n' "$1"; FOUTEN=$((FOUTEN+1)); }
 grijs() { printf '  ----  %s\n' "$1"; }
@@ -21,35 +28,35 @@ echo "═══ $DOMEIN — $(date '+%Y-%m-%d %H:%M') ═══"
 echo
 echo "Website — moet naar Cloud86 wijzen"
 
-a=$(dig +short A "$DOMEIN" | tr '\n' ' ' | xargs)
+a=$(vraag A "$DOMEIN" | tr '\n' ' ' | xargs)
 [ "$a" = "$CLOUD86" ] && groen "A        $a" \
   || { [ "$a" = "$OUD_A" ] && grijs "A        $a  (nog het oude Strato-adres — nog niet omgezet)" \
        || rood "A        $a  (verwacht $CLOUD86)"; }
 
-aaaa=$(dig +short AAAA "$DOMEIN" | tr '\n' ' ' | xargs)
+aaaa=$(vraag AAAA "$DOMEIN" | tr '\n' ' ' | xargs)
 [ -z "$aaaa" ] && groen "AAAA     weg" || rood "AAAA     $aaaa  (hoort weg te zijn, anders gaat IPv6 nog naar Strato)"
 
-w=$(dig +short A "www.$DOMEIN" | tail -1)
+w=$(vraag A "www.$DOMEIN" | tail -1)
 [ "$w" = "$CLOUD86" ] && groen "www      $w" || grijs "www      $w"
 
-ap=$(dig +short A "app.$DOMEIN" | tail -1)
+ap=$(vraag A "app.$DOMEIN" | tail -1)
 [ "$ap" = "$CLOUD86" ] && groen "app      $ap" || rood "app      ${ap:-ontbreekt}  (verwacht $CLOUD86)"
 
 echo
 echo "Mail — moet ONVERANDERD zijn"
 
-mx=$(dig +short MX "$DOMEIN" | tr '\n' ' ' | xargs)
+mx=$(vraag MX "$DOMEIN" | tr '\n' ' ' | xargs)
 [ "$mx" = "5 smtp.rzone.de." ] && groen "MX       $mx" || rood "MX       $mx  (verwacht: 5 smtp.rzone.de.)"
 
 for s in strato-dkim-0002 strato-dkim-0003; do
-  d=$(dig +short TXT "$s._domainkey.$DOMEIN")
+  d=$(vraag TXT "$s._domainkey.$DOMEIN")
   [ -n "$d" ] && groen "DKIM     $s aanwezig" || rood "DKIM     $s WEG"
 done
 
-dm=$(dig +short TXT "_dmarc.$DOMEIN")
+dm=$(vraag TXT "_dmarc.$DOMEIN")
 [ -n "$dm" ] && groen "DMARC    $dm" || rood "DMARC    weg"
 
-spf=$(dig +short TXT "$DOMEIN")
+spf=$(vraag TXT "$DOMEIN")
 [ -z "$spf" ] && grijs "SPF      geen — klopt tot ronde 3, maar LET OP: met DMARC op reject" \
              || grijs "SPF      $spf"
 [ -z "$spf" ] && grijs "         wordt Resend-mail geweigerd zolang SPF en DKIM ontbreken."

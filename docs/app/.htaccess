@@ -5,8 +5,12 @@
 DirectoryIndex flow8-v2.html
 
 # ── https afdwingen ──
+# Het controlepad van Let's Encrypt blijft bewust over http bereikbaar: anders moet de
+# uitgifte via een doorverwijzing naar een certificaat dat er nog niet is, en dat is precies
+# de situatie bij een eerste aanvraag.
 RewriteEngine On
 RewriteCond %{HTTPS} !=on
+RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
 # ── Compressie ──
