@@ -253,3 +253,13 @@ een wijziging niet vlak voor een drukke dag.
 
 **Les uit de ViVo-verhuizing:** de DNS-cache van de router hield het oude adres nog 13 minuten
 vast. Op wifi zie je dan nog het oude, op mobiel internet al het nieuwe. Dat is geen fout.
+
+---
+
+## In de praktijk geverifieerd
+
+**1 november 2026, Thomas:** inloggen en het gebruik van de app werken op `app.flow-8.nl`.
+Daarmee is ronde 2 volledig afgerond — de verhuizing is geslaagd.
+
+GitHub Pages blijft tot ronde 4 draaien als terugvaloptie. Zolang dat zo is, blijven
+`thomv-flow8.github.io` bij Firebase Authorized domains en bij de reCAPTCHA-sleutel staan.
