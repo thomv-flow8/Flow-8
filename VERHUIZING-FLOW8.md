@@ -129,7 +129,7 @@ Twee dingen staan er bewust **niet** in:
   kaartoverzicht gebruiken `navigator.geolocation`. Blind de regel van ViVo overnemen had dat
   zonder foutmelding gebroken.
 
-### Ronde 1 — Plesk inrichten en testen zonder DNS
+### Ronde 1 — Plesk inrichten en testen zonder DNS — GEDAAN (1 nov 2026)
 - [ ] Controleren in Mijn Cloud86 hoeveel websites het pakket nog toelaat. Is het krap, dan
       `app.flow-8.nl` als subdomein ín de webruimte van `flow-8.nl` zetten — zoals THNK onder
       ViVo hangt.
@@ -139,13 +139,36 @@ Twee dingen staan er bewust **niet** in:
 - [ ] Is de repo privé: deploy key aanmaken in Plesk en in GitHub zetten (alleen lezen).
 - [ ] Webhook GitHub → Plesk, anders moet je na elke push handmatig op **Pull now** klikken.
       Die URL bevat een geheim; niet in een commit zetten.
-- [ ] `app.flow-8.nl` alvast toevoegen bij Firebase → Authentication → Authorized domains.
-- [ ] Testen vóór de DNS-wijziging, met het IP opgedrongen:
-      `curl --resolve app.flow-8.nl:443:45.82.191.90 https://app.flow-8.nl/` en in Chromium met
-      `--host-resolver-rules=MAP app.flow-8.nl 45.82.191.90`.
-      Controleren: de app laadt, inloggen werkt, de kaart laadt, `sw.js` geeft
-      `Cache-Control: no-store`, `.htaccess` geeft 403, en `TODO.md` / `flow8-functions/` zijn
-      **niet** bereikbaar (dat is de reden dat de document root op `docs/...` staat).
+- [x] `app.flow-8.nl` toegevoegd bij Firebase → Authentication → Authorized domains
+      (1 nov 2026). `thomv-flow8.github.io` blijft staan zolang Pages draait.
+- [x] **Preferred domain** van `flow-8.nl` op het kale domein gezet, zodat `www` met een 301
+      doorverwijst en er één canoniek adres is — net als bij vivoproducts.nl. Het certificaat
+      moet daarom straks `flow-8.nl` én `www.flow-8.nl` dekken: zonder dat krijgt wie `www.`
+      intikt eerst een certificaatfout en bereikt hij de doorverwijzing nooit.
+- [x] Getest met het IP opgedrongen (`curl --resolve …:443:45.82.191.90`). Beide sites geven
+      precies de bestanden uit `docs/`, byte voor byte gelijk aan de lokale build:
+      `flow-8.nl/` 474.607 bytes, `app.flow-8.nl/` 2.334.106 bytes (via `DirectoryIndex`),
+      `sw.js` 3.464 bytes. Alle repo-bestanden geven 404, `.htaccess` geeft 403. De koppen
+      komen door, met `geolocation=(self)` en `sw.js` op `no-store`.
+
+**Wat hier misging en hoe het eruitzag.** Vóór het verzetten van de document root waren
+`TODO.md` (45 kB) en `flow8-functions/database.rules.json` (17 kB) met een 200 op te halen —
+de hele repository stond op het web. Niet gevaarlijk op dat moment, want het domein wees nog
+naar Strato, dus je moest het IP kennen én de Host-header zetten. En er stonden geen sleutels
+in: `functions/.env` staat in `.gitignore` en zit dus niet in de repo. **Maar dit is precies de
+reden dat de document root op `docs/site` en `docs/app` moet staan en niet op de hoofdmap.**
+
+**Les: LiteSpeed cachet, dus een eerste test liegt.** Twee keer leek een wijziging niet
+aangekomen terwijl hij wél goed was — eenmaal na het verzetten van de document root, eenmaal
+na het aanmaken van het subdomein (dat gaf eerst Plesk's eigen `/login.php`, omdat de server
+de naam nog niet kende). Meet daarom altijd met een cache-omzeiler (`?a=$RANDOM`) en geef het
+twintig seconden voordat je concludeert dat er iets mis is.
+
+**Ontdekt: de app is pas ná het certificaat echt te testen.** Een service worker registreert
+alleen op een beveiligde verbinding met een geldig certificaat, en Let's Encrypt kan er pas
+een uitgeven als het domein naar deze server wijst. Inloggen, de kaart en de PWA zijn dus niet
+vóór de DNS-wijziging te controleren — alleen dat de juiste bestanden geserveerd worden, en
+dat is hierboven gebeurd. Voor de marketingsite speelt dit niet; die is volledig getest.
 
 ### Ronde 2 — DNS omzetten
 - [ ] Iedereen laten synchroniseren: online gaan, wachten tot er niets meer in de wachtrij staat.
