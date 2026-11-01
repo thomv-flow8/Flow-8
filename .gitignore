@@ -15,3 +15,8 @@ node_modules/
 .env.*
 *.local
 .claude/settings.local.json
+
+# Wegwerp-previews met alles ingesloten (fonts en beelden als base64)
+site-preview.html
+*-preview.html
+*-varianten.html

@@ -528,3 +528,10 @@ Lettertypes Instrument Sans + Space Mono, zelf gehost — de huisletters uit CLA
       `Flow8-website.html`, dus live is er niets veranderd.
 - [ ] **Logo D ook in de app zetten** (`flow8-v2.html`, inlogscherm en zijbalk). Zolang dat niet
       gebeurt, toont elke productopname op de site een ander merk dan de navigatiebalk erboven.
+
+**Bijgewerkt 2 november 2026:** de twee zwaarstwegende secties staan er — **Prijzen** met een
+werkende rekenmodule (schuifregelaars, tarieven €9 basis en +€15 werkbonlicentie, geplafonneerd
+op het aantal gebruikers) en **Vragen** als `<details>`-lijst zonder JavaScript. Beide teksten en
+de rekenregels zijn overgenomen van de live site, dus de bedragen komen exact overeen.
+Nog te bouwen: Dashboard · Klanten & rapportage · Team · Werkbon op de telefoon · Zonder
+overtypen aan de slag.

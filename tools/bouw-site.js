@@ -66,8 +66,10 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
 
   # Deze site laadt alles van zichzelf: geen externe scripts, geen Google Fonts.
-  # Daarom kan de CSP hier wél streng, anders dan bij de app.
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+  # Daarom kan de CSP hier wél streng, anders dan bij de app. 'self' en niet 'none'
+  # voor script-src, omdat rekenmodule.js de prijsindicatie levend maakt; dat is één
+  # eigen bestand, geen inline code, dus 'unsafe-inline' blijft eruit.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
 
   # Pas aanzetten als https op Cloud86 bewezen werkt — browsers onthouden dit een jaar:
   # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"

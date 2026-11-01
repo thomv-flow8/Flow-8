@@ -40,6 +40,7 @@
       <a href="#platform">Platform</a>
       <a href="#voor-wie">Voor wie</a>
       <a href="#werkwijze">Zo werkt het</a>
+      <a href="#prijzen">Prijzen</a>
       <a href="#contact">Contact</a>
     </div>
     <a class="nav-cta" href="#contact">Demo aanvragen</a>
@@ -78,7 +79,7 @@
             <div><dt>Reistijd</dt><dd>2u 59m</dd></div>
             <div><dt>Afstand</dt><dd>209 km</dd></div>
           </dl>
-          <p class="privacy">Een echte dagroute uit een live-omgeving. De klantnamen zijn onherkenbaar gemaakt — jouw klantgegevens blijven van jou.</p>
+          <p class="privacy">Een echte dagroute uit een live-omgeving. De klantnamen zijn onherkenbaar gemaakt. Jouw klantgegevens blijven van jou.</p>
         </figcaption>
       </figure>
     </div>
@@ -142,6 +143,109 @@
       </ol>
     </section>
 
+
+    <!-- ── PRIJZEN ──────────────────────────────────────────────────────────
+         Tarieven staan hier én in rekenmodule.js. Zonder JavaScript toont de
+         pagina de beginstand (12 gebruikers, 5 met werkbon) en die klopt. -->
+    <section id="prijzen">
+      <span class="eyebrow">Prijzen</span>
+      <h2>Reken uit wat het <span class="stil">voor jouw bedrijf kost.</span></h2>
+      <p class="lood">Iedere gebruiker heeft basistoegang voor &euro;&nbsp;9 per maand. Wil een monteur ook werkbonnen invullen, dan komt daar &euro;&nbsp;15 werkbonlicentie bovenop — samen &euro;&nbsp;24.</p>
+
+      <div class="rekenmodule">
+        <div class="rk-knoppen">
+          <p class="rk-veld">
+            <label for="rk-gebruikers">Gebruikers totaal</label>
+            <output id="rk-gebruikers-uit" for="rk-gebruikers">12</output>
+          </p>
+          <input type="range" id="rk-gebruikers" min="1" max="40" value="12" step="1">
+          <p class="rk-grens"><span>1</span><span>40+</span></p>
+
+          <p class="rk-veld">
+            <label for="rk-bonnen">Waarvan met werkbon</label>
+            <output id="rk-bonnen-uit" for="rk-bonnen">5</output>
+          </p>
+          <input type="range" id="rk-bonnen" min="0" max="12" value="5" step="1">
+          <p class="rk-grens"><span>0</span><span>12</span></p>
+        </div>
+
+        <div class="rk-uitkomst">
+          <dl class="rk-regels">
+            <div><dt id="rk-basis-regel">Basistoegang &middot; 12 &times; &euro;&nbsp;9</dt><dd id="rk-basis-bedrag">&euro;&nbsp;108</dd></div>
+            <div><dt id="rk-bon-regel">Werkbonlicentie &middot; 5 &times; &euro;&nbsp;15</dt><dd id="rk-bon-bedrag">&euro;&nbsp;75</dd></div>
+          </dl>
+          <p class="rk-per" id="rk-per-gebruiker">5 &times; &euro;&nbsp;24 &middot; 7 &times; &euro;&nbsp;9 — &euro;&nbsp;15,25 per gebruiker</p>
+          <p class="rk-label">Jouw indicatie</p>
+          <p class="rk-totaal"><strong id="rk-totaal">&euro;&nbsp;183</strong> <span>/ maand</span></p>
+          <p class="rk-klein">Excl. btw &middot; maandelijks opzegbaar &middot; eerste drie maanden gratis</p>
+          <a class="knop knop-vol" href="#contact">Demo aanvragen</a>
+        </div>
+      </div>
+
+      <div class="twee">
+        <div class="tegel">
+          <span class="eyebrow">Basis — kantoor en planning</span>
+          <h3>&euro;&nbsp;9 per gebruiker / maand</h3>
+          <ul class="lijst">
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard, agenda en afwezigheid</span></li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Slimme dagplanning met route-optimalisatie</span></li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Klanten, contracten en installaties</span></li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Werkorders en storingsdienst</span></li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Rapportages en medewerkersbeheer</span></li>
+          </ul>
+        </div>
+        <div class="tegel">
+          <span class="eyebrow">Werkbonlicentie — voor monteurs in het veld</span>
+          <h3>+ &euro;&nbsp;15 per monteur / maand <span class="stil">· totaal &euro;&nbsp;24</span></h3>
+          <p class="tegel-intro">Alles uit Basis, plus:</p>
+          <ul class="lijst">
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Digitale werkbon op telefoon en tablet</span></li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Checklists, uren en materialen ter plekke</span></li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Foto's, documenten en logboek per bon</span></li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Handtekening van de klant en pdf per mail</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── VRAGEN ───────────────────────────────────────────────────────────
+         <details>/<summary>: werkt met toetsenbord en zonder JavaScript. -->
+    <section id="vragen">
+      <span class="eyebrow">Vragen</span>
+      <h2>Wat klanten <span class="stil">meestal eerst vragen.</span></h2>
+      <p class="lood">Staat je vraag er niet bij? Stel hem gerust — je krijgt binnen één werkdag antwoord.</p>
+      <div class="vragen">
+        <details>
+          <summary>Werkt Flow8 op de telefoon van mijn monteurs?</summary>
+          <p>Ja. Flow8 draait in de browser, dus op elke telefoon of tablet — Android en iPhone. Geen app-store, geen installatie: inloggen en beginnen.</p>
+        </details>
+        <details>
+          <summary>Kan ik mijn huidige klantenbestand meenemen?</summary>
+          <p>Ja, via Excel. Klanten, medewerkers, installaties en materialen importeren we in één keer. Je mag aanleveren in je eigen format; wij zetten het om.</p>
+        </details>
+        <details>
+          <summary>Zijn er koppelingen met mijn boekhouding?</summary>
+          <p>Nog niet. Vandaag werkt Flow8 met import en export via Excel. Koppelingen met boekhoudpakketten staan op de planning — we bouwen ze op volgorde van wat klanten daadwerkelijk gebruiken.</p>
+        </details>
+        <details>
+          <summary>Hoe lang duurt het voor we live zijn?</summary>
+          <p>Meestal twee weken: intake en inrichting in week één, gegevens importeren en live in week twee. De eerste week draaien we met je mee.</p>
+        </details>
+        <details>
+          <summary>Wat gebeurt er met een werkbon als de monteur geen bereik heeft?</summary>
+          <p>De bon blijft op zijn toestel staan en gaat door zodra er weer verbinding is. Hij hoeft niets over te typen.</p>
+        </details>
+        <details>
+          <summary>Waar staan mijn gegevens?</summary>
+          <p>Op servers binnen de Europese Unie, met dagelijkse back-ups. Je gegevens blijven van jou: je kunt ze op elk moment exporteren, en bij opzeggen krijg je een volledige export mee.</p>
+        </details>
+        <details>
+          <summary>Zit ik ergens aan vast?</summary>
+          <p>Nee. Maandelijks opzegbaar, en de eerste drie maanden draai je zonder kosten mee. Je gegevens blijven van jou en kun je altijd exporteren.</p>
+        </details>
+      </div>
+    </section>
+
     <!-- ── CONTACT ──────────────────────────────────────────────────────── -->
     <section id="contact" class="contact">
       <span class="eyebrow">Contact</span>
@@ -169,6 +273,8 @@
         <a href="#platform">Platform</a>
         <a href="#voor-wie">Voor wie</a>
         <a href="#werkwijze">Zo werkt het</a>
+        <a href="#prijzen">Prijzen</a>
+        <a href="#vragen">Vragen</a>
         <a href="#contact">Contact</a>
       </nav>
       <p class="voet-regel">
@@ -178,5 +284,6 @@
     </div>
   </footer>
 </main>
+<script src="rekenmodule.js" defer></script>
 </body>
 </html>

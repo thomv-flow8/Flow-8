@@ -161,3 +161,65 @@ figure{margin-top:44px}
   *{transition:none!important;animation:none!important}
 }
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+/* ── Prijsindicatie ─────────────────────────────────────────────────────────
+   Twee schuifregelaars links, de uitkomst rechts. Zonder JavaScript staan de
+   beginwaarden in de HTML en kloppen de bedragen; rekenmodule.js maakt het
+   alleen levend. */
+.rekenmodule{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px;align-items:start}
+.rk-knoppen,.rk-uitkomst{border:1px solid var(--rand);border-radius:var(--radius);
+  background:var(--vlak);padding:28px 26px}
+.rk-veld{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-top:22px}
+.rk-knoppen .rk-veld:first-child{margin-top:0}
+.rk-veld label{font-size:14.5px;color:var(--zacht)}
+.rk-veld output{font-size:26px;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.rk-grens{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;
+  font-size:11px;color:var(--stil);margin-top:4px}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:var(--raak);
+  background:transparent;cursor:pointer;margin-top:10px}
+input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:99px;background:var(--rand)}
+input[type=range]::-moz-range-track{height:5px;border-radius:99px;background:var(--rand)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:26px;height:26px;border-radius:50%;background:var(--accent-knop);
+  border:3px solid var(--vlak);box-shadow:0 1px 4px rgba(10,11,16,.28);margin-top:-10.5px}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:var(--accent-knop);border:3px solid var(--vlak);box-shadow:0 1px 4px rgba(10,11,16,.28)}
+
+.rk-regels div{display:flex;justify-content:space-between;gap:16px;padding:9px 0;
+  border-bottom:1px solid var(--rand)}
+.rk-regels dt{color:var(--zacht);font-size:14px}
+.rk-regels dd{font-weight:500;font-variant-numeric:tabular-nums}
+.rk-per{color:var(--stil);font-size:12.5px;margin-top:12px}
+.rk-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--stil);margin-top:22px}
+.rk-totaal{display:flex;align-items:baseline;gap:8px;margin-top:2px}
+.rk-totaal strong{font-size:42px;font-weight:500;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.rk-totaal span{color:var(--zacht);font-size:15px}
+.rk-klein{color:var(--stil);font-size:12.5px;margin-top:8px}
+.rk-uitkomst .knop{margin-top:22px}
+
+.twee{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.twee .tegel h3{margin:10px 0 0;font-size:19px}
+.tegel-intro{color:var(--zacht);font-size:14px;margin-top:16px}
+.twee .lijst{margin-top:16px;gap:10px}
+.twee .lijst li{font-size:14.5px}
+
+/* ── Veelgestelde vragen ────────────────────────────────────────────────────
+   <details>/<summary>: toetsenbordtoegankelijk en werkt zonder JavaScript. */
+.vragen{margin-top:36px;padding-top:6px;border-top:1px solid var(--rand)}
+.vragen details{border-bottom:1px solid var(--rand)}
+.vragen summary{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  min-height:var(--raak);padding:16px 0;cursor:pointer;list-style:none;
+  font-weight:500;font-size:16px;letter-spacing:-.01em}
+.vragen summary::-webkit-details-marker{display:none}
+.vragen summary::after{content:"";flex-shrink:0;width:11px;height:11px;
+  border-right:2px solid var(--stil);border-bottom:2px solid var(--stil);
+  transform:rotate(45deg) translate(-3px,-3px);transition:transform .2s ease}
+.vragen details[open] summary::after{transform:rotate(-135deg) translate(-3px,-3px)}
+.vragen details p{color:var(--zacht);font-size:15.5px;padding:0 0 20px;max-width:64ch}
+
+@media (max-width:860px){
+  .rekenmodule,.twee{grid-template-columns:1fr}
+  .rk-totaal strong{font-size:36px}
+}
