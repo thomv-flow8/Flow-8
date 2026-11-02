@@ -183,7 +183,7 @@ thead th{background:var(--surface)}
 .td-acties{white-space:nowrap;display:flex;gap:4px;align-items:center}
 .kolom-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:2px 6px;border-radius:4px;transition:color .15s}
 .kolom-btn:hover{color:var(--text)}
-th{text-align:left;padding:11px 15px;font-family:'Space Mono',monospace;font-size:10.5px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border);background:var(--surface)}
+th{text-align:left;padding:11px 15px;font-family:'Space Mono',monospace;font-size:11px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface)}
 td{padding:14px 15px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
 tbody tr{transition:background .13s ease}
 td.num,.td-uren,.td-aantal,.td-bedrag{font-variant-numeric:tabular-nums;font-family:'Space Mono',monospace;font-size:13px}
@@ -509,6 +509,13 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 /* Actief filter: de pil krijgt een rand in de eigen kleur en een sprekender label. */
 .wp-sc.actief .stat-card,.wo-sc.actief .stat-card{border-color:currentColor;box-shadow:inset 0 0 0 1px currentColor}
 .wp-sc.actief .stat-label,.wo-sc.actief .stat-label{color:currentColor;font-weight:600}
+/* Aanraakscherm: tabs, filterknoppen en stat-filters minimaal 44px, ook met handschoenen.
+   Met een muis blijven ze compact. */
+@media (pointer:coarse){
+  .tab{min-height:44px;display:inline-flex;align-items:center}
+  .chip{min-height:44px;display:inline-flex;align-items:center}
+  .wp-sc .stat-card,.wo-sc .stat-card{min-height:44px}
+}
 .stat-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .stat-icon svg{width:13px;height:13px}
 .stat-value{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1;color:var(--text);white-space:nowrap}
@@ -7511,6 +7518,46 @@ function handtekeningNaarJpeg(canvas, kwaliteit) {
     return canvas.toDataURL('image/png');   // terugval: liever groot dan stuk
   }
 }
+// Toetsenbord en voorleessoftware voor klikbare elementen die geen echte knop zijn.
+// Tabs (.tab) en stat-filters (.wo-sc/.wp-sc) krijgen een rol en tabindex zodra ze in de
+// DOM komen; Enter en spatie werken op alles met role=button/tab of data-klik. Een eigen
+// onkeydown die preventDefault doet (zoals de werkbonsecties) gaat voor.
+function _a11yKlikbaar(){
+  document.querySelectorAll('.tabs:not([role])').forEach(function(t){ t.setAttribute('role','tablist'); });
+  document.querySelectorAll('.tab').forEach(function(t){
+    if(!t.hasAttribute('role')) t.setAttribute('role','tab');
+    if(t.tagName!=='BUTTON' && !t.hasAttribute('tabindex')) t.tabIndex = 0;
+    var sel = t.classList.contains('active') ? 'true' : 'false';
+    if(t.getAttribute('aria-selected')!==sel) t.setAttribute('aria-selected', sel);
+  });
+  document.querySelectorAll('.wo-sc,.wp-sc').forEach(function(c){
+    if(!c.hasAttribute('role')){ c.setAttribute('role','button'); c.tabIndex = 0; }
+    var aan = c.classList.contains('actief') ? 'true' : 'false';
+    if(c.getAttribute('aria-pressed')!==aan) c.setAttribute('aria-pressed', aan);
+  });
+}
+(function(){
+  var gepland = false;
+  // setTimeout i.p.v. requestAnimationFrame: die laatste staat stil in een tabblad op de achtergrond.
+  function plan(){ if(gepland) return; gepland = true; setTimeout(function(){ gepland = false; _a11yKlikbaar(); }, 0); }
+  function start(){
+    new MutationObserver(function(rs){
+      for(var i=0;i<rs.length;i++){
+        var r = rs[i];
+        if(r.type==='childList' ? r.addedNodes.length : (r.target.classList && (r.target.classList.contains('tab') || r.target.classList.contains('wo-sc') || r.target.classList.contains('wp-sc')))){ plan(); return; }
+      }
+    }).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class'] });
+    plan();
+  }
+  if(document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+  document.addEventListener('keydown', function(e){
+    if(e.defaultPrevented || (e.key!=='Enter' && e.key!==' ')) return;
+    var el = e.target;
+    if(!el || !el.matches || !el.matches('[role="button"],[role="tab"],[data-klik]')) return;
+    if(/^(BUTTON|A|INPUT|SELECT|TEXTAREA|SUMMARY)$/.test(el.tagName)) return;
+    e.preventDefault(); el.click();
+  });
+})();
 // Beschermt zoekvelden tegen de tekst 'undefined' en niet-stringwaarden.
 function safeZoek(v) { return (!v || v === 'undefined' || typeof v !== 'string') ? '' : v; }
 function esc(s) { return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
