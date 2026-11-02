@@ -573,3 +573,141 @@ exports.zetGebruikersClaim = onRequest(
     }
   }
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// demoAanvraag — het contactformulier van de marketingsite (flow-8.nl)
+//
+// Apart van verstuurMail, en dat is met opzet: verstuurMail eist een ingelogde
+// Flow8-gebruiker. Die is er op de marketingsite niet. verstuurMail daarvoor
+// openzetten zou er een open spamrelay van maken — iedereen zou er dan via jouw
+// domein post mee kunnen versturen.
+//
+// Daarom staat hier een eigen, publieke functie met een smalle taak en vier sloten:
+//   1. de ontvanger staat vást in de instellingen, nooit in het verzoek;
+//   2. alleen de eigen domeinen mogen hem aanroepen (CORS-lijst);
+//   3. een verborgen veld ("website") dat een mens leeg laat en een bot invult;
+//   4. hoogstens vijf aanvragen per uur per afzender-IP.
+//
+// De aanvraag wordt éérst weggeschreven en dán gemaild. Gaat Resend onderuit,
+// dan staat de lead nog steeds in de database in plaats van verloren te zijn.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Waar de aanvragen heen gaan. Via .env aanpasbaar zonder de code te wijzigen.
+const DEMO_NAAR = defineString('DEMO_NAAR', { default: 'info@flow-8.nl' });
+
+const DEMO_HERKOMST = [
+  'https://flow-8.nl',
+  'https://www.flow-8.nl',
+  'http://localhost:8794',   // lokale preview tijdens het bouwen
+  'http://localhost:8792',
+];
+
+const DEMO_VELDEN = {
+  naam:     { verplicht: true,  max: 100 },
+  bedrijf:  { verplicht: false, max: 100 },
+  email:    { verplicht: true,  max: 160 },
+  telefoon: { verplicht: false, max: 40 },
+  omvang:   { verplicht: false, max: 40 },
+  vraag:    { verplicht: false, max: 2000 },
+};
+
+function _demoSchoon(waarde, max) {
+  return String(waarde == null ? '' : waarde).replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+/* Hoogstens vijf aanvragen per uur per IP. Het IP zelf bewaren we niet: er gaat een
+   hash overheen, zodat de teller werkt zonder dat er adressen in de database staan. */
+async function _demoTeVaak(ip) {
+  const sleutel = require('crypto').createHash('sha256').update('flow8:' + ip).digest('hex').slice(0, 24);
+  const ref = admin.database().ref('flow8/demoAanvragen/teller/' + sleutel);
+  const nu = Date.now(), uur = 60 * 60 * 1000;
+
+  // Een transactie, geen lees-dan-schrijf: twee aanvragen die tegelijk binnenkomen
+  // zouden anders allebei langs de teller glippen.
+  const uitkomst = await ref.transaction((huidig) => {
+    // RTDB geeft een lijst soms als object terug (bij gaten in de nummering).
+    const eerder = Array.isArray(huidig) ? huidig : (huidig ? Object.values(huidig) : []);
+    const recent = eerder.filter((t) => typeof t === 'number' && nu - t < uur);
+    if (recent.length >= 5) return;        // undefined breekt de transactie af
+    recent.push(nu);
+    return recent;
+  });
+  return !uitkomst.committed;              // afgebroken = grens bereikt
+}
+
+exports.demoAanvraag = onRequest(
+  { region: 'europe-west1', secrets: [RESEND_API_KEY], cors: DEMO_HERKOMST,
+    memory: '256MiB', timeoutSeconds: 30 },
+  async (req, res) => {
+    try {
+      if (req.method !== 'POST') { res.status(405).json({ error: 'Alleen POST toegestaan' }); return; }
+      const body = req.body || {};
+
+      // Slot 3 — verborgen veld. Een bot vult alles in; een mens ziet dit niet eens.
+      // Stilletjes "ok" teruggeven: een bot hoeft niet te weten dat hij betrapt is.
+      if (_demoSchoon(body.website, 50)) { res.json({ ok: true }); return; }
+
+      // Velden opschonen en begrenzen
+      const velden = {};
+      for (const [naam, regel] of Object.entries(DEMO_VELDEN)) {
+        velden[naam] = _demoSchoon(body[naam], regel.max);
+        if (regel.verplicht && !velden[naam]) {
+          res.status(400).json({ error: 'Veld ontbreekt: ' + naam }); return;
+        }
+      }
+      if (!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(velden.email)) {
+        res.status(400).json({ error: 'Ongeldig e-mailadres' }); return;
+      }
+
+      // Slot 4 — snelheidsbegrenzing
+      const ip = String(req.headers['x-forwarded-for'] || req.ip || '').split(',')[0].trim() || 'onbekend';
+      if (await _demoTeVaak(ip)) {
+        res.status(429).json({ error: 'Te veel aanvragen. Probeer het over een uur opnieuw, of bel ons.' });
+        return;
+      }
+
+      // Eerst bewaren, dan pas mailen — zo gaat een lead nooit verloren.
+      const bewaard = await admin.database().ref('flow8/demoAanvragen/log').push({
+        ...velden, op: admin.database.ServerValue.TIMESTAMP, verstuurd: false,
+      });
+
+      const regels = [
+        'Naam: ' + velden.naam,
+        velden.bedrijf  ? 'Bedrijf: ' + velden.bedrijf   : null,
+        'E-mail: ' + velden.email,
+        velden.telefoon ? 'Telefoon: ' + velden.telefoon : null,
+        velden.omvang   ? 'Aantal medewerkers: ' + velden.omvang : null,
+      ].filter(Boolean).join('\n');
+      const tekst = regels + (velden.vraag ? '\n\nVraag:\n' + velden.vraag : '');
+      const onderwerp = _headerVeilig('Demo-aanvraag — ' + (velden.bedrijf || velden.naam));
+
+      // Slot 1 — de ontvanger komt uit de instellingen, nooit uit het verzoek.
+      const resp = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + RESEND_API_KEY.value(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: MAIL_FROM.value(),
+          to: [DEMO_NAAR.value()],
+          reply_to: velden.email,
+          subject: onderwerp,
+          text: tekst,
+          html: bouwMailHtml({ naam: 'Flow 8', mailKleur: '#4f6ef5', website: 'flow-8.nl' },
+                             onderwerp, tekst, 'Via de website'),
+        }),
+      });
+
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        // De aanvraag staat al in de database; dat is hier het belangrijkste.
+        console.error('demoAanvraag — Resend faalde:', data.message || resp.status);
+        res.status(502).json({ error: 'Versturen mislukt. Bel ons gerust op 06 – 28 70 24 22.' });
+        return;
+      }
+      await bewaard.update({ verstuurd: true });
+      res.json({ ok: true });
+    } catch (e) {
+      console.error('demoAanvraag:', e);
+      res.status(500).json({ error: 'Er ging iets mis. Bel ons gerust op 06 – 28 70 24 22.' });
+    }
+  }
+);
