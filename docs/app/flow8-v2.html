@@ -30,6 +30,10 @@
 
   /* Accenten — accent iets verzadigder, accent2 blijft de cyaan rol */
   --accent:#4f6ef5;--accent2:#35c4e3;
+  /* Knopvlak met witte tekst. Wit op #4f6ef5 haalt 4,30:1, te weinig voor knoptekst; vier
+     procent donkerder haalt 4,61:1 en is met het oog niet te zien. Zelfde keuze als op de
+     marketingsite. Nu op het inlogscherm; de overige primaire knoppen kunnen volgen. */
+  --accent-knop:#4c6aeb;
 
   /* Statuskleuren blijven ongewijzigd zodat gebruikers niets afleren.
      De *-t varianten zijn de leesbare tekstvariant op donkere vlakken. */
@@ -203,9 +207,23 @@ body .plan-tabel tbody tr:hover td{background:rgba(79,110,245,.09)}
 #login-screen{position:fixed;inset:0;z-index:1000;background:#0a0b10;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 24px 0;font-family:'Instrument Sans',ui-sans-serif,system-ui,sans-serif}
 #login-screen main{width:100%}
 #login-screen input:focus{border-color:#4f6ef5 !important;background:#1b1e33 !important}
+/* Inlogscherm — toegankelijkheid (audit 2026-11-02) */
+#login-screen input{caret-color:#4f6ef5}
+#login-screen input::placeholder{color:#868da3;opacity:1}  /* was de browserstandaard: 3,7:1 */
+/* Het echte vinkje is onzichtbaar (1x1); de focusring hoort op het zichtbare vakje. */
+#login-remember:focus-visible + #login-rm-box{outline:2px solid var(--accent);outline-offset:2px}
+/* Raakvlak van 44pt zonder de opmaak te verschuiven: een onzichtbare uitbreiding om kleine
+   tekstknoppen heen. -v alleen verticaal, voor knoppen die vlak naast elkaar staan. */
+.login-raak,.login-raak-v{position:relative}
+.login-raak::after{content:"";position:absolute;inset:-14px -6px}
+.login-raak-v::after{content:"";position:absolute;inset:-8px 0}
 #login-screen #login-btn:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 10px 30px rgba(79,110,245,.4)}
 #login-screen #google-btn:hover{background:#1a1e28;border-color:rgba(255,255,255,.34)}
-#login-screen #login-pw-toggle:hover{color:#f4f6fb;background:rgba(255,255,255,.06)}
+/* Raakvlak 44x44, maar het zichtbare hovervlak blijft 34x34: in een veld van 48 hoog zou
+   een vlak van 44 tegen de randen aan zitten. */
+/* !important omdat de inline-stijl de verkorte background: gebruikt, en die zet de clip terug. */
+#login-screen #login-pw-toggle{padding:5px;background-clip:content-box !important}
+#login-screen #login-pw-toggle:hover{color:#f4f6fb;background-color:rgba(255,255,255,.06)}
 #login-screen #login-install:hover{border-color:#4f6ef5}
 #login-screen #pw-vergeten-btn:hover{color:#f4f6fb}
 #login-screen #login-btn.loading{opacity:.72;cursor:default}
@@ -1008,8 +1026,8 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 
   <!-- Taalschakelaar -->
   <div style="position:absolute;top:18px;right:20px;z-index:6;display:flex;gap:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-pill);padding:3px">
-    <button type="button" id="login-nl" style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;padding:6px 12px;border-radius:var(--radius-pill);border:none;cursor:pointer;transition:background .25s ease,color .25s ease;background:#4f6ef5;color:#fff">NL</button>
-    <button type="button" id="login-en" style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;padding:6px 12px;border-radius:var(--radius-pill);border:none;cursor:pointer;transition:background .25s ease,color .25s ease;background:transparent;color:#a8aec0">EN</button>
+    <button type="button" id="login-nl" class="login-raak-v" aria-pressed="true" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;padding:6px 12px;min-width:44px;border-radius:var(--radius-pill);border:none;cursor:pointer;transition:background .25s ease,color .25s ease;background:var(--accent-knop);color:#fff">NL</button>
+    <button type="button" id="login-en" class="login-raak-v" aria-pressed="false" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;padding:6px 12px;min-width:44px;border-radius:var(--radius-pill);border:none;cursor:pointer;transition:background .25s ease,color .25s ease;background:transparent;color:#a8aec0">EN</button>
   </div>
 
   <div style="position:relative;z-index:4;width:100%;max-width:412px;display:flex;flex-direction:column;align-items:center">
@@ -1034,38 +1052,38 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
       </div>
 
       <label style="display:flex;flex-direction:column;gap:7px">
-        <span id="login-t-email" style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#868da3">E-mailadres</span>
+        <span id="login-t-email" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#868da3">E-mailadres</span>
         <input id="login-email" required type="email" autocomplete="username" placeholder="naam@bedrijf.nl" style="background:#181a2c;border:1px solid #2a3049;border-radius:11px;padding:13px 15px;font-family:inherit;font-size:14.5px;color:#f4f6fb;outline:none;transition:border-color .2s ease,background .2s ease">
       </label>
 
       <label style="display:flex;flex-direction:column;gap:7px">
-        <span id="login-t-pw" style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#868da3">Wachtwoord</span>
+        <span id="login-t-pw" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#868da3">Wachtwoord</span>
         <span style="position:relative;display:flex">
           <input id="login-pass" required type="password" autocomplete="current-password" placeholder="••••••••" style="flex:1;background:#181a2c;border:1px solid #2a3049;border-radius:11px;padding:13px 46px 13px 15px;font-family:inherit;font-size:14.5px;color:#f4f6fb;outline:none;transition:border-color .2s ease,background .2s ease">
-          <button type="button" id="login-pw-toggle" aria-label="Wachtwoord tonen" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:#868da3;cursor:pointer;border-radius:9px;transition:color .2s ease,background .2s ease">
+          <button type="button" id="login-pw-toggle" aria-label="Wachtwoord tonen" style="position:absolute;right:1px;top:50%;transform:translateY(-50%);width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:#868da3;cursor:pointer;border-radius:9px;transition:color .2s ease,background .2s ease">
             <svg id="login-eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z M12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"></path></svg>
           </button>
         </span>
       </label>
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:2px">
-        <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13px;color:#a8aec0">
+        <label class="login-raak" style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13px;color:#a8aec0">
           <input type="checkbox" id="login-remember" checked style="position:absolute;opacity:0;width:1px;height:1px">
           <span id="login-rm-box" style="width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s ease,border-color .2s ease;background:#4f6ef5;border:1.5px solid #4f6ef5">
             <svg id="login-rm-check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;opacity:1;transition:opacity .2s ease"><path d="M20 6 9 17l-5-5"></path></svg>
           </span><span id="login-t-remember">Onthoud mij</span>
         </label>
-        <button type="button" id="pw-vergeten-btn" style="font-size:13px;color:#868da3;background:none;border:none;cursor:pointer;font-family:inherit;transition:color .2s ease">Wachtwoord vergeten?</button>
+        <button type="button" id="pw-vergeten-btn" class="login-raak" style="font-size:13px;color:#868da3;background:none;border:none;cursor:pointer;font-family:inherit;transition:color .2s ease">Wachtwoord vergeten?</button>
       </div>
 
-      <button type="submit" id="login-btn" style="margin-top:6px;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 24px;border-radius:var(--radius-pill);background:#4f6ef5;color:#fff;border:1px solid #4f6ef5;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .2s ease,filter .2s ease,box-shadow .2s ease,opacity .2s ease">
+      <button type="submit" id="login-btn" style="margin-top:6px;font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 24px;border-radius:var(--radius-pill);background:var(--accent-knop);color:#fff;border:1px solid var(--accent-knop);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .2s ease,filter .2s ease,box-shadow .2s ease,opacity .2s ease">
         <span class="login-spinner" style="display:none;width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.32);border-top-color:#fff;animation:loginSpin .7s linear infinite;flex-shrink:0"></span>
         <span class="login-btn-text">Inloggen</span>
       </button>
 
       <div style="display:flex;align-items:center;gap:12px;margin:2px 0">
         <span style="flex:1;height:1px;background:#262b3d"></span>
-        <span id="login-t-or" style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6f7688">of</span>
+        <span id="login-t-or" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#868da3">of</span>
         <span style="flex:1;height:1px;background:#262b3d"></span>
       </div>
 
@@ -1083,8 +1101,8 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
     </button>
 
     <!-- Footer -->
-    <div style="display:flex;align-items:center;gap:14px;margin-top:20px;font-family:'Space Mono',monospace;font-size:10.5px;color:#5f6676">
-      <span>v2.0</span><span style="opacity:.4">·</span><button type="button" id="login-support" style="color:#5f6676;background:none;border:none;cursor:pointer;font-family:inherit;font-size:10.5px">Support</button><span style="opacity:.4">·</span><button type="button" id="login-debug" style="color:#5f6676;background:none;border:none;cursor:pointer;font-family:inherit;font-size:10.5px">Debug log</button>
+    <div style="display:flex;align-items:center;gap:14px;margin-top:20px;font-family:'Space Mono',monospace;font-size:11px;color:#868da3">
+      <span id="login-versie">v2.0</span><span style="opacity:.4">·</span><button type="button" id="login-support" class="login-raak" style="color:#868da3;background:none;border:none;cursor:pointer;font-family:inherit;font-size:11px">Support</button><span style="opacity:.4">·</span><button type="button" id="login-debug" class="login-raak" style="color:#868da3;background:none;border:none;cursor:pointer;font-family:inherit;font-size:11px">Debug log</button>
     </div>
   </div>
 
@@ -5373,6 +5391,17 @@ function forceerHerverbinding() {
   } catch(e) { _zetDatabaseOnline(); _herverbindBezig = false; }
 }
 
+// Toestand van de herstelcyclus. Moet vóór de .info/connected-registratie hieronder staan.
+// .info is een lokale node in de SDK, dus .on('value') vuurt meteen, nog tijdens het laden
+// van dit script, met de beginwaarde false. zetOfflineBanner start dan _herstelPlan; stonden
+// deze variabelen verderop, dan was _HERSTEL_PAUZES op dat moment nog undefined en crashte
+// de eerste herstelpoging bij elke start. Mét bereik merkte je daar niets van. Zonder bereik
+// kwam de cyclus nooit op gang: een tweede false volgt niet.
+var _herstelTimer = null;
+var _herstelPoging = 0;
+// Oplopende tussenpozen, zodat we bij echt geen netwerk niet elke paar seconden stampen.
+var _HERSTEL_PAUZES = [5000, 10000, 20000, 30000];
+
 try {
   FB.ref('.info/connected').on('value', function(snap) {
     zetOfflineBanner(snap.val() === true);
@@ -5397,10 +5426,8 @@ try {
 //
 // `navigator.onLine` doet hier bewust niet meer mee: op iOS blijft die na vliegtuigmodus-uit
 // vaak nog minutenlang op false hangen, en juist dan moet er hersteld worden.
-var _herstelTimer = null;
-var _herstelPoging = 0;
-// Oplopende tussenpozen, zodat we bij echt geen netwerk niet elke paar seconden stampen.
-var _HERSTEL_PAUZES = [5000, 10000, 20000, 30000];
+// _herstelTimer, _herstelPoging en _HERSTEL_PAUZES staan boven de .info/connected-
+// registratie (zoek op "Toestand van de herstelcyclus") — zie daar waarom.
 
 function probeerHerverbinden(){
   // Ook als we denken verbonden te zijn: een vorige poging kan de database offline hebben
@@ -5725,8 +5752,12 @@ function _loginTaal(){
   var bt = document.querySelector('#login-btn .login-btn-text'); if(bt) bt.textContent = t.button;
   var tg = document.getElementById('login-pw-toggle'); if(tg) tg.setAttribute('aria-label', _loginShowPw?t.pwHide:t.pwShow);
   var nl=document.getElementById('login-nl'), en=document.getElementById('login-en');
-  if(nl){ nl.style.background=_loginLang==='nl'?'#4f6ef5':'transparent'; nl.style.color=_loginLang==='nl'?'#fff':'#a8aec0'; }
-  if(en){ en.style.background=_loginLang==='en'?'#4f6ef5':'transparent'; en.style.color=_loginLang==='en'?'#fff':'#a8aec0'; }
+  if(nl){ nl.style.background=_loginLang==='nl'?'var(--accent-knop)':'transparent'; nl.style.color=_loginLang==='nl'?'#fff':'#a8aec0'; nl.setAttribute('aria-pressed', String(_loginLang==='nl')); }
+  if(en){ en.style.background=_loginLang==='en'?'var(--accent-knop)':'transparent'; en.style.color=_loginLang==='en'?'#fff':'#a8aec0'; en.setAttribute('aria-pressed', String(_loginLang==='en')); }
+  // Taal van de inhoud, zodat een schermlezer de juiste stem kiest. Op het inlogscherm zelf
+  // en niet op <html>: de rest van de app is Nederlands en bleef anders na het inloggen als
+  // Engels gemarkeerd staan.
+  var ls=document.getElementById('login-screen'); if(ls) ls.setAttribute('lang', _loginLang);
 }
 
 function _initNieuweLogin(){
@@ -5796,6 +5827,10 @@ function _initNieuweLogin(){
     if(!email){ _loginToonFout('Voer eerst je e-mailadres in.'); return; }
     AUTH.sendPasswordResetEmail(email).then(function(){ toast('Reset e-mail verstuurd','success'); }).catch(function(e){ toast('Mislukt: '+e.message,'error'); });
   });
+
+  // Footer: versie uit APP_VERSION, zoals de zijbalk — er stond vast "v2.0".
+  var ver=document.getElementById('login-versie');
+  if(ver && typeof APP_VERSION!=='undefined') ver.textContent='v'+APP_VERSION;
 
   // Footer: Support / Debug log
   var sup=document.getElementById('login-support');
@@ -32487,7 +32522,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var logPanel=document.getElementById('log-panel');
   function toggleLog(){logPanel.classList.toggle('hidden');if(!logPanel.classList.contains('hidden'))refreshLog();}
   document.getElementById('log-btn').addEventListener('click', toggleLog);
-  document.getElementById('toggle-log-btn').addEventListener('click', toggleLog);
   document.getElementById('log-clear').addEventListener('click',function(){LOGS=[];refreshLog();});
   document.getElementById('log-close').addEventListener('click',function(){logPanel.classList.add('hidden');});
 });
