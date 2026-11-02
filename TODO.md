@@ -503,6 +503,12 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       bevestiging, net als een foto. Detector: 16 → 9 meldingen (contrast en kleine tekst 0).
 - [ ] **Werkbon: geneste kaarten** — de detector ziet nog 9 kaarten-in-kaarten (blokken binnen de
       inklapbare secties). Indelingskeuze, geen fout; pas oppakken bij een herindeling van de bon.
+- [x] **Planning op de telefoon** (2 november 2026) — eigen indeling tot 768px breed, volgens
+      `planning-mobiel-preview.html` (lokaal, niet in git): werkbalk van twee rijen, monteurs als
+      chips, zoeken/periode/status in een vel, lijst als kaarten per dag en monteur, dag als tijdlijn
+      per monteur (of alle onder elkaar), week als dagstrook + dagen onder elkaar, "+ Opdracht" als
+      zwevende knop. Desktop ongewijzigd; filterlogica van de lijst gedeeld (`_planLijstSelectie`).
+      Nog niet op de telefoon: slepen om te verplaatsen (alleen desktop) en de kolomkeuze.
 - [x] **Werkorders: audit doorgevoerd** (2 november 2026) — lijst en detail op 44px op een
       aanraakscherm, kop overlapt niet meer, deadline op mobiel altijd volledig (status onder de
       gegevens), hoge prioriteit als getinte nummerkolom i.p.v. rode zijrand, blokken en

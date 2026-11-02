@@ -316,6 +316,83 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .wok-info{flex:1;min-width:0}
 .wok-klant{font-size:14px;font-weight:600;overflow-wrap:anywhere}
 .wok-meta{font-size:12px;color:var(--muted);margin-top:2px}
+/* ── Planning op de telefoon (≤768px): eigen indeling, zie _plmToolbarHtml ── */
+.plm-balk{margin:0 0 4px}
+.plm-rij1,.plm-rij2{display:flex;gap:8px;align-items:center}
+.plm-rij2{margin-top:8px;gap:6px}
+.plm-seg{flex:1;min-width:0;display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:2px;gap:2px}
+.plm-seg .plan-view-btn{flex:1;min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:13.5px;padding:0 6px;border-radius:9px}
+.plm-seg .plan-view-btn.active{background:var(--surface2);color:var(--text);box-shadow:inset 0 0 0 1px var(--border)}
+.plm-ico{width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;position:relative;padding:0}
+.plm-rij1 .plm-ico{height:50px}
+.plm-stip{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.plm-lbl{flex:1;min-width:0;text-align:center;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;line-height:1.2}
+.plm-lbl small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.plm-rij2 #plan-today{min-height:44px}
+.plm-chips{display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:2px;scrollbar-width:none}
+.plm-chips::-webkit-scrollbar{display:none}
+.plm-chip{min-height:44px;padding:0 12px 0 6px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.plm-chip.zonder{padding-left:14px}
+.plm-chip.aan{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.plm-chip-n{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+.plm-inhoud{padding-bottom:88px}
+.plm-dagkop{position:sticky;top:0;z-index:3;background:var(--bg);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 2px 8px}
+.plm-dagkop b{font-size:15px}
+.plm-dagkop .tag{font-size:12px}
+.plm-n{margin-left:auto;font-size:12px;color:var(--muted)}
+.plm-mkop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 2px 6px;font-size:13px;font-weight:600}
+.plm-meta{font-weight:500;color:var(--muted);font-size:12px}
+.plm-av{display:flex;align-items:center;flex-shrink:0}
+.plm-av .avatar+.avatar{margin-left:-6px;box-shadow:0 0 0 2px var(--surface)}
+.plm-kaart{display:flex;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:11px 12px;margin-bottom:8px;cursor:pointer}
+.plm-kaart:active,.plm-rij:active{background:var(--surface2)}
+.plm-kaart.spoed{background:color-mix(in srgb,var(--red) 8%,var(--surface));border-color:color-mix(in srgb,var(--red) 35%,var(--border))}
+.plm-tijd{width:50px;flex-shrink:0;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;line-height:1.25}
+.plm-tijd small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.plm-tijd.blok,.plm-t.blok{color:var(--blok-t)}
+.plm-tijd.vast,.plm-t.vast{color:var(--vast-t)}
+.plm-lijf{flex:1;min-width:0}
+.plm-klant{font-weight:600;font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+.plm-adres{font-size:13px;color:var(--muted);margin-top:2px}
+.plm-onder{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;margin-top:7px}
+.plm-onder>span[title]{float:none;margin:0}
+.plm-typ{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+.plm-typ i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.plm-spoed{font-size:12px;font-weight:700;color:var(--red-t);display:inline-flex;align-items:center;gap:3px}
+.plm-actie{font-size:12px;color:var(--orange-t)}
+.plm-retour{margin:0 4px 12px}
+.plm-leeg{border:1px dashed var(--border);border-radius:var(--radius-lg);padding:6px 6px 6px 14px;min-height:56px;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.plm-melding{border-radius:var(--radius);padding:10px 12px;font-size:13px;font-weight:600;margin:2px 0 8px}
+.plm-filterregel{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:2px 2px 4px}
+.plm-kopje{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 2px 6px}
+.plm-lijn{margin-top:6px}
+.plm-uur{display:flex;gap:10px;min-height:56px;border-top:1px solid var(--border)}
+.plm-u{width:44px;flex-shrink:0;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);padding-top:5px}
+.plm-vak{flex:1;min-width:0;padding:6px 0 0}
+.plm-vak .plm-kaart{margin-bottom:6px}
+.plm-strook{display:flex;gap:6px;margin:4px 0 2px}
+.plm-dagknop{flex:1;min-width:0;min-height:56px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:0}
+.plm-dagknop small{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+.plm-dagknop.vandaag{border-color:var(--accent);color:var(--accent-t)}
+.plm-stippen{display:flex;gap:2px;height:5px}
+.plm-stippen i{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.plm-rij{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer}
+.plm-rij.spoed{border-color:color-mix(in srgb,var(--red) 35%,var(--border))}
+.plm-t{width:44px;flex-shrink:0;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.plm-k{flex:1;min-width:0;font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.plm-k small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.plm-fab{position:fixed;right:16px;bottom:calc(78px + var(--safe-bottom));z-index:90;height:56px;padding:0 20px 0 16px;border-radius:var(--radius-pill);border:none;background:var(--accent-knop);color:#fff;font-family:inherit;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;box-shadow:0 6px 18px rgba(0,0,0,.22);cursor:pointer}
+.plm-vel{position:fixed;inset:0;z-index:450;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
+.plm-vel.open{display:flex}
+.plm-vel-in{background:var(--surface);width:100%;border-radius:20px 20px 0 0;padding:10px 16px calc(20px + var(--safe-bottom));max-height:82vh;overflow-y:auto}
+.plm-greep{width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 12px}
+.plm-vel-kop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.plm-vel-kop h2{font-size:16px;font-weight:700}
+.plm-vel-kop .btn{min-height:44px}
+.plm-vel-lbl{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.plm-vel-chips{display:flex;flex-wrap:wrap;gap:8px}
+.plm-vel-chips .tag{min-height:44px;padding:0 14px;font-family:inherit;font-size:13px;cursor:pointer}
+.plm-vel-chips .tag.aan{box-shadow:inset 0 0 0 2px currentColor;font-weight:700}
 /* Werkorder-detail: velden en knoppen groot genoeg voor een telefoon. */
 .wox-body input.wox-veld,.wox-body select.wox-veld{min-height:44px}
 .wox-veld-radio,.wox-veld-check{width:20px;height:20px;flex-shrink:0}
@@ -15457,6 +15534,13 @@ function _planZoekMatch(o){
 // belandden in een veld dat net was vervangen. Die tekens raakten dan zoek, waardoor de
 // laatste letters bleven staan. De toolbar blijft nu staan, dus dat kan niet meer.
 // De statistieken en filterchips zitten ín renderPlanLijst en lopen dus gewoon mee.
+// De gekozen weergave, op een telefoon in de eigen indeling.
+function _planInhoudHtml(monteurs){
+  var mob = _planIsMobiel();
+  if (_planView === 'week') return mob ? renderPlanWeekMobiel(monteurs) : renderPlanWeek(monteurs);
+  if (_planView === 'dag')  return mob ? renderPlanDagMobiel(monteurs) : renderPlanDag(monteurs);
+  return mob ? renderPlanLijstMobiel(monteurs) : renderPlanLijst(monteurs);
+}
 function _planHertekenInhoud(){
   var pc = document.getElementById('plan-content');
   if(!pc){ renderPlanning(); return; }
@@ -15464,9 +15548,7 @@ function _planHertekenInhoud(){
   var monteurs = APP.medewerkers.filter(function(m){
     return m.status !== 'inactief' && planningRollen.indexOf(m.rol) >= 0;
   });
-  if (_planView === 'lijst')      pc.innerHTML = renderPlanLijst(monteurs);
-  else if (_planView === 'week')  pc.innerHTML = renderPlanWeek(monteurs);
-  else if (_planView === 'dag')   pc.innerHTML = renderPlanDag(monteurs);
+  pc.innerHTML = _planInhoudHtml(monteurs);
   bindPlanningEvents();
 }
 
@@ -15536,7 +15618,9 @@ function renderPlanning() {
   h += '</div>';
   h += '</div>'; // sluit buitenste flex container (regel 6733)
 
-  el.innerHTML = h + '<div id="plan-content">Laden...</div>';
+  // Telefoon: eigen werkbalk (twee rijen, monteurs als chips, filters in een vel).
+  if (_planMob) h = _plmToolbarHtml(monteurs);
+  el.innerHTML = h + '<div id="plan-content"'+(_planMob?' class="plm-inhoud"':'')+'>Laden...</div>';
 
   // Events
   el.querySelectorAll('.plan-view-btn[data-view]').forEach(function(b){
@@ -15548,7 +15632,8 @@ function renderPlanning() {
   el.querySelector('#plan-prev').addEventListener('click', function(){ _planDatum = verschuifDatum(_planDatum, _planView, -1); _planPage=1; renderPlanning(); });
   el.querySelector('#plan-next').addEventListener('click', function(){ _planDatum = verschuifDatum(_planDatum, _planView, 1); _planPage=1; renderPlanning(); });
   el.querySelector('#plan-today').addEventListener('click', function(){ _planDatum = vandaagISO(); _planPage=1; renderPlanning(); });
-  el.querySelector('#plan-mont-filter').addEventListener('change', function(e){ _planFilter = e.target.value; _planPage=1; renderPlanning(); });
+  var montFilter = el.querySelector('#plan-mont-filter');
+  if (montFilter) montFilter.addEventListener('change', function(e){ _planFilter = e.target.value; _planPage=1; renderPlanning(); });
   var addBtn = el.querySelector('#plan-add-btn'); if(addBtn) addBtn.addEventListener('click', function(){ openOpdrachtModal(null); });
   var dagplanBtn = el.querySelector('#plan-dagplan-btn'); if(dagplanBtn) dagplanBtn.addEventListener('click', openDagplanning);
   var planExpBtn = el.querySelector('#plan-export-btn'); if(planExpBtn) planExpBtn.addEventListener('click', function(){
@@ -15574,9 +15659,7 @@ function renderPlanning() {
 
   // Render gekozen weergave
   var pc = document.getElementById('plan-content');
-  if (_planView === 'lijst')  pc.innerHTML = renderPlanLijst(monteurs);
-  else if (_planView === 'week') pc.innerHTML = renderPlanWeek(monteurs);
-  else if (_planView === 'dag')  pc.innerHTML = renderPlanDag(monteurs);
+  pc.innerHTML = _planInhoudHtml(monteurs);
 
   // Post-render events
   bindPlanningEvents();
@@ -15778,6 +15861,7 @@ function bindPlanningEvents() {
   });
   var wisFilter = el.querySelector('#plan-filter-wis');
   if(wisFilter) wisFilter.addEventListener('click', function(){ _planStatusFilter = ''; _planActieFilter = ''; renderPlanning(); });
+  if(_planIsMobiel()) _plmBind(el);
 }
 
 // ── LIJST WEERGAVE ─────────────────────────────────────────────────
@@ -15861,17 +15945,366 @@ function _planRetourRegel(ri, uitlijning){
     + ';gap:4px;font-size:11px;color:var(--muted);line-height:1.2;margin-top:3px">' + ICO.huis + '<span>' + tekst + '</span></div>';
 }
 
-function renderPlanLijst(monteurs) {
+// Welke opdrachten de lijst toont: gedeeld door de desktoptabel en de telefoonweergave, zodat
+// beide precies hetzelfde laten zien. statBron telt zonder status-/actiefilter, zodat de
+// badge-tellingen kloppen ongeacht welk filter actief is.
+function _planLijstSelectie(){
   var bereik = getPeriodeBereik(_planDatum, _planPeriode);
-  var opdrachten = APP.opdrachten.filter(function(o){
+  var statBron = APP.opdrachten.filter(function(o){
     if (_planFilter !== 'alle' && String(o.monteurId) !== _planFilter) return false;
-    if (_planStatusFilter === 'spoed') { if(!_isSpoed(o)) return false; }
-    else if (_planStatusFilter && o.status !== _planStatusFilter) return false;
-    if (_planActieFilter && (o.status !== 'actie' || (o.actietype||'') !== _planActieFilter)) return false;
     if (!_planZoekMatch(o)) return false;
     if (!o.datum) return true;
     return o.datum >= bereik.van && o.datum <= bereik.tot;
   });
+  var opdrachten = statBron.filter(function(o){
+    if (_planStatusFilter === 'spoed') { if(!_isSpoed(o)) return false; }
+    else if (_planStatusFilter && o.status !== _planStatusFilter) return false;
+    if (_planActieFilter && (o.status !== 'actie' || (o.actietype||'') !== _planActieFilter)) return false;
+    return true;
+  });
+  return { bereik: bereik, opdrachten: opdrachten, statBron: statBron };
+}
+
+// ── PLANNING OP DE TELEFOON ────────────────────────────────────────
+// Tot 768px breed krijgt de planning een eigen indeling: kaarten i.p.v. een tabel, de dag
+// per monteur als tijdlijn, de week als dagen onder elkaar, en een werkbalk van twee rijen
+// met zoeken en filters in een vel. Zelfde gegevens en klikacties als op desktop: kaarten
+// zijn .plan-event (opent het paneel), "+ Opdracht" is .plan-add-dag; zie bindPlanningEvents.
+var _plmVelOpen = false;
+var _PLM_DAG  = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+var _PLM_DAGK = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+var _PLM_MND  = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+var _PLM_ICO_LIJST = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>';
+var _PLM_ICO_FILTER = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>';
+
+function _planIsMobiel(){ return window.innerWidth <= 768; }
+function _planHeeftMonteur(o, id){
+  return String(o.monteurId) === String(id) || (Array.isArray(o.monteurIds) && o.monteurIds.map(String).indexOf(String(id)) >= 0);
+}
+function _plmMonteurIds(o){
+  return (Array.isArray(o.monteurIds) ? o.monteurIds : []).concat((o.monteurId != null && o.monteurId !== '') ? [o.monteurId] : [])
+    .filter(function(x){ return x != null && x !== ''; }).map(String)
+    .filter(function(x, i, a){ return a.indexOf(x) === i; });
+}
+function _plmAvatar(m, maat){
+  maat = maat || 26;
+  var kl = medKleur(m);
+  return '<span class="avatar" style="width:'+maat+'px;height:'+maat+'px;font-size:'+(maat >= 30 ? 12 : 11)+'px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</span>';
+}
+function _plmDagNaam(datum){
+  var d = new Date(datum+'T00:00:00');
+  return _PLM_DAG[d.getDay()]+' '+d.getDate()+' '+_PLM_MND[d.getMonth()];
+}
+function _plmTijd(o){
+  var blok = o.blokVan && o.blokTot;
+  if(o.tijdVan){
+    var onder = o.tijdTot ? esc(o.tijdTot) : '';
+    if(blok) onder = esc(o.blokVan)+'–'+esc(o.blokTot);
+    return '<div class="plm-tijd'+(o.pinTijd ? ' vast' : blok ? ' blok' : '')+'">'+esc(o.tijdVan)+(onder ? '<small>'+onder+'</small>' : '')+'</div>';
+  }
+  if(blok) return '<div class="plm-tijd blok">'+esc(o.blokVan)+'<small>tot '+esc(o.blokTot)+'</small></div>';
+  return '<div class="plm-tijd"><small>geen tijd</small></div>';
+}
+function _plmAvatars(o){
+  var ids = _plmMonteurIds(o);
+  if(!ids.length) return '';
+  return '<div class="plm-av">'+ids.slice(0,3).map(function(id){ var m = getMed(id); return m ? _plmAvatar(m, 26) : ''; }).join('')+'</div>';
+}
+function _plmKaart(o, metMonteur){
+  var ot = getOpdrachttype(o.type), spoed = _isSpoed(o);
+  var adres = [o.adres, o.plaats].filter(Boolean).join(', ');
+  var h = '<div class="plm-kaart plan-event'+(spoed ? ' spoed' : '')+'" data-id="'+esc(o.id)+'" role="button" tabindex="0">';
+  h += _plmTijd(o);
+  h += '<div class="plm-lijf"><div class="plm-klant">'+esc(o.klantNaam || '—')+'</div>';
+  if(adres) h += '<div class="plm-adres">'+esc(adres)+'</div>';
+  h += '<div class="plm-onder">';
+  if(spoed) h += '<span class="plm-spoed">'+ICO.zap+'Spoed</span>';
+  h += '<span class="plm-typ"><i style="background:'+ot.kleur+'"></i>'+esc(ot.label || '')+'</span>';
+  h += wkStatusBadge(o.status);
+  if(o.status === 'actie') h += '<span class="plm-actie">→ '+esc(o.actietype || 'Actie vereist')+'</span>';
+  h += '</div></div>';
+  if(metMonteur) h += _plmAvatars(o);
+  return h + '</div>';
+}
+function _plmRij(o){
+  var spoed = _isSpoed(o);
+  var adres = [o.adres, o.plaats].filter(Boolean).join(', ');
+  var h = '<div class="plm-rij plan-event'+(spoed ? ' spoed' : '')+'" data-id="'+esc(o.id)+'" role="button" tabindex="0">';
+  h += '<span class="plm-t'+(o.pinTijd ? ' vast' : (o.blokVan && o.blokTot) ? ' blok' : '')+'">'+esc(o.tijdVan || o.blokVan || '—')+'</span>';
+  h += '<span class="plm-k">'+(spoed ? '<span class="plm-spoed">'+ICO.zap+'</span> ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+'</span>';
+  return h + _plmAvatars(o) + '</div>';
+}
+function _plmLeeg(datum, monteurId){
+  var blok = APP.blokkadeDagen && APP.blokkadeDagen[datum];
+  var kan = magSchrijven('planning') && !blok && datum !== '_geen';
+  return '<div class="plm-leeg"><span>'+(blok ? 'Geblokkeerde dag' : 'Niets gepland')+'</span>'
+    + (kan ? '<button type="button" class="btn btn-ghost btn-sm plan-add-dag" data-datum="'+esc(datum)+'" data-monteur="'+esc(monteurId || '')+'">+ Opdracht</button>' : '')+'</div>';
+}
+function _plmDagkop(datum, n, id){
+  var nu = vandaagISO();
+  var blok = datum !== '_geen' && APP.blokkadeDagen && APP.blokkadeDagen[datum];
+  var naam = datum === '_geen' ? 'Geen datum' : _plmDagNaam(datum);
+  var kl = blok ? 'var(--red-t)' : datum === nu ? 'var(--accent-t)' : (datum !== '_geen' && datum < nu) ? 'var(--muted)' : 'var(--text)';
+  return '<div class="plm-dagkop"'+(id ? ' id="'+id+'"' : '')+'><b style="color:'+kl+'">'+esc(naam)+'</b>'
+    + (datum === nu ? '<span class="tag tag-blue">Vandaag</span>' : '')
+    + (blok ? '<span class="tag tag-red">Geblokkeerd</span>' : '')
+    + '<span class="plm-n">'+n+' opdracht'+(n === 1 ? '' : 'en')+'</span></div>';
+}
+function _plmRetour(medId, datum){
+  var ri = _planRetourInfo(medId, datum);
+  return ri ? '<div class="plm-retour">'+_planRetourRegel(ri)+'</div>' : '';
+}
+// Verlof of ziekte van een monteur op een dag, als melding boven diens opdrachten.
+function _plmAfwezig(medId, dag){
+  var vz = verzuimOpDag(medId, dag);
+  if(vz) return '<div class="plm-melding" style="background:rgba(239,68,68,.12);color:var(--red-t)">'+(vz.type === 'gedeeltelijk' ? 'Gedeeltelijk ziek' : 'Ziek')+'</div>';
+  var vl = (APP.verlof || []).find(function(v){ return String(v.medId) === String(medId) && v.status === 'goedgekeurd' && dag >= v.van && dag <= (v.tot || v.van); });
+  if(vl) return '<div class="plm-melding" style="background:rgba(245,158,11,.14);color:var(--orange-t)">Verlof'+((vl.gedeeltelijk && vl.tijdVan) ? ' '+esc(vl.tijdVan)+(vl.tijdTot ? '–'+esc(vl.tijdTot) : '') : '')+'</div>';
+  return '';
+}
+
+function _plmToolbarHtml(monteurs){
+  var actiefFilter = !!(_planZoek || _planStatusFilter || _planActieFilter);
+  var h = '<div class="plm-balk">';
+  h += '<div class="plm-rij1"><div class="plm-seg">';
+  [['lijst','Lijst',_PLM_ICO_LIJST],['dag','Dag',ICO.clock],['week','Week',ICO.kalender]].forEach(function(v){
+    h += '<button type="button" class="plan-view-btn'+(_planView === v[0] ? ' active' : '')+'" data-view="'+v[0]+'" aria-pressed="'+(_planView === v[0])+'">'+v[2]+v[1]+'</button>';
+  });
+  h += '</div>';
+  h += '<button type="button" class="plm-ico" id="plm-filter-btn" aria-label="Zoeken en filters" title="Zoeken en filters">'+_PLM_ICO_FILTER+(actiefFilter ? '<span class="plm-stip"></span>' : '')+'</button>';
+  h += '<button type="button" class="plm-ico" id="plan-dagplan-btn" aria-label="Route" title="Route">'+_routeIcoon(18)+'</button>';
+  h += '</div>';
+
+  // Periode
+  var lbl = '', sub = '';
+  if(_planView === 'dag'){
+    var dd = new Date(_planDatum+'T00:00:00');
+    lbl = _PLM_DAGK[dd.getDay()]+' '+dd.getDate()+' '+_PLM_MND[dd.getMonth()].slice(0,3);
+    sub = _planDatum === vandaagISO() ? 'Vandaag' : String(dd.getFullYear());
+  } else if(_planView === 'week'){
+    var ma = getMaandagVan(_planDatum), vr = new Date(ma); vr.setDate(vr.getDate() + 4);
+    lbl = 'Week '+isoWeekNr(ma);
+    sub = ma.getDate()+(ma.getMonth() !== vr.getMonth() ? ' '+_PLM_MND[ma.getMonth()].slice(0,3) : '')+' – '+vr.getDate()+' '+_PLM_MND[vr.getMonth()].slice(0,3)+' '+vr.getFullYear();
+  } else {
+    var mnd = parseInt(_planDatum.slice(5,7), 10), jr = _planDatum.slice(0,4);
+    lbl = _planPeriode === 'kwartaal' ? 'Q'+Math.ceil(mnd/3)+' '+jr : _PLM_MND[mnd-1].charAt(0).toUpperCase()+_PLM_MND[mnd-1].slice(1)+' '+jr;
+    var n = _planLijstSelectie().opdrachten.length;
+    sub = n+' opdracht'+(n === 1 ? '' : 'en');
+  }
+  h += '<div class="plm-rij2">';
+  h += '<button type="button" class="plm-ico" id="plan-prev" aria-label="Vorige periode" title="Vorige periode"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  h += '<div class="plm-lbl">'+esc(lbl)+'<small>'+esc(sub)+'</small></div>';
+  h += '<button type="button" class="plm-ico" id="plan-next" aria-label="Volgende periode" title="Volgende periode"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>';
+  h += '<button type="button" class="btn btn-ghost btn-sm" id="plan-today">Vandaag</button>';
+  h += '</div>';
+
+  // Monteurs als chips; het aantal telt binnen de gekozen periode.
+  var telOps;
+  if(_planView === 'dag') telOps = APP.opdrachten.filter(function(o){ return o.datum === _planDatum && _planZoekMatch(o); });
+  else if(_planView === 'week'){
+    var ma2 = getMaandagVan(_planDatum), dg = [];
+    for(var i=0; i<5; i++){ var x = new Date(ma2); x.setDate(x.getDate() + i); dg.push(dateToStr(x)); }
+    telOps = APP.opdrachten.filter(function(o){ return dg.indexOf(o.datum) >= 0 && _planZoekMatch(o); });
+  } else {
+    var br = getPeriodeBereik(_planDatum, _planPeriode);
+    telOps = APP.opdrachten.filter(function(o){ return o.datum && o.datum >= br.van && o.datum <= br.tot && _planZoekMatch(o); });
+  }
+  h += '<div class="plm-chips">';
+  h += '<button type="button" class="plm-chip zonder'+(_planFilter === 'alle' ? ' aan' : '')+'" data-m="alle" aria-pressed="'+(_planFilter === 'alle')+'">Alle monteurs</button>';
+  monteurs.forEach(function(m){
+    var n = telOps.filter(function(o){ return _planHeeftMonteur(o, m.id); }).length;
+    var aan = _planFilter === String(m.id);
+    h += '<button type="button" class="plm-chip'+(aan ? ' aan' : '')+'" data-m="'+esc(m.id)+'" aria-pressed="'+aan+'">'+_plmAvatar(m, 30)+esc(m.voornaam || '')+' <span class="plm-chip-n">'+n+'</span></button>';
+  });
+  h += '</div></div>';
+
+  h += _plmVelHtml();
+  if(magSchrijven('planning')) h += '<button type="button" class="plm-fab" id="plan-add-btn"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Opdracht</button>';
+  return h;
+}
+
+// Vel met zoeken, periode en status. Status en periode gelden alleen voor de lijst, zoals op desktop.
+function _plmVelHtml(){
+  var h = '<div class="plm-vel'+(_plmVelOpen ? ' open' : '')+'" id="plm-vel"><div class="plm-vel-in" role="dialog" aria-label="Zoeken en filters">';
+  h += '<div class="plm-greep"></div>';
+  h += '<div class="plm-vel-kop"><h2>Zoeken en filters</h2><button type="button" class="btn btn-primary btn-sm" id="plm-vel-klaar">Klaar</button></div>';
+  h += '<input class="input" id="plan-zoek" type="search" placeholder="Zoek klant, adres of nummer" value="'+esc(safeZoek(_planZoek))+'">';
+  if(_planView === 'lijst'){
+    h += '<div class="plm-vel-lbl">Periode</div><div class="plm-seg">';
+    [['maand','Maand'],['kwartaal','Kwartaal']].forEach(function(p){
+      h += '<button type="button" class="plan-view-btn'+(_planPeriode === p[0] ? ' active' : '')+'" data-periode="'+p[0]+'" aria-pressed="'+(_planPeriode === p[0])+'">'+p[1]+'</button>';
+    });
+    h += '</div>';
+    var bron = _planLijstSelectie().statBron, tel = {};
+    bron.forEach(function(o){ tel[o.status] = (tel[o.status] || 0) + 1; if(_isSpoed(o)) tel._spoed = (tel._spoed || 0) + 1; });
+    var st = [['klaargezet','tag-muted','Klaargezet'],['gereserveerd','tag-gereserveerd','Gereserveerd'],['ingepland','tag-blue','Ingepland'],['actie','tag-orange','Actie vereist'],['afgehandeld','tag-green','Afgehandeld'],['verwerkt','tag-slate','Verwerkt']];
+    h += '<div class="plm-vel-lbl">Status</div><div class="plm-vel-chips">';
+    st.forEach(function(s){
+      if(!tel[s[0]]) return;
+      h += '<button type="button" class="tag '+s[1]+' plm-status'+(_planStatusFilter === s[0] ? ' aan' : '')+'" data-status="'+s[0]+'" aria-pressed="'+(_planStatusFilter === s[0])+'">'+tel[s[0]]+' '+s[2]+'</button>';
+    });
+    if(tel._spoed) h += '<button type="button" class="tag tag-red plm-status'+(_planStatusFilter === 'spoed' ? ' aan' : '')+'" data-status="spoed" aria-pressed="'+(_planStatusFilter === 'spoed')+'">'+ICO.zap+' '+tel._spoed+' Spoed</button>';
+    h += '</div>';
+    if(_planStatusFilter || _planActieFilter) h += '<button type="button" class="btn btn-ghost btn-sm" id="plm-filter-wis" style="margin-top:10px">Filter wissen</button>';
+  }
+  return h + '</div></div>';
+}
+
+function renderPlanLijstMobiel(monteurs){
+  var sel = _planLijstSelectie();
+  var ops = sel.opdrachten, bereik = sel.bereik;
+  if(planKolAan('adres')) _planVraagReistijdenAan(ops);
+  var h = '';
+  if(_planStatusFilter || _planActieFilter){
+    var lbl = _planActieFilter || ({klaargezet:'Klaargezet',gereserveerd:'Gereserveerd',ingepland:'Ingepland',actie:'Actie vereist',afgehandeld:'Afgehandeld',verwerkt:'Verwerkt',spoed:'Spoed'})[_planStatusFilter] || _planStatusFilter;
+    h += '<div class="plm-filterregel">Filter: <b>'+esc(lbl)+'</b><button type="button" class="btn btn-ghost btn-sm" id="plan-wis-filter-empty">Wissen</button></div>';
+  }
+  // Alle werkdagen in de periode, ook lege: zo zie je waar nog ruimte is (zelfde als desktop).
+  var groepen = {};
+  ops.forEach(function(o){ var d = o.datum || '_geen'; (groepen[d] = groepen[d] || []).push(o); });
+  var werkdagen = (APP.planningInst && APP.planningInst.werkdagen) || ['ma','di','wo','do','vr'];
+  var code = ['zo','ma','di','wo','do','vr','za'];
+  var dagen = [];
+  var cur = new Date(bereik.van+'T00:00:00'), tot = new Date(bereik.tot+'T00:00:00');
+  while(cur <= tot){ if(werkdagen.indexOf(code[cur.getDay()]) >= 0) dagen.push(dateToStr(cur)); cur.setDate(cur.getDate() + 1); }
+  Object.keys(groepen).forEach(function(d){ if(d !== '_geen' && dagen.indexOf(d) < 0) dagen.push(d); });
+  dagen.sort();
+  if(groepen._geen) dagen.push('_geen');
+  // Met een statusfilter of zoekterm alleen dagen met resultaten.
+  if(_planStatusFilter || _planActieFilter || _planZoek) dagen = dagen.filter(function(d){ return groepen[d]; });
+  if(!dagen.length) return h + legeStaat('<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>', 'Niets gevonden', 'Geen opdrachten die passen bij dit filter in deze periode.');
+
+  var naamVan = function(id){ var m = getMed(id); return m ? (m.voornaam+' '+m.achternaam) : ''; };
+  dagen.forEach(function(datum){
+    var dagOps = groepen[datum] || [];
+    h += _plmDagkop(datum, dagOps.length, datum === vandaagISO() ? 'plm-vandaag' : '');
+    if(!dagOps.length){ h += _plmLeeg(datum, _planFilter !== 'alle' ? _planFilter : ''); return; }
+    // Per monteur (of vaste combinatie van monteurs), net als de desktoplijst.
+    var clusters = {};
+    dagOps.forEach(function(o){ var k = _plmMonteurIds(o).slice().sort().join('|') || '_geen'; (clusters[k] = clusters[k] || []).push(o); });
+    Object.keys(clusters).sort(function(a, b){
+      if(a === '_geen') return 1; if(b === '_geen') return -1;
+      return naamVan(a.split('|')[0]).localeCompare(naamVan(b.split('|')[0]));
+    }).forEach(function(k){
+      var co = clusters[k].sort(_planSorteerOpTijd);
+      var ids = k === '_geen' ? [] : k.split('|');
+      h += '<div class="plm-mkop">';
+      if(ids.length){
+        h += '<span class="plm-av">'+ids.map(function(id){ var m = getMed(id); return m ? _plmAvatar(m, 26) : ''; }).join('')+'</span>';
+        h += esc(ids.map(function(id){ return naamVan(id) || medArchiefNaam(id) || 'Onbekend'; }).join(' & '));
+      } else {
+        h += '<span class="avatar" style="width:26px;height:26px;font-size:11px;background:var(--border);color:var(--muted);flex-shrink:0">?</span>Niet toegewezen';
+      }
+      h += '<span class="plm-meta">· '+co.length+' opdracht'+(co.length === 1 ? '' : 'en')+'</span></div>';
+      co.forEach(function(o){ h += _plmKaart(o, false); });
+      if(ids.length === 1 && datum !== '_geen') h += _plmRetour(ids[0], datum);
+    });
+  });
+  return h;
+}
+
+function renderPlanDagMobiel(monteurs){
+  var dag = _planDatum;
+  var dagOps = APP.opdrachten.filter(function(o){ return o.datum === dag && _planZoekMatch(o); });
+  _planVraagReistijdenAan(dagOps);
+  var h = '';
+  if(APP.blokkadeDagen && APP.blokkadeDagen[dag]) h += '<div class="plm-melding" style="background:rgba(239,68,68,.12);color:var(--red-t)">Geblokkeerde dag</div>';
+  var m = _planFilter !== 'alle' ? getMed(_planFilter) : null;
+  if(!m){
+    // Alle monteurs onder elkaar.
+    monteurs.forEach(function(mm){
+      var mo = dagOps.filter(function(o){ return _planHeeftMonteur(o, mm.id); }).sort(_planSorteerOpTijd);
+      h += '<div class="plm-dagkop">'+_plmAvatar(mm, 30)+'<b>'+esc(mm.voornaam+' '+mm.achternaam)+'</b><span class="plm-n">'+mo.length+' opdracht'+(mo.length === 1 ? '' : 'en')+'</span></div>';
+      h += _plmAfwezig(mm.id, dag);
+      if(!mo.length){ h += _plmLeeg(dag, mm.id); return; }
+      mo.forEach(function(o){ h += _plmKaart(o, _plmMonteurIds(o).length > 1); });
+      h += _plmRetour(mm.id, dag);
+    });
+    var los = dagOps.filter(function(o){ return !_plmMonteurIds(o).length; }).sort(_planSorteerOpTijd);
+    if(los.length){
+      h += '<div class="plm-dagkop"><span class="avatar" style="width:30px;height:30px;font-size:12px;background:var(--border);color:var(--muted)">?</span><b>Niet toegewezen</b><span class="plm-n">'+los.length+'</span></div>';
+      los.forEach(function(o){ h += _plmKaart(o, false); });
+    }
+    return h;
+  }
+  // Eén monteur: zijn dag als tijdlijn, schermbreed.
+  var mo = dagOps.filter(function(o){ return _planHeeftMonteur(o, m.id); });
+  h += _plmAfwezig(m.id, dag);
+  var zonder = mo.filter(function(o){ return !o.tijdVan; });
+  var met = mo.filter(function(o){ return o.tijdVan; }).sort(_planSorteerOpTijd);
+  if(!mo.length) h += _plmLeeg(dag, m.id);
+  if(zonder.length){
+    h += '<div class="plm-kopje">Zonder vaste tijd</div>';
+    zonder.forEach(function(o){ h += _plmKaart(o, false); });
+  }
+  if(met.length){
+    var van = 7, tot = 17;
+    met.forEach(function(o){
+      var u = parseInt(o.tijdVan, 10); if(!isNaN(u) && u < van) van = u;
+      var e = parseInt(o.tijdTot || o.tijdVan, 10); if(!isNaN(e) && e > tot) tot = e;
+    });
+    h += '<div class="plm-lijn">';
+    for(var u = van; u <= tot; u++){
+      var hier = met.filter(function(o){ return parseInt(o.tijdVan, 10) === u; });
+      h += '<div class="plm-uur"><div class="plm-u">'+(u < 10 ? '0' : '')+u+':00</div><div class="plm-vak">'+hier.map(function(o){ return _plmKaart(o, _plmMonteurIds(o).length > 1); }).join('')+'</div></div>';
+    }
+    h += '</div>';
+  }
+  if(mo.length) h += _plmRetour(m.id, dag);
+  return h;
+}
+
+function renderPlanWeekMobiel(monteurs){
+  var ma = getMaandagVan(_planDatum), dagen = [];
+  for(var i=0; i<5; i++){ var d = new Date(ma); d.setDate(d.getDate() + i); dagen.push(dateToStr(d)); }
+  var nu = vandaagISO();
+  var past = function(o){ return _planZoekMatch(o) && (_planFilter === 'alle' || _planHeeftMonteur(o, _planFilter)); };
+  var weekOps = APP.opdrachten.filter(function(o){ return dagen.indexOf(o.datum) >= 0 && past(o); });
+  _planVraagReistijdenAan(weekOps);
+  var h = '<div class="plm-strook">';
+  dagen.forEach(function(dag, i){
+    var n = weekOps.filter(function(o){ return o.datum === dag; }).length;
+    var dd = new Date(dag+'T00:00:00');
+    h += '<button type="button" class="plm-dagknop'+(dag === nu ? ' vandaag' : '')+'" data-naar="plm-dag-'+dag+'" aria-label="'+esc(_plmDagNaam(dag))+', '+n+' opdracht'+(n === 1 ? '' : 'en')+'">'
+      + _PLM_DAGK[dd.getDay()]+'<small>'+dd.getDate()+'</small><span class="plm-stippen">'+new Array(Math.min(n, 5) + 1).join('<i></i>')+'</span></button>';
+  });
+  h += '</div>';
+  dagen.forEach(function(dag){
+    var dagOps = weekOps.filter(function(o){ return o.datum === dag; }).sort(_planSorteerOpTijd);
+    h += _plmDagkop(dag, dagOps.length, 'plm-dag-'+dag);
+    if(!dagOps.length){ h += _plmLeeg(dag, _planFilter !== 'alle' ? _planFilter : ''); return; }
+    dagOps.forEach(function(o){ h += _plmRij(o); });
+  });
+  return h;
+}
+
+// Bindingen die alleen de telefoonindeling heeft (chips, filtervel, dagstrook).
+function _plmBind(el){
+  // Het vel en de chips blijven staan als alleen de inhoud hertekent (zoeken); daarom elk
+  // element maar één keer binden, anders schakelt een filter bij één tik twee keer.
+  var eens = function(x, fn){ if(!x || x._plm) return; x._plm = 1; x.addEventListener('click', fn); };
+  var vel = el.querySelector('#plm-vel');
+  var zetVel = function(open){ _plmVelOpen = open; if(vel) vel.classList.toggle('open', open); if(open){ var z = el.querySelector('#plan-zoek'); if(z) setTimeout(function(){ z.focus(); }, 50); } };
+  eens(el.querySelector('#plm-filter-btn'), function(){ zetVel(true); });
+  eens(el.querySelector('#plm-vel-klaar'), function(){ zetVel(false); renderPlanning(); });
+  eens(vel, function(e){ if(e.target === vel){ zetVel(false); renderPlanning(); } });
+  eens(el.querySelector('#plm-filter-wis'), function(){ _planStatusFilter = ''; _planActieFilter = ''; renderPlanning(); });
+  el.querySelectorAll('.plm-status').forEach(function(b){
+    eens(b, function(){ _planStatusFilter = (_planStatusFilter === b.dataset.status) ? '' : b.dataset.status; _planActieFilter = ''; renderPlanning(); });
+  });
+  el.querySelectorAll('.plm-chip').forEach(function(c){
+    eens(c, function(){ _planFilter = c.dataset.m; _planPage = 1; renderPlanning(); });
+  });
+  el.querySelectorAll('.plm-dagknop').forEach(function(b){
+    eens(b, function(){ var doel = document.getElementById(b.dataset.naar); if(doel) doel.scrollIntoView({ behavior:'smooth', block:'start' }); });
+  });
+}
+
+
+function renderPlanLijst(monteurs) {
+  var _sel = _planLijstSelectie();
+  var bereik = _sel.bereik;
+  var opdrachten = _sel.opdrachten;
   // Sortering: altijd primair op datum, dan op sorteersleutel
   if (_planSortKey && _planSortKey !== 'datum') {
     opdrachten = sorteerLijst(opdrachten, _planSortKey, _planSortDir);
@@ -15885,12 +16318,7 @@ function renderPlanLijst(monteurs) {
 
   // Statistieken — geteld op basis zónder status/actietype-filter (wél monteur/periode/zoek),
   // zodat alle badge-tellingen kloppen ongeacht welk filter actief is.
-  var _statBron = APP.opdrachten.filter(function(o){
-    if (_planFilter !== 'alle' && String(o.monteurId) !== _planFilter) return false;
-    if (!_planZoekMatch(o)) return false;
-    if (!o.datum) return true;
-    return o.datum >= bereik.van && o.datum <= bereik.tot;
-  });
+  var _statBron = _sel.statBron;
   var stats = { totaal:0, klaargezet:0, gereserveerd:0, ingepland:0, actie:0, afgehandeld:0, verwerkt:0, spoed:0 };
   var _actieStats = { 'Niet thuis':0, 'Offerte maken':0, 'Opnieuw inplannen':0, 'Werk afmaken':0, 'Contact opnemen':0, 'Wacht op klant':0 };
   _statBron.forEach(function(o){
