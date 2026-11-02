@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 64" fill="none" role="img" aria-label="Flow 8">
-  <defs><linearGradient id="f8a" x1="6" y1="10" x2="84" y2="54" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#7fe0f5"/><stop offset="100%" stop-color="#6d8cff"/></linearGradient></defs>
-  <path d="M8 32C8 20 15 13 24 13 33 13 38 23 45 32 52 41 57 51 66 51 75 51 82 44 82 32" stroke="url(#f8a)" stroke-width="7.5" fill="none" stroke-linecap="round"/><path d="M8 32C8 44 15 51 24 51 33 51 38 41 45 32 52 23 57 13 66 13 75 13 82 20 82 32" stroke="url(#f8a)" stroke-width="7.5" fill="none" stroke-linecap="round" opacity=".5"/>
-</svg>
