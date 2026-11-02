@@ -8390,6 +8390,7 @@ var ICO = {
   euro:     '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18.5 5.5A8 8 0 007 8m11.5 10.5A8 8 0 017 16"/><line x1="3" y1="10" x2="13" y2="10"/><line x1="3" y1="14" x2="13" y2="14"/></svg>',
   refresh:  '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
   locatie:  '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  huis:     '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>',
   auto:     '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
   gebouw:   '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><line x1="9" y1="9" x2="9" y2="9.01"/><line x1="15" y1="9" x2="15" y2="9.01"/><line x1="9" y1="13" x2="9" y2="13.01"/><line x1="15" y1="13" x2="15" y2="13.01"/><path d="M10 21v-4h4v4"/></svg>',
   zon:      '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
@@ -15530,6 +15531,7 @@ function bindPlanningEvents() {
   el.querySelectorAll('.week-opdracht[draggable]').forEach(function(drag){
     drag.addEventListener('dragstart', function(e){
       _dragOpId = drag.dataset.id;
+      _planSleeptNu = true;
       drag.style.opacity = '0.4';
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', drag.dataset.id);
@@ -15609,6 +15611,86 @@ function bindPlanningEvents() {
 }
 
 // ── LIJST WEERGAVE ─────────────────────────────────────────────────
+// ── Reistijden: gedeeld door de lijst-, week- en dagweergave ─────────────────────
+// Vraagt de dagroute aan voor elke monteur+datum waar `opdrachten` iets van laat zien.
+// `opdrachten` bepaalt alleen WELKE routes; de controle op een verouderde cache kijkt
+// naar dezelfde selectie als berekenReistijdenVoorPlanning: alle opdrachten van die
+// monteur op die dag, met adres. Eerder vergeleek die controle met de gefilterde lijst.
+// Verborg een status-, actie-, zoek- of monteurfilter een deel van iemands opdrachten,
+// dan klopte de vergelijking nooit en werd de route bij elke hertekening gewist en
+// opnieuw bij Google aangevraagd. Het monteurfilter deed dat vanzelf bij elke gedeelde
+// klus, omdat het alleen naar de hoofdmonteur kijkt.
+function _planVraagReistijdenAan(opdrachten){
+  var reistijdStats = getReistijdStatussen();
+  // Verzamel unieke monteur+datum combinaties voor opdrachten met relevante status
+  var reistijdSleutels = {};
+  opdrachten.forEach(function(o){
+    if(o.datum && _binnenReistijdVenster(o.datum) && reistijdStats.indexOf(o.status) >= 0){
+      // Alle betrokken monteurs (niet alleen de primaire): bij een gedeelde klus rijden
+      // beide monteurs een eigen dagroute, dus beide hebben een reistijd-berekening nodig.
+      var _betrokken = (o.monteurIds && o.monteurIds.length)
+        ? o.monteurIds.map(String).filter(function(x){return x;})
+        : (o.monteurId ? [String(o.monteurId)] : []);
+      if(_planFilter !== 'alle') _betrokken = [String(_planFilter)];
+      _betrokken.forEach(function(mId){
+        var sleutel = mId + '_' + o.datum;
+        if(!reistijdSleutels[sleutel]) reistijdSleutels[sleutel] = { monteurId: mId, datum: o.datum };
+      });
+    }
+  });
+  // Valideer bestaande caches vóór (her)berekening: als de opgeslagen id-volgorde niet
+  // meer overeenkomt met de huidige opdrachten van die monteur+datum (bijv. na een
+  // autoplanner-run of tijdswijziging), is de cache verouderd. Wissen, zodat de trigger
+  // hieronder hem vers berekent — met de actuele tijd-volgorde, gelijk aan de tabel.
+  Object.keys(reistijdSleutels).forEach(function(sleutel){
+    var cache = _locReistijden[sleutel];
+    if(!cache || !cache.ops) return;
+    var m = reistijdSleutels[sleutel];
+    var huidige = APP.opdrachten.filter(function(o){
+      return o.datum === m.datum && o.adres
+        && (String(o.monteurId)===String(m.monteurId) || (o.monteurIds && o.monteurIds.indexOf(String(m.monteurId))>-1));
+    }).sort(_planRouteVolgorde).map(function(o){ return String(o.id); }).join(',');
+    var cacheIds = cache.ops.map(function(o){ return String(o.id); }).join(',');
+    if(huidige && huidige !== cacheIds){
+      delete _locReistijden[sleutel];
+      try { FB.ref(_rtCachePad(sleutel)).remove(); } catch(e){}
+    }
+  });
+  Object.values(reistijdSleutels).forEach(function(m){
+    berekenReistijdenVoorPlanning(m.monteurId, m.datum);
+  });
+}
+
+// Terugtijd naar het bedrijf voor één monteur op één dag, uit de dagroute in
+// _locReistijden: de laatste etappe is de terugrit. Null zolang die route er niet is.
+// De laatste stop komt uit de route zelf, niet uit wat er in beeld staat: een filter
+// kan de laatste opdracht verbergen, en een opdracht zonder adres zit niet in de route.
+function _planRetourInfo(monteurId, datum){
+  var rt = _locReistijden[String(monteurId)+'_'+(datum||'')];
+  if(!rt || !rt.legs || !rt.ops || !rt.ops.length || rt.legs.length <= rt.ops.length) return null;
+  var leg = rt.legs[rt.ops.length];
+  if(!leg || !leg.duration) return null;
+  var laatsteId = String((rt.ops[rt.ops.length-1] || {}).id || '');
+  var laatste = laatsteId ? APP.opdrachten.find(function(o){ return String(o.id) === laatsteId; }) : null;
+  var retMin = Math.round((leg.duration.value || 0) / 60);
+  var terug = '';
+  if(laatste && laatste.tijdTot){
+    var d = String(laatste.tijdTot).split(':');
+    var eind = parseInt(d[0], 10) * 60 + parseInt(d[1] || '0', 10);
+    if(!isNaN(eind)) terug = minToTijd(eind + retMin);
+  }
+  return { duur: leg.duration.text || (retMin + ' min'), afst: (leg.distance && leg.distance.text) || '', min: retMin, terug: terug };
+}
+
+// Compacte terugtijd-regel voor de week- en dagweergave. De lijst heeft een eigen,
+// ruimere tabelrij, maar leest dezelfde gegevens uit _planRetourInfo.
+function _planRetourRegel(ri, uitlijning){
+  var titel = 'Terug bij bedrijf' + (ri.terug ? ' ±' + ri.terug : '') + ' · ' + ri.duur + ' retour' + (ri.afst ? ' · ' + ri.afst : '');
+  var tekst = ri.terug ? 'terug ±<b style="color:var(--text)">' + ri.terug + '</b>' : 'retour ' + esc(ri.duur);
+  return '<div title="' + esc(titel) + '" style="display:flex;align-items:center;justify-content:' + (uitlijning || 'flex-start')
+    + ';gap:4px;font-size:10px;color:var(--muted);line-height:1.2;margin-top:3px">' + ICO.huis + '<span>' + tekst + '</span></div>';
+}
+
 function renderPlanLijst(monteurs) {
   var bereik = getPeriodeBereik(_planDatum, _planPeriode);
   var opdrachten = APP.opdrachten.filter(function(o){
@@ -15708,45 +15790,7 @@ function renderPlanLijst(monteurs) {
 
   // ── Reistijden berekenen voor inline weergave ──
   var reistijdStats = getReistijdStatussen();
-  if(planKolAan('adres')) {
-    // Verzamel unieke monteur+datum combinaties voor opdrachten met relevante status
-    var reistijdSleutels = {};
-    opdrachten.forEach(function(o){
-      if(o.datum && _binnenReistijdVenster(o.datum) && reistijdStats.indexOf(o.status) >= 0){
-        // Alle betrokken monteurs (niet alleen de primaire): bij een gedeelde klus rijden
-        // beide monteurs een eigen dagroute, dus beide hebben een reistijd-berekening nodig.
-        var _betrokken = (o.monteurIds && o.monteurIds.length)
-          ? o.monteurIds.map(String).filter(function(x){return x;})
-          : (o.monteurId ? [String(o.monteurId)] : []);
-        if(_planFilter !== 'alle') _betrokken = [String(_planFilter)];
-        _betrokken.forEach(function(mId){
-          var sleutel = mId + '_' + o.datum;
-          if(!reistijdSleutels[sleutel]) reistijdSleutels[sleutel] = { monteurId: mId, datum: o.datum };
-        });
-      }
-    });
-    // Valideer bestaande caches vóór (her)berekening: als de opgeslagen id-volgorde niet
-    // meer overeenkomt met de huidige opdrachten van die monteur+datum (bijv. na een
-    // autoplanner-run of tijdswijziging), is de cache verouderd. Wissen, zodat de trigger
-    // hieronder hem vers berekent — met de actuele tijd-volgorde, gelijk aan de tabel.
-    Object.keys(reistijdSleutels).forEach(function(sleutel){
-      var cache = _locReistijden[sleutel];
-      if(!cache || !cache.ops) return;
-      var m = reistijdSleutels[sleutel];
-      var huidige = opdrachten.filter(function(o){
-        return o.datum === m.datum && o.adres
-          && (String(o.monteurId)===String(m.monteurId) || (o.monteurIds && o.monteurIds.indexOf(String(m.monteurId))>-1));
-      }).sort(_planRouteVolgorde).map(function(o){ return String(o.id); }).join(',');
-      var cacheIds = cache.ops.map(function(o){ return String(o.id); }).join(',');
-      if(huidige && huidige !== cacheIds){
-        delete _locReistijden[sleutel];
-        try { FB.ref(_rtCachePad(sleutel)).remove(); } catch(e){}
-      }
-    });
-    Object.values(reistijdSleutels).forEach(function(m){
-      berekenReistijdenVoorPlanning(m.monteurId, m.datum);
-    });
-  }
+  if(planKolAan('adres')) _planVraagReistijdenAan(opdrachten);
 
   // ── Eén consistente tabel ─────────────────────────────────────
   h += '<div class="card rollen-tabel-wrap" style="padding:0;overflow-x:auto">';
@@ -16194,31 +16238,16 @@ function renderPlanLijst(monteurs) {
         // pak de eerste monteur van de cluster voor de cache-lookup.
         var _rtEersteMont = monteurId.split('|')[0];
         var rtMontId = _planFilter !== 'alle' ? _planFilter : _rtEersteMont;
-        var rtSleutRet = rtMontId+'_'+(datum||'');
-        var rtDataRet = _locReistijden[rtSleutRet];
-        if(rtDataRet && rtDataRet.legs && rtDataRet.legs.length > rtDataRet.ops.length) {
-          // Retourleg = laatste leg (na alle opdracht-legs)
-          var retourLeg = rtDataRet.legs[rtDataRet.ops.length];
-          if(retourLeg && retourLeg.duration) {
-            var laatsteOp = ops[ops.length-1];
-            var retourTijd = '';
-            if(laatsteOp.tijdTot) {
-              var totParts = laatsteOp.tijdTot.split(':');
-              var totMin = parseInt(totParts[0])*60 + parseInt(totParts[1]||0);
-              var retMin = Math.round(retourLeg.duration.value / 60);
-              retourTijd = minToTijd(totMin + retMin);
-            }
-            var retuurDuur = retourLeg.duration ? retourLeg.duration.text : '';
-            var retuurAfst = retourLeg.distance ? retourLeg.distance.text : '';
-            h += '<tr><td colspan="99" style="padding:4px 14px 6px;border-bottom:1px solid var(--border)">'
-               + '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">'
-               + '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>'
-               + '<span>Retour</span>'
-               + '<span style="font-weight:600;color:var(--accent)">'+esc(retuurDuur)+'</span>'
-               + (retuurAfst ? '<span>· '+esc(retuurAfst)+'</span>' : '')
-               + (retourTijd ? '<span>· terug ±<b style="color:var(--text)"> '+retourTijd+'</b></span>' : '')
-               + '</div></td></tr>';
-          }
+        var ri = _planRetourInfo(rtMontId, datum);
+        if(ri) {
+          h += '<tr><td colspan="99" style="padding:4px 14px 6px;border-bottom:1px solid var(--border)">'
+             + '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">'
+             + ICO.huis
+             + '<span>Retour</span>'
+             + '<span style="font-weight:600;color:var(--accent)">'+esc(ri.duur)+'</span>'
+             + (ri.afst ? '<span>· '+esc(ri.afst)+'</span>' : '')
+             + (ri.terug ? '<span>· terug ±<b style="color:var(--text)"> '+ri.terug+'</b></span>' : '')
+             + '</div></td></tr>';
         }
       }
 
@@ -16262,6 +16291,10 @@ function renderPlanWeek(monteurs) {
   var dagKort = ['Ma','Di','Wo','Do','Vr'];
   var nu = vandaagISO();
   var zichtbareMonteurs = _planFilter === 'alle' ? monteurs : monteurs.filter(function(m){ return String(m.id) === _planFilter; });
+
+  // Routes aanvragen voor de zichtbare week, voor de terugtijd per cel. Binnen dezelfde
+  // grenzen als de lijst: het reistijdvenster, de statussen en de bewaarde cache.
+  _planVraagReistijdenAan(APP.opdrachten.filter(function(o){ return dagen.indexOf(o.datum) >= 0 && _planZoekMatch(o); }));
 
   var h = '<div style="overflow-x:auto"><table style="min-width:700px;border-collapse:collapse;table-layout:fixed;width:100%">';
   h += '<colgroup><col style="width:130px">';
@@ -16345,6 +16378,13 @@ function renderPlanWeek(monteurs) {
         if(o.status==='actie') h += '<div style="font-size:10px;color:var(--orange)">→ '+(o.actietype||'Actie vereist')+'</div>';
         h += '</div>';
       });
+
+      // Terugtijd: dezelfde berekening als de retourregel in de lijst. Voor iedereen die
+      // de planning ziet, niet alleen voor wie mag schrijven.
+      if(dagOps.length){
+        var _riw = _planRetourInfo(m.id, dag);
+        if(_riw) h += '<div style="padding:0 4px 2px">' + _planRetourRegel(_riw) + '</div>';
+      }
 
       if(magSchrijven('planning')) {
         // Onderin de cel, niet rechtsboven: daar zit al de statusbadge van het eerste
@@ -16435,6 +16475,9 @@ function renderPlanDag(monteurs) {
   var isVandaag = _planDatum === nu;
   var zichtbareMonteurs = _planFilter === 'alle' ? monteurs : monteurs.filter(function(m){ return String(m.id) === _planFilter; });
 
+  // Routes aanvragen voor deze dag, voor de terugtijd in de kolomkop.
+  _planVraagReistijdenAan(APP.opdrachten.filter(function(o){ return o.datum === _planDatum && _planZoekMatch(o); }));
+
   // Alle monteur-id's van een opdracht (monteurId + monteurIds), zonder lege waarden
   function _monteurIdsVan(o){
     var ids = Array.isArray(o.monteurIds) ? o.monteurIds.slice() : [];
@@ -16518,7 +16561,13 @@ function renderPlanDag(monteurs) {
       h += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:var(--border);color:var(--muted)">?</div>';
       h += '<span style="font-size:12px;font-weight:600;color:var(--muted)">'+(k.nietInPlanning ? 'Niet in planning' : 'Niet toegewezen')+'</span>';
     }
-    h += '</div></th>';
+    h += '</div>';
+    // Terugtijd onder de naam — dezelfde berekening als de retourregel in de lijst.
+    if(k.m && k.ops.length){
+      var _rid = _planRetourInfo(k.m.id, _planDatum);
+      if(_rid) h += _planRetourRegel(_rid, 'center');
+    }
+    h += '</th>';
   });
   h += '</tr></thead><tbody>';
 
@@ -26597,13 +26646,31 @@ var _rtHerrenderTimer = null;
 // Zonder deze debounce rendert elke voltooide route de hele planning opnieuw, en die
 // render start weer berekeningen voor alle andere monteur/datum-combinaties.
 function _rtHerrenderPlanning() {
-  if (APP.activePage !== 'planning' || _planView !== 'lijst') return;
+  // Ook week en dag: die tonen nu ook de terugtijd. Voorheen alleen de lijst, waardoor
+  // een route die in een andere weergave binnenkwam nooit in beeld verscheen.
+  if (APP.activePage !== 'planning' || ['lijst','week','dag'].indexOf(_planView) < 0) return;
   clearTimeout(_rtHerrenderTimer);
   _rtHerrenderTimer = setTimeout(function(){
     _rtHerrenderTimer = null;
+    // Niet tijdens het slepen in de weekweergave: hertekenen vervangt de cel en het blok
+    // onder de muis verdwijnt. Na het loslaten wordt dit alsnog gedaan.
+    if (_planSleeptNu) { _planHerrenderNaSlepen = true; return; }
     renderPlanning();
   }, 400);
 }
+
+// Sleepstatus van de weekweergave. Afgemeld op documentniveau: na een geslaagde drop
+// tekent de planning zich opnieuw en bestaat het gesleepte blok niet meer, dus een
+// dragend op dat blok zelf komt dan niet aan. 'drop' vangt dat geval, 'dragend' het
+// afgebroken slepen.
+var _planSleeptNu = false, _planHerrenderNaSlepen = false;
+function _planSleepKlaar(){
+  if (!_planSleeptNu) return;
+  _planSleeptNu = false;
+  if (_planHerrenderNaSlepen) { _planHerrenderNaSlepen = false; _rtHerrenderPlanning(); }
+}
+document.addEventListener('drop', _planSleepKlaar, true);
+document.addEventListener('dragend', _planSleepKlaar, true);
 
 // Statussen die tijdelijk zijn: opnieuw proberen heeft zin. De rest is permanent
 // (adres onvindbaar, geen route mogelijk) en wordt leeg gecached.
