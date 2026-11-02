@@ -97,7 +97,7 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 .input:focus-visible{outline:none}
 .input{width:100%;box-sizing:border-box;max-width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:11px;color:var(--text);padding:12px 14px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
 .input-sm{padding:9px 12px;font-size:13.5px}
-.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,110,245,.2)}.input::placeholder{color:var(--muted2)}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,110,245,.2)}.input::placeholder{color:var(--muted)}
 .tag{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:var(--radius-pill);font-size:11.5px;font-weight:500;border:1px solid transparent;line-height:1.2}
 .tag::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
 .tag.heeft-icoon::before{display:none}
@@ -521,7 +521,8 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wp-sc:hover .stat-card,.wo-sc:hover .stat-card{transform:translateY(-1px);box-shadow:0 3px 9px rgba(20,25,35,.10)}
 /* Actief filter: de pil krijgt een rand in de eigen kleur en een sprekender label. */
 .wp-sc.actief .stat-card,.wo-sc.actief .stat-card{border-color:currentColor;box-shadow:inset 0 0 0 1px currentColor}
-.wp-sc.actief .stat-label,.wo-sc.actief .stat-label{color:currentColor;font-weight:600}
+/* Label in de eigen kleur, maar per thema donkerder/lichter gemaakt zodat het leesbaar blijft. */
+.wp-sc.actief .stat-label,.wo-sc.actief .stat-label{color:currentColor;color:oklch(from currentColor var(--kl-l) c h);font-weight:600}
 /* Aanraakscherm: tabs, filterknoppen en stat-filters minimaal 44px, ook met handschoenen.
    Met een muis blijven ze compact. */
 @media (pointer:coarse){
@@ -546,7 +547,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 /* Tabs */
 .tabs{display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:20px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}.tabs::-webkit-scrollbar{display:none}.tab{white-space:nowrap}
 .tab{padding:9px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
-.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent-t);border-bottom-color:var(--accent)}
 /* Instellingen: menu links op desktop, tabbladen bovenaan op mobiel */
 .inst-wrap{display:flex;gap:24px;align-items:flex-start}
 .inst-menu{flex:0 0 220px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0}
@@ -722,7 +723,6 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .stats-grid{gap:6px}
   .stat-card{padding:6px 12px 6px 7px}
   .stat-value{font-size:14.5px}
-  .stat-label{font-size:11px}
   .card{padding:10px}
   .topbar-title{font-size:14px}
   table{min-width:400px}
@@ -930,10 +930,10 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .bn-item{
   display:flex;flex-direction:column;align-items:center;gap:2px;
   padding:4px 0;cursor:pointer;border:none;background:none;
-  color:var(--muted);font-size:9px;font-weight:600;font-family:inherit;
+  color:var(--muted);font-size:11px;font-weight:600;font-family:inherit;
   transition:color .15s;min-width:56px;
 }
-.bn-item.active{color:var(--accent)}
+.bn-item.active{color:var(--accent-t)}
 .bn-item svg{width:20px;height:20px}
 
 /* Hamburger */
@@ -1244,7 +1244,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
         <!-- Globale zoek -->
         <button id="global-zoek-btn" title="Zoeken (Ctrl+K)" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
-          <span style="opacity:.6">Zoeken</span>
+          <span>Zoeken</span>
         </button>
         <!-- Notificatie bel -->
         <div style="position:relative" id="notif-wrapper">
