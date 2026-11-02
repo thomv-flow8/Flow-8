@@ -58,7 +58,9 @@ body.light{
   --bg:#f5f6f8;--surface:#ffffff;--surface2:#f2f4f8;--border:#e2e5ec;
   --text:#0d0f14;--muted:#5f6572;--muted2:#8a90a0;
   --bg-gradient:#f5f6f8;--dagkop:#e4e9f2;
-  --green-t:#0f9d6f;--orange-t:#b97a09;--red-t:#d33b3b;--purple-t:#7040e0;--accent-t:#3552d4;--blok-t:#1d4ed8;--vast-t:#92400e;
+  --green-t:#0f9d6f;--orange-t:#92400e;--red-t:#d33b3b;--purple-t:#7040e0;--accent-t:#3552d4;--blok-t:#1d4ed8;--vast-t:#92400e;
+  /* --orange-t: #b97a09 haalde op --surface2 met een oranje tint maar 2,9:1. #92400e haalt
+     overal minstens 5,8:1 en is dezelfde tint als --vast-t. */
 }
 body.light .card{box-shadow:none}
 body.light .modal{box-shadow:0 24px 70px rgba(20,26,60,.18)}
@@ -563,7 +565,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 #log-panel{position:fixed;bottom:0;right:0;width:480px;height:300px;background:var(--surface);border:1px solid var(--border);border-radius:12px 0 0 0;z-index:9998;display:flex;flex-direction:column;box-shadow:-4px -4px 20px rgba(0,0,0,.3)}
 #log-body{flex:1;overflow-y:auto;padding:8px 12px;font-family:monospace;font-size:11px}
 .log-entry{padding:3px 0;border-bottom:1px solid var(--border)}
-.log-entry .lt{color:var(--muted)}.log-entry .ll-OK{color:var(--green)}.log-entry .ll-INFO{color:var(--accent)}.log-entry .ll-WARN{color:var(--orange)}.log-entry .ll-ERROR{color:var(--red)}
+.log-entry .lt{color:var(--muted)}.log-entry .ll-OK{color:var(--green)}.log-entry .ll-INFO{color:var(--accent)}.log-entry .ll-WARN{color:var(--orange-t)}.log-entry .ll-ERROR{color:var(--red)}
 @media(max-width:768px){
   /* ── BODY & APP ── */
   body.app-active{flex-direction:column;overflow:hidden}
@@ -991,7 +993,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbx-foto-item .wbx-ftop{display:flex;gap:10px;align-items:center;margin-bottom:8px}
 .wbx-foto-item .wbx-fthumb{width:56px;height:56px;border-radius:8px;overflow:hidden;flex-shrink:0;position:relative;cursor:pointer;background:#222}
 .wbx-fthumb.wbx-fpending img{opacity:.6}
-.wbx-fpending-badge{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.wbx-fpending-badge{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--orange);color:#1a1200;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .wbx-foto-item .wbx-fthumb img{width:100%;height:100%;object-fit:cover;display:block}
 .wbx-foto-item .wbx-fnum{flex:1;font-size:12px;font-weight:700;color:var(--accent)}
 .wbx-foto-item .wbx-fcap{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);resize:vertical;min-height:38px}
@@ -1205,7 +1207,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
       <button id="offline-herverbind" style="margin-left:8px;padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">Opnieuw proberen</button>
     </div>
     <!-- Foto-upload wachtrij indicator (los van offline-banner) -->
-    <div id="fq-teller" style="display:none;position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:9998;background:var(--orange,#f59e0b);color:#fff;padding:6px 14px;border-radius:var(--radius-pill);font-size:12px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25);white-space:nowrap"></div>
+    <div id="fq-teller" style="display:none;position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:9998;background:var(--orange,#f59e0b);color:#1a1200;padding:6px 14px;border-radius:var(--radius-pill);font-size:12px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25);white-space:nowrap"></div>
     <div class="topbar">
       <button id="hamburger" aria-label="Menu">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -5304,11 +5306,13 @@ function _updateFqBanner(){
     el.style.display = '';
     if(vast){
       el.style.background = 'var(--red,#ef4444)';
+      el.style.color = '#fff';
       el.style.cursor = 'pointer';
       el.textContent = (vast===1 ? '1 foto komt niet weg' : vast+' foto\'s komen niet weg')
         + ' — tik om opnieuw te proberen';
     } else {
       el.style.background = 'var(--orange,#f59e0b)';
+      el.style.color = '#1a1200';   // wit op oranje haalde 2,2:1
       el.style.cursor = '';
       el.textContent = (n===1 ? '1 foto wacht' : n+' foto\'s wachten') + ' op upload';
     }
@@ -8196,8 +8200,8 @@ function bContractBadge(klein, code) {
   var _pre = 'Contract ' + _c;
   if (_naam.indexOf(_pre) === 0) _naam = _naam.slice(_pre.length).replace(/^\s*[—-]\s*/, '');
   var _vol = _ct ? (_ct.code + ' · ' + _naam) : 'Contract B · 24u storingsdienst';
-  if(klein) return '<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,0.15);color:var(--orange);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;vertical-align:middle;margin-left:4px">'+esc(_c)+'</span>';
-  return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.12);color:var(--orange);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'+esc(_vol)+'</span>';
+  if(klein) return '<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,0.15);color:var(--orange-t);border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700;vertical-align:middle;margin-left:4px">'+esc(_c)+'</span>';
+  return '<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.12);color:var(--orange-t);border:1px solid rgba(245,158,11,0.3);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'+esc(_vol)+'</span>';
 }
 
  function berekenVolgend(laatste, contractId, sk) {
@@ -8310,12 +8314,12 @@ function wkStatusBadge(s) {
     gereserveerd:{ kl:'#8b5cf6', lbl:'Gereserv.' },
     ingepland:   { kl:'#4a6cf7', lbl:'Ingepland' },
     opgehaald:   { kl:'#06b6d4', lbl:'Opgehaald' },
-    actie:       { kl:'#f59e0b', lbl:'Actie' },
+    actie:       { kl:'#f59e0b', tekst:'var(--orange-t)', lbl:'Actie' },
     afgehandeld: { kl:'#10b981', lbl:'Afgerond' },
     verwerkt:    { kl:'#64748b', lbl:'Verwerkt' },
   };
   var c = cfg[s]; if(!c) return '';
-  return '<span title="'+c.lbl+'" style="position:absolute;top:4px;right:4px;display:inline-flex;align-items:center;gap:3px;font-size:8px;font-weight:700;padding:1px 5px 1px 4px;border-radius:8px;background:'+c.kl+'26;color:'+c.kl+';line-height:1.4">'
+  return '<span title="'+c.lbl+'" style="position:absolute;top:4px;right:4px;display:inline-flex;align-items:center;gap:3px;font-size:8px;font-weight:700;padding:1px 5px 1px 4px;border-radius:8px;background:'+c.kl+'26;color:'+(c.tekst||c.kl)+';line-height:1.4">'
     + '<span style="width:5px;height:5px;border-radius:50%;background:'+c.kl+';flex-shrink:0"></span>'+c.lbl+'</span>';
 }
 // Maakt een hex-kleur donkerder (voor leesbare agenda-tekst in light mode)
@@ -8533,7 +8537,7 @@ function renderDashboard(stil) {
     if (_openTotaal > 0) {
       h += '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;margin-bottom:18px">';
       h += '<svg width="20" height="20" fill="none" stroke="var(--orange)" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-      h += '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--orange)">'+_openTotaal+' aanvraag'+ (_openTotaal!==1?'en':'')+' wachten op goedkeuring</div>';
+      h += '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--orange-t)">'+_openTotaal+' aanvraag'+ (_openTotaal!==1?'en':'')+' wachten op goedkeuring</div>';
       h += '<div style="font-size:12px;color:var(--muted);margin-top:2px">';
       var _delen = [];
       if(_openVerlof)   _delen.push(_openVerlof+' verlof');
@@ -8580,7 +8584,7 @@ function renderDashboard(stil) {
     h += '<div style="font-weight:700;font-size:14px">'+esc(sdMed.voornaam+' '+sdMed.achternaam)+'<span style="color:var(--accent);font-weight:400;font-size:12px"> · '+esc(sdMed.telefoon||sdMed.email||'—')+'</span></div></div>';
   } else {
     h += '<div><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Storingsdienst · Week '+huidigWeek+'</div>';
-    h += '<div style="color:var(--orange);font-size:13px;font-weight:600">'+ICO.warn+' Niet ingesteld</div></div>';
+    h += '<div style="color:var(--orange-t);font-size:13px;font-weight:600">'+ICO.warn+' Niet ingesteld</div></div>';
   }
   h += '</div>';
   h += '</div>';
@@ -8715,7 +8719,7 @@ function renderDashboard(stil) {
           ingepland:   { kl:'#4a6cf7', lbl:'Ingepland' },
           klaargezet:  { kl:'#6b7694', lbl:'Klaargezet' },
           opgehaald:   { kl:'#06b6d4', lbl:'Bezig' },
-          actie:       { kl:'#f59e0b', lbl:'Actie' },
+          actie:       { kl:'#f59e0b', tekst:'var(--orange-t)', lbl:'Actie' },
           afgehandeld: { kl:'#10b981', lbl:'Afgerond' },
           verwerkt:    { kl:'#64748b', lbl:'Verwerkt' }
         }[o.status] || { kl:'#6b7694', lbl:(o.status||'\u2014') };
@@ -8732,7 +8736,7 @@ function renderDashboard(stil) {
         var _adr = [o.adres||'', o.postcode||''].filter(Boolean).join(', ');
         if(_adr) h += '<div style="font-size:11px;color:var(--muted);opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_adr)+'</div>';
         h += '</div>';
-        h += '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;background:'+_sc.kl+'22;color:'+_sc.kl+'">'+esc(_sc.lbl)+'</span>';
+        h += '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;background:'+_sc.kl+'22;color:'+(_sc.tekst||_sc.kl)+'">'+esc(_sc.lbl)+'</span>';
         h += '</div>';
       });
       h += '</div>';
@@ -9777,8 +9781,8 @@ function renderServiceklanten() {
     h+='<button class="chip'+(_skFilter===ct.id?' active':'')+'" data-filter="'+ct.id+'">'+esc(ct.code)+'</button>';
   });
   h+='<button class="chip'+(_skFilter==='vervallen'?' active':'')+'" data-filter="vervallen">Vervallen</button>';
-  h+='<button class="chip'+(_skFilter==='bcontract'?' active':'')+'" data-filter="bcontract" style="background:rgba(245,158,11,.12);color:var(--orange);border-color:rgba(245,158,11,.3)'+(_skFilter==='bcontract'?';font-weight:700':'')+'">Contract B</button>';
-  h+='<button class="chip'+(_skFilter==='extern'?' active':'')+'" data-filter="extern" style="background:rgba(245,158,11,.08);color:var(--orange)'+(_skFilter==='extern'?';font-weight:700':'')+'">Extern/ZZP</button>';
+  h+='<button class="chip'+(_skFilter==='bcontract'?' active':'')+'" data-filter="bcontract" style="background:rgba(245,158,11,.12);color:var(--orange-t);border-color:rgba(245,158,11,.3)'+(_skFilter==='bcontract'?';font-weight:700':'')+'">Contract B</button>';
+  h+='<button class="chip'+(_skFilter==='extern'?' active':'')+'" data-filter="extern" style="background:rgba(245,158,11,.08);color:var(--orange-t)'+(_skFilter==='extern'?';font-weight:700':'')+'">Extern/ZZP</button>';
   h+='<button class="chip'+(_skFilter==='intern'?' active':'')+'" data-filter="intern"'+(_skFilter==='intern'?' style="font-weight:700"':'')+'>Intern</button>';
   var passiefAantal=APP.serviceklanten.filter(function(k){return k.status==='passief';}).length;
   h+='<button class="chip'+(_skFilter==='passief'?' active':'')+' chip-muted" data-filter="passief" style="'+(passiefAantal?'':'opacity:.5')+'">Passief ('+passiefAantal+')</button>';
@@ -11878,20 +11882,20 @@ function _openContractImport(){
   function _preview(){
     var a = _analyseer();
     var el2 = document.getElementById('cimp-preview'); if(!el2) return;
-    if(!a){ el2.innerHTML = '<div style="font-size:12px;color:var(--orange)">Koppel eerst debiteurnummer én contractcode.</div>'; return; }
+    if(!a){ el2.innerHTML = '<div style="font-size:12px;color:var(--orange-t)">Koppel eerst debiteurnummer én contractcode.</div>'; return; }
     var h = '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:10px 12px;line-height:1.7">';
     h += '<div><strong style="color:var(--green)">'+a.bij.length+'</strong> serviceklant(en) worden bijgewerkt</div>';
     if(a.nieuw.length)         h += '<div><strong style="color:var(--accent)">'+a.nieuw.length+'</strong> nieuwe serviceklant(en) worden aangemaakt</div>';
     if(a.conflict.length)      h += '<div><strong style="color:var(--red)">'+a.conflict.length+'</strong> met meerdere onderhoudscontracten — worden overgeslagen</div>';
-    if(a.geenSk.length)        h += '<div><strong style="color:var(--orange)">'+a.geenSk.length+'</strong> debiteurnummer(s) zonder serviceklant — worden overgeslagen</div>';
-    if(a.geenDeb.length)       h += '<div><strong style="color:var(--orange)">'+a.geenDeb.length+'</strong> debiteurnummer(s) bestaan niet in Flow8 — worden overgeslagen</div>';
+    if(a.geenSk.length)        h += '<div><strong style="color:var(--orange-t)">'+a.geenSk.length+'</strong> debiteurnummer(s) zonder serviceklant — worden overgeslagen</div>';
+    if(a.geenDeb.length)       h += '<div><strong style="color:var(--orange-t)">'+a.geenDeb.length+'</strong> debiteurnummer(s) bestaan niet in Flow8 — worden overgeslagen</div>';
     if(a.onbekendeCode.length){
       h += '<div><strong style="color:var(--red)">'+a.onbekendeCode.length+'</strong> onbekende contractcode(s) — <strong>worden niet geïmporteerd</strong></div>';
       var _codes = a.onbekendeCode.map(function(x){ return x.code; }).filter(function(v,i,z){ return z.indexOf(v)===i; });
       h += '<div style="font-size:11.5px;color:var(--muted);margin:2px 0 6px">Voeg de code eerst toe bij Instellingen \u2192 Contracten, of corrigeer het bestand: '
          + esc(_codes.slice(0,6).join(', ')) + (_codes.length>6?' \u2026':'') + '</div>';
     }
-    if(a.bWeg.length)          h += '<div><strong style="color:var(--orange)">'+a.bWeg.length+'</strong> met B-vinkje maar zónder B in het bestand — ter controle, niets wordt uitgevinkt</div>';
+    if(a.bWeg.length)          h += '<div><strong style="color:var(--orange-t)">'+a.bWeg.length+'</strong> met B-vinkje maar zónder B in het bestand — ter controle, niets wordt uitgevinkt</div>';
     h += '</div>';
     if(a.bij.length){
       h += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Voorbeeld (eerste 3):</div><div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-top:4px">';
@@ -11966,7 +11970,7 @@ function _openContractImport(){
           r += '</div>';
         }
         if(a.bWeg.length){
-          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange)">Controleer 24-uurscontract ('+a.bWeg.length+')</div>';
+          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange-t)">Controleer 24-uurscontract ('+a.bWeg.length+')</div>';
           r += '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze klanten hebben het B-vinkje aanstaan, maar kwamen in dit bestand niet voor met een B-contract. Mogelijk is het 24-uurscontract beëindigd. Er is niets gewijzigd — vink zelf uit waar dat klopt.</p>';
           r += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-bottom:14px;max-height:160px;overflow:auto">';
           r += a.bWeg.map(function(x){
@@ -11978,14 +11982,14 @@ function _openContractImport(){
           r += '</div>';
         }
         if(a.geenDeb.length){
-          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange)">Debiteur niet gevonden ('+a.geenDeb.length+')</div>';
+          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange-t)">Debiteur niet gevonden ('+a.geenDeb.length+')</div>';
           r += '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze debiteurnummers staan niet in Flow8, dus er kon geen serviceklant worden aangemaakt. Importeer eerst de debiteuren.</p>';
           r += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-bottom:14px;max-height:160px;overflow:auto">';
           r += a.geenDeb.map(function(d){ return esc(d.nr)+' → '+esc(d.onderhoud.join(', '))+(d.b?(d.onderhoud.length?' + B':'B'):''); }).join('<br>');
           r += '</div>';
         }
         if(a.geenSk.length){
-          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange)">Geen serviceklant gevonden ('+a.geenSk.length+')</div>';
+          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange-t)">Geen serviceklant gevonden ('+a.geenSk.length+')</div>';
           r += '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze debiteurnummers hebben nog geen serviceklant. Vink bij de debiteur eerst \u201cook serviceklant\u201d aan en importeer daarna opnieuw.</p>';
           r += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;max-height:160px;overflow:auto">';
           r += a.geenSk.map(function(d){ return esc(d.nr)+' → '+esc(d.onderhoud.join(', '))+(d.b?(d.onderhoud.length?' + B':'B'):''); }).join('<br>');
@@ -12365,7 +12369,7 @@ function renderVerlof(){
     h += '</div>';
     // Open indicator
     if(openItems > 0) {
-      h += '<div style="background:rgba(245,158,11,0.15);color:#f59e0b;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+openItems+' open</div>';
+      h += '<div style="background:rgba(245,158,11,0.15);color:var(--orange-t);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+openItems+' open</div>';
     }
     // + Verlof knop (snelle aanvraag voor deze medewerker)
     if(isAdmin()||magSchrijven('verlof')) {
@@ -15200,7 +15204,7 @@ function _apRenderStap3(){
         b+='<div style="font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0">'+(k.duurUren||1.5)+'u</div>';
       }
       if(k.voorkeurDag||k.voorkeurWeek){
-        b+='<div style="font-size:10px;color:var(--orange);flex-shrink:0" title="'+(k.voorkeurDag?'Voorkeurdag: '+k.voorkeurDag:'Voorkeurweek: '+k.voorkeurWeek)+'">'+ICO.ster+'</div>';
+        b+='<div style="font-size:10px;color:var(--orange-t);flex-shrink:0" title="'+(k.voorkeurDag?'Voorkeurdag: '+k.voorkeurDag:'Voorkeurweek: '+k.voorkeurWeek)+'">'+ICO.ster+'</div>';
       }
       b+='</div>';
     });
@@ -15216,8 +15220,8 @@ function _apRenderStap3(){
   // Niet ingepland
   if(_apNietIngepland.length){
     b+='<div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px 16px;margin-bottom:12px">';
-    b+='<div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:8px">⚠ '+_apNietIngepland.length+' niet ingepland</div>';
-    _apNietIngepland.forEach(function(k){ b+='<div style="font-size:12px;color:var(--muted);padding:3px 0">'+esc(k.naam)+' — '+(k.duurUren||1.5)+'u'+(k._apNietReden?' <span style="color:var(--orange)">('+esc(k._apNietReden)+')</span>':'')+'</div>'; });
+    b+='<div style="font-size:13px;font-weight:700;color:var(--orange-t);margin-bottom:8px">⚠ '+_apNietIngepland.length+' niet ingepland</div>';
+    _apNietIngepland.forEach(function(k){ b+='<div style="font-size:12px;color:var(--muted);padding:3px 0">'+esc(k.naam)+' — '+(k.duurUren||1.5)+'u'+(k._apNietReden?' <span style="color:var(--orange-t)">('+esc(k._apNietReden)+')</span>':'')+'</div>'; });
     b+='</div>';
   } else {
     b+='<div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:14px 16px;margin-bottom:12px">';
@@ -16244,7 +16248,7 @@ function renderPlanLijst(monteurs) {
               break;
             case 'status':
               h += '<td data-col="status" style="padding:6px 10px">'+tagStatus(o.status);
-              if(o.status==='actie'&&o.actietype) h += '<div style="font-size:10px;color:var(--orange);padding:0 0 2px 2px">→ '+esc(o.actietype)+'</div>';
+              if(o.status==='actie'&&o.actietype) h += '<div style="font-size:10px;color:var(--orange-t);padding:0 0 2px 2px">→ '+esc(o.actietype)+'</div>';
               h += '</td>';
               break;
             case 'werkomschrijving':
@@ -16384,7 +16388,7 @@ function renderPlanWeek(monteurs) {
     h += '<div style="font-size:12px;font-weight:600">'+esc(m.voornaam+' '+m.achternaam)+'</div></div>';
     // Verlof indicatie
     var opVerlof = APP.verlof.some(function(v){return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&_planDatum>=v.van&&_planDatum<=v.tot;});
-    if(opVerlof) h += '<div style="font-size:10px;color:var(--orange);margin-top:4px;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof</div>';
+    if(opVerlof) h += '<div style="font-size:10px;color:var(--orange-t);margin-top:4px;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof</div>';
     h += '</td>';
 
     dagen.forEach(function(dag) {
@@ -16401,7 +16405,7 @@ function renderPlanWeek(monteurs) {
       if(opVerlofDag.length) {
         var vl = opVerlofDag[0];
         var tijdTxt = (vl.gedeeltelijk && vl.tijdVan) ? ' '+vl.tijdVan+(vl.tijdTot?'–'+vl.tijdTot:'') : '';
-        verlofBadge = '<div style="background:var(--orange);border-radius:4px;padding:4px 7px;font-size:10px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:4px"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof'+esc(tijdTxt)+'</div>';
+        verlofBadge = '<div style="background:var(--orange);border-radius:4px;padding:4px 7px;font-size:10px;font-weight:700;color:#1a1200;margin-bottom:3px;display:flex;align-items:center;gap:4px"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof'+esc(tijdTxt)+'</div>';
       }
       var _vzDag = verzuimOpDag(m.id, dag);
       var opVerzuimDag = _vzDag ? [_vzDag] : [];
@@ -16433,7 +16437,7 @@ function renderPlanWeek(monteurs) {
         h += '<div style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:3px">'+getOtSvg(ot.icon)+esc(ot.label)+'</div>';
         var _wkAdres = (o.adres||'') + (o.plaats ? (o.adres?', ':'')+o.plaats : '');
         if(_wkAdres) h += '<div style="font-size:10px;color:var(--muted);line-height:1.35;word-break:break-word">'+esc(_wkAdres)+'</div>';
-        if(o.status==='actie') h += '<div style="font-size:10px;color:var(--orange)">→ '+(o.actietype||'Actie vereist')+'</div>';
+        if(o.status==='actie') h += '<div style="font-size:10px;color:var(--orange-t)">→ '+(o.actietype||'Actie vereist')+'</div>';
         h += '</div>';
       });
 
@@ -16679,7 +16683,7 @@ function renderPlanDag(monteurs) {
             h += '<div style="background:var(--red);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>'+esc(zLbl2)+'</div>';
           } else if(toonVerlof){
             var tijdTxt2 = (_vDag.gedeeltelijk && _vDag.tijdVan) ? _vDag.tijdVan+(_vDag.tijdTot?'–'+_vDag.tijdTot:'') : 'Hele dag';
-            h += '<div style="background:var(--orange);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof '+esc(tijdTxt2)+'</div>';
+            h += '<div style="background:var(--orange);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#1a1200;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof '+esc(tijdTxt2)+'</div>';
           }
         }
       }
@@ -16830,7 +16834,7 @@ function openOpdrachtPanel(id) {
 
   if (o.status === 'actie' && (o.actietype || o.actietekst)) {
     h += '<div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;margin-bottom:14px">';
-    h += '<div style="font-size:11px;font-weight:600;color:var(--orange);margin-bottom:4px">ACTIE VEREIST</div>';
+    h += '<div style="font-size:11px;font-weight:600;color:var(--orange-t);margin-bottom:4px">ACTIE VEREIST</div>';
     if (o.actietype) h += '<div style="font-size:13px;font-weight:700">'+esc(o.actietype)+'</div>';
     if (o.actietekst) h += '<div style="font-size:13px;margin-top:4px">'+esc(o.actietekst)+'</div>';
     if (o.actietype === 'Opnieuw inplannen') {
@@ -16887,7 +16891,7 @@ function openOpdrachtPanel(id) {
     h += '<button class="btn btn-primary" id="op-mail" style="justify-content:center">'+ICO.mail+' Mail versturen</button>';
   }
   if (o.status === 'actie' && o.actietype === 'Niet thuis' && kanPlannen) {
-    h += '<button class="btn btn-primary" id="op-herplan" style="justify-content:center;background:var(--orange)">↻ Herplannen</button>';
+    h += '<button class="btn btn-primary" id="op-herplan" style="justify-content:center;background:var(--orange);border-color:var(--orange);color:#1a1200">↻ Herplannen</button>';
   }
   if (kanPlannen) {
     h += '<button class="btn btn-ghost" id="op-edit" style="justify-content:center">'+ICO.edit+' Bewerken</button>';
@@ -17086,7 +17090,7 @@ function openOpdrachtModal(id, prefill) {
        +'cursor:pointer;text-align:left;transition:all .15s;width:100%;display:flex;align-items:center;gap:6px">';
      monteurGrid += '<div style="width:24px;height:24px;border-radius:50%;background:'+kl+';color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;'+avatarShadow+'">'+initials(m)+'</div>';
      monteurGrid += '<div style="min-width:0;flex:1"><div style="font-size:11px;font-weight:'+(isChecked?'700':'500')+';color:'+(isChecked?kl:'var(--text)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
-     monteurGrid += '<div class="mont-warn" style="font-size:9px;color:var(--orange);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+(waarschuwing?'':'display:none')+'">'+(waarschuwing||'')+'</div>';
+     monteurGrid += '<div class="mont-warn" style="font-size:9px;color:var(--orange-t);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+(waarschuwing?'':'display:none')+'">'+(waarschuwing||'')+'</div>';
      monteurGrid += '</div>';
      monteurGrid += '<input type="hidden" class="op-mont-cb" data-id="'+m.id+'" data-checked="'+(isChecked?'1':'0')+'" value="'+(isChecked?m.id:'')+'"></button>';
    });
@@ -18402,7 +18406,7 @@ function renderOveruren() {
     }
     h += '</div></div>';
     if(openItems > 0) {
-      h += '<div style="background:rgba(245,158,11,0.15);color:#f59e0b;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+openItems+' open</div>';
+      h += '<div style="background:rgba(245,158,11,0.15);color:var(--orange-t);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+openItems+' open</div>';
     }
     if(kanGoedkeuren) {
       h += '<button class="btn btn-ghost btn-sm ou-add-med" data-mid="'+mid+'" title="Overuren registreren voor '+esc(m.voornaam)+'" style="flex-shrink:0;font-size:12px;padding:5px 10px;white-space:nowrap">+ Overuren</button>';
@@ -18942,7 +18946,7 @@ function renderOnkosten() {
     }
     h += '</div></div>';
     if(openItems > 0) {
-      h += '<div style="background:rgba(245,158,11,0.15);color:#f59e0b;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+openItems+' open · € '+openBdr.toFixed(2)+'</div>';
+      h += '<div style="background:rgba(245,158,11,0.15);color:var(--orange-t);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+openItems+' open · € '+openBdr.toFixed(2)+'</div>';
     }
     if(!okAlleenEigen) {
       h += '<button class="btn btn-ghost btn-sm ok-add-med" data-mid="'+mid+'" title="Onkosten registreren voor '+esc(m.voornaam)+'" style="flex-shrink:0;font-size:12px;padding:5px 10px;white-space:nowrap">+ Onkosten</button>';
@@ -19416,7 +19420,7 @@ function renderVerzuim() {
       h += '<div style="background:rgba(239,68,68,0.15);color:#ef4444;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+actiefItems+' actief</div>';
     }
     if(langdurigItems > 0) {
-      h += '<div style="background:rgba(245,158,11,0.15);color:#f59e0b;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+langdurigItems+' langdurig</div>';
+      h += '<div style="background:rgba(245,158,11,0.15);color:var(--orange-t);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+langdurigItems+' langdurig</div>';
     }
     if(kanBeheren) {
       h += '<button class="btn btn-ghost btn-sm vz-add-med" data-mid="'+mid+'" title="Verzuim registreren voor '+esc(m.voornaam)+'" style="flex-shrink:0;font-size:12px;padding:5px 10px;white-space:nowrap">+ Verzuim</button>';
@@ -19452,7 +19456,7 @@ function renderVerzuim() {
           h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
           if(v.status==='actief'||v.status==='langdurig'){
             h += '<button class="btn btn-ghost btn-sm vz-herstel-btn" data-id="'+v.id+'" style="color:var(--green);font-size:11px">✓ Hersteld</button>';
-            if(v.status==='actief'&&duren>42) h += '<button class="btn btn-ghost btn-sm vz-lang-btn" data-id="'+v.id+'" style="color:var(--orange);font-size:11px">⚠ Langdurig</button>';
+            if(v.status==='actief'&&duren>42) h += '<button class="btn btn-ghost btn-sm vz-lang-btn" data-id="'+v.id+'" style="color:var(--orange-t);font-size:11px">⚠ Langdurig</button>';
           }
           h += '</td>';
         }
@@ -19688,7 +19692,7 @@ function openVerzuimPanel(id){
   if(_pT.notitie)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Notitie</div><div style="font-size:13px">'+esc(_pT.notitie)+'</div></div>';
   h+='<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px">';
   if(kanBeheren&&(v.status==='actief'||v.status==='langdurig'))h+='<button class="btn btn-primary" id="vzp-herstel" style="justify-content:center">✓ Markeer als hersteld</button>';
-  if(kanBeheren&&v.status==='actief'&&duren>42)h+='<button class="btn btn-ghost" id="vzp-lang" style="justify-content:center;color:var(--orange)">⚠ Markeer als langdurig</button>';
+  if(kanBeheren&&v.status==='actief'&&duren>42)h+='<button class="btn btn-ghost" id="vzp-lang" style="justify-content:center;color:var(--orange-t)">⚠ Markeer als langdurig</button>';
   // Verzuim is inzien-only voor wie geen schrijfrecht heeft (monteurs). Bewerken/
   // verwijderen alleen voor beheerders — spiegelt de RTDB-rule (vzRecht=='s').
   if(kanBeheren){
@@ -25269,7 +25273,7 @@ async function _prAnalyseerPdfBuffer(arrayBuffer, statusEl, previewEl, saveBtn, 
     var waarschuwing = (onderdelen.length < aantalRijenMetGetal * 0.7);
     if(statusEl){
       statusEl.innerHTML = '<div style="color:var(--green)">✓ '+onderdelen.length+' onderdelen herkend — controleer en sla op.</div>';
-      if(waarschuwing) statusEl.innerHTML += '<div style="color:var(--orange);margin-top:6px;font-size:11px">⚠ Mogelijk niet alle onderdelen herkend ('+onderdelen.length+' van ~'+aantalRijenMetGetal+' verwacht). Controleer de preview zorgvuldig.</div>';
+      if(waarschuwing) statusEl.innerHTML += '<div style="color:var(--orange-t);margin-top:6px;font-size:11px">⚠ Mogelijk niet alle onderdelen herkend ('+onderdelen.length+' van ~'+aantalRijenMetGetal+' verwacht). Controleer de preview zorgvuldig.</div>';
     }
     // Preview
     if(previewEl){
@@ -25390,7 +25394,7 @@ function openPdfImportModal(pompId) {
       var kb = '<div style="font-size:13px;color:var(--muted);line-height:1.6">Er is al een onderdelenlijst ('+Object.keys(pomp.onderdelen).length+' onderdelen). Wat wil je doen met de '+_geextraheerdeOnderdelen.length+' nieuw herkende onderdelen?</div>';
       var kf = '<button class="btn btn-ghost" id="pr-ond-annuleer">Annuleren</button>';
       kf += '<button class="btn btn-ghost" id="pr-ond-voegtoe">Toevoegen</button>';
-      kf += '<button class="btn btn-primary" id="pr-ond-vervang" style="background:var(--orange);border-color:var(--orange)">Vervangen</button>';
+      kf += '<button class="btn btn-primary" id="pr-ond-vervang" style="background:var(--orange);border-color:var(--orange);color:#1a1200">Vervangen</button>';
       openModal('Onderdelen opslaan', kb, kf);
       document.getElementById('pr-ond-annuleer').addEventListener('click', closeModal);
       document.getElementById('pr-ond-voegtoe').addEventListener('click', function(){ _prOnderdelenOpslaan(pompId, _geextraheerdeOnderdelen, 'voegtoe'); });
@@ -25910,9 +25914,9 @@ function renderStoringsdienst() {
     h+='<div class="avatar" style="width:34px;height:34px;font-size:12px;background:'+kl+';color:#fff">'+initials(huidigeMed)+'</div>';
     h+='<div><div style="font-weight:700;font-size:15px">'+esc(huidigeMed.voornaam+' '+huidigeMed.achternaam)+'</div>';
     h+='<div style="font-size:12px;color:var(--muted)">'+esc(huidigeMed.telefoon||huidigeMed.email||'')+'</div></div></div>';
-    if(sd[huidigDagKey]) h+='<div style="font-size:11px;color:var(--orange);margin-top:4px">'+ICO.zap+' Dagwissel actief</div>';
+    if(sd[huidigDagKey]) h+='<div style="font-size:11px;color:var(--orange-t);margin-top:4px">'+ICO.zap+' Dagwissel actief</div>';
   } else {
-    h+='<div style="font-weight:600;font-size:14px;color:var(--orange);margin-top:4px">'+ICO.warn+' Nog niet ingesteld</div>';
+    h+='<div style="font-weight:600;font-size:14px;color:var(--orange-t);margin-top:4px">'+ICO.warn+' Nog niet ingesteld</div>';
   }
   h+='</div></div>';
 
@@ -25951,7 +25955,7 @@ function renderStoringsdienst() {
         h+='<div class="sd-dag-cel" data-datum="'+dagStr+'" data-weekkey="'+w.key+'" data-dagidx="'+di+'" title="'+(med?esc(med.voornaam+' '+med.achternaam):'—')+' · klik om te wijzigen" style="cursor:pointer;border-radius:4px;padding:3px 2px;min-height:28px;'+(verleden&&!med?'opacity:.35':'')+(isOverride?';background:rgba(245,158,11,.15)':'')+'">';
         if(med){
           h+='<div class="avatar" style="width:22px;height:22px;font-size:8px;background:'+kl+';color:#fff;margin:0 auto">'+initials(med)+'</div>';
-          if(isOverride) h+='<div style="font-size:8px;color:var(--orange)">!</div>';
+          if(isOverride) h+='<div style="font-size:8px;color:var(--orange-t)">!</div>';
         } else {
           h+='<div style="font-size:11px;color:var(--muted)">—</div>';
         }
@@ -25964,7 +25968,7 @@ function renderStoringsdienst() {
     // Legenda
     h+='<div style="display:flex;gap:16px;font-size:12px;color:var(--muted);margin-top:10px;flex-wrap:wrap">';
     h+='<span>Avatars = weekrooster</span>';
-    h+='<span style="color:var(--orange)">'+ICO.zap+' Oranje rand = dagwissel</span>';
+    h+='<span style="color:var(--orange-t)">'+ICO.zap+' Oranje rand = dagwissel</span>';
     h+='<span>Klik op dag om te wijzigen</span>';
     h+='</div>';
 
@@ -26017,7 +26021,7 @@ function renderStoringsdienst() {
         h+='<div class="sd-dag-cel" data-datum="'+dagStr+'" data-weekkey="'+w.key+'" data-dagidx="'+di+'" title="Klik om dag te wijzigen" style="cursor:pointer;border-radius:6px;padding:4px 2px;border:1px solid '+(isOverride?'var(--orange)':'transparent')+';background:'+(isOverride?'rgba(245,158,11,.1)':'transparent')+'">';
         if(dagMed){
           h+='<div class="avatar" style="width:24px;height:24px;font-size:8px;background:'+dkl+';color:#fff;margin:0 auto" title="'+esc(dagMed.voornaam+' '+dagMed.achternaam)+'">'+initials(dagMed)+'</div>';
-          h+='<div style="font-size:9px;color:var(--orange);margin-top:1px">wissel</div>';
+          h+='<div style="font-size:9px;color:var(--orange-t);margin-top:1px">wissel</div>';
         } else if(effectiefMed){
           h+='<div style="font-size:9px;color:var(--muted)">✓</div>';
         } else {
@@ -26075,7 +26079,7 @@ function openSdDagModal(datum, weekKey, dagIdx, monteurs) {
   b+='</select></div>';
 
   var f='<button class="btn btn-ghost" id="sdd-cancel">Annuleren</button>';
-  if(dagDienst) f+='<button class="btn btn-ghost" id="sdd-reset" style="color:var(--orange)">↩ Reset naar week</button>';
+  if(dagDienst) f+='<button class="btn btn-ghost" id="sdd-reset" style="color:var(--orange-t)">↩ Reset naar week</button>';
   f+='<button class="btn btn-primary" id="sdd-save">Opslaan</button>';
 
   openModal(dagNamen[dagIdx]+' '+fmtD(datum)+' — Dagwissel',b,f);
@@ -28702,7 +28706,7 @@ function openRapMedPanel(medId, tabNaam) {
         var dagIdx=parseInt(k.slice(-1));
         var week=parseInt(k.slice(k.indexOf('W')+1,k.lastIndexOf('-')));
         var ma2=getMaandagVanWeek(parseInt(jaarStr),week);
-        h += '<div style="padding:5px 10px;background:rgba(245,158,11,.1);border-radius:6px;font-size:12px;font-weight:600;color:var(--orange)">'+dagNamen2[dagIdx]+' W'+('0'+week).slice(-2)+'</div>';
+        h += '<div style="padding:5px 10px;background:rgba(245,158,11,.1);border-radius:6px;font-size:12px;font-weight:600;color:var(--orange-t)">'+dagNamen2[dagIdx]+' W'+('0'+week).slice(-2)+'</div>';
       });
       h += '</div>';
     }
@@ -28860,7 +28864,7 @@ function renderRapOpdrachten(el) {
     h += '<td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:#fff;flex-shrink:0">'+initials(m)+'</div><span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
     h += '<td style="font-weight:700">'+r.totaal+'</td>';
     h += '<td style="color:var(--green);font-weight:600">'+r.afgehandeld+'</td>';
-    h += '<td style="color:var(--orange)">'+r.open+'</td>';
+    h += '<td style="color:var(--orange-t)">'+r.open+'</td>';
     h += '<td style="color:var(--red)">'+r.spoed+'</td>';
     h += '<td><div style="display:flex;align-items:center;gap:8px"><div class="progress" style="width:80px"><div class="progress-fill" style="width:'+pct+'%;background:'+(pct>=80?'var(--green)':pct>=50?'var(--orange)':'var(--red)')+'"></div></div><span style="font-size:12px">'+pct+'%</span></div></td>';
     h += '</tr>';
@@ -29006,7 +29010,7 @@ function renderRapServiceklanten(el) {
     h += '<td><span class="tag" style="background:'+r.kleur+'22;color:'+r.kleur+'">'+esc(r.code)+'</span></td>';
     h += '<td style="font-weight:600">'+r.actief+'</td>';
     h += '<td style="color:'+(r.vervallen?'var(--red)':'var(--muted)')+'">'+r.vervallen+'</td>';
-    h += '<td style="color:var(--orange)">'+r.contractB+'</td>';
+    h += '<td style="color:var(--orange-t)">'+r.contractB+'</td>';
     h += '<td style="color:var(--muted)">'+r.passief+'</td>';
     h += '</tr>';
   });
@@ -29902,7 +29906,7 @@ function renderRapStoringsdienst(el) {
   sdRijen.forEach(function(rr){ var mid=rr.mid;
     var m=getMed(mid);var t=tellers[mid];var kl=m?(medKleur(m)):'#6b7694';
     h+='<tr class="rap-med-rij" data-id="'+mid+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px">'+(m?'<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:#fff">'+initials(m)+'</div>':'')+'<span style="font-weight:600">'+esc(m?m.voornaam+' '+m.achternaam:'?')+'</span></div></td>';
-    h+='<td style="padding:10px 14px;font-weight:700">'+t.weken+'</td><td style="padding:10px 14px;color:var(--orange)">'+t.dagwissels+'</td><td style="padding:10px 14px">'+(t.weken+t.dagwissels)+'</td></tr>';
+    h+='<td style="padding:10px 14px;font-weight:700">'+t.weken+'</td><td style="padding:10px 14px;color:var(--orange-t)">'+t.dagwissels+'</td><td style="padding:10px 14px">'+(t.weken+t.dagwissels)+'</td></tr>';
   });
   if(!gesorteerd.length)h+='<tr><td colspan="4" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
@@ -30708,7 +30712,7 @@ function renderInstRollen(el) {
         h += '<div style="display:flex;flex-direction:column;align-items:center;gap:4px">';
         h += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--muted)">';
         h += '<input type="checkbox" class="rol-lezen-cb" data-rol="'+r+'" data-mod="'+mod.k+'"'+(lezen?' checked':'')+' style="width:13px;height:13px">L</label>';
-        h += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--orange)">';
+        h += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--orange-t)">';
         h += '<input type="checkbox" class="rol-eigen-cb" data-rol="'+r+'" data-mod="'+mod.k+'"'+(eigen?' checked':'')+' style="width:13px;height:13px;accent-color:var(--orange)">E</label>';
         h += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--accent)">';
         h += '<input type="checkbox" class="rol-schrijven-cb" data-rol="'+r+'" data-mod="'+mod.k+'"'+(schrijven?' checked':'')+' style="width:13px;height:13px;accent-color:var(--accent)">S</label>';
@@ -30751,9 +30755,9 @@ function renderInstRollen(el) {
   h += '</div></div>';
   // Uitleg bij E en S: de betekenis verschilt per module, met een status-slot bij aanvragen.
   h += '<div style="margin-top:12px;padding:12px 14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--orange)">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--orange)">Wat betekenen E (Eigen) en S (Schrijven) precies?</div>';
+  h += '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--orange-t)">Wat betekenen E (Eigen) en S (Schrijven) precies?</div>';
   h += '<div style="font-size:12px;color:var(--muted);line-height:1.6">';
-  h += '<strong style="color:var(--accent)">S (Schrijven)</strong> geeft volledige toegang binnen de module: alle records van iedereen zien, aanmaken, bewerken en goedkeuren. <strong style="color:var(--orange)">E (Eigen)</strong> beperkt tot de eigen gegevens \u2014 wat \u201ceigen\u201d betekent, verschilt per module:';
+  h += '<strong style="color:var(--accent)">S (Schrijven)</strong> geeft volledige toegang binnen de module: alle records van iedereen zien, aanmaken, bewerken en goedkeuren. <strong style="color:var(--orange-t)">E (Eigen)</strong> beperkt tot de eigen gegevens \u2014 wat \u201ceigen\u201d betekent, verschilt per module:';
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px">';
   h += '<div><div style="font-weight:700;color:var(--accent);margin-bottom:3px">Werkbonnen</div>';
   h += 'Met E ziet en bewerkt een monteur alleen de werkbonnen die <em>aan hem zijn toegewezen</em> \u2014 niet die van collega\u2019s.</div>';
@@ -31751,7 +31755,7 @@ function renderInstGebruikers(el) {
       html+='<td><div style="display:flex;align-items:center;gap:10px">';
       if(med) html+='<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:#fff;flex-shrink:0">'+initials(med)+'</div>';
       html+='<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+esc(med?med.voornaam+' '+med.achternaam:gb.email||'Onbekend')+'</div>';
-      if(!med) html+='<div style="font-size:10px;color:var(--orange)">Niet gekoppeld aan een medewerker</div>';
+      if(!med) html+='<div style="font-size:10px;color:var(--orange-t)">Niet gekoppeld aan een medewerker</div>';
       if(gb._profielOntbreekt) html+='<div style="font-size:10px;color:var(--red)">Profiel ontbreekt — kan niet inloggen</div>';
       html+='</div></div></td>';
       html+='<td style="font-size:12px;color:var(--muted)">'+esc(gb.email||'—')+'</td>';
@@ -32025,7 +32029,7 @@ function renderInstGoedkeuring(el) {
   });
   if(_leeg > 0) {
     h += '<div style="display:flex;gap:10px;align-items:flex-start;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28);border-radius:9px;padding:11px 13px;margin-bottom:16px">';
-    h += '<span style="color:#f59e0b;flex-shrink:0;margin-top:1px">'+(ICO.alert||ICO.info||'')+'</span>';
+    h += '<span style="color:var(--orange-t);flex-shrink:0;margin-top:1px">'+(ICO.alert||ICO.info||'')+'</span>';
     h += '<div style="font-size:12.5px;line-height:1.6"><b>'+_leeg+' vakje'+(_leeg===1?'':'s')+' nog leeg.</b> '
        + 'Voor die combinaties kan alleen een beheerder goedkeuren — de aanvraag blijft anders liggen. '
        + 'Vul aan waar iemand anders moet tekenen.</div>';
@@ -34735,7 +34739,7 @@ function _woFotoSectieHtml(scope, data){
     h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222">';
     if(bron) h += '<img class="wox-foto-thumb" data-scope="'+esc(scope)+'" data-fi="'+fi+'" src="'+esc(bron)+'" style="width:100%;height:100%;object-fit:cover;cursor:pointer'+(f._pending?';opacity:.6':'')+'">';
     else h += '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
-    if(f._pending) h += '<span title="Wacht op upload — wordt verstuurd zodra er verbinding is" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
+    if(f._pending) h += '<span title="Wacht op upload — wordt verstuurd zodra er verbinding is" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#1a1200;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
     if(_woDetailState.bewerkbaar) h += '<button type="button" class="wox-foto-del" data-scope="'+esc(scope)+'" data-fi="'+fi+'" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;line-height:1">\u00d7</button>';
     h += '</div>';
   });
@@ -34886,7 +34890,7 @@ function _woDocSectieHtml(scope, data){
     if(d.grootte) h += '<div style="font-size:11px;color:var(--muted)">'+esc(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.grootte):(Math.round(d.grootte/1024)+' KB'))+'</div>';
     h += '</div>';
     if(d._pending){
-      h += '<span style="font-size:11px;color:var(--orange)">uploaden…</span>';
+      h += '<span style="font-size:11px;color:var(--orange-t)">uploaden…</span>';
     } else if(bew){
       h += '<button type="button" class="wox-doc-edit" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Naam wijzigen" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;display:flex">'+ICO.edit+'</button>';
     }
