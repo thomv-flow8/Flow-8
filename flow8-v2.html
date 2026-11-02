@@ -65,6 +65,12 @@ body.light .modal{box-shadow:0 24px 70px rgba(20,26,60,.18)}
 body.light #toast{box-shadow:0 16px 40px rgba(20,26,60,.16)}
 body.light .stat-card{background:#fff}
 body.light .nav-item:hover{background:rgba(13,15,20,.05)}
+/* Licht thema: het actieve item stond in wit op een lichtblauwe tint over de witte zijbalk —
+   1,26:1, vrijwel onzichtbaar. --accent-t haalt 5,0:1 en blijft blauw, net als het icoon.
+   De systeemitems zakten op 78% dekking naar 3,5:1; in licht dus vol. In donker halen ze
+   op 78% nog 5,5:1, daar blijft de demping. */
+body.light .nav-item.active{color:var(--accent-t)}
+body.light .nav-systeem .nav-item{opacity:1}
 body.light tbody tr:hover{background:rgba(79,110,245,.05)}
 body{font-family:'Instrument Sans',ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
 body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:100%}
@@ -243,7 +249,7 @@ body .plan-tabel tbody tr:hover td{background:rgba(79,110,245,.09)}
 #sidebar.collapsed #sidebar-nav{overflow-y:visible}
 #sidebar.collapsed .nav-scheiding{margin:8px 8px 2px}
 /* Sidebar tooltip bij collapsed */
-#sidebar.collapsed .nav-item{justify-content:center;padding:10px 0;margin:1px 4px}
+#sidebar.collapsed .nav-item{justify-content:center;padding:11px 0;margin:1px 4px}
 .sb-tooltip{position:fixed;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;padding:7px 14px;border-radius:10px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s ease;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.35)}
 .sb-tooltip.show{opacity:1}
 .sb-tooltip::before{content:'';position:absolute;left:-6px;top:50%;transform:translateY(-50%) rotate(45deg);width:10px;height:10px;background:var(--surface2);border-left:1px solid var(--border);border-bottom:1px solid var(--border)}
@@ -272,7 +278,7 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .sidebar-logo-text{font-family:'Instrument Sans',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.02em}
 .sidebar-logo-sub{font-size:11px;color:var(--muted);margin-top:2px}
 .nav-section{padding:14px 18px 6px;font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:11px;padding:10px 14px;color:var(--muted);cursor:pointer;font-size:13.5px;font-weight:400;border-radius:10px;margin:2px 8px;position:relative;transition:background .15s ease,color .15s ease}
+.nav-item{display:flex;align-items:center;gap:11px;padding:11px 14px;color:var(--muted);cursor:pointer;font-size:14px;font-weight:400;border-radius:10px;margin:2px 8px;position:relative;transition:background .15s ease,color .15s ease}
 .wb-acc-hdr:hover { background: rgba(74,108,247,.06) !important; }
 @media(max-width:768px){
   .wb-info-grid { grid-template-columns:1fr !important; max-width:680px; }
@@ -286,8 +292,8 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .nav-item.active{color:#fff;background:rgba(79,110,245,.16);font-weight:600;box-shadow:none}
 .nav-item.active::before{content:none}
 .nav-item svg{opacity:1;flex-shrink:0}.nav-item.active svg{opacity:1;color:var(--accent)}
-.nav-ico{display:flex;align-items:center;justify-content:center;width:20px;flex-shrink:0}
-.nav-ico svg{width:19px;height:19px}
+.nav-ico{display:flex;align-items:center;justify-content:center;width:22px;flex-shrink:0}
+.nav-ico svg{width:21px;height:21px}
 #sidebar.collapsed .nav-ico{width:auto}
 
 .grecaptcha-badge { visibility: hidden !important; opacity: 0 !important; }
@@ -309,7 +315,7 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .nav-scheiding{height:1px;background:var(--border);margin:10px 12px 2px}
 /* Beheerblok onderaan: scrollt niet mee en staat visueel op de achtergrond. */
 .nav-systeem{flex-shrink:0;border-top:1px solid var(--border);padding:4px 0 6px}
-.nav-systeem .nav-item{font-size:12.5px;opacity:.78}
+.nav-systeem .nav-item{font-size:13px;opacity:.78}
 .nav-systeem .nav-item:hover,.nav-systeem .nav-item.active{opacity:1}
 .nav-systeem .nav-section{opacity:.75}
 .sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);margin-top:auto;padding-bottom:max(12px,env(safe-area-inset-bottom))}
