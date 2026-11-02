@@ -38,7 +38,7 @@
   /* Statuskleuren blijven ongewijzigd zodat gebruikers niets afleren.
      De *-t varianten zijn de leesbare tekstvariant op donkere vlakken. */
   --green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
-  --green-t:#34d99f;--orange-t:#e0b072;--red-t:#f98a8a;--purple-t:#b69bff;--accent-t:#93a6ff;
+  --green-t:#34d99f;--orange-t:#e0b072;--red-t:#f98a8a;--purple-t:#b69bff;--accent-t:#93a6ff;--blok-t:#3b82f6;--vast-t:#f59e0b;
 
   /* Tekst — muted van 45% dekking naar een vaste, leesbare waarde */
   --text:#f4f6fb;--muted:#a8aec0;--muted2:#868da3;
@@ -58,7 +58,7 @@ body.light{
   --bg:#f5f6f8;--surface:#ffffff;--surface2:#f2f4f8;--border:#e2e5ec;
   --text:#0d0f14;--muted:#5f6572;--muted2:#8a90a0;
   --bg-gradient:#f5f6f8;--dagkop:#e4e9f2;
-  --green-t:#0f9d6f;--orange-t:#b97a09;--red-t:#d33b3b;--purple-t:#7040e0;--accent-t:#3552d4;
+  --green-t:#0f9d6f;--orange-t:#b97a09;--red-t:#d33b3b;--purple-t:#7040e0;--accent-t:#3552d4;--blok-t:#2563eb;--vast-t:#b45309;
 }
 body.light .card{box-shadow:none}
 body.light .modal{box-shadow:0 24px 70px rgba(20,26,60,.18)}
@@ -6881,7 +6881,7 @@ function bouwAdminSwitcher() {
       lijst.innerHTML = ids.map(function(id){
         var naam = (bedrijven[id] && bedrijven[id].naam) || id;
         var actief = id === APP.bedrijfId;
-        return '<div class="admin-sw-item" data-id="'+esc(id)+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:'+(actief?'default':'pointer')+';background:'+(actief?'var(--accent)22':'transparent')+';transition:background .15s">'
+        return '<div class="admin-sw-item" data-id="'+esc(id)+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:'+(actief?'default':'pointer')+';background:'+(actief?'rgba(79,110,245,.13)':'transparent')+';transition:background .15s">'
           + '<svg width="13" height="13" fill="none" stroke="'+(actief?'var(--accent)':'currentColor')+'" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-size:13px;font-weight:'+(actief?'700':'500')+';color:'+(actief?'var(--accent)':'var(--text)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(naam)+'</div>'
@@ -7671,6 +7671,18 @@ function getMijnMedId() {
 }
 function rolKleur(rolId) { var r=APP.rollen[rolId]; return r?r.kleur:'#6b7694'; }
 // medKleur: altijd persoonlijke kleur van medewerker, nooit de rol-kleur
+// Doorzichtige tint van een kleur, voor "kleur + alfa-achtervoegsel". Een hexkleur krijgt
+// het achtervoegsel erachter, zoals voorheen (#4a6cf7 + '22' = #4a6cf722). Een var(--…) of
+// een korte hex (#abc) kan dat niet: var(--accent) met '22' erachter is geen geldige CSS, de browser
+// negeert de hele declaratie. Daarvoor color-mix met hetzelfde percentage. Een oude browser
+// zonder color-mix negeert het net zoals hij de kapotte waarde negeerde.
+function _kleurTint(kleur, alfaHex){
+  kleur = String(kleur || '');
+  if(/^#[0-9a-f]{6}$/i.test(kleur)) return kleur + alfaHex;
+  var pct = Math.round(parseInt(alfaHex, 16) / 255 * 100);
+  return 'color-mix(in srgb,' + kleur + ' ' + pct + '%,transparent)';
+}
+
 function medKleur(med) {
   if(!med) return '#6b7694';
   var kl = med.kleur || '#6b7694';
@@ -13297,21 +13309,21 @@ function _renderDagplanning() {
 
         var h = '<div style="display:flex;gap:0;margin-bottom:10px;background:var(--surface2);border-radius:8px;padding:3px">';
         h += '<div class="dp-pick-tab" data-tab="vrij" style="flex:1;text-align:center;padding:5px 8px;border-radius:6px;font-size:12px;font-weight:'+(type==='vrij'?'700':'600')+';color:'+(type==='vrij'?'#fff':'var(--muted)')+';background:'+(type==='vrij'?'var(--accent-knop)':'none')+';cursor:pointer">Vrij</div>';
-        h += '<div class="dp-pick-tab" data-tab="blok" style="flex:1;text-align:center;padding:5px 8px;border-radius:6px;font-size:12px;font-weight:'+(type==='blok'?'700':'600')+';color:'+(type==='blok'?'#fff':'var(--muted)')+';background:'+(type==='blok'?'#3b82f6':'none')+';cursor:pointer">Tijdblok</div>';
-        h += '<div class="dp-pick-tab" data-tab="vast" style="flex:1;text-align:center;padding:5px 8px;border-radius:6px;font-size:12px;font-weight:'+(type==='vast'?'700':'600')+';color:'+(type==='vast'?'#fff':'var(--muted)')+';background:'+(type==='vast'?'#f59e0b':'none')+';cursor:pointer">Vast</div>';
+        h += '<div class="dp-pick-tab" data-tab="blok" style="flex:1;text-align:center;padding:5px 8px;border-radius:6px;font-size:12px;font-weight:'+(type==='blok'?'700':'600')+';color:'+(type==='blok'?'#fff':'var(--muted)')+';background:'+(type==='blok'?'#2563eb':'none')+';cursor:pointer">Tijdblok</div>';
+        h += '<div class="dp-pick-tab" data-tab="vast" style="flex:1;text-align:center;padding:5px 8px;border-radius:6px;font-size:12px;font-weight:'+(type==='vast'?'700':'600')+';color:'+(type==='vast'?'#000':'var(--muted)')+';background:'+(type==='vast'?'#f59e0b':'none')+';cursor:pointer">Vast</div>';
         h += '</div>';
         if(type === 'blok') {
           h += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
-          h += '<span style="font-size:12px;font-weight:600;color:#3b82f6">Tussen</span>';
+          h += '<span style="font-size:12px;font-weight:600;color:var(--blok-t)">Tussen</span>';
           h += tijdSelHtml('dp-pick-van', o._dpBlokVan || huidigeTijd);
-          h += '<span style="font-size:12px;font-weight:600;color:#3b82f6">en</span>';
+          h += '<span style="font-size:12px;font-weight:600;color:var(--blok-t)">en</span>';
           h += tijdSelHtml('dp-pick-tot', o._dpBlokTot || minToTijd(parseInt(huidigeTijd.split(':')[0])*60+parseInt(huidigeTijd.split(':')[1]||0)+120));
-          h += '<button id="dp-pick-ok" style="background:#3b82f6;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">OK</button>';
+          h += '<button id="dp-pick-ok" style="background:#2563eb;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">OK</button>';
           h += '<button id="dp-pick-cancel" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:5px">Annuleren</button>';
           h += '</div>';
         } else if(type === 'vast') {
           h += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
-          h += '<span style="font-size:12px;font-weight:600;color:#f59e0b">Exact om</span>';
+          h += '<span style="font-size:12px;font-weight:600;color:var(--vast-t)">Exact om</span>';
           h += tijdSelHtml('dp-pick-vast', o._dpPinTijd || huidigeTijd);
           h += '<button id="dp-pick-ok" style="background:#f59e0b;color:#000;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">OK</button>';
           h += '<button id="dp-pick-cancel" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:5px">Annuleren</button>';
@@ -16412,7 +16424,7 @@ function renderPlanWeek(monteurs) {
         var ot    = getOpdrachttype(o.type);
         var spoed = _isSpoed(o);
         h += '<div class="week-opdracht plan-event" draggable="true" data-id="'+o.id+'" data-monteur="'+m.id+'" data-dag="'+dag+'"';
-        h += ' style="background:'+(spoed?'rgba(239,68,68,.15)':ot.kleur+'22')+';border-left:3px solid '+(spoed?'var(--red)':ot.kleur)+';border-radius:5px;padding:5px 7px;margin-bottom:3px;cursor:grab;user-select:none;position:relative">';
+        h += ' style="background:'+(spoed?'rgba(239,68,68,.15)':_kleurTint(ot.kleur,'22'))+';border-left:3px solid '+(spoed?'var(--red)':ot.kleur)+';border-radius:5px;padding:5px 7px;margin-bottom:3px;cursor:grab;user-select:none;position:relative">';
         h += wkStatusBadge(o.status);
         h += '<div style="font-size:11px;font-weight:700;color:'+(spoed?'var(--red)':ot.kleur)+';padding-right:62px">'+(o.tijdVan||'')+(spoed?' '+ICO.zap:'')+'</div>';
         h += '<div style="font-size:11px;font-weight:600;line-height:1.3;word-break:break-word;display:flex;align-items:flex-start;gap:3px">';
@@ -17067,7 +17079,7 @@ function openOpdrachtModal(id, prefill) {
      var waarschuwing = verlofWaarschuwing || (opVerzuim ? '<svg width=\"9\" height=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\" style=\"vertical-align:middle\"><path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z\"/></svg> Ziek' : '');
      var kl = medKleur(m);
      var borderKl = isChecked ? kl : waarschuwing ? 'var(--orange)' : 'var(--border)';
-     var bgKl = isChecked ? kl+'18' : waarschuwing ? 'rgba(245,158,11,.06)' : 'var(--surface2)';
+     var bgKl = isChecked ? _kleurTint(kl,'18') : waarschuwing ? 'rgba(245,158,11,.06)' : 'var(--surface2)';
      var avatarShadow = isChecked ? 'box-shadow:0 0 0 2px #1a1e2e,0 0 0 4px '+kl+';' : '';
      monteurGrid += '<button type="button" class="op-mont-btn" data-id="'+m.id+'" data-kl="'+kl+'" style="'
        +'padding:6px 7px;border-radius:7px;border:2px solid '+borderKl+';background:'+bgKl+';'
@@ -17549,7 +17561,7 @@ function openOpdrachtModal(id, prefill) {
       hiddenInp.value = isSelected ? btn.dataset.id : '';
       var kl = btn.dataset.kl || 'var(--accent)';
       btn.style.borderColor = isSelected ? kl : 'var(--border)';
-      btn.style.backgroundColor = isSelected ? kl+'18' : 'var(--surface2)';
+      btn.style.backgroundColor = isSelected ? _kleurTint(kl,'18') : 'var(--surface2)';
       // Avatar ring
       var avatar = btn.querySelector('div:first-of-type');
       if(avatar) avatar.style.boxShadow = isSelected ? '0 0 0 2px #1a1e2e,0 0 0 4px '+kl : 'none';
@@ -23039,7 +23051,7 @@ function renderPompObjecten() {
       h += '<td class="hide-mobile" style="font-size:12px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(obj.omschrijving||'—')+'</td>';
       h += '<td class="hide-mobile" style="font-size:12px;color:var(--muted)">'+esc(locTekst)+'</td>';
       h += '<td class="hide-mobile" style="font-size:12px;color:var(--muted)">'+esc(obj.besturing||'—')+'</td>';
-      h += '<td><span class="tag" style="background:var(--accent)22;color:var(--accent)">'+pompen.length+' pomp'+(pompen.length!==1?'en':'')+'</span></td>';
+      h += '<td><span class="tag" style="background:rgba(79,110,245,.13);color:var(--accent)">'+pompen.length+' pomp'+(pompen.length!==1?'en':'')+'</span></td>';
       h += '<td style="white-space:nowrap">';
       h += '<button class="btn btn-ghost btn-sm pr-obj-edit" data-id="'+esc(obj.id)+'" style="padding:4px 8px" title="Bewerken">'+ICO.edit+'</button>';
       if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-obj-del" data-id="'+esc(obj.id)+'" data-naam="'+esc(obj.naam||'')+'" style="padding:4px 8px;color:var(--red)" title="Verwijderen">'+ICO.trash+'</button>';
@@ -24513,7 +24525,7 @@ function _renderPompInstallatieTab(pomp, klantNm, kanSchrijven) {
     return o.pompIds && o.pompIds.map(String).indexOf(String(pomp.id)) >= 0;
   });
   if(pompObject) {
-    h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--accent)15;border:1px solid var(--accent)40;border-radius:10px;margin-bottom:16px;cursor:pointer" id="pr-inst-obj-link">';
+    h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(79,110,245,.08);border:1px solid rgba(79,110,245,.25);border-radius:10px;margin-bottom:16px;cursor:pointer" id="pr-inst-obj-link">';
     h += '<svg width="16" height="16" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>';
     h += '<div style="flex:1"><div style="font-size:12px;color:var(--accent);font-weight:600">Onderdeel van object</div>';
     h += '<div style="font-size:13px;font-weight:700">'+esc(pompObject.naam||'—')+'</div></div>';
@@ -33278,7 +33290,7 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
         if(inArchief){
           h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-terug" data-id="'+esc(w.id)+'" title="Terughalen uit archief" style="padding:3px 8px">'+ICO.undo+'</button>';
         } else {
-          h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-prio" data-id="'+esc(w.id)+'" title="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" style="padding:3px 8px'+(isHoog?';color:var(--red);border-color:var(--red)66':'')+'">'+ICO.flag+'</button>';
+          h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-prio" data-id="'+esc(w.id)+'" title="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" style="padding:3px 8px'+(isHoog?';color:var(--red);border-color:rgba(239,68,68,.4)':'')+'">'+ICO.flag+'</button>';
         }
         h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-edit" data-id="'+esc(w.id)+'" title="Bewerken" style="padding:3px 8px">'+ICO.edit+'</button>';
         h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-del" data-id="'+esc(w.id)+'" title="Verwijderen" style="padding:3px 8px;color:var(--red)">'+ICO.trash+'</button></td>';
@@ -34427,7 +34439,7 @@ function _woRenderDetail(){
   var _kanBeheren = isAdmin() || magBeheren('werkorders');
   if(_kanBeheren){
     var _isHoog = wo.prioriteit==='hoog';
-    h += '<button type="button" class="btn btn-ghost wox-prio" style="'+(_isHoog?'color:var(--red);border-color:var(--red)66':'')+'">'+ICO.flag+'<span style="vertical-align:middle;margin-left:5px">'+(_isHoog?'Hoge prioriteit':'Prioriteit')+'</span></button>';
+    h += '<button type="button" class="btn btn-ghost wox-prio" style="'+(_isHoog?'color:var(--red);border-color:rgba(239,68,68,.4)':'')+'">'+ICO.flag+'<span style="vertical-align:middle;margin-left:5px">'+(_isHoog?'Hoge prioriteit':'Prioriteit')+'</span></button>';
   }
   if(_kanBeheren) h += '<button type="button" class="btn btn-ghost wox-verwijder" style="color:var(--red)">'+ICO.trash+'<span style="vertical-align:middle;margin-left:5px">Verwijderen</span></button>';
   h += '</div>';
