@@ -34,6 +34,8 @@
      procent donkerder haalt 4,61:1 en is met het oog niet te zien. Zelfde keuze als op de
      marketingsite. Nu op het inlogscherm; de overige primaire knoppen kunnen volgen. */
   --accent-knop:#4c6aeb;
+  /* Groen knopvlak met witte tekst: wit op #10b981 haalt 2,54:1, op #047857 5,48:1. */
+  --green-knop:#047857;
 
   /* Statuskleuren blijven ongewijzigd zodat gebruikers niets afleren.
      De *-t varianten zijn de leesbare tekstvariant op donkere vlakken. */
@@ -58,9 +60,11 @@ body.light{
   --bg:#f5f6f8;--surface:#ffffff;--surface2:#f2f4f8;--border:#e2e5ec;
   --text:#0d0f14;--muted:#5f6572;--muted2:#8a90a0;
   --bg-gradient:#f5f6f8;--dagkop:#e4e9f2;
-  --green-t:#0f9d6f;--orange-t:#92400e;--red-t:#d33b3b;--purple-t:#7040e0;--accent-t:#3552d4;--blok-t:#1d4ed8;--vast-t:#92400e;
+  --green-t:#065f46;--orange-t:#92400e;--red-t:#d33b3b;--purple-t:#7040e0;--accent-t:#3552d4;--blok-t:#1d4ed8;--vast-t:#92400e;
   /* --orange-t: #b97a09 haalde op --surface2 met een oranje tint maar 2,9:1. #92400e haalt
-     overal minstens 5,8:1 en is dezelfde tint als --vast-t. */
+     overal minstens 5,8:1 en is dezelfde tint als --vast-t.
+     --green-t: #0f9d6f haalde 2,75:1, ook #047857 niet overal (4,4). #065f46 haalt overal
+     minstens 6,1:1, gemeten op --surface, --surface2, --bg, wit en groene tinten van 8–15%. */
 }
 body.light .card{box-shadow:none}
 body.light .modal{box-shadow:0 24px 70px rgba(20,26,60,.18)}
@@ -565,7 +569,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 #log-panel{position:fixed;bottom:0;right:0;width:480px;height:300px;background:var(--surface);border:1px solid var(--border);border-radius:12px 0 0 0;z-index:9998;display:flex;flex-direction:column;box-shadow:-4px -4px 20px rgba(0,0,0,.3)}
 #log-body{flex:1;overflow-y:auto;padding:8px 12px;font-family:monospace;font-size:11px}
 .log-entry{padding:3px 0;border-bottom:1px solid var(--border)}
-.log-entry .lt{color:var(--muted)}.log-entry .ll-OK{color:var(--green)}.log-entry .ll-INFO{color:var(--accent)}.log-entry .ll-WARN{color:var(--orange-t)}.log-entry .ll-ERROR{color:var(--red)}
+.log-entry .lt{color:var(--muted)}.log-entry .ll-OK{color:var(--green-t)}.log-entry .ll-INFO{color:var(--accent)}.log-entry .ll-WARN{color:var(--orange-t)}.log-entry .ll-ERROR{color:var(--red)}
 @media(max-width:768px){
   /* ── BODY & APP ── */
   body.app-active{flex-direction:column;overflow:hidden}
@@ -924,7 +928,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbx-hdr .wbx-naam{font-weight:600;font-size:14px;flex:1}
 .wbx-hdr .wbx-chev{color:var(--muted);transition:transform .2s;display:flex}
 .wbx-sec.open .wbx-hdr .wbx-chev{transform:rotate(180deg)}
-.wbx-svc-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:var(--radius-pill);background:rgba(16,185,129,.16);color:var(--green);letter-spacing:.3px}
+.wbx-svc-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:var(--radius-pill);background:rgba(16,185,129,.16);color:var(--green-t);letter-spacing:.3px}
 .wbx-cnt-badge{font-size:10px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:var(--radius-pill);background:rgba(74,108,247,.16);color:var(--accent);display:flex;align-items:center;justify-content:center}
 .wbx-body{display:none;padding:0 15px 15px;border-top:1px solid var(--border)}
 .wbx-sec.open .wbx-body{display:block}
@@ -1965,7 +1969,7 @@ function _wbHistorieAccordion(containerId, bonnen, bron, bronId, beginOpen){
         h+='<div class="wbh-item" data-id="'+esc(b.id)+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-left:4px solid '+_otH.kleur+';border-radius:8px;margin-bottom:6px;cursor:pointer">';
         h+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(b.datum?fmtD(b.datum):'—')+' · '+esc(opdrachtTypeLabel(b.typeWerk)||'Werkbon')+'</div>';
         h+='<div style="font-size:11px;color:var(--muted)">'+esc(bonNr)+(b.werkAdres&&b.werkAdres.plaats?(' · '+esc(b.werkAdres.plaats)):'')+'</div></div>';
-        h+='<span class="wbl-status" style="background:#10b9811f;color:#10b981">'+(b.status==='verwerkt'?'Verwerkt':'Afgehandeld')+'</span>';
+        h+='<span class="wbl-status" style="background:#10b9811f;color:var(--green-t)">'+(b.status==='verwerkt'?'Verwerkt':'Afgehandeld')+'</span>';
         // Directe PDF-knop naast de regel: de regel zelf opent nog steeds de werkbon.
         h+='<button type="button" class="wbh-pdf" data-id="'+esc(b.id)+'" title="PDF openen" aria-label="PDF openen" '
           +'style="flex-shrink:0;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);'
@@ -4223,7 +4227,7 @@ function _wbSignStatusHtml(hasSign, dataUrl){
   if(hasSign && dataUrl){
     return '<div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px">'
       + '<img src="'+esc(dataUrl)+'" style="height:48px;border-radius:6px;background:#fff;border:1px solid var(--border)">'
-      + '<div style="font-size:12px;color:var(--green);font-weight:700">\u2713 Ondertekend</div></div>';
+      + '<div style="font-size:12px;color:var(--green-t);font-weight:700">\u2713 Ondertekend</div></div>';
   }
   return '<div style="background:var(--surface2);border:1px dashed var(--border);border-radius:10px;padding:12px;font-size:12px;color:var(--muted);text-align:center">Nog niet ondertekend \u2014 gebruik de knop \u201cHandtekening\u201d onderaan.</div>';
 }
@@ -7867,7 +7871,7 @@ function openCorrectieModal(medId) {
   if (!m) return;
   var urenPerDag = (APP.teamInstellingen && APP.teamInstellingen.werkUrenPerDag) || 8;
   var b = '<div class="form-grid">';
-  b += fgf('Medewerker','<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;font-weight:600">'+esc(m.voornaam+' '+m.achternaam)+' · huidig saldo: <strong style="color:var(--green)">'+String(getVerlofSaldoUren(m)).replace('.',',')+' uur</strong> (\u2248 '+String(verlofUrenNaarDagen(getVerlofSaldoUren(m), m)).replace('.',',')+' dg)</div>');
+  b += fgf('Medewerker','<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;font-weight:600">'+esc(m.voornaam+' '+m.achternaam)+' · huidig saldo: <strong style="color:var(--green-t)">'+String(getVerlofSaldoUren(m)).replace('.',',')+' uur</strong> (\u2248 '+String(verlofUrenNaarDagen(getVerlofSaldoUren(m), m)).replace('.',',')+' dg)</div>');
   b += fgf('Eenheid','<div style="display:flex;gap:10px"><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="cor-eenheid" value="dagen" checked> Dagen</label><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="cor-eenheid" value="uren"> Uren</label></div>');
   b += fg('Aantal (+ of -)', '<input class="input" type="number" id="cor-waarde" step="0.1" placeholder="Bijv. 2 of -1.5"><div id="cor-preview" style="font-size:11px;color:var(--muted);margin-top:4px"></div>');
   b += fgf('Omschrijving *', finp('cor-omschr','text','','Bijv. correctie ziekteverlof 2024'));
@@ -8315,7 +8319,7 @@ function wkStatusBadge(s) {
     ingepland:   { kl:'#4a6cf7', lbl:'Ingepland' },
     opgehaald:   { kl:'#06b6d4', lbl:'Opgehaald' },
     actie:       { kl:'#f59e0b', tekst:'var(--orange-t)', lbl:'Actie' },
-    afgehandeld: { kl:'#10b981', lbl:'Afgerond' },
+    afgehandeld: { kl:'#10b981', tekst:'var(--green-t)', lbl:'Afgerond' },
     verwerkt:    { kl:'#64748b', lbl:'Verwerkt' },
   };
   var c = cfg[s]; if(!c) return '';
@@ -8669,7 +8673,7 @@ function renderDashboard(stil) {
   h += '<div style="font-weight:700;font-size:14px"><svg width="16" height="16" style="flex-shrink:0;vertical-align:middle;margin-right:6px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span style="vertical-align:middle">Opdrachten vandaag</span></div>';
   h += '<span class="tag tag-blue">'+opVandaag.length+'</span></div>';
   if(!opVandaag.length){
-    h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 12px;gap:8px"><div style="width:38px;height:38px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">Geen opdrachten vandaag</div></div>';
+    h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 12px;gap:8px"><div style="width:38px;height:38px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green-t)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">Geen opdrachten vandaag</div></div>';
   } else {
     // Groepeer op monteur-COMBINATIE (set), zodat duo-klussen één keer verschijnen
     var perGroep={};
@@ -8720,7 +8724,7 @@ function renderDashboard(stil) {
           klaargezet:  { kl:'#6b7694', lbl:'Klaargezet' },
           opgehaald:   { kl:'#06b6d4', lbl:'Bezig' },
           actie:       { kl:'#f59e0b', tekst:'var(--orange-t)', lbl:'Actie' },
-          afgehandeld: { kl:'#10b981', lbl:'Afgerond' },
+          afgehandeld: { kl:'#10b981', tekst:'var(--green-t)', lbl:'Afgerond' },
           verwerkt:    { kl:'#64748b', lbl:'Verwerkt' }
         }[o.status] || { kl:'#6b7694', lbl:(o.status||'\u2014') };
         // Spoed is urgentie, geen status: rode linkerrand, zodat de status leesbaar blijft.
@@ -8804,7 +8808,7 @@ function renderDashboard(stil) {
   h += '<div style="font-weight:700;font-size:14px"><svg width="16" height="16" style="flex-shrink:0;vertical-align:middle;margin-right:6px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span style="vertical-align:middle">Afwezig vandaag</span></div>';
   h += '<span class="tag '+(afwezig.length?'tag-orange':'tag-green')+'">'+afwezig.length+'</span></div>';
   if(!afwezig.length){
-    h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 12px;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">'+(_isWerkdag ? 'Iedereen aanwezig' : 'Weekend — geen werkdag')+'</div></div>';
+    h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 12px;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green-t)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">'+(_isWerkdag ? 'Iedereen aanwezig' : 'Weekend — geen werkdag')+'</div></div>';
   } else {
     afwezig.filter(function(a){return a.med;}).forEach(function(a){
       var kl=medKleur(a.med);
@@ -9120,7 +9124,7 @@ function openMedPanel(id) {
   h += '<div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:12px">';
   h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
   h += '<div><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Huidig saldo</div>';
-  h += '<div style="font-family:\'Instrument Sans\',sans-serif;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.5px;color:var(--green)">' + String(_saldoUren).replace('.',',') + '<span style="font-size:13px;font-weight:500;margin-left:4px;letter-spacing:0">uur</span></div>';
+  h += '<div style="font-family:\'Instrument Sans\',sans-serif;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.5px;color:var(--green-t)">' + String(_saldoUren).replace('.',',') + '<span style="font-size:13px;font-weight:500;margin-left:4px;letter-spacing:0">uur</span></div>';
   h += '<div style="font-size:12px;color:var(--muted)">\u2248 ' + String(_saldo).replace('.',',') + ' dagen</div></div>';
   h += '<div style="text-align:right"><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Per jaar (' + _uren + 'u)</div>';
   h += '<div style="font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent)">' + _jaarTegoed + '<span style="font-size:12px;font-weight:500;margin-left:3px">dagen</span></div></div></div>';
@@ -9847,7 +9851,7 @@ function renderServiceklanten() {
       h+='<td data-col="_acties" style="white-space:nowrap">';
       // Passieve klant terugzetten. reactiverenSk bestond al, maar er was nooit een knop
       // die hem aanriep — een klant kon dus wel op passief, maar niet meer terug.
-      if(k.status==='passief') h+='<button class="btn btn-ghost btn-sm sk-act-btn" data-id="'+k.id+'" title="Weer activeren" style="color:var(--green);font-size:11px;padding:4px 9px">Activeren</button>';
+      if(k.status==='passief') h+='<button class="btn btn-ghost btn-sm sk-act-btn" data-id="'+k.id+'" title="Weer activeren" style="color:var(--green-t);font-size:11px;padding:4px 9px">Activeren</button>';
       h+='<button class="btn btn-ghost btn-sm btn-icon sk-edit-btn" data-id="'+k.id+'">'+ICO.edit+'</button>';
       h+='<button class="btn btn-ghost btn-sm btn-icon sk-del-btn" data-id="'+k.id+'" style="color:var(--red)">'+ICO.trash+'</button>';
       h+='</td>';
@@ -10367,7 +10371,7 @@ function renderMemoSectie(debId, inPanel) {
       h += '<div style="display:flex;align-items:center;gap:8px">';
       h += '<span style="font-size:10px;color:var(--muted)">'+esc(m.auteur||'')+'  ·  '+fmtD(m.datum)+'</span>';
       if(magSchrijven('debiteuren')) {
-        h += '<button class="memo-oplossen-btn" data-memoid="'+m.id+'" style="font-size:15px;color:var(--green);background:none;border:none;cursor:pointer;font-weight:700;padding:2px 7px;border-radius:6px;line-height:1" title="Markeer als opgelost">✓</button>';
+        h += '<button class="memo-oplossen-btn" data-memoid="'+m.id+'" style="font-size:15px;color:var(--green-t);background:none;border:none;cursor:pointer;font-weight:700;padding:2px 7px;border-radius:6px;line-height:1" title="Markeer als opgelost">✓</button>';
         h += '<button class="btn-icon memo-del-btn" data-memoid="'+m.id+'" style="font-size:18px;color:var(--red)" title="Verwijderen">'+ICO.trash+'</button>';
       }
       h += '</div></div>';
@@ -10380,7 +10384,7 @@ function renderMemoSectie(debId, inPanel) {
         var ti = memoTypeInfo('opgelost');
         h += '<div style="background:'+ti.bg+';border:1px solid '+ti.border+';border-radius:8px;padding:8px 12px;margin-top:6px;opacity:.7">';
         h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
-        h += '<div style="font-size:10px;color:var(--green);font-weight:700">✓ OPGELOST</div>';
+        h += '<div style="font-size:10px;color:var(--green-t);font-weight:700">✓ OPGELOST</div>';
         h += '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--muted)">'+esc(m.auteur||'')+'</span>';
         if(magSchrijven('debiteuren')) h += '<button class="btn-icon memo-del-btn" data-memoid="'+m.id+'" style="font-size:18px;color:var(--muted)" title="Verwijderen">'+ICO.trash+'</button>';
         h += '</div></div>';
@@ -10705,7 +10709,7 @@ function openDebPanel(id, opties){
   h+='</div>';
   if(sk){
     h+='<div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:12px;margin-bottom:16px">';
-    h+='<div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:4px">✓ Servicecontract</div>';
+    h+='<div style="font-size:12px;font-weight:600;color:var(--green-t);margin-bottom:4px">✓ Servicecontract</div>';
     h+='<div style="font-size:13px;font-weight:600">'+esc(sk.naam)+'</div>';
     h+='<div style="font-size:12px;color:var(--muted);margin-top:2px">Contract '+esc(sk.contractType)+' · Volgende: '+fmtD(sk.volgendeDatum)+'</div>';
     if(klantAanvulling(sk)) h+='<div style="margin-top:8px">'+bContractBadge(false, klantAanvulling(sk))+'</div>';
@@ -10742,7 +10746,7 @@ function openDebPanel(id, opties){
       h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px">';
       h+='<div style="flex:1;min-width:0">';
       h+='<div style="font-size:13px;font-weight:600">'+esc(c.naam||'Naamloos')
-        +(c.standaard?' <span style="color:var(--green);font-size:11px;font-weight:600">\u00b7 standaard</span>':'')+'</div>';
+        +(c.standaard?' <span style="color:var(--green-t);font-size:11px;font-weight:600">\u00b7 standaard</span>':'')+'</div>';
       if(c.functie) h+='<div style="font-size:11px;color:var(--muted)">'+esc(c.functie)+'</div>';
       var _cr=[];
       if(c.telefoon) _cr.push('<a href="tel:'+esc(String(c.telefoon).replace(/\s/g,''))+'" style="color:var(--accent);text-decoration:none">'+esc(c.telefoon)+'</a>');
@@ -10839,7 +10843,7 @@ function openDebPanel(id, opties){
         h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;border:1px solid '+(_inContract?'rgba(16,185,129,.35)':'transparent')+'">';
         h+='<div style="flex:1;min-width:0">';
         h+='<div style="font-size:13px;font-weight:600">'+_pTitel
-          +(_inContract?' <span style="color:var(--green);font-size:11px;font-weight:600">\u2713 contract</span>':'')+'</div>';
+          +(_inContract?' <span style="color:var(--green-t);font-size:11px;font-weight:600">\u2713 contract</span>':'')+'</div>';
         if(_pRegels.length) h+='<div style="font-size:11px;color:var(--muted)">'+_pRegels.join(' \u00b7 ')+'</div>';
         h+='</div>';
         h+='</div>';
@@ -11250,7 +11254,7 @@ function openDebModal(id){
       _mCts.forEach(function(c){
         b+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface);border-radius:8px;margin-bottom:6px">';
         b+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(c.naam||'Naamloos')
-          +(c.standaard?' <span style="color:var(--green);font-size:11px;font-weight:600">\u00b7 standaard</span>':'')+'</div>';
+          +(c.standaard?' <span style="color:var(--green-t);font-size:11px;font-weight:600">\u00b7 standaard</span>':'')+'</div>';
         var _mr=[]; if(c.functie) _mr.push(esc(c.functie)); if(c.telefoon) _mr.push(esc(c.telefoon)); if(c.email) _mr.push(esc(c.email));
         if(_mr.length) b+='<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_mr.join(' \u00b7 ')+'</div>';
         b+='</div></div>';
@@ -11884,7 +11888,7 @@ function _openContractImport(){
     var el2 = document.getElementById('cimp-preview'); if(!el2) return;
     if(!a){ el2.innerHTML = '<div style="font-size:12px;color:var(--orange-t)">Koppel eerst debiteurnummer én contractcode.</div>'; return; }
     var h = '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:10px 12px;line-height:1.7">';
-    h += '<div><strong style="color:var(--green)">'+a.bij.length+'</strong> serviceklant(en) worden bijgewerkt</div>';
+    h += '<div><strong style="color:var(--green-t)">'+a.bij.length+'</strong> serviceklant(en) worden bijgewerkt</div>';
     if(a.nieuw.length)         h += '<div><strong style="color:var(--accent)">'+a.nieuw.length+'</strong> nieuwe serviceklant(en) worden aangemaakt</div>';
     if(a.conflict.length)      h += '<div><strong style="color:var(--red)">'+a.conflict.length+'</strong> met meerdere onderhoudscontracten — worden overgeslagen</div>';
     if(a.geenSk.length)        h += '<div><strong style="color:var(--orange-t)">'+a.geenSk.length+'</strong> debiteurnummer(s) zonder serviceklant — worden overgeslagen</div>';
@@ -12005,7 +12009,7 @@ function _openContractImport(){
               k.aanvulling = null;
               k.heeftBContract = null;
               dbSaveItem('serviceklanten', k.id, k);
-              bt.outerHTML = '<span style="font-size:11px;color:var(--green);font-weight:600">Uitgevinkt</span>';
+              bt.outerHTML = '<span style="font-size:11px;color:var(--green-t);font-weight:600">Uitgevinkt</span>';
               renderDebiteuren();
             });
           });
@@ -12356,7 +12360,7 @@ function renderVerlof(){
     if(heeftItems) {
       h += '<span>'+items.length+' aanvra'+(items.length===1?'ag':'gen')+'</span>';
       h += '<span>·</span><span>'+totUren.toFixed(1)+' uur ('+totDagen.toFixed(1)+' dg)</span>';
-      if(goedItems) h += '<span>·</span><span style="color:var(--green)">'+goedItems+' goedgekeurd</span>';
+      if(goedItems) h += '<span>·</span><span style="color:var(--green-t)">'+goedItems+' goedgekeurd</span>';
     } else {
       h += '<span>Geen aanvragen in '+jaarStr+'</span>';
     }
@@ -12425,7 +12429,7 @@ function renderVerlof(){
           if(v.status==='aangevraagd'){
             // Alleen de ingestelde goedkeurder van deze medewerker (of admin) tekent.
             if(magGoedkeuren('verlof', v.medId)){
-              h += '<button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="1" style="color:var(--green)">✓</button> <button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="0" style="color:var(--red)">✗</button> ';
+              h += '<button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="1" style="color:var(--green-t)">✓</button> <button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="0" style="color:var(--red)">✗</button> ';
             } else {
               var _gkV = getGoedkeurderVoor(v.medId, 'verlof');
               h += '<span style="font-size:11px;color:var(--muted)">Wacht op '+esc(_gkV?(_gkV.voornaam||''):'beheerder')+'</span> ';
@@ -13098,7 +13102,7 @@ function _renderDagplanning() {
     content += '</div>';
 
     // Start marker
-    content += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:8px;border-radius:10px;font-size:13px;font-weight:600;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:#22c55e">'
+    content += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:8px;border-radius:10px;font-size:13px;font-weight:600;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:var(--green-t)">'
        + '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>'
        + _dpStarttijd+' — Vertrek vanaf bedrijfsadres</div>';
 
@@ -14551,8 +14555,8 @@ function _jpRenderStap3(voorkeurMaand){
 
   var b = '';
   b += '<div style="display:flex;gap:0;margin-bottom:16px;background:var(--surface2);border-radius:10px;padding:3px">';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green)">✓ Periode</div>';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green)">✓ Voorstel</div>';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green-t)">✓ Periode</div>';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green-t)">✓ Voorstel</div>';
   b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent-knop);color:#fff">3. Dagen</div>';
   b += '</div>';
 
@@ -14699,7 +14703,7 @@ function _jpRenderStap2(){
   var res = _jpResultaat;
   var b = '';
   b += '<div style="display:flex;gap:0;margin-bottom:16px;background:var(--surface2);border-radius:10px;padding:3px">';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green)">✓ Periode</div>';
+  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green-t)">✓ Periode</div>';
   b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent-knop);color:#fff">2. Voorstel</div>';
   b += '</div>';
 
@@ -15128,8 +15132,8 @@ function _apRenderStap3(){
   _apStap=3;
   var b='';
   b+='<div style="display:flex;gap:0;margin-bottom:16px;background:var(--surface2);border-radius:10px;padding:3px">';
-  b+='<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green)">✓ Configuratie</div>';
-  b+='<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green)">✓ Berekend</div>';
+  b+='<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green-t)">✓ Configuratie</div>';
+  b+='<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green-t)">✓ Berekend</div>';
   b+='<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent-knop);color:#fff">3. Voorstel</div>';
   b+='</div>';
 
@@ -15225,12 +15229,12 @@ function _apRenderStap3(){
     b+='</div>';
   } else {
     b+='<div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:14px 16px;margin-bottom:12px">';
-    b+='<div style="font-size:13px;font-weight:600;color:var(--green)">✓ Alle servicebeurten zijn succesvol verdeeld</div></div>';
+    b+='<div style="font-size:13px;font-weight:600;color:var(--green-t)">✓ Alle servicebeurten zijn succesvol verdeeld</div></div>';
   }
 
   var f='<button class="btn btn-ghost" id="ap-terug">← Terug</button>';
   f+='<button class="btn btn-ghost" id="ap-opnieuw">Opnieuw berekenen</button>';
-  f+='<button class="btn btn-primary" id="ap-aanmaken" style="background:var(--green)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Aanmaken in planning</button>';
+  f+='<button class="btn btn-primary" id="ap-aanmaken" style="background:var(--green-knop);border-color:var(--green-knop)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Aanmaken in planning</button>';
   document.getElementById('modal-body').innerHTML=b;
   document.getElementById('modal-footer').innerHTML=f;
   document.getElementById('ap-terug').addEventListener('click',function(){_jpRenderStap3(_apMaand);});
@@ -16883,7 +16887,7 @@ function openOpdrachtPanel(id) {
 
   h += '<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px">';
   if (o.werkbonId) {
-    h += '<button class="btn btn-primary" id="op-werkbon" style="justify-content:center;background:var(--green)">'+(ICO.clipboard||ICO.document||'')+' Werkbon openen</button>';
+    h += '<button class="btn btn-primary" id="op-werkbon" style="justify-content:center;background:var(--green-knop);border-color:var(--green-knop)">'+(ICO.clipboard||ICO.document||'')+' Werkbon openen</button>';
   }
   // Klantmail is een externe actie namens het bedrijf; planners houden hun bestaande
   // recht, monteurs zonder schrijfrecht kunnen niet ongemerkt namens het bedrijf mailen.
@@ -17326,7 +17330,7 @@ function openOpdrachtModal(id, prefill) {
           + '<div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(k.label)+'</div>'
           + '<div style="font-size:11px;color:var(--muted);margin-top:1px">'+esc(k.sub)+'</div>'
           + '</div>'
-          + (isServiceKl ? '<span style="font-size:10px;background:rgba(16,185,129,.15);color:var(--green);border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0">Contract</span>' : '')
+          + (isServiceKl ? '<span style="font-size:10px;background:rgba(16,185,129,.15);color:var(--green-t);border-radius:4px;padding:2px 6px;white-space:nowrap;flex-shrink:0">Contract</span>' : '')
           + '</div>';
       }).join('') + _nwOptie;
     }
@@ -18444,7 +18448,7 @@ function renderOveruren() {
           h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
           if(o.status==='aangevraagd') {
             if(magTekenen) {
-              h += '<button class="btn btn-ghost btn-sm ou-goed-btn" data-id="'+o.id+'" style="color:var(--green)">'+ICO.check+' Goed</button>';
+              h += '<button class="btn btn-ghost btn-sm ou-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">'+ICO.check+' Goed</button>';
               h += '<button class="btn btn-ghost btn-sm ou-af-btn" data-id="'+o.id+'" style="color:var(--red)">'+ICO.cross+' Af</button>';
             } else {
               var _gk = getGoedkeurderVoor(mid, 'overuren');
@@ -18977,7 +18981,7 @@ function renderOnkosten() {
           h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
           if(o.status==='aangevraagd'){
             if(magTekenenOk){
-              h += '<button class="btn btn-ghost btn-sm ok-goed-btn" data-id="'+o.id+'" style="color:var(--green)">✓</button>';
+              h += '<button class="btn btn-ghost btn-sm ok-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">✓</button>';
               h += '<button class="btn btn-ghost btn-sm ok-af-btn" data-id="'+o.id+'" style="color:var(--red)">✗</button>';
             } else {
               var _gkK = getGoedkeurderVoor(o.medId, 'onkosten');
@@ -19411,7 +19415,7 @@ function renderVerzuim() {
     if(heeftItems) {
       h += '<span>'+items.length+' melding'+(items.length===1?'':'en')+'</span>';
       h += '<span>·</span><span>'+totDg+' werkdagen</span>';
-      if(hersteldItems) h += '<span>·</span><span style="color:var(--green)">'+hersteldItems+' hersteld</span>';
+      if(hersteldItems) h += '<span>·</span><span style="color:var(--green-t)">'+hersteldItems+' hersteld</span>';
     } else {
       h += '<span>Geen verzuim in '+jaarStr+'</span>';
     }
@@ -19455,7 +19459,7 @@ function renderVerzuim() {
         if(kanBeheren){
           h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
           if(v.status==='actief'||v.status==='langdurig'){
-            h += '<button class="btn btn-ghost btn-sm vz-herstel-btn" data-id="'+v.id+'" style="color:var(--green);font-size:11px">✓ Hersteld</button>';
+            h += '<button class="btn btn-ghost btn-sm vz-herstel-btn" data-id="'+v.id+'" style="color:var(--green-t);font-size:11px">✓ Hersteld</button>';
             if(v.status==='actief'&&duren>42) h += '<button class="btn btn-ghost btn-sm vz-lang-btn" data-id="'+v.id+'" style="color:var(--orange-t);font-size:11px">⚠ Langdurig</button>';
           }
           h += '</td>';
@@ -19676,7 +19680,7 @@ function openVerzuimPanel(id){
   if(v.type==='gedeeltelijk'&&(v.urenZiek||v.urenWerk)){
     h+='<div style="display:flex;gap:10px;margin-top:6px">';
     if(v.urenZiek) h+='<div style="background:rgba(239,68,68,.1);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--red)">'+ICO.thermo+' '+v.urenZiek+'u ziek/dag</div>';
-    if(v.urenWerk) h+='<div style="background:rgba(16,185,129,.1);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--green)">'+ICO.koffer+' '+v.urenWerk+'u werkt/dag</div>';
+    if(v.urenWerk) h+='<div style="background:rgba(16,185,129,.1);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--green-t)">'+ICO.koffer+' '+v.urenWerk+'u werkt/dag</div>';
     h+='</div>';
   }
   h+='<div style="margin-top:6px"><span class="tag" style="background:'+stKleur+'22;color:'+stKleur+'">'+esc(v.status)+'</span></div></div>';
@@ -23891,7 +23895,7 @@ function _renderPompOverzichtAccordion(pomp, klantNm, kanSchrijven, kanDocUpload
   // Technisch
   var techInhoud = renderPompTechnisch(pomp, klantNm, kanSchrijven);
   var heeftTech = !!(pomp.fabrikant||pomp.bouwjaar||pomp.iNom||pomp.waaierD);
-  var techBadge = heeftTech ? '<span class="tag" style="background:rgba(16,185,129,.15);color:var(--green);font-size:10px">✓ Gevuld</span>' : '';
+  var techBadge = heeftTech ? '<span class="tag" style="background:rgba(16,185,129,.15);color:var(--green-t);font-size:10px">✓ Gevuld</span>' : '';
   prAccSectie('technisch', 'Technische gegevens', techBadge, techInhoud);
 
   // Documenten
@@ -24974,7 +24978,7 @@ function openPompModal(id, opties) {
         return '<div class="pr-klant-opt" data-val="'+esc(k.val)+'" data-label="'+esc(k.label)+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">'
           +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(k.label)+'</div>'
           +'<div style="font-size:11px;color:var(--muted);margin-top:1px">'+esc(k.sub)+'</div></div>'
-          +(k.type==='sk'?'<span style="font-size:10px;background:rgba(16,185,129,.15);color:var(--green);border-radius:4px;padding:2px 6px;flex-shrink:0">Contract</span>':'')
+          +(k.type==='sk'?'<span style="font-size:10px;background:rgba(16,185,129,.15);color:var(--green-t);border-radius:4px;padding:2px 6px;flex-shrink:0">Contract</span>':'')
           +'</div>';
       }).join('');
     }
@@ -25272,7 +25276,7 @@ async function _prAnalyseerPdfBuffer(arrayBuffer, statusEl, previewEl, saveBtn, 
     var aantalRijenMetGetal = Object.keys((function(){ var r={}; alleItems.forEach(function(i){ if(/^\d{1,4}$/.test(i.tekst)){ var k=Math.round(i.y/8)*8; r[k]=true; }}); return r; })()).length;
     var waarschuwing = (onderdelen.length < aantalRijenMetGetal * 0.7);
     if(statusEl){
-      statusEl.innerHTML = '<div style="color:var(--green)">✓ '+onderdelen.length+' onderdelen herkend — controleer en sla op.</div>';
+      statusEl.innerHTML = '<div style="color:var(--green-t)">✓ '+onderdelen.length+' onderdelen herkend — controleer en sla op.</div>';
       if(waarschuwing) statusEl.innerHTML += '<div style="color:var(--orange-t);margin-top:6px;font-size:11px">⚠ Mogelijk niet alle onderdelen herkend ('+onderdelen.length+' van ~'+aantalRijenMetGetal+' verwacht). Controleer de preview zorgvuldig.</div>';
     }
     // Preview
@@ -27683,7 +27687,7 @@ function openMailModal(opdrachtId) {
     b += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">';
     b += '<div><div style="font-weight:600;font-size:13px">'+esc(tpl.naam)+'</div>';
     b += '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+esc(vulMailIn(tpl.onderwerp,o))+'</div>';
-    if(alVerzonden) b += '<div style="font-size:11px;color:var(--green);margin-top:4px">✓ Verstuurd op '+fmtD(alVerzonden.datum)+'</div>';
+    if(alVerzonden) b += '<div style="font-size:11px;color:var(--green-t);margin-top:4px">✓ Verstuurd op '+fmtD(alVerzonden.datum)+'</div>';
     b += '</div>';
     b += '<button class="btn btn-primary btn-sm mail-send-btn" data-tpl="'+tpl.id+'" data-op="'+opdrachtId+'">'+ICO.mail+' Openen</button>';
     b += '</div>';
@@ -27886,7 +27890,7 @@ function renderKlantmails() {
       if (!email) {
         h += '<span style="font-size:11px;color:var(--muted)">Geen e-mail</span>';
       } else if (verzonden) {
-        h += '<div style="font-size:11px;color:var(--green);margin-bottom:3px">✓ '+fmtD(laasteMail.datum)+'</div>';
+        h += '<div style="font-size:11px;color:var(--green-t);margin-bottom:3px">✓ '+fmtD(laasteMail.datum)+'</div>';
         h += '<button class="btn btn-ghost btn-sm mail-bulk-btn" data-id="'+o.id+'" style="font-size:11px;padding:3px 8px">↻ Opnieuw</button>';
       } else {
         h += '<button class="btn btn-primary btn-sm mail-bulk-btn" data-id="'+o.id+'">'+ICO.mail+' Versturen</button>';
@@ -28637,7 +28641,7 @@ function openRapMedPanel(medId, tabNaam) {
       h += '<div style="display:flex;justify-content:space-between;align-items:center">';
       h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(o.datum)+' · '+esc(o.categorie||'—')+'</div>';
       h += '<div style="font-size:11px;color:var(--muted)">'+esc(o.omschrijving||'')+'</div></div>';
-      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--green)">€ '+(o.bedrag||0).toFixed(2)+'</div>';
+      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--green-t)">€ '+(o.bedrag||0).toFixed(2)+'</div>';
       h += '<div style="font-size:11px;color:'+stKleur+'">'+esc(o.status)+'</div></div></div></div>';
     });
     if(!data2.length) h += '<div style="color:var(--muted);font-size:13px">Geen onkosten in '+jaarStr+'</div>';
@@ -28863,7 +28867,7 @@ function renderRapOpdrachten(el) {
     h += '<tr>';
     h += '<td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:#fff;flex-shrink:0">'+initials(m)+'</div><span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
     h += '<td style="font-weight:700">'+r.totaal+'</td>';
-    h += '<td style="color:var(--green);font-weight:600">'+r.afgehandeld+'</td>';
+    h += '<td style="color:var(--green-t);font-weight:600">'+r.afgehandeld+'</td>';
     h += '<td style="color:var(--orange-t)">'+r.open+'</td>';
     h += '<td style="color:var(--red)">'+r.spoed+'</td>';
     h += '<td><div style="display:flex;align-items:center;gap:8px"><div class="progress" style="width:80px"><div class="progress-fill" style="width:'+pct+'%;background:'+(pct>=80?'var(--green)':pct>=50?'var(--orange)':'var(--red)')+'"></div></div><span style="font-size:12px">'+pct+'%</span></div></td>';
@@ -28885,7 +28889,7 @@ function renderRapOpdrachten(el) {
   h += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:14px">Per maand — '+_rapJaar+'</div>';
   h += '<div class="table-wrap"><table style="width:100%"><thead><tr>'+_opmTh('Maand','mnd')+_opmTh('Totaal','totaal')+_opmTh('Afgehandeld','afgehandeld')+_opmTh('Open','open')+'</tr></thead><tbody>';
   opMndRijen.forEach(function(r){
-    h += '<tr><td style="font-weight:600">'+r.mndLabel+'</td><td>'+r.totaal+'</td><td style="color:var(--green)">'+r.afgehandeld+'</td><td style="color:var(--muted)">'+r.open+'</td></tr>';
+    h += '<tr><td style="font-weight:600">'+r.mndLabel+'</td><td>'+r.totaal+'</td><td style="color:var(--green-t)">'+r.afgehandeld+'</td><td style="color:var(--muted)">'+r.open+'</td></tr>';
   });
   h += '</tbody></table></div>';
   h += '<button class="btn btn-ghost btn-sm" id="rap-op-export" style="margin-top:12px">'+ICO.download+' Export</button>';
@@ -29571,7 +29575,7 @@ function renderRapOveruren(el) {
   ouRijen.forEach(function(r){
     var m=r.med, kl=m?(medKleur(m)):'#6b7694';
     h+='<tr class="rap-med-rij" data-id="'+r.mid+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px">'+(m?'<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:#fff">'+initials(m)+'</div>':'')+'<span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
-    h+='<td style="padding:10px 14px;font-weight:700">'+r.totaal+'u</td><td style="padding:10px 14px">'+r.goedgekeurd+'u</td><td style="padding:10px 14px;color:var(--green)">'+r.gecompenseerd+'u</td><td style="padding:10px 14px;color:var(--muted)">'+r.uitbetaald+'u</td></tr>';
+    h+='<td style="padding:10px 14px;font-weight:700">'+r.totaal+'u</td><td style="padding:10px 14px">'+r.goedgekeurd+'u</td><td style="padding:10px 14px;color:var(--green-t)">'+r.gecompenseerd+'u</td><td style="padding:10px 14px;color:var(--muted)">'+r.uitbetaald+'u</td></tr>';
   });
   if(!ouRijen.length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
@@ -29630,7 +29634,7 @@ function renderRapOnkosten(el) {
   _onkMids.forEach(function(rr){ var mid=rr.mid;
     var m=getMed(mid);var d=perMed[mid];var kl=m?(medKleur(m)):'#6b7694';
     h+='<tr class="rap-med-rij" data-id="'+mid+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px">'+(m?'<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:#fff">'+initials(m)+'</div>':'')+'<span style="font-weight:600">'+esc(m?m.voornaam+' '+m.achternaam:'?')+'</span></div></td>';
-    h+='<td style="padding:10px 14px">'+d.n+'</td><td style="padding:10px 14px;font-weight:700">€ '+d.tot.toFixed(2)+'</td><td style="padding:10px 14px;color:var(--accent)">€ '+d.goed.toFixed(2)+'</td><td style="padding:10px 14px;color:var(--green)">€ '+d.uitb.toFixed(2)+'</td></tr>';
+    h+='<td style="padding:10px 14px">'+d.n+'</td><td style="padding:10px 14px;font-weight:700">€ '+d.tot.toFixed(2)+'</td><td style="padding:10px 14px;color:var(--accent)">€ '+d.goed.toFixed(2)+'</td><td style="padding:10px 14px;color:var(--green-t)">€ '+d.uitb.toFixed(2)+'</td></tr>';
   });
   if(!Object.keys(perMed).length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
@@ -33062,7 +33066,7 @@ function _dashDringendVul(){
     h += '</div>';
 
     if(!items.length){
-      h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 12px;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">Geen dringende werkorders</div></div>';
+      h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 12px;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green-t)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">Geen dringende werkorders</div></div>';
     } else {
       items.slice(0,8).forEach(function(it){
         var w = it.w, info = it.info;
@@ -34368,7 +34372,7 @@ function _woRenderDetail(){
      + '<span style="font-size:13px;font-weight:600;color:var(--muted);margin-left:7px;white-space:nowrap">'+esc(_woNummerLabel(wo))+'</span></div>';
   if(_kopKlant) h += '<div style="font-size:12.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'+((wo&&wo.tbvVoorraad)?';font-style:italic':'')+'">'+esc(_kopKlant)+'</div>';
   h += '</div>';
-  h += '<span id="wox-save-status" style="font-size:12px;color:var(--green);min-width:70px;text-align:right;transition:opacity .2s"></span>';
+  h += '<span id="wox-save-status" style="font-size:12px;color:var(--green-t);min-width:70px;text-align:right;transition:opacity .2s"></span>';
   h += '<span class="tag tag-'+esc(statusKl)+'" style="font-size:12px">'+esc(statusNaam)+'</span>';
   h += '</div>';
 
@@ -34420,7 +34424,7 @@ function _woRenderDetail(){
       }
       if(sAfgerond){
         var sAfrTijd = sAntw._afgerondOp ? fmtD(new Date(sAntw._afgerondOp).toISOString().slice(0,10)) : '';
-        h += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green);font-weight:600"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Afgerond'+(sAfrTijd?(' op '+esc(sAfrTijd)):'')+'</div>';
+        h += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green-t);font-weight:600"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Afgerond'+(sAfrTijd?(' op '+esc(sAfrTijd)):'')+'</div>';
         if(isAdmin() || magBeheren('werkorders')) h += '<button type="button" class="btn btn-ghost btn-sm wox-simpel-heropen" style="margin-top:6px;font-size:11px">Heropenen</button>';
       } else if(_woDetailState.bewerkbaar){
         if(_tSec.mail){
@@ -34602,7 +34606,7 @@ function _woBlokAccordionHtml(bl, bi){
       // Afrond-knop of afgerond-status
       if(afgerond){
         var afrTijd = antw._afgerondOp ? fmtD(new Date(antw._afgerondOp).toISOString().slice(0,10)) : '';
-        h += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green);font-weight:600"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Blok afgerond'+(afrTijd?(' op '+esc(afrTijd)):'')+(bl.afronding.mail?(' · gemaild → '+(bl.afronding.mailNaar||'kantoor')):'')+'</div>';
+        h += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green-t);font-weight:600"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Blok afgerond'+(afrTijd?(' op '+esc(afrTijd)):'')+(bl.afronding.mail?(' · gemaild → '+(bl.afronding.mailNaar||'kantoor')):'')+'</div>';
         if(isAdmin() || magBeheren('werkorders')) h += '<button type="button" class="btn btn-ghost btn-sm wox-blok-heropen" data-bi="'+bi+'" style="margin-top:6px;font-size:11px">Heropenen</button>';
       } else if(_woDetailState.bewerkbaar){
         if(bl.afronding.mail){
