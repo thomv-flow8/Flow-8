@@ -578,13 +578,14 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   /* ── SIDEBAR: volledig off-canvas ── */
   #sidebar{
     position:fixed;left:-100%;width:80%;max-width:280px;
-    z-index:50;transition:left .25s ease;height:100%;
+    /* Boven de onderbalk (#bottom-nav, 300): anders valt de voet met Uitloggen eronder weg. */
+    z-index:320;transition:left .25s ease;height:100%;
     top:0;box-shadow:4px 0 24px rgba(0,0,0,.4);
     overflow-y:auto;
     padding-bottom:env(safe-area-inset-bottom, 16px);
   }
   #sidebar.open{left:0}
-  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:310}
   .sidebar-overlay.open{display:block}
 
   /* ── MAIN: vult het scherm ── */
