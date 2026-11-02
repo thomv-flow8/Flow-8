@@ -12,8 +12,7 @@ dan hier.
 | Bestand | Inhoud |
 |---|---|
 | `kaartoverzicht.webp` | Kaartoverzicht, honderden serviceklanten — bron van `site/beeld/kaart-vlak.webp` |
-| `planning-week.webp`  | Planning, weekweergave |
-| `register.webp`       | Register met klantkaart |
+| `register.webp`       | Installatieregister: coördinaten en een satellietpin op de installatie |
 | `route.webp`          | Dagroute met rij- en werktijden |
 
 Nog niet beschikbaar: een opname van de werkbon op een telefoon.
