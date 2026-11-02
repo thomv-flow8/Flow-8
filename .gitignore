@@ -20,3 +20,6 @@ node_modules/
 site-preview.html
 *-preview.html
 *-varianten.html
+
+# Werkbestanden in site/ (vergelijkingsbladen, proefjes) — zie tools/bouw-site.js
+site/_*

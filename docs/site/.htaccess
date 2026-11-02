@@ -1,11 +1,9 @@
-# Flow8 marketingsite (flow-8.nl) — gegenereerd door publiceer.js, niet met de hand aanpassen.
+# Flow8 marketingsite — gegenereerd door tools/bouw-site.js, niet met de hand aanpassen.
 
 DirectoryIndex index.html
 
 # ── https afdwingen ──
-# Het controlepad van Let's Encrypt blijft bewust over http bereikbaar: anders moet de
-# uitgifte via een doorverwijzing naar een certificaat dat er nog niet is, en dat is precies
-# de situatie bij een eerste aanvraag.
+# Het controlepad van Let's Encrypt blijft bewust over http bereikbaar.
 RewriteEngine On
 RewriteCond %{HTTPS} !=on
 RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/
@@ -23,9 +21,14 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
 
-  # Ook hier nog geen CSP: de marketingsite is een gebundelde export met een verwijzing naar
-  # React op unpkg.com in een JSON-blok. Of die bij het laden echt opgehaald wordt is van
-  # buitenaf niet met zekerheid te zien, dus eerst Report-Only, dan pas afdwingen.
+  # Deze site laadt alles van zichzelf: geen externe scripts, geen Google Fonts.
+  # Daarom kan de CSP hier wél streng, anders dan bij de app. 'self' en niet 'none'
+  # voor script-src, omdat rekenmodule.js de prijsindicatie levend maakt; dat is één
+  # eigen bestand, geen inline code, dus 'unsafe-inline' blijft eruit.
+  # connect-src staat de eigen Cloud Function toe: daar gaat het contactformulier
+  # heen. Zonder die regel valt hij terug op default-src 'self' en blokkeert de
+  # browser de aanvraag — stil, met alleen een melding in de console.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://europe-west1-flow8-715de.cloudfunctions.net; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
 
   # Pas aanzetten als https op Cloud86 bewezen werkt — browsers onthouden dit een jaar:
   # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -35,5 +38,8 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 <IfModule mod_headers.c>
   <FilesMatch "\.html$">
     Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(webp|png|jpg|svg|woff2|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
 </IfModule>

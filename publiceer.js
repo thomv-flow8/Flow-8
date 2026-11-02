@@ -8,7 +8,7 @@
 // Daardoor kan de oude omgeving gewoon blijven draaien zolang de verhuizing loopt: Pages
 // serveert de bronbestanden met /Flow-8/, Cloud86 serveert docs/ met /.
 //
-//   docs/site/   → flow-8.nl        (marketingsite)
+//   docs/site/   → flow-8.nl        (marketingsite — NIET hier, zie tools/bouw-site.js)
 //   docs/app/    → app.flow-8.nl    (de applicatie)
 //
 // Draai het script twee keer: de tweede keer hoort "0 bestanden bijgewerkt" te geven. Staat
@@ -135,33 +135,7 @@ ${HSTS_UITLEG.split('\n').map(r => '  ' + r).join('\n')}
 </IfModule>
 `;
 
-const HTACCESS_SITE = `# Flow8 marketingsite (flow-8.nl) — gegenereerd door publiceer.js, niet met de hand aanpassen.
-
-DirectoryIndex index.html
-
-${HTACCESS_BASIS}
-
-# ── Beveiligingskoppen ──
-<IfModule mod_headers.c>
-  Header always set X-Content-Type-Options "nosniff"
-  Header always set X-Frame-Options "DENY"
-  Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
-
-  # Ook hier nog geen CSP: de marketingsite is een gebundelde export met een verwijzing naar
-  # React op unpkg.com in een JSON-blok. Of die bij het laden echt opgehaald wordt is van
-  # buitenaf niet met zekerheid te zien, dus eerst Report-Only, dan pas afdwingen.
-
-${HSTS_UITLEG.split('\n').map(r => '  ' + r).join('\n')}
-</IfModule>
-
-# ── Caching ──
-<IfModule mod_headers.c>
-  <FilesMatch "\\.html$">
-    Header set Cache-Control "public, max-age=0, must-revalidate"
-  </FilesMatch>
-</IfModule>
-`;
+// HTACCESS_SITE stond hier; die hoort nu bij tools/bouw-site.js.
 
 // ── Bouwen ───────────────────────────────────────────────────────────────────
 
@@ -191,15 +165,10 @@ try {
 
   schrijf('docs/app/.htaccess', HTACCESS_APP);
 
-  // 3. De marketingsite. De drie knoppen naar de app wijzen nu naar het eigen subdomein.
-  let site = lees('Flow8-website.html');
-  site = vervang(site,
-    'https://thomv-flow8.github.io/Flow-8/flow8-v2.html',
-    `https://${APP_HOST}/flow8-v2.html`,
-    3, 'Flow8-website.html (knoppen naar de app)');
-  schrijf('docs/site/index.html', site);
-
-  schrijf('docs/site/.htaccess', HTACCESS_SITE);
+  // De marketingsite stond hier ook, gebouwd uit Flow8-website.html. Die bundel is
+  // sinds de omzetting geen bron meer: de site komt nu uit site/ en wordt gebouwd
+  // door tools/bouw-site.js. Zou dit script docs/site/ blijven schrijven, dan zette
+  // één keer "node publiceer.js" de oude site er zo weer overheen.
 
   if (ALLEEN_CONTROLE) {
     if (gewijzigd === 0) { console.log('✓ docs/ is bij'); process.exit(0); }

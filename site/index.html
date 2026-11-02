@@ -3,363 +3,1220 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flow 8 — planning en digitale werkbonnen voor installatie en service</title>
-<meta name="description" content="Planning met route-optimalisatie, digitale werkbonnen en klantbeheer voor installatie- en servicebedrijven. Kantoor en veld in één omgeving.">
-<link rel="canonical" href="https://flow-8.nl/">
-
-<!-- Linkvoorbeeld bij delen via WhatsApp en socials — in deze branche gaat dat veel. -->
+<title>Flow 8 — Field Service Management voor installatie en service</title>
+<meta name="description" content="Planning, digitale werkbonnen en rapportage in één omgeving. Flow 8 verbindt kantoor en veld voor installatie- en servicebedrijven. Vanaf € 9 per gebruiker per maand.">
+<meta name="theme-color" content="#0a0b10">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://flow-8.nl/">
-<meta property="og:locale" content="nl_NL">
 <meta property="og:site_name" content="Flow 8">
-<meta property="og:title" content="Flow 8 — planning en digitale werkbonnen voor installatie en service">
-<meta property="og:description" content="Kantoor en veld in één omgeving. Plan met route-optimalisatie en handel werkbonnen digitaal af.">
-<meta property="og:image" content="https://flow-8.nl/beeld/route.webp">
-<meta property="og:image:width" content="1364">
-<meta property="og:image:height" content="1036">
-<meta property="og:image:alt" content="Een dagroute in Flow 8: vijf opdrachten op de kaart met de rijtijden ernaast">
+<meta property="og:title" content="Flow 8 — de brug tussen planner en monteur">
+<meta property="og:description" content="Planning, digitale werkbonnen en rapportage in één omgeving. Vanaf € 9 per gebruiker per maand, eerste 3 maanden gratis.">
+<meta property="og:locale" content="nl_NL">
 <meta name="twitter:card" content="summary_large_image">
-
-<link rel="stylesheet" href="stijl.css">
-<link rel="icon" href="merk.svg" type="image/svg+xml">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCcgdmlld0JveD0nMCAwIDY0IDY0Jz48cmVjdCB3aWR0aD0nNjQnIGhlaWdodD0nNjQnIHJ4PScxNCcgZmlsbD0nIzBhMGIxMCcvPjxnIHRyYW5zZm9ybT0ndHJhbnNsYXRlKC0zIDApJz48cGF0aCBkPSdNMTIgMzIgQzEyIDIyIDE4IDE2IDI1IDE2IEMzMiAxNiAzNiAyNCA0MiAzMiBDNDggNDAgNTIgNDggNTkgNDgnIHN0cm9rZT0nIzZkOGNmZicgc3Ryb2tlLXdpZHRoPSc2LjUnIGZpbGw9J25vbmUnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcvPjxwYXRoIGQ9J00xMiAzMiBDMTIgNDIgMTggNDggMjUgNDggQzMyIDQ4IDM2IDQwIDQyIDMyIEM0OCAyNCA1MiAxNiA1OSAxNicgc3Ryb2tlPScjN2ZlMGY1JyBzdHJva2Utd2lkdGg9JzYuNScgZmlsbD0nbm9uZScgc3Ryb2tlLWxpbmVjYXA9J3JvdW5kJyBvcGFjaXR5PScuNicvPjwvZz48L3N2Zz4=">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc2NCcgaGVpZ2h0PSc2NCcgdmlld0JveD0nMCAwIDY0IDY0Jz48cmVjdCB3aWR0aD0nNjQnIGhlaWdodD0nNjQnIHJ4PScxNCcgZmlsbD0nIzBhMGIxMCcvPjxnIHRyYW5zZm9ybT0ndHJhbnNsYXRlKC0zIDApJz48cGF0aCBkPSdNMTIgMzIgQzEyIDIyIDE4IDE2IDI1IDE2IEMzMiAxNiAzNiAyNCA0MiAzMiBDNDggNDAgNTIgNDggNTkgNDgnIHN0cm9rZT0nIzZkOGNmZicgc3Ryb2tlLXdpZHRoPSc2LjUnIGZpbGw9J25vbmUnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcvPjxwYXRoIGQ9J00xMiAzMiBDMTIgNDIgMTggNDggMjUgNDggQzMyIDQ4IDM2IDQwIDQyIDMyIEM0OCAyNCA1MiAxNiA1OSAxNicgc3Ryb2tlPScjN2ZlMGY1JyBzdHJva2Utd2lkdGg9JzYuNScgZmlsbD0nbm9uZScgc3Ryb2tlLWxpbmVjYXA9J3JvdW5kJyBvcGFjaXR5PScuNicvPjwvZz48L3N2Zz4=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<style>
+/* Zelf gehost, geen externe lettertypedienst — zelfde keuze als bij ViVo (AVG).
+   De export laadde ze als losse bestanden met een UUID als naam; hier komen ze
+   uit @fontsource. Syne (alleen het FLOW 8-woordmerk, gewicht 300 en 800)
+   ontbreekt nog:  npm install --no-save @fontsource/syne  */
+@font-face{font-family:'Instrument Sans';src:url(fonts/InstrumentSans-400.woff2) format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url(fonts/InstrumentSans-500.woff2) format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url(fonts/InstrumentSans-600.woff2) format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url(fonts/InstrumentSans-700.woff2) format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Space Mono';src:url(fonts/SpaceMono-400.woff2) format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Space Mono';src:url(fonts/SpaceMono-700.woff2) format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Syne';src:url(fonts/Syne-400.woff2) format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Syne';src:url(fonts/Syne-800.woff2) format('woff2');font-weight:800;font-style:normal;font-display:swap}
+</style>
+<style>
+:root{--acc:#4f6ef5;--acc2:#8ea2ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#0a0b10;color:#f4f6fb;font-family:'Instrument Sans',ui-sans-serif,system-ui,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--acc2)}
+ul{list-style:none}
+[data-reveal]{opacity:0;transform:translateY(14px);transition:opacity .62s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
+[data-reveal="mock"]{transform:translateY(24px) scale(.985);transition:opacity .8s cubic-bezier(.2,.7,.3,1),transform .88s cubic-bezier(.2,.7,.3,1)}
+[data-reveal][data-in]{opacity:1;transform:none}
+[data-delay="50"]{transition-delay:50ms}[data-delay="80"]{transition-delay:80ms}[data-delay="90"]{transition-delay:90ms}
+[data-delay="100"]{transition-delay:100ms}[data-delay="150"]{transition-delay:150ms}[data-delay="160"]{transition-delay:160ms}
+[data-delay="180"]{transition-delay:180ms}[data-delay="200"]{transition-delay:200ms}[data-delay="240"]{transition-delay:240ms}
+[data-delay="250"]{transition-delay:250ms}[data-delay="260"]{transition-delay:260ms}[data-delay="300"]{transition-delay:300ms}
+[data-delay="350"]{transition-delay:350ms}
+@keyframes cue{0%{transform:scaleY(.3);transform-origin:top;opacity:.3}50%{transform:scaleY(1);opacity:1}100%{transform:scaleY(.3);transform-origin:bottom;opacity:.3}}
+@keyframes flowarc{to{stroke-dashoffset:-100}}
+@keyframes vwBreathe{0%,100%{opacity:.34;transform:scale(1)}50%{opacity:.6;transform:scale(1.012)}}
+@keyframes vwOrbit{to{transform:rotate(360deg)}}
+@keyframes vwTrace{to{stroke-dashoffset:-40}}
+@keyframes vwNode{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+[data-vwnode]{transform-box:fill-box;transform-origin:center}
+@keyframes glowpulse{0%,100%{opacity:.8}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+<style>
+/* Zweefstijlen: in de export stonden die in een style-hover-attribuut, hier als
+   gewone CSS-regels met een eigen klasse per element. */
+.zw1:hover{color:#fff;background:rgba(255,255,255,.07)}
+.zw2:hover{color:#fff;background:rgba(255,255,255,.07)}
+.zw3:hover{color:#fff;background:rgba(255,255,255,.07)}
+.zw4:hover{background:rgba(255,255,255,.06);color:#fff}
+.zw5:hover{background:rgba(255,255,255,.06);color:#fff}
+.zw6:hover{background:rgba(255,255,255,.06);color:#fff}
+.zw7:hover{background:rgba(255,255,255,.06);color:#fff}
+.zw8:hover{background:rgba(255,255,255,.06);color:#fff}
+.zw9:hover{color:#fff;background:rgba(255,255,255,.07)}
+.zw10:hover{color:#fff;background:rgba(255,255,255,.07)}
+.zw11:hover{background:rgba(255,255,255,.06);color:#fff}
+.zw12:hover{background:rgba(255,255,255,.06);color:#fff}
+.zw13:hover{background:rgba(255,255,255,.06);color:#fff}
+.zw14:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 8px 26px rgba(79,110,245,.45);color:#fff}
+.zw15:hover{background:#1a1e28;color:#fff}
+.zw16:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 8px 26px rgba(79,110,245,.45);color:#fff}
+.zw17:hover{border-color:#f4f6fb;color:#f4f6fb}
+.zw18:hover{border-color:#c9d0ff;box-shadow:0 10px 26px rgba(20,26,60,.07)}
+.zw19:hover{border-color:#c9d0ff;box-shadow:0 10px 26px rgba(20,26,60,.07)}
+.zw20:hover{border-color:#c9d0ff;box-shadow:0 10px 26px rgba(20,26,60,.07)}
+.zw21:hover{border-color:#c9d0ff;box-shadow:0 10px 26px rgba(20,26,60,.07)}
+.zw22:hover{border-color:#c9d0ff;box-shadow:0 10px 26px rgba(20,26,60,.07)}
+.zw23:hover{border-color:#c9d0ff;box-shadow:0 10px 26px rgba(20,26,60,.07)}
+.zw24:hover{border-color:#c9d0ff;box-shadow:0 10px 26px rgba(20,26,60,.07)}
+.zw25:hover{border-color:#c9d0ff;box-shadow:0 10px 26px rgba(20,26,60,.07)}
+.zw26:hover{border-color:#c9d0ff}
+.zw27:hover{border-color:#c9d0ff}
+.zw28:hover{border-color:#c9d0ff}
+.zw29:hover{border-color:#c9d0ff}
+.zw30:hover{border-color:#c9d0ff}
+.zw31:hover{border-color:#c9d0ff;box-shadow:0 14px 40px rgba(20,26,60,.08)}
+.zw32:hover{border-color:#c9d0ff;box-shadow:0 14px 40px rgba(20,26,60,.08)}
+.zw33:hover{border-color:#c9d0ff;box-shadow:0 14px 40px rgba(20,26,60,.08)}
+.zw34:hover{transform:translateY(-1px);filter:brightness(1.08);color:#fff}
+.zw35:hover{transform:translateY(-1px);filter:brightness(1.08);box-shadow:0 10px 30px rgba(79,110,245,.4)}
+.zw36:hover{border-color:var(--acc);color:#fff}
+.zw37:hover{color:#fff}
+.zw38:hover{color:#fff}
+.zw39:focus{left:16px}
+.zw40:focus{border-color:var(--acc);background:rgba(255,255,255,.07)}
+.zw41:focus{border-color:var(--acc);background:rgba(255,255,255,.07)}
+.zw42:focus{border-color:var(--acc);background:rgba(255,255,255,.07)}
+.zw43:focus{border-color:var(--acc);background:rgba(255,255,255,.07)}
+.zw44:focus{border-color:var(--acc);background:rgba(255,255,255,.07)}
+.zw45:focus{border-color:var(--acc)}
+</style>
 </head>
 <body>
-<a class="overslaan alleen-lezer" href="#inhoud">Naar de inhoud</a>
+<div style="position:relative">
 
-<div class="nav-houder">
-  <nav class="nav" aria-label="Hoofdnavigatie">
-    <a class="nav-merk" href="/" aria-label="Flow 8 — naar de homepage">
-      <svg width="40" height="28" viewBox="0 0 90 64" fill="none" aria-hidden="true">
-        <defs><linearGradient id="merk-nav" x1="6" y1="10" x2="84" y2="54" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#7fe0f5"/><stop offset="100%" stop-color="#6d8cff"/></linearGradient></defs>
-        <path d="M8 32C8 20 15 13 24 13 33 13 38 23 45 32 52 41 57 51 66 51 75 51 82 44 82 32" stroke="url(#merk-nav)" stroke-width="7.5" stroke-linecap="round"/>
-        <path d="M8 32C8 44 15 51 24 51 33 51 38 41 45 32 52 23 57 13 66 13 75 13 82 20 82 32" stroke="url(#merk-nav)" stroke-width="7.5" stroke-linecap="round" opacity=".5"/>
+<a href="#voor-wie" data-skip="1" style="position:absolute;left:-9999px;top:8px;z-index:400;background:var(--acc);color:#fff;font-size:14px;font-weight:500;padding:11px 18px;border-radius:100px" class="zw39">Naar de inhoud</a>
+
+<nav data-navbar="1" style="position:fixed;top:0;left:0;right:0;z-index:200;height:74px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid transparent;transition:background .25s ease,border-color .25s ease">
+  <div style="width:100%;max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px">
+    <a href="#top" aria-label="Flow8 home" data-navbrand="1" style="display:flex;align-items:center;color:#f4f6fb;transition:color .25s ease">
+      <svg viewBox="0 0 168 64" fill="none" style="height:38px;width:auto;display:block" role="img" aria-label="Flow8">
+        <defs><linearGradient id="fl-nav" x1="0" y1="8" x2="82" y2="56" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#7fe0f5"></stop><stop offset="100%" stop-color="#6d8cff"></stop></linearGradient></defs>
+        <path d="M8 32 C8 20 15 13 24 13 C33 13 38 23 45 32 C52 41 57 51 66 51 C75 51 82 44 82 32" stroke="url(#fl-nav)" stroke-width="5.5" fill="none" stroke-linecap="round"></path>
+        <path d="M8 32 C8 44 15 51 24 51 C33 51 38 41 45 32 C52 23 57 13 66 13 C75 13 82 20 82 32" stroke="url(#fl-nav)" stroke-width="5.5" fill="none" stroke-linecap="round" opacity="0.5"></path>
+        
+        <text x="98" y="24" font-family="'Syne',sans-serif" font-weight="300" font-size="11" fill="currentColor" letter-spacing="3">FLOW</text>
+        <text x="95" y="53" font-family="'Syne',sans-serif" font-weight="800" font-size="32" fill="url(#fl-nav)" letter-spacing="-2">8</text>
       </svg>
     </a>
-    <div class="nav-links">
-      <a href="#platform">Platform</a>
-      <a href="#voor-wie">Voor wie</a>
-      <a href="#werkwijze">Zo werkt het</a>
-      <a href="#prijzen">Prijzen</a>
-      <a href="#contact">Contact</a>
-    </div>
-    <a class="nav-cta" href="#contact">Demo aanvragen</a>
-  </nav>
-</div>
 
-<main id="inhoud">
-  <div class="omhul">
-
-    <!-- ── HERO ─────────────────────────────────────────────────────────────
-         De routekaart is het enige op deze site dat alleen Flow8 kan laten zien,
-         dus die staat hier en niet klein verderop. De vier getallen staan als
-         échte tekst ernaast: leesbaar op elk formaat, ook voor een schermlezer
-         en voor Google, en ze werken ook als de afbeelding niet laadt. -->
-    <div class="hero">
-      <span class="vlag"><span class="vlag-nieuw">NIEUW</span> Route-optimalisatie per monteur</span>
-      <h1>De brug tussen <span class="stil">planner en monteur.</span></h1>
-      <p class="lood">Kantoor en veld in één omgeving — planning, digitale werkbonnen en rapportage. Van de eerste opdracht tot de afgeronde werkbon.</p>
-      <div class="knoppen">
-        <a class="knop knop-vol" href="#contact">Demo aanvragen</a>
-        <a class="knop knop-rand" href="#platform">Bekijk het platform</a>
-      </div>
-
-      <figure class="hero-beeld">
-        <div class="beeldkaart">
-          <picture>
-            <source media="(max-width:700px)" srcset="beeld/route-kaart.webp" width="720" height="760">
-            <img src="beeld/route.webp" width="1364" height="1036" fetchpriority="high"
-                 alt="Een dagroute in Flow 8: vijf opdrachten langs Amsterdam, Zaandam, Enkhuizen en Alkmaar, met per stop de aankomst- en vertrektijd naast de kaart">
-          </picture>
+    <div data-navlinks="1" style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:5px">
+      <a data-navlink="1" href="#top" style="font-size:14px;color:#a8aec0;padding:9px 16px;border-radius:100px;white-space:nowrap;transition:color .2s ease,background .2s ease" class="zw1">Home</a>
+      <a data-navlink="1" href="#voor-wie" style="font-size:14px;color:#a8aec0;padding:9px 16px;border-radius:100px;white-space:nowrap;transition:color .2s ease,background .2s ease" class="zw2">Voor wie</a>
+      <div data-drop="0" data-doe-mouseenter="dropOn0" data-doe-mouseleave="dropOff0" style="position:relative">
+        <span data-navlink="1" data-navhref="modules" role="button" tabindex="0" aria-haspopup="true" data-doe-click="dropToggle0" data-doe-keydown="dropKey0" style="font-size:14px;color:#a8aec0;padding:9px 16px;border-radius:100px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:color .2s ease,background .2s ease" class="zw3">Modules
+          <svg data-chev="0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:12px;height:12px;transition:transform .2s ease"><path d="M6 9l6 6 6-6"></path></svg>
+        </span>
+        <span data-bridge="1" aria-hidden="true" style="position:absolute;top:100%;left:-70px;right:-70px;height:18px;display:none"></span>
+        <div data-dropmenu="0" role="menu" style="position:absolute;top:calc(100% + 14px);left:50%;transform:translateX(-50%) translateY(-6px);background:#101320;border:1px solid #262b3d;border-radius:16px;padding:14px 10px;box-shadow:0 24px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;min-width:230px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,transform .18s ease;z-index:210">
+          <a href="#dashboard" style="display:block;font-size:13.5px;color:#a8aec0;padding:9px 12px;border-radius:9px;white-space:nowrap;transition:background .15s ease,color .15s ease" class="zw4">Dashboard</a>
+          <a href="#operationeel" style="display:block;font-size:13.5px;color:#a8aec0;padding:9px 12px;border-radius:9px;white-space:nowrap;transition:background .15s ease,color .15s ease" class="zw5">Operationeel</a>
+          <a href="#inzicht" style="display:block;font-size:13.5px;color:#a8aec0;padding:9px 12px;border-radius:9px;white-space:nowrap;transition:background .15s ease,color .15s ease" class="zw6">Klanten &amp; rapportage</a>
+          <a href="#team" style="display:block;font-size:13.5px;color:#a8aec0;padding:9px 12px;border-radius:9px;white-space:nowrap;transition:background .15s ease,color .15s ease" class="zw7">Team</a>
+          <a href="#werkbon" style="display:block;font-size:13.5px;color:#a8aec0;padding:9px 12px;border-radius:9px;white-space:nowrap;transition:background .15s ease,color .15s ease" class="zw8">Werkbon op mobiel</a>
         </div>
-        <figcaption>
-          <dl class="cijfers">
-            <div><dt>Opdrachten</dt><dd>5</dd></div>
-            <div><dt>Werktijd</dt><dd>3u 30m</dd></div>
-            <div><dt>Reistijd</dt><dd>2u 59m</dd></div>
-            <div><dt>Afstand</dt><dd>209 km</dd></div>
-          </dl>
-          <p class="privacy">Een echte dagroute uit een live-omgeving. De klantnamen zijn onherkenbaar gemaakt. Jouw klantgegevens blijven van jou.</p>
-        </figcaption>
-      </figure>
+      </div>
+      <a data-navlink="1" href="#prijzen" style="font-size:14px;color:#a8aec0;padding:9px 16px;border-radius:100px;white-space:nowrap;transition:color .2s ease,background .2s ease" class="zw9">Prijzen</a>
+      <div data-drop="1" data-doe-mouseenter="dropOn1" data-doe-mouseleave="dropOff1" style="position:relative">
+        <span data-navlink="1" data-navhref="contactgroep" role="button" tabindex="0" aria-haspopup="true" data-doe-click="dropToggle1" data-doe-keydown="dropKey1" style="font-size:14px;color:#a8aec0;padding:9px 16px;border-radius:100px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:color .2s ease,background .2s ease" class="zw10">Contact
+          <svg data-chev="1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:12px;height:12px;transition:transform .2s ease"><path d="M6 9l6 6 6-6"></path></svg>
+        </span>
+        <span data-bridge="1" aria-hidden="true" style="position:absolute;top:100%;left:-70px;right:-70px;height:18px;display:none"></span>
+        <div data-dropmenu="1" role="menu" style="position:absolute;top:calc(100% + 14px);left:50%;transform:translateX(-50%) translateY(-6px);background:#101320;border:1px solid #262b3d;border-radius:16px;padding:14px 10px;box-shadow:0 24px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;min-width:214px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,transform .18s ease;z-index:210">
+          <a href="#contact" style="display:block;font-size:13.5px;color:#a8aec0;padding:9px 12px;border-radius:9px;white-space:nowrap;transition:background .15s ease,color .15s ease" class="zw11">Demo aanvragen</a>
+          <a href="#overstappen" style="display:block;font-size:13.5px;color:#a8aec0;padding:9px 12px;border-radius:9px;white-space:nowrap;transition:background .15s ease,color .15s ease" class="zw12">Zo stap je over</a>
+          <a href="#faq" style="display:block;font-size:13.5px;color:#a8aec0;padding:9px 12px;border-radius:9px;white-space:nowrap;transition:background .15s ease,color .15s ease" class="zw13">Veelgestelde vragen</a>
+        </div>
+      </div>
+      <div data-mobcta="1" style="display:none;flex-direction:column;gap:8px;padding:12px 6px 4px;border-top:1px solid #262b3d;margin-top:6px">
+        <a href="#contact" style="display:flex;justify-content:center;font-size:14px;font-weight:500;padding:13px 24px;border-radius:100px;background:var(--acc);color:#fff">Demo aanvragen</a>
+        <a href="https://thomv-flow8.github.io/Flow-8/flow8-v2.html" target="_blank" rel="noopener" style="display:flex;justify-content:center;font-size:14px;font-weight:500;padding:13px 24px;border-radius:100px;background:#0d0f14;color:#fff;border:1px solid rgba(255,255,255,.22)">Inloggen</a>
+      </div>
     </div>
 
-    <!-- ── VOOR WIE ─────────────────────────────────────────────────────── -->
-    <section id="voor-wie">
-      <span class="eyebrow">Voor wie</span>
-      <h2>Alles op <span class="stil">één centrale plek.</span></h2>
-      <p class="lood">Veel installatie- en servicebedrijven regelen hun planning met een eigen mix van systemen, spreadsheets en losse lijstjes — overal net iets anders, nergens centraal. Flow8 brengt het samen.</p>
-      <div class="drie">
-        <div class="tegel">
-          <h3>Installatiebedrijven</h3>
-          <p>Kantoor en veld in één omgeving, met dezelfde gegevens aan beide kanten.</p>
-        </div>
-        <div class="tegel">
-          <h3>Serviceklanten</h3>
-          <p>Vaste klanten en terugkerend onderhoud bij elkaar, inclusief contract en historie.</p>
-        </div>
-        <div class="tegel">
-          <h3>Machines &amp; installaties</h3>
-          <p>Gekoppeld aan de klant, inzichtelijk en klaar voor onderhoud of reparatie.</p>
-        </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a data-navcta="1" href="#contact" style="font-size:14px;font-weight:500;display:inline-flex;align-items:center;padding:13px 24px;border-radius:100px;background:var(--acc);color:#fff;border:1px solid var(--acc);transition:transform .2s ease,filter .2s ease,box-shadow .2s ease" class="zw14">Demo aanvragen</a>
+      <a data-navcta="1" data-navlogin="1" href="https://thomv-flow8.github.io/Flow-8/flow8-v2.html" target="_blank" rel="noopener" style="font-size:14px;font-weight:500;padding:13px 22px;border-radius:100px;background:#0d0f14;color:#fff;border:1px solid rgba(255,255,255,.22);cursor:pointer;font-family:inherit;transition:background .2s ease,border-color .2s ease;display:inline-flex;align-items:center" class="zw15">Inloggen</a>
+      <button data-navtoggle="1" aria-label="Menu" aria-expanded="false" data-doe-click="toggleMenu" style="display:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;width:42px;height:42px;align-items:center;justify-content:center;cursor:pointer;color:#fff">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header id="top" data-band="dark" style="position:relative;background:#0a0b10;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding:132px 0 96px">
+  <canvas data-fx="1" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block"></canvas>
+  <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(10,11,16,.06),rgba(10,11,16,.34)),radial-gradient(72% 58% at 50% 0%,rgba(79,110,245,.19),rgba(79,110,245,.05) 46%,transparent 66%),radial-gradient(60% 70% at 50% 52%,rgba(79,110,245,.12),rgba(10,11,16,0) 62%)"></div>
+  <div style="position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.045;mix-blend-mode:overlay;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E&quot;);background-size:170px 170px"></div>
+  <div style="position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:0 24px;width:100%">
+    <div style="max-width:600px">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--acc2);display:inline-flex;align-items:center;gap:10px;margin-bottom:22px"><span style="display:inline-block;width:26px;height:1.5px;background:currentColor;opacity:.6"></span>Het Flow8-platform</span>
+      <h1 data-reveal="up" data-delay="80" style="font-size:clamp(40px,6.2vw,82px);font-weight:500;line-height:.98;letter-spacing:-.035em;text-wrap:balance;text-shadow:0 2px 40px rgba(8,9,14,.55)">De brug tussen<br><span style="color:var(--acc2)">planner</span> en monteur.</h1>
+      <p data-reveal="up" data-delay="160" style="margin-top:22px;font-size:18.5px;line-height:1.5;color:#cbd1de;max-width:520px;text-wrap:pretty;text-shadow:0 1px 22px rgba(8,9,14,.7)">Kantoor en veld in één omgeving — planning, digitale werkbonnen en rapportage. Van de eerste opdracht tot de afgeronde werkbon.</p>
+      <div data-reveal="up" data-delay="240" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:34px">
+        <a href="#contact" style="font-size:14px;font-weight:500;display:inline-flex;align-items:center;padding:14px 26px;border-radius:100px;background:var(--acc);color:#fff;border:1px solid var(--acc);transition:transform .2s ease,filter .2s ease,box-shadow .2s ease" class="zw16">Demo aanvragen</a>
+        <a href="#dashboard" style="font-size:14px;font-weight:500;display:inline-flex;align-items:center;padding:14px 26px;border-radius:100px;background:transparent;color:#f4f6fb;border:1px solid rgba(255,255,255,.28);transition:border-color .2s ease" class="zw17">Bekijk het platform</a>
       </div>
-    </section>
+    </div>
+  </div>
+  <div data-cue="1" style="position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;color:#868da3;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase">
+    <span>Scroll</span><span data-loop="1" style="width:1px;height:34px;background:linear-gradient(#868da3,transparent);animation:cue 2.2s cubic-bezier(.4,0,.2,1) infinite"></span>
+  </div>
+</header>
 
-    <!-- ── OPERATIONEEL ─────────────────────────────────────────────────── -->
-    <section id="platform">
-      <span class="eyebrow">Operationeel</span>
-      <h2>Het kloppend hart <span class="stil">van je werkdag.</span></h2>
-      <p class="lood">Plan met route-optimalisatie, stuur je monteurs aan en handel werkbonnen digitaal af — alle dagelijkse uitvoering in één module.</p>
-      <ul class="lijst">
-        <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Slimme dagplanning: minste kilometers en reistijd</span></li>
-        <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Lijst-, week- en dagweergave voor de planning</span></li>
-        <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Werkbonnen, storingsdienst en werkorders in één flow</span></li>
-      </ul>
-      <figure>
-        <div class="beeldkaart">
-          <img src="beeld/planning-kop.webp" width="1972" height="320" loading="lazy"
-               alt="De weekplanning in Flow 8, met de knoppen voor lijst-, week- en dagweergave en het aantal opdrachten per dag">
-        </div>
-      </figure>
-    </section>
-
-
-    <!-- ── IN HET VELD ──────────────────────────────────────────────────────
-         Geen schermafbeelding: van de werkbon op telefoon is er nog geen schone
-         opname. Liever geen beeld dan een namaakscherm. Staat in TODO.md. -->
-    <section id="veld">
-      <span class="eyebrow">In het veld</span>
-      <h2>De werkbon in <span class="stil">de broekzak van de monteur.</span></h2>
-      <p class="lood">Dezelfde opdracht die de planner klaarzet, opent de monteur op zijn telefoon. Uren, materialen, foto's en handtekening gaan er ter plekke in, en de bon is verstuurd voordat hij wegrijdt.</p>
-      <ul class="lijst">
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Klantgegevens en werkadres met één tik naar navigatie</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Checklists, uren, materialen, foto&rsquo;s en documenten op één bon</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Ondertekenen door de klant en direct als pdf in de mailbox</span></li>
-      </ul>
-      <p class="merkjes">
-        <span>Interne memo</span><span>Logboek</span><span>Bevindingen monteur</span><span>Werkt op elke telefoon</span>
-      </p>
-    </section>
-
-    <!-- ── KLANTEN EN RAPPORTAGE ────────────────────────────────────────── -->
-    <section id="klanten">
-      <span class="eyebrow">Klanten &amp; rapportage</span>
-      <h2>Je klanten <span class="stil">overzichtelijk bij elkaar.</span></h2>
-      <p class="lood">Van debiteuren tot vaste serviceklanten: contactgegevens, contracten en gekoppelde installaties op één plek, zodat je bij elke klant meteen de historie ziet.</p>
-      <ul class="lijst">
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Debiteuren en serviceklanten in één overzicht</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Contactgegevens, contracten en locaties per klant</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Gekoppelde installaties met onderhoudshistorie</span></li>
-      </ul>
-      <figure>
-        <div class="beeldkaart">
-          <img src="beeld/register-locatie.webp" width="1875" height="615" loading="lazy"
-               alt="Een installatie gespeld op de satellietkaart in Flow 8, zodat de monteur de locatie precies kan vinden">
-        </div>
-        <figcaption>Elke installatie op zijn eigen plek, los van het factuuradres</figcaption>
-      </figure>
-      <div class="twee">
-        <figure style="margin:0">
-          <div class="beeldkaart">
-            <img src="beeld/inzicht-verdeling.webp" width="930" height="265" loading="lazy"
-                 alt="Verdeling per opdrachttype over 2026: 455 servicebeurten, 182 installaties, 162 storingen, 68 eerste onderhoudsbeurten">
+<section id="voor-wie" data-band="light" style="position:relative;background:#f5f6f8;color:#0d0f14;padding:104px 0;scroll-margin-top:88px;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:80px;pointer-events:none;background:linear-gradient(180deg,rgba(13,15,20,.06),transparent)"></div>
+  <div data-mod="1" style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1.02fr;gap:60px;align-items:center">
+    <div style="max-width:520px">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc);display:inline-flex;align-items:center;gap:10px"><span style="display:inline-block;width:24px;height:1.5px;background:currentColor;opacity:.6"></span>Voor wie</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:16px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance">Alles op één centrale plek.</h2>
+      <p data-reveal="up" data-delay="160" style="margin-top:18px;font-size:18px;line-height:1.55;color:#5f6572;max-width:520px;text-wrap:pretty">Veel installatie- en servicebedrijven regelen hun planning met een eigen mix van systemen, spreadsheets en losse lijstjes — overal net iets anders, nergens centraal. Flow8 brengt het samen, en bespaart zo tijd én geld.</p>
+      <div data-reveal="up" data-delay="240" style="display:flex;flex-direction:column;gap:8px;margin-top:30px">
+        <span data-lus="sats" data-lus-nr="0" style="display:contents">
+          <div data-doe-mouseenter="hover:0" data-doe-click="hover:0" style="display:flex;align-items:flex-start;gap:14px;padding:15px 17px;border-radius:13px;transition:background .45s ease,border-color .45s ease,box-shadow .45s ease;border:1px solid rgba(79,110,245,.34);background:#fff;box-shadow:0 14px 34px rgba(20,26,60,.09)">
+            <span style="width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .45s ease,color .45s ease;background:var(--acc);color:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M3 21h18M5 21V8l7-5 7 5v13M10 21v-6h4v6"></path></svg></span>
+            <div><div style="font-size:15.5px;font-weight:600;letter-spacing:-.015em;line-height:1.3">Installatiebedrijven</div><div style="font-size:14px;line-height:1.5;color:#5f6572;margin-top:3px;text-wrap:pretty">Kantoor en veld in één omgeving, met dezelfde gegevens aan beide kanten.</div></div>
           </div>
-        </figure>
-        <figure style="margin:0">
-          <div class="beeldkaart">
-            <img src="beeld/inzicht-maanden.webp" width="1875" height="295" loading="lazy"
-                 alt="Staafdiagram met het aantal opdrachten per maand over 2026, uitgesplitst naar afgehandeld en open">
+        
+          <div data-doe-mouseenter="hover:1" data-doe-click="hover:1" style="display:flex;align-items:flex-start;gap:14px;padding:15px 17px;border-radius:13px;transition:background .45s ease,border-color .45s ease,box-shadow .45s ease;border:1px solid #e2e5ec;background:rgba(255,255,255,.55);box-shadow:none">
+            <span style="width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .45s ease,color .45s ease;background:rgba(79,110,245,.1);color:var(--acc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z M12 7v5l3 2"></path></svg></span>
+            <div><div style="font-size:15.5px;font-weight:600;letter-spacing:-.015em;line-height:1.3">Serviceklanten</div><div style="font-size:14px;line-height:1.5;color:#5f6572;margin-top:3px;text-wrap:pretty">Vaste klanten en terugkerend onderhoud bij elkaar, inclusief contract en historie.</div></div>
           </div>
-        </figure>
+        
+          <div data-doe-mouseenter="hover:2" data-doe-click="hover:2" style="display:flex;align-items:flex-start;gap:14px;padding:15px 17px;border-radius:13px;transition:background .45s ease,border-color .45s ease,box-shadow .45s ease;border:1px solid #e2e5ec;background:rgba(255,255,255,.55);box-shadow:none">
+            <span style="width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .45s ease,color .45s ease;background:rgba(79,110,245,.1);color:var(--acc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M21 8l-9-5-9 5 9 5 9-5z M3 8v8l9 5 9-5V8 M12 13v8"></path></svg></span>
+            <div><div style="font-size:15.5px;font-weight:600;letter-spacing:-.015em;line-height:1.3">Machines & installaties</div><div style="font-size:14px;line-height:1.5;color:#5f6572;margin-top:3px;text-wrap:pretty">Gekoppeld aan de klant, inzichtelijk en klaar voor onderhoud of reparatie.</div></div>
+          </div>
+        </span>
       </div>
-      <figcaption class="los">Rapportage over 895 opdrachten uit een live-omgeving</figcaption>
-    </section>
+    </div>
 
-    <!-- ── TEAM ─────────────────────────────────────────────────────────── -->
-    <section id="team">
-      <span class="eyebrow">Team</span>
-      <h2>Je hele team <span class="stil">in één overzicht.</span></h2>
-      <p class="lood">Van contracturen tot verlofsaldo, overuren, onkosten en verzuim: beheer je medewerkers en hun uren op één plek, met goedkeuring waar nodig.</p>
-      <figure>
-        <div class="beeldkaart">
-          <img src="beeld/team-tabs.webp" width="1320" height="115" loading="lazy"
-               alt="De tabbladen van de rapportage in Flow 8: medewerkers, opdrachten, serviceklanten, werkorders, overuren, onkosten, verlof, verzuim en storingsdienst">
-        </div>
-        <figcaption>Medewerkers &middot; Verlof &middot; Overuren &middot; Onkosten &middot; Verzuim &middot; Storingsdienst</figcaption>
-      </figure>
-    </section>
+    <div data-reveal="mock" data-parallax="1" data-orbitwrap="1" style="position:relative;width:100%;max-width:500px;margin:0 auto;aspect-ratio:1">
+      <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 36%,#fff 0%,#fbfcfe 60%,#f2f4f9 100%);border:1px solid #ebedf4;box-shadow:0 26px 60px rgba(20,26,60,.1);pointer-events:none"></div>
+      <svg viewBox="0 0 400 400" fill="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+        <g stroke="#e2e5ef" stroke-width="1.2"><circle cx="200" cy="200" r="72"></circle><circle cx="200" cy="200" r="128"></circle></g>
+        <circle cx="200" cy="200" r="166" stroke="#eceef5" stroke-width="1.2" stroke-dasharray="2 9"></circle>
+        <circle data-loop="1" cx="200" cy="200" r="128" pathLength="100" stroke="var(--acc)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="11 89" opacity=".85" style="animation:flowarc 26s linear infinite"></circle>
+        <circle data-loop="1" cx="200" cy="200" r="72" stroke="var(--acc)" stroke-width="1.3" opacity=".3" style="transform-box:fill-box;transform-origin:center;animation:vwBreathe 11s ease-in-out infinite"></circle>
+      </svg>
 
-    <!-- ── OVERSTAPPEN ──────────────────────────────────────────────────── -->
-    <section id="overstappen">
-      <span class="eyebrow">Overstappen</span>
-      <h2>Zonder overtypen <span class="stil">aan de slag.</span></h2>
-      <p class="lood">Je klanten, medewerkers en installaties staan al ergens, meestal in Excel. Die lijsten gaan er in één keer in, zodat je op dag één met je eigen gegevens werkt. Je mag aanleveren in je eigen opmaak; wij zetten het om.</p>
-    </section>
-
-    <!-- ── ZO WERKT HET ─────────────────────────────────────────────────── -->
-    <section id="werkwijze">
-      <span class="eyebrow">Zo werkt het</span>
-      <h2>Plannen. <span class="stil">Rijden.</span> Afronden.</h2>
-      <ol class="drie stappen">
-        <li class="tegel">
-          <h3>Plannen</h3>
-          <p>Opdrachten verdelen over je monteurs, met de kortste route en de minste reistijd.</p>
-        </li>
-        <li class="tegel">
-          <h3>Rijden</h3>
-          <p>De monteur ziet zijn dag op zijn telefoon — adres, contract, historie en installaties.</p>
-        </li>
-        <li class="tegel">
-          <h3>Afronden</h3>
-          <p>Werkbon digitaal aftekenen bij de klant, en hij staat meteen op kantoor.</p>
-        </li>
-      </ol>
-    </section>
-
-
-    <!-- ── PRIJZEN ──────────────────────────────────────────────────────────
-         Tarieven staan hier én in rekenmodule.js. Zonder JavaScript toont de
-         pagina de beginstand (12 gebruikers, 5 met werkbon) en die klopt. -->
-    <section id="prijzen">
-      <span class="eyebrow">Prijzen</span>
-      <h2>Reken uit wat het <span class="stil">voor jouw bedrijf kost.</span></h2>
-      <p class="lood">Iedere gebruiker heeft basistoegang voor &euro;&nbsp;9 per maand. Wil een monteur ook werkbonnen invullen, dan komt daar &euro;&nbsp;15 werkbonlicentie bovenop — samen &euro;&nbsp;24.</p>
-
-      <div class="rekenmodule">
-        <div class="rk-knoppen">
-          <p class="rk-veld">
-            <label for="rk-gebruikers">Gebruikers totaal</label>
-            <output id="rk-gebruikers-uit" for="rk-gebruikers">12</output>
-          </p>
-          <input type="range" id="rk-gebruikers" min="1" max="40" value="12" step="1">
-          <p class="rk-grens"><span>1</span><span>40+</span></p>
-
-          <p class="rk-veld">
-            <label for="rk-bonnen">Waarvan met werkbon</label>
-            <output id="rk-bonnen-uit" for="rk-bonnen">5</output>
-          </p>
-          <input type="range" id="rk-bonnen" min="0" max="12" value="5" step="1">
-          <p class="rk-grens"><span>0</span><span>12</span></p>
-        </div>
-
-        <div class="rk-uitkomst">
-          <dl class="rk-regels">
-            <div><dt id="rk-basis-regel">Basistoegang &middot; 12 &times; &euro;&nbsp;9</dt><dd id="rk-basis-bedrag">&euro;&nbsp;108</dd></div>
-            <div><dt id="rk-bon-regel">Werkbonlicentie &middot; 5 &times; &euro;&nbsp;15</dt><dd id="rk-bon-bedrag">&euro;&nbsp;75</dd></div>
-          </dl>
-          <p class="rk-per" id="rk-per-gebruiker">5 &times; &euro;&nbsp;24 &middot; 7 &times; &euro;&nbsp;9 — &euro;&nbsp;15,25 per gebruiker</p>
-          <p class="rk-label">Jouw indicatie</p>
-          <p class="rk-totaal"><strong id="rk-totaal">&euro;&nbsp;183</strong> <span>/ maand</span></p>
-          <p class="rk-klein">Excl. btw &middot; maandelijks opzegbaar &middot; eerste drie maanden gratis</p>
-          <a class="knop knop-vol" href="#contact">Demo aanvragen</a>
-        </div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:112px;height:112px;border-radius:50%;background:#f7f9fd;border:1px solid #e6e9f2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 12px 30px rgba(20,26,60,.12)">
+        <svg viewBox="0 0 70 64" fill="none" style="width:46px;height:42px" aria-hidden="true">
+          <defs><linearGradient id="vwl" x1="0" y1="8" x2="82" y2="56" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#35c4e3"></stop><stop offset="100%" stop-color="#4f6ef5"></stop></linearGradient></defs>
+          <path d="M8 32 C8 20 15 13 24 13 C33 13 38 23 45 32 C52 41 57 51 66 51 C75 51 82 44 82 32" stroke="url(#vwl)" stroke-width="5.5" stroke-linecap="round"></path>
+          <path d="M8 32 C8 44 15 51 24 51 C33 51 38 41 45 32 C52 23 57 13 66 13 C75 13 82 20 82 32" stroke="url(#vwl)" stroke-width="5.5" stroke-linecap="round" opacity=".45"></path>
+        </svg>
+        <span style="font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a90a0">één plek</span>
       </div>
 
-      <div class="twee">
-        <div class="tegel">
-          <span class="eyebrow">Basis — kantoor en planning</span>
-          <h3>&euro;&nbsp;9 per gebruiker / maand</h3>
-          <ul class="lijst">
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Dashboard, agenda en afwezigheid</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Slimme dagplanning met route-optimalisatie</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Klanten, contracten en installaties</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Werkorders en storingsdienst</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Rapportages en medewerkersbeheer</span></li>
-          </ul>
+      <div data-loop="1" style="position:absolute;inset:0;animation:vwOrbit 120s linear infinite">
+        <span data-lus="sats" data-lus-nr="1" style="display:contents">
+          <div style="position:absolute;top:50%;left:50%;width:0;height:0;transform:rotate(-90deg)">
+            <div data-satarm="1" style="transform:translateX(150px)">
+              <div style="transform:rotate(90deg)">
+                <div data-loop="1" style="animation:vwOrbit 120s linear infinite reverse">
+                  <div data-satchip="1" data-doe-mouseenter="hover:0" title="Installatiebedrijven" aria-label="Installatiebedrijven" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .45s ease,border-color .45s ease,box-shadow .45s ease,scale .5s cubic-bezier(.2,.9,.3,1);background:var(--acc);border:1px solid var(--acc);box-shadow:0 10px 26px rgba(79,110,245,.32);scale:1.06">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;transition:color .45s ease;color:#fff"><path d="M3 21h18M5 21V8l7-5 7 5v13M10 21v-6h4v6"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <div style="position:absolute;top:50%;left:50%;width:0;height:0;transform:rotate(30deg)">
+            <div data-satarm="1" style="transform:translateX(150px)">
+              <div style="transform:rotate(-30deg)">
+                <div data-loop="1" style="animation:vwOrbit 120s linear infinite reverse">
+                  <div data-satchip="1" data-doe-mouseenter="hover:1" title="Serviceklanten" aria-label="Serviceklanten" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .45s ease,border-color .45s ease,box-shadow .45s ease,scale .5s cubic-bezier(.2,.9,.3,1);background:#fff;border:1px solid #e2e5ec;box-shadow:0 6px 16px rgba(20,26,60,.09);scale:1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;transition:color .45s ease;color:var(--acc)"><path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z M12 7v5l3 2"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <div style="position:absolute;top:50%;left:50%;width:0;height:0;transform:rotate(150deg)">
+            <div data-satarm="1" style="transform:translateX(150px)">
+              <div style="transform:rotate(-150deg)">
+                <div data-loop="1" style="animation:vwOrbit 120s linear infinite reverse">
+                  <div data-satchip="1" data-doe-mouseenter="hover:2" title="Machines & installaties" aria-label="Machines & installaties" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .45s ease,border-color .45s ease,box-shadow .45s ease,scale .5s cubic-bezier(.2,.9,.3,1);background:#fff;border:1px solid #e2e5ec;box-shadow:0 6px 16px rgba(20,26,60,.09);scale:1">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;transition:color .45s ease;color:var(--acc)"><path d="M21 8l-9-5-9 5 9 5 9-5z M3 8v8l9 5 9-5V8 M12 13v8"></path></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dashboard" data-band="dark" style="position:relative;background:#0a0b10;padding:104px 0;overflow:hidden;scroll-margin-top:88px">
+  <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(72% 58% at 50% 0%,rgba(79,110,245,.19),rgba(79,110,245,.05) 46%,transparent 66%)"></div>
+  <div style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px">
+    <div style="max-width:640px;margin:0 auto 44px;text-align:center">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc2)">Dashboard</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:14px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance">Begin de dag met overzicht.</h2>
+      <p data-reveal="up" data-delay="160" style="margin:16px auto 0;font-size:18px;line-height:1.55;color:#a8aec0;max-width:520px;text-wrap:pretty">Opdrachten, agenda, afwezigheid en dringende werkorders — alles in één oogopslag.</p>
+    </div>
+
+    <div data-mockscroll="1" style="max-width:1060px;margin:0 auto;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch">
+    <div data-reveal="mock" data-anim="1" style="min-width:100%;background:#101320;border:1px solid #4f4f80;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(79,79,128,.3),0 30px 80px rgba(0,0,0,.55)">
+      <div style="display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid #262b3d;background:#0c0e18">
+        <span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span><span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span><span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span>
+        <span style="margin-left:8px;font-size:13px;color:#f4f6fb;letter-spacing:-.01em">Dashboard</span>
+        <span style="margin-left:auto;display:flex;gap:6px"><span style="font-family:'Space Mono',monospace;font-size:10px;color:#868da3;border:1px solid #262b3d;border-radius:100px;padding:3px 10px">Zoeken</span><span style="font-family:'Space Mono',monospace;font-size:10px;color:#868da3;border:1px solid #262b3d;border-radius:100px;padding:3px 10px">Vandaag</span></span>
+      </div>
+      <div style="padding:18px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 14px;font-size:12px;color:#a8aec0"><span style="width:7px;height:7px;border-radius:50%;background:var(--acc2)"></span><b data-count="168" style="color:#f4f6fb;font-weight:600">0</b>&nbsp;u verlof</span>
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 14px;font-size:12px;color:#a8aec0"><span style="width:7px;height:7px;border-radius:50%;background:var(--acc2)"></span><b data-count="12" style="color:#f4f6fb;font-weight:600">0</b>&nbsp;u overuren</span>
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 14px;font-size:12px;color:#a8aec0"><span style="width:7px;height:7px;border-radius:50%;background:var(--acc2)"></span>verzuim <b style="color:#f4f6fb;font-weight:600">geen</b></span>
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 14px;font-size:12px;color:#a8aec0"><span style="width:7px;height:7px;border-radius:50%;background:var(--acc2)"></span><b data-count="11" style="color:#f4f6fb;font-weight:600">0</b>&nbsp;opdrachten vandaag</span>
         </div>
-        <div class="tegel">
-          <span class="eyebrow">Werkbonlicentie — voor monteurs in het veld</span>
-          <h3>+ &euro;&nbsp;15 per monteur / maand <span class="stil">· totaal &euro;&nbsp;24</span></h3>
-          <p class="tegel-intro">Alles uit Basis, plus:</p>
-          <ul class="lijst">
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Digitale werkbon op telefoon en tablet</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Checklists, uren en materialen ter plekke</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Foto's, documenten en logboek per bon</span></li>
-            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg><span>Handtekening van de klant en pdf per mail</span></li>
-          </ul>
+        <div data-dashmain="1" style="display:grid;grid-template-columns:1.7fr 1fr;gap:14px">
+          <div style="background:#181a2c;border:1px solid #262b3d;border-radius:12px;padding:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:13px;font-weight:600;color:#f4f6fb">Opdrachten vandaag</span><span style="font-family:'Space Mono',monospace;font-size:10.5px;color:#868da3;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:100px">11</span></div>
+            
+              <div style="margin-bottom:10px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Space Mono',monospace;background:#4f6ef5">SV</span>
+                  <span style="font-size:12.5px;color:#f4f6fb;font-weight:500">S. de Vries</span>
+                  <span style="margin-left:auto;font-size:10.5px;color:#868da3">0/5 · 5u werk</span>
+                </div>
+                
+                  <div style="display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #262b3d">
+                    <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">08:30</span>
+                    <span style="font-size:12.5px;color:#a8aec0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Servicebeurt <span style="color:#868da3">· Alphen a/d Rijn</span></span>
+                    <span style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;white-space:nowrap;background:rgba(79,110,245,.15);color:#93a6ff;border:1px solid rgba(79,110,245,.3)">Ingepland</span>
+                  </div>
+                
+                  <div style="display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #262b3d">
+                    <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">10:15</span>
+                    <span style="font-size:12.5px;color:#a8aec0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Onderhoud <span style="color:#868da3">· Gouda</span></span>
+                    <span style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;white-space:nowrap;background:rgba(79,110,245,.15);color:#93a6ff;border:1px solid rgba(79,110,245,.3)">Ingepland</span>
+                  </div>
+                
+                  <div style="display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #262b3d">
+                    <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">11:45</span>
+                    <span style="font-size:12.5px;color:#a8aec0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Installatie <span style="color:#868da3">· Moerkapelle</span></span>
+                    <span style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;white-space:nowrap;background:rgba(53,196,227,.14);color:#5fd6ef;border:1px solid rgba(53,196,227,.32)">Onderweg</span>
+                  </div>
+                
+              </div>
+            
+              <div style="margin-bottom:10px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Space Mono',monospace;background:#7c5cff">KV</span>
+                  <span style="font-size:12.5px;color:#f4f6fb;font-weight:500">K. Visser</span>
+                  <span style="margin-left:auto;font-size:10.5px;color:#868da3">1/6 · 5,5u werk</span>
+                </div>
+                
+                  <div style="display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #262b3d">
+                    <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">08:15</span>
+                    <span style="font-size:12.5px;color:#a8aec0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Servicebeurt <span style="color:#868da3">· Giessenburg</span></span>
+                    <span style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;white-space:nowrap;background:rgba(16,185,129,.14);color:#34d99f;border:1px solid rgba(16,185,129,.32)">Afgerond</span>
+                  </div>
+                
+                  <div style="display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #262b3d">
+                    <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">09:40</span>
+                    <span style="font-size:12.5px;color:#a8aec0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Servicebeurt <span style="color:#868da3">· Vianen</span></span>
+                    <span style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;white-space:nowrap;background:rgba(79,110,245,.15);color:#93a6ff;border:1px solid rgba(79,110,245,.3)">Ingepland</span>
+                  </div>
+                
+                  <div style="display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #262b3d">
+                    <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">12:20</span>
+                    <span style="font-size:12.5px;color:#a8aec0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">1e onderhoud <span style="color:#868da3">· Schelluinen</span></span>
+                    <span style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;white-space:nowrap;background:rgba(79,110,245,.15);color:#93a6ff;border:1px solid rgba(79,110,245,.3)">Ingepland</span>
+                  </div>
+                
+              </div>
+            
+          </div>
+          <div>
+            <div style="background:#181a2c;border:1px solid #262b3d;border-radius:12px;padding:14px">
+              <div style="font-size:13px;font-weight:600;color:#f4f6fb;margin-bottom:10px">Agenda</div>
+              <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#868da3;margin-bottom:5px">Vandaag</div>
+              <div style="display:flex;align-items:center;gap:9px;background:rgba(79,110,245,.06);border:1px solid rgba(79,110,245,.16);border-radius:10px;padding:9px 11px"><span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Space Mono',monospace;background:#4f6ef5">SV</span><span style="font-size:12px;color:#a8aec0">Storingsdienst — S. de Vries<small style="display:block;color:#868da3;font-size:10.5px">Hele dag</small></span></div>
+              <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#868da3;margin:10px 0 5px">Morgen</div>
+              <div style="display:flex;align-items:center;gap:9px;background:rgba(79,110,245,.06);border:1px solid rgba(79,110,245,.16);border-radius:10px;padding:9px 11px"><span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Space Mono',monospace;background:#7c5cff">KV</span><span style="font-size:12px;color:#a8aec0">Storingsdienst — K. Visser<small style="display:block;color:#868da3;font-size:10.5px">Hele dag</small></span></div>
+            </div>
+            <div style="background:#181a2c;border:1px solid #262b3d;border-radius:12px;padding:14px;margin-top:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;font-weight:600;color:#f4f6fb">Afwezig vandaag</span><span style="font-family:'Space Mono',monospace;font-size:10.5px;color:#868da3;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:100px">4</span></div>
+              
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid #262b3d">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Space Mono',monospace;background:#3aa0a0">JS</span>
+                  <span style="font-size:12px;color:#a8aec0">J. Smit</span>
+                  <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;background:rgba(79,110,245,.14);color:#93a6ff;border:1px solid rgba(79,110,245,.28)">Verlof</span>
+                </div>
+              
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid #262b3d">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Space Mono',monospace;background:#c05cc0">PV</span>
+                  <span style="font-size:12px;color:#a8aec0">P. van Dijk</span>
+                  <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;background:rgba(79,110,245,.14);color:#93a6ff;border:1px solid rgba(79,110,245,.28)">Verlof</span>
+                </div>
+              
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid #262b3d">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Space Mono',monospace;background:#4f6ef5">RK</span>
+                  <span style="font-size:12px;color:#a8aec0">R. Kuiper</span>
+                  <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;background:rgba(79,110,245,.14);color:#93a6ff;border:1px solid rgba(79,110,245,.28)">Verlof</span>
+                </div>
+              
+                <div style="display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid #262b3d">
+                  <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Space Mono',monospace;background:#b46b3a">TB</span>
+                  <span style="font-size:12px;color:#a8aec0">T. Bos</span>
+                  <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;background:rgba(239,68,68,.14);color:#f98a8a;border:1px solid rgba(239,68,68,.3)">Ziek</span>
+                </div>
+              
+            </div>
+          </div>
+        </div>
+        <div data-dashbottom="1" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#181a2c;border:1px solid #262b3d;border-radius:12px;padding:14px">
+            <div style="font-size:13px;font-weight:600;color:#f4f6fb;margin-bottom:10px">Werkorders</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <span style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:12px;color:#a8aec0"><b style="color:#f4f6fb;font-weight:600">3</b> Assemblage</span>
+              <span style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:12px;color:#a8aec0"><b style="color:#f4f6fb;font-weight:600">1</b> Reparatie</span>
+              <span style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:12px;color:#a8aec0"><b style="color:#f4f6fb;font-weight:600">2</b> Werkservice</span>
+              <span style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:12px;color:#a8aec0"><b style="color:#f4f6fb;font-weight:600">0</b> Reservering</span>
+            </div>
+          </div>
+          <div style="background:#181a2c;border:1px solid #262b3d;border-radius:12px;padding:14px">
+            <div style="font-size:13px;font-weight:600;color:#f4f6fb;margin-bottom:10px">Dringende werkorders</div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px;color:#868da3;font-size:11.5px">
+              <span style="width:30px;height:30px;border-radius:50%;background:rgba(16,185,129,.14);display:flex;align-items:center;justify-content:center;color:#34d99f"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+              Geen dringende werkorders
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
+    </div>
+  </div>
+</section>
 
-    <!-- ── VRAGEN ───────────────────────────────────────────────────────────
-         <details>/<summary>: werkt met toetsenbord en zonder JavaScript. -->
-    <section id="vragen">
-      <span class="eyebrow">Vragen</span>
-      <h2>Wat klanten <span class="stil">meestal eerst vragen.</span></h2>
-      <p class="lood">Staat je vraag er niet bij? Stel hem gerust — je krijgt binnen één werkdag antwoord.</p>
-      <div class="vragen">
-        <details>
-          <summary>Werkt Flow8 op de telefoon van mijn monteurs?</summary>
-          <p>Ja. Flow8 draait in de browser, dus op elke telefoon of tablet — Android en iPhone. Geen app-store, geen installatie: inloggen en beginnen.</p>
-        </details>
-        <details>
-          <summary>Kan ik mijn huidige klantenbestand meenemen?</summary>
-          <p>Ja, via Excel. Klanten, medewerkers, installaties en materialen importeren we in één keer. Je mag aanleveren in je eigen format; wij zetten het om.</p>
-        </details>
-        <details>
-          <summary>Zijn er koppelingen met mijn boekhouding?</summary>
-          <p>Nog niet. Vandaag werkt Flow8 met import en export via Excel. Koppelingen met boekhoudpakketten staan op de planning — we bouwen ze op volgorde van wat klanten daadwerkelijk gebruiken.</p>
-        </details>
-        <details>
-          <summary>Hoe lang duurt het voor we live zijn?</summary>
-          <p>Meestal twee weken: intake en inrichting in week één, gegevens importeren en live in week twee. De eerste week draaien we met je mee.</p>
-        </details>
-        <details>
-          <summary>Wat gebeurt er met een werkbon als de monteur geen bereik heeft?</summary>
-          <p>De bon blijft op zijn toestel staan en gaat door zodra er weer verbinding is. Hij hoeft niets over te typen.</p>
-        </details>
-        <details>
-          <summary>Waar staan mijn gegevens?</summary>
-          <p>Op servers binnen de Europese Unie, met dagelijkse back-ups. Je gegevens blijven van jou: je kunt ze op elk moment exporteren, en bij opzeggen krijg je een volledige export mee.</p>
-        </details>
-        <details>
-          <summary>Zit ik ergens aan vast?</summary>
-          <p>Nee. Maandelijks opzegbaar, en de eerste drie maanden draai je zonder kosten mee. Je gegevens blijven van jou en kun je altijd exporteren.</p>
-        </details>
+<section id="operationeel" data-band="light" style="position:relative;background:#f5f6f8;color:#0d0f14;padding:104px 0;scroll-margin-top:88px">
+  <div style="position:absolute;top:0;left:0;right:0;height:80px;pointer-events:none;background:linear-gradient(180deg,rgba(13,15,20,.06),transparent)"></div>
+  <div data-mod="1" style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1.05fr;gap:64px;align-items:center">
+    <div style="max-width:500px">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc);display:inline-flex;align-items:center;gap:10px"><span style="display:inline-block;width:24px;height:1.5px;background:currentColor;opacity:.6"></span>Operationeel</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:16px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance">Het kloppend hart van je werkdag.</h2>
+      <p data-reveal="up" data-delay="160" style="margin-top:18px;font-size:18px;line-height:1.55;color:#5f6572;max-width:460px;text-wrap:pretty">Plan met route-optimalisatie, stuur je monteurs aan en handel werkbonnen digitaal af — alle dagelijkse uitvoering in één module.</p>
+      <ul data-reveal="up" data-delay="240" style="margin-top:26px;display:flex;flex-direction:column;gap:11px">
+        <li style="position:relative;padding-left:24px;font-size:15px;color:#5f6572;line-height:1.5">Slimme dagplanning: minste kilometers en reistijd<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc)"></span></li>
+        <li style="position:relative;padding-left:24px;font-size:15px;color:#5f6572;line-height:1.5">Lijst-, week- en dagweergave voor de planning<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc)"></span></li>
+        <li style="position:relative;padding-left:24px;font-size:15px;color:#5f6572;line-height:1.5">Werkbonnen, storingsdienst en werkorders in één flow<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc)"></span></li>
+      </ul>
+    </div>
+    <div data-parallax="1" data-reveal="mock" data-anim="1" style="background:#101320;border:1px solid #4f4f80;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(79,79,128,.22),0 30px 70px rgba(10,12,24,.3)">
+      <div style="display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid #262b3d;background:#0c0e18">
+        <span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span><span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span><span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span>
+        <span style="margin-left:8px;font-size:13px;color:#f4f6fb">Slimme Dagplanning</span>
+        <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:#868da3;border:1px solid #262b3d;border-radius:100px;padding:3px 10px">Optimaliseer route</span>
       </div>
-    </section>
-
-    <!-- ── CONTACT ──────────────────────────────────────────────────────── -->
-    <section id="contact" class="contact">
-      <span class="eyebrow">Contact</span>
-      <h2>Even bellen <span class="stil">mag ook.</span></h2>
-      <p class="lood">Een demo duurt een half uur, bij jou op kantoor of via beeldbellen. We kijken naar jouw planning, niet naar een voorbeeldbedrijf. Je zit nergens aan vast.</p>
-      <div class="contact-knoppen">
-        <a class="knop knop-vol" href="tel:+31628702422">Bel 06 – 28 70 24 22</a>
-        <a class="knop knop-rand" href="mailto:info@flow-8.nl?subject=Demo%20Flow%208">Mail info@flow-8.nl</a>
+      <div style="padding:18px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:11.5px;color:#a8aec0"><b data-count="5" style="color:#f4f6fb;font-weight:600">0</b>&nbsp;opdrachten</span>
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:11.5px;color:#a8aec0"><b style="color:#f4f6fb;font-weight:600">3u 30m</b> werktijd</span>
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:11.5px;color:#a8aec0"><b style="color:#f4f6fb;font-weight:600">2u 02m</b> reistijd</span>
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:11.5px;color:#a8aec0"><b data-count="107" style="color:#f4f6fb;font-weight:600">0</b>&nbsp;km</span>
+        </div>
+        <div style="position:relative;border:1px solid #262b3d;border-radius:11px;overflow:hidden">
+          <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:block;width:100%;height:auto">
+            <defs><linearGradient id="planRoute" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7fe0f5"></stop><stop offset="100%" stop-color="#6d8cff"></stop></linearGradient></defs>
+            <rect width="420" height="260" fill="#0e1220"></rect>
+            <path d="M0 46 Q120 12 210 58 T420 44 L420 0 L0 0Z" fill="#152142" opacity="0.45"></path>
+            <path d="M0 206 Q130 240 270 208 T420 228 L420 260 L0 260Z" fill="#122a22" opacity="0.4"></path>
+            <g stroke="#2a3350" stroke-width="1" opacity="0.5" fill="none"><path d="M46 0 L128 260"></path><path d="M420 118 L60 182"></path><path d="M214 0 L268 260"></path></g>
+            <path d="M75 210 L195 150 L295 62 L330 58 L350 92 L300 112 L75 210" fill="none" stroke="#4f6ef5" stroke-width="7" opacity="0.18" stroke-linejoin="round" stroke-linecap="round"></path>
+            <path data-route="1" pathLength="100" d="M75 210 L195 150 L295 62 L330 58 L350 92 L300 112 L75 210" fill="none" stroke="url(#planRoute)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" style="stroke-dasharray:100;stroke-dashoffset:100"></path>
+            <g font-family="'Space Mono',monospace" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">
+              <g data-pin="1" style="opacity:0;transform:scale(.4);transform-box:fill-box;transform-origin:center"><circle cx="195" cy="150" r="9" fill="#4f6ef5"></circle><text x="195" y="153.5">1</text></g>
+              <g data-pin="1" style="opacity:0;transform:scale(.4);transform-box:fill-box;transform-origin:center"><circle cx="295" cy="62" r="9" fill="#4f6ef5"></circle><text x="295" y="65.5">2</text></g>
+              <g data-pin="1" style="opacity:0;transform:scale(.4);transform-box:fill-box;transform-origin:center"><circle cx="330" cy="58" r="9" fill="#4f6ef5"></circle><text x="330" y="61.5">3</text></g>
+              <g data-pin="1" style="opacity:0;transform:scale(.4);transform-box:fill-box;transform-origin:center"><circle cx="350" cy="92" r="9" fill="#4f6ef5"></circle><text x="350" y="95.5">4</text></g>
+              <g data-pin="1" style="opacity:0;transform:scale(.4);transform-box:fill-box;transform-origin:center"><circle cx="300" cy="112" r="9" fill="#4f6ef5"></circle><text x="300" y="115.5">5</text></g>
+            </g>
+            <g><circle cx="75" cy="210" r="11" fill="#10b981"></circle><path d="M69 211 L75 205 L81 211 Z" fill="#0e1220"></path><rect x="71.5" y="210" width="7" height="6" fill="#0e1220"></rect></g>
+          </svg>
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:9px;font-size:11.5px;padding:9px 11px;border-radius:9px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.22);color:#6fd7b6">08:00 — Vertrek vanaf bedrijf</div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:#868da3;padding-left:14px">59 min · 75 km</div>
+          <div style="display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:10px;background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:9px 11px"><span style="width:20px;height:20px;border-radius:50%;background:var(--acc);color:#fff;font-family:'Space Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700">1</span><span style="font-size:12px;color:#a8aec0">Servicebeurt · Amsterdam<small style="display:block;color:#868da3;font-size:10.5px">09:00 → 09:30 · 30m</small></span><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">09:00</span></div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:#868da3;padding-left:14px">15 min · 4 km</div>
+          <div style="display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:10px;background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:9px 11px"><span style="width:20px;height:20px;border-radius:50%;background:var(--acc);color:#fff;font-family:'Space Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700">2</span><span style="font-size:12px;color:#a8aec0">Onderhoud · Amsterdam<small style="display:block;color:#868da3;font-size:10.5px">09:45 → 10:15 · 30m</small></span><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">09:45</span></div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:#e0b072;background:rgba(224,176,114,.1);border:1px solid rgba(224,176,114,.22);border-radius:8px;padding:7px 11px">Gat van 22 min — volgende tijdblok 12:55</div>
+          <div style="display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:10px;background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:9px 11px"><span style="width:20px;height:20px;border-radius:50%;background:var(--acc);color:#fff;font-family:'Space Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700">3</span><span style="font-size:12px;color:#a8aec0">Installatie · Aalsmeer<small style="display:block;color:#868da3;font-size:10.5px">12:55 → 13:55 · 1u</small></span><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">12:55</span></div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:11.5px;padding:9px 11px;border-radius:9px;background:rgba(79,110,245,.08);border:1px solid rgba(79,110,245,.18);color:#7c8dd8">14:55 — Terug bij bedrijf · 60 min retour</div>
+        </div>
       </div>
-    </section>
-
+    </div>
   </div>
 
-  <footer class="voet">
-    <div class="omhul voet-binnen">
-      <a class="voet-merk" href="/" aria-label="Flow 8 — naar de homepage">
-        <svg width="46" height="33" viewBox="0 0 90 64" fill="none" aria-hidden="true">
-          <defs><linearGradient id="merk-voet" x1="6" y1="10" x2="84" y2="54" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#7fe0f5"/><stop offset="100%" stop-color="#6d8cff"/></linearGradient></defs>
-          <path d="M8 32C8 20 15 13 24 13 33 13 38 23 45 32 52 41 57 51 66 51 75 51 82 44 82 32" stroke="url(#merk-voet)" stroke-width="7.5" stroke-linecap="round"/>
-          <path d="M8 32C8 44 15 51 24 51 33 51 38 41 45 32 52 23 57 13 66 13 75 13 82 20 82 32" stroke="url(#merk-voet)" stroke-width="7.5" stroke-linecap="round" opacity=".5"/>
-        </svg>
-      </a>
-      <nav class="voet-links" aria-label="Voettekstnavigatie">
-        <a href="#platform">Platform</a>
-        <a href="#voor-wie">Voor wie</a>
-        <a href="#veld">In het veld</a>
-        <a href="#klanten">Klanten</a>
-        <a href="#team">Team</a>
-        <a href="#werkwijze">Zo werkt het</a>
-        <a href="#prijzen">Prijzen</a>
-        <a href="#vragen">Vragen</a>
-        <a href="#contact">Contact</a>
-      </nav>
-      <p class="voet-regel">
-        <a href="tel:+31628702422">06 – 28 70 24 22</a> ·
-        <a href="mailto:info@flow-8.nl">info@flow-8.nl</a>
-      </p>
+  <div style="position:relative;max-width:1280px;margin:64px auto 0;padding:0 24px">
+    <span data-reveal="up" style="display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc)"><span style="display:inline-block;width:24px;height:1.5px;background:currentColor;opacity:.6"></span>Alles in Operationeel</span>
+    <div data-grid="4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      
+        <div data-reveal="up" data-delay="0" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:12px;padding:14px 16px;transition:border-color .2s ease,box-shadow .2s ease" class="zw18">
+          <span style="width:36px;height:36px;border-radius:9px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M3 11l19-9-9 19-2-8-8-2z"></path></svg></span>
+          <span style="font-size:13.5px;color:#0d0f14;font-weight:500;line-height:1.2">Planning & route</span>
+        </div>
+      
+        <div data-reveal="up" data-delay="50" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:12px;padding:14px 16px;transition:border-color .2s ease,box-shadow .2s ease" class="zw19">
+          <span style="width:36px;height:36px;border-radius:9px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M6 3h12v18H6z M9 9h6 M9 13h6"></path></svg></span>
+          <span style="font-size:13.5px;color:#0d0f14;font-weight:500;line-height:1.2">Werkbonnen</span>
+        </div>
+      
+        <div data-reveal="up" data-delay="100" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:12px;padding:14px 16px;transition:border-color .2s ease,box-shadow .2s ease" class="zw20">
+          <span style="width:36px;height:36px;border-radius:9px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M3 6h18v12H3z M3 7l9 6 9-6"></path></svg></span>
+          <span style="font-size:13.5px;color:#0d0f14;font-weight:500;line-height:1.2">Klantmails</span>
+        </div>
+      
+        <div data-reveal="up" data-delay="150" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:12px;padding:14px 16px;transition:border-color .2s ease,box-shadow .2s ease" class="zw21">
+          <span style="width:36px;height:36px;border-radius:9px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11z M12 7.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"></path></svg></span>
+          <span style="font-size:13.5px;color:#0d0f14;font-weight:500;line-height:1.2">Kaartoverzicht</span>
+        </div>
+      
+        <div data-reveal="up" data-delay="200" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:12px;padding:14px 16px;transition:border-color .2s ease,box-shadow .2s ease" class="zw22">
+          <span style="width:36px;height:36px;border-radius:9px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4"></path></svg></span>
+          <span style="font-size:13.5px;color:#0d0f14;font-weight:500;line-height:1.2">Agenda</span>
+        </div>
+      
+        <div data-reveal="up" data-delay="250" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:12px;padding:14px 16px;transition:border-color .2s ease,box-shadow .2s ease" class="zw23">
+          <span style="width:36px;height:36px;border-radius:9px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"></path></svg></span>
+          <span style="font-size:13.5px;color:#0d0f14;font-weight:500;line-height:1.2">Storingsdienst</span>
+        </div>
+      
+        <div data-reveal="up" data-delay="300" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:12px;padding:14px 16px;transition:border-color .2s ease,box-shadow .2s ease" class="zw24">
+          <span style="width:36px;height:36px;border-radius:9px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z"></path></svg></span>
+          <span style="font-size:13.5px;color:#0d0f14;font-weight:500;line-height:1.2">Werkorders</span>
+        </div>
+      
+        <div data-reveal="up" data-delay="350" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:12px;padding:14px 16px;transition:border-color .2s ease,box-shadow .2s ease" class="zw25">
+          <span style="width:36px;height:36px;border-radius:9px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px"><path d="M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5"></path></svg></span>
+          <span style="font-size:13.5px;color:#0d0f14;font-weight:500;line-height:1.2">Register & materialen</span>
+        </div>
+      
     </div>
-  </footer>
-</main>
-<script src="rekenmodule.js" defer></script>
+  </div>
+</section>
+
+<section id="inzicht" data-band="dark" style="position:relative;background:#0a0b10;padding:104px 0;overflow:hidden;scroll-margin-top:88px">
+  <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(72% 58% at 50% 0%,rgba(53,196,227,.15),rgba(79,110,245,.05) 46%,transparent 66%)"></div>
+  <div data-mod="1" style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1.05fr;gap:64px;align-items:center">
+    <div style="max-width:500px">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc2);display:inline-flex;align-items:center;gap:10px"><span style="display:inline-block;width:24px;height:1.5px;background:currentColor;opacity:.6"></span>Klanten &amp; rapportage</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:16px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance"><span data-bind="tabTitle">Je klanten overzichtelijk bij elkaar.</span></h2>
+      <p data-reveal="up" data-delay="160" style="margin-top:18px;font-size:18px;line-height:1.55;color:#a8aec0;max-width:460px;text-wrap:pretty"><span data-bind="tabLead">Van debiteuren tot vaste serviceklanten — contactgegevens, contracten en gekoppelde installaties op één plek, zodat je bij elke klant meteen de historie ziet.</span></p>
+      <div data-reveal="up" data-delay="200" style="display:flex;gap:6px;margin-top:26px;background:rgba(255,255,255,.04);border:1px solid #262b3d;border-radius:100px;padding:5px;width:max-content">
+        <button data-doe-click="showKlanten" style="font-family:inherit;font-size:13.5px;padding:9px 20px;border-radius:100px;border:none;cursor:pointer;transition:background .2s ease,color .2s ease;background:var(--acc);color:#fff">Klanten</button>
+        <button data-doe-click="showRapportage" style="font-family:inherit;font-size:13.5px;padding:9px 20px;border-radius:100px;border:none;cursor:pointer;transition:background .2s ease,color .2s ease;background:transparent;color:#a8aec0">Rapportage</button>
+      </div>
+      <ul data-reveal="up" data-delay="260" style="margin-top:26px;display:flex;flex-direction:column;gap:11px"><span data-lus="tabFeats" data-lus-nr="0" style="display:contents">
+        
+          <li style="position:relative;padding-left:24px;font-size:15px;color:#a8aec0;line-height:1.5">Debiteuren en serviceklanten in één overzicht<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px rgba(79,110,245,.5)"></span></li>
+        
+          <li style="position:relative;padding-left:24px;font-size:15px;color:#a8aec0;line-height:1.5">Contactgegevens, contracten en locaties per klant<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px rgba(79,110,245,.5)"></span></li>
+        
+          <li style="position:relative;padding-left:24px;font-size:15px;color:#a8aec0;line-height:1.5">Gekoppelde installaties met onderhoudshistorie<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px rgba(79,110,245,.5)"></span></li>
+        
+      </span></ul>
+    </div>
+
+    <div data-parallax="1">
+      <div data-toon="isKlanten">
+        <div data-reveal="mock" data-anim="1" style="max-width:440px;margin:0 auto;background:#101320;border:1px solid #4f4f80;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(79,79,128,.3),0 26px 60px rgba(0,0,0,.5)">
+          <div style="display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid #262b3d;background:#0c0e18">
+            <span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span><span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span><span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span>
+            <span style="margin-left:8px;font-size:13px;color:#f4f6fb">Klantkaart</span>
+          </div>
+          <div style="padding:18px">
+            <div style="background:#181a2c;border:1px solid #262b3d;border-radius:11px;padding:12px 14px;margin-bottom:12px">
+              <div style="font-size:17px;color:#f4f6fb;letter-spacing:-.02em">De Zeewind B.V. (A+B)</div>
+              <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2);margin-top:3px">Deb.nr: 2341</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div style="background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:9px 11px;min-width:0"><span style="display:block;font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:#868da3;margin-bottom:4px">Adres</span><span style="font-size:12px;color:#a8aec0;line-height:1.35">Havenweg 12 · 3898 LJ Zeewolde</span></div>
+              <div style="background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:9px 11px;min-width:0"><span style="display:block;font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:#868da3;margin-bottom:4px">Contactpersoon</span><span style="font-size:12px;color:#a8aec0;line-height:1.35">J. Bakker</span></div>
+              <div style="background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:9px 11px;min-width:0"><span style="display:block;font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:#868da3;margin-bottom:4px">E-mail</span><span style="font-size:12px;color:#a8aec0;line-height:1.35;word-break:break-word">info@dezeewind.nl</span></div>
+              <div style="background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:9px 11px;min-width:0"><span style="display:block;font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:#868da3;margin-bottom:4px">Telefoon</span><span style="font-size:12px;color:#a8aec0;line-height:1.35">06 – 12 34 56 78</span></div>
+            </div>
+            <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:11px;padding:12px 14px;margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5fd6a8;font-weight:600;margin-bottom:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M20 6 9 17l-5-5"></path></svg>Servicecontract</div>
+              <div style="font-size:13px;color:#f4f6fb;font-weight:500">De Zeewind B.V. (A+B)</div>
+              <div style="font-size:11px;color:#868da3;margin:3px 0 9px">Contract A22 · Volgende beurt: 02-08-2027</div>
+              <span style="display:inline-block;font-family:'Space Mono',monospace;font-size:10px;color:#e0b072;background:rgba(224,176,114,.1);border:1px solid rgba(224,176,114,.28);border-radius:100px;padding:4px 10px">Contract B · 24u storingsdienst</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+              
+                <div style="display:flex;align-items:center;gap:11px;background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:10px 12px">
+                  <span style="width:26px;height:26px;border-radius:7px;background:rgba(79,110,245,.12);color:var(--acc2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8z M5 21v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"></path></svg></span>
+                  <div><span style="display:block;font-size:12.5px;color:#f4f6fb;font-weight:500">Contactpersonen</span><small style="font-size:10.5px;color:#868da3">1 · standaard</small></div>
+                  <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;color:#868da3;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:100px">1</span>
+                </div>
+              
+                <div style="display:flex;align-items:center;gap:11px;background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:10px 12px">
+                  <span style="width:26px;height:26px;border-radius:7px;background:rgba(79,110,245,.12);color:var(--acc2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11z M12 7.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"></path></svg></span>
+                  <div><span style="display:block;font-size:12.5px;color:#f4f6fb;font-weight:500">Locaties</span><small style="font-size:10.5px;color:#868da3">alleen hoofdadres</small></div>
+                  <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;color:#868da3;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:100px">0</span>
+                </div>
+              
+                <div style="display:flex;align-items:center;gap:11px;background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:10px 12px">
+                  <span style="width:26px;height:26px;border-radius:7px;background:rgba(79,110,245,.12);color:var(--acc2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 8l-9-5-9 5 9 5 9-5z M3 8v8l9 5 9-5V8 M12 13v8"></path></svg></span>
+                  <div><span style="display:block;font-size:12.5px;color:#f4f6fb;font-weight:500">Installaties</span><small style="font-size:10.5px;color:#868da3">8 in servicecontract</small></div>
+                  <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;color:#868da3;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:100px">8</span>
+                </div>
+              
+            </div>
+            <div style="background:#181a2c;border:1px solid #262b3d;border-radius:9px;padding:12px">
+              <div style="font-size:12.5px;color:#f4f6fb;font-weight:500;display:flex;align-items:center;gap:8px;margin-bottom:8px">Werkbonnen <span style="font-family:'Space Mono',monospace;font-size:10.5px;color:#868da3;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:100px">1</span></div>
+              <div style="display:flex;align-items:center;gap:10px;border-top:1px solid #262b3d;padding-top:8px;font-size:12px;color:#a8aec0"><div>31-07-2026 · Servicebeurt<small style="display:block;color:#868da3;font-size:10.5px">WB-a1b2c3 · Zeewolde</small></div><span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:4px 9px;border-radius:100px;background:rgba(16,185,129,.14);color:#34d99f;border:1px solid rgba(16,185,129,.32)">Afgehandeld</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-toon="isRapportage" hidden>
+        <figure data-reveal="mock" style="margin:0">
+          <img src="beeld/rapportage.webp" width="1972" height="1150" loading="lazy" decoding="async"
+               alt="De rapportage in Flow 8 over 2026: 895 opdrachten waarvan 872 afgehandeld, met de verdeling per monteur en per opdrachttype in ringdiagrammen en het aantal opdrachten per maand in staven"
+               style="width:100%;height:auto;display:block;border:1px solid #262b3d;border-radius:16px;box-shadow:0 30px 70px rgba(0,0,0,.45)">
+          <figcaption style="margin-top:12px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;color:#868da3">
+            Een echte omgeving · 895 opdrachten in 2026 · namen onherkenbaar gemaakt
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="team" data-band="light" style="position:relative;background:#f5f6f8;color:#0d0f14;padding:104px 0;scroll-margin-top:88px">
+  <div style="position:absolute;top:0;left:0;right:0;height:80px;pointer-events:none;background:linear-gradient(180deg,rgba(13,15,20,.06),transparent)"></div>
+  <div data-mod="1" style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1.05fr;gap:64px;align-items:center">
+    <div style="max-width:500px">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc);display:inline-flex;align-items:center;gap:10px"><span style="display:inline-block;width:24px;height:1.5px;background:currentColor;opacity:.6"></span>Team</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:16px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance">Je hele team in één overzicht.</h2>
+      <p data-reveal="up" data-delay="160" style="margin-top:18px;font-size:18px;line-height:1.55;color:#5f6572;max-width:460px;text-wrap:pretty">Van contracturen tot verlofsaldo, overuren, onkosten en verzuim — beheer je medewerkers en hun uren op één plek, met goedkeuring waar nodig.</p>
+      <div data-grid="5" data-reveal="up" data-delay="240" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:28px">
+        
+          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e5ec;border-radius:11px;padding:11px 13px;transition:border-color .2s ease" class="zw26">
+            <span style="width:30px;height:30px;border-radius:8px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M9 4.8a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 0 1 0-6.4z M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1 M16 5a3 3 0 0 1 0 6 M21.5 20v-1a5 5 0 0 0-3.5-4.8"></path></svg></span>
+            <span style="font-size:13px;color:#0d0f14;font-weight:500">Medewerkers</span>
+          </div>
+        
+          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e5ec;border-radius:11px;padding:11px 13px;transition:border-color .2s ease" class="zw27">
+            <span style="width:30px;height:30px;border-radius:8px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z M12 2v2 M12 20v2 M4 12H2 M22 12h-2 M5.6 5.6 4.2 4.2 M19.8 19.8l-1.4-1.4 M5.6 18.4l-1.4 1.4 M19.8 4.2l-1.4 1.4"></path></svg></span>
+            <span style="font-size:13px;color:#0d0f14;font-weight:500">Verlof</span>
+          </div>
+        
+          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e5ec;border-radius:11px;padding:11px 13px;transition:border-color .2s ease" class="zw28">
+            <span style="width:30px;height:30px;border-radius:8px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z M12 7v5l3 2"></path></svg></span>
+            <span style="font-size:13px;color:#0d0f14;font-weight:500">Overuren</span>
+          </div>
+        
+          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e5ec;border-radius:11px;padding:11px 13px;transition:border-color .2s ease" class="zw29">
+            <span style="width:30px;height:30px;border-radius:8px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M5 3h14v18l-2.5-1.6L14 21l-2-1.6L10 21l-2.5-1.6L5 21z M9 8h6 M9 12h6"></path></svg></span>
+            <span style="font-size:13px;color:#0d0f14;font-weight:500">Onkosten</span>
+          </div>
+        
+          <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e2e5ec;border-radius:11px;padding:11px 13px;transition:border-color .2s ease" class="zw30">
+            <span style="width:30px;height:30px;border-radius:8px;background:rgba(79,110,245,.1);display:flex;align-items:center;justify-content:center;color:var(--acc);flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M3 12h4l2 6 4-13 2 7h6"></path></svg></span>
+            <span style="font-size:13px;color:#0d0f14;font-weight:500">Verzuim</span>
+          </div>
+        
+      </div>
+    </div>
+    <div data-parallax="1" data-reveal="mock" data-anim="1" style="background:#101320;border:1px solid #4f4f80;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(79,79,128,.22),0 30px 70px rgba(10,12,24,.3)">
+      <div style="display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid #262b3d;background:#0c0e18">
+        <span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span><span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span><span style="width:9px;height:9px;border-radius:50%;background:#2c3145"></span>
+        <span style="margin-left:8px;font-size:13px;color:#f4f6fb">Medewerkers</span>
+      </div>
+      <div style="padding:18px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:11.5px;color:#a8aec0"><b data-count="19" style="color:#f4f6fb;font-weight:600">0</b>&nbsp;actief</span>
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:11.5px;color:#a8aec0"><b data-count="5" style="color:#f4f6fb;font-weight:600">0</b>&nbsp;monteurs</span>
+          <span style="display:flex;align-items:center;gap:8px;background:#181a2c;border:1px solid #262b3d;border-radius:100px;padding:7px 13px;font-size:11.5px;color:#a8aec0"><b data-count="2" style="color:#f4f6fb;font-weight:600">0</b>&nbsp;planners</span>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          
+            <div style="display:grid;grid-template-columns:26px 1fr 92px 58px;gap:10px;align-items:center;padding:11px 2px;border-top:1px solid #262b3d">
+              <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;color:#fff;background:#3aa0a0">SV</span>
+              <div><div style="font-size:12.5px;color:#f4f6fb;font-weight:500;line-height:1.2">S. de Vries</div><div style="font-size:10.5px;color:#868da3">Monteur · 40 u/wk</div></div>
+              <div style="text-align:right;min-width:0"><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">119,8u</span><div style="height:4px;border-radius:100px;background:rgba(255,255,255,.08);margin-top:4px;overflow:hidden"><i data-fill="75" style="display:block;height:100%;width:0;border-radius:100px;background:#34d99f"></i></div></div>
+              <span style="justify-self:end;background:rgba(16,185,129,.14);color:#34d99f;border:1px solid rgba(16,185,129,.3);font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;padding:3px 7px;border-radius:100px">Actief</span>
+            </div>
+          
+            <div style="display:grid;grid-template-columns:26px 1fr 92px 58px;gap:10px;align-items:center;padding:11px 2px;border-top:1px solid #262b3d">
+              <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;color:#fff;background:#10b981">JB</span>
+              <div><div style="font-size:12.5px;color:#f4f6fb;font-weight:500;line-height:1.2">J. Bakker</div><div style="font-size:10.5px;color:#868da3">Planner · 36 u/wk</div></div>
+              <div style="text-align:right;min-width:0"><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">23,5u</span><div style="height:4px;border-radius:100px;background:rgba(255,255,255,.08);margin-top:4px;overflow:hidden"><i data-fill="30" style="display:block;height:100%;width:0;border-radius:100px;background:#e0b072"></i></div></div>
+              <span style="justify-self:end;background:rgba(16,185,129,.14);color:#34d99f;border:1px solid rgba(16,185,129,.3);font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;padding:3px 7px;border-radius:100px">Actief</span>
+            </div>
+          
+            <div style="display:grid;grid-template-columns:26px 1fr 92px 58px;gap:10px;align-items:center;padding:11px 2px;border-top:1px solid #262b3d">
+              <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;color:#fff;background:#7c5cff">MJ</span>
+              <div><div style="font-size:12.5px;color:#f4f6fb;font-weight:500;line-height:1.2">M. Jansen</div><div style="font-size:10.5px;color:#868da3">Administratie · 32 u/wk</div></div>
+              <div style="text-align:right;min-width:0"><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">58,4u</span><div style="height:4px;border-radius:100px;background:rgba(255,255,255,.08);margin-top:4px;overflow:hidden"><i data-fill="55" style="display:block;height:100%;width:0;border-radius:100px;background:#34d99f"></i></div></div>
+              <span style="justify-self:end;background:rgba(16,185,129,.14);color:#34d99f;border:1px solid rgba(16,185,129,.3);font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;padding:3px 7px;border-radius:100px">Actief</span>
+            </div>
+          
+            <div style="display:grid;grid-template-columns:26px 1fr 92px 58px;gap:10px;align-items:center;padding:11px 2px;border-top:1px solid #262b3d">
+              <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;color:#fff;background:#4f6ef5">KV</span>
+              <div><div style="font-size:12.5px;color:#f4f6fb;font-weight:500;line-height:1.2">K. Visser</div><div style="font-size:10.5px;color:#868da3">Magazijn · 40 u/wk</div></div>
+              <div style="text-align:right;min-width:0"><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">160u</span><div style="height:4px;border-radius:100px;background:rgba(255,255,255,.08);margin-top:4px;overflow:hidden"><i data-fill="95" style="display:block;height:100%;width:0;border-radius:100px;background:#34d99f"></i></div></div>
+              <span style="justify-self:end;background:rgba(16,185,129,.14);color:#34d99f;border:1px solid rgba(16,185,129,.3);font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;padding:3px 7px;border-radius:100px">Actief</span>
+            </div>
+          
+            <div style="display:grid;grid-template-columns:26px 1fr 92px 58px;gap:10px;align-items:center;padding:11px 2px;border-top:1px solid #262b3d">
+              <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;color:#fff;background:#c05cc0">RG</span>
+              <div><div style="font-size:12.5px;color:#f4f6fb;font-weight:500;line-height:1.2">R. de Groot</div><div style="font-size:10.5px;color:#868da3">Verkoop · 40 u/wk</div></div>
+              <div style="text-align:right;min-width:0"><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--acc2)">4,9u</span><div style="height:4px;border-radius:100px;background:rgba(255,255,255,.08);margin-top:4px;overflow:hidden"><i data-fill="8" style="display:block;height:100%;width:0;border-radius:100px;background:#f98a8a"></i></div></div>
+              <span style="justify-self:end;background:rgba(16,185,129,.14);color:#34d99f;border:1px solid rgba(16,185,129,.3);font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;padding:3px 7px;border-radius:100px">Actief</span>
+            </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="werkbon" data-band="dark" style="position:relative;background:#0a0b10;padding:104px 0;overflow:hidden;scroll-margin-top:88px">
+  <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(72% 58% at 50% 0%,rgba(53,196,227,.15),rgba(79,110,245,.05) 46%,transparent 66%)"></div>
+  <div data-mod="1" style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1.05fr;gap:64px;align-items:center">
+    <div style="max-width:500px">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc2);display:inline-flex;align-items:center;gap:10px"><span style="display:inline-block;width:24px;height:1.5px;background:currentColor;opacity:.6"></span>In het veld</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:16px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance">De werkbon in de broekzak van de monteur.</h2>
+      <p data-reveal="up" data-delay="160" style="margin-top:18px;font-size:18px;line-height:1.55;color:#a8aec0;max-width:460px;text-wrap:pretty">Dezelfde opdracht die de planner klaarzet, opent de monteur op zijn telefoon. Uren, materialen, foto's en handtekening gaan er ter plekke in — en de bon is verstuurd voordat hij wegrijdt.</p>
+      <ul data-reveal="up" data-delay="240" style="margin-top:26px;display:flex;flex-direction:column;gap:11px">
+        <li style="position:relative;padding-left:24px;font-size:15px;color:#a8aec0;line-height:1.5">Klantgegevens en werkadres met één tik naar navigatie<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px rgba(79,110,245,.5)"></span></li>
+        <li style="position:relative;padding-left:24px;font-size:15px;color:#a8aec0;line-height:1.5">Checklists, uren, materialen, foto's en documenten op één bon<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px rgba(79,110,245,.5)"></span></li>
+        <li style="position:relative;padding-left:24px;font-size:15px;color:#a8aec0;line-height:1.5">Ondertekenen door de klant en direct als PDF in de mailbox<span style="position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px rgba(79,110,245,.5)"></span></li>
+      </ul>
+      <div data-reveal="up" data-delay="300" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:26px">
+        <span style="font-family:'Space Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#a8aec0;border:1px solid #262b3d;border-radius:100px;padding:7px 13px">Interne memo</span>
+        <span style="font-family:'Space Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#a8aec0;border:1px solid #262b3d;border-radius:100px;padding:7px 13px">Logboek</span>
+        <span style="font-family:'Space Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#a8aec0;border:1px solid #262b3d;border-radius:100px;padding:7px 13px">Bevindingen monteur</span>
+        <span style="font-family:'Space Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#a8aec0;border:1px solid #262b3d;border-radius:100px;padding:7px 13px">Werkt op elke telefoon</span>
+      </div>
+    </div>
+
+    <div data-parallax="1" style="position:relative;display:flex;justify-content:center">
+      <div data-phonewrap="1" style="position:relative;width:326px;max-width:100%">
+      <div data-reveal="mock" data-anim="1" style="position:relative;width:100%;border-radius:38px;background:#101320;border:1px solid #343a55;padding:9px;box-shadow:0 40px 90px rgba(0,0,0,.55)">
+        <div style="position:relative;border-radius:30px;overflow:hidden;background:#fff">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 18px 5px;font-family:'Space Mono',monospace;font-size:10px;color:#0d0f14"><span>9:41</span><span style="display:flex;gap:4px;align-items:center"><span style="width:14px;height:7px;border:1px solid #0d0f14;border-radius:2px;display:inline-block"></span></span></div>
+          <div style="display:flex;align-items:center;gap:9px;padding:5px 16px 11px;border-bottom:1px solid #eceef4">
+            <span style="font-size:15px;font-weight:700;letter-spacing:-.03em;color:#0d0f14">Werkbon</span>
+            <span style="font-family:'Space Mono',monospace;font-size:10px;color:#8a90a0">#WB-2418</span>
+            <span style="margin-left:auto;font-size:9.5px;font-weight:600;color:#fff;background:#7c85a8;border-radius:100px;padding:4px 10px">Klaargezet</span>
+          </div>
+          <div style="padding:11px 16px 0">
+            <div style="font-size:14.5px;font-weight:600;letter-spacing:-.02em;color:#0d0f14">Van Elzen Techniek B.V.</div>
+            <div style="font-size:11px;color:#7c8291;margin-top:2px">Storing · 12-05-2026</div>
+          </div>
+          <div style="padding:10px 16px 0">
+            <div style="border:1px solid #eceef4;border-radius:12px;padding:11px 13px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="color:var(--acc);display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8z M5 21v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"></path></svg></span><span style="font-size:12.5px;font-weight:600;color:#0d0f14">Klantgegevens</span></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #eceef4"><span style="font-size:11.5px;color:#7c8291">Werkadres</span><span style="font-size:11.5px;color:#0d0f14;font-weight:500;text-align:right">Molenkade 14, Nieuwegein</span></div>
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #eceef4"><span style="font-size:11.5px;color:#7c8291">Contact</span><span style="font-size:11.5px;color:#0d0f14;font-weight:500;text-align:right">R. Hendriks</span></div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:10px;background:rgba(79,110,245,.07);border:1px solid rgba(79,110,245,.2);border-radius:9px;padding:9px 11px;font-size:11.5px;font-weight:600;color:var(--acc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11z M12 7.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"></path></svg>Navigeer naar werkadres<span style="margin-left:auto;color:#a8aec0">›</span></div>
+            </div>
+          </div>
+          <div style="padding:9px 16px 0;display:flex;flex-direction:column;gap:6px">
+            
+              <div style="display:flex;align-items:center;gap:10px;border:1px solid #eceef4;border-radius:11px;padding:10px 12px">
+                <span style="color:var(--acc);display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M9 11l3 3 8-8 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span>
+                <span style="font-size:12.5px;font-weight:600;color:#0d0f14">Checklists</span>
+                <span style="margin-left:auto;display:flex;align-items:center;gap:7px"><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--acc);background:rgba(79,110,245,.1);border-radius:100px;padding:2px 7px">4</span><span style="color:#b9bfcd">⌄</span></span>
+              </div>
+            
+              <div style="display:flex;align-items:center;gap:10px;border:1px solid #eceef4;border-radius:11px;padding:10px 12px">
+                <span style="color:var(--acc);display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z M12 7v5l3 2"></path></svg></span>
+                <span style="font-size:12.5px;font-weight:600;color:#0d0f14">Uren</span>
+                <span style="margin-left:auto;display:flex;align-items:center;gap:7px"><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--acc);background:rgba(79,110,245,.1);border-radius:100px;padding:2px 7px">2 u</span><span style="color:#b9bfcd">⌄</span></span>
+              </div>
+            
+              <div style="display:flex;align-items:center;gap:10px;border:1px solid #eceef4;border-radius:11px;padding:10px 12px">
+                <span style="color:var(--acc);display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M21 8l-9-5-9 5 9 5 9-5z M3 8v8l9 5 9-5V8 M12 13v8"></path></svg></span>
+                <span style="font-size:12.5px;font-weight:600;color:#0d0f14">Materialen</span>
+                <span style="margin-left:auto;display:flex;align-items:center;gap:7px"><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--acc);background:rgba(79,110,245,.1);border-radius:100px;padding:2px 7px">3</span><span style="color:#b9bfcd">⌄</span></span>
+              </div>
+            
+              <div style="display:flex;align-items:center;gap:10px;border:1px solid #eceef4;border-radius:11px;padding:10px 12px">
+                <span style="color:var(--acc);display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M4 7h3l2-2h6l2 2h3v12H4z M12 16a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"></path></svg></span>
+                <span style="font-size:12.5px;font-weight:600;color:#0d0f14">Foto's</span>
+                <span style="margin-left:auto;display:flex;align-items:center;gap:7px"><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--acc);background:rgba(79,110,245,.1);border-radius:100px;padding:2px 7px">5</span><span style="color:#b9bfcd">⌄</span></span>
+              </div>
+            
+              <div style="display:flex;align-items:center;gap:10px;border:1px solid #eceef4;border-radius:11px;padding:10px 12px">
+                <span style="color:var(--acc);display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M6 3h8l4 4v14H6z M14 3v4h4"></path></svg></span>
+                <span style="font-size:12.5px;font-weight:600;color:#0d0f14">Documenten</span>
+                <span style="margin-left:auto;display:flex;align-items:center;gap:7px"><span style="font-family:'Space Mono',monospace;font-size:9.5px;color:var(--acc);background:rgba(79,110,245,.1);border-radius:100px;padding:2px 7px">1</span><span style="color:#b9bfcd">⌄</span></span>
+              </div>
+            
+          </div>
+          <div style="display:flex;gap:8px;padding:12px 16px 14px">
+            <span style="flex:0 0 auto;font-size:11.5px;font-weight:600;color:#0d0f14;border:1px solid #dfe2ea;border-radius:100px;padding:10px 16px">Opslaan</span>
+            <span style="flex:1;text-align:center;font-size:11.5px;font-weight:600;color:#fff;background:var(--acc);border-radius:100px;padding:10px 12px">Ondertekenen &amp; versturen</span>
+          </div>
+        </div>
+      </div>
+
+      <div data-signcard="1" data-reveal="mock" data-delay="180" style="position:absolute;right:-116px;bottom:26px;width:216px;background:#fff;border:1px solid #e4e7f1;border-radius:16px;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,.42)">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#8a90a0;margin-bottom:8px">Afronding — status werk</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+          <span style="font-size:10.5px;font-weight:600;color:var(--acc);background:rgba(79,110,245,.1);border:1px solid rgba(79,110,245,.3);border-radius:100px;padding:5px 11px">Gereed</span>
+          <span style="font-size:10.5px;color:#5f6572;background:#f2f4f8;border-radius:100px;padding:5px 11px">Vervolgafspraak</span>
+          <span style="font-size:10.5px;color:#5f6572;background:#f2f4f8;border-radius:100px;padding:5px 11px">Klant niet thuis</span>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#8a90a0;margin-bottom:6px">Handtekening klant</div>
+        <div style="border:1px dashed #d7dbe6;border-radius:10px;height:58px;display:flex;align-items:center;justify-content:center;background:#fafbfd">
+          <svg viewBox="0 0 180 46" fill="none" style="width:82%;height:auto" aria-hidden="true"><path data-sign="1" pathLength="100" d="M12 33c14-4 18-22 26-22s6 20 13 20 12-16 20-16 7 14 14 14 12-10 19-10 9 8 16 8 14-5 18-9" stroke="#0d0f14" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:100;stroke-dashoffset:100"></path></svg>
+        </div>
+        <div style="font-size:10px;color:#7c8291;margin-top:8px">R. Hendriks · r.hendriks@vanelzen.nl</div>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="overstappen" data-band="light" style="position:relative;background:#f5f6f8;color:#0d0f14;padding:104px 0;scroll-margin-top:88px">
+  <div style="position:absolute;top:0;left:0;right:0;height:80px;pointer-events:none;background:linear-gradient(180deg,rgba(13,15,20,.06),transparent)"></div>
+  <div style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px">
+    <div style="max-width:620px">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc);display:inline-flex;align-items:center;gap:10px"><span style="display:inline-block;width:24px;height:1.5px;background:currentColor;opacity:.6"></span>Overstappen</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:16px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance">Zonder overtypen aan de slag.</h2>
+      <p data-reveal="up" data-delay="160" style="margin-top:18px;font-size:18px;line-height:1.55;color:#5f6572;max-width:560px;text-wrap:pretty">Je klanten, medewerkers en installaties staan al ergens — meestal in Excel. Die lijsten gaan er in één keer in, zodat je op dag één met je eigen gegevens werkt.</p>
+    </div>
+
+    <div data-grid="3" data-scenes="1" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px">
+
+      <div data-reveal="up" style="background:#fff;border:1px solid #e2e5ec;border-radius:14px;padding:22px;transition:border-color .25s ease,box-shadow .25s ease" class="zw31">
+        <div style="height:112px;border-radius:11px;background:linear-gradient(180deg,#fafbfd,#f2f4f9);border:1px solid #eceef4;padding:13px 14px;display:flex;flex-direction:column;gap:7px;justify-content:center;overflow:hidden">
+          
+            <div style="display:flex;align-items:center;gap:9px">
+              <span data-check="0" style="width:16px;height:16px;border-radius:5px;border:1.5px solid #d5d9e4;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .35s ease,border-color .35s ease">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px;opacity:0;transition:opacity .3s ease"><path d="M20 6 9 17l-5-5"></path></svg>
+              </span>
+              <span data-checkbar="0" style="height:7px;border-radius:100px;background:#e4e7ef;width:68%;transition:background .35s ease"></span>
+            </div>
+          
+            <div style="display:flex;align-items:center;gap:9px">
+              <span data-check="1" style="width:16px;height:16px;border-radius:5px;border:1.5px solid #d5d9e4;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .35s ease,border-color .35s ease">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px;opacity:0;transition:opacity .3s ease"><path d="M20 6 9 17l-5-5"></path></svg>
+              </span>
+              <span data-checkbar="1" style="height:7px;border-radius:100px;background:#e4e7ef;width:84%;transition:background .35s ease"></span>
+            </div>
+          
+            <div style="display:flex;align-items:center;gap:9px">
+              <span data-check="2" style="width:16px;height:16px;border-radius:5px;border:1.5px solid #d5d9e4;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .35s ease,border-color .35s ease">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px;opacity:0;transition:opacity .3s ease"><path d="M20 6 9 17l-5-5"></path></svg>
+              </span>
+              <span data-checkbar="2" style="height:7px;border-radius:100px;background:#e4e7ef;width:54%;transition:background .35s ease"></span>
+            </div>
+          
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:18px">
+          <span style="width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</span>
+          <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8a90a0">Week 1</span>
+        </div>
+        <h3 style="font-size:17px;font-weight:600;letter-spacing:-.015em;margin-top:11px">Intake &amp; inrichting</h3>
+        <p style="font-size:14.5px;line-height:1.55;color:#5f6572;margin-top:7px;text-wrap:pretty">We lopen je werkwijze door en richten opdrachttypes, checklists en werkbonlayout in op jouw manier van werken.</p>
+      </div>
+
+      <div data-reveal="up" data-delay="90" style="background:#fff;border:1px solid #e2e5ec;border-radius:14px;padding:22px;transition:border-color .25s ease,box-shadow .25s ease" class="zw32">
+        <div style="position:relative;height:112px;border-radius:11px;background:linear-gradient(180deg,#fafbfd,#f2f4f9);border:1px solid #eceef4;overflow:hidden;display:flex;align-items:center;padding:0 13px">
+          <div style="width:52px;flex-shrink:0;border-radius:7px;border:1px solid #cfe6da;background:#fff;overflow:hidden">
+            <div style="height:13px;background:#1f7a4d;display:flex;align-items:center;padding-left:5px"><span style="font-family:'Space Mono',monospace;font-size:6.5px;color:#fff;letter-spacing:.04em">XLSX</span></div>
+            <div style="padding:4px 5px;display:flex;flex-direction:column;gap:3px">
+              <span style="height:4px;border-radius:2px;background:#e3e8ee;display:block"></span>
+              <span style="height:4px;border-radius:2px;background:#e3e8ee;display:block;width:78%"></span>
+              <span style="height:4px;border-radius:2px;background:#e3e8ee;display:block;width:60%"></span>
+              <span style="height:4px;border-radius:2px;background:#e3e8ee;display:block;width:85%"></span>
+            </div>
+          </div>
+          <div data-flylane="1" style="flex:1;position:relative;height:100%">
+            
+              <div data-fly="0" style="position:absolute;left:4px;top:26%;display:flex;align-items:center;gap:5px;opacity:0;transform:translateX(0);transition:transform 1s cubic-bezier(.4,0,.3,1),opacity .5s ease">
+                <span style="width:6px;height:6px;border-radius:2px;background:#4f6ef5"></span>
+                <span style="height:5px;width:60%;border-radius:100px;background:#d9dfeb;display:block"></span>
+              </div>
+            
+              <div data-fly="1" style="position:absolute;left:4px;top:46%;display:flex;align-items:center;gap:5px;opacity:0;transform:translateX(0);transition:transform 1s cubic-bezier(.4,0,.3,1),opacity .5s ease">
+                <span style="width:6px;height:6px;border-radius:2px;background:#35c4e3"></span>
+                <span style="height:5px;width:76%;border-radius:100px;background:#d9dfeb;display:block"></span>
+              </div>
+            
+              <div data-fly="2" style="position:absolute;left:4px;top:66%;display:flex;align-items:center;gap:5px;opacity:0;transform:translateX(0);transition:transform 1s cubic-bezier(.4,0,.3,1),opacity .5s ease">
+                <span style="width:6px;height:6px;border-radius:2px;background:#10b981"></span>
+                <span style="height:5px;width:52%;border-radius:100px;background:#d9dfeb;display:block"></span>
+              </div>
+            
+          </div>
+          <div style="width:56px;flex-shrink:0;border-radius:7px;border:1px solid #d7deef;background:#fff;padding:6px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 12px rgba(20,26,60,.06)">
+            <span style="font-family:'Space Mono',monospace;font-size:6.5px;letter-spacing:.06em;color:#8a90a0">FLOW 8</span>
+            <b data-scount="284" style="font-family:'Space Mono',monospace;font-size:13px;color:var(--acc);font-weight:700">0</b>
+            <span style="font-size:6.5px;color:#8a90a0;line-height:1.2">klanten<br>ingelezen</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:18px">
+          <span style="width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</span>
+          <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8a90a0">Week 1 – 2</span>
+        </div>
+        <h3 style="font-size:17px;font-weight:600;letter-spacing:-.015em;margin-top:11px">Je gegevens erin</h3>
+        <p style="font-size:14.5px;line-height:1.55;color:#5f6572;margin-top:7px;text-wrap:pretty">Klanten, medewerkers, installaties en materialen komen via Excel binnen. Aanleveren mag in je eigen format.</p>
+      </div>
+
+      <div data-reveal="up" data-delay="180" style="background:#fff;border:1px solid #e2e5ec;border-radius:14px;padding:22px;transition:border-color .25s ease,box-shadow .25s ease" class="zw33">
+        <div style="position:relative;height:112px;border-radius:11px;background:linear-gradient(180deg,#fafbfd,#f2f4f9);border:1px solid #eceef4;overflow:hidden;display:flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 200 112" fill="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%">
+            <circle cx="100" cy="56" r="34" stroke="#e4e7f1" stroke-width="2"></circle>
+            <circle data-ring="1" cx="100" cy="56" r="34" pathLength="100" stroke="#10b981" stroke-width="2.6" stroke-linecap="round" transform="rotate(-90 100 56)" style="stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset 1.3s cubic-bezier(.3,.8,.25,1)"></circle>
+          </svg>
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:5px">
+            <div style="display:flex">
+              
+                <span data-avatar="0" style="width:22px;height:22px;border-radius:50%;border:2px solid #fafbfd;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;font-weight:700;color:#fff;background:#4f6ef5;opacity:0;transform:scale(.5);transition:opacity .3s ease,transform .45s cubic-bezier(.2,1.4,.4,1)">SV</span>
+              
+                <span data-avatar="1" style="width:22px;height:22px;border-radius:50%;border:2px solid #fafbfd;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;font-weight:700;color:#fff;background:#7c5cff;opacity:0;transform:scale(.5);transition:opacity .3s ease,transform .45s cubic-bezier(.2,1.4,.4,1)">KV</span>
+              
+                <span data-avatar="2" style="width:22px;height:22px;border-radius:50%;border:2px solid #fafbfd;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;font-weight:700;color:#fff;background:#10b981;opacity:0;transform:scale(.5);transition:opacity .3s ease,transform .45s cubic-bezier(.2,1.4,.4,1)">JB</span>
+              
+                <span data-avatar="3" style="width:22px;height:22px;border-radius:50%;border:2px solid #fafbfd;margin-left:-6px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;font-weight:700;color:#fff;background:#35c4e3;opacity:0;transform:scale(.5);transition:opacity .3s ease,transform .45s cubic-bezier(.2,1.4,.4,1)">MJ</span>
+              
+            </div>
+            <span data-liveflag="1" style="font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#0f9d6f;background:rgba(16,185,129,.12);border-radius:100px;padding:3px 9px;opacity:0;transition:opacity .5s ease">live</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:18px">
+          <span style="width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</span>
+          <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8a90a0">Week 2</span>
+        </div>
+        <h3 style="font-size:17px;font-weight:600;letter-spacing:-.015em;margin-top:11px">Live met begeleiding</h3>
+        <p style="font-size:14.5px;line-height:1.55;color:#5f6572;margin-top:7px;text-wrap:pretty">Planners en monteurs krijgen uitleg, de eerste week draaien we mee. Vragen tussendoor? Gewoon bellen.</p>
+      </div>
+    </div>
+
+    <div data-reveal="up" data-delay="300" data-whygrid="1" style="margin-top:44px;background:#fff;border:1px solid #e2e5ec;border-radius:16px;padding:34px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center">
+      <div>
+        <span style="font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc)">Waarom Flow 8</span>
+        <p style="margin-top:14px;font-size:21px;line-height:1.42;letter-spacing:-.02em;color:#0d0f14;text-wrap:pretty">Ik kom zelf uit de branche. Ik heb met de systemen gewerkt die er al zijn, gezien waar bedrijven in de praktijk op vastlopen — en op basis daarvan Flow 8 gebouwd.</p>
+        <p style="margin-top:14px;font-size:14.5px;line-height:1.55;color:#5f6572;text-wrap:pretty">Geen pakket dat je moet buigen naar je werkwijze, maar een platform dat is ontstaan uit het werk zelf.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;gap:13px"><span style="width:32px;height:32px;border-radius:9px;background:rgba(79,110,245,.1);color:var(--acc);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M14 2H6v20h12V8z M14 2v6h4 M9 13h6 M9 17h4"></path></svg></span><div><div style="font-size:14.5px;font-weight:600;letter-spacing:-.015em">Gebouwd uit de praktijk</div><div style="font-size:13.5px;line-height:1.5;color:#5f6572;margin-top:3px;text-wrap:pretty">Vanuit eigen ervaring in installatie en service, niet vanuit een functielijst.</div></div></div>
+        <div style="display:flex;gap:13px"><span style="width:32px;height:32px;border-radius:9px;background:rgba(79,110,245,.1);color:var(--acc);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"></path></svg></span><div><div style="font-size:14.5px;font-weight:600;letter-spacing:-.015em">Je spreekt de bouwer</div><div style="font-size:13.5px;line-height:1.5;color:#5f6572;margin-top:3px;text-wrap:pretty">Geen ticketsysteem tussen jou en degene die het maakt. Bellen mag.</div></div></div>
+        <div style="display:flex;gap:13px"><span style="width:32px;height:32px;border-radius:9px;background:rgba(79,110,245,.1);color:var(--acc);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M3 17l6-6 4 4 7-7 M14 8h6v6"></path></svg></span><div><div style="font-size:14.5px;font-weight:600;letter-spacing:-.015em">Meegroeien met je werk</div><div style="font-size:13.5px;line-height:1.5;color:#5f6572;margin-top:3px;text-wrap:pretty">Loop je tegen iets aan, dan kijken we of het erin hoort — en bouwen we het.</div></div></div>
+      </div>
+    </div>
+
+    <div data-reveal="up" data-delay="260" style="margin-top:16px;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e2e5ec;border-radius:14px;padding:16px 20px;flex-wrap:wrap">
+      <span style="width:32px;height:32px;border-radius:9px;background:rgba(16,185,129,.12);color:#0f9d6f;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M4 4h16v16H4z M4 10h16 M10 10v10"></path></svg></span>
+      <span style="font-size:14.5px;color:#5f6572;text-wrap:pretty"><b style="color:#0d0f14;font-weight:600">Import via Excel</b> — klanten, medewerkers, installaties en materialen. Aanlevering in je eigen format; wij zetten het om.</span>
+    </div>
+  </div>
+</section>
+
+<section id="prijzen" data-band="dark" style="position:relative;background:#0a0b10;padding:104px 0;overflow:hidden;scroll-margin-top:88px">
+  <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(72% 58% at 50% 0%,rgba(79,110,245,.19),rgba(79,110,245,.05) 46%,transparent 66%)"></div>
+  <div style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px">
+    <div style="max-width:620px;margin:0 auto 44px;text-align:center">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc2)">Prijzen</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:14px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance">Reken uit wat het voor jouw bedrijf kost.</h2>
+      <p data-reveal="up" data-delay="160" style="margin:16px auto 0;font-size:18px;line-height:1.55;color:#a8aec0;max-width:500px;text-wrap:pretty">Iedere gebruiker heeft basistoegang voor € 9 per maand. Wil een monteur ook werkbonnen invullen, dan komt daar € 15 werkbonlicentie bovenop — samen € 24.</p>
+    </div>
+
+    <div data-calcgrid="1" data-reveal="mock" style="max-width:960px;margin:0 auto;display:grid;grid-template-columns:1.25fr 1fr;gap:0;background:#101320;border:1px solid #262b3d;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)">
+      <div style="padding:32px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+          <span style="font-size:14.5px;font-weight:600">Gebruikers totaal</span>
+          <span style="font-family:'Space Mono',monospace;font-size:20px;color:var(--acc2)"><span data-bind="pUsers">12</span></span>
+        </div>
+        <input type="range" min="1" max="40" step="1" value="12" data-doe-input="setUsers" aria-label="Aantal gebruikers met basistoegang" style="width:100%;margin:14px 0 4px;accent-color:var(--acc);height:4px;cursor:pointer">
+        <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:#868da3"><span>1</span><span>40+</span></div>
+
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:28px">
+          <span style="font-size:14.5px;font-weight:600">Waarvan met werkbon</span>
+          <span style="font-family:'Space Mono',monospace;font-size:20px;color:var(--acc2)"><span data-bind="pTechs">5</span></span>
+        </div>
+        <input type="range" min="0" max="12" step="1" value="5" data-doe-input="setTechs" aria-label="Aantal monteurs met werkbon" style="width:100%;margin:14px 0 4px;accent-color:var(--acc);height:4px;cursor:pointer">
+        <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:10px;color:#868da3"><span>0</span><span><span data-bind="pTechMax">12</span></span></div>
+
+        <div style="margin-top:30px;border-top:1px solid #262b3d;padding-top:20px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;font-size:13.5px;color:#a8aec0"><span>Basistoegang · <span data-bind="pUsers">12</span> × € 9</span><span style="font-family:'Space Mono',monospace;color:#f4f6fb"><span data-bind="pBaseFmt">€ 108</span></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13.5px;color:#a8aec0"><span>Werkbonlicentie · <span data-bind="pTechs">5</span> × € 15</span><span style="font-family:'Space Mono',monospace;color:#f4f6fb"><span data-bind="pAddFmt">€ 75</span></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13.5px;color:#868da3;border-top:1px solid #1e2233;padding-top:10px"><span><span data-bind="pSplit">5 × € 24 · 7 × € 9</span></span><span style="font-family:'Space Mono',monospace;color:#a8aec0"><span data-bind="pAvgFmt">€ 15,25</span> p/gebruiker</span></div>
+        </div>
+      </div>
+
+      <div data-calcside="1" style="padding:32px;background:linear-gradient(160deg,#151a2e,#101320);border-left:1px solid #262b3d;display:flex;flex-direction:column;justify-content:center">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#868da3">Jouw indicatie</span>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:10px">
+          <span style="font-size:34px;font-weight:500;letter-spacing:-.03em;color:#f4f6fb"><span data-bind="pTotalFmt">€ 183</span></span>
+          <span style="font-size:14px;color:#a8aec0">/ maand</span>
+        </div>
+        <span style="font-size:12.5px;color:#868da3;margin-top:4px">excl. btw · maandelijks opzegbaar</span>
+        <div style="display:flex;align-items:center;gap:9px;margin-top:20px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.26);border-radius:11px;padding:11px 13px">
+          <span style="width:24px;height:24px;border-radius:50%;background:rgba(16,185,129,.18);color:#34d99f;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M20 6 9 17l-5-5"></path></svg></span>
+          <span style="font-size:12.5px;color:#6fd7b6;line-height:1.4"><b style="color:#8ce6c6">Eerste 3 maanden gratis</b><br>daarna pas de eerste factuur</span>
+        </div>
+        <a href="#contact" style="display:flex;justify-content:center;font-size:14px;font-weight:500;padding:13px 24px;border-radius:100px;background:var(--acc);color:#fff;border:1px solid var(--acc);margin-top:18px;transition:transform .2s ease,filter .2s ease" class="zw34">Demo aanvragen</a>
+      </div>
+    </div>
+
+    <div data-tiers="1" style="max-width:960px;margin:14px auto 0;display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+      <div style="border-radius:12px;padding:18px 20px;background:rgba(255,255,255,.03);border:1px solid #262b3d">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#868da3">Basis — kantoor en planning</div>
+        <div style="font-size:20px;font-weight:500;margin-top:6px">€ 9 <span style="font-size:13px;color:#a8aec0">per gebruiker / maand</span></div>
+        <ul style="display:flex;flex-direction:column;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid #1e2233">
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Dashboard, agenda en afwezigheid<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Slimme dagplanning met route-optimalisatie<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Klanten, contracten en installaties<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Werkorders en storingsdienst<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Rapportages en medewerkersbeheer<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+        </ul>
+      </div>
+      <div style="border-radius:12px;padding:18px 20px;background:rgba(79,110,245,.12);border:1px solid var(--acc)">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--acc2)">Werkbonlicentie — voor monteurs in het veld</div>
+        <div style="font-size:20px;font-weight:500;margin-top:6px">+ € 15 <span style="font-size:13px;color:#a8aec0">per monteur / maand · totaal € 24</span></div>
+        <ul style="display:flex;flex-direction:column;gap:7px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12)">
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Alles uit Basis, plus:<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Digitale werkbon op telefoon en tablet<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Checklists, uren en materialen ter plekke<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Foto's, documenten en logboek per bon<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+          <li style="position:relative;padding-left:18px;font-size:13px;color:#a8aec0;line-height:1.45">Handtekening van de klant en pdf per mail<span style="position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--acc2);opacity:.8"></span></li>
+        </ul>
+      </div>
+    </div>
+    <p data-reveal="up" style="text-align:center;font-size:12.5px;color:#868da3;margin-top:16px">Excl. btw · maandelijks opzegbaar · eerste 3 maanden gratis</p>
+  </div>
+</section>
+
+<section id="faq" data-band="light" style="position:relative;background:#f5f6f8;color:#0d0f14;padding:104px 0;scroll-margin-top:88px">
+  <div style="position:absolute;top:0;left:0;right:0;height:80px;pointer-events:none;background:linear-gradient(180deg,rgba(13,15,20,.06),transparent)"></div>
+  <div data-faqgrid="1" style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:start">
+    <div>
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc);display:inline-flex;align-items:center;gap:10px"><span style="display:inline-block;width:24px;height:1.5px;background:currentColor;opacity:.6"></span>Vragen</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:16px;font-size:clamp(31px,4.4vw,44px);font-weight:500;line-height:1.05;letter-spacing:-.03em;text-wrap:balance">Wat klanten meestal eerst vragen.</h2>
+      <p data-reveal="up" data-delay="160" style="margin-top:16px;font-size:16.5px;line-height:1.55;color:#5f6572;text-wrap:pretty">Staat je vraag er niet bij? Stel hem gerust — je krijgt binnen één werkdag antwoord.</p>
+    </div>
+    <div data-reveal="up" data-delay="120" style="display:flex;flex-direction:column;gap:8px">
+      <span data-lus="faqs" data-lus-nr="0" style="display:contents">
+        <div style="background:#fff;border:1px solid rgba(79,110,245,.34);border-radius:13px;overflow:hidden;transition:border-color .25s ease,box-shadow .25s ease;box-shadow:0 14px 34px rgba(20,26,60,.08)">
+          <button data-doe-click="toggle:0" aria-expanded="true" style="width:100%;display:flex;align-items:center;gap:14px;padding:17px 19px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.015em;color:#0d0f14">Werkt Flow8 op de telefoon van mijn monteurs?</span>
+            <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s ease,color .25s ease,rotate .3s cubic-bezier(.2,.8,.3,1);background:var(--acc);color:#fff;rotate:180deg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </button>
+          <div style="overflow:hidden;transition:grid-template-rows .35s cubic-bezier(.2,.8,.3,1);display:grid;grid-template-rows:1fr">
+            <div style="min-height:0"><p style="padding:0 19px 18px;font-size:14.5px;line-height:1.6;color:#5f6572;text-wrap:pretty">Ja. Flow8 draait in de browser, dus op elke telefoon of tablet — Android en iPhone. Geen app-store, geen installatie: inloggen en beginnen.</p></div>
+          </div>
+        </div>
+      
+        <div style="background:#fff;border:1px solid #e2e5ec;border-radius:13px;overflow:hidden;transition:border-color .25s ease,box-shadow .25s ease;box-shadow:none">
+          <button data-doe-click="toggle:1" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:14px;padding:17px 19px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.015em;color:#0d0f14">Kan ik mijn huidige klantenbestand meenemen?</span>
+            <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s ease,color .25s ease,rotate .3s cubic-bezier(.2,.8,.3,1);background:rgba(79,110,245,.1);color:var(--acc);rotate:0deg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </button>
+          <div style="overflow:hidden;transition:grid-template-rows .35s cubic-bezier(.2,.8,.3,1);display:grid;grid-template-rows:0fr">
+            <div style="min-height:0"><p style="padding:0 19px 18px;font-size:14.5px;line-height:1.6;color:#5f6572;text-wrap:pretty">Ja, via Excel. Klanten, medewerkers, installaties en materialen importeren we in één keer. Je mag aanleveren in je eigen format; wij zetten het om.</p></div>
+          </div>
+        </div>
+      
+        <div style="background:#fff;border:1px solid #e2e5ec;border-radius:13px;overflow:hidden;transition:border-color .25s ease,box-shadow .25s ease;box-shadow:none">
+          <button data-doe-click="toggle:2" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:14px;padding:17px 19px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.015em;color:#0d0f14">Zijn er koppelingen met mijn boekhouding?</span>
+            <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s ease,color .25s ease,rotate .3s cubic-bezier(.2,.8,.3,1);background:rgba(79,110,245,.1);color:var(--acc);rotate:0deg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </button>
+          <div style="overflow:hidden;transition:grid-template-rows .35s cubic-bezier(.2,.8,.3,1);display:grid;grid-template-rows:0fr">
+            <div style="min-height:0"><p style="padding:0 19px 18px;font-size:14.5px;line-height:1.6;color:#5f6572;text-wrap:pretty">Nog niet. Vandaag werkt Flow8 met import en export via Excel. Koppelingen met boekhoudpakketten staan op de planning — we bouwen ze op volgorde van wat klanten daadwerkelijk gebruiken.</p></div>
+          </div>
+        </div>
+      
+        <div style="background:#fff;border:1px solid #e2e5ec;border-radius:13px;overflow:hidden;transition:border-color .25s ease,box-shadow .25s ease;box-shadow:none">
+          <button data-doe-click="toggle:3" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:14px;padding:17px 19px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.015em;color:#0d0f14">Hoe lang duurt het voor we live zijn?</span>
+            <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s ease,color .25s ease,rotate .3s cubic-bezier(.2,.8,.3,1);background:rgba(79,110,245,.1);color:var(--acc);rotate:0deg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </button>
+          <div style="overflow:hidden;transition:grid-template-rows .35s cubic-bezier(.2,.8,.3,1);display:grid;grid-template-rows:0fr">
+            <div style="min-height:0"><p style="padding:0 19px 18px;font-size:14.5px;line-height:1.6;color:#5f6572;text-wrap:pretty">Meestal twee weken: intake en inrichting in week één, gegevens importeren en live in week twee. De eerste week draaien we met je mee.</p></div>
+          </div>
+        </div>
+      
+        <div style="background:#fff;border:1px solid #e2e5ec;border-radius:13px;overflow:hidden;transition:border-color .25s ease,box-shadow .25s ease;box-shadow:none">
+          <button data-doe-click="toggle:4" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:14px;padding:17px 19px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.015em;color:#0d0f14">Wat gebeurt er met een werkbon als de monteur geen bereik heeft?</span>
+            <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s ease,color .25s ease,rotate .3s cubic-bezier(.2,.8,.3,1);background:rgba(79,110,245,.1);color:var(--acc);rotate:0deg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </button>
+          <div style="overflow:hidden;transition:grid-template-rows .35s cubic-bezier(.2,.8,.3,1);display:grid;grid-template-rows:0fr">
+            <div style="min-height:0"><p style="padding:0 19px 18px;font-size:14.5px;line-height:1.6;color:#5f6572;text-wrap:pretty">De bon blijft op zijn toestel staan en gaat door zodra er weer verbinding is. Hij hoeft niets over te typen.</p></div>
+          </div>
+        </div>
+      
+        <div style="background:#fff;border:1px solid #e2e5ec;border-radius:13px;overflow:hidden;transition:border-color .25s ease,box-shadow .25s ease;box-shadow:none">
+          <button data-doe-click="toggle:5" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:14px;padding:17px 19px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.015em;color:#0d0f14">Waar staan mijn gegevens?</span>
+            <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s ease,color .25s ease,rotate .3s cubic-bezier(.2,.8,.3,1);background:rgba(79,110,245,.1);color:var(--acc);rotate:0deg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </button>
+          <div style="overflow:hidden;transition:grid-template-rows .35s cubic-bezier(.2,.8,.3,1);display:grid;grid-template-rows:0fr">
+            <div style="min-height:0"><p style="padding:0 19px 18px;font-size:14.5px;line-height:1.6;color:#5f6572;text-wrap:pretty">Op servers binnen de Europese Unie, met dagelijkse back-ups. Je gegevens blijven van jou: je kunt ze op elk moment exporteren, en bij opzeggen krijg je een volledige export mee.</p></div>
+          </div>
+        </div>
+      
+        <div style="background:#fff;border:1px solid #e2e5ec;border-radius:13px;overflow:hidden;transition:border-color .25s ease,box-shadow .25s ease;box-shadow:none">
+          <button data-doe-click="toggle:6" aria-expanded="false" style="width:100%;display:flex;align-items:center;gap:14px;padding:17px 19px;background:transparent;border:none;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.015em;color:#0d0f14">Zit ik ergens aan vast?</span>
+            <span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .25s ease,color .25s ease,rotate .3s cubic-bezier(.2,.8,.3,1);background:rgba(79,110,245,.1);color:var(--acc);rotate:0deg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </button>
+          <div style="overflow:hidden;transition:grid-template-rows .35s cubic-bezier(.2,.8,.3,1);display:grid;grid-template-rows:0fr">
+            <div style="min-height:0"><p style="padding:0 19px 18px;font-size:14.5px;line-height:1.6;color:#5f6572;text-wrap:pretty">Nee. Maandelijks opzegbaar, en de eerste drie maanden draai je zonder kosten mee. Je gegevens blijven van jou en kun je altijd exporteren.</p></div>
+          </div>
+        </div>
+      </span>
+    </div>
+  </div>
+</section>
+
+<section id="contact" data-band="dark" style="position:relative;background:#0a0b10;padding:112px 0 0;overflow:hidden;display:flex;flex-direction:column;scroll-margin-top:88px">
+  <div style="position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(72% 58% at 50% 0%,rgba(79,110,245,.19),rgba(79,110,245,.05) 46%,transparent 66%)"></div>
+  <div style="position:relative;z-index:3;max-width:1280px;margin:0 auto;padding:0 24px;width:100%">
+    <div style="max-width:620px;margin:0 auto;text-align:center">
+      <span data-reveal="up" style="font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc2)">Aan de slag</span>
+      <h2 data-reveal="up" data-delay="80" style="margin-top:16px;font-size:clamp(31px,4.4vw,50px);font-weight:500;line-height:1.03;letter-spacing:-.03em;text-wrap:balance;text-shadow:0 2px 40px rgba(8,9,14,.6)">Klaar om alles op één plek te zetten?</h2>
+      <p data-reveal="up" data-delay="160" style="margin:16px auto 0;font-size:18px;line-height:1.55;color:#a8aec0;max-width:460px;text-wrap:pretty">Laat je gegevens achter, dan plannen we een demo van een half uur in — met je eigen soort werk erin.</p>
+
+      <div data-toon="notSent">
+      <form data-reveal="up" data-delay="240" data-doe-submit="submit" style="display:flex;flex-direction:column;gap:9px;margin:34px auto 0;max-width:440px;text-align:left">
+        <input name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+        <div data-two="1" style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <input required="required" name="naam" placeholder="Naam" style="background:rgba(255,255,255,.05);border:1px solid #2a3049;border-radius:11px;padding:14px 16px;font-family:inherit;font-size:14px;color:#f4f6fb;outline:none;transition:border-color .2s ease,background .2s ease" class="zw40">
+          <input required="required" name="bedrijf" placeholder="Bedrijf" style="background:rgba(255,255,255,.05);border:1px solid #2a3049;border-radius:11px;padding:14px 16px;font-family:inherit;font-size:14px;color:#f4f6fb;outline:none;transition:border-color .2s ease,background .2s ease" class="zw41">
+        </div>
+        <input required="required" type="email" name="email" placeholder="E-mailadres" style="background:rgba(255,255,255,.05);border:1px solid #2a3049;border-radius:11px;padding:14px 16px;font-family:inherit;font-size:14px;color:#f4f6fb;outline:none;transition:border-color .2s ease,background .2s ease" class="zw42">
+        <input name="tel" placeholder="Telefoon (optioneel)" style="background:rgba(255,255,255,.05);border:1px solid #2a3049;border-radius:11px;padding:14px 16px;font-family:inherit;font-size:14px;color:#f4f6fb;outline:none;transition:border-color .2s ease,background .2s ease" class="zw43">
+        <textarea name="bericht" rows="2" placeholder="Waar loop je nu tegenaan? (optioneel)" style="background:rgba(255,255,255,.05);border:1px solid #2a3049;border-radius:11px;padding:14px 16px;font-family:inherit;font-size:14px;color:#f4f6fb;outline:none;resize:vertical;transition:border-color .2s ease,background .2s ease" class="zw44"></textarea>
+        <div data-two="1" style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <select name="omvang" style="background:rgba(255,255,255,.05);border:1px solid #2a3049;border-radius:11px;padding:14px 16px;font-family:inherit;font-size:14px;color:#a8aec0;outline:none;cursor:pointer;transition:border-color .2s ease" class="zw45">
+            <option value="">Aantal medewerkers</option><option>1 – 10</option><option>11 – 20</option><option>21 – 35</option><option>36 of meer</option>
+          </select>
+          <button type="submit" style="font-family:inherit;font-size:14.5px;font-weight:500;padding:14px 24px;border-radius:11px;background:var(--acc);color:#fff;border:1px solid var(--acc);cursor:pointer;transition:transform .2s ease,filter .2s ease,box-shadow .2s ease" class="zw35">Demo aanvragen</button>
+        </div>
+      </form>
+      </div>
+      <div data-toon="sent" hidden>
+        <div style="margin:34px auto 0;max-width:440px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:16px;padding:26px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+          <span style="width:42px;height:42px;border-radius:50%;background:rgba(16,185,129,.18);color:#34d99f;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><path d="M20 6 9 17l-5-5"></path></svg></span>
+          <div style="font-size:17px;font-weight:600;letter-spacing:-.015em;color:#f4f6fb">Bedankt — je aanvraag is onderweg</div>
+          <p style="font-size:14px;line-height:1.55;color:#a8aec0;max-width:330px;text-wrap:pretty">Je hoort binnen één werkdag van ons, meestal sneller. Liever direct? Bel 06 – 28 70 24 22.</p>
+          <button data-doe-click="resetForm" style="margin-top:4px;font-family:inherit;font-size:13px;color:#a8aec0;background:transparent;border:1px solid #2a3049;border-radius:100px;padding:9px 18px;cursor:pointer;transition:border-color .2s ease,color .2s ease" class="zw36">Nog een aanvraag doen</button>
+        </div>
+      </div>
+
+      <div data-reveal="up" data-delay="300" style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:#868da3">
+        <span>Eerste 3 maanden gratis</span><span style="opacity:.4">·</span><span>geen betaalgegevens nodig</span><span style="opacity:.4">·</span><span>antwoord binnen één werkdag</span>
+      </div>
+      <p data-reveal="up" data-delay="310" style="margin:10px auto 0;max-width:420px;font-size:11.5px;line-height:1.5;color:#6f7688">We gebruiken je gegevens alleen om contact met je op te nemen over Flow 8 en delen ze niet met derden.</p>
+      <div data-reveal="up" data-delay="340" style="display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap;margin-top:26px;padding-top:24px;border-top:1px solid rgba(255,255,255,.07)">
+        <a href="tel:+31628702422" style="display:inline-flex;align-items:center;gap:9px;font-size:14px;color:#a8aec0;transition:color .2s ease" class="zw37">
+          <span style="width:28px;height:28px;border-radius:8px;background:rgba(79,110,245,.14);color:var(--acc2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"></path></svg></span>06 – 28 70 24 22</a>
+        <a href="mailto:info@flow-8.nl" style="display:inline-flex;align-items:center;gap:9px;font-size:14px;color:#a8aec0;transition:color .2s ease" class="zw38">
+          <span style="width:28px;height:28px;border-radius:8px;background:rgba(79,110,245,.14);color:var(--acc2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M3 6h18v12H3z M3 7l9 6 9-6"></path></svg></span>info@flow-8.nl</a>
+      </div>
+    </div>
+  </div>
+  <div style="height:140px"></div>
+  <div data-loop="1" style="position:absolute;left:50%;bottom:-18%;transform:translateX(-50%);width:90%;max-width:1100px;height:62%;background:radial-gradient(ellipse at center,rgba(79,110,245,.26),rgba(53,196,227,.08) 45%,transparent 68%);filter:blur(34px);z-index:1;pointer-events:none;animation:glowpulse 9s ease-in-out infinite"></div>
+  <div data-arcs="1" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:135%;max-width:1500px;z-index:2;pointer-events:none">
+    <svg viewBox="0 0 1200 520" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:block;width:100%;height:auto">
+      <defs><linearGradient id="ag" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#35c4e3"></stop><stop offset="50%" stop-color="#6d8cff"></stop><stop offset="100%" stop-color="#7fe0f5"></stop></linearGradient></defs>
+      <g fill="none">
+        <circle cx="600" cy="980" r="780" stroke="url(#ag)" stroke-width="2" opacity="0.14"></circle>
+        <circle cx="600" cy="980" r="700" stroke="url(#ag)" stroke-width="2" opacity="0.24"></circle>
+        <circle cx="600" cy="980" r="620" stroke="url(#ag)" stroke-width="2.4" opacity="0.38"></circle>
+        <circle cx="600" cy="980" r="540" stroke="url(#ag)" stroke-width="2.6" opacity="0.56"></circle>
+        <circle data-loop="1" cx="600" cy="980" r="540" pathLength="100" stroke="#dff4ff" stroke-width="3" stroke-linecap="round" style="stroke-dasharray:7 93;animation:flowarc 7s linear infinite"></circle>
+        <circle cx="600" cy="980" r="465" stroke="url(#ag)" stroke-width="2.8" opacity="0.7"></circle>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<footer style="background:#07080c;color:#868da3;padding:56px 0 30px;border-top:1px solid #262b3d">
+  <div data-footgrid="1" style="max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:32px">
+    <div>
+      <svg viewBox="0 0 168 64" fill="none" style="height:40px;width:auto" role="img" aria-label="Flow8">
+        <defs><linearGradient id="fl-foot" x1="0" y1="8" x2="82" y2="56" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#7fe0f5"></stop><stop offset="100%" stop-color="#6d8cff"></stop></linearGradient></defs>
+        <path d="M8 32 C8 20 15 13 24 13 C33 13 38 23 45 32 C52 41 57 51 66 51 C75 51 82 44 82 32" stroke="url(#fl-foot)" stroke-width="5.5" fill="none" stroke-linecap="round"></path>
+        <path d="M8 32 C8 44 15 51 24 51 C33 51 38 41 45 32 C52 23 57 13 66 13 C75 13 82 20 82 32" stroke="url(#fl-foot)" stroke-width="5.5" fill="none" stroke-linecap="round" opacity="0.5"></path>
+        <circle cx="45" cy="32" r="4.5" fill="#07080c"></circle>
+        <text x="98" y="24" font-family="'Syne',sans-serif" font-weight="300" font-size="11" fill="#f4f6fb" letter-spacing="3">FLOW</text>
+        <text x="95" y="53" font-family="'Syne',sans-serif" font-weight="800" font-size="32" fill="url(#fl-foot)" letter-spacing="-2">8</text>
+      </svg>
+      <p style="font-size:14px;margin-top:14px;max-width:300px;line-height:1.6;color:#868da3">Field Service Management voor de installatie- en servicebranche. De brug tussen planner en monteur.</p>
+      <p style="font-size:13px;margin-top:16px;line-height:1.7;color:#6f7688">Flow 8<br>Albert Verweystraat 1<br>4207 RD Gorinchem<br>KvK 80912532</p>
+    </div>
+    <div>
+      <h4 style="font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#f4f6fb;margin-bottom:12px">Product</h4>
+      <a href="#voor-wie" style="display:block;font-size:14px;color:#868da3;padding:5px 0">Voor wie</a>
+      <a href="#dashboard" style="display:block;font-size:14px;color:#868da3;padding:5px 0">Modules</a>
+      <a href="#werkbon" style="display:block;font-size:14px;color:#868da3;padding:5px 0">Werkbon op mobiel</a>
+      <a href="#prijzen" style="display:block;font-size:14px;color:#868da3;padding:5px 0">Prijzen</a>
+      <a href="#faq" style="display:block;font-size:14px;color:#868da3;padding:5px 0">Veelgestelde vragen</a>
+    </div>
+    <div>
+      <h4 style="font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#f4f6fb;margin-bottom:12px">Contact</h4>
+      <a href="mailto:info@flow-8.nl" style="display:block;font-size:14px;color:#868da3;padding:5px 0">info@flow-8.nl</a>
+      <a href="mailto:demo@flow-8.nl" style="display:block;font-size:14px;color:#868da3;padding:5px 0">demo@flow-8.nl</a>
+      <a href="tel:+31628702422" style="display:block;font-size:14px;color:#868da3;padding:5px 0">06 – 28 70 24 22</a>
+      <a href="https://thomv-flow8.github.io/Flow-8/flow8-v2.html" target="_blank" rel="noopener" style="display:block;font-size:14px;color:#868da3;padding:5px 0">Inloggen</a>
+    </div>
+  </div>
+  <div style="max-width:1280px;margin:40px auto 0;padding:20px 24px 0;border-top:1px solid #262b3d;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:13px">
+    <span>© 2026 Flow 8 · KvK 80912532</span>
+    <span style="display:flex;gap:18px;flex-wrap:wrap;color:#6f7688"><span>Privacyverklaring — in voorbereiding</span><span>Algemene voorwaarden — in voorbereiding</span></span>
+  </div>
+</footer>
+
+</div>
+<script src="leven.js" defer></script>
 </body>
 </html>

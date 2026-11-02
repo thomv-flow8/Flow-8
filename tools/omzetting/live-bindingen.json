@@ -1,0 +1,606 @@
+{
+  "isKlanten": true,
+  "isRapportage": false,
+  "klantenBg": "var(--acc)",
+  "klantenFg": "#fff",
+  "rapBg": "transparent",
+  "rapFg": "#a8aec0",
+  "tabTitle": "Je klanten overzichtelijk bij elkaar.",
+  "tabLead": "Van debiteuren tot vaste serviceklanten — contactgegevens, contracten en gekoppelde installaties op één plek, zodat je bij elke klant meteen de historie ziet.",
+  "tabFeats": [
+    "Debiteuren en serviceklanten in één overzicht",
+    "Contactgegevens, contracten en locaties per klant",
+    "Gekoppelde installaties met onderhoudshistorie"
+  ],
+  "showKlanten": {
+    "__fn": "showKlanten"
+  },
+  "showRapportage": {
+    "__fn": "showRapportage"
+  },
+  "dropToggle0": {
+    "__fn": "dropToggle0"
+  },
+  "dropOn0": {
+    "__fn": "dropOn0"
+  },
+  "dropOff0": {
+    "__fn": "dropOff0"
+  },
+  "dropKey0": {
+    "__fn": "dropKey0"
+  },
+  "dropToggle1": {
+    "__fn": "dropToggle1"
+  },
+  "dropOn1": {
+    "__fn": "dropOn1"
+  },
+  "dropOff1": {
+    "__fn": "dropOff1"
+  },
+  "dropKey1": {
+    "__fn": "dropKey1"
+  },
+  "toggleMenu": {
+    "__fn": "toggleMenu"
+  },
+  "sats": [
+    {
+      "t": "Installatiebedrijven",
+      "short": "Installatie-\nbedrijven",
+      "p": "Kantoor en veld in één omgeving, met dezelfde gegevens aan beide kanten.",
+      "d": "M3 21h18M5 21V8l7-5 7 5v13M10 21v-6h4v6",
+      "rot": -90,
+      "antirot": 90,
+      "rowBd": "rgba(79,110,245,.34)",
+      "rowBg": "#fff",
+      "rowSh": "0 14px 34px rgba(20,26,60,.09)",
+      "iconBg": "var(--acc)",
+      "iconFg": "#fff",
+      "chipBg": "var(--acc)",
+      "chipBd": "var(--acc)",
+      "chipSh": "0 10px 26px rgba(79,110,245,.32)",
+      "chipScale": "1.06",
+      "chipIconFg": "#fff"
+    },
+    {
+      "t": "Serviceklanten",
+      "short": "Service-\nklanten",
+      "p": "Vaste klanten en terugkerend onderhoud bij elkaar, inclusief contract en historie.",
+      "d": "M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z M12 7v5l3 2",
+      "rot": 30,
+      "antirot": -30,
+      "rowBd": "#e2e5ec",
+      "rowBg": "rgba(255,255,255,.55)",
+      "rowSh": "none",
+      "iconBg": "rgba(79,110,245,.1)",
+      "iconFg": "var(--acc)",
+      "chipBg": "#fff",
+      "chipBd": "#e2e5ec",
+      "chipSh": "0 6px 16px rgba(20,26,60,.09)",
+      "chipScale": "1",
+      "chipIconFg": "var(--acc)"
+    },
+    {
+      "t": "Machines & installaties",
+      "short": "Machines &\ninstallaties",
+      "p": "Gekoppeld aan de klant, inzichtelijk en klaar voor onderhoud of reparatie.",
+      "d": "M21 8l-9-5-9 5 9 5 9-5z M3 8v8l9 5 9-5V8 M12 13v8",
+      "rot": 150,
+      "antirot": -150,
+      "rowBd": "#e2e5ec",
+      "rowBg": "rgba(255,255,255,.55)",
+      "rowSh": "none",
+      "iconBg": "rgba(79,110,245,.1)",
+      "iconFg": "var(--acc)",
+      "chipBg": "#fff",
+      "chipBd": "#e2e5ec",
+      "chipSh": "0 6px 16px rgba(20,26,60,.09)",
+      "chipScale": "1",
+      "chipIconFg": "var(--acc)"
+    }
+  ],
+  "pUsers": 12,
+  "pTechs": 5,
+  "pTechMax": 12,
+  "setUsers": {
+    "__fn": "setUsers"
+  },
+  "setTechs": {
+    "__fn": "setTechs"
+  },
+  "pBaseFmt": "€ 108",
+  "pAddFmt": "€ 75",
+  "pTotalFmt": "€ 183",
+  "pSplit": "5 × € 24 · 7 × € 9",
+  "pAvgFmt": "€ 15,25",
+  "wbRows": [
+    {
+      "t": "Checklists",
+      "n": "4",
+      "d": "M9 11l3 3 8-8 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+    },
+    {
+      "t": "Uren",
+      "n": "2 u",
+      "d": "M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z M12 7v5l3 2"
+    },
+    {
+      "t": "Materialen",
+      "n": "3",
+      "d": "M21 8l-9-5-9 5 9 5 9-5z M3 8v8l9 5 9-5V8 M12 13v8"
+    },
+    {
+      "t": "Foto's",
+      "n": "5",
+      "d": "M4 7h3l2-2h6l2 2h3v12H4z M12 16a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"
+    },
+    {
+      "t": "Documenten",
+      "n": "1",
+      "d": "M6 3h8l4 4v14H6z M14 3v4h4"
+    }
+  ],
+  "steps": [
+    {
+      "n": "1",
+      "when": "Week 1",
+      "t": "Intake & inrichting",
+      "p": "We lopen je werkwijze door en richten opdrachttypes, checklists en werkbonlayout in op jouw manier van werken.",
+      "delay": 0
+    },
+    {
+      "n": "2",
+      "when": "Week 1 – 2",
+      "t": "Je gegevens erin",
+      "p": "Klanten, medewerkers, installaties en materialen komen via Excel binnen. Aanleveren mag in je eigen format.",
+      "delay": 90
+    },
+    {
+      "n": "3",
+      "when": "Week 2",
+      "t": "Live met begeleiding",
+      "p": "Planners en monteurs krijgen uitleg, de eerste week draaien we mee. Vragen tussendoor? Gewoon bellen.",
+      "delay": 180
+    }
+  ],
+  "faqs": [
+    {
+      "q": "Werkt Flow8 op de telefoon van mijn monteurs?",
+      "a": "Ja. Flow8 draait in de browser, dus op elke telefoon of tablet — Android en iPhone. Geen app-store, geen installatie: inloggen en beginnen.",
+      "expanded": "true",
+      "rows": "1fr",
+      "rot": "180deg",
+      "bd": "rgba(79,110,245,.34)",
+      "sh": "0 14px 34px rgba(20,26,60,.08)",
+      "iconBg": "var(--acc)",
+      "iconFg": "#fff"
+    },
+    {
+      "q": "Kan ik mijn huidige klantenbestand meenemen?",
+      "a": "Ja, via Excel. Klanten, medewerkers, installaties en materialen importeren we in één keer. Je mag aanleveren in je eigen format; wij zetten het om.",
+      "expanded": "false",
+      "rows": "0fr",
+      "rot": "0deg",
+      "bd": "#e2e5ec",
+      "sh": "none",
+      "iconBg": "rgba(79,110,245,.1)",
+      "iconFg": "var(--acc)"
+    },
+    {
+      "q": "Zijn er koppelingen met mijn boekhouding?",
+      "a": "Nog niet. Vandaag werkt Flow8 met import en export via Excel. Koppelingen met boekhoudpakketten staan op de planning — we bouwen ze op volgorde van wat klanten daadwerkelijk gebruiken.",
+      "expanded": "false",
+      "rows": "0fr",
+      "rot": "0deg",
+      "bd": "#e2e5ec",
+      "sh": "none",
+      "iconBg": "rgba(79,110,245,.1)",
+      "iconFg": "var(--acc)"
+    },
+    {
+      "q": "Hoe lang duurt het voor we live zijn?",
+      "a": "Meestal twee weken: intake en inrichting in week één, gegevens importeren en live in week twee. De eerste week draaien we met je mee.",
+      "expanded": "false",
+      "rows": "0fr",
+      "rot": "0deg",
+      "bd": "#e2e5ec",
+      "sh": "none",
+      "iconBg": "rgba(79,110,245,.1)",
+      "iconFg": "var(--acc)"
+    },
+    {
+      "q": "Wat gebeurt er met een werkbon als de monteur geen bereik heeft?",
+      "a": "De bon blijft op zijn toestel staan en gaat door zodra er weer verbinding is. Hij hoeft niets over te typen.",
+      "expanded": "false",
+      "rows": "0fr",
+      "rot": "0deg",
+      "bd": "#e2e5ec",
+      "sh": "none",
+      "iconBg": "rgba(79,110,245,.1)",
+      "iconFg": "var(--acc)"
+    },
+    {
+      "q": "Waar staan mijn gegevens?",
+      "a": "Op servers binnen de Europese Unie, met dagelijkse back-ups. Je gegevens blijven van jou: je kunt ze op elk moment exporteren, en bij opzeggen krijg je een volledige export mee.",
+      "expanded": "false",
+      "rows": "0fr",
+      "rot": "0deg",
+      "bd": "#e2e5ec",
+      "sh": "none",
+      "iconBg": "rgba(79,110,245,.1)",
+      "iconFg": "var(--acc)"
+    },
+    {
+      "q": "Zit ik ergens aan vast?",
+      "a": "Nee. Maandelijks opzegbaar, en de eerste drie maanden draai je zonder kosten mee. Je gegevens blijven van jou en kun je altijd exporteren.",
+      "expanded": "false",
+      "rows": "0fr",
+      "rot": "0deg",
+      "bd": "#e2e5ec",
+      "sh": "none",
+      "iconBg": "rgba(79,110,245,.1)",
+      "iconFg": "var(--acc)"
+    }
+  ],
+  "checks": [
+    {
+      "i": 0,
+      "w": "68%"
+    },
+    {
+      "i": 1,
+      "w": "84%"
+    },
+    {
+      "i": 2,
+      "w": "54%"
+    }
+  ],
+  "flyRows": [
+    {
+      "i": 0,
+      "top": "26%",
+      "w": "60%",
+      "c": "#4f6ef5"
+    },
+    {
+      "i": 1,
+      "top": "46%",
+      "w": "76%",
+      "c": "#35c4e3"
+    },
+    {
+      "i": 2,
+      "top": "66%",
+      "w": "52%",
+      "c": "#10b981"
+    }
+  ],
+  "crew": [
+    {
+      "i": 0,
+      "n": "SV",
+      "c": "#4f6ef5"
+    },
+    {
+      "i": 1,
+      "n": "KV",
+      "c": "#7c5cff"
+    },
+    {
+      "i": 2,
+      "n": "JB",
+      "c": "#10b981"
+    },
+    {
+      "i": 3,
+      "n": "MJ",
+      "c": "#35c4e3"
+    }
+  ],
+  "sent": false,
+  "notSent": true,
+  "submit": {
+    "__fn": "submit"
+  },
+  "resetForm": {
+    "__fn": "resetForm"
+  },
+  "crews": [
+    {
+      "init": "SV",
+      "color": "#4f6ef5",
+      "name": "S. de Vries",
+      "meta": "0/5 · 5u werk",
+      "rows": [
+        {
+          "t": "08:30",
+          "job": "Servicebeurt",
+          "place": "Alphen a/d Rijn",
+          "status": "Ingepland",
+          "bg": "rgba(79,110,245,.15)",
+          "fg": "#93a6ff",
+          "bd": "rgba(79,110,245,.3)"
+        },
+        {
+          "t": "10:15",
+          "job": "Onderhoud",
+          "place": "Gouda",
+          "status": "Ingepland",
+          "bg": "rgba(79,110,245,.15)",
+          "fg": "#93a6ff",
+          "bd": "rgba(79,110,245,.3)"
+        },
+        {
+          "t": "11:45",
+          "job": "Installatie",
+          "place": "Moerkapelle",
+          "status": "Onderweg",
+          "bg": "rgba(53,196,227,.14)",
+          "fg": "#5fd6ef",
+          "bd": "rgba(53,196,227,.32)"
+        }
+      ]
+    },
+    {
+      "init": "KV",
+      "color": "#7c5cff",
+      "name": "K. Visser",
+      "meta": "1/6 · 5,5u werk",
+      "rows": [
+        {
+          "t": "08:15",
+          "job": "Servicebeurt",
+          "place": "Giessenburg",
+          "status": "Afgerond",
+          "bg": "rgba(16,185,129,.14)",
+          "fg": "#34d99f",
+          "bd": "rgba(16,185,129,.32)"
+        },
+        {
+          "t": "09:40",
+          "job": "Servicebeurt",
+          "place": "Vianen",
+          "status": "Ingepland",
+          "bg": "rgba(79,110,245,.15)",
+          "fg": "#93a6ff",
+          "bd": "rgba(79,110,245,.3)"
+        },
+        {
+          "t": "12:20",
+          "job": "1e onderhoud",
+          "place": "Schelluinen",
+          "status": "Ingepland",
+          "bg": "rgba(79,110,245,.15)",
+          "fg": "#93a6ff",
+          "bd": "rgba(79,110,245,.3)"
+        }
+      ]
+    }
+  ],
+  "absent": [
+    {
+      "init": "JS",
+      "color": "#3aa0a0",
+      "name": "J. Smit",
+      "kind": "Verlof",
+      "bg": "rgba(79,110,245,.14)",
+      "fg": "#93a6ff",
+      "bd": "rgba(79,110,245,.28)"
+    },
+    {
+      "init": "PV",
+      "color": "#c05cc0",
+      "name": "P. van Dijk",
+      "kind": "Verlof",
+      "bg": "rgba(79,110,245,.14)",
+      "fg": "#93a6ff",
+      "bd": "rgba(79,110,245,.28)"
+    },
+    {
+      "init": "RK",
+      "color": "#4f6ef5",
+      "name": "R. Kuiper",
+      "kind": "Verlof",
+      "bg": "rgba(79,110,245,.14)",
+      "fg": "#93a6ff",
+      "bd": "rgba(79,110,245,.28)"
+    },
+    {
+      "init": "TB",
+      "color": "#b46b3a",
+      "name": "T. Bos",
+      "kind": "Ziek",
+      "bg": "rgba(239,68,68,.14)",
+      "fg": "#f98a8a",
+      "bd": "rgba(239,68,68,.3)"
+    }
+  ],
+  "opTiles": [
+    {
+      "t": "Planning & route",
+      "d": "M3 11l19-9-9 19-2-8-8-2z",
+      "delay": 0
+    },
+    {
+      "t": "Werkbonnen",
+      "d": "M6 3h12v18H6z M9 9h6 M9 13h6",
+      "delay": 50
+    },
+    {
+      "t": "Klantmails",
+      "d": "M3 6h18v12H3z M3 7l9 6 9-6",
+      "delay": 100
+    },
+    {
+      "t": "Kaartoverzicht",
+      "d": "M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11z M12 7.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z",
+      "delay": 150
+    },
+    {
+      "t": "Agenda",
+      "d": "M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4",
+      "delay": 200
+    },
+    {
+      "t": "Storingsdienst",
+      "d": "M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z",
+      "delay": 250
+    },
+    {
+      "t": "Werkorders",
+      "d": "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
+      "delay": 300
+    },
+    {
+      "t": "Register & materialen",
+      "d": "M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5",
+      "delay": 350
+    }
+  ],
+  "teamTiles": [
+    {
+      "t": "Medewerkers",
+      "d": "M9 4.8a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 0 1 0-6.4z M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1 M16 5a3 3 0 0 1 0 6 M21.5 20v-1a5 5 0 0 0-3.5-4.8"
+    },
+    {
+      "t": "Verlof",
+      "d": "M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z M12 2v2 M12 20v2 M4 12H2 M22 12h-2 M5.6 5.6 4.2 4.2 M19.8 19.8l-1.4-1.4 M5.6 18.4l-1.4 1.4 M19.8 4.2l-1.4 1.4"
+    },
+    {
+      "t": "Overuren",
+      "d": "M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z M12 7v5l3 2"
+    },
+    {
+      "t": "Onkosten",
+      "d": "M5 3h14v18l-2.5-1.6L14 21l-2-1.6L10 21l-2.5-1.6L5 21z M9 8h6 M9 12h6"
+    },
+    {
+      "t": "Verzuim",
+      "d": "M3 12h4l2 6 4-13 2 7h6"
+    }
+  ],
+  "team": [
+    {
+      "init": "SV",
+      "color": "#3aa0a0",
+      "name": "S. de Vries",
+      "role": "Monteur · 40 u/wk",
+      "hours": "119,8u",
+      "pct": 75,
+      "barc": "#34d99f"
+    },
+    {
+      "init": "JB",
+      "color": "#10b981",
+      "name": "J. Bakker",
+      "role": "Planner · 36 u/wk",
+      "hours": "23,5u",
+      "pct": 30,
+      "barc": "#e0b072"
+    },
+    {
+      "init": "MJ",
+      "color": "#7c5cff",
+      "name": "M. Jansen",
+      "role": "Administratie · 32 u/wk",
+      "hours": "58,4u",
+      "pct": 55,
+      "barc": "#34d99f"
+    },
+    {
+      "init": "KV",
+      "color": "#4f6ef5",
+      "name": "K. Visser",
+      "role": "Magazijn · 40 u/wk",
+      "hours": "160u",
+      "pct": 95,
+      "barc": "#34d99f"
+    },
+    {
+      "init": "RG",
+      "color": "#c05cc0",
+      "name": "R. de Groot",
+      "role": "Verkoop · 40 u/wk",
+      "hours": "4,9u",
+      "pct": 8,
+      "barc": "#f98a8a"
+    }
+  ],
+  "kkSecs": [
+    {
+      "t": "Contactpersonen",
+      "sub": "1 · standaard",
+      "n": "1",
+      "d": "M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8z M5 21v-1a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v1"
+    },
+    {
+      "t": "Locaties",
+      "sub": "alleen hoofdadres",
+      "n": "0",
+      "d": "M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11z M12 7.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"
+    },
+    {
+      "t": "Installaties",
+      "sub": "8 in servicecontract",
+      "n": "8",
+      "d": "M21 8l-9-5-9 5 9 5 9-5z M3 8v8l9 5 9-5V8 M12 13v8"
+    }
+  ],
+  "legend": [
+    {
+      "c": "#4f6ef5",
+      "t": "Servicebeurt",
+      "v": "48%"
+    },
+    {
+      "c": "#34d99f",
+      "t": "Installatie",
+      "v": "23%"
+    },
+    {
+      "c": "#f98a8a",
+      "t": "Storing",
+      "v": "19%"
+    },
+    {
+      "c": "#35c4e3",
+      "t": "1e Onderhoud",
+      "v": "8%"
+    },
+    {
+      "c": "#7a8091",
+      "t": "Overig",
+      "v": "2%"
+    }
+  ],
+  "bars": [
+    {
+      "v": "55",
+      "h": 30,
+      "m": "Apr"
+    },
+    {
+      "v": "153",
+      "h": 79,
+      "m": "Mei"
+    },
+    {
+      "v": "154",
+      "h": 80,
+      "m": "Jun"
+    },
+    {
+      "v": "137",
+      "h": 71,
+      "m": "Jul"
+    },
+    {
+      "v": "141",
+      "h": 73,
+      "m": "Aug"
+    }
+  ]
+}

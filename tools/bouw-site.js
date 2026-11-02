@@ -69,7 +69,10 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
   # Daarom kan de CSP hier wél streng, anders dan bij de app. 'self' en niet 'none'
   # voor script-src, omdat rekenmodule.js de prijsindicatie levend maakt; dat is één
   # eigen bestand, geen inline code, dus 'unsafe-inline' blijft eruit.
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+  # connect-src staat de eigen Cloud Function toe: daar gaat het contactformulier
+  # heen. Zonder die regel valt hij terug op default-src 'self' en blokkeert de
+  # browser de aanvraag — stil, met alleen een melding in de console.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://europe-west1-flow8-715de.cloudfunctions.net; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
 
   # Pas aanzetten als https op Cloud86 bewezen werkt — browsers onthouden dit een jaar:
   # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -88,16 +91,24 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
 try {
   if (!fs.existsSync(BRON)) throw new Error('site/ bestaat niet');
-  const lijst = bestanden(BRON);
+  const lijst = bestanden(BRON)
+    .filter(f => !f.split('/').some(deel => deel.startsWith('_')));
 
   // ── Elke verwijzing in de HTML moet bestaan ───────────────────────────────
   const ontbreekt = [];
   for (const rel of lijst.filter(f => f.endsWith('.html'))) {
     const html = fs.readFileSync(path.join(BRON, rel), 'utf8');
-    const verwijzingen = [...html.matchAll(/(?:src|href)="([^"#?:][^"]*)"/g)].map(m => m[1])
+    // De attribuutnaam moet aan een spatie of tagbegin grenzen: anders wordt
+    // data-navhref="modules" als href gelezen en zoekt het script een bestand
+    // dat nooit bestaan heeft.
+    const verwijzingen = [...html.matchAll(/(?:^|[\s])(?:src|href)="([^"#?:][^"]*)"/g)].map(m => m[1])
       .concat([...html.matchAll(/url\(([^)'"]+)\)/g)].map(m => m[1]));
     for (const v of new Set(verwijzingen)) {
+      // Overslaan: absolute paden, ankers, schema's (http:, data:) en alles wat
+      // uit een percent-gecodeerde data-URI komt (daarin staat url(%23g) voor een
+      // anker binnen dezelfde SVG, geen bestand).
       if (v.startsWith('/') || v.startsWith('#') || /^[a-z]+:/.test(v)) continue;
+      if (v.includes('%')) continue;
       if (!fs.existsSync(path.join(BRON, path.dirname(rel), v))) ontbreekt.push(rel + ' → ' + v);
     }
   }
