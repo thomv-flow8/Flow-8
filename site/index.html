@@ -105,6 +105,37 @@ ul{list-style:none}
 .zw44:focus{border-color:var(--acc);background:rgba(255,255,255,.07)}
 .zw45:focus{border-color:var(--acc)}
 </style>
+
+<style>
+.kaartband{position:relative;background:#0d1410;overflow:hidden;scroll-margin-top:88px}
+.kaartband>img{display:block;width:100%;height:auto}
+.kaartband::after{content:"";position:absolute;left:0;right:0;top:0;bottom:30px;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,11,16,.94) 0%,rgba(10,11,16,.6) 30%,rgba(10,11,16,0) 62%),
+             linear-gradient(to right,rgba(10,11,16,.76) 0%,rgba(10,11,16,0) 48%)}
+.kaart-tekst{position:absolute;z-index:2;left:0;right:0;bottom:30px;max-width:1280px;margin:0 auto;
+  padding:0 24px 30px;display:flex;align-items:flex-end;justify-content:space-between;gap:40px;flex-wrap:wrap}
+.kaart-links{max-width:32ch}
+.kaart-links h2{font-size:clamp(19px,2vw,25px);font-weight:500;letter-spacing:.01em;text-transform:uppercase;line-height:1.16;margin:0}
+.kaart-links p{color:#a8aec0;font-size:14.5px;margin-top:12px;line-height:1.5}
+.kaart-rechts{text-align:right}
+.kaart-rechts .et{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;color:#a8aec0}
+.kaart-rechts .et::before{content:"";width:7px;height:7px;border-radius:50%;background:#34d99f}
+.kaart-rechts b{display:block;font-size:clamp(38px,5.4vw,66px);font-weight:400;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;line-height:1;margin-top:8px;color:#f4f6fb}
+.kaart-legenda{position:absolute;z-index:2;top:26px;left:0;right:0;display:flex;gap:16px;justify-content:center;
+  flex-wrap:wrap;padding:0 20px}
+.kaart-legenda i{font-style:normal;display:inline-flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;
+  font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#dfe3ec;background:rgba(10,11,16,.58);
+  border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:6px 13px}
+.kaart-legenda i::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--k)}
+@media(max-width:760px){
+  .kaartband::after{display:none}
+  .kaart-tekst{position:static;padding:22px;flex-direction:column;align-items:flex-start;gap:22px}
+  .kaart-rechts{text-align:left}
+  .kaart-legenda{position:static;justify-content:flex-start;padding:18px 22px 0}
+}
+</style>
 </head>
 <body>
 <div style="position:relative">
@@ -527,6 +558,27 @@ ul{list-style:none}
   </div>
 </section>
 
+
+<section id="kaart" class="kaartband" data-band="dark">
+  <img src="beeld/kaart-vlak.webp" width="1865" height="758" loading="lazy" decoding="async"
+       alt="Het kaartoverzicht in Flow 8: honderden serviceklanten als gekleurde spelden over Zuid- en Midden-Nederland, elk gekleurd naar de status van het werk">
+  <div class="kaart-legenda">
+    <i style="--k:#8b93ab">Klaargezet</i><i style="--k:#f2b544">Mee bezig</i>
+    <i style="--k:#ef4444">Actie vereist</i><i style="--k:#34d99f">Afgehandeld</i>
+  </div>
+  <div class="kaart-tekst">
+    <div class="kaart-links">
+      <h2>Je hele klantenbestand op één kaart</h2>
+      <p>Elke serviceklant op zijn eigen plek, gekleurd naar status. Zo zie je in één oogopslag
+         waar werk ligt — en welke monteur er het dichtste bij zit.</p>
+    </div>
+    <div class="kaart-rechts">
+      <span class="et">Opdrachten in 2026</span>
+      <b>895</b>
+    </div>
+  </div>
+</section>
+
 <section id="inzicht" data-band="dark" style="position:relative;background:#0a0b10;padding:104px 0;overflow:hidden;scroll-margin-top:88px">
   <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(72% 58% at 50% 0%,rgba(53,196,227,.15),rgba(79,110,245,.05) 46%,transparent 66%)"></div>
   <div data-mod="1" style="position:relative;max-width:1280px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 1.05fr;gap:64px;align-items:center">
@@ -602,11 +654,11 @@ ul{list-style:none}
         </div>
       </div>
       <div data-toon="isRapportage" hidden>
-        <figure data-reveal="mock" style="margin:0">
+        <figure data-reveal="mock" style="margin:0;background:#eceef3;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px 14px 12px;box-shadow:0 30px 70px rgba(0,0,0,.45)">
           <img src="beeld/rapportage.webp" width="1972" height="1150" loading="lazy" decoding="async"
                alt="De rapportage in Flow 8 over 2026: 895 opdrachten waarvan 872 afgehandeld, met de verdeling per monteur en per opdrachttype in ringdiagrammen en het aantal opdrachten per maand in staven"
-               style="width:100%;height:auto;display:block;border:1px solid #262b3d;border-radius:16px;box-shadow:0 30px 70px rgba(0,0,0,.45)">
-          <figcaption style="margin-top:12px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;color:#868da3">
+               style="width:100%;height:auto;display:block;border:1px solid rgba(13,15,20,.12);border-radius:5px">
+          <figcaption style="margin-top:11px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;color:#5f6572">
             Een echte omgeving · 895 opdrachten in 2026 · namen onherkenbaar gemaakt
           </figcaption>
         </figure>
