@@ -38,7 +38,7 @@
   /* Statuskleuren blijven ongewijzigd zodat gebruikers niets afleren.
      De *-t varianten zijn de leesbare tekstvariant op donkere vlakken. */
   --green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;
-  --green-t:#34d99f;--orange-t:#e0b072;--red-t:#f98a8a;--purple-t:#b69bff;--accent-t:#93a6ff;--blok-t:#3b82f6;--vast-t:#f59e0b;
+  --green-t:#34d99f;--orange-t:#e0b072;--red-t:#f98a8a;--purple-t:#b69bff;--accent-t:#93a6ff;--blok-t:#60a5fa;--vast-t:#f59e0b;
 
   /* Tekst — muted van 45% dekking naar een vaste, leesbare waarde */
   --text:#f4f6fb;--muted:#a8aec0;--muted2:#868da3;
@@ -58,7 +58,7 @@ body.light{
   --bg:#f5f6f8;--surface:#ffffff;--surface2:#f2f4f8;--border:#e2e5ec;
   --text:#0d0f14;--muted:#5f6572;--muted2:#8a90a0;
   --bg-gradient:#f5f6f8;--dagkop:#e4e9f2;
-  --green-t:#0f9d6f;--orange-t:#b97a09;--red-t:#d33b3b;--purple-t:#7040e0;--accent-t:#3552d4;--blok-t:#2563eb;--vast-t:#b45309;
+  --green-t:#0f9d6f;--orange-t:#b97a09;--red-t:#d33b3b;--purple-t:#7040e0;--accent-t:#3552d4;--blok-t:#1d4ed8;--vast-t:#92400e;
 }
 body.light .card{box-shadow:none}
 body.light .modal{box-shadow:0 24px 70px rgba(20,26,60,.18)}
@@ -13110,8 +13110,8 @@ function _renderDagplanning() {
       var isBlok = !!(o._dpBlokVan && o._dpBlokTot);
       var tijdType = isPinned ? 'vast' : isBlok ? 'blok' : 'vrij';
       var borderKleur = isPinned ? 'rgba(245,158,11,0.3)' : isBlok ? 'rgba(59,130,246,0.3)' : 'var(--border)';
-      var tijdKleur = isPinned ? '#f59e0b' : isBlok ? '#3b82f6' : 'var(--accent)';
-      var pinBtnKleur = isPinned ? '#f59e0b' : isBlok ? '#3b82f6' : 'var(--muted)';
+      var tijdKleur = isPinned ? 'var(--vast-t)' : isBlok ? 'var(--blok-t)' : 'var(--accent)';
+      var pinBtnKleur = isPinned ? 'var(--vast-t)' : isBlok ? 'var(--blok-t)' : 'var(--muted)';
       var pinFill = (isPinned || isBlok) ? 'currentColor' : 'none';
 
       // Reistijd indicator
@@ -13126,7 +13126,7 @@ function _renderDagplanning() {
       // Gat indicator
       if(o._dpGat && o._dpGat > 5) {
         var gatReden = isPinned ? 'gepind op '+o._dpPinTijd : isBlok ? 'tijdblok '+o._dpBlokVan+' – '+o._dpBlokTot : '';
-        content += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:6px;background:rgba(245,158,11,0.08);border:1px dashed rgba(245,158,11,0.3);border-radius:8px;font-size:12px;color:#f59e0b;font-weight:600">'
+        content += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:6px;background:rgba(245,158,11,0.08);border:1px dashed rgba(245,158,11,0.3);border-radius:8px;font-size:12px;color:var(--vast-t);font-weight:600">'
            + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> '
            + 'Gat van '+o._dpGat+' min'+(gatReden?' — volgende opdracht '+gatReden:'')+'</div>';
       }
@@ -13166,14 +13166,14 @@ function _renderDagplanning() {
         content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(239,68,68,0.15);color:#ef4444;display:inline-flex;align-items:center;gap:3px">'+ICO.zap+' Spoed</span>';
       }
       if(o.status === 'actie' || o.status === 'actie_vereist') {
-        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,0.15);color:#f59e0b;display:inline-flex;align-items:center;gap:3px">⚠ '+(o.actietype||'Actie vereist')+'</span>';
+        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,0.15);color:var(--vast-t);display:inline-flex;align-items:center;gap:3px">⚠ '+(o.actietype||'Actie vereist')+'</span>';
       }
       if(isPinned) {
-        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,0.12);color:#f59e0b;display:inline-flex;align-items:center;gap:4px">'
+        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,0.12);color:var(--vast-t);display:inline-flex;align-items:center;gap:4px">'
            + '<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Vast op '+o._dpPinTijd+'</span>';
       }
       if(isBlok) {
-        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(59,130,246,0.12);color:#3b82f6;display:inline-flex;align-items:center;gap:4px">'
+        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(59,130,246,0.12);color:var(--blok-t);display:inline-flex;align-items:center;gap:4px">'
            + '<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> '+o._dpBlokVan+' – '+o._dpBlokTot+'</span>';
       }
       content += '<span style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px">'
@@ -16160,10 +16160,10 @@ function renderPlanLijst(monteurs) {
               h += '<td data-col="naam" style="padding:10px;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+(spoed?'var(--red)':'var(--text)')+'">'+( spoed?ICO.zap+' ':'')+(_skOpgezegd?'<span title="Contract opgezegd — controleer of deze opdracht nog nodig is" style="display:inline-flex;align-items:center;gap:2px;background:rgba(239,68,68,.15);color:var(--red);font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;margin-right:5px;vertical-align:middle">⚠ OPGEZEGD</span>':'')+esc(o.klantNaam||'—')+(function(){var _toegew=(o.monteurIds&&o.monteurIds.length)?o.monteurIds.length:(o.monteurId?1:0);var _n=Math.max(o.aantalMonteurs||0,_toegew);return _n>=2?'<span title="'+_n+' monteurs" style="display:inline-flex;align-items:center;gap:2px;background:rgba(74,108,247,.15);color:var(--accent);font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;margin-left:5px;vertical-align:middle">'+ICO.users+' '+_n+'</span>':'';})()+(o.notitie?'<span title="'+esc(o.notitie)+'" style="margin-left:5px;opacity:.7"><svg width="11" height="11" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:middle"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>':'')+'</td>';
               break;
             case 'tijd':
-              var _tijdKl = o.pinTijd ? '#f59e0b' : (o.blokVan && o.blokTot) ? '#3b82f6' : 'var(--accent)';
+              var _tijdKl = o.pinTijd ? 'var(--vast-t)' : (o.blokVan && o.blokTot) ? 'var(--blok-t)' : 'var(--accent)';
               var _tijdIco = o.pinTijd ? '<span title="Vast tijdstip" style="display:inline-flex;vertical-align:middle">'+ICO.pin+'</span> ' : (o.blokVan && o.blokTot) ? '<span title="Tijdblok '+esc(o.blokVan)+' – '+esc(o.blokTot)+'" style="display:inline-flex;vertical-align:middle">'+ICO.clock+'</span> ' : '';
               h += '<td data-col="tijd" style="padding:10px;font-size:12px;font-weight:700;color:'+_tijdKl+';white-space:nowrap">'+_tijdIco+esc(o.tijdVan||'—')+(o.tijdTot?' – '+esc(o.tijdTot):'');
-              if(o.blokVan && o.blokTot) h += '<div style="font-size:10px;font-weight:500;color:#3b82f6;opacity:0.7">'+esc(o.blokVan)+' – '+esc(o.blokTot)+'</div>';
+              if(o.blokVan && o.blokTot) h += '<div style="font-size:10px;font-weight:500;color:var(--blok-t)">'+esc(o.blokVan)+' – '+esc(o.blokTot)+'</div>';
               h += '</td>';
               break;
             case 'debNr':
@@ -17102,13 +17102,13 @@ function openOpdrachtModal(id, prefill) {
 
   _tsHtml += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
   _tsHtml += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px"><input type="radio" name="op-ts" value="vrij" id="op-ts-vrij" '+(_tsType==='vrij'?'checked':'')+'>Vrij</label>';
-  _tsHtml += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;color:#3b82f6"><input type="radio" name="op-ts" value="blok" id="op-ts-blok" '+(_tsType==='blok'?'checked':'')+'>Tijdblok</label>';
+  _tsHtml += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;color:var(--blok-t)"><input type="radio" name="op-ts" value="blok" id="op-ts-blok" '+(_tsType==='blok'?'checked':'')+'>Tijdblok</label>';
   _tsHtml += '<span id="op-ts-blok-velden" style="display:'+(_tsType==='blok'?'flex':'none')+';align-items:center;gap:4px">';
   _tsHtml += '<select class="input" id="op-blok-van" style="width:85px;font-size:12px">'+tijdOpts(o.blokVan||'08:00')+'</select>';
   _tsHtml += '<span style="font-size:12px;color:var(--muted)">–</span>';
   _tsHtml += '<select class="input" id="op-blok-tot" style="width:85px;font-size:12px">'+tijdOpts(o.blokTot||'12:00')+'</select>';
   _tsHtml += '</span>';
-  _tsHtml += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;color:#f59e0b"><input type="radio" name="op-ts" value="vast" id="op-ts-vast" '+(_tsType==='vast'?'checked':'')+'>Vast</label>';
+  _tsHtml += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px;color:var(--vast-t)"><input type="radio" name="op-ts" value="vast" id="op-ts-vast" '+(_tsType==='vast'?'checked':'')+'>Vast</label>';
   _tsHtml += '<span id="op-ts-vast-veld" style="display:'+(_tsType==='vast'?'inline-flex':'none')+';align-items:center;gap:4px">';
   _tsHtml += '<select class="input" id="op-pin-tijd" style="width:85px;font-size:12px">'+tijdOpts(o.pinTijd||'09:00')+'</select>';
   _tsHtml += '</span>';
