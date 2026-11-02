@@ -503,8 +503,12 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       bevestiging, net als een foto. Detector: 16 → 9 meldingen (contrast en kleine tekst 0).
 - [ ] **Werkbon: geneste kaarten** — de detector ziet nog 9 kaarten-in-kaarten (blokken binnen de
       inklapbare secties). Indelingskeuze, geen fout; pas oppakken bij een herindeling van de bon.
-- [ ] **"Afronden zonder versturen" in werkorderflows** (wox, ~regel 34440 en 34620) is nog de oude
-      kleine tekstlink van 27px hoog; de werkbonversie is 44px.
+- [x] **Werkorders: audit doorgevoerd** (2 november 2026) — lijst en detail op 44px op een
+      aanraakscherm, kop overlapt niet meer, deadline op mobiel altijd volledig (status onder de
+      gegevens), hoge prioriteit als getinte nummerkolom i.p.v. rode zijrand, blokken en
+      werkdocumenten met toetsenbord, `--accent-t`/`--red-t` voor tekst, labels min. 12px, onderbalk
+      verborgen tijdens het invullen. Ook "Afronden zonder versturen" (wox) en de keuzerondjes in
+      werkbon-checklists zijn nu 44px.
 
 ## Gevonden tijdens de verhuizing naar Cloud86 (1 november 2026)
 - [ ] **Twee consolefouten bij het laden van de app** — bestonden al vóór de verhuizing en treden

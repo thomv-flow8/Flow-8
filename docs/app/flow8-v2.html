@@ -308,12 +308,25 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .wo-kaarten{display:none}
 .wo-kaart{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:7px;cursor:pointer}
 .wo-kaart:active{background:var(--surface2)}
-.wok-nr{flex:0 0 74px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px;gap:2px;text-align:center;font-size:12px;font-weight:700;color:var(--accent);line-height:1.2}
-.wok-nr small{font-weight:500;color:var(--muted);font-size:10px}
+.wok-nr{flex:0 0 74px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 4px;gap:2px;text-align:center;font-size:12px;font-weight:700;color:var(--accent-t);line-height:1.2}
+/* Hoge prioriteit: getinte nummerkolom + rode vlag, geen gekleurde zijrand. */
+.wo-kaart.wo-hoog .wok-nr{background:rgba(239,68,68,.12)}
+.wok-nr small{font-weight:500;color:var(--muted);font-size:11px}
 .wok-body{flex:1;min-width:0;padding:9px 11px;display:flex;align-items:center;gap:9px}
 .wok-info{flex:1;min-width:0}
-.wok-klant{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wok-meta{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wok-klant{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.wok-meta{font-size:12px;color:var(--muted);margin-top:2px}
+/* Werkorder-detail: velden en knoppen groot genoeg voor een telefoon. */
+.wox-body input.wox-veld,.wox-body select.wox-veld{min-height:44px}
+.wox-veld-radio,.wox-veld-check{width:20px;height:20px;flex-shrink:0}
+@media (pointer:coarse){
+  #wo-nieuw-btn,.wox-body .btn{min-height:44px}
+}
+/* Tijdens het invullen geen onderbalk over de werkorder: die bedekt de onderkant en één
+   tik brengt je weg uit een half ingevuld formulier. */
+@media(max-width:768px){
+  body:has(#panel.open .wox-body) #bottom-nav{display:none!important}
+}
 @media(max-width:700px){
   .wo-lijst-wrap{display:none}
   .wo-kaarten{display:block}
@@ -3858,7 +3871,7 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
     if(v.type==='paginaeinde'){ h += '<div style="border-top:1px dashed var(--border);margin:14px 0;font-size:10px;color:var(--muted);text-align:center">pagina-einde</div>'; return; }
 
     h += '<div class="wbx-cl-veld" style="margin-bottom:14px">';
-    h += '<div style="font-size:12px;font-weight:600;margin-bottom:6px">'+esc(v.label||'')+(v.verplicht?' <span style="color:var(--red)">*</span>':'')+'</div>';
+    h += '<div style="font-size:12px;font-weight:600;margin-bottom:6px">'+esc(v.label||'')+(v.verplicht?' <span style="color:var(--red-t)">*</span>':'')+'</div>';
 
     if(v.type==='tekst_kort'){
       h += '<input type="text" class="input cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+'>';
@@ -3872,12 +3885,12 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
       h += '</select>';
     } else if(v.type==='radio'){
       (v.opties||[]).forEach(function(o){
-        h += '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer"><input type="radio" name="cl-radio-'+ci+'-'+vi+'" class="cl-ant-radio" '+attrs+' value="'+esc(o)+'"'+(waarde===o?' checked':'')+dis+' style="width:15px;height:15px"><span style="font-size:13px">'+esc(o)+'</span></label>';
+        h += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer"><input type="radio" name="cl-radio-'+ci+'-'+vi+'" class="cl-ant-radio" '+attrs+' value="'+esc(o)+'"'+(waarde===o?' checked':'')+dis+' style="width:20px;height:20px;flex-shrink:0"><span style="font-size:13px">'+esc(o)+'</span></label>';
       });
     } else if(v.type==='checkbox'){
       var geselecteerd = Array.isArray(waarde) ? waarde : [];
       (v.opties||[]).forEach(function(o){
-        h += '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer"><input type="checkbox" class="cl-ant-checkbox" '+attrs+' value="'+esc(o)+'"'+(geselecteerd.indexOf(o)>=0?' checked':'')+dis+' style="width:15px;height:15px"><span style="font-size:13px">'+esc(o)+'</span></label>';
+        h += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer"><input type="checkbox" class="cl-ant-checkbox" '+attrs+' value="'+esc(o)+'"'+(geselecteerd.indexOf(o)>=0?' checked':'')+dis+' style="width:20px;height:20px;flex-shrink:0"><span style="font-size:13px">'+esc(o)+'</span></label>';
       });
     } else if(v.type==='datum'){
       h += '<input type="date" class="input cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+' style="max-width:200px">';
@@ -33356,35 +33369,37 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
       var isHoog = w.prioriteit==='hoog';
       var typeKl = (type && type.kleur) || '#6b7694';
       var dlVerstreken = !inArchief && _woDeadlineVerstreken(w);
-      h += '<tr class="wo-rij" data-id="'+esc(w.id)+'" style="cursor:pointer;border-top:1px solid var(--border);border-left:3px solid '+(isHoog?'var(--red)':'transparent')+(inArchief?';opacity:.72':'')+'">';
-      h += '<td data-col="nummer" style="padding:11px;font-weight:700;color:var(--accent)">'+(isHoog?'<span title="Hoge prioriteit" style="color:var(--red);margin-right:4px;vertical-align:middle">'+ICO.flag+'</span>':'')+esc(_woNummerLabel(w))+'</td>';
+      h += '<tr class="wo-rij" data-id="'+esc(w.id)+'" tabindex="0" data-klik style="cursor:pointer;border-top:1px solid var(--border)'+(inArchief?';opacity:.72':'')+'">';
+      h += '<td data-col="nummer" style="padding:11px;font-weight:700;color:var(--accent-t)">'+(isHoog?'<span title="Hoge prioriteit" style="color:var(--red);margin-right:4px;vertical-align:middle">'+ICO.flag+'</span>':'')+esc(_woNummerLabel(w))+'</td>';
       h += '<td data-col="type" style="padding:11px;font-size:13px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+typeKl+';margin-right:7px;vertical-align:middle"></span>'+esc(w.typeNaam||(type&&type.naam)||'\u2014')+'</td>';
       h += '<td data-col="klant" style="padding:11px;font-size:13px'+(w.tbvVoorraad?';color:var(--muted);font-style:italic':'')+'">'+esc(klantTekst||'\u2014')+'</td>';
       h += '<td data-col="details" style="padding:11px;font-size:12px;color:var(--muted);max-width:200px">'+esc(detailKort||'\u2014')+'</td>';
-      h += '<td data-col="status" style="padding:11px"><span class="tag tag-'+esc(statusKl)+'" style="font-size:11px">'+esc(statusNaam)+'</span></td>';
-      h += '<td data-col="deadline" style="padding:11px;font-size:12px'+(dlVerstreken?';color:var(--red);font-weight:600':(w.deadline?'':';color:var(--muted)'))+'">'+(dlVerstreken?'<span title="Deadline verstreken" style="vertical-align:middle;margin-right:3px">'+ICO.warn+'</span>':'')+esc(w.deadline?fmtD(w.deadline):'\u2014')+'</td>';
+      h += '<td data-col="status" style="padding:11px"><span class="tag tag-'+esc(statusKl)+'" style="font-size:12px">'+esc(statusNaam)+'</span></td>';
+      h += '<td data-col="deadline" style="padding:11px;font-size:12px'+(dlVerstreken?';color:var(--red-t);font-weight:600':(w.deadline?'':';color:var(--muted)'))+'">'+(dlVerstreken?'<span title="Deadline verstreken" style="vertical-align:middle;margin-right:3px">'+ICO.warn+'</span>':'')+esc(w.deadline?fmtD(w.deadline):'\u2014')+'</td>';
       h += '<td data-col="aangemaakt" style="padding:11px;font-size:12px;color:var(--muted)">'+esc(datum||'\u2014')+(w.aangemaaktDoor&&w.aangemaaktDoor.naam?(' \u00b7 '+esc(w.aangemaaktDoor.naam)):'')+'</td>';
       if(kanBeheren){
         h += '<td data-col="acties" style="padding:11px;white-space:nowrap;text-align:right">';
         if(inArchief){
-          h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-terug" data-id="'+esc(w.id)+'" title="Terughalen uit archief" style="padding:3px 8px">'+ICO.undo+'</button>';
+          h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-terug" data-id="'+esc(w.id)+'" title="Terughalen uit archief" aria-label="Terughalen uit archief" style="padding:6px 9px">'+ICO.undo+'</button>';
         } else {
-          h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-prio" data-id="'+esc(w.id)+'" title="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" style="padding:3px 8px'+(isHoog?';color:var(--red);border-color:rgba(239,68,68,.4)':'')+'">'+ICO.flag+'</button>';
+          h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-prio" data-id="'+esc(w.id)+'" title="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" aria-label="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" style="padding:6px 9px'+(isHoog?';color:var(--red);border-color:rgba(239,68,68,.4)':'')+'">'+ICO.flag+'</button>';
         }
-        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-edit" data-id="'+esc(w.id)+'" title="Bewerken" style="padding:3px 8px">'+ICO.edit+'</button>';
-        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-del" data-id="'+esc(w.id)+'" title="Verwijderen" style="padding:3px 8px;color:var(--red)">'+ICO.trash+'</button></td>';
+        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-edit" data-id="'+esc(w.id)+'" title="Bewerken" aria-label="Bewerken" style="padding:6px 9px">'+ICO.edit+'</button>';
+        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-del" data-id="'+esc(w.id)+'" title="Verwijderen" aria-label="Verwijderen" style="padding:6px 9px;color:var(--red)">'+ICO.trash+'</button></td>';
       }
       h += '</tr>';
 
       // Kaart voor mobiel: nummer + datum links, klant groot, type/deadline eronder.
-      hk += '<div class="wo-rij wo-kaart" data-id="'+esc(w.id)+'" style="border-left:3px solid '+(isHoog?'var(--red)':'transparent')+(inArchief?';opacity:.72':'')+'">';
+      hk += '<div class="wo-rij wo-kaart'+(isHoog?' wo-hoog':'')+'" data-id="'+esc(w.id)+'" role="button" tabindex="0"'+(inArchief?' style="opacity:.72"':'')+'>';
       hk += '<div class="wok-nr">'+(isHoog?'<span style="color:var(--red)">'+ICO.flag+'</span>':'')+esc(_woNummerLabel(w))+(datum?'<small>'+esc(datum)+'</small>':'')+'</div>';
       hk += '<div class="wok-body"><div class="wok-info">';
       hk += '<div class="wok-klant"'+(w.tbvVoorraad?' style="font-style:italic;color:var(--muted);font-weight:500"':'')+'>'+esc(klantTekst||'\u2014')+'</div>';
       var _mk = ['<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+typeKl+';margin-right:5px;vertical-align:middle"></span>'+esc(w.typeNaam||(type&&type.naam)||'\u2014')];
-      if(w.deadline) _mk.push((dlVerstreken?'<span style="color:var(--red);font-weight:600">deadline '+esc(fmtD(w.deadline))+'</span>':'deadline '+esc(fmtD(w.deadline))));
+      if(w.deadline) _mk.push((dlVerstreken?'<span style="color:var(--red-t);font-weight:600">deadline '+esc(fmtD(w.deadline))+'</span>':'deadline '+esc(fmtD(w.deadline))));
       hk += '<div class="wok-meta">'+_mk.join(' \u00b7 ')+'</div>';
-      hk += '</div><span class="tag tag-'+esc(statusKl)+'" style="font-size:10.5px;flex-shrink:0">'+esc(statusNaam)+'</span></div></div>';
+      // Status onder de gegevens i.p.v. ernaast: zo past de deadline altijd volledig.
+      hk += '<span class="tag tag-'+esc(statusKl)+'" style="font-size:12px;margin-top:7px">'+esc(statusNaam)+'</span>';
+      hk += '</div></div></div>';
     });
     h += '</tbody></table></div></div>';
     h += '<div class="wo-kaarten">'+hk+'</div>';
@@ -34433,18 +34448,21 @@ function _woRenderDetail(){
   var h = '';
   // Kop
   h += '<div class="wox-kop" style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)">';
-  h += '<button id="wox-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:4px;display:flex"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  h += '<button id="wox-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:10px;margin:-10px 0 -10px -10px;display:flex" title="Terug" aria-label="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
   // Zelfde opzet als de werkbon-kop: typenaam groot, nummer klein en gedempt ernaast.
   // Geen ellipsis op de titel — een lange typenaam mag afbreken, niet wegvallen.
   var _kopKlant = (typeof _woKlantKort==='function') ? _woKlantKort(wo) : '';
   h += '<div style="flex:1;min-width:0">';
   h += '<div style="font-size:18px;font-weight:800;font-family:\'Instrument Sans\',sans-serif;line-height:1.15">'
      + esc(wo.typeNaam||'Werkorder')
-     + '<span style="font-size:13px;font-weight:600;color:var(--muted);margin-left:7px;white-space:nowrap">'+esc(_woNummerLabel(wo))+'</span></div>';
+     + ' <span style="display:inline-block;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap">'+esc(_woNummerLabel(wo))+'</span></div>';
   if(_kopKlant) h += '<div style="font-size:12.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'+((wo&&wo.tbvVoorraad)?';font-style:italic':'')+'">'+esc(_kopKlant)+'</div>';
   h += '</div>';
-  h += '<span id="wox-save-status" style="font-size:12px;color:var(--green-t);min-width:70px;text-align:right;transition:opacity .2s"></span>';
+  // Status met de opslagmelding eronder: geen vaste ruimte meer die de titel verdringt.
+  h += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">';
   h += '<span class="tag tag-'+esc(statusKl)+'" style="font-size:12px">'+esc(statusNaam)+'</span>';
+  h += '<span id="wox-save-status" style="font-size:12px;color:var(--green-t);text-align:right;transition:opacity .2s"></span>';
+  h += '</div>';
   h += '</div>';
 
   // Body
@@ -34458,7 +34476,7 @@ function _woRenderDetail(){
   // Werkdocumenten: centrale documentenmap, raadpleegbaar zonder de werkorder te verlaten.
   // Inhoud wordt pas geladen bij het openen van de accordion (scheelt reads).
   h += '<div class="wox-sectie" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px">';
-  h += '<div id="wox-wd-kop" style="display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;user-select:none">';
+  h += '<div id="wox-wd-kop" role="button" tabindex="0" aria-expanded="false" style="display:flex;align-items:center;gap:10px;padding:13px 15px;min-height:48px;cursor:pointer;user-select:none">';
   h += '<span style="color:var(--accent);display:flex"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span>';
   h += '<div style="font-size:14px;font-weight:700;flex:1">Werkdocumenten</div>';
   h += '<svg id="wox-wd-pijl" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color:var(--muted);transition:transform .2s"><path d="M6 9l6 6 6-6"/></svg>';
@@ -34490,7 +34508,7 @@ function _woRenderDetail(){
       h += '<div style="font-size:13px;font-weight:700;margin-bottom:10px">Afronding</div>';
       // ── Werkbon-stijl: signstatus-vlak, 'afronden zonder versturen', [Handtekening][Versturen] ──
       if(_tSec.handtekening){
-        h += '<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Handtekening klant</div>';
+        h += '<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Handtekening klant</div>';
         h += '<div style="margin-bottom:14px">'+_wbSignStatusHtml(!!sHtk, sHtk)+'</div>';
       }
       if(sAfgerond){
@@ -34499,7 +34517,7 @@ function _woRenderDetail(){
         if(isAdmin() || magBeheren('werkorders')) h += '<button type="button" class="btn btn-ghost btn-sm wox-simpel-heropen" style="margin-top:6px;font-size:11px">Heropenen</button>';
       } else if(_woDetailState.bewerkbaar){
         if(_tSec.mail){
-          h += '<div style="text-align:center;margin:2px 0"><button type="button" class="wox-simpel-afrondkaal" style="background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit;padding:6px">Afronden zonder versturen</button></div>';
+          h += '<div style="text-align:center;margin:2px 0"><button type="button" class="wox-simpel-afrondkaal" style="background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;padding:12px 14px;min-height:44px">Afronden zonder versturen</button></div>';
         }
         h += '<div style="display:flex;gap:10px;margin-top:8px">';
         if(_tSec.handtekening){
@@ -34553,31 +34571,31 @@ function _woInfoblokHtml(wo, type){
   var h = '<div class="card" style="padding:14px 16px;margin-bottom:16px">';
   h += '<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Informatie</div>';
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;font-size:13px">';
-  var rij = function(label, waarde){ return '<div><div style="font-size:11px;color:var(--muted)">'+esc(label)+'</div><div style="font-weight:500">'+esc(waarde||'—')+'</div></div>'; };
+  var rij = function(label, waarde){ return '<div><div style="font-size:12px;color:var(--muted)">'+esc(label)+'</div><div style="font-weight:500">'+esc(waarde||'—')+'</div></div>'; };
   h += rij('Nummer', _woNummerLabel(wo));
   var datum = '';
   if(wo.aangemaaktOp && wo.aangemaaktOp.toDate){ try { datum = fmtD(wo.aangemaaktOp.toDate().toISOString().slice(0,10)); } catch(e){} }
   h += rij('Aangemaakt op', datum);
   h += rij('Aangemaakt door', wo.aangemaaktDoor && wo.aangemaaktDoor.naam ? wo.aangemaaktDoor.naam : '');
   // Deadline (bewerkbaar)
-  h += '<div><div style="font-size:11px;color:var(--muted)">Deadline</div><input type="date" class="input wox-deadline" value="'+esc(wo.deadline||'')+'" style="max-width:170px;padding:5px 8px;font-size:12px"'+(_woDetailState.bewerkbaar?'':' disabled')+'></div>';
+  h += '<div><div style="font-size:12px;color:var(--muted)">Deadline</div><input type="date" class="input wox-deadline" value="'+esc(wo.deadline||'')+'" style="max-width:170px;min-height:44px;padding:9px 10px;font-size:13px"'+(_woDetailState.bewerkbaar?'':' disabled')+'></div>';
   h += '</div>';
   // Details / omschrijving (bewerkbaar)
-  h += '<div style="margin-top:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Details</div><textarea class="input wox-details" rows="2" placeholder="Omschrijving werkzaamheden" style="width:100%;box-sizing:border-box;resize:vertical;font-size:13px"'+(_woDetailState.bewerkbaar?'':' disabled')+'>'+esc(wo.details||'')+'</textarea></div>';
+  h += '<div style="margin-top:12px"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">Details</div><textarea class="input wox-details" rows="2" placeholder="Omschrijving werkzaamheden" style="width:100%;box-sizing:border-box;resize:vertical;font-size:13px"'+(_woDetailState.bewerkbaar?'':' disabled')+'>'+esc(wo.details||'')+'</textarea></div>';
   // Klantgegevens (indien gekoppeld of t.b.v. voorraad)
   if(wo.tbvVoorraad){
-    h += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)"><div style="font-size:11px;color:var(--muted)">Klant</div><div style="font-weight:500;font-style:italic;color:var(--muted)">T.b.v. voorraad</div></div>';
+    h += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)"><div style="font-size:12px;color:var(--muted)">Klant</div><div style="font-weight:500;font-style:italic;color:var(--muted)">T.b.v. voorraad</div></div>';
   } else if(wo.debId || wo.klantnaam){
     var deb = wo.debId ? (APP.debiteuren||[]).find(function(d){ return String(d.id)===String(wo.debId); }) : null;
     var kn = wo.klantnaam || (deb&&deb.naam) || (typeof debNaam==='function' ? debNaam(wo.debId) : '') || '';
     // Zelfde opzet als het klantblok op de werkbon: label links, waarde rechts,
     // elk gegeven op een eigen regel.
     h += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">';
-    h += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Klant</div>';
+    h += '<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Klant</div>';
     var _kr = function(label, waarde, html){
       if(!waarde) return '';
       return '<div style="display:flex;gap:10px;padding:3px 0;font-size:12.5px;align-items:baseline">'
-           + '<span style="flex:0 0 100px;color:var(--muted);font-size:11.5px">'+esc(label)+'</span>'
+           + '<span style="flex:0 0 100px;color:var(--muted);font-size:12px">'+esc(label)+'</span>'
            + '<span style="flex:1;min-width:0">'+(html||esc(waarde))+'</span></div>';
     };
     h += _kr('Naam', kn||'—', '<span style="font-weight:600">'+esc(kn||'—')+'</span>');
@@ -34586,11 +34604,11 @@ function _woInfoblokHtml(wo, type){
       h += _kr('Adres', deb.adres);
       var _pcpl = [deb.postcode, deb.plaats].filter(Boolean).join('  ');
       h += _kr('Postcode/plaats', _pcpl);
-      h += _kr('Telefoon', deb.telefoon, deb.telefoon ? '<a href="tel:'+esc(String(deb.telefoon).replace(/\s/g,''))+'" style="color:var(--accent);text-decoration:none">'+esc(deb.telefoon)+'</a>' : '');
-      h += _kr('E-mail', deb.email, deb.email ? '<a href="mailto:'+esc(deb.email)+'" style="color:var(--accent);text-decoration:none;word-break:break-all">'+esc(deb.email)+'</a>' : '');
+      h += _kr('Telefoon', deb.telefoon, deb.telefoon ? '<a href="tel:'+esc(String(deb.telefoon).replace(/\s/g,''))+'" style="color:var(--accent-t);text-decoration:none;display:inline-block;padding:10px 0;margin:-10px 0">'+esc(deb.telefoon)+'</a>' : '');
+      h += _kr('E-mail', deb.email, deb.email ? '<a href="mailto:'+esc(deb.email)+'" style="color:var(--accent-t);text-decoration:none;word-break:break-all;display:inline-block;padding:10px 0;margin:-10px 0">'+esc(deb.email)+'</a>' : '');
       var _navQ = encodeURIComponent([deb.adres, deb.postcode, deb.plaats].filter(Boolean).join(' '));
       if(_navQ) h += '<a href="https://www.google.com/maps/dir/?api=1&destination='+_navQ+'" target="_blank" rel="noopener" '
-        + 'style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;color:var(--accent);text-decoration:none">'
+        + 'style="display:inline-flex;align-items:center;gap:5px;margin-top:4px;min-height:44px;font-size:13px;font-weight:600;color:var(--accent-t);text-decoration:none">'
         + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z"/><circle cx="12" cy="10" r="3"/></svg> Navigeer naar adres</a>';
     }
     h += '</div>';
@@ -34642,7 +34660,7 @@ function _woBlokAccordionHtml(bl, bi){
   var antw = st.antwoorden[skey];
   var aantalVeld = Array.isArray(bl.velden)?bl.velden.length:0;
   var h = '<div class="wox-blok card" style="padding:0;margin-bottom:10px;overflow:hidden">';
-  h += '<div class="wox-blok-hdr" data-bi="'+bi+'" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none">';
+  h += '<div class="wox-blok-hdr" data-bi="'+bi+'" role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none">';
   h += '<span style="width:26px;height:26px;border-radius:8px;background:var(--accent-knop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">'+(bi+1)+'</span>';
   h += '<span style="flex:1;font-weight:700;font-size:14px">'+esc(bl.naam||'Blok')+'</span>';
   h += '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="transform:rotate('+(open?'180':'0')+'deg);transition:transform .15s;flex-shrink:0"><path d="M6 9l6 6 6-6"/></svg>';
@@ -34670,7 +34688,7 @@ function _woBlokAccordionHtml(bl, bi){
       // Handtekening
       if(bl.afronding.handtekening){
         h += '<div style="margin-bottom:10px">';
-        h += '<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Handtekening klant</div>';
+        h += '<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Handtekening klant</div>';
         h += '<div style="margin-bottom:14px">'+_wbSignStatusHtml(!!htkData, htkData)+'</div>';
         h += '</div>';
       }
@@ -34681,7 +34699,7 @@ function _woBlokAccordionHtml(bl, bi){
         if(isAdmin() || magBeheren('werkorders')) h += '<button type="button" class="btn btn-ghost btn-sm wox-blok-heropen" data-bi="'+bi+'" style="margin-top:6px;font-size:11px">Heropenen</button>';
       } else if(_woDetailState.bewerkbaar){
         if(bl.afronding.mail){
-          h += '<div style="text-align:center;margin:2px 0"><button type="button" class="wox-blok-afrondkaal" data-bi="'+bi+'" style="background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit;padding:6px">Afronden zonder versturen</button></div>';
+          h += '<div style="text-align:center;margin:2px 0"><button type="button" class="wox-blok-afrondkaal" data-bi="'+bi+'" style="background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;padding:12px 14px;min-height:44px">Afronden zonder versturen</button></div>';
         }
         h += '<div style="display:flex;gap:10px;margin-top:8px">';
         if(bl.afronding.handtekening){
@@ -34705,11 +34723,11 @@ function _woVeldenInvulHtml(velden, antwoorden, scope){
   velden.forEach(function(v, vi){
     var waarde = antwoorden[v.id];
     // Zelfde uitstraling als de sectiekoppen op de PDF: accentkleur, groter, met lijn.
-    if(v.type==='header'){ h += '<div style="font-weight:700;font-size:15px;color:var(--accent);margin:'+(vi===0?'2px':'20px')+' 0 10px;padding-bottom:5px;border-bottom:1px solid var(--border)">'+esc(v.label||'')+'</div>'; return; }
+    if(v.type==='header'){ h += '<div style="font-weight:700;font-size:15px;color:var(--accent-t);margin:'+(vi===0?'2px':'20px')+' 0 10px;padding-bottom:5px;border-bottom:1px solid var(--border)">'+esc(v.label||'')+'</div>'; return; }
     if(v.type==='paragraaf'){ h += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;white-space:pre-wrap">'+esc(v.label||'')+'</div>'; return; }
     if(v.type==='paginaeinde'){ return; }
     h += '<div style="margin-bottom:14px">';
-    h += '<div style="font-size:12px;font-weight:600;margin-bottom:6px">'+esc(v.label||'')+(v.verplicht?' <span style="color:var(--red)">*</span>':'')+'</div>';
+    h += '<div style="font-size:12px;font-weight:600;margin-bottom:6px">'+esc(v.label||'')+(v.verplicht?' <span style="color:var(--red-t)">*</span>':'')+'</div>';
     var a = 'class="wox-veld" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'"';
     if(v.type==='tekst_kort'){
       h += '<input type="text" '+a+' value="'+esc(waarde||'')+'"'+dis+' style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text)">';
@@ -34722,10 +34740,10 @@ function _woVeldenInvulHtml(velden, antwoorden, scope){
       (v.opties||[]).forEach(function(o){ h += '<option value="'+esc(o)+'"'+(waarde===o?' selected':'')+'>'+esc(o)+'</option>'; });
       h += '</select>';
     } else if(v.type==='radio'){
-      (v.opties||[]).forEach(function(o){ h += '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer"><input type="radio" name="wox-'+esc(scope)+'-'+esc(v.id)+'" class="wox-veld-radio" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'" value="'+esc(o)+'"'+(waarde===o?' checked':'')+dis+'><span style="font-size:13px">'+esc(o)+'</span></label>'; });
+      (v.opties||[]).forEach(function(o){ h += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer"><input type="radio" name="wox-'+esc(scope)+'-'+esc(v.id)+'" class="wox-veld-radio" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'" value="'+esc(o)+'"'+(waarde===o?' checked':'')+dis+'><span style="font-size:13px">'+esc(o)+'</span></label>'; });
     } else if(v.type==='checkbox'){
       var sel = Array.isArray(waarde)?waarde:[];
-      (v.opties||[]).forEach(function(o){ h += '<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer"><input type="checkbox" class="wox-veld-check" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'" value="'+esc(o)+'"'+(sel.indexOf(o)>=0?' checked':'')+dis+'><span style="font-size:13px">'+esc(o)+'</span></label>'; });
+      (v.opties||[]).forEach(function(o){ h += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer"><input type="checkbox" class="wox-veld-check" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'" value="'+esc(o)+'"'+(sel.indexOf(o)>=0?' checked':'')+dis+'><span style="font-size:13px">'+esc(o)+'</span></label>'; });
     } else if(v.type==='datum'){
       h += '<input type="date" '+a+' value="'+esc(waarde||'')+'"'+dis+' style="max-width:200px;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text)">';
     } else if(v.type==='tijd'){
@@ -35241,6 +35259,7 @@ function _woBindDetail(fullscreen){
     if(!body) return;
     var open = body.style.display !== 'none';
     body.style.display = open ? 'none' : 'block';
+    wdKop.setAttribute('aria-expanded', open ? 'false' : 'true');
     if(pijl) pijl.style.transform = open ? '' : 'rotate(180deg)';
     if(!open && !body._gevuld){ body._gevuld = true; _woWdAccordionVul(body); }
   });
@@ -35249,8 +35268,11 @@ function _woBindDetail(fullscreen){
   root.querySelectorAll('.wox-blok-hdr').forEach(function(hdr){
     hdr.addEventListener('click', function(){
       var bi = +hdr.dataset.bi;
+      var hadFocus = document.activeElement === hdr;
       st.openBlok = (st.openBlok===bi) ? -1 : bi;
       _woRenderDetail();
+      // Na het herbouwen de focus terug op dezelfde kop, anders ben je met het toetsenbord je plek kwijt.
+      if(hadFocus){ var nw = document.querySelector('.wox-blok-hdr[data-bi="'+bi+'"]'); if(nw) nw.focus(); }
     });
   });
 
