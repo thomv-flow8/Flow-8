@@ -495,6 +495,17 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 Fase 1 (tokens + typografie), 2 (componenten), 3 (details + licht thema), 4 (toegankelijkheid +
 iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor details.
 
+- [x] **Werkbon monteur: audit doorgevoerd** (2 november 2026) — aanraakvlakken ≥44px (was 17 van
+      33 te klein, nu 0), statuslabel als tint met leesbare tekst, `--accent-t` voor blauwe tekst,
+      sectiekoppen bedienbaar met toetsenbord (role/aria-expanded), e-mailveld `type=email` op 16px,
+      resultaatkeuzes en "Checklist toevoegen" als echte knoppen, handtekening scherp op retina
+      (canvas op apparaatpixels, max 2×), tekst min. 12px. Uurregel verwijderen vraagt nu om
+      bevestiging, net als een foto. Detector: 16 → 9 meldingen (contrast en kleine tekst 0).
+- [ ] **Werkbon: geneste kaarten** — de detector ziet nog 9 kaarten-in-kaarten (blokken binnen de
+      inklapbare secties). Indelingskeuze, geen fout; pas oppakken bij een herindeling van de bon.
+- [ ] **"Afronden zonder versturen" in werkorderflows** (wox, ~regel 34440 en 34620) is nog de oude
+      kleine tekstlink van 27px hoog; de werkbonversie is 44px.
+
 ## Gevonden tijdens de verhuizing naar Cloud86 (1 november 2026)
 - [ ] **Twee consolefouten bij het laden van de app** — bestonden al vóór de verhuizing en treden
       op beide adressen op (vergeleken op `thomv-flow8.github.io` én `app.flow-8.nl`, dus het ligt

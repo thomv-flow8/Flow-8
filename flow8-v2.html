@@ -417,7 +417,7 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 #wb-fullscreen .wbx-md-navitem.actief{background:rgba(74,108,247,.10);font-weight:600}
 #wb-fullscreen .wbx-md-navico{flex-shrink:0;display:flex;color:var(--accent)}
 #wb-fullscreen .wbx-md-navlbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-#wb-fullscreen .wbx-md-navbadge{flex-shrink:0;font-size:10px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:var(--radius-pill);background:rgba(74,108,247,.16);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-left:auto}
+#wb-fullscreen .wbx-md-navbadge{flex-shrink:0;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:var(--radius-pill);background:rgba(74,108,247,.16);color:var(--accent-t);display:flex;align-items:center;justify-content:center;margin-left:auto}
 /* Sectie-headers verbergen (nav vervangt ze), body altijd tonen */
 #wb-fullscreen .wbx-sec .wbx-hdr{display:none}
 #wb-fullscreen .wbx-sec{border:none;background:none;margin:0}
@@ -878,7 +878,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .mail-tabel td{padding:13px 8px;font-size:12px}
   .deb-tabel th, .sk-tabel th, .mail-tabel th{padding:8px 8px;font-size:11px}
   /* Materialen-stepper op de werkbon: aantal-veld compact houden */
-  input.wb-mat-aantal[type="number"]{width:64px!important;min-width:64px!important;max-width:64px!important;flex:0 0 auto}
+  input.wb-mat-aantal[type="number"]{width:64px!important;min-width:64px!important;max-width:64px!important;height:44px;flex:0 0 auto}
   /* Instellingen tabs 2 rijen */
   .inst-tabs{flex-wrap:wrap !important;overflow-x:visible !important}
   /* Tabellen scrollbaar */
@@ -923,13 +923,14 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 }
 /* ─── Werkbon invulbon (accordion-stijl, preview-werkbon-uitgebreid) ─── */
 .wbx-sec{margin:0 0 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.wbx-hdr{display:flex;align-items:center;gap:11px;padding:14px 15px;cursor:pointer;user-select:none}
+.wbx-hdr{display:flex;align-items:center;gap:11px;padding:14px 15px;min-height:52px;cursor:pointer;user-select:none}
+.wbx-hdr:focus-visible{outline-offset:-2px}
 .wbx-hdr .wbx-ico{color:var(--accent);display:flex;flex-shrink:0}
 .wbx-hdr .wbx-naam{font-weight:600;font-size:14px;flex:1}
 .wbx-hdr .wbx-chev{color:var(--muted);transition:transform .2s;display:flex}
 .wbx-sec.open .wbx-hdr .wbx-chev{transform:rotate(180deg)}
 .wbx-svc-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:var(--radius-pill);background:rgba(16,185,129,.16);color:var(--green-t);letter-spacing:.3px}
-.wbx-cnt-badge{font-size:10px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:var(--radius-pill);background:rgba(74,108,247,.16);color:var(--accent);display:flex;align-items:center;justify-content:center}
+.wbx-cnt-badge{font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:var(--radius-pill);background:rgba(74,108,247,.16);color:var(--accent-t);display:flex;align-items:center;justify-content:center}
 .wbx-body{display:none;padding:0 15px 15px;border-top:1px solid var(--border)}
 .wbx-sec.open .wbx-body{display:block}
 .wbx-body.pt{padding-top:13px}
@@ -937,19 +938,20 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbx-row:last-child{border-bottom:none}
 .wbx-row .wbx-k{color:var(--muted);flex-shrink:0}
 .wbx-row .wbx-v{font-weight:500;text-align:right}
-.wbx-field-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:12px 0 5px}
+.wbx-field-lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:12px 0 5px}
 .wbx-field{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--text);width:100%;font-family:inherit;resize:vertical;box-sizing:border-box}
 .wbx-field.area{min-height:70px;font-size:13px;font-family:inherit;line-height:1.4}
 .wbx-field::placeholder{color:var(--muted)}
-.wbx-chip-add{display:inline-flex;align-items:center;gap:5px;background:rgba(74,108,247,.12);color:var(--accent);border:1px dashed rgba(74,108,247,.4);border-radius:9px;padding:9px 13px;font-size:12px;font-weight:600;margin-top:10px;cursor:pointer}
-.wbx-mini-link{display:flex;align-items:center;gap:7px;background:rgba(74,108,247,.08);border:1px solid rgba(74,108,247,.25);border-radius:9px;padding:9px 11px;font-size:12px;font-weight:600;color:var(--accent);margin:11px 0;cursor:pointer;text-decoration:none}
+.wbx-chip-add{display:inline-flex;align-items:center;gap:5px;background:rgba(74,108,247,.12);color:var(--accent-t);border:1px dashed rgba(74,108,247,.4);border-radius:9px;padding:9px 14px;min-height:44px;font-family:inherit;font-size:13px;font-weight:600;margin-top:10px;cursor:pointer}
+.wbx-mini-link{display:flex;align-items:center;gap:7px;background:rgba(74,108,247,.08);border:1px solid rgba(74,108,247,.25);border-radius:9px;padding:9px 11px;min-height:44px;font-size:13px;font-weight:600;color:var(--accent-t);margin:11px 0;cursor:pointer;text-decoration:none}
 .wbx-uur-regel{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px;margin-top:8px}
 .wbx-uur-regel .wbx-who{width:32px;height:32px;border-radius:50%;background:var(--accent-knop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
 .wbx-uur-regel .wbx-det{flex:1;font-size:12px;min-width:0}
 .wbx-uur-regel .wbx-det .wbx-n{font-weight:600}
-.wbx-uur-regel .wbx-det .wbx-t{color:var(--muted);font-size:11px}
+.wbx-uur-regel .wbx-det .wbx-t{color:var(--muted);font-size:12px}
 .wbx-uur-regel .wbx-amt{font-weight:700;font-size:14px;flex-shrink:0}
-.wbx-uur-regel .wbx-del{color:var(--red);cursor:pointer;font-size:18px;padding:0 4px;flex-shrink:0;line-height:1}
+.wbx-uur-regel .wbx-del{color:var(--red);cursor:pointer;padding:0;min-width:44px;min-height:44px;margin:-6px -8px -6px 0;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:none;border:none}
+.wbx-uur-regel .wbx-del svg,.wbx-foto-item .wbx-fdelbtn svg,.wbx-foto-item .wbx-ftekenbtn svg,.wb-mat-verwijder svg,.wbx-cl-hernoem svg,.wbx-cl-verwijder svg{width:18px;height:18px}
 .wbx-foto-grid{margin-top:10px}
 .wbx-foto-thumb{aspect-ratio:1;border-radius:9px;background:var(--surface2);border:1px solid var(--border);position:relative;overflow:hidden;cursor:pointer}
 .wbx-foto-thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -957,8 +959,8 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbx-foto-add{aspect-ratio:1;border-radius:9px;border:1px dashed rgba(74,108,247,.4);background:rgba(74,108,247,.08);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:600;cursor:pointer}
 .wbx-teken-note{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);margin-top:13px}
 .wbx-form-opts{display:flex;gap:8px;flex-wrap:wrap}
-.wbx-form-opt{border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;background:var(--surface2);cursor:pointer}
-.wbx-form-opt.sel{background:rgba(74,108,247,.15);border-color:var(--accent);color:var(--accent);font-weight:600}
+.wbx-form-opt{border:1px solid var(--border);border-radius:8px;padding:8px 14px;min-height:44px;display:inline-flex;align-items:center;font-family:inherit;font-size:13px;color:var(--text);background:var(--surface2);cursor:pointer}
+.wbx-form-opt.sel{background:rgba(74,108,247,.15);border-color:var(--accent);color:var(--accent-t);font-weight:600}
 .wbx-save-status{font-size:11px;color:var(--muted);margin-top:4px;height:14px}
 .wbx-actiebar{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:12px 0 calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;margin-top:8px;z-index:5}
 .wbx-actiebar .btn{flex:1;justify-content:center;border-radius:var(--radius-pill);padding:14px 18px;font-size:14px}
@@ -999,11 +1001,11 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbx-fthumb.wbx-fpending img{opacity:.6}
 .wbx-fpending-badge{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--orange);color:#1a1200;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .wbx-foto-item .wbx-fthumb img{width:100%;height:100%;object-fit:cover;display:block}
-.wbx-foto-item .wbx-fnum{flex:1;font-size:12px;font-weight:700;color:var(--accent)}
+.wbx-foto-item .wbx-fnum{flex:1;font-size:12px;font-weight:700;color:var(--accent-t)}
 .wbx-foto-item .wbx-fcap{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);resize:vertical;min-height:38px}
 .wbx-foto-item .wbx-fcap::placeholder{color:var(--muted)}
-.wbx-foto-item .wbx-fdelbtn{flex-shrink:0;color:var(--red);cursor:pointer;font-size:20px;line-height:1;padding:2px 8px;background:none;border:none}
-.wbx-foto-item .wbx-ftekenbtn{flex-shrink:0;color:var(--accent);cursor:pointer;padding:4px 6px;background:none;border:none;display:flex;align-items:center}
+.wbx-foto-item .wbx-fdelbtn{flex-shrink:0;color:var(--red);cursor:pointer;font-size:20px;line-height:1;padding:2px 8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none}
+.wbx-foto-item .wbx-ftekenbtn{flex-shrink:0;color:var(--accent-t);cursor:pointer;padding:4px 6px;min-width:44px;min-height:44px;background:none;border:none;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
 
@@ -2385,7 +2387,7 @@ function _wbActiveerMasterDetail(rootEl){
       if(kopEl) kopEl.style.display = '';
       if(subkopEl) subkopEl.style.display = '';
       afbreken();
-      secties.forEach(function(sec,i){ sec.style.display=''; if(i>0) sec.classList.remove('open'); });
+      secties.forEach(function(sec,i){ sec.style.display=''; if(i>0) sec.classList.remove('open'); var _hd=sec.querySelector('.wbx-hdr'); if(_hd) _hd.setAttribute('aria-expanded', sec.classList.contains('open')?'true':'false'); });
     }
   }
 
@@ -2412,6 +2414,12 @@ function _wbSluitWerkbon(){
   }
 }
 
+// Klapt een werkbonsectie open/dicht en houdt aria-expanded gelijk met wat je ziet.
+function _wbSecToggle(hdr){
+  var sec = hdr.parentElement;
+  sec.classList.toggle('open');
+  hdr.setAttribute('aria-expanded', sec.classList.contains('open') ? 'true' : 'false');
+}
 function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerCompact) {
   var bewerkbaar = _magWerkbonBewerken(wb);
   var _adr = function(a){ return a ? esc((a.adres||'')+', '+(a.postcode||'')+' '+(a.plaats||'')) : '\u2014'; };
@@ -2429,7 +2437,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   var ICO_CHECKLIST = '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>';
   var _sec = function(id, ico, naam, badge, bodyHtml, open){
     var h = '<div class="wbx-sec'+(open?' open':'')+'" id="wbx-sec-'+id+'">';
-    h += '<div class="wbx-hdr" onclick="this.parentElement.classList.toggle(\'open\')">';
+    h += '<div class="wbx-hdr" role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'" onclick="_wbSecToggle(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();_wbSecToggle(this)}">';
     h += '<span class="wbx-ico"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+ico+'</svg></span>';
     h += '<span class="wbx-naam">'+naam+'</span>'+(badge||'');
     h += '<span class="wbx-chev"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>';
@@ -2444,9 +2452,9 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   var _tijden = (wb.tijdVan||wb.tijdTot) ? ((wb.tijdVan||'')+(wb.tijdTot?('\u2013'+wb.tijdTot):'')) : '';
   var bonNr = wb.bonnummer || wb.nummer || (wb.planningId ? ('#'+String(wb.planningId).slice(-6)) : '');
   h += '<div id="wb-kop" style="display:flex;align-items:center;gap:12px;margin:-8px -4px 16px">';
-  h += '<button id="wb-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:4px;display:flex;align-items:center" title="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  h += '<button id="wb-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:10px;margin:-10px 0 -10px -10px;display:flex;align-items:center" title="Terug" aria-label="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
   h += '<div style="flex:1;min-width:0"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px">Werkbon <span style="font-size:13px;font-weight:600;color:var(--muted)">'+esc(bonNr)+'</span></div></div>';
-  h += '<span style="flex-shrink:0;font-size:11px;font-weight:600;color:#fff;background:'+kl+';padding:4px 10px;border-radius:20px">'+(_statusLbl[wb.status]||wb.status)+'</span>';
+  h += '<span style="flex-shrink:0;font-size:12px;font-weight:600;color:'+_klTekst(kl)+';background:'+_kleurTint(kl,'26')+';padding:4px 10px;border-radius:var(--radius-pill)">'+(_statusLbl[wb.status]||wb.status)+'</span>';
   h += '</div>';
   // Subkop: klant + type + tijden
   h += '<div style="margin-bottom:14px">';
@@ -2521,7 +2529,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   // ── Sectie: Checklists (gekoppelde formulieren, dynamisch per sjabloon) ──
   var clBadge = (wb.checklists&&wb.checklists.length) ? '<span class="wbx-cnt-badge">'+wb.checklists.length+'</span>' : '';
   var clBody = '<div id="wb-checklists-body"></div>';
-  if(bewerkbaar) clBody += '<span class="wbx-chip-add" id="wb-checklist-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Checklist toevoegen</span>';
+  if(bewerkbaar) clBody += '<button type="button" class="wbx-chip-add" id="wb-checklist-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Checklist toevoegen</button>';
   h += _sec('checklists', ICO_CHECKLIST, 'Checklists', clBadge, clBody, false);
 
   // ── Sectie: Register / Objecten (pompen onder contract bij deze klant) ──
@@ -2557,7 +2565,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   var ICO_DOC = '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>';
   var docBadge = (documenten&&documenten.length) ? '<span class="wbx-cnt-badge">'+documenten.length+'</span>' : '';
   var docBody = '<div id="wb-documenten-body"></div>';
-  if(bewerkbaar) docBody += '<label id="wb-document-drop" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px;border:1.5px dashed var(--border);border-radius:10px;cursor:pointer;text-align:center;transition:all .15s"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color:var(--muted)"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg><span style="font-size:13px;font-weight:600">Bestand toevoegen</span><span style="font-size:11px;color:var(--muted)">Klik of sleep bestanden hierheen</span><input type="file" id="wb-document-input" multiple style="display:none"></label>';
+  if(bewerkbaar) docBody += '<label id="wb-document-drop" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:18px;border:1.5px dashed var(--border);border-radius:10px;cursor:pointer;text-align:center;transition:all .15s"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color:var(--muted)"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg><span style="font-size:13px;font-weight:600">Bestand toevoegen</span><span style="font-size:12px;color:var(--muted)">Klik of sleep bestanden hierheen</span><input type="file" id="wb-document-input" multiple style="display:none"></label>';
   h += _sec('documenten', ICO_DOC, 'Documenten', docBadge, docBody, false);
 
   // ── Sectie: Logboek (read-only audit-trail, nieuwste bovenaan) ──
@@ -3048,7 +3056,7 @@ function _wbTimerCard(wb, medId){
     [['werk','Werk',icoWerk],['reis','Reis',icoReis]].forEach(function(t){
       var aan = type === t[0];
       h += '<button type="button" class="wb-timer-type" data-type="'+t[0]+'" '
-         + 'style="border:none;font-family:inherit;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:'+r+';cursor:pointer;display:inline-flex;align-items:center;gap:5px;'
+         + 'style="border:none;font-family:inherit;font-size:12px;font-weight:600;padding:5px 12px;min-height:38px;border-radius:'+r+';cursor:pointer;display:inline-flex;align-items:center;gap:5px;'
          + (aan?'background:var(--accent-knop);color:#fff':'background:none;color:var(--muted)')+'">'+t[2]+t[1]+'</button>';
     });
     return h + '</div>';
@@ -3059,9 +3067,9 @@ function _wbTimerCard(wb, medId){
   // ── Compacte balk: op een telefoon telt elke pixel, en de lijst eronder is
   //    belangrijker dan een grote klok. ──
   h += '<div class="wb-timer-compact" style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid '+(actief?kleur:'var(--border)')+';border-radius:var(--radius-pill);padding:7px 12px 7px 7px">';
-  h += '<button type="button" class="wb-timer-btn" style="width:38px;height:38px;border-radius:50%;border:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:'+(actief?'var(--red)':kleur)+'">'+(actief?icoStop:icoPlay)+'</button>';
+  h += '<button type="button" class="wb-timer-btn" aria-label="'+(actief?'Timer stoppen':'Timer starten')+'" style="width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:'+(actief?'var(--red)':(isReis?'var(--accent-knop)':'var(--green-knop)'))+'">'+(actief?icoStop:icoPlay)+'</button>';
   h += '<div style="min-width:0"><div class="wb-timer-elapsed" style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1">'+tijd+'</div>';
-  h += '<div style="font-size:11px;color:'+(actief?kleur:'var(--muted)')+';white-space:nowrap">'+label.toLowerCase()+(actief?' \u00b7 loopt':' \u00b7 niet gestart')+'</div></div>';
+  h += '<div style="font-size:12px;color:'+(actief?(isReis?'var(--accent-t)':'var(--green-t)'):'var(--muted)')+';white-space:nowrap">'+label.toLowerCase()+(actief?' \u00b7 loopt':' \u00b7 niet gestart')+'</div></div>';
   var segC = segment(true);
   if(segC) h += '<div style="margin-left:auto">'+segC+'</div>';
   h += '</div>';
@@ -3085,7 +3093,7 @@ function _wbTimerCard(wb, medId){
   h += '</div></button>';
   var segR = segment(false);
   if(segR) h += segR;
-  if(actief) h += '<div style="font-size:11px;color:var(--muted)">'+label.toLowerCase()+' \u00b7 gestart '+esc(actief.startTijd||'')+'</div>';
+  if(actief) h += '<div style="font-size:12px;color:var(--muted)">'+label.toLowerCase()+' \u00b7 gestart '+esc(actief.startTijd||'')+'</div>';
   h += '</div>';
 
   h += '</div>';
@@ -3338,16 +3346,19 @@ function _wbRenderUren(state){
     var _tijdLbl = (u.tijdVan && u.tijdTot) ? (u.tijdVan+'\u2013'+u.tijdTot+' \u00b7 ') : '';
     h += '<span class="wbx-det"><span class="wbx-n">'+esc(naam)+'</span><br><span class="wbx-t">'+esc(_tijdLbl)+esc(u.omschrijving||'\u2014')+'</span></span>';
     h += '<span class="wbx-amt">'+esc(String(u.uren||0).replace('.',','))+' u</span>';
-    if(state.bewerkbaar) h += '<span class="wbx-del wb-uur-del" data-id="'+esc(u.id)+'" title="Verwijderen">\u00d7</span>';
+    if(state.bewerkbaar) h += '<button type="button" class="wbx-del wb-uur-del" data-id="'+esc(u.id)+'" title="Verwijderen" aria-label="Uurregel verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
   });
   lijst.innerHTML = h;
   lijst.querySelectorAll('.wb-uur-del').forEach(function(b){
     b.addEventListener('click', function(){
-      fsUurVerwijderen(state.werkbonId, b.dataset.id).then(function(){
-        state.uren = state.uren.filter(function(x){ return x.id!==b.dataset.id; });
-        _wbRenderUren(state);
-        _wbUpdateBadge('uren', state.uren.length);
+      // Bevestigen, net als bij foto's: met handschoenen is een misser snel gemaakt.
+      bevestigActie('Uurregel verwijderen','Deze uurregel verwijderen?', function(){
+        fsUurVerwijderen(state.werkbonId, b.dataset.id).then(function(){
+          state.uren = state.uren.filter(function(x){ return x.id!==b.dataset.id; });
+          _wbRenderUren(state);
+          _wbUpdateBadge('uren', state.uren.length);
+        });
       });
     });
   });
@@ -3435,7 +3446,7 @@ function _wbRenderFotos(state){
     h += '</div>';
     h += '<div class="wbx-fnum">Foto '+(i+1)+'</div>';
     if(state.bewerkbaar) h += '<button class="wbx-ftekenbtn wb-foto-teken" data-id="'+esc(f.id)+'" title="Tekenen op foto"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>';
-    if(state.bewerkbaar) h += '<button class="wbx-fdelbtn wb-foto-del" data-id="'+esc(f.id)+'" data-url="'+esc(f.url)+'">\u00d7</button>';
+    if(state.bewerkbaar) h += '<button type="button" class="wbx-fdelbtn wb-foto-del" data-id="'+esc(f.id)+'" data-url="'+esc(f.url)+'" title="Verwijderen" aria-label="Foto verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
     if(state.bewerkbaar){
       h += '<textarea class="wbx-fcap wb-foto-cap" data-id="'+esc(f.id)+'" rows="2" placeholder="Bijschrift (optioneel)\u2026">'+esc(f.bijschrift||'')+'</textarea>';
@@ -3637,9 +3648,9 @@ function _wbRenderMaterialen(state){
 
   var top = '';
   if(state.bewerkbaar){
-    top += '<label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer">';
-    top += '<input type="checkbox" id="wb-mat-prijstoggle"'+(toonPrijs?' checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)">';
-    top += '<span style="font-size:12px;color:var(--muted)">Prijzen tonen op werkbon</span></label>';
+    top += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;margin-bottom:8px;cursor:pointer">';
+    top += '<input type="checkbox" id="wb-mat-prijstoggle"'+(toonPrijs?' checked':'')+' style="width:20px;height:20px;accent-color:var(--accent-knop)">';
+    top += '<span style="font-size:13px;color:var(--muted)">Prijzen tonen op werkbon</span></label>';
   }
 
   if(!lijst.length){
@@ -3657,16 +3668,16 @@ function _wbRenderMaterialen(state){
     h += m.foto ? '<img src="'+esc(m.foto)+'" class="wb-mat-foto" data-url="'+esc(m.foto)+'" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer">'
                 : '<div style="width:40px;height:40px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>';
     h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;line-height:1.3">'+esc(m.omschrijving||'')+'</div>';
-    h += '<div style="font-size:11px;color:var(--muted);margin-top:1px">'+esc(m.code||'')+(toonPrijs?(' \u00b7 '+_matEuro(m.stuksprijs)+' /'+esc(m.eenheid||'stuk')):'')+'</div></div>';
-    if(state.bewerkbaar) h += '<button class="wb-mat-verwijder" data-mi="'+mi+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;flex-shrink:0;align-self:flex-start">'+ICO.trash+'</button>';
+    h += '<div style="font-size:12px;color:var(--muted);margin-top:1px">'+esc(m.code||'')+(toonPrijs?(' \u00b7 '+_matEuro(m.stuksprijs)+' /'+esc(m.eenheid||'stuk')):'')+'</div></div>';
+    if(state.bewerkbaar) h += '<button class="wb-mat-verwijder" data-mi="'+mi+'" aria-label="Materiaal verwijderen" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;min-width:44px;min-height:44px;margin:-8px -8px 0 0;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:flex-start">'+ICO.trash+'</button>';
     h += '</div>';
     // Onderste regel: stepper links, regelbedrag rechts
     h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
     if(state.bewerkbaar){
       h += '<div style="display:flex;align-items:center;gap:6px">';
-      h += '<button class="wb-mat-min" data-mi="'+mi+'" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:17px;line-height:1">\u2212</button>';
+      h += '<button class="wb-mat-min" data-mi="'+mi+'" aria-label="Eén minder" style="width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer;font-size:17px;line-height:1">\u2212</button>';
       h += '<input class="wb-mat-aantal" data-mi="'+mi+'" type="number" step="0.01" value="'+esc(m.aantal!=null?m.aantal:1)+'" style="width:56px;text-align:center;border:1px solid var(--border);border-radius:6px;padding:5px;background:var(--surface)">';
-      h += '<button class="wb-mat-plus" data-mi="'+mi+'" style="width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:17px;line-height:1">+</button>';
+      h += '<button class="wb-mat-plus" data-mi="'+mi+'" aria-label="Eén meer" style="width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer;font-size:17px;line-height:1">+</button>';
       h += '<span style="font-size:12px;color:var(--muted);margin-left:2px">'+esc(m.eenheid||'stuk')+'</span>';
       h += '</div>';
     } else {
@@ -3927,8 +3938,8 @@ function _wbRenderChecklists(state){
     h += '<span style="flex:1;font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(cl.naam||'Checklist')+'</span>';
     // Met meerdere formulieren op één bon staat er drie keer dezelfde sjabloonnaam;
     // een eigen omschrijving maakt duidelijk om welke installatie het gaat.
-    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-hernoem" data-ci="'+ci+'" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;display:flex;align-items:center" title="Naam aanpassen">'+ICO.edit+'</button>';
-    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-verwijder" data-ci="'+ci+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;display:flex;align-items:center" title="Checklist verwijderen">'+ICO.trash+'</button>';
+    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-hernoem" data-ci="'+ci+'" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;min-width:44px;min-height:44px;margin:-10px 0;display:flex;align-items:center;justify-content:center" title="Naam aanpassen" aria-label="Naam aanpassen">'+ICO.edit+'</button>';
+    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-verwijder" data-ci="'+ci+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;min-width:44px;min-height:44px;margin:-10px 0;display:flex;align-items:center;justify-content:center" title="Checklist verwijderen" aria-label="Checklist verwijderen">'+ICO.trash+'</button>';
     h += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="transform:rotate('+(open?'180':'0')+'deg)"><path d="M6 9l6 6 6-6"/></svg>';
     h += '</div>';
     h += '<div class="wbx-cl-body" style="display:'+(open?'':'none')+';padding:12px">';
@@ -4250,10 +4261,15 @@ function _wbTekenOverlay(bestaand, onKlaar){
   var canvas = ov.querySelector('#wb-teken-canvas');
   var ctx = canvas.getContext('2d');
   var leeg = true, tekent=false, lx=0, ly=0;
+  // Op een retinascherm tekent een canvas op CSS-resolutie wazig. Daarom krijgt het canvas
+  // apparaatpixels (max. 2x, zodat de jpeg klein blijft) en schaalt de context mee: de
+  // coördinaten uit pos() blijven gewone CSS-pixels.
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
   function meet(){
     var r = canvas.getBoundingClientRect();
-    if(canvas.width !== Math.round(r.width)){
-      canvas.width = Math.round(r.width); canvas.height = 220;
+    if(canvas.width !== Math.round(r.width * dpr)){
+      canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(220 * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.lineWidth=2.6; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#111';
     }
   }
@@ -4266,7 +4282,7 @@ function _wbTekenOverlay(bestaand, onKlaar){
   canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',eind);
 
   function sluit(){ window.removeEventListener('mouseup',eind); ov.remove(); }
-  ov.querySelector('#wb-teken-wis').addEventListener('click', function(){ ctx.clearRect(0,0,canvas.width,canvas.height); leeg=true; });
+  ov.querySelector('#wb-teken-wis').addEventListener('click', function(){ ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr); leeg=true; });
   ov.querySelector('#wb-teken-annuleer').addEventListener('click', function(){ sluit(); });
   ov.querySelector('#wb-teken-ok').addEventListener('click', function(){
     var data = leeg ? null : handtekeningNaarJpeg(canvas);
@@ -4459,7 +4475,7 @@ function _wbAfrondDialoog(state){
   var h = '';
   // Kop met terug-pijl
   h += '<div style="display:flex;align-items:center;gap:12px;margin:-8px -4px 16px">';
-  h += '<button id="wb-af-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:4px;display:flex;align-items:center"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  h += '<button id="wb-af-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:10px;margin:-10px 0 -10px -10px;display:flex;align-items:center" title="Terug" aria-label="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
   h += '<div style="flex:1;font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:800">Ondertekenen &amp; versturen</div>';
   h += '</div>';
 
@@ -4470,7 +4486,7 @@ function _wbAfrondDialoog(state){
   h += '<div style="font-size:12px;color:var(--muted);margin-top:3px">'+esc([(wa.adres||''),(wa.plaats||'')].filter(Boolean).join(', '))+'</div>';
   h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
   h += '<span style="font-size:12px;color:var(--muted)">Verzenden naar</span>';
-  h += '<input id="wb-af-email" class="input" style="max-width:60%;text-align:right;font-size:13px" value="'+esc(klantEmail)+'" placeholder="e-mailadres">';
+  h += '<input id="wb-af-email" class="input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" style="max-width:60%;text-align:right;font-size:16px" value="'+esc(klantEmail)+'" placeholder="e-mailadres">';
   h += '</div></div>';
 
   // Werk-samenvatting
@@ -4520,7 +4536,7 @@ function _wbAfrondDialoog(state){
   h += '<div class="wbx-field-lbl">Afronding — status werk</div>';
   h += '<div class="wbx-form-opts" style="margin-bottom:14px">';
   redenen.forEach(function(r,i){
-    h += '<span class="wbx-form-opt wb-af-reden'+(i===0?' sel':'')+'" data-reden="'+r.k+'">'+esc(r.l)+'</span>';
+    h += '<button type="button" class="wbx-form-opt wb-af-reden'+(i===0?' sel':'')+'" aria-pressed="'+(i===0?'true':'false')+'" data-reden="'+r.k+'">'+esc(r.l)+'</button>';
   });
   h += '</div>';
 
@@ -4537,7 +4553,7 @@ function _wbAfrondDialoog(state){
   h += '</div>';
 
   // Actiebalk: Handtekening + Versturen (zoals preview), met 'afronden zonder versturen' als secundaire optie
-  h += '<div style="text-align:center;margin:4px 0 2px"><button id="wb-af-afrondkaal" style="background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;font-family:inherit;padding:6px">Afronden zonder versturen</button></div>';
+  h += '<div style="text-align:center;margin:4px 0 2px"><button id="wb-af-afrondkaal" style="background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;padding:12px 14px;min-height:44px">Afronden zonder versturen</button></div>';
   h += '<div class="wbx-actiebar">';
   h += '<button class="btn btn-ghost" id="wb-af-handtekening">Handtekening</button>';
   h += '<button class="btn btn-primary" id="wb-af-versturen">Versturen</button>';
@@ -4564,8 +4580,8 @@ function _wbAfrondDialoog(state){
   var gekozenReden = 'gereed';
   document.querySelectorAll('.wb-af-reden').forEach(function(el){
     el.addEventListener('click', function(){
-      document.querySelectorAll('.wb-af-reden').forEach(function(x){ x.classList.remove('sel'); });
-      el.classList.add('sel'); gekozenReden = el.dataset.reden;
+      document.querySelectorAll('.wb-af-reden').forEach(function(x){ x.classList.remove('sel'); x.setAttribute('aria-pressed','false'); });
+      el.classList.add('sel'); el.setAttribute('aria-pressed','true'); gekozenReden = el.dataset.reden;
     });
   });
 
