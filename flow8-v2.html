@@ -1305,6 +1305,78 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbl-type svg{flex-shrink:0}
 .wbl-obj,.wbl-mont{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}
 .wbl-status{flex-shrink:0;font-size:12px;font-weight:600;padding:4px 10px;border-radius:var(--radius-pill);white-space:nowrap}
+/* Rapportage */
+.rap-wrap .stat-card{cursor:default}
+.staaf-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px}
+.staaf-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;cursor:pointer;border-radius:8px;padding:0 2px;outline:none}
+.staaf-col:hover,.staaf-col.aan{background:var(--surface2)}
+.staaf-col:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+/* Staven met een maximale breedte: ze rekten mee met het scherm en werden op een breed scherm blokken */
+.staaf-balk{width:min(100%,32px);display:flex;flex-direction:column;justify-content:flex-end;gap:0;border-radius:4px 4px 2px 2px;overflow:hidden}
+.staaf-mnd{font-size:12px;color:var(--muted);text-align:center;height:20px;line-height:20px}
+.staaf-col.aan .staaf-mnd{color:var(--text);font-weight:700}
+.staaf-label{position:absolute;left:50%;transform:translateX(-50%);font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;pointer-events:none}
+.staaf-detail{margin-top:12px;background:var(--surface2);border-radius:var(--radius);padding:10px 12px;font-size:13px;min-height:44px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;color:var(--muted)}
+.staaf-detail b{color:var(--text);font-weight:700}
+.staaf-detail .k{display:inline-flex;align-items:center;gap:6px;color:var(--text)}
+.staaf-detail .k i,.staaf-leg i,.sw-leg i{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0}
+.staaf-leg,.sw-leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px}
+.staaf-leg span,.sw-leg span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.um-kop{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.um-titel{font-weight:700;font-size:13px}
+.um-sub{font-size:12px;color:var(--muted)}
+.um-rijlbl{font-size:12px;color:var(--muted);margin:12px 0 4px}
+.um-gewerkt div{font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.um-gewerkt div.leeg{color:var(--muted);font-weight:400}
+.um-stapel{width:min(100%,28px);display:flex;flex-direction:column-reverse;gap:2px}
+.um-stapel i{display:block;border-radius:2px}
+.um-stapel i:last-child{border-radius:4px 4px 2px 2px}
+.um-tot{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.sw-leg{margin:10px 0 12px}
+.sw-rij{display:grid;grid-template-columns:170px 1fr 44px;gap:12px;align-items:center;width:100%;min-height:44px;padding:6px;border:none;border-radius:10px;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.sw-rij:hover,.sw-rij.aan{background:var(--surface2)}
+.sw-rij:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.sw-naam{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;min-width:0}
+.sw-naam-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sw-balk{display:flex;gap:2px;height:16px}
+.sw-balk i{display:block;height:100%;border-radius:2px;min-width:3px}
+.sw-n{font-size:13px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.sw-uit{margin:2px 6px 10px 188px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
+.sw-uit[hidden]{display:none}
+.sw-uit>div{background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:13px;display:flex;align-items:center;gap:8px}
+.sw-uit>div i{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.sw-uit>div b{margin-left:auto;font-variant-numeric:tabular-nums}
+.sw-uit>div small{color:var(--muted);font-size:12px;min-width:32px;text-align:right}
+.sw-link{grid-column:1/-1;justify-self:start;min-height:44px;padding:0 4px;border:none;background:none;font:inherit;font-size:13px;font-weight:600;color:var(--accent-t);cursor:pointer}
+@media (max-width:768px){
+  .rap-tabs{flex-wrap:nowrap!important;border-bottom:none!important;gap:6px;padding-bottom:2px}
+  .rap-tabs .tab{flex-shrink:0;height:40px;display:inline-flex;align-items:center;padding:0 14px;margin-bottom:0;border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface);font-size:14px}
+  .rap-tabs .tab.active{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}
+  #rap-prev-jaar,#rap-next-jaar{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  #rap-med-filter{flex:1 1 160px;width:auto!important;margin-left:0!important}
+  .rap-wrap .stats-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .rap-wrap .stat-card{flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;border-radius:var(--radius);padding:10px 12px;min-height:72px}
+  .rap-wrap .stat-icon{display:none}
+  /* Tabellen als kaarten (labels via _rapTabelKaarten) */
+  .rap-wrap .card:has(> .rap-kaarten){background:none!important;border:none!important;padding:0!important;box-shadow:none!important}
+  .rap-kaarten{overflow:visible!important;border:none!important}
+  .rap-kaarten table,.rap-kaarten tbody,.rap-kaarten td{display:block;width:auto!important;min-width:0!important}
+  .rap-wrap .btn-sm{min-height:44px}
+  .rap-wrap [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+  .rap-kaarten thead{display:none}
+  .rap-kaarten tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px}
+  .rap-kaarten td{padding:0!important;border:none!important;font-size:15px!important;min-width:0;white-space:normal!important;text-align:left!important}
+  .rap-kaarten td::before{content:attr(data-label);display:block;font-size:12px;font-weight:400;color:var(--muted);margin-bottom:2px}
+  .rap-kaarten td:first-child,.rap-kaarten td[colspan]{grid-column:1/-1}
+  .rap-kaarten td:first-child::before,.rap-kaarten td[colspan]::before{display:none}
+  .sw-rij{grid-template-columns:1fr 40px;grid-template-areas:"naam n" "balk balk";gap:6px 8px}
+  .sw-naam{grid-area:naam}.sw-balk{grid-area:balk}.sw-n{grid-area:n}
+  .sw-uit{margin-left:6px}
+}
+@media (max-width:560px){
+  /* Te smal voor getallen boven elke staaf: het detailvak toont ze bij aantikken */
+  .staaf-label,.um-gewerkt-rij{display:none}
+}
 /* Foto-lijst met bijschrift (werkbon-invulbon) */
 .wbx-foto-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px}
 .wbx-foto-item .wbx-ftop{display:flex;gap:10px;align-items:center;margin-bottom:8px}
@@ -8912,12 +8984,13 @@ function _dashKpi(waarde, label, soort, doel){
 // rasterlijnen, alleen de laatste waarde als label. Waarde per balk via de tooltip (data-tip).
 function _dashBalken(data, labels, eenheid, titel){
   var W = 520, H = 130, mb = 18, mt = 16, max = Math.max.apply(null, data.concat([1])), top = Math.ceil(max/5)*5 || 5;
-  var bw = (W - (data.length-1)*6) / data.length, s = '';
+  // Vaste maximale staafbreedte, gecentreerd in zijn vak: anders werden het blokken op een breed scherm.
+  var vak = W / data.length, bw = Math.min(28, vak - 6), s = '';
   [0, top/2, top].forEach(function(v){ var y = H - mb - (v/top)*(H-mb-mt); s += '<line x1="0" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="var(--border)" stroke-width="1"/>'; });
   data.forEach(function(v, i){
-    var h = Math.max(2, (v/top)*(H-mb-mt)), x = i*(bw+6), y = H - mb - h, r = Math.min(4, bw/2, h), laatste = i === data.length-1;
+    var h = Math.max(2, (v/top)*(H-mb-mt)), x = i*vak + (vak-bw)/2, y = H - mb - h, r = Math.min(4, bw/2, h), laatste = i === data.length-1;
     s += '<path d="M'+x+' '+(H-mb)+'V'+(y+r)+'Q'+x+' '+y+' '+(x+r)+' '+y+'H'+(x+bw-r)+'Q'+(x+bw)+' '+y+' '+(x+bw)+' '+(y+r)+'V'+(H-mb)+'Z" fill="var(--accent)" opacity="'+(laatste ? 1 : .55)+'"/>';
-    s += '<rect x="'+(x-3)+'" y="0" width="'+(bw+6)+'" height="'+H+'" fill="transparent" data-tip="'+esc(labels[i])+': <b>'+v+'</b> '+esc(eenheid)+'"/>';
+    s += '<rect x="'+(i*vak)+'" y="0" width="'+vak+'" height="'+H+'" fill="transparent" data-tip="'+esc(labels[i])+': <b>'+v+'</b> '+esc(eenheid)+'"/>';
     if(laatste) s += '<text x="'+(x+bw/2)+'" y="'+(y-5)+'" text-anchor="middle" class="dash-gr-w">'+v+'</text>';
     if(i % 2 === 1 || laatste) s += '<text x="'+(x+bw/2)+'" y="'+(H-3)+'" text-anchor="middle" class="dash-gr-as">'+esc(labels[i].replace('Week ',''))+'</text>';
   });
@@ -29430,7 +29503,7 @@ function renderRapportage() {
     { k:'verzuim',        l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Verzuim</span></span>' },
     { k:'storingsdienst', l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg><span>Storingsdienst</span></span>' },
   ];
-  var h = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;min-height:48px">';
+  var h = '<div class="rap-wrap"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;min-height:48px">';
   h += '<button class="btn btn-ghost btn-sm" id="rap-prev-jaar">‹</button>';
   h += '<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+_rapJaar+'</div>';
   h += '<button class="btn btn-ghost btn-sm" id="rap-next-jaar">›</button>';
@@ -29443,12 +29516,15 @@ function renderRapportage() {
     h += '</select>';
   }
   h += '</div>';
-  h += '<div class="tabs" style="margin-bottom:18px;border-bottom:2px solid var(--border);flex-wrap:wrap">';
+  h += '<div class="tabs rap-tabs" style="margin-bottom:18px;border-bottom:2px solid var(--border);flex-wrap:wrap">';
   tabs.forEach(function(t){
     h += '<div class="tab'+(_rapTab===t.k?' active':'')+'" data-rap-tab="'+t.k+'" style="white-space:nowrap">'+t.l+'</div>';
   });
-  h += '</div><div id="rap-content"></div>';
+  h += '</div><div id="rap-content"></div></div>';
   el.innerHTML = h;
+  // Telefoon: de tabbladen staan in één rij die scrolt; zet de actieve in beeld.
+  var _rapAct = el.querySelector('.rap-tabs .tab.active');
+  if(_rapAct && _rapAct.parentNode.scrollWidth > _rapAct.parentNode.clientWidth) _rapAct.parentNode.scrollLeft = _rapAct.offsetLeft - 16;
   el.querySelector('#rap-prev-jaar').addEventListener('click',function(){_rapJaar--;renderRapportage();});
   el.querySelector('#rap-next-jaar').addEventListener('click',function(){_rapJaar++;renderRapportage();});
   el.querySelectorAll('.tab[data-rap-tab]').forEach(function(t){
@@ -29525,6 +29601,39 @@ function initGrafiekInteractie(el) {
     seg.addEventListener('mousemove',  function(e){ _showTooltip(e, seg.dataset.tip, seg.dataset.kl); });
     seg.addEventListener('mouseleave', _hideTooltip);
   });
+  // Maand aanklikken/-tikken: de waarden in het vak onder de grafiek. De tooltip volgt alleen
+  // de muis; dit werkt ook met een vinger en (via role=button) met het toetsenbord.
+  // Eén luisteraar per container: bij sorteren tekent de tab opnieuw in hetzelfde element.
+  if(!el._staafKlik){
+    el._staafKlik = true;
+    el.addEventListener('click', function(e){
+      var col = e.target.closest('.staaf-col');
+      var kaart = col && col.closest('.staaf-kaart');
+      if(!kaart) return;
+      kaart.querySelectorAll('.staaf-col.aan').forEach(function(c){ c.classList.remove('aan'); c.setAttribute('aria-pressed','false'); });
+      col.classList.add('aan'); col.setAttribute('aria-pressed','true');
+      var det = kaart.querySelector('.staaf-detail');
+      if(det) det.innerHTML = col.dataset.detail || '';
+    });
+  }
+  _rapTabelKaarten(el);
+}
+
+// Telefoon: tabellen in rapportage worden kaarten. Elke cel krijgt het kopje van zijn kolom
+// als data-label; de CSS (tot 768px) zet de rij om in een kaart met die labels erboven.
+function _rapTabelKaarten(el){
+  if(!el || !el.closest || !el.closest('.rap-wrap')) return;
+  el.querySelectorAll('.table-wrap').forEach(function(w){
+    var t = w.querySelector('table'); if(!t) return;
+    var koppen = [].map.call(t.querySelectorAll('thead th'), function(th){ return (th.textContent||'').replace(/[▲▼]/g,'').trim(); });
+    if(!koppen.length) return;
+    w.classList.add('rap-kaarten');
+    t.querySelectorAll('tbody tr').forEach(function(tr){
+      [].forEach.call(tr.children, function(td, i){
+        if(koppen[i] && !td.hasAttribute('colspan')) td.setAttribute('data-label', koppen[i]);
+      });
+    });
+  });
 }
 
 // seg.weergave (optioneel): tekst voor tooltip/legenda i.p.v. het kale getal (bv. "7.120 u").
@@ -29546,7 +29655,7 @@ function donutSVG(segmenten, midden) {
   var parts=midden?midden.split('|'):['',''];
   return '<svg width="160" height="160" viewBox="0 0 160 160" style="overflow:visible">'+paden
     +'<text x="80" y="'+(parts[1]?'75':'86')+'" text-anchor="middle" font-family="\'Instrument Sans\',sans-serif" font-size="22" font-weight="700" fill="var(--text)">'+parts[0]+'</text>'
-    +(parts[1]?'<text x="80" y="95" text-anchor="middle" font-family="\'Instrument Sans\',sans-serif" font-size="11" fill="var(--muted)">'+parts[1]+'</text>':'')
+    +(parts[1]?'<text x="80" y="95" text-anchor="middle" font-family="\'Instrument Sans\',sans-serif" font-size="12" fill="var(--muted)">'+parts[1]+'</text>':'')
     +'</svg>';
 }
 
@@ -29558,7 +29667,7 @@ function legendaHTML(segmenten,totaal) {
     h+='<div style="width:10px;height:10px;border-radius:3px;background:'+s.kleur+';flex-shrink:0"></div>';
     h+='<div style="flex:1;font-size:12px">'+esc(s.label)+'</div>';
     h+='<div style="font-size:12px;font-weight:700">'+(s.weergave!=null?esc(String(s.weergave)):_nlAantal(s.waarde))+'</div>';
-    h+='<div style="font-size:11px;color:var(--muted);min-width:30px;text-align:right">'+pct+'%</div></div>';
+    h+='<div style="font-size:12px;color:var(--muted);min-width:34px;text-align:right">'+pct+'%</div></div>';
   });
   return h+'</div>';
 }
@@ -29570,42 +29679,51 @@ function grafiekKaart(titel,svg,legenda) {
     +'<div style="flex:1;min-width:120px">'+legenda+'</div></div></div>';
 }
 
+var _RAP_MND_LANG = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+// Tooltipteksten beginnen met de maand ("Okt — Storing: 3"); in het detailvak staat de maand al.
+function _staafTipZonderMaand(tip, mn){
+  tip = String(tip||'');
+  return mn && tip.indexOf(mn)===0 ? tip.slice(mn.length).replace(/^\s*[·—-]\s*/, '') : tip;
+}
 function staafDiagram(titel, mndData, maxVal, labelFn, kleurFn, legendaItems) {
   var BAR_H = 120;
-  var LABEL_H = 20;
-  var MND_H = 16;
-  var h = '<div class="card" style="padding:16px">';
+  var LABEL_H = 22;
+  var MND_H = 20;
+  var h = '<div class="card staaf-kaart" style="padding:16px">';
   h += '<div style="font-weight:700;font-size:13px;margin-bottom:12px">'+titel+'</div>';
   // Wrapper met ruimte voor labels bovenaan
   h += '<div style="padding-top:'+LABEL_H+'px;position:relative">';
-  h += '<div style="display:grid;grid-template-columns:repeat(12,1fr);gap:4px">';
+  h += '<div class="staaf-grid">';
   mndData.forEach(function(d,idx){
     var label = labelFn(d);
-    var segmenten = kleurFn(d);
-    var tip = segmenten.length ? (segmenten[0].tip||label||'') : label||'';
-    h += '<div class="staaf-col" data-tip="'+esc(tip)+'" data-idx="'+idx+'" style="display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative;pointer-events:none">';
+    var segmenten = kleurFn(d).filter(function(s){ return s.h > 0; });
+    var lang = _RAP_MND_LANG[idx] || d.mn;
+    var delen = segmenten.map(function(s){ return { kl:s.kl, t:_staafTipZonderMaand(s.tip||label||'', d.mn) }; }).filter(function(x){ return x.t; });
+    var det = '<b>'+esc(lang)+'</b>' + (delen.length
+      ? delen.map(function(x){ return '<span class="k"><i style="background:'+x.kl+'"></i>'+esc(x.t)+'</span>'; }).join('')
+      : '<span>Geen gegevens</span>');
+    var aria = lang+': '+(delen.length ? delen.map(function(x){ return x.t; }).join(', ') : (label||'geen gegevens'));
+    h += '<div class="staaf-col" role="button" tabindex="0" aria-pressed="false" aria-label="'+esc(aria)+'" data-detail="'+esc(det)+'">';
     // Balk container
-    h += '<div style="width:100%;height:'+BAR_H+'px;display:flex;flex-direction:column;justify-content:flex-end;border-radius:3px;overflow:hidden">';
+    h += '<div class="staaf-balk" style="height:'+BAR_H+'px">';
     segmenten.forEach(function(s){
-      if(s.h > 0) h += '<div class="staaf-seg" data-kl="'+s.kl+'" data-tip="'+esc(s.tip||label||'')+'" style="width:100%;height:'+s.h+'px;background:'+s.kl+';transition:filter .15s;pointer-events:all;cursor:pointer"></div>';
+      h += '<div class="staaf-seg" data-kl="'+s.kl+'" data-tip="'+esc(s.tip||label||'')+'" style="width:100%;height:'+s.h+'px;background:'+s.kl+';transition:filter .15s"></div>';
     });
     h += '</div>';
     // Maandlabel onder balk
-    h += '<div style="font-size:9px;color:var(--muted);text-align:center;margin-top:3px;height:'+MND_H+'px;line-height:'+MND_H+'px">'+d.mn+'</div>';
-    // Label boven balk — als absolute positioned overlay op de wrapper
+    h += '<div class="staaf-mnd">'+d.mn+'</div>';
+    // Label direct boven de balk (stond eerst voor elke maand op dezelfde hoogte)
     if(label) {
       var segH = segmenten.reduce(function(s,x){return s+x.h;},0);
-      var bottomOffset = MND_H + (BAR_H - segH);
-      h += '<div class="staaf-label" data-label="'+esc(label)+'" data-bottom="'+(bottomOffset + segH + 4)+'" style="position:absolute;bottom:'+(bottomOffset + segH + 4)+'px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);font-weight:700;white-space:nowrap;pointer-events:none;z-index:10;background:var(--surface);padding:0 2px;border-radius:2px">'+label+'</div>';
+      h += '<div class="staaf-label" style="bottom:'+(MND_H + segH + 4)+'px">'+label+'</div>';
     }
     h += '</div>';
   });
   h += '</div></div>';
+  h += '<div class="staaf-detail" aria-live="polite">Kies een maand voor de details</div>';
   if(legendaItems && legendaItems.length) {
-    h += '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px">';
-    legendaItems.forEach(function(l){
-      h += '<div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:'+l.kl+'"></div><span style="font-size:11px;color:var(--muted)">'+l.l+'</span></div>';
-    });
+    h += '<div class="staaf-leg">';
+    legendaItems.forEach(function(l){ h += '<span><i style="background:'+l.kl+'"></i>'+l.l+'</span>'; });
     h += '</div>';
   }
   h += '</div>';
@@ -29766,6 +29884,50 @@ function openRapMedPanel(medId, tabNaam) {
 
 // ── TAB: PERSOONLIJK ─────────────────────────────────────────────
 // ── RAPPORT: OPDRACHTEN ──────────────────────────────────────────
+// Soort werk per monteur: per monteur één balk, opgedeeld per opdrachttype in de typekleuren
+// uit Instellingen. De lengte is het aantal opdrachten; aantikken klapt de aantallen uit.
+function _rapSoortWerkPerMonteur(opJaar, monteurs){
+  var typeVolg = [], typeInfo = {}, rijen = [];
+  monteurs.forEach(function(m){
+    var per = {}, tot = 0;
+    opJaar.forEach(function(o){
+      var van = String(o.monteurId)===String(m.id) ||
+        (Array.isArray(o.monteurIds) && o.monteurIds.map(String).indexOf(String(m.id))>=0);
+      if(!van) return;
+      var k = o.type || 'Onbekend';
+      if(!typeInfo[k]){ var ot = getOpdrachttype(k); typeInfo[k] = { label: ot.label || k, kleur: ot.kleur || '#6b7694' }; typeVolg.push(k); }
+      per[k] = (per[k]||0) + 1; tot++;
+    });
+    if(tot) rijen.push({ m:m, per:per, tot:tot });
+  });
+  if(!rijen.length) return '';
+  // Typen in de volgorde van Instellingen, onbekende achteraan
+  var lijst = getOpdrachttypes() || [];
+  var pos = function(k){ for(var i=0;i<lijst.length;i++){ if(String(lijst[i].id)===String(k)) return i; } return 999; };
+  typeVolg.sort(function(a,b){ return pos(a)-pos(b); });
+  rijen.sort(function(a,b){ return b.tot-a.tot; });
+  var max = rijen[0].tot;
+  var h = '<div class="card" style="padding:16px;margin-bottom:16px">';
+  h += '<div class="um-kop"><div class="um-titel">Soort werk per monteur — '+_rapJaar+'</div><div class="um-sub">aantal opdrachten</div></div>';
+  h += '<div class="sw-leg">'+typeVolg.map(function(k){ return '<span><i style="background:'+typeInfo[k].kleur+'"></i>'+esc(typeInfo[k].label)+'</span>'; }).join('')+'</div>';
+  rijen.forEach(function(r){
+    var m = r.m, kl = medKleur(m);
+    h += '<button type="button" class="sw-rij" aria-expanded="false">';
+    h += '<span class="sw-naam"><span class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</span><span class="sw-naam-t">'+esc(m.voornaam+' '+m.achternaam)+'</span></span>';
+    h += '<span class="sw-balk" style="width:'+Math.max(4, Math.round(r.tot/max*100))+'%">';
+    typeVolg.forEach(function(k){ if(r.per[k]) h += '<i style="flex:'+r.per[k]+';background:'+typeInfo[k].kleur+'"></i>'; });
+    h += '</span><span class="sw-n">'+r.tot+'</span></button>';
+    h += '<div class="sw-uit" hidden>';
+    typeVolg.slice().sort(function(a,b){ return (r.per[b]||0)-(r.per[a]||0); }).forEach(function(k){
+      var n = r.per[k]; if(!n) return;
+      h += '<div><i style="background:'+typeInfo[k].kleur+'"></i>'+esc(typeInfo[k].label)+'<b>'+n+'</b><small>'+Math.round(n/r.tot*100)+'%</small></div>';
+    });
+    if(_rapMedId==='alle') h += '<button type="button" class="sw-link" data-med="'+esc(m.id)+'">Alleen '+esc(m.voornaam)+' tonen</button>';
+    h += '</div>';
+  });
+  return h + '</div>';
+}
+
 function renderRapOpdrachten(el) {
   var jaarStr = String(_rapJaar);
   var vandaag = vandaagISO();
@@ -29822,6 +29984,7 @@ function renderRapOpdrachten(el) {
   h += grafiekKaart('Opdrachten per monteur — '+_rapJaar, donutSVG(segMonteurs, totaal+'|totaal'), legendaHTML(segMonteurs, totaal));
   h += grafiekKaart('Verdeling per opdrachttype — '+_rapJaar, donutSVG(segTypes, totaal+'|totaal'), legendaHTML(segTypes, totaal));
   h += '</div>';
+  h += _rapSoortWerkPerMonteur(opJaar, monteurs);
 
   // ── Staafdiagram per maand ──
   var mndNamen = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
@@ -29936,6 +30099,12 @@ function renderRapOpdrachten(el) {
 
   el.innerHTML = h;
   initGrafiekInteractie(el);
+  el.querySelectorAll('.sw-rij').forEach(function(b){ b.addEventListener('click', function(){
+    var open = b.getAttribute('aria-expanded')==='true';
+    b.setAttribute('aria-expanded', open?'false':'true'); b.classList.toggle('aan', !open);
+    b.nextElementSibling.hidden = open;
+  }); });
+  el.querySelectorAll('.sw-link').forEach(function(b){ b.addEventListener('click', function(){ _rapMedId = String(b.dataset.med); renderRapportage(); }); });
   el.querySelectorAll('.rap-opmont-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOpMontSortKey===k)_rapOpMontSortDir*=-1; else{_rapOpMontSortKey=k;_rapOpMontSortDir=(k==='naam')?1:-1;} renderRapOpdrachten(el); }); });
   el.querySelectorAll('.rap-opmnd-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOpMndSortKey===k)_rapOpMndSortDir*=-1; else{_rapOpMndSortKey=k;_rapOpMndSortDir=(k==='mnd')?1:-1;} renderRapOpdrachten(el); }); });
   var expBtn = el.querySelector('#rap-op-export');
@@ -30427,20 +30596,37 @@ function _rapMedewerkersGrafieken(actieve, metRollen){
     perMed.forEach(function(x){ var q = x.mnd[i]; d.gewerkt += q.gewerkt; d.verlof += q.verlof; d.verzuim += q.verzuim; d.over += q.over; });
     return d;
   });
-  var KL = { gewerkt: '#10b981', verlof: '#4a6cf7', verzuim: '#ef4444', over: '#f59e0b' };
-  var totaal = function(d){ return d.gewerkt + d.verlof + d.verzuim + d.over; };
-  var maxT = Math.max.apply(null, mnd.map(totaal)) || 1;
-  h += '<div style="margin-bottom:16px">';
-  h += staafDiagram('Uren per maand — '+jaar, mnd, maxT,
-    function(d){ var t = totaal(d); return t >= 0.5 ? fmt(t) : ''; },
-    function(d){
-      var t = totaal(d); if(t < 0.5) return [];
-      var bH = Math.max(4, Math.round(t / maxT * 120));
-      return [['over','Overuren'], ['verzuim','Verzuim'], ['verlof','Verlof'], ['gewerkt','Gewerkt']].map(function(p){
-        return { h: Math.round(d[p[0]] / t * bH), kl: KL[p[0]], tip: d.mn+' · '+p[1]+': '+fmt(d[p[0]])+' u' };
-      });
-    },
-    [{ kl: KL.gewerkt, l: 'Gewerkt' }, { kl: KL.verlof, l: 'Verlof' }, { kl: KL.verzuim, l: 'Verzuim' }, { kl: KL.over, l: 'Overuren' }]);
+  // Gewerkte uren als getal in een eigen regel; verlof, verzuim en overuren op een eigen
+  // schaal. Gestapeld bovenop ±700 gewerkte uren waren die drie alleen een streepje.
+  var KL = { gewerkt: 'var(--muted2)', verlof: '#4a6cf7', verzuim: '#ef4444', over: '#f59e0b' };
+  var UM_H = 110;
+  var maxA = Math.max.apply(null, mnd.map(function(d){ return d.verlof + d.verzuim + d.over; })) || 1;
+  var totGewerkt = mnd.reduce(function(s2, d){ return s2 + d.gewerkt; }, 0);
+  h += '<div class="card staaf-kaart" style="padding:16px;margin-bottom:16px">';
+  h += '<div class="um-kop"><div class="um-titel">Uren per maand — '+jaar+'</div><div class="um-sub">'+fmt(totGewerkt)+' u gewerkt</div></div>';
+  h += '<div class="um-gewerkt-rij"><div class="um-rijlbl">Gewerkt (u)</div><div class="staaf-grid um-gewerkt">';
+  mnd.forEach(function(d){ h += d.gewerkt >= 0.5 ? '<div>'+fmt(d.gewerkt)+'</div>' : '<div class="leeg">—</div>'; });
+  h += '</div></div>';
+  h += '<div class="um-rijlbl">Verlof, verzuim en overuren (u)</div>';
+  h += '<div class="staaf-grid" style="height:'+(UM_H + 40)+'px">';
+  var _umDelen = [['gewerkt','Gewerkt'], ['verlof','Verlof'], ['verzuim','Verzuim'], ['over','Overuren']];
+  mnd.forEach(function(d, i){
+    var a = d.verlof + d.verzuim + d.over;
+    var det = '<b>'+_RAP_MND_LANG[i]+'</b>' + _umDelen.map(function(p){
+      return '<span class="k"><i style="background:'+KL[p[0]]+'"></i>'+p[1]+' <b>'+fmt(d[p[0]])+' u</b></span>';
+    }).join('');
+    var aria = _RAP_MND_LANG[i]+': '+_umDelen.map(function(p){ return p[1].toLowerCase()+' '+fmt(d[p[0]])+' uur'; }).join(', ');
+    h += '<div class="staaf-col" role="button" tabindex="0" aria-pressed="false" aria-label="'+esc(aria)+'" data-detail="'+esc(det)+'">';
+    if(a >= 0.5) h += '<div class="um-tot">'+fmt(a)+'</div>';
+    h += '<div class="um-stapel">';
+    ['verlof','verzuim','over'].forEach(function(k){
+      if(d[k] >= 0.5) h += '<i style="height:'+Math.max(3, Math.round(d[k] / maxA * UM_H))+'px;background:'+KL[k]+'"></i>';
+    });
+    h += '</div><div class="staaf-mnd">'+d.mn+'</div></div>';
+  });
+  h += '</div>';
+  h += '<div class="staaf-detail" aria-live="polite">Kies een maand voor de details</div>';
+  h += '<div class="staaf-leg"><span><i style="background:'+KL.verlof+'"></i>Verlof</span><span><i style="background:'+KL.verzuim+'"></i>Verzuim</span><span><i style="background:'+KL.over+'"></i>Overuren</span></div>';
   h += '</div>';
   return h;
 }
