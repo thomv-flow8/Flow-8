@@ -503,6 +503,15 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       bevestiging, net als een foto. Detector: 16 → 9 meldingen (contrast en kleine tekst 0).
 - [ ] **Werkbon: geneste kaarten** — de detector ziet nog 9 kaarten-in-kaarten (blokken binnen de
       inklapbare secties). Indelingskeuze, geen fout; pas oppakken bij een herindeling van de bon.
+- [x] **Instelbaar dashboard** (3 november 2026) — volgens `dashboard-preview.html` (lokaal, niet in
+      git). Blokken aan/uit en in volgorde via "Indeling aanpassen", bewaard per gebruiker in
+      `flow8/gebruikers/<uid>/dashboard` (geen regelwijziging nodig: `$overig` mag). Standaard per rol
+      (monteur: mijn dag, mijn werkbonnen, agenda, mijn cijfers). Nieuw: werkbonnen, planning deze
+      week (bezetting per monteur), werkorders per status, afgeronde opdrachten per week. Desktop in
+      twee los stapelende kolommen, telefoon één kolom. Storingsdienst als regel bij de begroeting.
+      Auditpunten opgelost: goedkeuringsmelding alleen voor wie mag goedkeuren (`magGoedkeuren`),
+      "aanvraagen", doorzichtige afgeronde opdrachten, 44px, toetsenbord, gekleurde zijranden.
+      Werkbon-cijfers komen uit de planningstatus (geen extra Firestore-reads).
 - [x] **Planning op de telefoon** (2 november 2026) — eigen indeling tot 768px breed, volgens
       `planning-mobiel-preview.html` (lokaal, niet in git): werkbalk van twee rijen, monteurs als
       chips, zoeken/periode/status in een vel, lijst als kaarten per dag en monteur, dag als tijdlijn

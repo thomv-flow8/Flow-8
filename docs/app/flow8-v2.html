@@ -316,6 +316,134 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .wok-info{flex:1;min-width:0}
 .wok-klant{font-size:14px;font-weight:600;overflow-wrap:anywhere}
 .wok-meta{font-size:12px;color:var(--muted);margin-top:2px}
+/* ── Dashboard: instelbare blokken, zie renderDashboard ── */
+:root{--dash-g1:#4f6ef5;--dash-g2:#d97706}
+body.light{--dash-g2:#f59e0b}
+.dash-melding{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-lg);background:color-mix(in srgb,var(--orange) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--orange) 30%,var(--border));margin-bottom:16px}
+.dash-melding.info{background:color-mix(in srgb,var(--accent) 8%,var(--surface));border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
+.dash-melding-ico{display:flex;color:var(--orange-t);flex-shrink:0}
+.dash-melding.info .dash-melding-ico{color:var(--accent-t)}
+.dash-melding-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.dash-melding-t b{font-size:14px;color:var(--orange-t)}
+.dash-melding.info .dash-melding-t b{color:var(--accent-t)}
+.dash-melding-t span{font-size:13px;color:var(--muted)}
+.dash-melding .btn{min-height:44px;flex-shrink:0}
+.dash-groet{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;margin-bottom:16px}
+.dash-groet-t h2{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.dash-groet-t p{font-size:13px;color:var(--muted);margin-top:3px}
+.dash-groet-r{display:flex;align-items:center;gap:8px}
+.dash-dienst{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:4px 14px 4px 6px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;text-align:left;min-width:0}
+.dash-dienst b{color:var(--text)}
+.dash-dienst-ico{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--muted);flex-shrink:0}
+.dash-dienst.ik{background:color-mix(in srgb,var(--orange) 12%,var(--surface));border-color:color-mix(in srgb,var(--orange) 40%,var(--border));color:var(--orange-t)}
+.dash-dienst.ik b,.dash-dienst.leeg b{color:var(--orange-t)}
+.dash-dienst.ik .dash-dienst-ico{background:color-mix(in srgb,var(--orange) 22%,transparent);color:var(--orange-t)}
+.btn.dash-aanpassen{min-height:44px;min-width:44px;justify-content:center;gap:6px;flex-shrink:0}
+/* Niet klikbaar: de algemene regel [class*="-rij"]{cursor:pointer} geldt hier niet. */
+.dash-rij,.dash-rij-k,.dash-rij-r,.dash-rij-ico,.dash-bez-rij,.plm-rij1,.plm-rij2{cursor:default}
+.dash-kolommen{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start}
+.dash-kolom{display:flex;flex-direction:column;gap:16px;min-width:0}
+.dash-blok{padding:16px;min-width:0}
+.dash-blok-kop{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.dash-blok-kop h3{font-size:14px;font-weight:700;flex:1;min-width:0}
+.dash-blok-ico{display:flex;color:var(--accent-t)}
+.dash-link{min-height:44px;margin:-12px -6px -12px 0;padding:0 6px;border:none;background:none;color:var(--accent-t);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.dash-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.dash-kpis.drie{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dash-kpi{background:var(--surface2);border:none;border-radius:var(--radius);padding:12px;min-height:76px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;gap:4px;text-align:left;font-family:inherit;color:var(--text);cursor:pointer;min-width:0}
+.dash-kpi:disabled{cursor:default;color:var(--text)}
+.dash-kpi-w{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.dash-kpi-l{font-size:13px;color:var(--muted);line-height:1.3}
+.dash-kpi.let .dash-kpi-w{color:var(--orange-t)}
+.dash-kpi.mis .dash-kpi-w{color:var(--red-t)}
+.dash-kpi.goed .dash-kpi-w{color:var(--green-t)}
+.dash-grafiek{margin-top:14px}
+.dash-gr-kop{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+.dash-grafiek svg{display:block;width:100%;height:auto;overflow:visible}
+.dash-gr-as{fill:var(--muted);font-family:'Space Mono',monospace;font-size:11px}
+.dash-gr-w{fill:var(--text);font-weight:700;font-size:12px}
+.dash-bez{display:flex;flex-direction:column;gap:12px}
+.dash-bez-rij{display:grid;grid-template-columns:120px minmax(0,1fr) 72px;align-items:center;gap:10px;font-size:13px}
+.dash-bez-naam{display:flex;align-items:center;gap:7px;font-weight:600;min-width:0}
+.dash-bez-naam span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-spoor{height:10px;border-radius:5px;background:var(--surface2);position:relative;overflow:hidden}
+.dash-vul{position:absolute;top:0;bottom:0;left:0;border-radius:5px;background:var(--accent)}
+.dash-vul.vol{background:var(--orange)}
+.dash-bez-w{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.dash-bez-w b{color:var(--text)}
+.dash-voet{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dash-voet b{color:var(--text)}
+.dash-voet .btn{min-height:44px;margin-left:auto}
+.dash-groep{margin-bottom:12px}
+.dash-groep:last-child{margin-bottom:0}
+.dash-groep-kop{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:6px}
+.dash-avs{display:flex;flex-shrink:0}
+.dash-avs .avatar+.avatar{margin-left:-6px;box-shadow:0 0 0 2px var(--surface)}
+.dash-groep-naam{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-groep-n{margin-left:auto;font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+.dash-item{display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 10px;border-radius:var(--radius);background:var(--surface2);margin-bottom:6px}
+.dash-item[role=button]{cursor:pointer}
+.dash-item.spoed{background:color-mix(in srgb,var(--red) 7%,var(--surface2))}
+.dash-item-t{width:44px;flex-shrink:0;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.dash-item-k{flex:1;min-width:0;font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.dash-item-k small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.dash-st{font-size:12px;font-weight:600;padding:2px 9px;border-radius:var(--radius-pill);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
+.dash-meer{width:100%;min-height:44px;border:1px dashed var(--border);border-radius:var(--radius);background:none;color:var(--accent-t);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:6px}
+.dash-leeg{font-size:13px;color:var(--muted);padding:4px 0}
+.dash-sub{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:4px 0 2px}
+.dash-rij{display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px}
+.dash-rij:last-child{border-bottom:none}
+.dash-rij-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dash-rij-k{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.dash-rij-k small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.dash-rij-r{font-size:13px;color:var(--muted);text-align:right}
+.dash-pillen{display:flex;flex-wrap:wrap;gap:8px}
+.dash-pil-k{min-height:44px;padding:0 14px;border-radius:var(--radius-pill);border:none;background:var(--surface2);display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer}
+.dash-pil-k b{color:var(--text);font-size:15px;font-variant-numeric:tabular-nums}
+.dash-stapel{display:flex;gap:2px;height:14px;border-radius:7px;overflow:hidden;margin:2px 0 10px}
+.dash-stapel span{display:block;height:100%}
+.dash-legenda{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.dash-legenda span{display:inline-flex;align-items:center;gap:6px}
+.dash-legenda i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.dash-legenda b{color:var(--text);font-variant-numeric:tabular-nums}
+.dash-types{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.dash-type{min-height:44px;padding:0 14px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);color:var(--muted);font-family:inherit;font-size:13px;cursor:pointer}
+.dash-type b{color:var(--text);margin-left:4px}
+.dash-alarm{display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;border-radius:var(--radius);background:color-mix(in srgb,var(--red) 10%,transparent);color:var(--red-t);font-size:13px;font-weight:600}
+.dash-vel{position:fixed;inset:0;z-index:450;background:rgba(0,0,0,.45);display:none;justify-content:flex-end}
+.dash-vel.open{display:flex}
+.dash-vel-in{background:var(--surface);width:420px;max-width:100%;height:100%;padding:20px;display:flex;flex-direction:column;border-left:1px solid var(--border)}
+.dash-greep{display:none;width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 12px}
+.dash-vel h2{font-size:17px;font-weight:700}
+.dash-vel-uitleg{font-size:13px;color:var(--muted);margin:4px 0 12px;line-height:1.45}
+.dash-keuzes{flex:1;overflow-y:auto;min-height:0}
+.dash-keuze{display:flex;align-items:center;gap:6px;min-height:56px;border-bottom:1px solid var(--border)}
+.dash-keuze-n{flex:1;min-width:0;font-size:14px;font-weight:600}
+.dash-keuze-n small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.dash-pijl{width:40px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0}
+.dash-pijl:disabled{opacity:.35;cursor:default}
+.dash-schuif{width:56px;height:44px;flex-shrink:0;border:none;background:none;position:relative;cursor:pointer;padding:0}
+.dash-schuif::before{content:"";position:absolute;left:5px;top:8px;width:46px;height:28px;border-radius:14px;background:var(--border)}
+.dash-schuif::after{content:"";position:absolute;left:8px;top:11px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.dash-schuif.aan::before{background:var(--accent-knop)}
+.dash-schuif.aan::after{left:26px}
+.dash-vel-onder{display:flex;gap:8px;margin-top:14px}
+.dash-vel-onder .btn{flex:1;justify-content:center;min-height:44px}
+.dash-tip{position:fixed;pointer-events:none;z-index:9000;background:#15171d;color:#f4f6fb;font-size:12.5px;padding:6px 9px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.25);display:none;white-space:nowrap}
+@media(max-width:768px){
+  .dash-kolommen{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+  .dash-kolom,.dash-kolom.zij{display:contents}
+  .dash-blok{padding:14px}
+  .dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dash-kpis.drie{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dash-groet-r{width:100%}
+  .dash-dienst{flex:1}
+  .dash-aanpassen span{display:none}
+  .dash-bez-rij{grid-template-columns:96px minmax(0,1fr) 64px}
+  .dash-vel{align-items:flex-end;justify-content:stretch}
+  .dash-vel-in{width:100%;height:auto;max-height:85vh;border-radius:20px 20px 0 0;border-left:none;padding:10px 16px calc(20px + var(--safe-bottom))}
+  .dash-greep{display:block}
+}
 /* ── Planning op de telefoon (≤768px): eigen indeling, zie _plmToolbarHtml ── */
 .plm-balk{margin:0 0 4px}
 .plm-rij1,.plm-rij2{display:flex;gap:8px;align-items:center}
@@ -8666,378 +8794,483 @@ function _dashHerteken() {
 
 // 'stil' = automatische hertekening na een statuswijziging. Dan slaan we de count-up-
 // animatie over, want cijfers die bij elke wijziging opnieuw vanaf 0 oplopen leiden af.
+// ── Instelbaar dashboard ─────────────────────────────────────────
+// Elke gebruiker kiest welke blokken hij ziet en in welke volgorde ("Indeling aanpassen").
+// De keuze staat in zijn eigen profiel (flow8/gebruikers/<uid>/dashboard); de RTDB-rules
+// laten extra velden op het eigen profiel toe zolang rol, actief, bedrijf en e-mail gelijk
+// blijven. Zonder keuze geldt een standaard per rol. Op desktop twee kolommen die elk los
+// stapelen (de rechter: agenda, afwezig, mijn cijfers), op een telefoon één kolom in de
+// gekozen volgorde (CSS: display:contents + order).
+var _dashOpen = {};        // per monteurgroep in "Opdrachten vandaag": alles tonen of de eerste 3
+var _dashVelOpen = false;
+var _DASH_ICO = {
+  dag:     '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  bon:     '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+  plan:    '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+  wo:      '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>',
+  grafiek: '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  agenda:  '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg>',
+  mens:    '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',
+  alarm:   '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>',
+  storing: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg>',
+  indeling:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></svg>',
+  op:      '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>',
+  neer:    '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+  vink:    '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
+};
+function _dashMagPlanning(){ return isAdmin() || magLezen('planning'); }
+function _dashMagWO(){ return isAdmin() || magLezen('werkorders'); }
+function _dashMagBonnen(){ return isAdmin() || magLezen('werkbonnen') || magLezen('planning'); }
+function _dashHeeftMed(){ return !!getMijnMedId(); }
+var DASH_BLOKKEN = {
+  vandaag:      { n:'Vandaag',              u:'Opdrachten, afgerond, op pad, afwezig',        mag:_dashMagPlanning },
+  werkbonnen:   { n:'Werkbonnen',           u:'Klaargezet, bezig, te verwerken + grafiek',     mag:_dashMagBonnen },
+  planning:     { n:'Planning deze week',   u:'Bezetting per monteur, nog in te plannen',      mag:_dashMagPlanning },
+  vandaaglijst: { n:'Opdrachten vandaag',   u:'Per monteur, met status',                       mag:function(){ return true; } },
+  werkorders:   { n:'Werkorders',           u:'Per status en type, verlopen deadlines',        mag:_dashMagWO },
+  trend:        { n:'Afgeronde opdrachten', u:'Grafiek per week, laatste 8 weken',             mag:_dashMagPlanning },
+  dringend:     { n:'Dringende werkorders', u:'Te laat, hoge prioriteit of binnenkort',        mag:_dashMagWO },
+  mijndag:      { n:'Mijn dag',             u:'Jouw opdrachten van vandaag',                   mag:_dashHeeftMed },
+  mijnbonnen:   { n:'Mijn werkbonnen',      u:'Wat jij nog moet afronden',                     mag:_dashHeeftMed },
+  agenda:       { n:'Agenda',               u:'Vandaag en morgen · rechterkolom',              mag:function(){ return true; }, zij:1 },
+  afwezig:      { n:'Afwezig vandaag',      u:'Verlof en ziekte · rechterkolom',               mag:function(){ return true; }, zij:1 },
+  mijncijfers:  { n:'Mijn cijfers',         u:'Verlof, overuren, onkosten, verzuim · rechterkolom', mag:_dashHeeftMed, zij:1 }
+};
+var DASH_STANDAARD = {
+  monteur: ['mijndag','mijnbonnen','agenda','mijncijfers'],
+  overig:  ['vandaag','werkbonnen','planning','vandaaglijst','werkorders','trend','dringend','agenda','afwezig','mijncijfers']
+};
+function _dashStandaard(){
+  var rol = APP.profiel && APP.profiel.rol;
+  return (rol === 'monteur' ? DASH_STANDAARD.monteur : DASH_STANDAARD.overig).slice();
+}
+function _dashIndeling(){
+  var eigen = APP.profiel && Array.isArray(APP.profiel.dashboard) ? APP.profiel.dashboard : null;
+  return (eigen || _dashStandaard()).filter(function(id, i, a){ return DASH_BLOKKEN[id] && a.indexOf(id) === i && DASH_BLOKKEN[id].mag(); });
+}
+function _dashBewaar(lijst){
+  if(!APP.profiel) return;
+  APP.profiel.dashboard = lijst ? lijst.slice() : null;
+  if(!APP.profiel.uid || typeof FB === 'undefined') return;
+  FB.ref('flow8/gebruikers/'+APP.profiel.uid+'/dashboard').set(lijst ? lijst.slice() : null)
+    .catch(function(e){ log('WARN','DASH','Indeling opslaan mislukt: '+(e && e.message || e)); toast('Indeling kon niet worden opgeslagen','error'); });
+}
+
+function _dashKop(ico, titel, doel, linkTekst){
+  return '<div class="dash-blok-kop"><span class="dash-blok-ico">'+ico+'</span><h3>'+titel+'</h3>'
+    + (doel ? '<button type="button" class="dash-link" data-nav="'+doel+'">'+esc(linkTekst || 'Bekijken')+'</button>' : '')+'</div>';
+}
+function _dashKpi(waarde, label, soort, doel){
+  return '<button type="button" class="dash-kpi'+(soort ? ' '+soort : '')+'"'+(doel ? ' data-nav="'+doel+'"' : ' disabled')+'><span class="dash-kpi-w">'+waarde+'</span><span class="dash-kpi-l">'+label+'</span></button>';
+}
+// Balkdiagram met één reeks: dunne balken met een afgeronde kop op de basislijn, rustige
+// rasterlijnen, alleen de laatste waarde als label. Waarde per balk via de tooltip (data-tip).
+function _dashBalken(data, labels, eenheid, titel){
+  var W = 520, H = 130, mb = 18, mt = 16, max = Math.max.apply(null, data.concat([1])), top = Math.ceil(max/5)*5 || 5;
+  var bw = (W - (data.length-1)*6) / data.length, s = '';
+  [0, top/2, top].forEach(function(v){ var y = H - mb - (v/top)*(H-mb-mt); s += '<line x1="0" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="var(--border)" stroke-width="1"/>'; });
+  data.forEach(function(v, i){
+    var h = Math.max(2, (v/top)*(H-mb-mt)), x = i*(bw+6), y = H - mb - h, r = Math.min(4, bw/2, h), laatste = i === data.length-1;
+    s += '<path d="M'+x+' '+(H-mb)+'V'+(y+r)+'Q'+x+' '+y+' '+(x+r)+' '+y+'H'+(x+bw-r)+'Q'+(x+bw)+' '+y+' '+(x+bw)+' '+(y+r)+'V'+(H-mb)+'Z" fill="var(--accent)" opacity="'+(laatste ? 1 : .55)+'"/>';
+    s += '<rect x="'+(x-3)+'" y="0" width="'+(bw+6)+'" height="'+H+'" fill="transparent" data-tip="'+esc(labels[i])+': <b>'+v+'</b> '+esc(eenheid)+'"/>';
+    if(laatste) s += '<text x="'+(x+bw/2)+'" y="'+(y-5)+'" text-anchor="middle" class="dash-gr-w">'+v+'</text>';
+    if(i % 2 === 1 || laatste) s += '<text x="'+(x+bw/2)+'" y="'+(H-3)+'" text-anchor="middle" class="dash-gr-as">'+esc(labels[i].replace('Week ',''))+'</text>';
+  });
+  return '<div class="dash-grafiek"><div class="dash-gr-kop"><span>'+esc(titel)+'</span><span>week</span></div>'
+    + '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(titel)+': '+labels.map(function(l, i){ return l+' '+data[i]; }).join(', ')+'">'+s+'</svg></div>';
+}
+// De laatste n ISO-weken (tot en met deze week) als [{label, van, tot}].
+function _dashWeken(n){
+  var res = [], ma = getMaandagVan(vandaagISO());
+  for(var i = n-1; i >= 0; i--){
+    var van = new Date(ma); van.setDate(van.getDate() - i*7);
+    var tot = new Date(van); tot.setDate(tot.getDate() + 6);
+    res.push({ label:'Week '+isoWeekNr(van), van:dateToStr(van), tot:dateToStr(tot) });
+  }
+  return res;
+}
+function _dashIdsVan(o){
+  return Array.isArray(o.monteurIds) && o.monteurIds.length ? o.monteurIds.map(String) : (o.monteurId ? [String(o.monteurId)] : []);
+}
+function _dashUren(o){
+  if(o.tijdVan && o.tijdTot){
+    var a = String(o.tijdVan).split(':'), b = String(o.tijdTot).split(':');
+    var m = (parseInt(b[0],10)*60 + parseInt(b[1]||'0',10)) - (parseInt(a[0],10)*60 + parseInt(a[1]||'0',10));
+    if(m > 0) return m/60;
+  }
+  return parseFloat(o.duurUren) || 1.5;
+}
+function _dashStatus(o){
+  return ({
+    gereserveerd:{ kl:'#8b5cf6', lbl:'Gereserveerd' }, ingepland:{ kl:'#4a6cf7', lbl:'Ingepland' },
+    klaargezet:{ kl:'#6b7694', lbl:'Klaargezet' }, opgehaald:{ kl:'#06b6d4', lbl:'Bezig' },
+    actie:{ kl:'#f59e0b', tekst:'var(--orange-t)', lbl:'Actie' }, afgehandeld:{ kl:'#10b981', tekst:'var(--green-t)', lbl:'Afgerond' },
+    verwerkt:{ kl:'#64748b', lbl:'Verwerkt' }
+  })[o.status] || { kl:'#6b7694', lbl:(o.status || '—') };
+}
+function _dashAvatar(m, maat){
+  maat = maat || 28;
+  if(!m) return '<span class="avatar" style="width:'+maat+'px;height:'+maat+'px;font-size:11px;background:var(--border);color:var(--muted);flex-shrink:0">?</span>';
+  var kl = medKleur(m);
+  return '<span class="avatar" style="width:'+maat+'px;height:'+maat+'px;font-size:11px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</span>';
+}
+function _dashOpdrachtItem(o, magOpenen){
+  var st = _dashStatus(o), spoed = _isSpoed(o), klaar = o.status === 'afgehandeld' || o.status === 'verwerkt';
+  var ot = getOpdrachttype(o.type);
+  var sub = [ot && ot.label ? ot.label : '', [o.adres, o.plaats].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+  return '<div class="dash-item'+(spoed ? ' spoed' : '')+'"'+(magOpenen ? ' data-opdracht="'+esc(o.id)+'" role="button" tabindex="0"' : '')+'>'
+    + '<span class="dash-item-t">'+esc(o.tijdVan || o.blokVan || '—')+'</span>'
+    + '<span class="dash-item-k">'+esc(o.klantNaam || '—')+(sub ? '<small>'+esc(sub)+'</small>' : '')+'</span>'
+    + (spoed && !klaar ? '<span class="dash-st" style="background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red-t)">'+ICO.zap+' Spoed</span>' : '')
+    + '<span class="dash-st" style="background:'+_kleurTint(st.kl,'22')+';color:'+(st.tekst || _klTekst(st.kl))+'">'+(klaar ? _DASH_ICO.vink : '')+esc(st.lbl)+'</span></div>';
+}
+
+// ── De blokken ──
+var DASH_RENDER = {
+  vandaag: function(c){
+    var ops = APP.opdrachten.filter(function(o){ return o.datum === c.vandaag; });
+    var klaar = ops.filter(function(o){ return o.status === 'afgehandeld' || o.status === 'verwerkt'; }).length;
+    var opPad = {}; ops.forEach(function(o){ _dashIdsVan(o).forEach(function(id){ opPad[id] = 1; }); });
+    return _dashKop(_DASH_ICO.dag, 'Vandaag', 'planning', 'Planning')
+      + '<div class="dash-kpis">'
+      + _dashKpi(ops.length, 'opdracht'+(ops.length === 1 ? '' : 'en'), '', 'planning')
+      + _dashKpi(klaar+'/'+ops.length, 'afgerond', klaar && klaar === ops.length ? 'goed' : '', 'planning')
+      + _dashKpi(Object.keys(opPad).length, 'monteur'+(Object.keys(opPad).length === 1 ? '' : 's')+' op pad', '', 'planning')
+      + _dashKpi(c.afwezig.length, 'afwezig', c.afwezig.length ? 'let' : '', null)
+      + '</div>';
+  },
+  werkbonnen: function(c){
+    var tel = function(st){ return APP.opdrachten.filter(function(o){ return o.status === st; }).length; };
+    var wk = _dashWeken(8), nu = wk[wk.length-1];
+    var perWeek = wk.map(function(w){ return APP.opdrachten.filter(function(o){ return o.status === 'verwerkt' && o.datum && o.datum >= w.van && o.datum <= w.tot; }).length; });
+    var verwerktNu = perWeek[perWeek.length-1];
+    return _dashKop(_DASH_ICO.bon, 'Werkbonnen', 'werkbonnen', 'Alle werkbonnen')
+      + '<div class="dash-kpis">'
+      + _dashKpi(tel('klaargezet'), 'klaargezet', '', 'werkbonnen')
+      + _dashKpi(tel('opgehaald'), 'bezig', tel('opgehaald') ? 'let' : '', 'werkbonnen')
+      + _dashKpi(tel('afgehandeld'), 'te verwerken', tel('afgehandeld') ? 'mis' : '', 'werkbonnen')
+      + _dashKpi(verwerktNu, 'verwerkt deze week', 'goed', 'werkbonnen')
+      + '</div>' + _dashBalken(perWeek, wk.map(function(w){ return w.label; }), 'verwerkt', 'Verwerkt per week');
+  },
+  planning: function(c){
+    var ma = getMaandagVan(c.vandaag), dagen = [];
+    for(var i=0; i<5; i++){ var d = new Date(ma); d.setDate(d.getDate()+i); dagen.push(dateToStr(d)); }
+    var rollen = APP.planningRollen || ['monteur','extern'];
+    var monteurs = APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0; });
+    var h = _dashKop(_DASH_ICO.plan, 'Planning deze week', 'planning', 'Week '+isoWeekNr(ma));
+    if(!monteurs.length) return h + '<div class="dash-leeg">Geen monteurs in de planning.</div>';
+    h += '<div class="dash-bez">';
+    monteurs.forEach(function(m){
+      var gepland = APP.opdrachten.filter(function(o){ return dagen.indexOf(o.datum) >= 0 && _dashIdsVan(o).indexOf(String(m.id)) >= 0; })
+        .reduce(function(s, o){ return s + _dashUren(o); }, 0);
+      var perDag = _verlofUrenPerDagVan(m), beschikbaar = 0;
+      dagen.forEach(function(dag){
+        if(verzuimOpDag(m.id, dag)) return;
+        var vl = APP.verlof.find(function(v){ return String(v.medId) === String(m.id) && v.status === 'goedgekeurd' && dag >= v.van && dag <= (v.tot || v.van); });
+        beschikbaar += vl ? (vl.gedeeltelijk ? perDag/2 : 0) : perDag;
+      });
+      var r1 = function(x){ return String(Math.round(x*10)/10).replace('.', ','); };
+      var vol = gepland > beschikbaar, pct = beschikbaar ? Math.min(100, gepland/beschikbaar*100) : (gepland ? 100 : 0);
+      h += '<div class="dash-bez-rij" data-tip="'+esc(m.voornaam+' '+m.achternaam)+': <b>'+r1(gepland)+'</b> van '+r1(beschikbaar)+' uur gepland'+(vol ? ' (overboekt)' : '')+'">'
+        + '<span class="dash-bez-naam">'+_dashAvatar(m, 26)+'<span>'+esc(m.voornaam)+'</span></span>'
+        + '<span class="dash-spoor"><span class="dash-vul'+(vol ? ' vol' : '')+'" style="width:'+pct+'%"></span></span>'
+        + '<span class="dash-bez-w"><b>'+r1(gepland)+'</b>/'+r1(beschikbaar)+' u</span></div>';
+    });
+    var zonder = APP.opdrachten.filter(function(o){ return !o.datum && o.status !== 'afgehandeld' && o.status !== 'verwerkt'; }).length;
+    h += '</div><div class="dash-voet"><span><b>'+zonder+'</b> opdracht'+(zonder === 1 ? '' : 'en')+' nog zonder datum</span>'
+      + (zonder ? '<button type="button" class="btn btn-ghost btn-sm" data-nav="planning">Inplannen</button>' : '')+'</div>';
+    return h;
+  },
+  vandaaglijst: function(c){
+    var ops = APP.opdrachten.filter(function(o){ return o.datum === c.vandaag; });
+    var h = _dashKop(_DASH_ICO.plan, 'Opdrachten vandaag'+(ops.length ? ' · '+ops.length : ''), _dashMagPlanning() ? 'planning' : '', 'Planning');
+    if(!ops.length) return h + '<div class="dash-leeg">Geen opdrachten vandaag.</div>';
+    var groepen = {};
+    ops.forEach(function(o){ var ids = _dashIdsVan(o); var k = ids.slice().sort().join('+') || '_'; (groepen[k] = groepen[k] || { ids:ids, ops:[] }).ops.push(o); });
+    Object.keys(groepen).sort(function(a, b){
+      if(a === '_') return 1; if(b === '_') return -1;
+      var ma = getMed(groepen[a].ids[0]), mb = getMed(groepen[b].ids[0]);
+      return (ma ? ma.voornaam : '').localeCompare(mb ? mb.voornaam : '');
+    }).forEach(function(k){
+      var g = groepen[k], lijst = g.ops.slice().sort(_planRouteVolgorde);
+      var ms = g.ids.map(getMed), klaar = lijst.filter(function(o){ return o.status === 'afgehandeld' || o.status === 'verwerkt'; }).length;
+      var open = !!_dashOpen[k], toon = open ? lijst : lijst.slice(0, 3);
+      h += '<div class="dash-groep"><div class="dash-groep-kop"><span class="dash-avs">'+(g.ids.length ? ms.map(function(m){ return _dashAvatar(m, 26); }).join('') : _dashAvatar(null, 26))+'</span>'
+        + '<span class="dash-groep-naam">'+esc(g.ids.length ? ms.map(function(m, i){ return m ? m.voornaam+' '+m.achternaam : (medArchiefNaam(g.ids[i]) || 'Onbekend'); }).join(' & ') : 'Niet toegewezen')+'</span>'
+        + '<span class="dash-groep-n">'+klaar+' van '+lijst.length+' af</span></div>';
+      toon.forEach(function(o){ h += _dashOpdrachtItem(o, c.magOpenen); });
+      if(lijst.length > 3) h += '<button type="button" class="dash-meer" data-groep="'+esc(k)+'">'+(open ? 'Minder tonen' : 'Nog '+(lijst.length-3)+' opdracht'+(lijst.length-3 === 1 ? '' : 'en'))+'</button>';
+      h += '</div>';
+    });
+    return h;
+  },
+  werkorders: function(){
+    return _dashKop(_DASH_ICO.wo, 'Werkorders', 'werkorders', 'Alle werkorders')+'<div id="dash-wo-status"><div class="dash-leeg">Werkorders laden…</div></div>';
+  },
+  trend: function(c){
+    var wk = _dashWeken(8);
+    var afg = function(o){ return o.status === 'afgehandeld' || o.status === 'verwerkt'; };
+    var data = wk.map(function(w){ return APP.opdrachten.filter(function(o){ return afg(o) && o.datum && o.datum >= w.van && o.datum <= w.tot; }).length; });
+    var mnd = c.vandaag.slice(0,7), vd = new Date(c.vandaag+'T00:00:00'); vd.setDate(1); vd.setMonth(vd.getMonth()-1);
+    var vorig = dateToStr(vd).slice(0,7);
+    var deze = APP.opdrachten.filter(function(o){ return afg(o) && (o.datum || '').slice(0,7) === mnd; }).length;
+    var toen = APP.opdrachten.filter(function(o){ return afg(o) && (o.datum || '').slice(0,7) === vorig; }).length;
+    var verschil = toen ? Math.round((deze - toen) / toen * 100) : null;
+    return _dashKop(_DASH_ICO.grafiek, 'Afgeronde opdrachten', (isAdmin() || magLezen('rapportage')) ? 'rapportage' : '', 'Rapportage')
+      + '<div class="dash-kpis drie">'
+      + _dashKpi(deze, 'deze maand', '', null)
+      + _dashKpi(toen, 'vorige maand', '', null)
+      + _dashKpi(verschil === null ? '—' : (verschil > 0 ? '+' : '')+verschil+'%', 'verschil', verschil > 0 ? 'goed' : '', null)
+      + '</div>' + _dashBalken(data, wk.map(function(w){ return w.label; }), 'afgerond', 'Afgerond per week');
+  },
+  dringend: function(){
+    return '<div id="dash-wo-dringend"><div class="dash-leeg">Dringende werkorders laden…</div></div>';
+  },
+  mijndag: function(c){
+    var ops = APP.opdrachten.filter(function(o){ return o.datum === c.vandaag && _dashIdsVan(o).indexOf(String(c.mijnId)) >= 0; }).sort(_planRouteVolgorde);
+    var h = _dashKop(_DASH_ICO.dag, 'Mijn dag'+(ops.length ? ' · '+ops.length+' opdracht'+(ops.length === 1 ? '' : 'en') : ''), (isAdmin() || magLezen('werkbonnen')) ? 'werkbonnen' : '', 'Werkbonnen');
+    if(!ops.length) return h + '<div class="dash-leeg">Vandaag geen opdrachten voor jou.</div>';
+    ops.forEach(function(o){ h += _dashOpdrachtItem(o, c.magOpenen); });
+    return h;
+  },
+  mijnbonnen: function(c){
+    var mijn = APP.opdrachten.filter(function(o){ return _dashIdsVan(o).indexOf(String(c.mijnId)) >= 0; });
+    var wk = _dashWeken(1)[0];
+    var n = function(f){ return mijn.filter(f).length; };
+    var klaargezet = n(function(o){ return o.status === 'klaargezet'; }), bezig = n(function(o){ return o.status === 'opgehaald'; });
+    var af = n(function(o){ return (o.status === 'afgehandeld' || o.status === 'verwerkt') && o.datum && o.datum >= wk.van && o.datum <= wk.tot; });
+    var doel = (isAdmin() || magLezen('werkbonnen')) ? 'werkbonnen' : null;
+    return _dashKop(_DASH_ICO.bon, 'Mijn werkbonnen', doel || '', 'Werkbonnen')
+      + '<div class="dash-kpis drie">'+_dashKpi(klaargezet, 'klaargezet voor jou', '', doel)+_dashKpi(bezig, 'bezig', bezig ? 'let' : '', doel)+_dashKpi(af, 'afgerond deze week', 'goed', doel)+'</div>';
+  },
+  agenda: function(c){
+    var h = _dashKop(_DASH_ICO.agenda, 'Agenda', magLezen('agenda') || isAdmin() ? 'agenda' : '', 'Agenda');
+    if(!c.agVandaag.length && !c.agMorgen.length) return h + '<div class="dash-leeg">Geen afspraken vandaag of morgen.</div>';
+    [[c.agVandaag,'Vandaag'],[c.agMorgen,'Morgen']].forEach(function(set){
+      if(!set[0].length) return;
+      h += '<div class="dash-sub">'+set[1]+'</div>';
+      set[0].slice().sort(function(a, b){ return (a.tijdVan || '00:00') > (b.tijdVan || '00:00') ? 1 : -1; }).forEach(function(a){
+        var ti = agTypeInfo(a.type);
+        var kl = a.isStoringsdienst ? (a.medKleur || '#ef4444') : a.isBlokkade ? '#ef4444' : ti.kleur;
+        h += '<div class="dash-rij"><span class="dash-rij-ico" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+'">'+(a.isBlokkade ? ICO.lock : (ti.icon || ''))+'</span>'
+          + '<span class="dash-rij-k">'+esc(a.titel || ti.l)+'<small>'+(a.tijdVan ? esc(a.tijdVan)+(a.tijdTot ? ' – '+esc(a.tijdTot) : '') : 'Hele dag')+'</small></span></div>';
+      });
+    });
+    return h;
+  },
+  afwezig: function(c){
+    var h = _dashKop(_DASH_ICO.mens, 'Afwezig vandaag'+(c.afwezig.length ? ' · '+c.afwezig.length : ''), '', '');
+    if(!c.afwezig.length) return h + '<div class="dash-leeg">Iedereen is er vandaag.</div>';
+    c.afwezig.forEach(function(a){
+      h += '<div class="dash-rij">'+_dashAvatar(a.med, 28)+'<span class="dash-rij-k">'+esc(a.med.voornaam+' '+a.med.achternaam)+'</span>'
+        + '<span class="dash-rij-r"'+(a.ziek ? ' style="color:var(--red-t)"' : '')+'>'+esc(a.reden)+'</span></div>';
+    });
+    return h;
+  },
+  mijncijfers: function(c){
+    var p = c.persoonlijk;
+    var pil = function(doel, waarde, label){ return '<button type="button" class="dash-pil-k" data-nav="'+doel+'"><b>'+waarde+'</b>'+label+'</button>'; };
+    return _dashKop(_DASH_ICO.mens, 'Mijn cijfers', '', '')
+      + '<div class="dash-pillen">'
+      + pil('verlof', String(p.verlofUren).replace('.', ',')+' u', 'verlof · ≈'+String(p.verlofDagen).replace('.', ',')+' dagen')
+      + pil('overuren', String(p.ouSaldo).replace('.', ',')+' u', 'overuren '+p.jaar)
+      + pil('onkosten', '€ '+p.onkosten.toFixed(0), 'onkosten goedgekeurd')
+      + pil('verzuim', p.verzuimDagen ? p.verzuimDagen+' d' : '0', p.verzuimDagen ? (p.verzuimLang ? 'langdurig verzuim' : 'verzuim, lopend') : 'dagen verzuim')
+      + '</div>';
+  }
+};
+
 function renderDashboard(stil) {
   var el   = document.getElementById('content');
   var now  = new Date();
   var gr   = now.getHours()<12?'Goedemorgen':now.getHours()<18?'Goedemiddag':'Goedenavond';
-  // Gebruik voornaam van gekoppelde medewerker, anders profiel naam
-  var mijnMedDash = getMijnMedId() ? getMed(getMijnMedId()) : null;
-  var naam = mijnMedDash ? mijnMedDash.voornaam : (APP.profiel?(APP.profiel.naam||'').split(' ')[0]:'');
-  var vandaag = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  var vandaag = vandaagISO();
   var _morgenD = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
-  var morgen  = _morgenD.getFullYear()+'-'+String(_morgenD.getMonth()+1).padStart(2,'0')+'-'+String(_morgenD.getDate()).padStart(2,'0');
-
-  // Eigen medewerker
+  var morgen  = dateToStr(_morgenD);
   var mijnId  = getMijnMedId();
   var mijnMed = mijnId ? getMed(mijnId) : null;
+  var naam = mijnMed ? mijnMed.voornaam : (APP.profiel?(APP.profiel.naam||'').split(' ')[0]:'');
 
-  // ── Persoonlijke stats ──────────────────────────────────────
-  var verlofSaldo  = mijnMed ? (parseFloat(mijnMed.verlofSaldo)||0) : 0;
-  var verlofSaldoUren = mijnMed ? getVerlofSaldoUren(mijnMed) : 0;
-  var huidigJaarStr = vandaag.slice(0,4);
-  var ouGecomp = mijnMed ? APP.overuren.filter(function(o){
-    return String(o.medId)===String(mijnId) && o.status==='gecompenseerd' && (o.datum||'').startsWith(huidigJaarStr);
-  }).reduce(function(s,o){return s+(o.uren||0);},0) : 0;
-  var ouUitbet = mijnMed ? APP.overuren.filter(function(o){
-    return String(o.medId)===String(mijnId) && o.status==='uitbetaald' && (o.datum||'').startsWith(huidigJaarStr);
-  }).reduce(function(s,o){return s+(o.uren||0);},0) : 0;
-  var ouSaldo = Math.round((ouGecomp - ouUitbet) * 10) / 10;
-  var onkostenGoed = mijnMed ? APP.onkosten.filter(function(o){
-    return String(o.medId)===String(mijnId) && o.status==='goedgekeurd' && (o.datum||'').startsWith(vandaag.slice(0,4));
-  }).reduce(function(s,o){return s+(o.bedrag||0);},0) : 0;
-  var mijnVerzuim  = mijnMed ? APP.verzuim.filter(function(v){
-    return String(v.medId)===String(mijnId) && (v.status==='actief'||v.status==='langdurig');
-  }) : [];
+  // Persoonlijke cijfers
+  var jaar = vandaag.slice(0,4);
+  var ouUren = function(st){ return mijnMed ? APP.overuren.filter(function(o){ return String(o.medId)===String(mijnId) && o.status===st && (o.datum||'').startsWith(jaar); }).reduce(function(s,o){ return s+(o.uren||0); },0) : 0; };
+  var verlofUren = mijnMed ? getVerlofSaldoUren(mijnMed) : 0;
+  var mijnVerzuim = mijnMed ? APP.verzuim.filter(function(v){ return String(v.medId)===String(mijnId) && (v.status==='actief'||v.status==='langdurig'); }) : [];
+  var persoonlijk = {
+    jaar: jaar, verlofUren: verlofUren, verlofDagen: verlofUrenNaarDagen(verlofUren, mijnMed),
+    ouSaldo: Math.round((ouUren('gecompenseerd') - ouUren('uitbetaald')) * 10) / 10,
+    onkosten: mijnMed ? APP.onkosten.filter(function(o){ return String(o.medId)===String(mijnId) && o.status==='goedgekeurd' && (o.datum||'').startsWith(jaar); }).reduce(function(s,o){ return s+(o.bedrag||0); },0) : 0,
+    verzuimDagen: mijnVerzuim.length && mijnVerzuim[0].van ? Math.max(1, Math.ceil((now - new Date(mijnVerzuim[0].van+'T00:00:00'))/86400000)) : 0,
+    verzuimLang: mijnVerzuim.length && mijnVerzuim[0].status === 'langdurig'
+  };
 
-  // Storingsdienst
-  var huidigWeek  = getISOWeek(vandaag);
-  var huidigWJaar = getISOWeekJaar(vandaag);
-  var sdKey       = huidigWJaar+'-W'+('0'+huidigWeek).slice(-2);
-  var sdDagIdx    = (now.getDay()||7)-1;
-  var sdDagDienst = (APP.storingsdienst||{})[sdKey+'-'+sdDagIdx];
-  var sdWeekDienst= (APP.storingsdienst||{})[sdKey];
-  var sdDienst    = sdDagDienst || sdWeekDienst;
-  var sdMed       = sdDienst ? getMed(sdDienst.medId) : null;
-  var sdKl        = sdMed?medKleur(sdMed):'#6b7694';
+  // Afwezig vandaag (verlof of ziek, alleen op werkdagen en alleen medewerkers in dienst)
+  var _dagNr = new Date(vandaag+'T00:00:00').getDay(), _isWerkdag = _dagNr > 0 && _dagNr < 6;
+  var afwezig = !_isWerkdag ? [] : APP.verlof.filter(function(v){ return v.status==='goedgekeurd' && v.van<=vandaag && (v.tot||v.van)>=vandaag && _medInDienst(v.medId); })
+    .map(function(v){ return { med:getMed(v.medId), reden:verlofRedenLabel(v) }; })
+    .concat(APP.verzuim.filter(function(v){ return _medInDienst(v.medId) && verzuimOpDag(v.medId, vandaag) === v; })
+    .map(function(v){ return { med:getMed(v.medId), ziek:true, reden:(v.type==='gedeeltelijk'?'Gedeeltelijk ziek':v.status==='langdurig'?'Langdurig ziek':'Ziek') }; }))
+    .filter(function(a){ return a.med; });
+
+  // Agenda zonder verlof (staat bij afwezig) en zonder storingsdienst (staat bovenaan)
+  var agVandaag = typeof agAfsprakenOp==='function' ? agAfsprakenOp(vandaag).filter(function(a){ return !a.isVerlof && !a.isStoringsdienst; }) : [];
+  var agMorgen  = typeof agAfsprakenOp==='function' ? agAfsprakenOp(morgen).filter(function(a){ return !a.isVerlof && !a.isStoringsdienst && (a.van > vandaag || (a.tot||a.van) > vandaag); }) : [];
+
+  var c = { vandaag:vandaag, mijnId:mijnId, afwezig:afwezig, agVandaag:agVandaag, agMorgen:agMorgen, persoonlijk:persoonlijk, magOpenen:_dashMagPlanning() };
+
+  // Storingsdienst: per dag of per week ingesteld
+  var sdKey = getISOWeekJaar(vandaag)+'-W'+('0'+getISOWeek(vandaag)).slice(-2);
+  var sdDienst = (APP.storingsdienst||{})[sdKey+'-'+((now.getDay()||7)-1)] || (APP.storingsdienst||{})[sdKey];
+  var sdMed = sdDienst ? getMed(sdDienst.medId) : null;
+  var sdIk = !!(sdMed && mijnId && String(sdMed.id) === String(mijnId));
 
   var h = '';
-
-  // ── Acties te goedkeuren banner (voor beheerders) ────────────
-  if (isAdmin() || magSchrijven('onkosten') || magSchrijven('overuren')) {
-    var _openOnkosten = APP.onkosten.filter(function(o){ return o.status === 'aangevraagd' && _medBestaat(o.medId); }).length;
-    var _openOveruren = APP.overuren.filter(function(o){ return o.status === 'aangevraagd' && _medBestaat(o.medId); }).length;
-    var _openVerlof   = APP.verlof.filter(function(v){ return v.status === 'aangevraagd' && _medBestaat(v.medId); }).length;
-    var _openTotaal = _openOnkosten + _openOveruren + _openVerlof;
-    if (_openTotaal > 0) {
-      h += '<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;margin-bottom:18px">';
-      h += '<svg width="20" height="20" fill="none" stroke="var(--orange)" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-      h += '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--orange-t)">'+_openTotaal+' aanvraag'+ (_openTotaal!==1?'en':'')+' wachten op goedkeuring</div>';
-      h += '<div style="font-size:12px;color:var(--muted);margin-top:2px">';
-      var _delen = [];
-      if(_openVerlof)   _delen.push(_openVerlof+' verlof');
-      if(_openOveruren) _delen.push(_openOveruren+' overuren');
-      if(_openOnkosten) _delen.push(_openOnkosten+' onkostendeclaratie'+ (_openOnkosten!==1?'s':''));
-      h += _delen.join(' · ');
-      h += '</div></div>';
-      if(_openOnkosten) h += '<button class="btn btn-ghost btn-sm dash-actie-btn" data-nav="onkosten" style="white-space:nowrap">Bekijken →</button>';
-      else if(_openOveruren) h += '<button class="btn btn-ghost btn-sm dash-actie-btn" data-nav="overuren" style="white-space:nowrap">Bekijken →</button>';
-      else h += '<button class="btn btn-ghost btn-sm dash-actie-btn" data-nav="verlof" style="white-space:nowrap">Bekijken →</button>';
-      h += '</div>';
-    }
+  // Melding: aanvragen die ík mag goedkeuren (niet: die ik zelf mag indienen)
+  var _teKeuren = function(lijst, mod){ return lijst.filter(function(o){ return o.status === 'aangevraagd' && _medBestaat(o.medId) && magGoedkeuren(mod, o.medId); }).length; };
+  var _openOnkosten = _teKeuren(APP.onkosten, 'onkosten'), _openOveruren = _teKeuren(APP.overuren, 'overuren'), _openVerlof = _teKeuren(APP.verlof, 'verlof');
+  var _openTotaal = _openOnkosten + _openOveruren + _openVerlof;
+  if (_openTotaal > 0) {
+    var _delen = [];
+    if(_openVerlof)   _delen.push(_openVerlof+' verlof');
+    if(_openOveruren) _delen.push(_openOveruren+' overuren');
+    if(_openOnkosten) _delen.push(_openOnkosten+' onkostendeclaratie'+(_openOnkosten!==1?'s':''));
+    h += '<div class="dash-melding">'+'<span class="dash-melding-ico">'+_DASH_ICO.alarm+'</span><div class="dash-melding-t"><b>'+_openTotaal+' '+(_openTotaal===1?'aanvraag wacht':'aanvragen wachten')+' op jouw goedkeuring</b><span>'+_delen.join(' · ')+'</span></div>'
+      + '<button type="button" class="btn btn-ghost btn-sm" data-nav="'+(_openOnkosten?'onkosten':_openOveruren?'overuren':'verlof')+'">Bekijken</button></div>';
   }
-
-  // ── Verlof bijschrijf banner (voor goedkeurder / admin) ─────
-  if (isAdmin() || magSchrijven('verlof')) {
-    var _jaar = now.getFullYear();
-    var _jaarKey = 'verlofJaar_' + _jaar;
-    // Check async of bijschrijving nog niet gedaan is
+  // Melding: verlof bijschrijven voor het nieuwe jaar (beheerder)
+  if (isAdmin() || magBeheren('verlof')) {
+    var _jaarKey = 'verlofJaar_' + now.getFullYear();
     FB.ref(dbPath('meta', _jaarKey)).once('value').then(function(jSnap){
-      if(jSnap.exists()) return; // al gedaan
+      if(jSnap.exists()) return;
       var banner = document.getElementById('dash-verlof-banner');
-      if(!banner) return;
-      banner.style.display = 'flex';
-    });
-  }
-  h += '<div id="dash-verlof-banner" style="display:none;align-items:center;gap:14px;padding:12px 16px;background:rgba(74,108,247,.1);border:1px solid rgba(74,108,247,.25);border-radius:10px;margin-bottom:18px">';
-  h += '<svg width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-  h += '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--accent)">Verlof bijschrijving '+new Date().getFullYear()+' klaarstaan</div>';
-  h += '<div style="font-size:12px;color:var(--muted);margin-top:1px">Controleer en keur het aantal vakantiedagen per medewerker goed.</div></div>';
-  h += '<button class="btn btn-primary btn-sm" id="dash-verlof-btn">Bekijken →</button>';
-  h += '</div>';
-
-  // ── Begroeting + Storingsdienst (header-rij) ─────────────────
-  h += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:6px;flex-wrap:wrap">';
-  var _grSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;color:var(--accent);flex-shrink:0;display:inline-block"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v3"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>';
-  h += '<div><h2 style="font-family:\'Instrument Sans\',sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center">'+_grSvg+gr+', '+esc(naam)+'</h2>';
-  h += '<div style="font-size:13px;color:var(--muted);margin-top:3px">'+now.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</div></div>';
-  // Storingsdienst-kaart (rechtsboven)
-  h += '<div style="display:flex;align-items:center;gap:12px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);border-radius:var(--radius);padding:10px 16px;cursor:pointer;transition:border-color .15s,box-shadow .15s" class="dash-storingsdienst" onclick="navigateTo(\'storingsdienst\')" onmouseover="this.style.borderColor=\'var(--orange)\';this.style.boxShadow=\'0 0 0 2px rgba(245,158,11,.12)\'" onmouseout="this.style.borderColor=\'rgba(245,158,11,.22)\';this.style.boxShadow=\'\'" title="Ga naar Storingsdienst">';
-  if(sdMed){
-    h += '<div class="avatar" style="width:38px;height:38px;font-size:12px;background:'+sdKl+';color:'+_tekstOpKleur(sdKl)+';flex-shrink:0">'+initials(sdMed)+'</div>';
-    h += '<div><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:5px;margin-bottom:2px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>Storingsdienst · Week '+huidigWeek+'</div>';
-    h += '<div style="font-weight:700;font-size:14px">'+esc(sdMed.voornaam+' '+sdMed.achternaam)+'<span style="color:var(--accent);font-weight:400;font-size:12px"> · '+esc(sdMed.telefoon||sdMed.email||'—')+'</span></div></div>';
-  } else {
-    h += '<div><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Storingsdienst · Week '+huidigWeek+'</div>';
-    h += '<div style="color:var(--orange-t);font-size:13px;font-weight:600">'+ICO.warn+' Niet ingesteld</div></div>';
-  }
-  h += '</div>';
-  h += '</div>';
-
-  // ── Dagsamenvatting ──────────────────────────────────────────
-  var _dsOpdrachten = APP.opdrachten.filter(function(o){ return o.datum===vandaag; });
-  var _dsMonteurIds = {};
-  _dsOpdrachten.forEach(function(o){
-    var ids = Array.isArray(o.monteurIds)&&o.monteurIds.length ? o.monteurIds : (o.monteurId?[o.monteurId]:[]);
-    ids.forEach(function(mid){ if(mid) _dsMonteurIds[mid]=1; });
-  });
-  var _dsIsWerkdag = (function(){ var d=new Date(vandaag+'T00:00:00').getDay(); return d>0 && d<6; })();
-  // Zelfde criteria als "Afwezig vandaag": verlof of ziek, alleen medewerkers in dienst
-  var _dsAfwezig = !_dsIsWerkdag ? 0 : APP.medewerkers.filter(function(m){
-    if(m.status === 'inactief') return false;
-    return APP.verlof.some(function(v){ return String(v.medId)===String(m.id) && v.status==='goedgekeurd' && (v.van||'')<=vandaag && (v.tot||v.van||'')>=vandaag; })
-      || !!verzuimOpDag(m.id, vandaag);
-  }).length;
-  var _dsAgenda = (typeof agAfsprakenOp==='function' ? agAfsprakenOp(vandaag).filter(function(a){ return !a.isStoringsdienst && !a.isVerlof && !a.isBlokkade; }).length : 0);
-  h += '<div style="font-size:13px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
-  h += '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
-  h += 'Vandaag: <b style="color:var(--text);font-weight:700">'+_dsOpdrachten.length+' opdracht'+(_dsOpdrachten.length!==1?'en':'')+'</b>';
-  h += '<span style="width:3px;height:3px;border-radius:50%;background:var(--muted);display:inline-block"></span> <b style="color:var(--text);font-weight:700">'+Object.keys(_dsMonteurIds).length+' monteur'+(Object.keys(_dsMonteurIds).length!==1?'s':'')+'</b> op pad';
-  h += '<span style="width:3px;height:3px;border-radius:50%;background:var(--muted);display:inline-block"></span> <b style="color:var(--text);font-weight:700">'+_dsAfwezig+'</b> afwezig';
-  h += '<span style="width:3px;height:3px;border-radius:50%;background:var(--muted);display:inline-block"></span> <b style="color:var(--text);font-weight:700">'+_dsAgenda+'</b> agendapunt'+(_dsAgenda!==1?'en':'');
-  h += '</div>';
-
-  // ── TOP ROW: 4 stat-kaarten ──────────────────────────────────
-  h += '<div class="dash-top-row stats-grid" style="margin-bottom:18px">';
-
-  // De vier persoonlijke cijfers bovenaan gebruiken dezelfde pilvorm als de statkaarten
-  // elders, maar dienen als doorverwijzing naar de module in plaats van als filter.
-  // De extra context die eerst op een derde regel stond, staat nu in het label.
-  function _dashPil(doel, kleur, ico, waarde, label){
-    return '<div class="stat-card dash-pil" style="color:'+kleur+';cursor:pointer" '
-         + 'onclick="navigateTo(\''+doel+'\')" title="Ga naar '+label+'">'
-         + '<span class="stat-icon" style="background:'+kleur+'22">'+(ico||'')+'</span>'
-         + '<span class="stat-value">'+waarde+'</span>'
-         + '<span class="stat-label">'+label+'</span>'
-         + '</div>';
+      if(banner) banner.style.display = 'flex';
+    }).catch(function(){});
+    h += '<div id="dash-verlof-banner" class="dash-melding info" style="display:none"><span class="dash-melding-ico">'+_DASH_ICO.agenda+'</span><div class="dash-melding-t"><b>Verlof bijschrijving '+now.getFullYear()+' staat klaar</b><span>Controleer en keur het aantal vakantiedagen per medewerker goed.</span></div>'
+      + '<button type="button" class="btn btn-primary btn-sm" id="dash-verlof-btn">Bekijken</button></div>';
   }
 
+  // Begroeting, storingsdienst en de knop om de indeling aan te passen
+  h += '<div class="dash-groet"><div class="dash-groet-t"><h2>'+gr+(naam ? ', '+esc(naam) : '')+'</h2><p>'+now.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</p></div>';
+  h += '<div class="dash-groet-r">';
+  h += '<button type="button" class="dash-dienst'+(sdIk ? ' ik' : !sdMed ? ' leeg' : '')+'" data-nav="storingsdienst"><span class="dash-dienst-ico">'+_DASH_ICO.storing+'</span><span>'
+    + (sdIk ? '<b>Jij hebt deze week storingsdienst</b>' : sdMed ? 'Storingsdienst week '+getISOWeek(vandaag)+': <b>'+esc(sdMed.voornaam+' '+sdMed.achternaam)+'</b>'+(sdMed.telefoon ? ' · '+esc(sdMed.telefoon) : '') : 'Storingsdienst week '+getISOWeek(vandaag)+': <b>niet ingesteld</b>')
+    + '</span></button>';
+  h += '<button type="button" class="btn btn-ghost btn-sm dash-aanpassen" id="dash-aanpassen" aria-label="Indeling aanpassen" title="Indeling aanpassen">'+_DASH_ICO.indeling+'<span>Indeling aanpassen</span></button>';
+  h += '</div></div>';
 
-  // Verlofdagen
-  h += _dashPil('verlof', '#4a6cf7', SVGS.verlof||SVGS.clock,
-        String(verlofSaldoUren).replace('.',',')+' u',
-        'verlof \u00b7 \u2248'+String(verlofUrenNaarDagen(verlofSaldoUren, mijnMed)).replace('.',',')+' dagen');
+  // Blokken: twee kolommen op desktop, één kolom (gekozen volgorde) op een telefoon
+  var indeling = _dashIndeling();
+  var blok = function(id){ return '<section class="card dash-blok" data-blok="'+id+'" style="order:'+indeling.indexOf(id)+'">'+DASH_RENDER[id](c)+'</section>'; };
+  if(!indeling.length) h += '<div class="dash-leeg" style="padding:24px 0">Je hebt alle blokken uitgezet. Kies via "Indeling aanpassen" wat je wilt zien.</div>';
+  h += '<div class="dash-kolommen"><div class="dash-kolom">'+indeling.filter(function(id){ return !DASH_BLOKKEN[id].zij; }).map(blok).join('')+'</div>'
+     + '<div class="dash-kolom zij">'+indeling.filter(function(id){ return DASH_BLOKKEN[id].zij; }).map(blok).join('')+'</div></div>';
+  h += _dashVelHtml(indeling);
 
-  // Overuren saldo
-  h += _dashPil('overuren', '#f59e0b', SVGS.clock,
-        ouSaldo+' u',
-        'overuren '+huidigJaarStr+(ouUitbet>0?' \u00b7 '+ouUitbet+'u uitbetaald':''));
-
-  // Onkosten
-  h += _dashPil('onkosten', '#10b981', SVGS.onkosten||SVGS.dollar,
-        '\u20ac'+onkostenGoed.toFixed(0),
-        'goedgekeurd '+vandaag.slice(0,4));
-
-  // Verzuim
-  if(mijnVerzuim.length){
-    var vz0=mijnVerzuim[0];
-    var vzDagen=vz0.van?Math.max(1,Math.ceil((now-new Date(vz0.van+'T00:00:00'))/86400000)):0;
-    h += _dashPil('verzuim', '#f59e0b', SVGS.verzuim||SVGS.alert,
-          vzDagen+' d', (vz0.status==='langdurig'?'langdurig verzuim':'verzuim, lopend'));
-  } else {
-    h += _dashPil('verzuim', '#10b981', SVGS.check||SVGS.verzuim, '\u2713', 'geen verzuim');
-  }
-
-  h += '</div>'; // top row
-
-  // ── HOOFD GRID: 2 kolommen ───────────────────────────────────
-  h += '<div class="dash-main-grid" style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:stretch">';
-
-  // ── LINKER kolom ─────────────────────────────────────────────
-
-  // Opdrachten vandaag
-  // Afgehandeld/verwerkt blijft de hele dag staan (grijs met vinkje) zodat de voortgang per
-  // monteur klopt. De filter is dag-gebonden, dus morgen zijn ze vanzelf verdwenen.
-  var opVandaag = APP.opdrachten.filter(function(o){return o.datum===vandaag;});
-  h += '<div class="card" style="padding:14px 16px">';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
-  h += '<div style="font-weight:700;font-size:14px"><svg width="16" height="16" style="flex-shrink:0;vertical-align:middle;margin-right:6px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span style="vertical-align:middle">Opdrachten vandaag</span></div>';
-  h += '<span class="tag tag-blue">'+opVandaag.length+'</span></div>';
-  if(!opVandaag.length){
-    h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 12px;gap:8px"><div style="width:38px;height:38px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green-t)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">Geen opdrachten vandaag</div></div>';
-  } else {
-    // Groepeer op monteur-COMBINATIE (set), zodat duo-klussen één keer verschijnen
-    var perGroep={};
-    opVandaag.forEach(function(o){
-      var ids=Array.isArray(o.monteurIds)&&o.monteurIds.length?o.monteurIds.slice():(o.monteurId?[o.monteurId]:['_']);
-      var key=ids.slice().sort().join('+');
-      if(!perGroep[key]) perGroep[key]={ ids:ids, ops:[] };
-      perGroep[key].ops.push(o);
-    });
-    // Sorteer groepen op de voornaam van de eerste monteur (niet-toegewezen onderaan)
-    var _groepVolgorde = Object.keys(perGroep).sort(function(a,b){
-      if(a==='_') return 1; if(b==='_') return -1;
-      var ma=getMed(perGroep[a].ids[0]), mb=getMed(perGroep[b].ids[0]);
-      return ((ma?ma.voornaam:'')>(mb?mb.voornaam:'')?1:-1);
-    });
-    _groepVolgorde.forEach(function(key){
-      var groep=perGroep[key];
-      var ops=groep.ops.slice().sort(_planRouteVolgorde);
-      var monteurs=groep.ids.map(function(id){return id==='_'?null:getMed(id);});
-      var klaarCount=ops.filter(function(o){return ['afgehandeld','verwerkt'].indexOf(o.status)>=0;}).length;
-      var totUren=ops.reduce(function(s,o){return s+(parseFloat(o.duurUren)||1.5);},0);
-      var vPct=ops.length?Math.round(klaarCount/ops.length*100):0;
-      h += '<div style="margin-bottom:14px">';
-      // Monteur-band: alle avatars + volledige namen
-      h += '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:9px;margin-bottom:8px">';
-      h += '<div style="display:flex;flex-shrink:0">';
-      monteurs.forEach(function(mm,i){
-        var mkl=mm?medKleur(mm):'#6b7694';
-        h += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+mkl+';color:'+_tekstOpKleur(mkl)+';flex-shrink:0'+(i>0?';margin-left:-8px;border:2px solid var(--surface2)':'')+'">'+(mm?initials(mm):'?')+'</div>';
-      });
-      h += '</div>';
-      var namen=monteurs.map(function(mm){return mm?esc(mm.voornaam+' '+mm.achternaam):'Niet toegewezen';}).join(' & ');
-      h += '<div style="font-weight:700;font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis">'+namen+'</div>';
-      h += '<div style="font-size:11px;color:var(--muted);margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0">';
-      h += '<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:42px;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;display:inline-block"><span style="display:block;height:100%;background:var(--green);border-radius:3px;width:'+vPct+'%"></span></span>'+klaarCount+'/'+ops.length+'</span>';
-      h += '<span>· '+(totUren%1===0?totUren:totUren.toFixed(1).replace('.',','))+'u werk</span>';
-      h += '</div></div>';
-      // Opdrachten van deze groep
-      ops.forEach(function(o){
-        var ot=getOpdrachttype(o.type);
-        var isKlaar=['afgehandeld','verwerkt'].indexOf(o.status)>=0;
-        var isSpoed=_isSpoed(o);
-        // Statuskleur + label. De opdracht kent 'opgehaald' zodra de monteur de werkbon
-        // oppakt (zie fsWerkbonStatusNaarPlanning), dus de voortgang staat er al in.
-        var _sc = {
-          gereserveerd:{ kl:'#8b5cf6', lbl:'Gereserveerd' },
-          ingepland:   { kl:'#4a6cf7', lbl:'Ingepland' },
-          klaargezet:  { kl:'#6b7694', lbl:'Klaargezet' },
-          opgehaald:   { kl:'#06b6d4', lbl:'Bezig' },
-          actie:       { kl:'#f59e0b', tekst:'var(--orange-t)', lbl:'Actie' },
-          afgehandeld: { kl:'#10b981', tekst:'var(--green-t)', lbl:'Afgerond' },
-          verwerkt:    { kl:'#64748b', lbl:'Verwerkt' }
-        }[o.status] || { kl:'#6b7694', lbl:(o.status||'\u2014') };
-        // Spoed is urgentie, geen status: rode linkerrand, zodat de status leesbaar blijft.
-        var _rand = isSpoed ? '3px solid var(--red)' : '2px solid var(--border)';
-        h += '<div class="dash-opdracht-item" data-id="'+o.id+'" style="display:flex;align-items:center;gap:12px;padding:8px 12px 8px 14px;border-left:'+_rand+';margin:0 0 4px 12px;cursor:pointer'+(isKlaar?';opacity:.5':'')+'">';
-        h += '<div style="font-size:11px;font-weight:700;color:var(--accent);min-width:46px">'+(o.tijdVan||'\u2014')+'</div>';
-        h += '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.klantNaam||'\u2014')+'</div>';
-        // Type staat nu hier, want rechts is de plek van de status geworden.
-        var _tp = [ot&&ot.label ? ot.label : '', o.plaats||''].filter(Boolean).join(' \u00b7 ');
-        if(_tp) h += '<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_tp)+'</div>';
-        // Adres eronder: met alleen de plaats moet je de opdracht openen om te weten
-        // waar je heen moet.
-        var _adr = [o.adres||'', o.postcode||''].filter(Boolean).join(', ');
-        if(_adr) h += '<div style="font-size:11px;color:var(--muted);opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(_adr)+'</div>';
-        h += '</div>';
-        h += '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;background:'+_kleurTint(_sc.kl,'22')+';color:'+(_sc.tekst||_klTekst(_sc.kl))+'">'+esc(_sc.lbl)+'</span>';
-        h += '</div>';
-      });
-      h += '</div>';
-    });
-  }
-  h += '</div>';
-
-  // Agenda vandaag + morgen
-  // Agenda op dashboard: geen verlof tonen (verlof staat bij Afwezig vandaag)
-  function _dashAgFilter(a) { return !a.isVerlof; }
-  var agVandaag = (typeof agAfsprakenOp==='function' ? agAfsprakenOp(vandaag).filter(_dashAgFilter) : []);
-  var agMorgen  = (typeof agAfsprakenOp==='function' ? agAfsprakenOp(morgen).filter(function(a){
-    if(!_dashAgFilter(a)) return false;
-    // Toon op morgen alleen als de afspraak écht op morgen of later begint,
-    // of een meerdaagse afspraak is die verder gaat dan vandaag
-    if(a.van > vandaag) return true;          // begint morgen of later
-    if((a.tot||a.van) > vandaag) return true; // meerdaags: eindigt na vandaag
-    return false;                             // eendaags op vandaag: niet op morgen tonen
-  }) : []);
-  // ── RECHTER kolom: Agenda + Afwezig gestapeld ────────────────
-  h += '<div style="display:flex;flex-direction:column;gap:16px">';
-  h += '<div class="card" style="padding:14px 16px">';
-  h += '<div style="font-weight:700;font-size:14px;margin-bottom:12px"><svg width="16" height="16" style="flex-shrink:0;vertical-align:middle;margin-right:6px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="14" x2="12.01" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="16" y1="14" x2="16.01" y2="14" stroke-linecap="round" stroke-width="3"/><line x1="8" y1="18" x2="8.01" y2="18" stroke-linecap="round" stroke-width="3"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-linecap="round" stroke-width="3"/></svg><span style="vertical-align:middle">Agenda</span></div>';
-  if(!agVandaag.length&&!agMorgen.length){
-    h += '<div style="color:var(--muted);font-size:13px">Geen afspraken vandaag of morgen</div>';
-  } else {
-    [[agVandaag,'Vandaag'],[agMorgen,'Morgen']].forEach(function(set){
-      if(!set[0].length) return;
-      h += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+set[1]+'</div>';
-      set[0].sort(function(a,b){return (a.tijdVan||'00:00')>(b.tijdVan||'00:00')?1:-1;}).forEach(function(a){
-        var ti = agTypeInfo(a.type);
-        var kl = a.isVerlof ? '#f59e0b'
-               : a.isStoringsdienst ? (a.medKleur||'#ef4444')
-               : a.isBlokkade ? '#ef4444'
-               : ti.kleur;
-        var svg = a.isVerlof
-          ? '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>'
-          : a.isStoringsdienst
-          ? '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
-          : a.isBlokkade
-          ? '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>'
-          : ti.icon || '';
-        var tijdTekst = a.tijdVan ? a.tijdVan+(a.tijdTot?' – '+a.tijdTot:'') : 'Hele dag';
-        h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:7px;margin-bottom:4px;border-left:3px solid '+kl+'">';
-        h += '<div style="width:28px;height:28px;border-radius:6px;background:'+kl+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:'+kl+'">'+svg+'</div>';
-        h += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.titel||ti.l)+'</div>';
-        h += '<div style="font-size:11px;color:var(--muted)">'+tijdTekst+'</div></div></div>';
-      });
-      h += '<div style="height:10px"></div>';
-    });
-  }
-  h += '</div>';
-
-  // Afwezig vandaag
-  var _dagNr = new Date(vandaag+'T00:00:00').getDay(); // 0=zo, 6=za
-  var _isWerkdag = _dagNr > 0 && _dagNr < 6;
-  var verlofVandaag  = _isWerkdag ? APP.verlof.filter(function(v){return v.status==='goedgekeurd'&&v.van<=vandaag&&(v.tot||v.van)>=vandaag&&_medInDienst(v.medId);}) : [];
-  var verzuimVandaag = _isWerkdag ? APP.verzuim.filter(function(v){return _medInDienst(v.medId) && verzuimOpDag(v.medId, vandaag) === v;}) : [];
-  var afwezig = verlofVandaag.map(function(v){
-    var m=getMed(v.medId);
-    return{med:m, reden: verlofRedenLabel(v)};
-  }).concat(verzuimVandaag.map(function(v){var m=getMed(v.medId);return{med:m,ziek:true,reden:(v.type==='gedeeltelijk'?'Gedeeltelijk':v.status==='langdurig'?'Langdurig':'Ziek')};}) );
-  h += '<div class="card" style="padding:14px 16px">';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
-  h += '<div style="font-weight:700;font-size:14px"><svg width="16" height="16" style="flex-shrink:0;vertical-align:middle;margin-right:6px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span style="vertical-align:middle">Afwezig vandaag</span></div>';
-  h += '<span class="tag '+(afwezig.length?'tag-orange':'tag-green')+'">'+afwezig.length+'</span></div>';
-  if(!afwezig.length){
-    h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 12px;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green-t)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">'+(_isWerkdag ? 'Iedereen aanwezig' : 'Weekend — geen werkdag')+'</div></div>';
-  } else {
-    afwezig.filter(function(a){return a.med;}).forEach(function(a){
-      var kl=medKleur(a.med);
-      h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:7px;margin-bottom:4px">';
-      h += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(a.med)+'</div>';
-      h += '<span style="font-size:13px;font-weight:600;flex:1">'+esc(a.med.voornaam+' '+a.med.achternaam)+'</span>';
-      if(a.ziek) h += '<span style="font-size:12px;color:var(--red);display:inline-flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>'+esc(a.reden)+'</span>';
-      else h += '<span style="font-size:12px;color:var(--muted)">'+esc(a.reden)+'</span>';
-      h += '</div>';
-    });
-  }
-  h += '</div>';
-  h += '</div>'; // rechterkolom (agenda + afwezig)
-
-  h += '</div>'; // hoofd grid
-
-  // ── WERKORDERS: actieve werkorders per type ───────────────────
-  // Werkorders staan in Firestore, dus dit blok wordt asynchroon gevuld.
-  // (Verving het oude werkplaats-blok.)
-  h += '<div id="dash-wo-typen" style="margin-top:16px"></div>';
-
-  // ── Dringende werkorders (volle breedte) ──
-  // Werkorders staan in Firestore, dus deze tegel wordt asynchroon gevuld.
-  h += '<div class="card" style="margin-top:16px" id="dash-wo-dringend">';
-  h += '<div style="font-size:12px;color:var(--muted);padding:4px 0">Dringende werkorders laden\u2026</div>';
-  h += '</div>';
   el.innerHTML = h;
   if(!stil) triggerCountUp();
-  if(typeof _dashWerkorderTypenVul==='function') _dashWerkorderTypenVul();
-  if(typeof _dashDringendVul==='function') _dashDringendVul();
+  if(indeling.indexOf('werkorders') >= 0) _dashWerkordersVul();
+  if(indeling.indexOf('dringend') >= 0) _dashDringendVul();
+  _dashBind(el);
+}
 
-  el.querySelectorAll('.dash-actie-btn').forEach(function(b){
-    b.addEventListener('click', function(){ navigateTo(b.dataset.nav); });
+// Vel om blokken aan/uit te zetten en te verplaatsen.
+function _dashVelHtml(indeling){
+  var beschikbaar = Object.keys(DASH_BLOKKEN).filter(function(id){ return DASH_BLOKKEN[id].mag(); });
+  var lijst = indeling.concat(beschikbaar.filter(function(id){ return indeling.indexOf(id) < 0; }));
+  var h = '<div class="dash-vel'+(_dashVelOpen ? ' open' : '')+'" id="dash-vel"><div class="dash-vel-in" role="dialog" aria-label="Indeling aanpassen">';
+  h += '<div class="dash-greep"></div><h2>Indeling aanpassen</h2><p class="dash-vel-uitleg">Zet blokken aan of uit en zet ze in de volgorde die jij wilt. Wordt bewaard voor jouw account, op elk apparaat.</p><div class="dash-keuzes">';
+  lijst.forEach(function(id){
+    var b = DASH_BLOKKEN[id], aan = indeling.indexOf(id) >= 0, pos = indeling.indexOf(id);
+    h += '<div class="dash-keuze"><span class="dash-keuze-n">'+esc(b.n)+'<small>'+esc(b.u)+'</small></span>'
+      + '<button type="button" class="dash-pijl" data-op="'+id+'" aria-label="'+esc(b.n)+' omhoog"'+(!aan || pos === 0 ? ' disabled' : '')+'>'+_DASH_ICO.op+'</button>'
+      + '<button type="button" class="dash-pijl" data-neer="'+id+'" aria-label="'+esc(b.n)+' omlaag"'+(!aan || pos === indeling.length-1 ? ' disabled' : '')+'>'+_DASH_ICO.neer+'</button>'
+      + '<button type="button" class="dash-schuif'+(aan ? ' aan' : '')+'" data-sw="'+id+'" role="switch" aria-checked="'+aan+'" aria-label="'+esc(b.n)+' tonen"></button></div>';
   });
-  el.querySelectorAll('.dash-tile[data-nav]').forEach(function(t){
-    if(t.dataset.nav) t.addEventListener('click',function(){ navigateTo(t.dataset.nav); });
-  });
-  // Verlof bijschrijf banner knop
-  var dashVerlofBtn = el.querySelector('#dash-verlof-btn');
-  if(dashVerlofBtn) dashVerlofBtn.addEventListener('click', function(){ openVerlofBijschrijfModal(); });
-  // Klik op opdracht → open panel
-  // Doorklikken naar een opdracht alleen bij leesrecht op planning. Zonder dat recht
-  // blijft de regel staan als informatie, maar zonder klikgedrag of pointer.
-  var _dashMagOpenen = isAdmin() || magLezen('planning');
-  el.querySelectorAll('.dash-opdracht-item[data-id]').forEach(function(item){
-    if(!_dashMagOpenen) { item.style.cursor = 'default'; return; }
-    item.addEventListener('click',function(){
-      openOpdrachtPanel(item.dataset.id);
+  h += '</div><div class="dash-vel-onder"><button type="button" class="btn btn-ghost" id="dash-standaard">Standaard herstellen</button><button type="button" class="btn btn-primary" id="dash-klaar">Klaar</button></div></div></div>';
+  return h;
+}
+
+function _dashBind(el){
+  el.querySelectorAll('[data-nav]').forEach(function(b){ b.addEventListener('click', function(){ navigateTo(b.dataset.nav); }); });
+  var vb = el.querySelector('#dash-verlof-btn'); if(vb) vb.addEventListener('click', function(){ openVerlofBijschrijfModal(); });
+  el.querySelectorAll('[data-opdracht]').forEach(function(item){ item.addEventListener('click', function(){ openOpdrachtPanel(item.dataset.opdracht); }); });
+  el.querySelectorAll('.dash-meer').forEach(function(b){ b.addEventListener('click', function(){ _dashOpen[b.dataset.groep] = !_dashOpen[b.dataset.groep]; _dashHertekenNu(); }); });
+  // Indeling aanpassen
+  var vel = el.querySelector('#dash-vel');
+  var zet = function(lijst){ _dashBewaar(lijst); _dashHertekenNu(); };
+  el.querySelector('#dash-aanpassen').addEventListener('click', function(){ _dashVelOpen = true; vel.classList.add('open'); });
+  el.querySelector('#dash-klaar').addEventListener('click', function(){ _dashVelOpen = false; vel.classList.remove('open'); });
+  vel.addEventListener('click', function(e){ if(e.target === vel){ _dashVelOpen = false; vel.classList.remove('open'); } });
+  el.querySelector('#dash-standaard').addEventListener('click', function(){ zet(null); });
+  el.querySelectorAll('.dash-schuif').forEach(function(b){ b.addEventListener('click', function(){
+    var l = _dashIndeling(), i = l.indexOf(b.dataset.sw); if(i >= 0) l.splice(i, 1); else l.push(b.dataset.sw); zet(l);
+  }); });
+  el.querySelectorAll('[data-op]').forEach(function(b){ b.addEventListener('click', function(){
+    var l = _dashIndeling(), i = l.indexOf(b.dataset.op); if(i > 0){ l.splice(i, 1); l.splice(i-1, 0, b.dataset.op); zet(l); }
+  }); });
+  el.querySelectorAll('[data-neer]').forEach(function(b){ b.addEventListener('click', function(){
+    var l = _dashIndeling(), i = l.indexOf(b.dataset.neer); if(i >= 0 && i < l.length-1){ l.splice(i, 1); l.splice(i+1, 0, b.dataset.neer); zet(l); }
+  }); });
+  _dashTipBind();
+}
+// Direct opnieuw tekenen met behoud van scrollpositie (en van de scroll in het vel).
+function _dashHertekenNu(){
+  var c = document.getElementById('content'), y = c ? c.scrollTop : 0;
+  var k = document.querySelector('.dash-keuzes'), ky = k ? k.scrollTop : 0;
+  renderDashboard(true);
+  if(c) c.scrollTop = y;
+  var k2 = document.querySelector('.dash-keuzes'); if(k2) k2.scrollTop = ky;
+}
+// Tooltip bij grafieken en bezettingsbalken: muis (hover) of tik (telefoon). Eén keer binden.
+function _dashTipBind(){
+  if(window._dashTipGebonden) return;
+  window._dashTipGebonden = true;
+  var tip = document.createElement('div'); tip.className = 'dash-tip'; document.body.appendChild(tip);
+  var toon = function(e){
+    var t = e.target && e.target.closest ? e.target.closest('.dash-blok [data-tip]') : null;
+    if(!t){ tip.style.display = 'none'; return; }
+    var p = e.touches ? e.touches[0] : e;
+    tip.innerHTML = t.getAttribute('data-tip'); tip.style.display = 'block';
+    tip.style.left = Math.max(8, Math.min(p.clientX + 12, innerWidth - tip.offsetWidth - 8))+'px';
+    tip.style.top = Math.max(8, p.clientY - 40)+'px';
+  };
+  document.addEventListener('mousemove', toon);
+  document.addEventListener('touchstart', toon, { passive:true });
+}
+
+// Werkorders per status (nieuw / in uitvoering) en per type, met verlopen deadlines.
+// Asynchroon, want werkorders staan in Firestore; leest uit de bestaande cache.
+function _dashWerkordersVul(){
+  if(!document.getElementById('dash-wo-status')) return;
+  Promise.all([ laadWerkorderTypenCache(false), laadWerkordersCache(false) ]).then(function(res){
+    var vak = document.getElementById('dash-wo-status'); if(!vak) return;
+    var typen = (res[0]||[]).filter(function(t){ return t.actief !== false; }), wos = res[1]||[];
+    var nieuw = 0, bezig = 0, teLaat = 0, perType = {};
+    wos.forEach(function(w){
+      var t = typen.find(function(x){ return String(x.id) === String(w.typeId); });
+      if(!t || _woIsAfgehandeld(w, t)) return;
+      var eerste = Array.isArray(t.statussen) && t.statussen.length ? t.statussen[0].key : null;
+      if(w.status === eerste || !w.status) nieuw++; else bezig++;
+      if(_woDeadlineVerstreken(w)) teLaat++;
+      perType[t.id] = (perType[t.id] || 0) + 1;
     });
+    var tot = nieuw + bezig;
+    if(!tot){ vak.innerHTML = '<div class="dash-leeg">Geen openstaande werkorders.</div>'; return; }
+    var seg = [['Nieuw', nieuw, '--dash-g1'], ['In uitvoering', bezig, '--dash-g2']].filter(function(s){ return s[1]; });
+    var h = '<div class="dash-stapel" role="img" aria-label="'+seg.map(function(s){ return s[0]+' '+s[1]; }).join(', ')+'">'
+      + seg.map(function(s){ return '<span style="flex:'+s[1]+';background:var('+s[2]+')" data-tip="'+s[0]+': <b>'+s[1]+'</b>"></span>'; }).join('')+'</div>';
+    h += '<div class="dash-legenda">'+seg.map(function(s){ return '<span><i style="background:var('+s[2]+')"></i>'+s[0]+' <b>'+s[1]+'</b></span>'; }).join('')+'</div>';
+    h += '<div class="dash-types">'+typen.filter(function(t){ return perType[t.id]; }).map(function(t){
+      return '<button type="button" class="dash-type" data-type="'+esc(t.id)+'">'+esc(t.naam)+' <b>'+perType[t.id]+'</b></button>'; }).join('')+'</div>';
+    if(teLaat) h += '<div class="dash-alarm">'+_DASH_ICO.alarm+teLaat+' werkorder'+(teLaat === 1 ? '' : 's')+' met een verlopen deadline</div>';
+    vak.innerHTML = h;
+    vak.querySelectorAll('.dash-type').forEach(function(b){ b.addEventListener('click', function(){
+      if(typeof _woLijstFilter !== 'undefined'){ _woLijstFilter.typeId = b.dataset.type; _woLijstFilter.weergave = 'actief'; }
+      navigateTo('werkorders');
+    }); });
+  }).catch(function(){
+    var vak = document.getElementById('dash-wo-status');
+    if(vak) vak.innerHTML = '<div class="dash-leeg">Werkorders konden niet geladen worden.</div>';
   });
 }
 
@@ -33504,70 +33737,8 @@ function _woDringendInfo(w, type){
   return null;
 }
 
-// Vult het dashboard-blok met het aantal ACTIEVE werkorders per type.
-// Asynchroon, want werkorders staan in Firestore. Toont niets als er geen
-// openstaande werkorders zijn, zodat het dashboard niet onnodig vol raakt.
-function _dashWerkorderTypenVul(){
-  var blok = document.getElementById('dash-wo-typen');
-  if(!blok) return;
-  if(!(isAdmin() || magLezen('werkorders'))){ blok.innerHTML=''; return; }
-  Promise.all([ laadWerkorderTypenCache(false), laadWerkordersCache(false) ]).then(function(res){
-    var el2 = document.getElementById('dash-wo-typen');
-    if(!el2) return;
-    var typen = (res[0]||[]).filter(function(t){ return t.actief!==false; });
-    var wos   = res[1]||[];
-
-    var telling = {};
-    wos.forEach(function(w){
-      var t = typen.find(function(x){ return String(x.id)===String(w.typeId); });
-      if(!t || _woIsAfgehandeld(w, t)) return;
-      telling[t.id] = (telling[t.id]||0) + 1;
-    });
-    // Alle actieve types tonen, ook als de teller op 0 staat: zo zie je in één
-    // oogopslag welke soorten er zijn én dat er niets openstaat.
-    var metWerk = typen;
-    if(!metWerk.length){ el2.innerHTML = ''; return; }
-
-    var palet = ['#4a6cf7','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4'];
-    function ico16(key){
-      var p = (typeof WO_ICONEN!=='undefined') ? (WO_ICONEN[key]||WO_ICONEN.wrench) : '';
-      return '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+p+'</svg>';
-    }
-
-    var h = '';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
-    h += '<div style="font-weight:700;font-size:14px"><svg width="14" height="14" style="vertical-align:middle;margin-right:6px" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span style="vertical-align:middle">Werkorders</span></div>';
-    h += '<button class="btn btn-ghost btn-sm" id="dash-wo-alles" style="font-size:11px">Bekijken \u2192</button>';
-    h += '</div>';
-    h += '<div class="stats-grid">';
-    metWerk.forEach(function(t, i){
-      var kl = palet[i % palet.length];
-      h += '<div class="wo-sc dash-wo-type" data-id="'+esc(t.id)+'" style="border-radius:var(--radius-pill);cursor:pointer">'+statCard(t.naam, String(telling[t.id]), kl, ico16(t.icoon))+'</div>';
-    });
-    h += '</div>';
-    el2.innerHTML = h;
-    if(typeof triggerCountUp==='function') triggerCountUp(el2);
-
-    // Klik op een kaart: naar de werkorders, meteen gefilterd op dat type.
-    el2.querySelectorAll('.dash-wo-type').forEach(function(kaart){
-      kaart.addEventListener('click', function(){
-        if(typeof _woLijstFilter!=='undefined'){ _woLijstFilter.typeId = kaart.dataset.id; _woLijstFilter.weergave = 'actief'; }
-        navigateTo('werkorders');
-      });
-    });
-    var allesBtn = el2.querySelector('#dash-wo-alles');
-    if(allesBtn) allesBtn.addEventListener('click', function(){
-      if(typeof _woLijstFilter!=='undefined'){ _woLijstFilter.typeId = ''; _woLijstFilter.weergave = 'actief'; }
-      navigateTo('werkorders');
-    });
-  }).catch(function(){
-    var el2 = document.getElementById('dash-wo-typen');
-    if(el2) el2.innerHTML = '';
-  });
-}
-
-// Vult de dashboard-tegel met dringende werkorders. Asynchroon, want werkorders
-// staan in Firestore terwijl de rest van het dashboard uit RTDB komt.
+// Vult het blok "Dringende werkorders". Asynchroon, want werkorders staan in Firestore
+// terwijl de rest van het dashboard uit RTDB komt; leest uit de bestaande cache.
 function _dashDringendVul(){
   if(!document.getElementById('dash-wo-dringend')) return;
   Promise.all([ laadWerkorderTypenCache(false), laadWerkordersCache(false) ]).then(function(res){
@@ -33587,43 +33758,34 @@ function _dashDringendVul(){
       if(ad !== bd) return ad < bd ? -1 : 1;
       return (b.w.nummer||0)-(a.w.nummer||0);
     });
-    var teLaat = items.filter(function(i){ return i.info.soort==='verstreken'; }).length;
-
-    var h = '';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
-    h += '<div style="font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px"><svg width="16" height="16" style="color:var(--muted)" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Dringende werkorders</div>';
-    if(items.length) h += '<span class="tag '+(teLaat?'tag-red':'tag-orange')+'">'+items.length+'</span>';
-    h += '</div>';
-
+    var h = _dashKop(_DASH_ICO.alarm, 'Dringende werkorders'+(items.length ? ' · '+items.length : ''), 'werkorders', 'Werkorders');
     if(!items.length){
-      h += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 12px;gap:8px"><div style="width:36px;height:36px;border-radius:50%;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;color:var(--green-t)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><div style="font-size:12px;color:var(--muted)">Geen dringende werkorders</div></div>';
+      h += '<div class="dash-leeg">Geen dringende werkorders.</div>';
     } else {
       items.slice(0,8).forEach(function(it){
         var w = it.w, info = it.info;
         var klant = w.tbvVoorraad ? 'T.b.v. voorraad' : (w.klantnaam || (typeof debNaam==='function' ? debNaam(w.debId) : '') || '');
-        var typeNaam = w.typeNaam || (it.t && it.t.naam) || '';
-        var kop = _woNummerLabel(w)+(klant?(' \u00b7 '+klant):'');
-        var sub = typeNaam + (w.details ? (' \u00b7 '+w.details) : '');
-        h += '<div class="dash-wo-item" data-id="'+esc(w.id)+'" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:7px;margin-bottom:4px;cursor:pointer;border-left:3px solid '+info.kleur+'">';
-        h += '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(kop)+'</div>';
-        h += '<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(sub||'\u2014')+'</div></div>';
-        h += '<span style="font-size:11px;font-weight:600;color:'+_klTekst(info.kleur)+';white-space:nowrap">'+esc(info.label)+'</span></div>';
+        var sub = (w.typeNaam || (it.t && it.t.naam) || '') + (w.details ? (' · '+w.details) : '');
+        h += '<div class="dash-item" data-wo="'+esc(w.id)+'" role="button" tabindex="0">'
+          + '<span class="dash-item-t" style="width:auto;color:var(--accent-t)">'+esc(_woNummerLabel(w))+'</span>'
+          + '<span class="dash-item-k">'+esc(klant || '—')+(sub ? '<small>'+esc(sub)+'</small>' : '')+'</span>'
+          + '<span class="dash-st" style="background:'+_kleurTint(info.kleur,'22')+';color:'+_klTekst(info.kleur)+'">'+esc(info.label)+'</span></div>';
       });
-      if(items.length > 8) h += '<div style="font-size:11px;color:var(--muted);text-align:center;padding:6px 0">+'+(items.length-8)+' meer</div>';
+      if(items.length > 8) h += '<button type="button" class="dash-meer" data-nav="werkorders">Nog '+(items.length-8)+' in Werkorders</button>';
     }
     kaart.innerHTML = h;
-
     // Klik op een regel: naar de werkorders-module en die werkorder openen.
-    kaart.querySelectorAll('.dash-wo-item').forEach(function(rij){
+    kaart.querySelectorAll('[data-wo]').forEach(function(rij){
       rij.addEventListener('click', function(){
-        var id = rij.dataset.id;
+        var id = rij.dataset.wo;
         navigateTo('werkorders');
         setTimeout(function(){ if(typeof _woOpenDetail==='function') _woOpenDetail(id); }, 350);
       });
     });
+    kaart.querySelectorAll('[data-nav]').forEach(function(b){ b.addEventListener('click', function(){ navigateTo(b.dataset.nav); }); });
   }).catch(function(){
     var kaart = document.getElementById('dash-wo-dringend');
-    if(kaart) kaart.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">Dringende werkorders konden niet geladen worden.</div>';
+    if(kaart) kaart.innerHTML = '<div class="dash-leeg">Dringende werkorders konden niet geladen worden.</div>';
   });
 }
 
