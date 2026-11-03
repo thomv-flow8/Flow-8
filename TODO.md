@@ -518,7 +518,8 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       of eigen-recht op werkbonnen heeft, net als de Firestore-rules.
 - [ ] **Bonfoto's naar Firebase Storage** — staan nu (verkleind) als base64 in de RTDB-records van
       onkosten. Verhuizen raakt ook bestaande declaraties; eigen stap.
-- [ ] **Rapportage: getallen met punt** — o.a. "5.5d"; eigen opmaak in Rapportage.
+- [x] **Rapportage: getallen en kleuren** (3 november 2026) — alle bedragen/uren via `_nlGetal`/`_nlAantal`/`_nlEuro` (komma, duizendtal-punt); verlof overal in uren; export als echte getallen; tekstkleuren in de `-t`-tokens, sorteerkop app-breed `--accent-t`; vaste kleur per onkostencategorie; verloftypen weer in kleur (data staat als "Vakantie"/"ATV"); "uur opgenomen" in het medewerkerpaneel telt alleen goedgekeurd verlof. Bovenste regel vaste hoogte.
+- [ ] **Rapportage: grafieken en telefoon** — volgens `rapportage-preview.html` (lokaal): uren per maand met eigen schaal voor verlof/verzuim/overuren, soort werk per monteur, tabbladen in één rij, kaarten i.p.v. tabellen.
 - [x] **Instelbaar dashboard** (3 november 2026) — volgens `dashboard-preview.html` (lokaal, niet in
       git). Blokken aan/uit en in volgorde via "Indeling aanpassen", bewaard per gebruiker in
       `flow8/gebruikers/<uid>/dashboard` (geen regelwijziging nodig: `$overig` mag). Standaard per rol

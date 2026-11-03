@@ -172,10 +172,10 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 /* Sorteerbare kolomkoppen — nieuwe stijl (accent op actief, hover-feedback) */
 th[data-sort]{transition:color .15s,background .15s}
 th[data-sort]:hover{color:var(--text);background:rgba(127,127,127,.06)}
-th[data-sort].sort-active{color:var(--accent)}
+th[data-sort].sort-active{color:var(--accent-t)}
 th[data-sort] .sort-arrow{display:inline-block;margin-left:5px;font-size:9px;transition:opacity .15s,color .15s}
 th[data-sort] .sort-arrow.inactief{opacity:.3}
-th[data-sort].sort-active .sort-arrow{color:var(--accent);opacity:1}
+th[data-sort].sort-active .sort-arrow{color:var(--accent-t);opacity:1}
 table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--surface)}
 thead{position:sticky;top:0;z-index:2}
 thead th{background:var(--surface)}
@@ -29430,7 +29430,7 @@ function renderRapportage() {
     { k:'verzuim',        l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Verzuim</span></span>' },
     { k:'storingsdienst', l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg><span>Storingsdienst</span></span>' },
   ];
-  var h = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">';
+  var h = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;min-height:48px">';
   h += '<button class="btn btn-ghost btn-sm" id="rap-prev-jaar">‹</button>';
   h += '<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+_rapJaar+'</div>';
   h += '<button class="btn btn-ghost btn-sm" id="rap-next-jaar">›</button>';
@@ -29466,6 +29466,17 @@ function renderRapportage() {
   else if (_rapTab==='verzuim')        renderRapVerzuim(rc);
   else if (_rapTab==='storingsdienst') renderRapStoringsdienst(rc);
 }
+
+// Getallen in rapportage in Nederlandse notatie: komma als decimaal, punt als duizendtal.
+// toFixed() gaf "5.5" naast "6.971" — dat leest als vijfduizend-vijfhonderd.
+function _nlGetal(n, dec){
+  return (Number(n)||0).toLocaleString('nl-NL', { minimumFractionDigits:dec||0, maximumFractionDigits:dec||0 });
+}
+// Uren/dagen: één decimaal alleen als die er is ("40", "5,5"); vangt ook optelruis (0.1+0.2) af.
+function _nlAantal(n){ var x = Math.round((Number(n)||0)*10)/10; return _nlGetal(x, x%1 ? 1 : 0); }
+function _nlEuro(n, dec){ return '€ '+_nlGetal(n, dec==null ? 2 : dec); }
+// Voor de export: een echt getal (geen tekst als "1.5"), zodat Excel ermee kan rekenen.
+function _rapExportGetal(n){ return Math.round((Number(n)||0)*10)/10; }
 
 // ── SVG Donut helper ─────────────────────────────────────────────
 // ── Grafiek tooltip systeem ──────────────────────────────────────
@@ -29528,7 +29539,7 @@ function donutSVG(segmenten, midden) {
     var x1=cx+r*Math.cos(hoek),y1=cy+r*Math.sin(hoek);
     var x2=cx+r*Math.cos(hoek+sweep-0.001),y2=cy+r*Math.sin(hoek+sweep-0.001);
     var pct=Math.round(seg.waarde/totaal*100);
-    var tip=esc(seg.label)+': '+(seg.weergave!=null?esc(String(seg.weergave)):seg.waarde)+' ('+pct+'%)';
+    var tip=esc(seg.label)+': '+(seg.weergave!=null?esc(String(seg.weergave)):_nlAantal(seg.waarde))+' ('+pct+'%)';
     paden+='<path class="donut-seg" data-tip="'+tip+'" data-kl="'+seg.kleur+'" d="M'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+r+','+r+' 0 '+groot+',1 '+x2.toFixed(2)+','+y2.toFixed(2)+'" fill="none" stroke="'+seg.kleur+'" stroke-width="'+dik+'" stroke-linecap="butt" style="cursor:pointer;transition:stroke-width .15s,opacity .15s" onmouseover="this.setAttribute(\'stroke-width\',\'34\');this.style.opacity=\'.85\'" onmouseout="this.setAttribute(\'stroke-width\',\''+dik+'\');this.style.opacity=\'1\'"/>';
     hoek+=sweep;
   });
@@ -29546,7 +29557,7 @@ function legendaHTML(segmenten,totaal) {
     h+='<div style="display:flex;align-items:center;gap:7px">';
     h+='<div style="width:10px;height:10px;border-radius:3px;background:'+s.kleur+';flex-shrink:0"></div>';
     h+='<div style="flex:1;font-size:12px">'+esc(s.label)+'</div>';
-    h+='<div style="font-size:12px;font-weight:700">'+(s.weergave!=null?esc(String(s.weergave)):s.waarde)+'</div>';
+    h+='<div style="font-size:12px;font-weight:700">'+(s.weergave!=null?esc(String(s.weergave)):_nlAantal(s.waarde))+'</div>';
     h+='<div style="font-size:11px;color:var(--muted);min-width:30px;text-align:right">'+pct+'%</div></div>';
   });
   return h+'</div>';
@@ -29644,7 +29655,7 @@ function openRapMedPanel(medId, tabNaam) {
   if(tabNaam==='overuren') {
     var data = filterEigen(APP.overuren,'medId','overuren').filter(function(o){return String(o.medId)===String(medId)&&(o.datum||'').startsWith(jaarStr);}).sort(function(a,b){return(b.datum||'')>(a.datum||'')?1:-1;});
     var totUren = data.reduce(function(s,o){return s+(o.uren||0);},0);
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data.length+' registraties · '+totUren+'u totaal in '+jaarStr+'</div>';
+    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data.length+' registraties · '+_nlAantal(totUren)+'u totaal in '+jaarStr+'</div>';
     h += '<div style="display:flex;flex-direction:column;gap:6px">';
     data.forEach(function(o){
       var stKleur={aangevraagd:'var(--orange)',goedgekeurd:'var(--accent)',gecompenseerd:'var(--green)',uitbetaald:'var(--muted)',afgewezen:'var(--red)'}[o.status]||'var(--muted)';
@@ -29652,8 +29663,8 @@ function openRapMedPanel(medId, tabNaam) {
       h += '<div style="display:flex;justify-content:space-between;align-items:center">';
       h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(o.datum)+(o.omschrijving?' · '+esc(o.omschrijving):'')+'</div>';
       h += '<div style="font-size:11px;color:var(--muted)">'+(o.type==='uitbetaling'?ICO.euro+' Uitbetaling':ICO.refresh+' Compensatie')+'</div></div>';
-      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--accent)">'+o.uren+'u</div>';
-      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(o.status)+'</div></div></div></div>';
+      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--accent-t)">'+_nlAantal(o.uren)+'u</div>';
+      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(o.status))+'</div></div></div></div>';
     });
     if(!data.length) h += '<div style="color:var(--muted);font-size:13px">Geen overuren in '+jaarStr+'</div>';
     h += '</div>';
@@ -29661,7 +29672,7 @@ function openRapMedPanel(medId, tabNaam) {
   } else if(tabNaam==='onkosten') {
     var data2 = filterEigen(APP.onkosten,'medId','onkosten').filter(function(o){return String(o.medId)===String(medId)&&(o.datum||'').startsWith(jaarStr);}).sort(function(a,b){return(b.datum||'')>(a.datum||'')?1:-1;});
     var totBedrag = data2.reduce(function(s,o){return s+(o.bedrag||0);},0);
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data2.length+' declaraties · € '+totBedrag.toFixed(2)+' totaal in '+jaarStr+'</div>';
+    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data2.length+' declaraties · '+_nlEuro(totBedrag)+' totaal in '+jaarStr+'</div>';
     h += '<div style="display:flex;flex-direction:column;gap:6px">';
     data2.forEach(function(o){
       var stKleur={aangevraagd:'var(--orange)',goedgekeurd:'var(--accent)',uitbetaald:'var(--green)',afgewezen:'var(--red)'}[o.status]||'var(--muted)';
@@ -29669,8 +29680,8 @@ function openRapMedPanel(medId, tabNaam) {
       h += '<div style="display:flex;justify-content:space-between;align-items:center">';
       h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(o.datum)+' · '+esc(o.categorie||'—')+'</div>';
       h += '<div style="font-size:11px;color:var(--muted)">'+esc(o.omschrijving||'')+'</div></div>';
-      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--green-t)">€ '+(o.bedrag||0).toFixed(2)+'</div>';
-      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(o.status)+'</div></div></div></div>';
+      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--green-t)">'+_nlEuro(o.bedrag)+'</div>';
+      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(o.status))+'</div></div></div></div>';
     });
     if(!data2.length) h += '<div style="color:var(--muted);font-size:13px">Geen onkosten in '+jaarStr+'</div>';
     h += '</div>';
@@ -29678,7 +29689,7 @@ function openRapMedPanel(medId, tabNaam) {
   } else if(tabNaam==='verlof') {
     var data3 = filterEigen(APP.verlof,'medId','verlof').filter(function(v){return String(v.medId)===String(medId)&&(v.van||'').startsWith(jaarStr);}).sort(function(a,b){return(b.van||'')>(a.van||'')?1:-1;});
     var totDagen = data3.filter(function(v){return v.status==='goedgekeurd';}).reduce(function(s,v){return s+(parseFloat(v.dagen)||0);},0);
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data3.length+' aanvragen · '+verlofOpgenomenUren(data3).toFixed(1)+' uur opgenomen · Saldo: '+getVerlofSaldoUren(m).toFixed(1)+'u</div>';
+    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data3.length+' aanvragen · '+_nlAantal(verlofOpgenomenUren(data3.filter(function(v){return v.status==='goedgekeurd';}), m))+' uur opgenomen · Saldo: '+_nlAantal(getVerlofSaldoUren(m))+'u</div>';
     h += '<div style="display:flex;flex-direction:column;gap:6px">';
     data3.forEach(function(v){
       var stKleur={aangevraagd:'var(--orange)',goedgekeurd:'var(--green)',afgewezen:'var(--red)'}[v.status]||'var(--muted)';
@@ -29686,8 +29697,8 @@ function openRapMedPanel(medId, tabNaam) {
       h += '<div style="display:flex;justify-content:space-between;align-items:center">';
       h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(v.van)+(v.tot&&v.tot!==v.van?' t/m '+fmtD(v.tot):'')+'</div>';
       h += '<div style="font-size:11px;color:var(--muted)">'+esc(v.type||'vakantie')+'</div></div>';
-      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--accent)">'+(parseFloat(v.dagen)||0).toFixed(1)+'d</div>';
-      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(v.status)+'</div></div></div></div>';
+      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--accent-t)">'+_nlAantal(verlofOpgenomenUren([v], m))+'u</div>';
+      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(v.status))+'</div></div></div></div>';
     });
     if(!data3.length) h += '<div style="color:var(--muted);font-size:13px">Geen verlofaanvragen in '+jaarStr+'</div>';
     h += '</div>';
@@ -29708,7 +29719,7 @@ function openRapMedPanel(medId, tabNaam) {
       h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(v.van)+(v.tot?' → '+fmtD(v.tot):'  → nog ziek')+'</div>';
       h += '<div style="font-size:11px;color:var(--muted)">'+typeLabel+'</div></div>';
       h += '<div style="text-align:right"><div style="font-weight:800;color:'+_klTekst(stKleur)+'">'+duur+'d</div>';
-      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(v.status)+'</div></div></div></div>';
+      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(v.status))+'</div></div></div></div>';
     });
     if(!data4.length) h += '<div style="color:var(--muted);font-size:13px">Geen verzuim in '+jaarStr+'</div>';
     h += '</div>';
@@ -29897,7 +29908,7 @@ function renderRapOpdrachten(el) {
     h += '<td style="font-weight:700">'+r.totaal+'</td>';
     h += '<td style="color:var(--green-t);font-weight:600">'+r.afgehandeld+'</td>';
     h += '<td style="color:var(--orange-t)">'+r.open+'</td>';
-    h += '<td style="color:var(--red)">'+r.spoed+'</td>';
+    h += '<td style="color:var(--red-t)">'+r.spoed+'</td>';
     h += '<td><div style="display:flex;align-items:center;gap:8px"><div class="progress" style="width:80px"><div class="progress-fill" style="width:'+pct+'%;background:'+(pct>=80?'var(--green)':pct>=50?'var(--orange)':'var(--red)')+'"></div></div><span style="font-size:12px">'+pct+'%</span></div></td>';
     h += '</tr>';
   });
@@ -30041,7 +30052,7 @@ function renderRapServiceklanten(el) {
     h += '<tr>';
     h += '<td><span class="tag" style="background:'+_kleurTint(r.kleur,'22')+';color:'+_klTekst(r.kleur)+'">'+esc(r.code)+'</span></td>';
     h += '<td style="font-weight:600">'+r.actief+'</td>';
-    h += '<td style="color:'+(r.vervallen?'var(--red)':'var(--muted)')+'">'+r.vervallen+'</td>';
+    h += '<td style="color:'+(r.vervallen?'var(--red-t)':'var(--muted)')+'">'+r.vervallen+'</td>';
     h += '<td style="color:var(--orange-t)">'+r.contractB+'</td>';
     h += '<td style="color:var(--muted)">'+r.passief+'</td>';
     h += '</tr>';
@@ -30056,15 +30067,15 @@ function renderRapServiceklanten(el) {
     });
     skVervRijen = sorteerLijst(skVervRijen, _rapSkVervSortKey, _rapSkVervSortDir);
     function _skvTh(label, key){ var a=_rapSkVervSortKey===key; return '<th class="rap-skverv-th '+sortCls(a)+'" data-sort="'+key+'" style="cursor:pointer;user-select:none;white-space:nowrap">'+label+sortArrow(a,_rapSkVervSortDir)+'</th>'; }
-    h += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:14px;color:var(--red)">Vervallen serviceklanten ('+vervallen.length+')</div>';
+    h += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:14px;color:var(--red-t)">Vervallen serviceklanten ('+vervallen.length+')</div>';
     h += '<div class="table-wrap"><table style="width:100%"><thead><tr>'+_skvTh('Klant','naam')+_skvTh('Contract','contract')+_skvTh('Laatste beurt','laatste')+_skvTh('Volgende beurt','volgende')+_skvTh('Verlopen','maanden')+'</tr></thead><tbody>';
     skVervRijen.forEach(function(r){
       h += '<tr>';
       h += '<td style="font-weight:600">'+esc(r.naam)+'</td>';
       h += '<td><span class="tag" style="font-size:10px">'+esc(r.contract)+'</span></td>';
       h += '<td style="font-size:12px">'+fmtD(r.laatste)+'</td>';
-      h += '<td style="font-size:12px;color:var(--red)">'+fmtD(r.volgende)+'</td>';
-      h += '<td style="font-size:12px;font-weight:700;color:var(--red)">'+r.maanden+' mnd</td>';
+      h += '<td style="font-size:12px;color:var(--red-t)">'+fmtD(r.volgende)+'</td>';
+      h += '<td style="font-size:12px;font-weight:700;color:var(--red-t)">'+r.maanden+' mnd</td>';
       h += '</tr>';
     });
     h += '</tbody></table></div>';
@@ -30314,7 +30325,7 @@ function renderRapWerkorders(el) {
     el.innerHTML = h;
     initGrafiekInteractie(el);
   }).catch(function(e){
-    el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--red)">Laden mislukt: '+esc(e.message||String(e))+'</div>';
+    el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--red-t)">Laden mislukt: '+esc(e.message||String(e))+'</div>';
   });
 }
 
@@ -30452,16 +30463,17 @@ function renderRapPersoonlijk(el) {
   // ── Team stats ──
   var totVlOp=0,totOu=0,totOk=0,totVz=0;
   actieve.forEach(function(m){
-    totVlOp+=APP.verlof.filter(function(v){return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&(v.van||'').startsWith(jaarStr);}).reduce(function(s,v){return s+(parseFloat(v.dagen)||0);},0);
+    // In uren, net als de tabel eronder (stond in dagen: "5.5d" boven "40.0u").
+    totVlOp+=verlofOpgenomenUren(APP.verlof.filter(function(v){return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&(v.van||'').startsWith(jaarStr);}), m);
     totOu+=APP.overuren.filter(function(o){return String(o.medId)===String(m.id)&&(o.datum||'').startsWith(jaarStr);}).reduce(function(s,o){return s+(o.uren||0);},0);
     totOk+=APP.onkosten.filter(function(o){return String(o.medId)===String(m.id)&&(o.datum||'').startsWith(jaarStr);}).reduce(function(s,o){return s+(o.bedrag||0);},0);
     totVz+=APP.verzuim.filter(function(v){return String(v.medId)===String(m.id)&&(v.van||'').startsWith(jaarStr);}).reduce(function(s,v){return s+telWerkdagen(v.van,v.tot||null);},0);
   });
 
   var h='<div class="stats-grid" style="margin-bottom:16px">';
-  h+=statCard('Verlof opgenomen '+jaarStr, totVlOp.toFixed(1)+'d', '#4a6cf7', SVGS.file);
-  h+=statCard('Overuren '+jaarStr, totOu+'u', '#f59e0b', SVGS.alert);
-  h+=statCard('Onkosten '+jaarStr, '€'+Math.round(totOk), '#10b981', SVGS.file);
+  h+=statCard('Verlof opgenomen '+jaarStr, _nlAantal(totVlOp)+'u', '#4a6cf7', SVGS.file);
+  h+=statCard('Overuren '+jaarStr, _nlAantal(totOu)+'u', '#f59e0b', SVGS.alert);
+  h+=statCard('Onkosten '+jaarStr, _nlEuro(totOk,0), '#10b981', SVGS.file);
   h+=statCard('Verzuim '+jaarStr, totVz+'d', totVz>20?'#ef4444':'#6b7694', SVGS.alert);
   h+='</div>';
 
@@ -30486,11 +30498,11 @@ function renderRapPersoonlijk(el) {
     var m=r.med, kl=medKleur(m), saldo=r.saldo, vlOp=r.opgenomen, ouTot=r.overuren, okTot=r.onkosten, vzDagen=r.verzuim;
     h+='<tr style="cursor:pointer" class="rap-med-rij" data-id="'+m.id+'">';
     h+='<td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div><div><div style="font-size:13px;font-weight:600">'+esc(r.naam)+'</div><div style="font-size:11px;color:var(--muted)">'+esc(m.rol||'')+'</div></div></div></td>';
-    h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red)':saldo>0?'var(--green)':'var(--muted)')+'">'+saldo.toFixed(1)+'u</td>';
-    h+='<td style="padding:10px 14px;color:var(--muted)">'+vlOp.toFixed(1)+'u</td>';
-    h+='<td style="padding:10px 14px;font-weight:'+(ouTot?'700':'400')+';color:'+(ouTot?'var(--accent)':'var(--muted)')+'">'+ouTot+'u</td>';
-    h+='<td style="padding:10px 14px;font-weight:'+(okTot?'700':'400')+';color:'+(okTot?'var(--green)':'var(--muted)')+'">€ '+okTot.toFixed(0)+'</td>';
-    h+='<td style="padding:10px 14px;color:'+(vzDagen>10?'var(--red)':vzDagen>0?'var(--orange)':'var(--muted)')+'">'+vzDagen+'d</td>';
+    h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)')+'">'+_nlAantal(saldo)+'u</td>';
+    h+='<td style="padding:10px 14px;color:var(--muted)">'+_nlAantal(vlOp)+'u</td>';
+    h+='<td style="padding:10px 14px;font-weight:'+(ouTot?'700':'400')+';color:'+(ouTot?'var(--accent-t)':'var(--muted)')+'">'+_nlAantal(ouTot)+'u</td>';
+    h+='<td style="padding:10px 14px;font-weight:'+(okTot?'700':'400')+';color:'+(okTot?'var(--green-t)':'var(--muted)')+'">'+_nlEuro(okTot,0)+'</td>';
+    h+='<td style="padding:10px 14px;color:'+(vzDagen>10?'var(--red-t)':vzDagen>0?'var(--orange-t)':'var(--muted)')+'">'+vzDagen+'d</td>';
     h+='</tr>';
   });
   h+='</tbody></table></div></div>';
@@ -30509,7 +30521,7 @@ function renderRapPersoonlijk(el) {
         var ouT=APP.overuren.filter(function(o){return String(o.medId)===String(m.id)&&(o.datum||'').startsWith(jaarStr2);}).reduce(function(s,o){return s+(o.uren||0);},0);
         var okT=APP.onkosten.filter(function(o){return String(o.medId)===String(m.id)&&(o.datum||'').startsWith(jaarStr2);}).reduce(function(s,o){return s+(o.bedrag||0);},0);
         var vzD=APP.verzuim.filter(function(v){return String(v.medId)===String(m.id)&&(v.van||'').startsWith(jaarStr2);}).reduce(function(s,v){return s+telWerkdagen(v.van,v.tot||null);},0);
-        return[m.voornaam+' '+m.achternaam,m.rol||'',getVerlofSaldoUren(m).toFixed(1),vlOp2.toFixed(1),ouT,okT.toFixed(2),vzD];
+        return[m.voornaam+' '+m.achternaam,m.rol||'',_rapExportGetal(getVerlofSaldoUren(m)),_rapExportGetal(vlOp2),_rapExportGetal(ouT),Math.round(okT*100)/100,vzD];
       }),'medewerkers_overzicht_'+_rapJaar);
   });
 }
@@ -30530,11 +30542,11 @@ function openRapMedPersoonlijkPanel(medId) {
   h+='<div><div style="font-weight:800;font-size:15px">'+esc(m.voornaam+' '+m.achternaam)+'</div><div style="font-size:12px;color:var(--muted)">'+esc(m.rol||'')+'</div></div></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">';
   function sb(l,v,kl2){return '<div style="background:var(--surface2);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px">'+l+'</div><div style="font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:800;color:'+(kl2||'var(--text)')+'">'+v+'</div></div>';}
-  h+=sb('Verlof saldo',saldo.toFixed(1)+'u',saldo<0?'var(--red)':saldo>0?'var(--green)':'var(--muted)');
-  h+=sb('Opgenomen '+jaarStr,vlOp.toFixed(1)+'u','var(--accent)');
-  h+=sb('Overuren '+jaarStr,ouTot+'u',ouTot?'var(--orange)':'var(--muted)');
-  h+=sb('Onkosten '+jaarStr,'€ '+okTot.toFixed(0),okTot?'var(--green)':'var(--muted)');
-  h+=sb('Verzuim '+jaarStr,vzDagen+'d',vzDagen>10?'var(--red)':vzDagen>0?'var(--orange)':'var(--green)');
+  h+=sb('Verlof saldo',_nlAantal(saldo)+'u',saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)');
+  h+=sb('Opgenomen '+jaarStr,_nlAantal(vlOp)+'u','var(--accent-t)');
+  h+=sb('Overuren '+jaarStr,_nlAantal(ouTot)+'u',ouTot?'var(--orange-t)':'var(--muted)');
+  h+=sb('Onkosten '+jaarStr,_nlEuro(okTot,0),okTot?'var(--green-t)':'var(--muted)');
+  h+=sb('Verzuim '+jaarStr,vzDagen+'d',vzDagen>10?'var(--red-t)':vzDagen>0?'var(--orange-t)':'var(--green-t)');
   h+='</div>';
   h+='<div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:12px">';
   [['overuren',ICO.clock+' Bekijk overuren'],['onkosten','Bekijk onkosten'],['verlof','Bekijk verlof'],['verzuim','Bekijk verzuim'],['storingsdienst','Bekijk storingsdiensten']].forEach(function(x){
@@ -30565,7 +30577,7 @@ function renderRapOveruren(el) {
   ].filter(function(s){return s.waarde>0;});
 
   var h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
-  h+=grafiekKaart('Uren per status',donutSVG(segStatus,totUren+'u|totaal'),legendaHTML(segStatus,totUren));
+  h+=grafiekKaart('Uren per status',donutSVG(segStatus,_nlAantal(totUren)+'u|totaal'),legendaHTML(segStatus,totUren));
   h+=grafiekKaart('Type verdeling',donutSVG(segType,data.length+'|registraties'),legendaHTML(segType,data.length));
   h+='</div>';
 
@@ -30579,14 +30591,14 @@ function renderRapOveruren(el) {
   var BAR_H=130;
 
   h+=staafDiagram('Overuren per maand — '+jaarStr, mndData, maxMnd,
-    function(d){ var t=d.comp+d.uitb+d.open; return t?t+'u':''; },
+    function(d){ var t=d.comp+d.uitb+d.open; return t?_nlAantal(t)+'u':''; },
     function(d){ var t=d.comp+d.uitb+d.open; if(!t) return [];
       var bH=Math.max(4,Math.round(t/maxMnd*BAR_H));
       var cH=Math.round(d.comp/t*bH), uH=Math.round(d.uitb/t*bH), oH=bH-cH-uH;
       var r=[];
-      if(oH>0)r.push({h:oH,kl:'#f59e0b',tip:d.mn+' — Aangevraagd: '+d.open+'u'});
-      if(uH>0)r.push({h:uH,kl:'#6b7694',tip:d.mn+' — Uitbetaald: '+d.uitb+'u'});
-      if(cH>0)r.push({h:cH,kl:'#10b981',tip:d.mn+' — Gecompenseerd: '+d.comp+'u'});
+      if(oH>0)r.push({h:oH,kl:'#f59e0b',tip:d.mn+' — Aangevraagd: '+_nlAantal(d.open)+'u'});
+      if(uH>0)r.push({h:uH,kl:'#6b7694',tip:d.mn+' — Uitbetaald: '+_nlAantal(d.uitb)+'u'});
+      if(cH>0)r.push({h:cH,kl:'#10b981',tip:d.mn+' — Gecompenseerd: '+_nlAantal(d.comp)+'u'});
       return r;},
     [{kl:'#10b981',l:'Gecompenseerd'},{kl:'#6b7694',l:'Uitbetaald'},{kl:'#f59e0b',l:'Aangevraagd'}]);
 
@@ -30602,7 +30614,7 @@ function renderRapOveruren(el) {
   ouRijen.forEach(function(r){
     var m=r.med, kl=m?(medKleur(m)):'#6b7694';
     h+='<tr class="rap-med-rij" data-id="'+r.mid+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px">'+(m?'<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>':'')+'<span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
-    h+='<td style="padding:10px 14px;font-weight:700">'+r.totaal+'u</td><td style="padding:10px 14px">'+r.goedgekeurd+'u</td><td style="padding:10px 14px;color:var(--green-t)">'+r.gecompenseerd+'u</td><td style="padding:10px 14px;color:var(--muted)">'+r.uitbetaald+'u</td></tr>';
+    h+='<td style="padding:10px 14px;font-weight:700">'+_nlAantal(r.totaal)+'u</td><td style="padding:10px 14px">'+_nlAantal(r.goedgekeurd)+'u</td><td style="padding:10px 14px;color:var(--green-t)">'+_nlAantal(r.gecompenseerd)+'u</td><td style="padding:10px 14px;color:var(--muted)">'+_nlAantal(r.uitbetaald)+'u</td></tr>';
   });
   if(!ouRijen.length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
@@ -30620,7 +30632,10 @@ function renderRapOnkosten(el) {
   var totaal=data.reduce(function(s,o){return s+(o.bedrag||0);},0);
   var catTotalen={};var catKl=['#4a6cf7','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#6b7694'];
   data.forEach(function(o){catTotalen[o.categorie||'Overig']=(catTotalen[o.categorie||'Overig']||0)+(o.bedrag||0);});
-  var catSegs=Object.keys(catTotalen).map(function(c,i){return{label:c,waarde:Math.round(catTotalen[c]*100)/100,kleur:catKl[i%catKl.length]};}).sort(function(a,b){return b.waarde-a.waarde;});
+  // Kleur hoort bij de categorie zelf, niet bij de volgorde: anders wisselt "Parkeren" van kleur
+  // zodra je een ander jaar of een andere medewerker kiest.
+  function _okCatKleur(c){ var i=OK_CATEGORIEEN.indexOf(c); return i>=0 ? catKl[i%catKl.length] : '#6b7694'; }
+  var catSegs=Object.keys(catTotalen).map(function(c){return{label:c,waarde:Math.round(catTotalen[c]*100)/100,weergave:_nlEuro(catTotalen[c]),kleur:_okCatKleur(c)};}).sort(function(a,b){return b.waarde-a.waarde;});
   var stSegs=[
     {label:'Aangevraagd',waarde:data.filter(function(o){return o.status==='aangevraagd';}).reduce(function(s,o){return s+(o.bedrag||0);},0),kleur:'#f59e0b'},
     {label:'Goedgekeurd',waarde:data.filter(function(o){return o.status==='goedgekeurd';}).reduce(function(s,o){return s+(o.bedrag||0);},0),kleur:'#4a6cf7'},
@@ -30629,8 +30644,9 @@ function renderRapOnkosten(el) {
   ].filter(function(s){return s.waarde>0;});
 
   var h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
-  h+=grafiekKaart('Per categorie',donutSVG(catSegs,'€ '+Math.round(totaal)+'|totaal'),legendaHTML(catSegs,totaal));
-  h+=grafiekKaart('Per status',donutSVG(stSegs,'€ '+Math.round(totaal)+'|totaal'),legendaHTML(stSegs,totaal));
+  stSegs.forEach(function(sg){ sg.weergave=_nlEuro(sg.waarde); });
+  h+=grafiekKaart('Per categorie',donutSVG(catSegs,_nlEuro(totaal,0)+'|totaal'),legendaHTML(catSegs,totaal));
+  h+=grafiekKaart('Per status',donutSVG(stSegs,_nlEuro(totaal,0)+'|totaal'),legendaHTML(stSegs,totaal));
   h+='</div>';
 
   var mndNamen2=['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
@@ -30643,14 +30659,14 @@ function renderRapOnkosten(el) {
   var OK_BAR_H=130;
 
   h+=staafDiagram('Onkosten per maand — '+jaarStr, mndOkData, maxOkMnd,
-    function(d){ var t=d.goed+d.uitb+d.open; return t?'€'+Math.round(t):''; },
+    function(d){ var t=d.goed+d.uitb+d.open; return t?_nlEuro(t,0):''; },
     function(d){ var t=d.goed+d.uitb+d.open; if(!t) return [];
       var bH=Math.max(4,Math.round(t/maxOkMnd*OK_BAR_H));
       var gH=Math.round(d.goed/t*bH), uH=Math.round(d.uitb/t*bH), oH=bH-gH-uH;
       var r=[];
-      if(oH>0)r.push({h:oH,kl:'#f59e0b',tip:d.mn+' — Aangevraagd: €'+Math.round(d.open)});
-      if(gH>0)r.push({h:gH,kl:'#4a6cf7',tip:d.mn+' — Goedgekeurd: €'+Math.round(d.goed)});
-      if(uH>0)r.push({h:uH,kl:'#10b981',tip:d.mn+' — Uitbetaald: €'+Math.round(d.uitb)});
+      if(oH>0)r.push({h:oH,kl:'#f59e0b',tip:d.mn+' — Aangevraagd: '+_nlEuro(d.open,0)});
+      if(gH>0)r.push({h:gH,kl:'#4a6cf7',tip:d.mn+' — Goedgekeurd: '+_nlEuro(d.goed,0)});
+      if(uH>0)r.push({h:uH,kl:'#10b981',tip:d.mn+' — Uitbetaald: '+_nlEuro(d.uitb,0)});
       return r;},
     [{kl:'#10b981',l:'Uitbetaald'},{kl:'#4a6cf7',l:'Goedgekeurd'},{kl:'#f59e0b',l:'Aangevraagd'}]);
   var perMed={};
@@ -30661,7 +30677,7 @@ function renderRapOnkosten(el) {
   _onkMids.forEach(function(rr){ var mid=rr.mid;
     var m=getMed(mid);var d=perMed[mid];var kl=m?(medKleur(m)):'#6b7694';
     h+='<tr class="rap-med-rij" data-id="'+mid+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px">'+(m?'<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>':'')+'<span style="font-weight:600">'+esc(m?m.voornaam+' '+m.achternaam:'?')+'</span></div></td>';
-    h+='<td style="padding:10px 14px">'+d.n+'</td><td style="padding:10px 14px;font-weight:700">€ '+d.tot.toFixed(2)+'</td><td style="padding:10px 14px;color:var(--accent)">€ '+d.goed.toFixed(2)+'</td><td style="padding:10px 14px;color:var(--green-t)">€ '+d.uitb.toFixed(2)+'</td></tr>';
+    h+='<td style="padding:10px 14px">'+d.n+'</td><td style="padding:10px 14px;font-weight:700">'+_nlEuro(d.tot)+'</td><td style="padding:10px 14px;color:var(--accent-t)">'+_nlEuro(d.goed)+'</td><td style="padding:10px 14px;color:var(--green-t)">'+_nlEuro(d.uitb)+'</td></tr>';
   });
   if(!Object.keys(perMed).length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
@@ -30682,16 +30698,17 @@ function renderRapVerlof(el) {
     {label:'Geen saldo',waarde:actieve.filter(function(m){return getVerlofSaldoUren(m)===0;}).length,kleur:'#6b7694'},
     {label:'Negatief saldo',waarde:actieve.filter(function(m){return getVerlofSaldoUren(m)<0;}).length,kleur:'#ef4444'},
   ].filter(function(s){return s.waarde>0;});
-  var typeSegs={};var typeKl2={vakantie:'#4a6cf7',adv:'#8b5cf6',bijzonder:'#10b981',onbetaald:'#6b7694',overig:'#f59e0b'};
+  var typeSegs={};var typeKl2={vakantie:'#4a6cf7',adv:'#8b5cf6',atv:'#8b5cf6',bijzonder:'#10b981',onbetaald:'#6b7694',overig:'#f59e0b'};
+  function _vlTypeKleur(t){ return typeKl2[String(t||'').toLowerCase().split(' ')[0]] || '#6b7694'; }
   // In uren, met de eigen werkdag per medewerker als terugval voor oude aanvragen.
   verlofJaar.forEach(function(v){var t=v.type||'overig';typeSegs[t]=(typeSegs[t]||0)+verlofOpgenomenUren([v], getMed(v.medId));});
   // Totaal pas berekenen nadat typeSegs gevuld is (stond eerst erboven -> crash).
   var totDagen=Object.keys(typeSegs).reduce(function(s,t){return s+typeSegs[t];},0);
-  var verlofTypeSeg=Object.keys(typeSegs).map(function(t){return{label:t,waarde:Math.round(typeSegs[t]*10)/10,kleur:typeKl2[t]||'#6b7694'};});
+  var verlofTypeSeg=Object.keys(typeSegs).map(function(t){return{label:_hrHoofd(t),waarde:Math.round(typeSegs[t]*10)/10,weergave:_nlAantal(typeSegs[t])+'u',kleur:_vlTypeKleur(t)};});
 
   var h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
   h+=grafiekKaart('Saldo verdeling',donutSVG(saldoSegs,actieve.length+'|medewerkers'),legendaHTML(saldoSegs,actieve.length));
-  h+=grafiekKaart('Opgenomen per type '+jaarStr,donutSVG(verlofTypeSeg,totDagen.toFixed(1)+'u|opgenomen'),legendaHTML(verlofTypeSeg,totDagen));
+  h+=grafiekKaart('Opgenomen per type '+jaarStr,donutSVG(verlofTypeSeg,_nlAantal(totDagen)+'u|opgenomen'),legendaHTML(verlofTypeSeg,totDagen));
   h+='</div>';
 
   // ── Staafdiagram opgenomen per maand — volle breedte ──
@@ -30705,7 +30722,7 @@ function renderRapVerlof(el) {
   var VL_BAR_H=130;
 
   h+=staafDiagram('Opgenomen verlof per maand — '+jaarStr, mndVlData, maxVlMnd,
-    function(d){ return d.dagen?d.dagen.toFixed(1)+'u':''; },
+    function(d){ return d.dagen?_nlAantal(d.dagen)+'u':''; },
     function(d){ if(!d.dagen) return [];
       return [{h:Math.max(4,Math.round(d.dagen/maxVlMnd*VL_BAR_H)),kl:'var(--accent)'}]; },
     null);
@@ -30722,7 +30739,7 @@ function renderRapVerlof(el) {
     h+='<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+medKleur(m)+';color:'+_tekstOpKleur(medKleur(m))+';flex-shrink:0">'+initials(m)+'</div>';
     h+='<div style="font-size:12px;width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.voornaam)+'</div>';
     h+='<div style="flex:1;background:var(--surface2);border-radius:4px;height:8px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+kl+';border-radius:4px"></div></div>';
-    h+='<div style="font-size:11px;font-weight:700;color:'+_klTekst(kl)+';width:44px;text-align:right">'+saldo.toFixed(1)+'u</div>';
+    h+='<div style="font-size:12px;font-weight:700;color:'+_klTekst(kl)+';width:52px;text-align:right">'+_nlAantal(saldo)+'u</div>';
     h+='</div>';
   });
   h+='</div>';
@@ -30735,14 +30752,14 @@ function renderRapVerlof(el) {
   vlRijen.forEach(function(r){
     var m=r.med, kl=medKleur(m), saldo=r.saldo, op=r.opgenomen;
     h+='<tr class="rap-med-rij" data-id="'+m.id+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div><span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
-    h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red)':saldo>0?'var(--green)':'var(--muted)')+'">'+saldo.toFixed(1)+'u</td><td style="padding:10px 14px">'+op.toFixed(1)+'u</td><td style="padding:10px 14px;color:var(--muted)">'+r.aanvragen+'</td></tr>';
+    h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)')+'">'+_nlAantal(saldo)+'u</td><td style="padding:10px 14px">'+_nlAantal(op)+'u</td><td style="padding:10px 14px;color:var(--muted)">'+r.aanvragen+'</td></tr>';
   });
   h+='</tbody></table></div></div>';
   h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-vl-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
   el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'verlof');});});
   el.querySelectorAll('.rap-vl-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapVlSortKey===k)_rapVlSortDir*=-1; else{_rapVlSortKey=k;_rapVlSortDir=(k==='naam')?1:-1;} renderRapVerlof(el); }); });
-  el.querySelector('#rap-vl-export').addEventListener('click',function(){csvExport(['Medewerker','Verlofsaldo (uren)','Verlofsaldo (dagen)','Opgenomen '+jaarStr+' (uren)','Aanvragen'],actieve.map(function(m){var vlM=verlofJaar.filter(function(v){return String(v.medId)===String(m.id);});var _su=getVerlofSaldoUren(m);return[m.voornaam+' '+m.achternaam,_su.toFixed(1),verlofUrenNaarDagen(_su, m).toFixed(1),verlofOpgenomenUren(vlM, m).toFixed(1),vlM.length];}),'verlof_'+_rapJaar);});
+  el.querySelector('#rap-vl-export').addEventListener('click',function(){csvExport(['Medewerker','Verlofsaldo (uren)','Verlofsaldo (dagen)','Opgenomen '+jaarStr+' (uren)','Aanvragen'],actieve.map(function(m){var vlM=verlofJaar.filter(function(v){return String(v.medId)===String(m.id);});var _su=getVerlofSaldoUren(m);return[m.voornaam+' '+m.achternaam,_rapExportGetal(_su),_rapExportGetal(verlofUrenNaarDagen(_su, m)),_rapExportGetal(verlofOpgenomenUren(vlM, m)),vlM.length];}),'verlof_'+_rapJaar);});
 }
 
 // ── TAB: VERZUIM ─────────────────────────────────────────────────
@@ -30891,7 +30908,7 @@ function renderRapVerzuim(el) {
   vzRijen.forEach(function(r){
     var m=r.med, kl=medKleur(m), dagen=r.werkdagen, pct=r.pct, langd=r.langdurig;
     h+='<tr class="rap-med-rij" data-id="'+m.id+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div><span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
-    h+='<td style="padding:10px 14px">'+r.meldingen+'</td><td style="padding:10px 14px;font-weight:700;color:'+(dagen>20?'var(--red)':dagen>5?'var(--orange)':'var(--text)')+'">'+dagen+'d</td><td style="padding:10px 14px;color:'+(pct>5?'var(--red)':'var(--muted)')+'">'+pct+'%</td>';
+    h+='<td style="padding:10px 14px">'+r.meldingen+'</td><td style="padding:10px 14px;font-weight:700;color:'+(dagen>20?'var(--red-t)':dagen>5?'var(--orange-t)':'var(--text)')+'">'+dagen+'d</td><td style="padding:10px 14px;color:'+(pct>5?'var(--red-t)':'var(--muted)')+'">'+_nlAantal(pct)+'%</td>';
     h+='<td style="padding:10px 14px">'+(langd?'<span class="tag tag-orange">'+langd+'</span>':'<span style="color:var(--muted)">—</span>')+'</td></tr>';
   });
   h+='</tbody></table></div></div>';
@@ -30899,7 +30916,7 @@ function renderRapVerzuim(el) {
   el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'verzuim');});});
   el.querySelectorAll('.rap-vz-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapVzSortKey===k)_rapVzSortDir*=-1; else{_rapVzSortKey=k;_rapVzSortDir=(k==='naam')?1:-1;} renderRapVerzuim(el); }); });
-  el.querySelector('#rap-vz-export').addEventListener('click',function(){csvExport(['Medewerker','Meldingen','Werkdagen','Verzuim%'],actieve.map(function(m){var vzM=vzJaar.filter(function(v){return String(v.medId)===String(m.id);});var d=vzM.reduce(function(s,v){return s+telWerkdagen(v.van,v.tot||null);},0);return[m.voornaam+' '+m.achternaam,vzM.length,d,(Math.round(d/werkdagenJaar*1000)/10)+'%'];}),'verzuim_'+_rapJaar);});
+  el.querySelector('#rap-vz-export').addEventListener('click',function(){csvExport(['Medewerker','Meldingen','Werkdagen','Verzuim%'],actieve.map(function(m){var vzM=vzJaar.filter(function(v){return String(v.medId)===String(m.id);});var d=vzM.reduce(function(s,v){return s+telWerkdagen(v.van,v.tot||null);},0);return[m.voornaam+' '+m.achternaam,vzM.length,d,Math.round(d/werkdagenJaar*1000)/10];}),'verzuim_'+_rapJaar);});
 }
 
 // ── TAB: STORINGSDIENST ──────────────────────────────────────────
