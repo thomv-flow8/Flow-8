@@ -444,6 +444,21 @@ body.light{--dash-g2:#f59e0b}
   .dash-vel-in{width:100%;height:auto;max-height:85vh;border-radius:20px 20px 0 0;border-left:none;padding:10px 16px calc(20px + var(--safe-bottom))}
   .dash-greep{display:block}
 }
+/* ── Klanten: snelle acties, gegevensvakken, kaarten op de telefoon ── */
+.kl-nr{font-size:13px;font-weight:600;color:var(--accent-t);margin:0 0 12px}
+.kl-acties{display:flex;gap:8px;margin-bottom:16px}
+.kl-actie{flex:1;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:var(--radius);background:color-mix(in srgb,var(--accent) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 25%,var(--border));color:var(--accent-t);font-size:13px;font-weight:600;text-decoration:none}
+.kl-veld{background:var(--surface2);border-radius:8px;padding:10px 12px;min-width:0}
+.kl-veld-l{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.kl-veld-w{font-size:14px;font-weight:600;margin-top:3px;overflow-wrap:anywhere}
+.kl-veld-w a{color:var(--accent-t);text-decoration:none;display:inline-block;padding:10px 0;margin:-10px 0}
+.kl-lijst{display:flex;flex-direction:column;gap:8px}
+.kl-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px}
+.kl-kaart-t{font-size:15px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.kl-kaart-s{font-size:13px;color:var(--muted);margin-top:2px}
+.kl-kaart-o{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.kl-kaart-o .tag{font-size:12px}
+.kl-leeg{text-align:center;padding:32px;color:var(--muted)}
 /* ── Agenda: periodekeuze in de lijst en deelnemers als aanvinkbare lijst ── */
 .ag-periode{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .ag-periode select{width:auto;min-height:44px;padding:8px 12px}
@@ -579,7 +594,7 @@ body.light{--dash-g2:#f59e0b}
 /* Tijdens het invullen geen onderbalk over de werkorder: die bedekt de onderkant en één
    tik brengt je weg uit een half ingevuld formulier. */
 @media(max-width:768px){
-  body:has(#panel.open .wox-body) #bottom-nav{display:none!important}
+  body:has(#panel.open) #bottom-nav{display:none!important}
 }
 @media(max-width:700px){
   .wo-lijst-wrap{display:none}
@@ -791,6 +806,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   #plan-prev,#plan-next{min-width:44px}
   #plan-prev,#plan-next,#plan-today,#plan-add-btn,#plan-dagplan-btn,#plan-kolom-toolbar-btn{min-height:44px}
   /* Goedkeuren, afwijzen en uitbetalen in verlof, overuren en onkosten */
+  .pg-btn{min-width:44px;min-height:44px}
   /* Agenda */
   .ag-seg{min-height:44px}
   #ag-prev,#ag-next{min-width:44px}
@@ -10162,6 +10178,28 @@ function checkSkDuplicaat(sk, voorgesteldeDatum) {
 }
 
 
+// ── Klanten: bellen, navigeren en mailen; kaarten op de telefoon ─────────────
+function _klMobiel(){ return window.innerWidth <= 768; }
+function _klTel(t){ return 'tel:'+String(t||'').replace(/[^\d+]/g,''); }
+function _klWeb(w){ w = String(w||'').trim(); return /^https?:\/\//i.test(w) ? w : 'https://'+w; }
+// Grote knoppen bovenaan een klantpaneel: een monteur belt of navigeert met één tik.
+function _klActies(adres, tel, mail){
+  var k = [];
+  if(tel)   k.push('<a class="kl-actie" href="'+esc(_klTel(tel))+'"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>Bellen</a>');
+  if(adres) k.push('<a class="kl-actie" href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(adres)+'" target="_blank" rel="noopener"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Navigeren</a>');
+  if(mail)  k.push('<a class="kl-actie" href="mailto:'+esc(mail)+'"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Mailen</a>');
+  return k.length ? '<div class="kl-acties">'+k.join('')+'</div>' : '';
+}
+// Gegevensvak in een klantpaneel; met href wordt de waarde een link (bellen, mailen, website).
+function _klVeld(label, waarde, href){
+  var w = waarde ? (href ? '<a href="'+esc(href)+'"'+(/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : '')+'>'+esc(waarde)+'</a>' : esc(waarde)) : '\u2014';
+  return '<div class="kl-veld"><div class="kl-veld-l">'+esc(label)+'</div><div class="kl-veld-w">'+w+'</div></div>';
+}
+function _klKaart(cls, id, titel, sub, onder){
+  return '<div class="kl-kaart '+cls+'" data-id="'+esc(id)+'" role="button" tabindex="0"><div class="kl-kaart-t">'+titel+'</div>'
+    + (sub ? '<div class="kl-kaart-s">'+sub+'</div>' : '') + (onder ? '<div class="kl-kaart-o">'+onder+'</div>' : '') + '</div>';
+}
+
 function renderServiceklanten() {
   var vandaag=new Date();
   var isPassiefTab = _skFilter==='passief';
@@ -10186,19 +10224,21 @@ function renderServiceklanten() {
   var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h+='<input class="input" id="sk-zoek" placeholder="Zoek serviceklant..." value="'+esc(safeZoek(_skZoek))+'" style="flex:1;min-width:160px;max-width:320px">';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
-  h+='<button class="btn btn-ghost btn-sm" id="sk-jaarplanner-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Jaarplanning</button>';
-  h+='<button class="btn btn-ghost btn-sm" id="sk-snelinvoer-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg> Datums invoeren</button>';
+  // Jaarplanning en datums invoeren zijn beheerwerk; een monteur ziet ze niet.
+  var _skBeheer = isAdmin() || magSchrijven('serviceklanten');
+  if(_skBeheer) h+='<button class="btn btn-ghost btn-sm" id="sk-jaarplanner-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Jaarplanning</button>';
+  if(_skBeheer) h+='<button class="btn btn-ghost btn-sm" id="sk-snelinvoer-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg> Datums invoeren</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-export-btn">'+ICO.download+' Export</button>';
   h+='</div></div>';
   // Info banner: aanmaken via debiteuren (sluitbaar)
   var _skBannerGesloten = false;
   try { _skBannerGesloten = localStorage.getItem('flow8_sk_banner') === '1'; } catch(e){}
-  if (!_skBannerGesloten) {
+  if (!_skBannerGesloten && _skBeheer) {
     h+='<div id="sk-info-banner" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(74,108,247,0.08);border:1px solid rgba(74,108,247,0.2);border-radius:10px;margin-bottom:16px;font-size:12px;color:var(--muted)">';
     h+='<svg width="15" height="15" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
     h+='<span style="flex:1">Serviceklanten worden automatisch aangemaakt via <strong style="color:var(--text);cursor:pointer" onclick="navigateTo(\'debiteuren\')">Debiteuren</strong> — vink daar "Ook serviceklant" aan bij een debiteur.</span>';
-    h+='<button id="sk-banner-sluit" title="Niet meer tonen" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:0 4px;line-height:1;flex-shrink:0">✕</button>';
+    h+='<button id="sk-banner-sluit" title="Niet meer tonen" aria-label="Niet meer tonen" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;min-width:44px;min-height:44px;margin:-12px -10px -12px 0;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+ICO.cross+'</button>';
     h+='</div>';
   }
 
@@ -10233,6 +10273,18 @@ function renderServiceklanten() {
   h+='<button id="sk-batch-inplan" class="btn btn-primary btn-sm">'+ICO.kalender+' Inplannen</button>';
   h+='<button id="sk-batch-clear" class="btn btn-ghost btn-sm">✕ Deselecteer</button>';
   h+='</div>';
+  if(_klMobiel()){
+    // Telefoon: kaarten met naam, adres, contract, volgende beurt en status.
+    h += '<div class="kl-lijst">' + (slice.length ? slice.map(function(k){
+      var vd = k.volgendeDatum ? new Date(k.volgendeDatum) : null;
+      var verv = vd && vd < vandaag, binnk = vd && !verv && (vd - vandaag) < 60*86400000;
+      var ctKl = (getContract(k.contractType||k.contractId) || {}).kleur || '#6b7694';
+      var onder = (k.contractType ? '<span class="tag" style="background:'+_kleurTint(ctKl,'22')+';color:'+_klTekst(ctKl)+'">'+esc(k.contractType)+'</span>' : '')
+        + (vd ? '<span style="font-weight:600;color:'+(verv ? 'var(--red-t)' : binnk ? 'var(--orange-t)' : 'var(--text)')+'">Volgende beurt '+fmtD(k.volgendeDatum)+'</span>' : '')
+        + skStatusInfo(k).tag;
+      return _klKaart('sk-row', k.id, esc(k.naam), esc([k.adres, k.plaats].filter(Boolean).join(', ')), onder);
+    }).join('') : '<div class="kl-leeg">Geen serviceklanten gevonden</div>') + '</div>' + pgHtml(totaal,_skPage,_skPS,'_skPage');
+  } else {
   h+='<div class="card" style="padding:0"><div class="table-wrap"><table class="sk-tabel"><thead><tr>';
   h+='<th class="sk-check" style="width:36px;padding:6px 10px"><input type="checkbox" id="sk-select-all" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer" title="Alles selecteren"></th>';
   _skKolom.forEach(function(c) {
@@ -10259,7 +10311,7 @@ function renderServiceklanten() {
     _skKolom.forEach(function(c) {
       if (!c.aan) return;
       switch(c.k) {
-        case 'debNr':    h+='<td data-col="debNr" style="font-weight:600;color:var(--accent);white-space:nowrap">'+esc(k.debNr||'—')+'</td>'; break;
+        case 'debNr':    h+='<td data-col="debNr" style="font-weight:600;color:var(--accent-t);white-space:nowrap">'+esc(k.debNr||'—')+'</td>'; break;
         case 'naam':     h+='<td data-col="naam"><strong>'+esc(k.naam)+'</strong></td>'; break;
         case 'adres':    h+='<td data-col="adres" style="font-size:12px">'+esc(k.adres||'—')+'</td>'; break;
         case 'postcode': h+='<td data-col="postcode" style="font-size:12px;font-weight:600">'+esc(k.postcode||'—')+'</td>'; break;
@@ -10294,6 +10346,7 @@ function renderServiceklanten() {
     h+='</tr>';
   });
   h+='</tbody></table></div>'+pgHtml(totaal,_skPage,_skPS,'_skPage')+'</div>';
+  }
   el.innerHTML=h;
 
   var skBannerSluit = el.querySelector('#sk-banner-sluit');
@@ -10365,24 +10418,24 @@ function renderServiceklanten() {
 function openSkPanel(id, opties) {
   var k=APP.serviceklanten.find(function(x){return String(x.id)===String(id);}); if(!k) return;
   opties = opties||{};
-  function v(l,w){return '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">'+l+'</div><div style="font-size:13px;font-weight:600;margin-top:3px">'+esc(w||'—')+'</div></div>';}
-  var h='<div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:16px">';
-  h+='<div style="font-size:16px;font-weight:800">'+esc(k.naam)+'</div>';
-  if(k.debNr) h+='<div style="font-size:12px;color:var(--accent);margin-top:4px;font-weight:600">Deb.nr: '+esc(k.debNr)+'</div>';
-  h+='</div>';
+  function v(l,w){ return _klVeld(l, w); }
+  // De naam staat al in de kop van het paneel; hier het nummer en de snelle acties.
+  var h='';
+  if(k.debNr) h+='<div class="kl-nr">Deb.nr: '+esc(k.debNr)+'</div>';
+  h+=_klActies([k.adres, [k.postcode, k.plaats].filter(Boolean).join(' ')].filter(Boolean).join(', '), k.telefoon, k.email);
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
   h+=v('Adres',(k.adres||'')+(k.postcode?' '+k.postcode:'')+(k.plaats?', '+k.plaats:''));
-  h+=v('Contactpersoon',k.contactpersoon); h+=v('Email',k.email); h+=v('Telefoon',k.telefoon);
+  h+=v('Contactpersoon',k.contactpersoon); h+=_klVeld('Email',k.email,k.email?'mailto:'+k.email:null); h+=_klVeld('Telefoon',k.telefoon,k.telefoon?_klTel(k.telefoon):null);
   var _rgV = getRegisterInst();
   h+=v('Contract',k.contractType); h+=v(_rgV.veld1Label,k.pomptype); h+=v(_rgV.veld2Label,k.besturing);
   h+=v('Laatste beurt',fmtD(k.laatsteDatum)); h+=v('Volgende beurt',fmtD(k.volgendeDatum));
-  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">Uitvoerder</div><div style="font-size:13px;font-weight:700;margin-top:3px;color:'+(k.uitvoerder==='extern'?'var(--orange)':'var(--green)')+'">'+( k.uitvoerder==='extern'?'Extern / ZZP':'Homa intern')+'</div></div>';
+  h+='<div class="kl-veld"><div class="kl-veld-l">Uitvoerder</div><div class="kl-veld-w" style="color:'+(k.uitvoerder==='extern'?'var(--orange-t)':'var(--green-t)')+'">'+( k.uitvoerder==='extern'?'Extern / ZZP':'Intern')+'</div></div>';
   h+='</div>';
   if(klantAanvulling(k)) h+='<div style="margin-bottom:10px">'+bContractBadge(false, klantAanvulling(k))+'</div>';
   if(k.duurUren) h += v('Tijdsduur servicebeurt', k.duurUren+' uur');
-  if(k.contractOpgezegd) h += '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:2px">CONTRACT OPGEZEGD</div><div style="font-size:13px;color:var(--muted)">per '+fmtD(k.contractOpgezegd)+'</div></div>';
-  if(k.werkomschrijving) h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px">Werkomschrijving</div><div style="font-size:13px">'+esc(k.werkomschrijving)+'</div></div>';
-  if(k.notitie) h+='<div style="background:rgba(74,108,247,.06);border:1px solid rgba(74,108,247,.15);border-radius:8px;padding:10px 12px;margin-bottom:16px"><div style="font-size:10px;color:var(--accent);font-weight:600;text-transform:uppercase;margin-bottom:4px">Instructie monteur</div><div style="font-size:13px">'+esc(k.notitie)+'</div></div>';
+  if(k.contractOpgezegd) h += '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--red-t);margin-bottom:2px">CONTRACT OPGEZEGD</div><div style="font-size:13px;color:var(--muted)">per '+fmtD(k.contractOpgezegd)+'</div></div>';
+  if(k.werkomschrijving) h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px"><div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px">Werkomschrijving</div><div style="font-size:13px">'+esc(k.werkomschrijving)+'</div></div>';
+  if(k.notitie) h+='<div style="background:rgba(74,108,247,.06);border:1px solid rgba(74,108,247,.15);border-radius:8px;padding:10px 12px;margin-bottom:16px"><div style="font-size:11px;color:var(--accent-t);font-weight:600;text-transform:uppercase;margin-bottom:4px">Instructie monteur</div><div style="font-size:13px">'+esc(k.notitie)+'</div></div>';
 
 
   // Werkbon-historie (accordion) — vervangt de oude opdracht-servicehistorie
@@ -10390,7 +10443,7 @@ function openSkPanel(id, opties) {
 
   h+='<div style="display:flex;flex-direction:column;gap:8px;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">';
   if(magSchrijven('planning')) h+='<button class="btn btn-primary" id="sp-inplan" style="justify-content:center">'+ICO.kalender+' Inplannen</button>';
-  if(magSchrijven('serviceklanten')){h+='<button class="btn btn-ghost" id="sp-edit" style="justify-content:center">'+ICO.edit+' Bewerken</button>';h+='<button class="btn btn-ghost" id="sp-del" style="justify-content:center;color:var(--red)">'+ICO.trash+' Verwijderen</button>';}
+  if(magSchrijven('serviceklanten')){h+='<button class="btn btn-ghost" id="sp-edit" style="justify-content:center">'+ICO.edit+' Bewerken</button>';h+='<button class="btn btn-ghost" id="sp-del" style="justify-content:center;color:var(--red-t)">'+ICO.trash+' Verwijderen</button>';}
   h+='</div>';
   openPanel(k.naam,h);
   var pb=document.getElementById('panel-body');
@@ -10398,7 +10451,7 @@ function openSkPanel(id, opties) {
   fsWerkbonnenVanServiceklant(k).then(function(bonnen){
     _wbHistorieAccordion('sp-werkbonnen', bonnen, 'serviceklant', id, !!opties.histOpen);
   }).catch(function(){
-    var w=document.getElementById('sp-werkbonnen'); if(w) w.innerHTML='<div style="font-size:12px;color:var(--red);padding:6px 0">Historie laden mislukt.</div>';
+    var w=document.getElementById('sp-werkbonnen'); if(w) w.innerHTML='<div style="font-size:12px;color:var(--red-t);padding:6px 0">Historie laden mislukt.</div>';
   });
   var ip=pb.querySelector('#sp-inplan'); if(ip) ip.addEventListener('click',function(){closePanel();inplanVanuitSk(id);});
 
@@ -10919,6 +10972,14 @@ function renderDebiteuren(){
   h+='</div>';
 
   var _debSortKeys = { nr:'nr', naam:'naam', adres:'adres', postcode:'postcode', plaats:'plaats', contact:'contactpersoon', email:'email' };
+  if(_klMobiel()){
+    // Telefoon: kaarten met naam, adres, debiteurnummer en servicecontract.
+    h += '<div class="kl-lijst">' + (slice.length ? slice.map(function(d){
+      var sk = APP.serviceklanten.find(function(k){ return (d.nr && k.debNr===d.nr) || k.debId===d.id; });
+      var onder = (d.nr ? '<span>Deb.nr '+esc(d.nr)+'</span>' : '') + (sk ? '<span class="tag tag-green">Servicecontract'+(sk.contractType ? ' · '+esc(sk.contractType) : '')+'</span>' : '<span>Geen servicecontract</span>');
+      return _klKaart('deb-row', d.id, esc(debNaam(d)), esc([d.adres, d.plaats].filter(Boolean).join(', ')), onder);
+    }).join('') : '<div class="kl-leeg">Geen debiteuren gevonden</div>') + '</div>' + pgHtml(totaal,_debPage,_debPS,'_debPage');
+  } else {
   h+='<div class="card" style="padding:0"><div class="table-wrap"><table class="deb-tabel"><thead><tr>';
   _debKolom.forEach(function(c) {
     if (!c.aan) return;
@@ -10937,7 +10998,7 @@ function renderDebiteuren(){
     _debKolom.forEach(function(c) {
       if (!c.aan) return;
       switch(c.k) {
-        case 'nr':              h+='<td data-col="nr" style="font-weight:600;color:var(--accent);white-space:nowrap">'+esc(d.nr||'—')+'</td>'; break;
+        case 'nr':              h+='<td data-col="nr" style="font-weight:600;color:var(--accent-t);white-space:nowrap">'+esc(d.nr||'—')+'</td>'; break;
         case 'naam': {
           var actieveMemos = getActieveMemos(d.id);
           var badge = '';
@@ -10970,6 +11031,7 @@ function renderDebiteuren(){
     h+='</tr>';
   });
   h+='</tbody></table></div>'+pgHtml(totaal,_debPage,_debPS,'_debPage')+'</div>';
+  }
   el.innerHTML=h;
 
   el.querySelector('#deb-zoek').addEventListener('input',function(e){
@@ -11010,12 +11072,12 @@ var _dpOpen = { contacten:null, locaties:null, zoekCt:'', zoekLoc:'' };
 // klasse (optioneel): een andere class voor koppen die hun klik zelf afhandelen (bv. werkbonnen),
 // zodat de paneel-handler op .dp-sectie-kop ze niet oppakt.
 function _dpSectieKop(sleutel, icoon, titel, aantal, samenvatting, open, klasse){
-  var h = '<div class="'+(klasse||'dp-sectie-kop')+'" data-sectie="'+sleutel+'" style="display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--surface2);border-radius:9px;cursor:pointer;margin-bottom:8px">';
+  var h = '<div class="'+(klasse||'dp-sectie-kop')+'" data-sectie="'+sleutel+'" role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'" style="display:flex;align-items:center;gap:9px;padding:10px 12px;min-height:52px;background:var(--surface2);border-radius:9px;cursor:pointer;margin-bottom:8px">';
   h += icoon;
   h += '<span style="flex:1;min-width:0"><span style="font-weight:700;font-size:13px">'+esc(titel)+' ('+aantal+')</span>';
-  if(samenvatting) h += '<span style="display:block;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+samenvatting+'</span>';
+  if(samenvatting) h += '<span style="display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+samenvatting+'</span>';
   h += '</span>';
-  h += '<span style="color:var(--muted);font-size:11px;flex-shrink:0">'+(open?'\u25b2':'\u25bc')+'</span>';
+  h += '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color:var(--muted);flex-shrink:0;transform:rotate('+(open?180:0)+'deg)"><path d="M6 9l6 6 6-6"/></svg>';
   h += '</div>';
   return h;
 }
@@ -11119,7 +11181,7 @@ function openDebPanel(id, opties){
   var d=APP.debiteuren.find(function(x){return String(x.id)===String(id);}); if(!d) return;
   opties = opties||{};
   var sk=APP.serviceklanten.find(function(k){return (d.nr&&k.debNr===d.nr)||k.debId===d.id;});
-  function v(l,w){return '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">'+l+'</div><div style="font-size:13px;font-weight:600;margin-top:3px">'+esc(w||'—')+'</div></div>';}
+  function v(l,w){ return _klVeld(l, w); }
 
   // Actieve memo waarschuwingen bovenaan
   var actiefMemos = getActieveMemos(id);
@@ -11131,19 +11193,21 @@ function openDebPanel(id, opties){
       h += '<div style="color:'+ti.kleur+';flex-shrink:0;margin-top:1px">'+ti.icon+'</div>';
       h += '<div style="flex:1"><div style="font-size:11px;font-weight:700;color:'+_klTekst(ti.kleur)+';margin-bottom:3px">'+memoTypeInfo(m.type).label.toUpperCase()+'</div>';
       h += '<div style="font-size:13px;line-height:1.5">'+esc(m.tekst)+'</div>';
-      h += '<div style="font-size:10px;color:var(--muted);margin-top:4px">'+esc(m.auteur||'')+(m.datum?' · '+fmtD(m.datum):'')+'</div></div>';
+      h += '<div style="font-size:11px;color:var(--muted);margin-top:4px">'+esc(m.auteur||'')+(m.datum?' · '+fmtD(m.datum):'')+'</div></div>';
       h += '</div>';
     });
   }
 
-  h+='<div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:16px"><div style="font-size:16px;font-weight:800">'+esc(debNaam(d))+'</div><div style="font-size:13px;color:var(--accent);margin-top:4px;font-weight:600">Deb.nr: '+esc(d.nr||'—')+'</div></div>';
+  // De naam staat al in de kop van het paneel; hier het nummer en de snelle acties.
+  h+='<div class="kl-nr">Deb.nr: '+esc(d.nr||'\u2014')+'</div>';
+  h+=_klActies([d.adres, [d.postcode, d.plaats].filter(Boolean).join(' ')].filter(Boolean).join(', '), d.telefoon, d.email);
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
   h+=v('Adres',(d.adres||'')+(d.postcode?' '+d.postcode:'')+(d.plaats?', '+d.plaats:''));
-  h+=v('Contactpersoon',d.contactpersoon); h+=v('Email',d.email); h+=v('Telefoon',d.telefoon); h+=v('Website',d.website);
+  h+=v('Contactpersoon',d.contactpersoon); h+=_klVeld('Email',d.email,d.email?'mailto:'+d.email:null); h+=_klVeld('Telefoon',d.telefoon,d.telefoon?_klTel(d.telefoon):null); h+=_klVeld('Website',d.website,d.website?_klWeb(d.website):null);
   h+='</div>';
   if(sk){
     h+='<div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:12px;margin-bottom:16px">';
-    h+='<div style="font-size:12px;font-weight:600;color:var(--green-t);margin-bottom:4px">✓ Servicecontract</div>';
+    h+='<div style="font-size:12px;font-weight:600;color:var(--green-t);margin-bottom:4px;display:flex;align-items:center;gap:5px">'+ICO.check+' Servicecontract</div>';
     h+='<div style="font-size:13px;font-weight:600">'+esc(sk.naam)+'</div>';
     h+='<div style="font-size:12px;color:var(--muted);margin-top:2px">Contract '+esc(sk.contractType)+' · Volgende: '+fmtD(sk.volgendeDatum)+'</div>';
     if(klantAanvulling(sk)) h+='<div style="margin-top:8px">'+bContractBadge(false, klantAanvulling(sk))+'</div>';
@@ -11183,8 +11247,8 @@ function openDebPanel(id, opties){
         +(c.standaard?' <span style="color:var(--green-t);font-size:11px;font-weight:600">\u00b7 standaard</span>':'')+'</div>';
       if(c.functie) h+='<div style="font-size:11px;color:var(--muted)">'+esc(c.functie)+'</div>';
       var _cr=[];
-      if(c.telefoon) _cr.push('<a href="tel:'+esc(String(c.telefoon).replace(/\s/g,''))+'" style="color:var(--accent);text-decoration:none">'+esc(c.telefoon)+'</a>');
-      if(c.email)    _cr.push('<a href="mailto:'+esc(c.email)+'" style="color:var(--accent);text-decoration:none;word-break:break-all">'+esc(c.email)+'</a>');
+      if(c.telefoon) _cr.push('<a href="tel:'+esc(String(c.telefoon).replace(/\s/g,''))+'" style="color:var(--accent-t);text-decoration:none">'+esc(c.telefoon)+'</a>');
+      if(c.email)    _cr.push('<a href="mailto:'+esc(c.email)+'" style="color:var(--accent-t);text-decoration:none;word-break:break-all">'+esc(c.email)+'</a>');
       if(_cr.length) h+='<div style="font-size:11px;margin-top:2px">'+_cr.join(' \u00b7 ')+'</div>';
       h+='</div>';
       if(magSchrijven('debiteuren')){
@@ -11224,9 +11288,9 @@ function openDebPanel(id, opties){
   } else {
     _locZ.forEach(function(loc){
       h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;border:1px solid '+(loc.isStandaard?'var(--accent)':'transparent')+'">';
-      h+='<div><div style="font-size:13px;font-weight:600">'+esc(loc.naam||'Naamloos')+(loc.isStandaard?' <span style="color:var(--accent);font-size:11px">★ Standaard</span>':'')+'</div>';
+      h+='<div><div style="font-size:13px;font-weight:600">'+esc(loc.naam||'Naamloos')+(loc.isStandaard?' <span style="color:var(--accent-t);font-size:11px">★ Standaard</span>':'')+'</div>';
       h+='<div style="font-size:11px;color:var(--muted)">'+esc([loc.adres,loc.postcode,loc.plaats].filter(Boolean).join(', '))+'</div>';
-      if(loc.contactpersoon) h+='<div style="font-size:11px;color:var(--muted)">'+esc(loc.contactpersoon)+(loc.telefoon?' · '+esc(loc.telefoon):'')+'</div>';
+      if(loc.contactpersoon) h+='<div style="font-size:11px;color:var(--muted)">'+esc(loc.contactpersoon)+(loc.telefoon?' · <a href="'+esc(_klTel(loc.telefoon))+'" style="color:var(--accent-t);text-decoration:none">'+esc(loc.telefoon)+'</a>':'')+'</div>';
       h+='</div>';
       h+='<div style="display:flex;gap:4px">';
       // Zelfde knoppen als bij contactpersonen: SVG uit de ICO-set, niet de oude tekst-tekens.
@@ -17835,7 +17899,7 @@ function _modalSectieKop(doelId, icoon, titel, aantal, samenvatting){
   var h = '<div class="modal-sectie-kop" data-doel="'+doelId+'" style="display:flex;align-items:center;gap:9px;cursor:pointer;margin-bottom:0">';
   h += icoon;
   h += '<span style="flex:1;min-width:0"><span style="font-weight:700;font-size:13px">'+esc(titel)+' ('+aantal+')</span>';
-  if(samenvatting) h += '<span style="display:block;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+samenvatting+'</span>';
+  if(samenvatting) h += '<span style="display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+samenvatting+'</span>';
   h += '</span>';
   h += '<span class="modal-sectie-pijl" style="color:var(--muted);font-size:11px;flex-shrink:0">\u25bc</span>';
   h += '</div>';
