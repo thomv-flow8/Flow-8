@@ -740,6 +740,8 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .plan-view-btn,.plan-new-dag-btn,.plan-dagplan-dag{min-height:44px}
   #plan-prev,#plan-next{min-width:44px}
   #plan-prev,#plan-next,#plan-today,#plan-add-btn,#plan-dagplan-btn,#plan-kolom-toolbar-btn{min-height:44px}
+  /* Goedkeuren, afwijzen en uitbetalen in verlof, overuren en onkosten */
+  .btn.vl-gk,.btn.ou-goed-btn,.btn.ou-af-btn,.btn.ou-uitb-btn,.btn.ou-del-btn,.btn.ok-goed-btn,.btn.ok-af-btn,.btn.ok-uitb-btn,.btn.vl-del{min-height:44px}
 }
 .stat-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .stat-icon svg{width:13px;height:13px}
@@ -8676,43 +8678,10 @@ function tagMedStatus(s) {
 }
 
 // Stat card
-var _countUpDone = false;
-function easeOutExpo(t){ return t===1?1:1-Math.pow(2,-10*t); }
-function countUp(el, target, duration){
-  if(!el) return;
-  var isFloat = String(target).indexOf('.')!==-1;
-  var numTarget = parseFloat(target)||0;
-  var prefix = '', suffix = '';
-  var txt = el.textContent||'';
-  var m = txt.match(/^([€\s]*)[\d.,]+([^0-9]*)$/);
-  if(m){ prefix=m[1]; suffix=m[2]; }
-  var start = performance.now();
-  function step(now){
-    var elapsed = now - start;
-    var progress = Math.min(elapsed/(duration*1000),1);
-    var eased = easeOutExpo(progress);
-    var cur = eased * numTarget;
-    var val = isFloat ? cur.toFixed(1) : String(Math.round(cur));
-    el.textContent = prefix+val+suffix;
-    if(progress<1) requestAnimationFrame(step);
-    else el.textContent = prefix+(isFloat?numTarget.toFixed(1):String(numTarget))+suffix;
-  }
-  requestAnimationFrame(step);
-}
-function triggerCountUp(container){
-  var scope = container || document;
-  setTimeout(function(){
-    scope.querySelectorAll('[data-countup]').forEach(function(el){
-      countUp(el, el.dataset.countup, 0.5);
-    });
-  }, 80);
-}
-
 function statCard(lbl, val, kleur, svg) {
-  var num = parseFloat(String(val).replace(/[^0-9.]/g,''))||0;
   return '<div class="stat-card" style="color:'+kleur+'">'
        + '<span class="stat-icon" style="background:'+kleur+'22">'+svg+'</span>'
-       + '<span class="stat-value" data-countup="'+num+'">'+val+'</span>'
+       + '<span class="stat-value">'+val+'</span>'
        + '<span class="stat-label">'+lbl+'</span>'
        + '</div>';
 }
@@ -8787,13 +8756,11 @@ function _dashHerteken() {
     if (APP.activePage !== 'dashboard') return;
     var c = document.getElementById('content');
     var y = c ? c.scrollTop : 0;
-    renderDashboard(true);
+    renderDashboard();
     if (c) c.scrollTop = y;
   }, 300);
 }
 
-// 'stil' = automatische hertekening na een statuswijziging. Dan slaan we de count-up-
-// animatie over, want cijfers die bij elke wijziging opnieuw vanaf 0 oplopen leiden af.
 // ── Instelbaar dashboard ─────────────────────────────────────────
 // Elke gebruiker kiest welke blokken hij ziet en in welke volgorde ("Indeling aanpassen").
 // De keuze staat in zijn eigen profiel (flow8/gebruikers/<uid>/dashboard); de RTDB-rules
@@ -9080,7 +9047,7 @@ var DASH_RENDER = {
   }
 };
 
-function renderDashboard(stil) {
+function renderDashboard() {
   var el   = document.getElementById('content');
   var now  = new Date();
   var gr   = now.getHours()<12?'Goedemorgen':now.getHours()<18?'Goedemiddag':'Goedenavond';
@@ -9167,7 +9134,6 @@ function renderDashboard(stil) {
   h += _dashVelHtml(indeling);
 
   el.innerHTML = h;
-  if(!stil) triggerCountUp();
   if(indeling.indexOf('werkorders') >= 0) _dashWerkordersVul();
   if(indeling.indexOf('dringend') >= 0) _dashDringendVul();
   _dashBind(el);
@@ -9217,7 +9183,7 @@ function _dashBind(el){
 function _dashHertekenNu(){
   var c = document.getElementById('content'), y = c ? c.scrollTop : 0;
   var k = document.querySelector('.dash-keuzes'), ky = k ? k.scrollTop : 0;
-  renderDashboard(true);
+  renderDashboard();
   if(c) c.scrollTop = y;
   var k2 = document.querySelector('.dash-keuzes'); if(k2) k2.scrollTop = ky;
 }
@@ -9472,7 +9438,7 @@ function renderMedewerkers() {
   h+='</tbody></table></div>';
   h+=pgHtml(totaal,_medPage,_medPS,'_medPage');
   h+='</div>';
-  el.innerHTML=h; triggerCountUp(el);
+  el.innerHTML=h;
 
   // Events via delegation - geen inline onclick!
   el.querySelector('#med-zoek').addEventListener('input', function(e){
@@ -10273,7 +10239,7 @@ function renderServiceklanten() {
     h+='</tr>';
   });
   h+='</tbody></table></div>'+pgHtml(totaal,_skPage,_skPS,'_skPage')+'</div>';
-  el.innerHTML=h; triggerCountUp(el);
+  el.innerHTML=h;
 
   var skBannerSluit = el.querySelector('#sk-banner-sluit');
   if(skBannerSluit) skBannerSluit.addEventListener('click', function(){
@@ -10949,7 +10915,7 @@ function renderDebiteuren(){
     h+='</tr>';
   });
   h+='</tbody></table></div>'+pgHtml(totaal,_debPage,_debPS,'_debPage')+'</div>';
-  el.innerHTML=h; triggerCountUp(el);
+  el.innerHTML=h;
 
   el.querySelector('#deb-zoek').addEventListener('input',function(e){
     _debZoek=e.target.value;
@@ -12616,8 +12582,14 @@ function renderVerlof(){
   h+='<div class="stats-grid" style="margin-bottom:16px">';
   h+=statCard('Open aanvragen', String(openAanvragen), '#f59e0b', SVGS.alert);
   h+=statCard('Goedgekeurd '+jaarStr, String(goedgekeurdJaar), '#10b981', SVGS.check);
-  h+=statCard('Gem. saldo', gemSaldo.toFixed(1)+'u', '#4a6cf7', SVGS.clock);
-  h+=statCard('Negatief saldo', String(negSaldo), '#ef4444', SVGS.alert);
+  if(zietAlleenEigen('verlof')){
+    // Een monteur ziet zijn eigen saldo, niet de teamcijfers (gemiddelde, aantal negatief).
+    var _vlMijn = getMed(getMijnMedId()), _vlSaldo = _vlMijn ? getVerlofSaldoUren(_vlMijn) : 0;
+    h+=statCard('Mijn saldo', String(Math.round(_vlSaldo*10)/10).replace('.', ',')+'u', '#4a6cf7', SVGS.clock);
+  } else {
+    h+=statCard('Gem. saldo', gemSaldo.toFixed(1).replace('.', ',')+'u', '#4a6cf7', SVGS.clock);
+    h+=statCard('Negatief saldo', String(negSaldo), '#ef4444', SVGS.alert);
+  }
   h+='</div>';
   h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">';
   h+='<div class="tabs" style="margin:0;border:none">';
@@ -12772,7 +12744,7 @@ function renderVerlof(){
     h += '<div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px">';
     if(heeftItems) {
       h += '<span>'+items.length+' aanvra'+(items.length===1?'ag':'gen')+'</span>';
-      h += '<span>·</span><span>'+totUren.toFixed(1)+' uur ('+totDagen.toFixed(1)+' dg)</span>';
+      h += '<span>·</span><span>'+totUren.toFixed(1).replace('.', ',')+' uur ('+totDagen.toFixed(1).replace('.', ',')+' dg)</span>';
       if(goedItems) h += '<span>·</span><span style="color:var(--green-t)">'+goedItems+' goedgekeurd</span>';
     } else {
       h += '<span>Geen aanvragen in '+jaarStr+'</span>';
@@ -12782,7 +12754,7 @@ function renderVerlof(){
     var saldoKl = saldo < 0 ? '#ef4444' : saldo < 5 ? '#f59e0b' : 'var(--accent)';
     h += '<div style="text-align:center;flex-shrink:0;min-width:64px">';
     h += '<div style="font-size:15px;font-weight:800;color:'+_klTekst(saldoKl)+'">'+String(saldoUrenLijst).replace('.',',')+'<span style="font-size:10px">u</span></div>';
-    h += '<div style="font-size:10px;color:var(--muted);font-weight:600">≈ '+saldo.toFixed(1)+'d · SALDO</div>';
+    h += '<div style="font-size:11px;color:var(--muted);font-weight:600">≈ '+saldo.toFixed(1).replace('.', ',')+'d · saldo</div>';
     h += '</div>';
     // Open indicator
     if(openItems > 0) {
@@ -12842,14 +12814,14 @@ function renderVerlof(){
           if(v.status==='aangevraagd'){
             // Alleen de ingestelde goedkeurder van deze medewerker (of admin) tekent.
             if(magGoedkeuren('verlof', v.medId)){
-              h += '<button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="1" style="color:var(--green-t)">✓</button> <button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="0" style="color:var(--red)">✗</button> ';
+              h += '<button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="1" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button> <button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="0" style="color:var(--red-t)">'+ICO.cross+' Afwijzen</button> ';
             } else {
               var _gkV = getGoedkeurderVoor(v.medId, 'verlof');
               h += '<span style="font-size:11px;color:var(--muted)">Wacht op '+esc(_gkV?(_gkV.voornaam||''):'beheerder')+'</span> ';
             }
           }
           if(_vlBeheer){
-            h += '<button class="btn btn-ghost btn-sm btn-icon vl-del" data-id="'+v.id+'" style="color:var(--red)">'+ICO.trash+'</button>';
+            h += '<button class="btn btn-ghost btn-sm btn-icon vl-del" data-id="'+v.id+'" title="Verwijderen" aria-label="Verwijderen" style="color:var(--red)">'+ICO.trash+'</button>';
           } else if(String(v.medId)===String(mijnId) && v.status==='aangevraagd'){
             // Eigen, nog niet getekende aanvraag: wijzigen of terugtrekken.
             h += '<button class="btn btn-ghost btn-sm vl-eigen-edit" data-id="'+v.id+'" style="font-size:11px">'+ICO.edit+' Wijzig</button>';
@@ -12864,7 +12836,7 @@ function renderVerlof(){
     h += '</div>';
     h += '</div>';
   });
-  el.innerHTML=h; triggerCountUp(el);
+  el.innerHTML=h;
 
   // ── Accordion toggle events ──
   el.querySelectorAll('.vl-acc-header').forEach(function(hdr){
@@ -19202,7 +19174,7 @@ function renderOveruren() {
         }[o.status] || '<span class="tag tag-muted">'+esc(o.status)+'</span>';
         h += '<tr class="ou-rij" data-id="'+o.id+'" style="cursor:pointer">';
         h += '<td style="white-space:nowrap">'+fmtD(o.datum)+'</td>';
-        h += '<td style="font-weight:700;color:var(--accent)">'+( o.uren||0)+'u</td>';
+        h += '<td style="font-weight:700;color:var(--accent-t)">'+String(o.uren||0).replace('.', ',')+'u</td>';
         h += '<td><span class="tag '+(o.type==='uitbetaling'?'tag-muted':'tag-blue')+'">'+(o.type==='uitbetaling'?ICO.euro+' Uitbetaling':ICO.refresh+' Compensatie')+'</span></td>';
         h += '<td style="font-size:12px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.omschrijving||'—')+'</td>';
         h += '<td>'+statusTag+'</td>';
@@ -19213,18 +19185,18 @@ function renderOveruren() {
           h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
           if(o.status==='aangevraagd') {
             if(magTekenen) {
-              h += '<button class="btn btn-ghost btn-sm ou-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">'+ICO.check+' Goed</button>';
-              h += '<button class="btn btn-ghost btn-sm ou-af-btn" data-id="'+o.id+'" style="color:var(--red)">'+ICO.cross+' Af</button>';
+              h += '<button class="btn btn-ghost btn-sm ou-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button>';
+              h += '<button class="btn btn-ghost btn-sm ou-af-btn" data-id="'+o.id+'" style="color:var(--red-t)">'+ICO.cross+' Afwijzen</button>';
             } else {
               var _gk = getGoedkeurderVoor(mid, 'overuren');
               h += '<span style="font-size:11px;color:var(--muted)" title="Alleen de ingestelde goedkeurder kan tekenen">Wacht op '+esc(_gk?(_gk.voornaam||'')+' '+(_gk.achternaam||''):'beheerder')+'</span> ';
             }
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" style="color:var(--red)">'+ICO.trash+'</button>';
+            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen" style="color:var(--red)">'+ICO.trash+'</button>';
           } else if(o.status==='gecompenseerd'||o.status==='goedgekeurd') {
-            h += '<button class="btn btn-ghost btn-sm ou-uitb-btn" data-id="'+o.id+'" style="font-size:11px">'+ICO.euro+' Uitb.</button>';
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" style="color:var(--red)">'+ICO.trash+'</button>';
+            h += '<button class="btn btn-ghost btn-sm ou-uitb-btn" data-id="'+o.id+'">'+ICO.euro+' Uitbetalen</button>';
+            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen" style="color:var(--red)">'+ICO.trash+'</button>';
           } else if(o.status==='afgewezen') {
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" style="color:var(--red)">'+ICO.trash+'</button>';
+            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen" style="color:var(--red)">'+ICO.trash+'</button>';
           }
           h += '</td>';
         }
@@ -19235,7 +19207,7 @@ function renderOveruren() {
     h += '</div></div>';
   });
 
-  el.innerHTML = h; triggerCountUp(el);
+  el.innerHTML = h;
 
   // ── Accordion toggle events ──
   el.querySelectorAll('.ou-acc-header').forEach(function(hdr){
@@ -19354,7 +19326,7 @@ function openOverurenModal(id, prefill) {
   var b = '<div class="form-grid">';
   if (kanGoedkeuren) b += fgf('Medewerker','<select class="input" id="ou-med">'+medOpts+'</select>');
   b += fg('Datum', finp('ou-datum','date', o.datum||vandaagISO(),''));
-  b += fg('Aantal uren', '<div style="display:flex;align-items:center;gap:8px"><input class="input" type="number" id="ou-uren" value="'+(o.uren||'')+'" min="0.5" max="24" step="0.5" style="width:100px"> <span style="font-size:13px;color:var(--muted)">uur</span></div>');
+  b += fg('Aantal uren', '<div style="display:flex;align-items:center;gap:8px"><input class="input" type="number" inputmode="decimal" id="ou-uren" value="'+(o.uren||'')+'" min="0.5" max="24" step="0.5" style="width:100px"> <span style="font-size:13px;color:var(--muted)">uur</span></div>');
   b += fg('Type', '<select class="input" id="ou-type"><option value="compensatie"'+(o.type!=='uitbetaling'?' selected':'')+'>'+ICO.refresh+' Compensatie (tijd voor tijd)</option><option value="uitbetaling"'+(o.type==='uitbetaling'?' selected':'')+'>'+ICO.euro+' Uitbetaling</option></select>');
   b += fgf('Gekoppelde opdracht','<select class="input" id="ou-opdracht">'+opOpts+'</select>');
   b += fgf('Omschrijving', finp('ou-omschr','text',o.omschrijving||'','Bijv. avondwerk storing, reistijd buiten werktijd'));
@@ -19637,10 +19609,10 @@ function renderOnkosten() {
 
   // Stats
   h+='<div class="stats-grid" style="margin-bottom:16px">';
-  h+=statCard('Open (alle jaren)',     '€ '+openBedrag.toFixed(2), '#f59e0b', SVGS.alert);
-  h+=statCard('Goedgekeurd '+jaarStr,  '€ '+goedBedrag.toFixed(2), '#4a6cf7', SVGS.file);
-  h+=statCard('Uitbetaald '+jaarStr,   '€ '+uitbBedrag.toFixed(2), '#10b981', SVGS.file);
-  h+=statCard('Totaal '+jaarStr,       '€ '+totBedrag.toFixed(2),  '#6b7694', SVGS.file);
+  h+=statCard('Open (alle jaren)',     ''+_matEuro(openBedrag), '#f59e0b', SVGS.alert);
+  h+=statCard('Goedgekeurd '+jaarStr,  ''+_matEuro(goedBedrag), '#4a6cf7', SVGS.file);
+  h+=statCard('Uitbetaald '+jaarStr,   ''+_matEuro(uitbBedrag), '#10b981', SVGS.file);
+  h+=statCard('Totaal '+jaarStr,       ''+_matEuro(totBedrag),  '#6b7694', SVGS.file);
   h+='</div>';
 
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
@@ -19709,13 +19681,13 @@ function renderOnkosten() {
     h += '<div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px">';
     if(heeftItems) {
       h += '<span>'+items.length+' declaratie'+(items.length===1?'':'s')+'</span>';
-      h += '<span>·</span><span>€ '+totBdr.toFixed(2)+'</span>';
+      h += '<span>·</span><span>'+_matEuro(totBdr)+'</span>';
     } else {
       h += '<span>Geen onkosten in '+jaarStr+'</span>';
     }
     h += '</div></div>';
     if(openItems > 0) {
-      h += '<div style="background:rgba(245,158,11,0.15);color:var(--orange-t);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+openItems+' open · € '+openBdr.toFixed(2)+'</div>';
+      h += '<div style="background:rgba(245,158,11,0.15);color:var(--orange-t);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+openItems+' open · '+_matEuro(openBdr)+'</div>';
     }
     if(!okAlleenEigen) {
       h += '<button class="btn btn-ghost btn-sm ok-add-med" data-mid="'+mid+'" title="Onkosten registreren voor '+esc(m.voornaam)+'" style="flex-shrink:0;font-size:12px;padding:5px 10px;white-space:nowrap">+ Onkosten</button>';
@@ -19737,7 +19709,7 @@ function renderOnkosten() {
         h += '<tr class="ok-rij" data-id="'+o.id+'" style="cursor:pointer">';
         h += '<td style="white-space:nowrap">'+fmtD(o.datum)+'</td>';
         h += '<td><span class="tag tag-muted">'+esc(o.categorie||'—')+'</span></td>';
-        h += '<td style="font-weight:700;color:var(--accent)">€ '+(o.bedrag||0).toFixed(2)+'</td>';
+        h += '<td style="font-weight:700;color:var(--accent-t)">'+_matEuro(o.bedrag||0)+'</td>';
         h += '<td style="font-size:12px;color:var(--muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.omschrijving||'—')+'</td>';
         h += '<td>'+stTag+'</td>';
         if(kanGoedkeuren){
@@ -19746,14 +19718,14 @@ function renderOnkosten() {
           h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
           if(o.status==='aangevraagd'){
             if(magTekenenOk){
-              h += '<button class="btn btn-ghost btn-sm ok-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">✓</button>';
-              h += '<button class="btn btn-ghost btn-sm ok-af-btn" data-id="'+o.id+'" style="color:var(--red)">✗</button>';
+              h += '<button class="btn btn-ghost btn-sm ok-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button>';
+              h += '<button class="btn btn-ghost btn-sm ok-af-btn" data-id="'+o.id+'" style="color:var(--red-t)">'+ICO.cross+' Afwijzen</button>';
             } else {
               var _gkK = getGoedkeurderVoor(o.medId, 'onkosten');
               h += '<span style="font-size:11px;color:var(--muted)">Wacht op '+esc(_gkK?(_gkK.voornaam||''):'beheerder')+'</span>';
             }
           } else if(o.status==='goedgekeurd'){
-            h += '<button class="btn btn-ghost btn-sm ok-uitb-btn" data-id="'+o.id+'" style="font-size:11px">'+ICO.euro+' Uitbet.</button>';
+            h += '<button class="btn btn-ghost btn-sm ok-uitb-btn" data-id="'+o.id+'">'+ICO.euro+' Uitbetalen</button>';
           }
           h += '</td>';
         }
@@ -19764,7 +19736,7 @@ function renderOnkosten() {
     h += '</div></div>';
   });
 
-  el.innerHTML=h; triggerCountUp(el);
+  el.innerHTML=h;
 
   // ── Accordion toggle events ──
   el.querySelectorAll('.ok-acc-header').forEach(function(hdr){
@@ -19804,7 +19776,7 @@ function renderOnkosten() {
     if(!o) return;
     var m=getMed(o.medId);
     var naam=m?m.voornaam+' '+m.achternaam:'onbekend';
-    bevestigActie('Uitbetaling bevestigen','Weet je zeker dat je € '+(o.bedrag||0).toFixed(2)+' voor '+esc(naam)+' markeert als uitbetaald? Dit kan niet ongedaan gemaakt worden.',function(){keurOnkosten(b.dataset.id,'uitbetaald');});
+    bevestigActie('Uitbetaling bevestigen','Weet je zeker dat je '+_matEuro(o.bedrag||0)+' voor '+esc(naam)+' markeert als uitbetaald? Dit kan niet ongedaan gemaakt worden.',function(){keurOnkosten(b.dataset.id,'uitbetaald');});
   });});
 }
 
@@ -19832,7 +19804,7 @@ function openOnkostenModal(id, prefill) {
   if(kanGoedkeuren) b+=fgf('Medewerker','<select class="input" id="ok-med">'+medOpts+'</select>');
   b+=fg('Datum',finp('ok-datum','date',o.datum||vandaagISO(),''));
   b+=fg('Categorie','<select class="input" id="ok-cat"><option value="">— Kies —</option>'+catOpts+'</select>');
-  b+=fg('Bedrag (€)','<div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;color:var(--muted)">€</span><input class="input" type="number" id="ok-bedrag" value="'+(o.bedrag||'')+'" min="0" step="0.01" style="width:120px"></div>');
+  b+=fg('Bedrag (€)','<div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;color:var(--muted)">€</span><input class="input" type="number" inputmode="decimal" id="ok-bedrag" value="'+(o.bedrag||'')+'" min="0" step="0.01" style="width:120px"></div>');
   b+=fgf('Gekoppelde opdracht','<select class="input" id="ok-opdracht">'+opOpts+'</select>');
   b+=fgf('Omschrijving',finp('ok-omschr','text',o.omschrijving||'','Bijv. brandstof retour Gorinchem-Utrecht'));
   b+=fgf('Notitie',ftxtAuto('ok-notitie',o.notitie||''));
@@ -19885,13 +19857,17 @@ function openOnkostenModal(id, prefill) {
     var files = Array.from(e.target.files);
     var remaining = 5 - _bonnen.length;
     files.slice(0, remaining).forEach(function(file){
-      if(file.size > 3*1024*1024){ toast('Foto te groot (max 3MB)','error'); return; }
-      var reader = new FileReader();
-      reader.onload = function(ev){
-        _bonnen.push(ev.target.result);
-        updateBonPreview();
-      };
-      reader.readAsDataURL(file);
+      // Foto's eerst verkleinen, net als bij de werkbon: een iPhone-foto is vaak groter dan
+      // 3 MB en komt als tekst in de database. Een pdf blijft zoals hij is.
+      comprimeerFotoVoorUpload(file, 1600, 0.75).then(function(f){
+        if(f.size > 3*1024*1024){ toast('Bestand te groot (max 3 MB)','error'); return; }
+        var reader = new FileReader();
+        reader.onload = function(ev){
+          _bonnen.push(ev.target.result);
+          updateBonPreview();
+        };
+        reader.readAsDataURL(f);
+      }).catch(function(){ toast('Bestand kon niet worden gelezen','error'); });
     });
     if(files.length > remaining) toast('Maximum 5 bonnen per declaratie','error');
     bonInput.value = ''; // reset zodat je dezelfde foto opnieuw kunt kiezen
@@ -19971,7 +19947,7 @@ function _voerKeuringOnkosten(id, status, reden){
   if(typeof stuurNotificatie==='function' && magNotificatie('onkosten', status)) {
     var okTitels = {goedgekeurd:'Onkosten goedgekeurd ✓',afgewezen:'Onkosten afgewezen',uitbetaald:'Onkosten uitbetaald'};
     stuurNotificatie(o.medId,'onkosten',okTitels[status]||status,
-      'Jouw declaratie van € '+(o.bedrag||0).toFixed(2)+' is '+status+(reden?' — '+reden:'')+'.','onkosten');
+      'Jouw declaratie van '+_matEuro(o.bedrag||0)+' is '+status+(reden?' — '+reden:'')+'.','onkosten');
   }
 }
 
@@ -19988,7 +19964,7 @@ function openOnkostenPanel(id){
   h+='<div><div style="font-size:15px;font-weight:800">'+(m?esc(m.voornaam+' '+m.achternaam):'—')+'</div>';
   h+='<div style="font-size:13px;color:var(--muted)">'+fmtD(o.datum)+'</div>';
   h+='<div style="margin-top:6px">'+stTag+'</div></div>';
-  h+='<div style="margin-left:auto;text-align:right"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.5px;color:var(--accent)">€ '+(o.bedrag||0).toFixed(2)+'</div>';
+  h+='<div style="margin-left:auto;text-align:right"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.5px;color:var(--accent)">'+_matEuro(o.bedrag||0)+'</div>';
   h+='<div style="font-size:12px;color:var(--muted)">'+esc(o.categorie||'')+'</div></div></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
   h+=v('Aangevraagd door',o.door); h+=v('Op',fmtD(o.aangemaaktOp));
@@ -20018,7 +19994,7 @@ function openOnkostenPanel(id){
     h+='<button class="btn btn-ghost" id="okp-del" style="justify-content:center;color:var(--red)">'+ICO.trash+' Verwijderen</button>';
   }
   h+='</div>';
-  openPanel('€ '+(o.bedrag||0).toFixed(2)+' — '+esc(o.categorie||'Onkosten'),h);
+  openPanel(''+_matEuro(o.bedrag||0)+' — '+esc(o.categorie||'Onkosten'),h);
   var pb=document.getElementById('panel-body');
   var gB=pb.querySelector('#okp-goed');if(gB)gB.addEventListener('click',function(){keurOnkosten(id,'goedgekeurd');closePanel();});
   var aB=pb.querySelector('#okp-af');if(aB)aB.addEventListener('click',function(){keurOnkosten(id,'afgewezen');closePanel();});
@@ -20027,7 +20003,7 @@ function openOnkostenPanel(id){
     if(!o) return;
     var m=getMed(o.medId);
     var naam=m?m.voornaam+' '+m.achternaam:'onbekend';
-    bevestigActie('Uitbetaling bevestigen','Weet je zeker dat je € '+(o.bedrag||0).toFixed(2)+' voor '+esc(naam)+' markeert als uitbetaald? Dit kan niet ongedaan gemaakt worden.',function(){keurOnkosten(id,'uitbetaald');closePanel();});
+    bevestigActie('Uitbetaling bevestigen','Weet je zeker dat je '+_matEuro(o.bedrag||0)+' voor '+esc(naam)+' markeert als uitbetaald? Dit kan niet ongedaan gemaakt worden.',function(){keurOnkosten(id,'uitbetaald');closePanel();});
   });
   var eB=pb.querySelector('#okp-edit');if(eB)eB.addEventListener('click',function(){closePanel();openOnkostenModal(id);});
   var dkB=pb.querySelector('#okp-del');if(dkB)dkB.addEventListener('click',function(){
@@ -20236,7 +20212,7 @@ function renderVerzuim() {
     h += '</div></div>';
   });
 
-  el.innerHTML=h; triggerCountUp(el);
+  el.innerHTML=h;
 
   // ── Accordion toggle events ──
   el.querySelectorAll('.vz-acc-header').forEach(function(hdr){
@@ -29659,7 +29635,7 @@ function renderRapOpdrachten(el) {
   h += '</div>';
 
   el.innerHTML = h;
-  initGrafiekInteractie(el); triggerCountUp(el);
+  initGrafiekInteractie(el);
   el.querySelectorAll('.rap-opmont-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOpMontSortKey===k)_rapOpMontSortDir*=-1; else{_rapOpMontSortKey=k;_rapOpMontSortDir=(k==='naam')?1:-1;} renderRapOpdrachten(el); }); });
   el.querySelectorAll('.rap-opmnd-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOpMndSortKey===k)_rapOpMndSortDir*=-1; else{_rapOpMndSortKey=k;_rapOpMndSortDir=(k==='mnd')?1:-1;} renderRapOpdrachten(el); }); });
   var expBtn = el.querySelector('#rap-op-export');
@@ -29808,7 +29784,7 @@ function renderRapServiceklanten(el) {
   }
 
   el.innerHTML = h;
-  initGrafiekInteractie(el); triggerCountUp(el);
+  initGrafiekInteractie(el);
   el.querySelectorAll('.rap-skct-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapSkCtSortKey===k)_rapSkCtSortDir*=-1; else{_rapSkCtSortKey=k;_rapSkCtSortDir=(k==='code')?1:-1;} renderRapServiceklanten(el); }); });
   el.querySelectorAll('.rap-skverv-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapSkVervSortKey===k)_rapSkVervSortDir*=-1; else{_rapSkVervSortKey=k;_rapSkVervSortDir=(k==='naam'||k==='contract')?1:-1;} renderRapServiceklanten(el); }); });
 
@@ -29938,7 +29914,6 @@ function renderRapWerkorders(el) {
     if(totaal === 0){
       h += '<div style="padding:30px;text-align:center;color:var(--muted)">Geen werkorders in '+_rapJaar+'.</div>';
       el.innerHTML = h;
-      triggerCountUp(el);
       return;
     }
 
@@ -30048,7 +30023,7 @@ function renderRapWerkorders(el) {
     h += '</tbody></table></div></div>';
 
     el.innerHTML = h;
-    initGrafiekInteractie(el); triggerCountUp(el);
+    initGrafiekInteractie(el);
   }).catch(function(e){
     el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--red)">Laden mislukt: '+esc(e.message||String(e))+'</div>';
   });
@@ -30231,7 +30206,7 @@ function renderRapPersoonlijk(el) {
   });
   h+='</tbody></table></div></div>';
   h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-pers-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
-  el.innerHTML=h; initGrafiekInteractie(el); triggerCountUp(el);
+  el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){
     r.addEventListener('click',function(){ openRapMedPersoonlijkPanel(r.dataset.id); });
   });
@@ -30343,7 +30318,7 @@ function renderRapOveruren(el) {
   if(!ouRijen.length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
   h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-ou-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
-  el.innerHTML=h; initGrafiekInteractie(el); triggerCountUp(el);
+  el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'overuren');});});
   el.querySelectorAll('.rap-ou-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOuSortKey===k)_rapOuSortDir*=-1; else{_rapOuSortKey=k;_rapOuSortDir=(k==='naam')?1:-1;} renderRapOveruren(el); }); });
   el.querySelector('#rap-ou-export').addEventListener('click',function(){csvExport(['Medewerker','Datum','Uren','Type','Status','Omschrijving'],data.map(function(o){var m=getMed(o.medId);return[m?m.voornaam+' '+m.achternaam:'',fmtD(o.datum),o.uren,o.type,o.status,o.omschrijving||''];}), 'overuren_'+_rapJaar);});
@@ -30402,7 +30377,7 @@ function renderRapOnkosten(el) {
   if(!Object.keys(perMed).length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
   h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-ok-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
-  el.innerHTML=h; initGrafiekInteractie(el); triggerCountUp(el);
+  el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'onkosten');});});
   el.querySelectorAll('.rap-onk-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOnkSortKey===k)_rapOnkSortDir*=-1; else{_rapOnkSortKey=k;_rapOnkSortDir=(k==='naam')?1:-1;} renderRapOnkosten(el); }); });
   el.querySelector('#rap-ok-export').addEventListener('click',function(){csvExport(['Medewerker','Datum','Categorie','Bedrag','Status'],data.map(function(o){var m=getMed(o.medId);return[m?m.voornaam+' '+m.achternaam:'',fmtD(o.datum),o.categorie||'',o.bedrag||0,o.status];}),'onkosten_'+_rapJaar);});
@@ -30475,7 +30450,7 @@ function renderRapVerlof(el) {
   });
   h+='</tbody></table></div></div>';
   h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-vl-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
-  el.innerHTML=h; initGrafiekInteractie(el); triggerCountUp(el);
+  el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'verlof');});});
   el.querySelectorAll('.rap-vl-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapVlSortKey===k)_rapVlSortDir*=-1; else{_rapVlSortKey=k;_rapVlSortDir=(k==='naam')?1:-1;} renderRapVerlof(el); }); });
   el.querySelector('#rap-vl-export').addEventListener('click',function(){csvExport(['Medewerker','Verlofsaldo (uren)','Verlofsaldo (dagen)','Opgenomen '+jaarStr+' (uren)','Aanvragen'],actieve.map(function(m){var vlM=verlofJaar.filter(function(v){return String(v.medId)===String(m.id);});var _su=getVerlofSaldoUren(m);return[m.voornaam+' '+m.achternaam,_su.toFixed(1),verlofUrenNaarDagen(_su, m).toFixed(1),verlofOpgenomenUren(vlM, m).toFixed(1),vlM.length];}),'verlof_'+_rapJaar);});
@@ -30632,7 +30607,7 @@ function renderRapVerzuim(el) {
   });
   h+='</tbody></table></div></div>';
   h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-vz-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
-  el.innerHTML=h; initGrafiekInteractie(el); triggerCountUp(el);
+  el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'verzuim');});});
   el.querySelectorAll('.rap-vz-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapVzSortKey===k)_rapVzSortDir*=-1; else{_rapVzSortKey=k;_rapVzSortDir=(k==='naam')?1:-1;} renderRapVerzuim(el); }); });
   el.querySelector('#rap-vz-export').addEventListener('click',function(){csvExport(['Medewerker','Meldingen','Werkdagen','Verzuim%'],actieve.map(function(m){var vzM=vzJaar.filter(function(v){return String(v.medId)===String(m.id);});var d=vzM.reduce(function(s,v){return s+telWerkdagen(v.van,v.tot||null);},0);return[m.voornaam+' '+m.achternaam,vzM.length,d,(Math.round(d/werkdagenJaar*1000)/10)+'%'];}),'verzuim_'+_rapJaar);});
@@ -30678,7 +30653,7 @@ function renderRapStoringsdienst(el) {
   if(!gesorteerd.length)h+='<tr><td colspan="4" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
   h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-sd-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
-  el.innerHTML=h; initGrafiekInteractie(el); triggerCountUp(el);
+  el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'storingsdienst');});});
   el.querySelectorAll('.rap-sd-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapSdSortKey===k)_rapSdSortDir*=-1; else{_rapSdSortKey=k;_rapSdSortDir=(k==='naam')?1:-1;} renderRapStoringsdienst(el); }); });
   el.querySelector('#rap-sd-export').addEventListener('click',function(){csvExport(['Medewerker','Weekdiensten','Dagwissels','Totaal'],gesorteerd.map(function(mid){var m=getMed(mid);var t=tellers[mid];return[m?m.voornaam+' '+m.achternaam:'?',t.weken,t.dagwissels,t.weken+t.dagwissels];}),'storingsdienst_'+_rapJaar);});
