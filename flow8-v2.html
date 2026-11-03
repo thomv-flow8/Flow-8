@@ -847,14 +847,32 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .inst-paneel .card.inst-vol-breed{max-width:none}
 @media (max-width:768px){
   .inst-wrap{flex-direction:column;gap:0;align-items:stretch}
-  .inst-menu{flex:none;width:100%;flex-direction:row;gap:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;border-bottom:2px solid var(--border);margin-bottom:20px;position:static}
-  .inst-menu::-webkit-scrollbar{display:none}
-  .inst-menu-item{width:auto;flex-shrink:0;border-radius:0;padding:9px 14px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;background:none!important}
-  .inst-menu-item.active{background:none!important;color:var(--accent);border-bottom-color:var(--accent)}
-  .inst-menu-item.active svg{stroke:var(--accent)}
-  .inst-menu-item svg{width:13px!important;height:13px!important}
-  .inst-menu-item > span{gap:5px!important}
+  /* Menu: één keuzeknop met de huidige instelling; tikken opent een lijst van onderen */
+  .inst-kies{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;margin-bottom:16px;padding:0 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font:inherit;color:var(--text);text-align:left;cursor:pointer}
+  .inst-kies small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+  .inst-kies-lbl{font-size:15px;font-weight:600}
+  .inst-kies-lbl svg{color:var(--accent-t)}
+  .inst-kies>svg{margin-left:auto;color:var(--muted);flex-shrink:0}
+  .inst-kies.vuil .inst-kies-lbl>span::after{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-left:8px;vertical-align:middle}
+  .inst-menu{display:none;position:fixed;left:0;right:0;top:auto;bottom:0;z-index:720;flex-direction:column;gap:2px;max-height:80vh;overflow-y:auto;padding:12px 8px calc(16px + var(--safe-bottom,0px));background:var(--surface);border-radius:20px 20px 0 0;border-top:1px solid var(--border);box-shadow:0 -10px 30px rgba(0,0,0,.2)}
+  .inst-wrap.menu-open .inst-menu{display:flex}
+  .inst-wrap.menu-open .inst-menu-scherm{display:block;position:fixed;inset:0;z-index:719;background:rgba(10,12,20,.45)}
+  .inst-menu-item{min-height:48px;font-size:15px;border-radius:10px}
+  .inst-menu-item.active{background:var(--surface2);color:var(--accent-t)}
+  .inst-menu-item.active svg{stroke:currentColor}
+  .inst-menu-item.active.vuil::after{background:var(--orange)}
   .inst-paneel .card,.inst-paneel .inst-block,.inst-paneel .inst-acc{max-width:none}
+  .inst-wrap .btn{min-height:44px}
+  .inst-wrap .btn-sm{min-width:44px}
+  .inst-wrap .bg-kleur-preset{width:40px!important;height:40px!important}
+  .inst-wrap .ti-dag-actief{width:22px!important;height:22px!important}
+  .inst-wrap .card:has(> .rap-kaarten){background:none!important;border:none!important;padding:0!important;box-shadow:none!important}
+  .rol-tabel-wrap{display:none!important}
+  .rol-mob{display:block}
+  .inst-wrap .ikn-knop{width:44px;height:44px}
+  .inst-wrap .rol-balk{bottom:calc(76px + var(--safe-bottom,0px));flex-wrap:wrap;padding:12px}
+  .inst-wrap .rol-balk-n{flex-basis:100%}
+  .inst-wrap .rol-balk .btn{flex:1;justify-content:center}
   /* Pompregister mobiel: alleen pomptype + klant tonen (rij klikbaar naar detail) */
   .pr-pomp-tabel th[data-col]:not([data-col="type"]):not([data-col="klantnaam"]),
   .pr-pomp-tabel td[data-col]:not([data-col="type"]):not([data-col="klantnaam"]){display:none}
@@ -1380,6 +1398,44 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 @media (max-width:560px){
   /* Te smal voor getallen boven elke staaf: het detailvak toont ze bij aantikken */
   .staaf-label,.um-gewerkt-rij{display:none}
+}
+/* Instellingen: niet-opgeslagen stip, direct-opslaan-melding, keuzeknop menu (telefoon) */
+.inst-menu-item.vuil::after{content:'';width:7px;height:7px;border-radius:50%;background:var(--orange);margin-left:auto;flex-shrink:0}
+.inst-menu-item.active.vuil::after{background:#fff}
+.inst-auto{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:12px}
+.inst-kies,.inst-menu-scherm{display:none}
+/* Rollen & rechten */
+.rol-cel{display:inline-flex;gap:4px;justify-content:center}
+.rol-vk{position:relative;display:inline-flex;cursor:pointer}
+.rol-vk input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.rol-vk span{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;font:700 12px 'Space Mono',monospace;color:var(--muted);transition:background .12s,color .12s}
+.rol-vk input:checked + span{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}
+.rol-vk input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.rol-vk.gew span{box-shadow:0 0 0 2px var(--orange)}
+.ikn-knop{width:32px;height:32px;padding:0;border:none;border-radius:50%;background:transparent;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer}
+.ikn-knop:hover{background:var(--surface);color:var(--text)}
+.ikn-knop.weg:hover{color:var(--red-t)}
+.rol-balk{position:sticky;bottom:12px;z-index:5;display:none;align-items:center;gap:10px;margin-top:12px;padding:10px 12px 10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 6px 24px rgba(15,20,35,.14)}
+.rol-balk.aan{display:flex}
+.rol-balk-n{margin-right:auto;font-size:14px;font-weight:600;color:var(--orange-t)}
+.rol-mob{display:none}
+.rol-mk{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;overflow:hidden}
+.rol-mk-kop{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:0 14px;border:none;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.rol-mk-kop i{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.rol-mk-kop b{font-size:15px}
+.rol-mk-kop small{margin-left:auto;font-size:12px;color:var(--muted)}
+.rol-mk-kop svg{margin-left:auto;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.rol-mk-kop[aria-expanded="true"] svg{transform:rotate(180deg)}
+.rol-mk-body{border-top:1px solid var(--border);padding:2px 14px 8px}
+.rol-mk-body[hidden]{display:none}
+.rol-mk-mod{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:54px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600}
+.rol-mk-mod:last-child{border-bottom:none}
+.rol-mk .rol-vk span{width:44px;height:40px;font-size:13px}
+.inst-auto svg{width:14px;height:14px;flex-shrink:0}
+/* Deze basisregels staan ná het algemene telefoonblok; zet ze hier voor de telefoon weer aan */
+@media (max-width:768px){
+  .inst-kies{display:flex}
+  .rol-mob{display:block}
 }
 /* Foto-lijst met bijschrift (werkbon-invulbon) */
 .wbx-foto-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px}
@@ -7138,6 +7194,10 @@ function bouwMeerMenu() {
 
 function navigateTo(id) { toonPagina(id); }
 function toonPagina(id) {
+  // Instellingen met niet-opgeslagen wijzigingen: eerst vragen of het opgeslagen moet worden
+  if(APP.activePage==='instellingen' && id!=='instellingen' && !toonPagina._doorgaan && _instIsVuil()){
+    return _instVerlaat(function(){ toonPagina._doorgaan = true; try{ toonPagina(id); } finally { toonPagina._doorgaan = false; } });
+  }
   _bewaarPagina(id);
   // Rechtencheck — dashboard altijd toegestaan
   if (id !== 'dashboard' && !isAdmin() && !magLezen(id)) {
@@ -7980,6 +8040,7 @@ var _autoSaveStatus = {}; // per bon-id: 'saved'|'dirty'|'saving'|'error'
 // Waarschuw bij verlaten van de pagina als er niet-opgeslagen werkbon-wijzigingen zijn
 window.addEventListener('beforeunload', function(e){
   var vuil = Object.keys(_autoSaveStatus).some(function(k){ return _autoSaveStatus[k]==='dirty'||_autoSaveStatus[k]==='saving'||_autoSaveStatus[k]==='error'; });
+  if(!vuil && _instIsVuil()) vuil = true;
   if(vuil){ e.preventDefault(); e.returnValue=''; return ''; }
 });
 // Lokale datum van vandaag als 'YYYY-MM-DD' (geen UTC-offset zoals toISOString geeft)
@@ -29628,9 +29689,9 @@ function initGrafiekInteractie(el) {
 // Telefoon: tabellen in rapportage worden kaarten. Elke cel krijgt het kopje van zijn kolom
 // als data-label; de CSS (tot 768px) zet de rij om in een kaart met die labels erboven.
 function _rapTabelKaarten(el){
-  if(!el || !el.closest || !el.closest('.rap-wrap')) return;
+  if(!el || !el.closest || !el.closest('.rap-wrap, .inst-wrap')) return;
   el.querySelectorAll('.table-wrap').forEach(function(w){
-    var t = w.querySelector('table'); if(!t) return;
+    var t = w.querySelector('table'); if(!t || w.closest('[data-geen-kaarten]')) return;
     var koppen = [].map.call(t.querySelectorAll('thead th'), function(th){ return (th.textContent||'').replace(/[▲▼]/g,'').trim(); });
     if(!koppen.length) return;
     w.classList.add('rap-kaarten');
@@ -31166,6 +31227,8 @@ var _instTab = 'bedrijf';
 // wijziging dan stil terug) of als er geen verbinding was. Zonder melding: alleen fouten tonen.
 function _instBevestig(belofte, melding){
   var online = _fbVerbonden;
+  // Wat nu is opgeslagen is de nieuwe uitgangswaarde: geen 'niet opgeslagen'-vraag meer
+  _instBasis(document.getElementById('inst-content')); _instVuilTonen();
   if(!online && melding) toast('Geen verbinding: de wijziging wordt verstuurd zodra je weer online bent','info');
   return (Array.isArray(belofte) ? Promise.all(belofte) : Promise.resolve(belofte)).then(function(){
     if(melding && online) toast(melding,'success');
@@ -31176,6 +31239,75 @@ function _instBevestig(belofte, melding){
     log('WARN','INSTELLINGEN','Opslaan mislukt: '+m);
     return false;
   });
+}
+
+// ── Niet-opgeslagen wijzigingen in Instellingen ──
+// Tabs met een knop Opslaan: wie wegklikt zonder op te slaan krijgt eerst een vraag. De
+// uitgangswaarde per veld staat in defaultValue/defaultChecked/defaultSelected ("basis"):
+// na het tekenen en na elke opslag wordt die gelijkgezet aan de huidige waarde.
+var _INST_MET_OPSLAAN = { bedrijf:1, register:1, planning:1, team:1, goedkeuring:1, werkbonnen:1, werkorders:1, rollen:1 };
+var _INST_DIRECT = { notificaties:1, administraties:1, opdrachten:1 };
+function _instVelden(scope){
+  if(!scope || !scope.querySelectorAll) return [];
+  var lijst = scope.matches && scope.matches('input,select,textarea') ? [scope] : [].slice.call(scope.querySelectorAll('input,select,textarea'));
+  return lijst.filter(function(v){ return !/^(button|submit|reset|file|hidden|search)$/.test(v.type) && !v.closest('[data-geen-wijziging]'); });
+}
+function _instBasis(scope){
+  _instVelden(scope).forEach(function(v){
+    if(v.type==='checkbox'||v.type==='radio') v.defaultChecked = v.checked;
+    else if(v.tagName==='SELECT') [].forEach.call(v.options, function(o){ o.defaultSelected = o.selected; });
+    else v.defaultValue = v.value;
+  });
+}
+function _instVeldGewijzigd(v){
+  if(v.type==='checkbox'||v.type==='radio') return v.checked !== v.defaultChecked;
+  if(v.tagName==='SELECT') return [].some.call(v.options, function(o){ return o.selected !== o.defaultSelected; });
+  return v.value !== v.defaultValue;
+}
+function _instIsVuil(){
+  var c = document.getElementById('inst-content');
+  return !!(c && APP.activePage==='instellingen' && _INST_MET_OPSLAAN[_instTab] && _instVelden(c).some(_instVeldGewijzigd));
+}
+// Oranje stip in het menu en (bij Rollen) de opslagbalk bijwerken
+function _instVuilTonen(){
+  var vuil = _instIsVuil();
+  var a = document.querySelector('.inst-menu-item.active'); if(a) a.classList.toggle('vuil', vuil);
+  var k = document.querySelector('.inst-kies'); if(k) k.classList.toggle('vuil', vuil);
+  _rolBalkBijwerken();
+}
+function _instOpslaanKnoppen(c){
+  return [].filter.call(c.querySelectorAll('button'), function(b){
+    return b.offsetParent!==null && (/(^|-)(save|opslaan)$/i.test(b.id) || /opslaan$/i.test((b.textContent||'').trim()));
+  });
+}
+// Vraag bij wegklikken met niet-opgeslagen wijzigingen; verder() gaat door naar de gekozen tab of pagina.
+function _instVerlaat(verder){
+  if(!_instIsVuil()) return verder();
+  var c = document.getElementById('inst-content');
+  var knoppen = _instOpslaanKnoppen(c), een = knoppen.length===1;
+  var body = '<p style="margin:0;font-size:14px;color:var(--muted);line-height:1.55">Je hebt hier iets gewijzigd dat nog niet is opgeslagen.'
+    + (een ? '' : ' Sla het op met de knop Opslaan bij het blok dat je hebt gewijzigd, of laat de wijzigingen vervallen.')+'</p>';
+  var voet = '<button class="btn btn-ghost" id="inst-vl-terug">Annuleren</button>'
+    + '<button class="btn btn-ghost" id="inst-vl-weg">Niet opslaan</button>'
+    + (een ? '<button class="btn btn-primary" id="inst-vl-op">Opslaan</button>' : '');
+  openModal('Wijzigingen opslaan?', body, voet);
+  document.getElementById('inst-vl-terug').onclick = function(){ closeModal(); };
+  document.getElementById('inst-vl-weg').onclick = function(){ closeModal(); verder(); };
+  var op = document.getElementById('inst-vl-op');
+  if(op) op.onclick = function(){
+    closeModal(); knoppen[0].click();
+    // Tegengehouden door een controle in de tab (bv. een leeg veld)? Dan blijven we hier.
+    if(!_instIsVuil()) verder();
+  };
+}
+// Rollen: aantal gewijzigde rechten in de opslagbalk, oranje rand om gewijzigde letters
+function _rolBalkBijwerken(){
+  var c = document.getElementById('inst-content'), balk = document.getElementById('rol-balk');
+  if(!c || !balk) return;
+  var n = [].filter.call(c.querySelectorAll('.rol-tabel-wrap .rol-vk input'), _instVeldGewijzigd).length;
+  balk.classList.toggle('aan', n > 0);
+  document.getElementById('rol-balk-n').textContent = n ? n+' wijziging'+(n>1?'en':'')+' niet opgeslagen' : '';
+  c.querySelectorAll('.rol-vk').forEach(function(l){ var i = l.querySelector('input'); l.classList.toggle('gew', !!i && _instVeldGewijzigd(i)); });
 }
 
 function renderInstellingen() {
@@ -31197,8 +31329,13 @@ function renderInstellingen() {
     { k:'werkorders',   l:'<span style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Werkorders</span>' },
   ];
 
+  var _act = tabs.filter(function(t){ return t.k===_instTab; })[0] || tabs[0];
   var h = '<div class="inst-wrap">';
-  // Menu (desktop = verticaal links, mobiel = horizontale tabbladen bovenaan)
+  // Telefoon: één keuzeknop met de huidige instelling; het menu opent dan van onderen
+  h += '<button type="button" class="inst-kies" aria-haspopup="true" aria-expanded="false"><span><small>Instelling</small><span class="inst-kies-lbl">'+_act.l+'</span></span>'
+     + '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>';
+  h += '<div class="inst-menu-scherm"></div>';
+  // Menu (desktop = verticaal links, telefoon = lijst van onderen)
   h += '<nav class="inst-menu" aria-label="Instellingen">';
   tabs.forEach(function(t){
     h += '<button type="button" class="inst-menu-item'+(_instTab===t.k?' active':'')+'" data-inst-tab="'+t.k+'"'+(_instTab===t.k?' aria-current="page"':'')+'>'+t.l+'</button>';
@@ -31208,9 +31345,18 @@ function renderInstellingen() {
   h += '</div>';
   el.innerHTML = h;
 
+  var _wrap = el.querySelector('.inst-wrap'), _kies = el.querySelector('.inst-kies');
+  function _menuDicht(){ _wrap.classList.remove('menu-open'); _kies.setAttribute('aria-expanded','false'); }
   el.querySelectorAll('.inst-menu-item[data-inst-tab]').forEach(function(t){
-    t.addEventListener('click',function(){ _instTab=t.dataset.instTab; renderInstellingen(); });
+    t.addEventListener('click',function(){
+      var naar = t.dataset.instTab;
+      _menuDicht();
+      if(naar===_instTab) return;
+      _instVerlaat(function(){ _instTab=naar; renderInstellingen(); });
+    });
   });
+  _kies.addEventListener('click', function(){ var open = _wrap.classList.toggle('menu-open'); _kies.setAttribute('aria-expanded', open?'true':'false'); });
+  el.querySelector('.inst-menu-scherm').addEventListener('click', _menuDicht);
 
   var c = document.getElementById('inst-content');
   if      (_instTab==='bedrijf')    renderInstBedrijf(c);
@@ -31226,6 +31372,20 @@ function renderInstellingen() {
   else if (_instTab==='administraties')renderInstAdministraties(c);
   else if (_instTab==='werkbonnen')    renderInstWerkbonnen(c);
   else if (_instTab==='werkorders')    renderInstWerkorders(c);
+
+  // Tabs die direct opslaan zeggen dat, zodat het verschil met de Opslaan-tabs zichtbaar is
+  if(_INST_DIRECT[_instTab]) c.insertAdjacentHTML('afterbegin', '<div class="inst-auto">'+(ICO.check||'')+'Wijzigingen worden direct opgeslagen</div>');
+  _rapTabelKaarten(c);
+  _instBasis(c);
+  _instVuilTonen();
+  c.addEventListener('input', _instVuilTonen);
+  c.addEventListener('change', _instVuilTonen);
+  // Later getekende velden (opnieuw opgebouwd blok, nieuwe regel, geladen gegevens) zijn uitgangswaarde
+  new MutationObserver(function(rs){
+    var nieuw = false;
+    rs.forEach(function(m){ [].forEach.call(m.addedNodes, function(n){ if(n.nodeType===1){ _instBasis(n); nieuw = true; } }); });
+    if(nieuw){ _rapTabelKaarten(c); _instVuilTonen(); }
+  }).observe(c, { childList:true, subtree:true });
 }
 
 // ── TAB: BEDRIJFSGEGEVENS ────────────────────────────────────────
@@ -31915,6 +32075,17 @@ function renderInstRollen(el) {
   var rolNamen = Object.keys(rollen);
   if(!rolNamen.length) rolNamen = ['admin','planner','monteur','extern','verkoop','administratie','magazijn'];
 
+  // Rechten als letterknoppen (een verborgen vinkje onder elke letter). Desktop en de
+  // kaarten op de telefoon gebruiken dezelfde opbouw; mob=true geeft de telefoonset.
+  var _RL_SOORTEN = [['lezen','L','Lezen'],['eigen','E','Alleen eigen gegevens'],['schrijven','S','Schrijven/bewerken'],['beheren','B','Beheren (werkorders)'],['inzage','I','Inzage in alle verzuimdossiers']];
+  function _rolLetters(r, mod, rechten, mob){
+    var m = rechten[mod.k];
+    var aan = { lezen: m ? m.lezen!==false : true, eigen: !!(m && m.eigen===true), schrijven: !!(m && m.schrijven===true), beheren: !!(m && m.beheren), inzage: !!(m && m.inzageAlle) };
+    return _RL_SOORTEN.filter(function(s){ return (s[0]!=='beheren' || mod.k==='werkorders') && (s[0]!=='inzage' || mod.k==='verzuim'); }).map(function(s){
+      return '<label class="rol-vk" title="'+s[2]+'"><input type="checkbox" class="'+(mob?'rol-m-cb':'rol-'+s[0]+'-cb')+'" data-soort="'+s[0]+'" data-rol="'+r+'" data-mod="'+mod.k+'"'+(aan[s[0]]?' checked':'')+' aria-label="'+esc(r)+', '+mod.l+': '+s[2].toLowerCase()+'"><span aria-hidden="true">'+s[1]+'</span></label>';
+    }).join('');
+  }
+
   var h = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">';
   h += '<div style="font-weight:700;font-size:16px">Rollen & rechten</div>';
   h += '<button class="btn btn-primary btn-sm" id="rol-nieuw">+ Nieuwe rol</button></div>';
@@ -31928,8 +32099,8 @@ function renderInstRollen(el) {
     h += '<div style="width:10px;height:10px;border-radius:50%;background:'+kl+';flex-shrink:0"></div>';
     h += '<span style="font-size:13px;font-weight:600">'+esc(r)+'</span>';
     if(r!=='admin') {
-      h += '<button class="btn-icon rol-bewerk" data-rol="'+r+'" title="Bewerken" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px 4px;font-size:12px">'+ICO.edit+'</button>';
-      h += '<button class="btn-icon rol-verwijder" data-rol="'+r+'" title="Verwijderen" style="background:none;border:none;cursor:pointer;color:var(--red);padding:2px 4px;font-size:12px">×</button>';
+      h += '<button type="button" class="ikn-knop rol-bewerk" data-rol="'+r+'" title="Bewerken" aria-label="Rol '+esc(r)+' bewerken">'+ICO.edit+'</button>';
+      h += '<button type="button" class="ikn-knop weg rol-verwijder" data-rol="'+r+'" title="Verwijderen" aria-label="Rol '+esc(r)+' verwijderen"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>';
     } else {
       h += '<span style="margin-left:4px;display:inline-flex;align-items:center"><svg width="12" height="12" fill="var(--accent)" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>';
     }
@@ -31938,7 +32109,7 @@ function renderInstRollen(el) {
   h += '</div>';
 
   // Rechten matrix
-  h += '<div class="table-wrap" style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">';
+  h += '<div class="table-wrap rol-tabel-wrap" data-geen-kaarten style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">';
   h += '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--surface2)">';
   h += '<th style="padding:8px 14px;text-align:left;min-width:140px">Module</th>';
   rolNamen.forEach(function(r){
@@ -31953,39 +32124,32 @@ function renderInstRollen(el) {
     rolNamen.forEach(function(r){
       var rDef = rollen[r]||{};
       var rechten = rDef.rechten||{};
-      var lezen    = rechten[mod.k] ? rechten[mod.k].lezen!==false : true;
-      var eigen    = rechten[mod.k] ? rechten[mod.k].eigen===true : false;
-      var schrijven= rechten[mod.k] ? rechten[mod.k].schrijven===true : false;
       h += '<td style="padding:6px 10px;text-align:center">';
       if(r==='admin'){
         h += '<span title="Admin: altijd volledige toegang" style="display:inline-flex;align-items:center;justify-content:center">'+
           '<svg width="16" height="16" fill="var(--accent)" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'+
           '</span>';
       } else {
-        h += '<div style="display:flex;flex-direction:column;align-items:center;gap:4px">';
-        h += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--muted)">';
-        h += '<input type="checkbox" class="rol-lezen-cb" data-rol="'+r+'" data-mod="'+mod.k+'"'+(lezen?' checked':'')+' style="width:13px;height:13px">L</label>';
-        h += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--orange-t)">';
-        h += '<input type="checkbox" class="rol-eigen-cb" data-rol="'+r+'" data-mod="'+mod.k+'"'+(eigen?' checked':'')+' style="width:13px;height:13px;accent-color:var(--orange)">E</label>';
-        h += '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--accent)">';
-        h += '<input type="checkbox" class="rol-schrijven-cb" data-rol="'+r+'" data-mod="'+mod.k+'"'+(schrijven?' checked':'')+' style="width:13px;height:13px;accent-color:var(--accent)">S</label>';
-        if(mod.k==='werkorders'){
-          var _beheren = !!(rollen[r]&&rollen[r].rechten&&rollen[r].rechten[mod.k]&&rollen[r].rechten[mod.k].beheren);
-          h += '<label title="Beheren: aanmaken, verwijderen, kopgegevens, status wisselen, archief en werkdocumenten" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:#8b5cf6">';
-          h += '<input type="checkbox" class="rol-beheren-cb" data-rol="'+r+'" data-mod="'+mod.k+'"'+(_beheren?' checked':'')+' style="width:13px;height:13px;accent-color:#8b5cf6">B</label>';
-        }
-        if(mod.k==='verzuim'){
-          var _inzage = !!(rollen[r]&&rollen[r].rechten&&rollen[r].rechten[mod.k]&&rollen[r].rechten[mod.k].inzageAlle);
-          h += '<label title="Inzage in álle verzuimdossiers (bijzondere persoonsgegevens). Zonder dit vinkje ziet deze rol alleen het eigen dossier." style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:#ef4444">';
-          h += '<input type="checkbox" class="rol-inzage-cb" data-rol="'+r+'" data-mod="'+mod.k+'"'+(_inzage?' checked':'')+' style="width:13px;height:13px;accent-color:#ef4444">I</label>';
-        }
-        h += '</div>';
+        h += '<span class="rol-cel">'+_rolLetters(r, mod, rechten, false)+'</span>';
       }
       h += '</td>';
     });
     h += '</tr>';
   });
   h += '</tbody></table></div>';
+  // Telefoon: per rol een uitklapbare kaart met de modules eronder (de matrix past daar niet)
+  var _chev = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+  h += '<div class="rol-mob">';
+  rolNamen.forEach(function(r){
+    var kl = (rollen[r]||{}).kleur||'#6b7694', rechten = (rollen[r]||{}).rechten||{};
+    if(r==='admin'){ h += '<div class="rol-mk"><div class="rol-mk-kop"><i style="background:'+kl+'"></i><b>'+esc(r)+'</b><small>alle rechten</small></div></div>'; return; }
+    h += '<div class="rol-mk"><button type="button" class="rol-mk-kop" aria-expanded="false"><i style="background:'+kl+'"></i><b>'+esc(r)+'</b>'+_chev+'</button><div class="rol-mk-body" hidden>';
+    modules.forEach(function(mod){ h += '<div class="rol-mk-mod"><span>'+mod.l+'</span><span class="rol-cel">'+_rolLetters(r, mod, rechten, true)+'</span></div>'; });
+    h += '</div></div>';
+  });
+  h += '</div>';
+  // Opslagbalk: verschijnt bij een wijziging en blijft onderin in beeld tijdens het scrollen
+  h += '<div class="rol-balk" id="rol-balk" role="status"><span class="rol-balk-n" id="rol-balk-n"></span><button type="button" class="btn btn-ghost" id="rol-terug">Ongedaan maken</button><button class="btn btn-primary" id="rol-save">Rechten opslaan</button></div>';
   h += '<div style="font-size:11px;color:var(--muted);margin-top:8px">L = Lezen &nbsp;·&nbsp; E = Alleen eigen gegevens &nbsp;·&nbsp; S = Schrijven/bewerken &nbsp;·&nbsp; <span style="color:#8b5cf6;font-weight:700">B</span> = Beheren (alleen werkorders) &nbsp;·&nbsp; <span style="color:#ef4444;font-weight:700">I</span> = Inzage alle verzuimdossiers &nbsp;·&nbsp; '+ICO.ster+' = Admin heeft altijd volledige toegang</div>';
   // Uitleg bij het I-recht: verzuim is AVG-gevoelig, dus inzage is bewust apart.
   h += '<div style="margin-top:12px;padding:12px 14px;background:var(--surface2);border-radius:8px;border-left:3px solid #ef4444">';
@@ -32019,8 +32183,20 @@ function renderInstRollen(el) {
   h += '</div>';
   h += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11px">Verzuim werkt anders: dat kan niet met E worden ingediend. Registreren vraagt <strong style="color:var(--accent)">S</strong> (voor HR/administratie); zonder S ziet een medewerker alleen het feit d\u00e1t er verzuim is en \u2014 met <strong style="color:#ef4444">I</strong> \u2014 de volledige dossiers. Zie de uitleg hierboven.</div>';
   h += '</div></div>';
-  h += '<div style="margin-top:14px"><button class="btn btn-primary" id="rol-save">Rechten opslaan</button></div>';
   el.innerHTML = h;
+  // Telefoonkaarten en matrix tonen dezelfde rechten: een letter in de ene zet de andere mee
+  el.addEventListener('change', function(e){
+    var cb = e.target;
+    if(!cb.matches || !cb.matches('.rol-vk input')) return;
+    var mob = cb.classList.contains('rol-m-cb');
+    var ander = el.querySelector((mob ? '.rol-'+cb.dataset.soort+'-cb' : '.rol-m-cb[data-soort="'+cb.dataset.soort+'"]')+'[data-rol="'+cb.dataset.rol+'"][data-mod="'+cb.dataset.mod+'"]');
+    if(ander) ander.checked = cb.checked;
+  });
+  el.querySelectorAll('button.rol-mk-kop').forEach(function(b){ b.addEventListener('click', function(){
+    var open = b.getAttribute('aria-expanded')!=='true';
+    b.setAttribute('aria-expanded', open?'true':'false'); b.nextElementSibling.hidden = !open;
+  }); });
+  el.querySelector('#rol-terug').addEventListener('click', function(){ renderInstellingen(); });
 
   // Nieuwe rol aanmaken
   el.querySelector('#rol-nieuw').addEventListener('click', function(){ openRolModal(null, rollen); });
@@ -32484,8 +32660,7 @@ function _rgBewaar(deel) {
   var huidig = getRegisterInst();
   var nieuw = Object.assign({}, huidig, deel);
   APP.registerInst = nieuw;
-  FB.ref(dbPath('instellingen','registerInst')).set(nieuw)
-    .catch(function(e){ toast('Opslaan mislukt: '+e.message,'error'); });
+  _instBevestig(FB.ref(dbPath('instellingen','registerInst')).set(nieuw));
 }
 
 // ── Jaarplanner: speelruimte en periode (Instellingen → Planning) ──
@@ -33979,9 +34154,7 @@ function renderInstWerkbonnen(el) {
     var lbl = ((el.querySelector('#wbi-externnr-lbl')||{}).value||'').trim() || 'Extern nummer';
     if(!APP.werkbonnenInst) APP.werkbonnenInst={};
     APP.werkbonnenInst.externNrLabel = lbl;
-    FB.ref(dbPath('instellingen','werkbonnenInst','externNrLabel')).set(lbl)
-      .then(function(){ toast('Veldnaam opgeslagen: '+lbl,'success'); })
-      .catch(function(e){ toast('Opslaan mislukt: '+(e&&e.message||e),'error'); });
+    _instBevestig(FB.ref(dbPath('instellingen','werkbonnenInst','externNrLabel')).set(lbl), 'Veldnaam opgeslagen: '+lbl);
   });
 
   var reisSave = el.querySelector('#wbi-reistijd-save');
@@ -33989,9 +34162,7 @@ function renderInstWerkbonnen(el) {
     var aan = !!(el.querySelector('#wbi-reistijd')||{}).checked;
     if(!APP.werkbonnenInst) APP.werkbonnenInst={};
     APP.werkbonnenInst.reistijd = aan;
-    FB.ref(dbPath('instellingen','werkbonnenInst','reistijd')).set(aan)
-      .then(function(){ toast(aan?'Reistijd wordt apart bijgehouden':'Reistijd uitgeschakeld','success'); })
-      .catch(function(e){ toast('Opslaan mislukt: '+(e&&e.message||e),'error'); });
+    _instBevestig(FB.ref(dbPath('instellingen','werkbonnenInst','reistijd')).set(aan), aan?'Reistijd wordt apart bijgehouden':'Reistijd uitgeschakeld');
   });
 
   if(rolSave) rolSave.addEventListener('click', function(){
@@ -34019,12 +34190,11 @@ function renderInstWerkbonnen(el) {
     APP.werkbonnenInst.mailOnderwerp = ond;
     APP.werkbonnenInst.mailBody = bod;
     APP.werkbonnenInst.mailHandtekening = hnd;
-    Promise.all([
+    _instBevestig([
       FB.ref(dbPath('instellingen','werkbonnenInst','mailOnderwerp')).set(ond),
       FB.ref(dbPath('instellingen','werkbonnenInst','mailBody')).set(bod),
       FB.ref(dbPath('instellingen','werkbonnenInst','mailHandtekening')).set(hnd)
-    ]).then(function(){ toast('E-mailtemplate opgeslagen','success'); })
-      .catch(function(e){ toast('Opslaan mislukt: '+(e.message||e),'error'); });
+    ], 'E-mailtemplate opgeslagen');
   });
   var mailHerstel = el.querySelector('#wbi-mail-herstel');
   if(mailHerstel) mailHerstel.addEventListener('click', function(){
