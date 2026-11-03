@@ -507,6 +507,15 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       `hr-mobiel-preview.html` (lokaal): kaarten i.p.v. tabellen tot 768px; monteur eigen lijst met
       Wijzigen/Intrekken op de kaart, beheerder eerst "Te beoordelen". Eerder die dag: bonfoto's
       verkleind, goedkeurknoppen voluit, bedragen met komma, count-up-animatie overal weg.
+- [x] **Werkbonnenlijst: audit doorgevoerd** (3 november 2026) — volgens
+      `werkbonnenlijst-preview.html` (lokaal): geen stipje meer, label alleen als het iets zegt
+      (monteur ziet geen "Klaargezet"), openstaande bon van een eerdere dag krijgt een oranje kop
+      "Te laat" en het label "Te laat", dagkoppen voluit met weekdag, archief nieuwste eerst met
+      "Gisteren", datums in lokale tijd, tekst min. 12px, knoppen 44px, max. 760px breed op desktop.
+      Vegen om te verwijderen opnieuw gebouwd met pointer events: werkt nu ook met de muis, opent
+      niet meer tijdens verticaal scrollen, geen luisteraars meer die zich per render opstapelen.
+      Kaarten met toetsenbord (Enter opent, Delete verwijdert). Verwijderen alleen voor wie schrijf-
+      of eigen-recht op werkbonnen heeft, net als de Firestore-rules.
 - [ ] **Bonfoto's naar Firebase Storage** — staan nu (verkleind) als base64 in de RTDB-records van
       onkosten. Verhuizen raakt ook bestaande declaraties; eigen stap.
 - [ ] **Rapportage: getallen met punt** — o.a. "5.5d"; eigen opmaak in Rapportage.

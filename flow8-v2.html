@@ -1274,31 +1274,37 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbx-sign-box{border:1px solid var(--border);border-radius:10px;background:var(--surface2);margin-top:6px}
 .wbx-sign-canvas{display:block;width:100%;height:160px;touch-action:none;cursor:crosshair;border-radius:10px}
 .wbx-sign-bar{display:flex;gap:8px;padding:8px;border-top:1px solid var(--border)}
-/* Werkbonnen-lijst (preview-stijl) */
-.wbl-groep{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:18px 2px 9px}
+/* Werkbonnen-lijst */
+.wbl-pagina{padding:16px;max-width:792px}
+.wbl-ikn{width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius);border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer}
+.wbl-ikn.pri{border:none;background:var(--accent-knop);color:#fff}
+@media (pointer:coarse){.wbl-ikn{width:44px;height:44px}}
+.wbl-groep{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--muted);margin:20px 2px 9px}
 .wbl-groep:first-child{margin-top:2px}
+.wbl-groep.laat{color:var(--orange-t)}
+.wbl-groep svg{width:15px;height:15px;flex-shrink:0}
 .wbl-kaart{display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.wbl-kaart:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .wbl-swipe-wrap{position:relative;margin-bottom:10px;border-radius:var(--radius);overflow:hidden}
-.wbl-swipe-actie{position:absolute;top:0;right:0;bottom:0;width:96px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;padding:8px}
+.wbl-swipe-actie{position:absolute;top:0;right:0;bottom:0;width:96px;background:transparent;border:none;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;padding:8px}
 .wbl-swipe-actie .wbl-swipe-knop{width:56px;height:56px;border-radius:16px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(239,68,68,.35)}
-.wbl-swipe-actie .wbl-swipe-lbl{font-size:11px;font-weight:600;color:var(--red)}
-.wbl-swipe-wrap .wbl-kaart{margin-bottom:0;position:relative;transition:transform .2s ease;will-change:transform;z-index:1}
+.wbl-swipe-actie .wbl-swipe-lbl{font-size:12px;font-weight:600;color:var(--red-t)}
+.wbl-swipe-wrap .wbl-kaart{margin-bottom:0;position:relative;transition:transform .2s ease;will-change:transform;z-index:1;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .wbl-swipe-wrap.open .wbl-kaart{transform:translateX(-96px)}
 .wbl-kaart:hover{border-color:var(--accent)}
-.wbl-tijd{flex-shrink:0;width:64px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 6px;gap:3px;border-right:1px solid var(--border)}
-.wbl-tijd .t1{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
-.wbl-tijd .t2{font-size:13px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
-.wbl-tijd .tleeg{font-size:11px;color:var(--muted)}
+.wbl-tijd{flex-shrink:0;width:66px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 6px;gap:3px;border-right:1px solid var(--border)}
+.wbl-tijd .t1{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.wbl-tijd .t2{font-size:14px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.wbl-tijd .tleeg{font-size:12px;color:var(--muted)}
 .wbl-body{flex:1;min-width:0;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .wbl-info{flex:1;min-width:0}
-.wbl-naam{display:flex;align-items:center;gap:7px;font-weight:700;font-size:14px;margin-bottom:3px}
-.wbl-stip{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.wbl-adres{font-size:12px;color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wbl-naam{font-weight:700;font-size:15px;margin-bottom:3px}
+.wbl-adres{font-size:13px;color:var(--muted);margin-bottom:5px;overflow-wrap:anywhere}
 .wbl-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.wbl-type{font-size:12px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:5px}
+.wbl-type{font-size:13px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:5px}
 .wbl-type svg{flex-shrink:0}
-.wbl-obj{font-size:11px;color:var(--muted);display:inline-flex;align-items:center;gap:3px}
-.wbl-status{flex-shrink:0;font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.wbl-obj,.wbl-mont{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}
+.wbl-status{flex-shrink:0;font-size:12px;font-weight:600;padding:4px 10px;border-radius:var(--radius-pill);white-space:nowrap}
 /* Foto-lijst met bijschrift (werkbon-invulbon) */
 .wbx-foto-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px}
 .wbx-foto-item .wbx-ftop{display:flex;gap:10px;align-items:center;margin-bottom:8px}
@@ -4726,6 +4732,7 @@ function _wbFotoTekenOverlay(state, foto, opties){
 // zet de opdracht terug naar de planning met melding, en verwijdert de werkbon.
 function _wbVerwijderVanuitLijst(werkbonId){
   if(!werkbonId) return;
+  if(!(isAdmin() || magSchrijven('werkbonnen') || magEigen('werkbonnen'))){ toast('Je hebt geen recht om werkbonnen te verwijderen','warning'); return; }
   fsWerkbonOphalen(werkbonId).then(function(wb){
     if(!wb){ toast('Werkbon niet gevonden','warning'); return; }
     if(['afgehandeld','verwerkt'].indexOf(wb.status)>=0){ toast('Een afgehandelde werkbon kan niet verwijderd worden','warning'); return; }
@@ -26630,26 +26637,29 @@ function renderWerkbonnen() {
   if(!window._wbTab) window._wbTab = 'actief';
   var WB_HIST_DAGEN = 30;
   var isHist = window._wbTab==='afgehandeld';
+  // Verwijderen mag wie schrijfrecht op werkbonnen heeft, ook als dat alleen voor eigen
+  // bonnen geldt — dezelfde verdeling als de Firestore-rules (rch.werkbonnen 's' of 'e').
+  var _magVerwijderen = isAdmin() || magSchrijven('werkbonnen') || magEigen('werkbonnen');
 
   var _topRechts;
   if(isHist){
     _topRechts = '<span style="font-size:12px;color:var(--muted);align-self:center;margin-right:2px">laatste '+WB_HIST_DAGEN+' dagen</span>';
   } else {
     _topRechts = ''
-      + '<button id="wb-archief" title="Archief (afgehandeld)" style="width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer">'
+      + '<button type="button" id="wb-archief" class="wbl-ikn" title="Archief (afgehandeld)" aria-label="Archief: afgehandelde werkbonnen">'
       + '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9"/><line x1="10" y1="13" x2="14" y2="13"/></svg></button>'
-      + '<button id="wb-nieuw" title="Nieuwe werkbon" style="width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:none;background:var(--accent-knop);color:#fff;cursor:pointer">'
+      + '<button type="button" id="wb-nieuw" class="wbl-ikn pri" title="Nieuwe werkbon" aria-label="Nieuwe werkbon">'
       + '<svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>';
   }
   var _titel = isHist
     ? '<div style="display:flex;align-items:center;gap:8px">'
-      + '<button id="wb-archief-terug" title="Terug" style="width:30px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer">'
+      + '<button type="button" id="wb-archief-terug" class="wbl-ikn" title="Terug" aria-label="Terug naar openstaande werkbonnen">'
       + '<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>'
       + '<span style="font-weight:700;font-size:18px">Archief</span></div>'
     : '';
 
   el.innerHTML =
-    '<div style="padding:16px">'+
+    '<div class="wbl-pagina">'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">'+
     _titel+
     '<div style="display:flex;align-items:center;gap:8px;margin-left:auto">'+_topRechts+'</div>'+
@@ -26728,17 +26738,25 @@ function renderWerkbonnen() {
       return;
     }
 
-    // Groepeer op datum (Vandaag / Morgen / datum), in de bestaande sorteervolgorde
-    var vandaag = (typeof vandaagISO==='function') ? vandaagISO() : new Date().toISOString().slice(0,10);
-    var morgenD = new Date(); morgenD.setDate(morgenD.getDate()+1);
-    var morgen = morgenD.toISOString().slice(0,10);
-    function groepLabel(datum){
-      if(!datum) return 'Zonder datum';
-      if(datum===vandaag) return 'Vandaag';
-      if(datum===morgen) return 'Morgen';
-      return fmtD(datum);
+    // Groepeer op datum. Alles in lokale tijd: toISOString() rekent in UTC en gaf rond
+    // middernacht een dag verschil met vandaagISO().
+    var vandaag = vandaagISO();
+    function _plusDag(n){
+      var d = new Date(vandaag+'T00:00:00'); d.setDate(d.getDate()+n);
+      return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     }
-    // Sorteer op datum (oplopend) binnen de statusvolgorde blijft globaal; hier groeperen we op dag
+    var morgen = _plusDag(1), gisteren = _plusDag(-1);
+    // Een openstaande bon van een eerdere dag is te laat; in het archief bestaat dat niet.
+    function _isLaat(datum){ return !isHist && !!datum && datum < vandaag; }
+    function groepKop(datum){
+      if(!datum) return '<div class="wbl-groep">Zonder datum</div>';
+      var lang = _dagNaamLang(datum);
+      if(datum.slice(0,4) !== vandaag.slice(0,4)) lang += ' '+datum.slice(0,4);
+      var laat = _isLaat(datum);
+      var pre = datum===vandaag ? 'Vandaag' : datum===morgen ? 'Morgen' : laat ? 'Te laat' : datum===gisteren ? 'Gisteren' : '';
+      var txt = pre ? pre+' · '+lang.charAt(0).toLowerCase()+lang.slice(1) : lang;
+      return '<div class="wbl-groep'+(laat?' laat':'')+'">'+(laat?(ICO.alert||''):'')+esc(txt)+'</div>';
+    }
     var perDag = {};
     var dagVolgorde = [];
     zichtbaar.forEach(function(b){
@@ -26746,29 +26764,36 @@ function renderWerkbonnen() {
       if(!perDag[d]){ perDag[d]=[]; dagVolgorde.push(d); }
       perDag[d].push(b);
     });
-    dagVolgorde.sort(function(a,b){ return (a||'9999').localeCompare(b||'9999'); });
+    // Openstaand: oudste dag bovenaan (te laat eerst, dan vandaag). Archief: nieuwste bovenaan.
+    dagVolgorde.sort(function(a,b){
+      if(!a || !b) return (a?0:1) - (b?0:1);   // zonder datum altijd onderaan
+      return isHist ? b.localeCompare(a) : a.localeCompare(b);
+    });
 
-    var statusStip = { klaargezet:'#6b7694', opgehaald:'#06b6d4', afgehandeld:'#10b981', verwerkt:'#64748b' };
     var h = '';
     dagVolgorde.forEach(function(d){
-      var lbl = groepLabel(d);
-      var dagNaam = d ? (' \u00b7 '+_dagNaamLang(d)) : '';
-      h += '<div class="wbl-groep">'+esc(lbl.toUpperCase())+esc(d && lbl!==fmtD(d) ? dagNaam : '')+'</div>';
+      h += groepKop(d);
       perDag[d].forEach(function(b){
         var adr = b.werkAdres ? [(b.werkAdres.adres||''), (b.werkAdres.plaats||'')].filter(Boolean).join(', ') : '';
-        var kl = statusKl[b.status]||'#6b7694';
-        var stip = statusStip[b.status]||'#6b7694';
         var objAantal = b.aantalObjecten || b.objectenAantal || (Array.isArray(b.objecten)?b.objecten.length:0);
-        var _kanVerwijderen = ['afgehandeld','verwerkt'].indexOf(b.status)<0;
+        var _kanVerwijderen = _magVerwijderen && ['afgehandeld','verwerkt'].indexOf(b.status)<0;
+        // Label alleen als het iets zegt: 'Te laat' gaat voor, en wie alleen eigen bonnen
+        // ziet krijgt geen 'Klaargezet' — dat is voor een monteur de gewone stand.
+        var lbl = statusLbl[b.status]||b.status, kl = statusKl[b.status]||'#6b7694';
+        if(b.status==='klaargezet' && _isLaat(b.datum)){ lbl = 'Te laat'; kl = '#f59e0b'; }
+        else if(b.status==='klaargezet' && _wbAlleenEigen) lbl = '';
+        var _tijd = b.tijdVan ? (b.tijdVan+(b.tijdTot?'–'+b.tijdTot:'')) : '';
+        var _aria = (b.klantNaam||'Werkbon')+(_tijd?', '+_tijd:'')+(lbl?', '+lbl:'');
         if(_kanVerwijderen){
           h += '<div class="wbl-swipe-wrap" data-id="'+esc(b.id)+'">';
-          h += '<div class="wbl-swipe-actie" data-del="'+esc(b.id)+'"><span class="wbl-swipe-knop"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></span><span class="wbl-swipe-lbl">Verwijder</span></div>';
+          h += '<button type="button" class="wbl-swipe-actie" data-del="'+esc(b.id)+'" tabindex="-1" aria-label="Werkbon van '+esc(b.klantNaam||'deze klant')+' verwijderen"><span class="wbl-swipe-knop"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></span><span class="wbl-swipe-lbl">Verwijder</span></button>';
         }
         // Kleur van het opdrachttype: strook links + label, zodat een monteur in één
-        // oogopslag ziet om wat voor werk het gaat. Status houdt zijn eigen kleur (stip + badge),
+        // oogopslag ziet om wat voor werk het gaat. Status staat in het label rechts,
         // dezelfde rolverdeling als op de planningkaart: rand = type, badge = status.
         var _otB = _otVanType(b.typeWerk);
-        h += '<div class="wbl-kaart" data-id="'+esc(b.id)+'" style="border-left:4px solid '+_otB.kleur+'">';
+        h += '<div class="wbl-kaart" data-id="'+esc(b.id)+'" role="button" tabindex="0" aria-label="'+esc(_aria)+'"'
+           + (_kanVerwijderen?' aria-keyshortcuts="Delete"':'')+' style="border-left:4px solid '+_otB.kleur+'">';
         // Tijdkolom
         h += '<div class="wbl-tijd">';
         if(b.tijdVan||b.tijdTot){
@@ -26780,7 +26805,7 @@ function renderWerkbonnen() {
         h += '</div>';
         // Body
         h += '<div class="wbl-body"><div class="wbl-info">';
-        h += '<div class="wbl-naam"><span class="wbl-stip" style="background:'+stip+'"></span>'+esc(b.klantNaam||'—')+'</div>';
+        h += '<div class="wbl-naam">'+esc(b.klantNaam||'—')+'</div>';
         if(adr) h += '<div class="wbl-adres">'+esc(adr)+'</div>';
         h += '<div class="wbl-meta"><span class="wbl-type" style="color:'+_klTekst(_otB.kleur)+'">'+(b.typeWerk?getOtSvg(_otB.icon):'')+esc(_otB.label)+'</span>';
         if(objAantal>0) h += '<span class="wbl-obj">'+(ICO.pin||'')+' '+objAantal+' object'+(objAantal>1?'en':'')+'</span>';
@@ -26793,14 +26818,14 @@ function renderWerkbonnen() {
             return mi && mi.naam ? mi.naam : '';
           }).filter(Boolean);
           if(_mNamen.length){
-            h += '<span class="wbl-mont" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">'
+            h += '<span class="wbl-mont">'
                + '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
                + esc(_mNamen.join(', ')) + '</span>';
           }
         }
         h += '</div>';
         h += '</div>';
-        h += '<span class="wbl-status" style="background:'+_kleurTint(kl,'1f')+';color:'+_klTekst(kl)+'">'+(statusLbl[b.status]||b.status)+'</span>';
+        if(lbl) h += '<span class="wbl-status" style="background:'+_kleurTint(kl,'1f')+';color:'+_klTekst(kl)+'">'+esc(lbl)+'</span>';
         h += '</div>';   // sluit .wbl-body
         h += '</div>';   // sluit .wbl-kaart
         if(_kanVerwijderen) h += '</div>';   // sluit .wbl-swipe-wrap
@@ -26808,50 +26833,75 @@ function renderWerkbonnen() {
     });
     lijst.innerHTML = h;
 
-    // Klik op kaart → openen (tenzij net geswipet)
-    lijst.querySelectorAll('.wbl-kaart').forEach(function(kaart){
-      kaart.addEventListener('click', function(){
-        var wrap = kaart.closest('.wbl-swipe-wrap');
-        if(wrap && wrap.classList.contains('open')){ wrap.classList.remove('open'); return; }
-        openWerkbonVanuitPlanning(kaart.dataset.id);
+    // Eén set luisteraars op de lijst zelf (verdwijnt mee bij de volgende render), in plaats
+    // van per kaart en op window — die stapelden zich bij elke render op.
+    function _zetOpen(wrap, aan){
+      lijst.querySelectorAll('.wbl-swipe-wrap.open').forEach(function(w){
+        if(w!==wrap){ w.classList.remove('open'); w.querySelector('.wbl-swipe-actie').tabIndex = -1; }
       });
+      wrap.classList.toggle('open', aan);
+      wrap.querySelector('.wbl-swipe-actie').tabIndex = aan ? 0 : -1;
+    }
+
+    // Klik op kaart → openen (tenzij net geveegd of de verwijderknop openstaat)
+    lijst.addEventListener('click', function(e){
+      var del = e.target.closest('.wbl-swipe-actie');
+      if(del){ e.stopPropagation(); _wbVerwijderVanuitLijst(del.dataset.del); return; }
+      var kaart = e.target.closest('.wbl-kaart');
+      if(!kaart) return;
+      if(kaart._sleepTot && Date.now() < kaart._sleepTot) return;
+      var wrap = kaart.closest('.wbl-swipe-wrap');
+      if(wrap && wrap.classList.contains('open')){ _zetOpen(wrap, false); return; }
+      openWerkbonVanuitPlanning(kaart.dataset.id);
+    });
+    // Toetsenbord: Delete op een kaart in focus = verwijderen (met bevestiging).
+    lijst.addEventListener('keydown', function(e){
+      if(e.key!=='Delete') return;
+      var kaart = e.target.closest('.wbl-swipe-wrap .wbl-kaart');
+      if(!kaart) return;
+      e.preventDefault();
+      _wbVerwijderVanuitLijst(kaart.dataset.id);
     });
 
-    // Swipe-to-delete (touch + muis)
-    lijst.querySelectorAll('.wbl-swipe-wrap').forEach(function(wrap){
-      var kaart = wrap.querySelector('.wbl-kaart');
-      var startX=0, curX=0, dragging=false;
-      function begin(x){ startX=x; dragging=true; }
-      function beweeg(x){
-        if(!dragging) return;
-        curX = x - startX;
-        if(curX<0){ kaart.style.transition='none'; kaart.style.transform='translateX('+Math.max(curX,-96)+'px)'; }
-        else if(wrap.classList.contains('open')){ kaart.style.transition='none'; kaart.style.transform='translateX('+Math.min(-96+curX,0)+'px)'; }
-      }
-      function eind(){
-        if(!dragging) return; dragging=false;
-        kaart.style.transition=''; kaart.style.transform='';
-        if(curX < -40) wrap.classList.add('open');
-        else if(curX > 40) wrap.classList.remove('open');
-        curX=0;
-      }
-      // Touch
-      kaart.addEventListener('touchstart', function(e){ begin(e.touches[0].clientX); }, {passive:true});
-      kaart.addEventListener('touchmove',  function(e){ beweeg(e.touches[0].clientX); }, {passive:true});
-      kaart.addEventListener('touchend', eind);
-      // Muis (desktop)
-      kaart.addEventListener('mousedown', function(e){ begin(e.clientX); });
-      window.addEventListener('mousemove', function(e){ if(dragging) beweeg(e.clientX); });
-      window.addEventListener('mouseup', eind);
-      // Verwijder-knop
-      var delBtn = wrap.querySelector('.wbl-swipe-actie');
-      if(delBtn) delBtn.addEventListener('click', function(e){
-        e.stopPropagation();
-        _wbVerwijderVanuitLijst(wrap.dataset.id);
-      });
+    // Vegen om te verwijderen (vinger én muis) via pointer events. touch-action:pan-y op de
+    // kaart laat verticaal scrollen aan de browser; een veeg telt pas als hij duidelijk
+    // zijwaarts begint, zodat scrollen met een beetje drift de knop niet meer opent.
+    var _sl = null;
+    lijst.addEventListener('pointerdown', function(e){
+      if(e.button) return;
+      var kaart = e.target.closest('.wbl-swipe-wrap .wbl-kaart');
+      if(!kaart) return;
+      _sl = { wrap:kaart.parentNode, kaart:kaart, x0:e.clientX, y0:e.clientY, dx:0, richting:null, id:e.pointerId };
     });
+    lijst.addEventListener('pointermove', function(e){
+      if(!_sl || e.pointerId!==_sl.id) return;
+      var dx = e.clientX-_sl.x0, dy = e.clientY-_sl.y0;
+      if(!_sl.richting){
+        if(Math.abs(dx)<8 && Math.abs(dy)<8) return;
+        _sl.richting = Math.abs(dx) > Math.abs(dy)*1.5 ? 'x' : 'y';
+        if(_sl.richting==='x'){ try{ _sl.kaart.setPointerCapture(e.pointerId); }catch(_){} }
+      }
+      if(_sl.richting!=='x') return;
+      _sl.dx = dx;
+      var basis = _sl.wrap.classList.contains('open') ? -96 : 0;
+      _sl.kaart.style.transition = 'none';
+      _sl.kaart.style.transform = 'translateX('+Math.max(-96, Math.min(0, basis+dx))+'px)';
+    });
+    function _slEind(e){
+      if(!_sl || e.pointerId!==_sl.id) return;
+      var s = _sl; _sl = null;
+      if(s.richting!=='x') return;
+      s.kaart.style.transition = ''; s.kaart.style.transform = '';
+      // Na een veeg volgt nog een klik; die mag de kaart niet openen of weer dichtklappen.
+      s.kaart._sleepTot = Date.now()+350;
+      if(e.type==='pointercancel') return;
+      if(s.dx < -40) _zetOpen(s.wrap, true);
+      else if(s.dx > 40) _zetOpen(s.wrap, false);
+    }
+    lijst.addEventListener('pointerup', _slEind);
+    lijst.addEventListener('pointercancel', _slEind);
   }).catch(function(e){
-    lijst.innerHTML = '<div style="text-align:center;padding:40px;color:var(--danger,#ef4444)">Laden mislukt: '+esc(e.message||String(e))+'</div>';
+    lijst.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red-t)">Laden mislukt: '+esc(e.message||String(e))+'</div>';
   });
 }
 
