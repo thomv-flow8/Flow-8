@@ -503,6 +503,13 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       bevestiging, net als een foto. Detector: 16 → 9 meldingen (contrast en kleine tekst 0).
 - [ ] **Werkbon: geneste kaarten** — de detector ziet nog 9 kaarten-in-kaarten (blokken binnen de
       inklapbare secties). Indelingskeuze, geen fout; pas oppakken bij een herindeling van de bon.
+- [x] **Verlof, overuren, onkosten op de telefoon** (3 november 2026) — volgens
+      `hr-mobiel-preview.html` (lokaal): kaarten i.p.v. tabellen tot 768px; monteur eigen lijst met
+      Wijzigen/Intrekken op de kaart, beheerder eerst "Te beoordelen". Eerder die dag: bonfoto's
+      verkleind, goedkeurknoppen voluit, bedragen met komma, count-up-animatie overal weg.
+- [ ] **Bonfoto's naar Firebase Storage** — staan nu (verkleind) als base64 in de RTDB-records van
+      onkosten. Verhuizen raakt ook bestaande declaraties; eigen stap.
+- [ ] **Rapportage: getallen met punt** — o.a. "5.5d"; eigen opmaak in Rapportage.
 - [x] **Instelbaar dashboard** (3 november 2026) — volgens `dashboard-preview.html` (lokaal, niet in
       git). Blokken aan/uit en in volgorde via "Indeling aanpassen", bewaard per gebruiker in
       `flow8/gebruikers/<uid>/dashboard` (geen regelwijziging nodig: `$overig` mag). Standaard per rol

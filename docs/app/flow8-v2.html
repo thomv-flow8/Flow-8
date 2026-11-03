@@ -444,6 +444,45 @@ body.light{--dash-g2:#f59e0b}
   .dash-vel-in{width:100%;height:auto;max-height:85vh;border-radius:20px 20px 0 0;border-left:none;padding:10px 16px calc(20px + var(--safe-bottom))}
   .dash-greep{display:block}
 }
+/* ── Verlof, overuren, onkosten op de telefoon: kaarten, zie _hrKaart ── */
+.hr-sectie{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin:16px 2px 8px}
+.hr-sectie .n{font-size:12px;font-weight:600;padding:1px 8px;border-radius:var(--radius-pill);background:color-mix(in srgb,var(--orange) 16%,transparent);color:var(--orange-t)}
+.hr-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:8px;overflow:hidden}
+.hr-kaart:not([role=button]){cursor:default}
+.hr-groep-lijst{padding:8px 8px 0}
+.hr-groep-lijst .hr-kaart{background:var(--surface2);border-color:transparent}
+.hr-groep-lijst .hr-datum{background:var(--surface)}
+.hr-wie{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:12px 12px 0}
+.hr-lijf{display:flex;gap:12px;padding:12px}
+.hr-datum{width:48px;flex-shrink:0;text-align:center;background:var(--surface2);border-radius:10px;padding:6px 0;align-self:flex-start}
+.hr-datum b{display:block;font-size:19px;line-height:1.1;font-variant-numeric:tabular-nums}
+.hr-datum span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.hr-m{flex:1;min-width:0}
+.hr-t{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:600;line-height:1.3}
+.hr-t>span:first-child{min-width:0;overflow-wrap:anywhere}
+.hr-bedrag{margin-left:auto;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hr-s{font-size:13px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+.hr-extra{margin-top:6px}
+.hr-o{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.hr-o .tag{font-size:12px}
+.hr-o svg{vertical-align:-2px}
+.hr-acties{display:flex;border-top:1px solid var(--border)}
+.hr-actie{flex:1;min-height:48px;border:none;background:none;font-family:inherit;font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:0 8px}
+.hr-actie+.hr-actie,.hr-wacht+.hr-actie{border-left:1px solid var(--border)}
+.hr-actie.goed{color:var(--green-t)}
+.hr-actie.af{color:var(--red-t)}
+.hr-actie.smal{flex:0 0 56px;color:var(--red)}
+.hr-wacht{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);padding:0 10px;text-align:center}
+@media(max-width:768px){
+  #vl-prev-jaar,#vl-next-jaar,#ou-prev-jaar,#ou-next-jaar,#ok-prev-jaar,#ok-next-jaar{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+  #vl-add-btn,#ou-add-btn,#ok-add-btn{width:100%;min-height:48px;justify-content:center;font-size:15px}
+  .hr-tegels{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .hr-tegels .stat-card{flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;border-radius:var(--radius);padding:10px 12px;min-height:72px;cursor:default}
+  .hr-tegels .stat-icon{display:none}
+  .hr-tegels .stat-value{font-size:20px}
+  .hr-tegels .stat-label{white-space:normal;font-size:12.5px;line-height:1.3}
+  .vl-add-med,.ou-add-med,.ok-add-med{display:none!important}
+}
 /* ── Planning op de telefoon (≤768px): eigen indeling, zie _plmToolbarHtml ── */
 .plm-balk{margin:0 0 4px}
 .plm-rij1,.plm-rij2{display:flex;gap:8px;align-items:center}
@@ -12533,6 +12572,92 @@ var _vlFilter='alle', _vlTab='aanvragen', _vlSortKey='van', _vlSortDir=1, _vlZoe
 var _vlJaar = new Date().getFullYear();
 var _vlSaldoOpen = {}; // welke medewerker-accordions open zijn in saldo-historie
 
+// ── Verlof, overuren en onkosten op de telefoon ─────────────────────
+// Tot 768px breed kaarten i.p.v. tabellen. De knoppen houden hun klassen (vl-gk, ou-goed-btn,
+// ok-uitb-btn, …), zodat de bestaande bindingen, bevestigingen en rechtencontroles gelden.
+// Een monteur ziet zijn eigen aanvragen als lijst; een beheerder eerst "Te beoordelen".
+var _HR_MND = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+function _hrMobiel(){ return window.innerWidth <= 768; }
+function _hrGetal(n){ return String(Math.round((parseFloat(n)||0)*10)/10).replace('.', ','); }
+function _hrHoofd(t){ t = String(t||''); return t.charAt(0).toUpperCase() + t.slice(1); }
+function _hrWacht(medId, mod){
+  var gk = getGoedkeurderVoor(medId, mod);
+  return '<span class="hr-wacht">Wacht op '+esc(gk ? ((gk.voornaam||'')+' '+(gk.achternaam||'')).trim() : 'beheerder')+'</span>';
+}
+function _hrKnop(cls, id, inhoud, soort, extra){
+  return '<button type="button" class="hr-actie'+(soort ? ' '+soort : '')+' '+cls+'" data-id="'+esc(id)+'"'+(extra || '')+'>'+inhoud+'</button>';
+}
+function _hrPrullenbak(cls, id){ return _hrKnop(cls, id, ICO.trash, 'smal', ' title="Verwijderen" aria-label="Verwijderen"'); }
+// k: { cls (klikbare rijklasse, bv. ou-rij), id, datum, titel, bedrag, sub, status, meta, extra, med, acties }
+function _hrKaart(k){
+  var d = k.datum ? new Date(k.datum+'T00:00:00') : null;
+  var h = '<div class="hr-kaart'+(k.cls ? ' '+k.cls : '')+'"'+(k.cls ? ' data-id="'+esc(k.id)+'" role="button" tabindex="0"' : '')+'>';
+  if(k.med){ var kl = medKleur(k.med); h += '<div class="hr-wie"><span class="avatar" style="width:26px;height:26px;font-size:11px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(k.med)+'</span>'+esc(k.med.voornaam+' '+k.med.achternaam)+'</div>'; }
+  h += '<div class="hr-lijf"><div class="hr-datum">'+(d ? '<b>'+d.getDate()+'</b><span>'+_HR_MND[d.getMonth()]+'</span>' : '<b>—</b>')+'</div><div class="hr-m">';
+  h += '<div class="hr-t"><span>'+k.titel+'</span>'+(k.bedrag ? '<span class="hr-bedrag">'+k.bedrag+'</span>' : '')+'</div>';
+  if(k.sub) h += '<div class="hr-s">'+k.sub+'</div>';
+  h += '<div class="hr-o">'+(k.status || '')+(k.meta ? '<span>'+k.meta+'</span>' : '')+'</div>';
+  if(k.extra) h += '<div class="hr-s hr-extra">'+k.extra+'</div>';
+  h += '</div></div>';
+  if(k.acties) h += '<div class="hr-acties" onclick="event.stopPropagation()">'+k.acties+'</div>';
+  return h + '</div>';
+}
+// Bovenste deel op de telefoon: eigen lijst (monteur) of "Te beoordelen" (beheerder).
+function _hrMobielBoven(lijst, alleenEigen, kaartFn){
+  if(alleenEigen) return lijst.map(function(r){ return kaartFn(r, false); }).join('');
+  var open = lijst.filter(function(r){ return r.status === 'aangevraagd'; });
+  var h = '';
+  if(open.length) h += '<div class="hr-sectie">Te beoordelen <span class="n">'+open.length+'</span></div>' + open.map(function(r){ return kaartFn(r, true); }).join('');
+  return h + '<div class="hr-sectie">Per medewerker</div>';
+}
+function _vlKaartHtml(v, metWie){
+  var m = getMed(v.medId), mijnId = getMijnMedId(), beheer = isAdmin() || magSchrijven('verlof');
+  var tj = verlofTijden(v, m);
+  var u = (v.uren != null) ? parseFloat(v.uren) : verlofDagenNaarUren(v.dagen||0, m);
+  var meer = v.tot && v.tot !== v.van;
+  var sub = esc(meer ? fmtDk(v.van)+' t/m '+fmtDk(v.tot) : fmtDk(v.van)+(tj ? ' · '+tj.van+'–'+tj.tot : '')) + (v.opmerking ? ' · '+esc(v.opmerking) : '');
+  var status = tagVerlof(v.status) + (v.beoordeeldDoor && v.status !== 'aangevraagd' ? '<span>'+esc(v.beoordeeldDoor)+(v.beoordeeldOp ? ' · '+fmtDk(v.beoordeeldOp) : '')+'</span>' : '');
+  var acties = '';
+  if(v.status === 'aangevraagd'){
+    if(magGoedkeuren('verlof', v.medId)) acties += _hrKnop('vl-gk', v.id, ICO.cross+' Afwijzen', 'af', ' data-ok="0"') + _hrKnop('vl-gk', v.id, ICO.check+' Goedkeuren', 'goed', ' data-ok="1"');
+    else if(!beheer && String(v.medId) === String(mijnId)) acties += _hrKnop('vl-eigen-edit', v.id, ICO.edit+' Wijzigen') + _hrKnop('vl-eigen-intrek', v.id, ICO.undo+' Intrekken', 'af');
+    else acties += _hrWacht(v.medId, 'verlof');
+  }
+  if(beheer) acties += _hrPrullenbak('vl-del', v.id);
+  return _hrKaart({ datum:v.van, titel:esc(_hrHoofd(v.type || 'vakantie')), sub:sub, status:status,
+    meta:_hrGetal(u)+' uur · '+_hrGetal(verlofUrenNaarDagen(u, m))+' dg', med:metWie ? m : null, acties:acties });
+}
+function _ouKaartHtml(o, metWie){
+  var m = getMed(o.medId), mijnId = getMijnMedId(), kan = isAdmin() || magSchrijven('overuren');
+  var status = ({ aangevraagd:'<span class="tag tag-orange">Aangevraagd</span>', goedgekeurd:'<span class="tag tag-blue">Goedgekeurd</span>', afgewezen:'<span class="tag tag-red">Afgewezen</span>',
+    gecompenseerd:'<span class="tag tag-green">Gecompenseerd</span>', uitbetaald:'<span class="tag tag-muted">Uitbetaald</span>' })[o.status] || '<span class="tag tag-muted">'+esc(o.status)+'</span>';
+  var acties = '';
+  if(kan){
+    if(o.status === 'aangevraagd') acties += magGoedkeuren('overuren', o.medId) ? _hrKnop('ou-af-btn', o.id, ICO.cross+' Afwijzen', 'af') + _hrKnop('ou-goed-btn', o.id, ICO.check+' Goedkeuren', 'goed') : _hrWacht(o.medId, 'overuren');
+    else if(o.status === 'gecompenseerd' || o.status === 'goedgekeurd') acties += _hrKnop('ou-uitb-btn', o.id, ICO.euro+' Uitbetalen');
+    acties += _hrPrullenbak('ou-del-btn', o.id);
+  } else if(o.status === 'aangevraagd' && String(o.medId) === String(mijnId)){
+    acties += _hrKnop('ou-wijzig', o.id, ICO.edit+' Wijzigen') + _hrKnop('ou-del-btn', o.id, ICO.undo+' Intrekken', 'af');
+  }
+  return _hrKaart({ cls:'ou-rij', id:o.id, datum:o.datum, titel:_hrGetal(o.uren)+' uur · '+(o.type === 'uitbetaling' ? 'uitbetalen' : 'compenseren'),
+    sub:esc(o.omschrijving || ''), status:status, med:metWie ? m : null, acties:acties });
+}
+function _okKaartHtml(o, metWie){
+  var m = getMed(o.medId), mijnId = getMijnMedId(), kan = isAdmin() || magGoedkeuren('onkosten') || magSchrijven('onkosten');
+  var status = ({ aangevraagd:'<span class="tag tag-orange">Aangevraagd</span>', goedgekeurd:'<span class="tag tag-blue">Goedgekeurd</span>', afgewezen:'<span class="tag tag-red">Afgewezen</span>',
+    uitbetaald:'<span class="tag tag-green">Uitbetaald</span>' })[o.status] || '<span class="tag tag-muted">'+esc(o.status)+'</span>';
+  var nb = (o.bonnen || []).length;
+  var acties = '';
+  if(kan){
+    if(o.status === 'aangevraagd') acties += magGoedkeuren('onkosten', o.medId) ? _hrKnop('ok-af-btn', o.id, ICO.cross+' Afwijzen', 'af') + _hrKnop('ok-goed-btn', o.id, ICO.check+' Goedkeuren', 'goed') : _hrWacht(o.medId, 'onkosten');
+    else if(o.status === 'goedgekeurd') acties += _hrKnop('ok-uitb-btn', o.id, ICO.euro+' Uitbetalen');
+  } else if(o.status === 'aangevraagd' && String(o.medId) === String(mijnId)){
+    acties += _hrKnop('ok-wijzig', o.id, ICO.edit+' Wijzigen');
+  }
+  return _hrKaart({ cls:'ok-rij', id:o.id, datum:o.datum, titel:esc(_hrHoofd(o.categorie || 'onkosten')), bedrag:_matEuro(o.bedrag || 0),
+    sub:esc(o.omschrijving || ''), status:status, meta:nb ? ICO.foto+' '+nb+' bon'+(nb === 1 ? '' : 'nen') : 'geen bon', med:metWie ? m : null, acties:acties });
+}
+
 function renderVerlof(){
   var mijnId=getMijnMedId();
   var jaarStr = String(_vlJaar);
@@ -12564,9 +12689,9 @@ function renderVerlof(){
   var negSaldo = actieveMedVl.filter(function(m){return getVerlofSaldoUren(m)<0;}).length;
 
   var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
-    +'<button id="vl-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px">&#8249;</button>'
+    +'<button id="vl-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Vorig jaar" title="Vorig jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>'
     +'<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+jaarStr+'</div>'
-    +'<button id="vl-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px">&#8250;</button>'
+    +'<button id="vl-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Volgend jaar" title="Volgend jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>'
     +'</div>';
   // Toolbar in dezelfde opzet als verzuim, onkosten en overuren.
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
@@ -12579,7 +12704,7 @@ function renderVerlof(){
   h+='<button class="btn btn-primary btn-sm" id="vl-add-btn">+ Aanvragen</button>';
   h+='</div>';
 
-  h+='<div class="stats-grid" style="margin-bottom:16px">';
+  h+='<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
   h+=statCard('Open aanvragen', String(openAanvragen), '#f59e0b', SVGS.alert);
   h+=statCard('Goedgekeurd '+jaarStr, String(goedgekeurdJaar), '#10b981', SVGS.check);
   if(zietAlleenEigen('verlof')){
@@ -12717,6 +12842,10 @@ function renderVerlof(){
   if(!medIds.length) {
     h += '<div style="text-align:center;padding:40px;color:var(--muted)">Geen verlofaanvragen gevonden</div>';
   }
+  // Telefoon: kaarten. Een monteur ziet zijn eigen lijst; een beheerder eerst wat er te beoordelen is.
+  var _mob = _hrMobiel();
+  if(_mob) h += _hrMobielBoven(lijst, alleenEigen, _vlKaartHtml);
+  if(_mob && alleenEigen) medIds = [];
 
   medIds.forEach(function(mid){
     var m = getMed(mid);
@@ -12774,6 +12903,9 @@ function renderVerlof(){
     if(!heeftItems) {
       h += '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Geen verlofaanvragen in '+jaarStr+'</div>';
     } else {
+      if(_mob){
+        h += '<div class="hr-groep-lijst">'+items.map(function(v){ return _vlKaartHtml(v, false); }).join('')+'</div>';
+      } else {
       h += '<div class="table-wrap"><table><thead><tr>';
       h += '<th>Van</th><th>T/m</th><th>Uren · dagen</th><th>Type</th><th>Status</th>';
       // De actiekolom hoort er ook te staan als de eigenaar zelf nog iets mag: zijn eigen
@@ -12832,6 +12964,7 @@ function renderVerlof(){
         h += '</tr>';
       });
       h += '</tbody></table></div>';
+      }
     }
     h += '</div>';
     h += '</div>';
@@ -19052,9 +19185,9 @@ function renderOveruren() {
 
   // ── Jaarnavigatie ──
   h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
-    + '<button id="ou-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px">&#8249;</button>'
+    + '<button id="ou-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Vorig jaar" title="Vorig jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>'
     + '<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+jaarStr+'</div>'
-    + '<button id="ou-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px">&#8250;</button>'
+    + '<button id="ou-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Volgend jaar" title="Volgend jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>'
     + '</div>';
 
   // ── Toolbar ──
@@ -19066,7 +19199,7 @@ function renderOveruren() {
   h += '</div>';
 
   // ── Stats ──
-  h += '<div class="stats-grid" style="margin-bottom:16px">';
+  h += '<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
   h += statCard('Open (alle jaren)',           openUren+'u',    '#f59e0b', SVGS.alert);
   h += statCard('Gecompenseerd '+jaarStr,      compUren+'u',    '#4a6cf7', SVGS.file);
   h += statCard('Uitbetaald '+jaarStr,         uitbUren+'u',    '#10b981', SVGS.file);
@@ -19122,6 +19255,10 @@ function renderOveruren() {
   if(!ouMedIds.length) {
     h += '<div style="text-align:center;padding:40px;color:var(--muted)">Geen overuren gevonden</div>';
   }
+  // Telefoon: kaarten. Een monteur ziet zijn eigen lijst; een beheerder eerst wat er te beoordelen is.
+  var _mob = _hrMobiel();
+  if(_mob) h += _hrMobielBoven(lijst, ouAlleenEigen, _ouKaartHtml);
+  if(_mob && ouAlleenEigen) ouMedIds = [];
 
   ouMedIds.forEach(function(mid){
     var m = getMed(mid);
@@ -19160,6 +19297,9 @@ function renderOveruren() {
     if(!heeftItems) {
       h += '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Geen overuren in '+jaarStr+'</div>';
     } else {
+      if(_mob){
+        h += '<div class="hr-groep-lijst">'+items.map(function(o){ return _ouKaartHtml(o, false); }).join('')+'</div>';
+      } else {
       h += '<div class="table-wrap"><table style="width:100%"><thead><tr>';
       h += '<th>Datum</th><th>Uren</th><th>Type</th><th>Omschrijving</th><th>Status</th>';
       if(kanGoedkeuren) h += '<th style="width:160px">Actie</th>';
@@ -19203,6 +19343,7 @@ function renderOveruren() {
         h += '</tr>';
       });
       h += '</tbody></table></div>';
+      }
     }
     h += '</div></div>';
   });
@@ -19241,6 +19382,7 @@ function renderOveruren() {
   });
   el.querySelectorAll('.chip[data-filter]').forEach(function(b){b.addEventListener('click',function(){_ouFilter=b.dataset.filter;_ouPage=1;renderOveruren();});});
   el.querySelectorAll('.ou-rij').forEach(function(r){r.addEventListener('click',function(){openOverurenPanel(r.dataset.id);});});
+  el.querySelectorAll('.ou-wijzig').forEach(function(b){b.addEventListener('click',function(){openOverurenModal(b.dataset.id);});});
   el.querySelectorAll('.ou-goed-btn').forEach(function(b){b.addEventListener('click',function(){keurOveruren(b.dataset.id,'goedgekeurd');});});
   el.querySelectorAll('.ou-af-btn').forEach(function(b){b.addEventListener('click',function(){keurOveruren(b.dataset.id,'afgewezen');});});
   el.querySelectorAll('.ou-uitb-btn').forEach(function(b){b.addEventListener('click',function(){
@@ -19596,9 +19738,9 @@ function renderOnkosten() {
 
   var h='';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
-    +'<button id="ok-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px">&#8249;</button>'
+    +'<button id="ok-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Vorig jaar" title="Vorig jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>'
     +'<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+jaarStr+'</div>'
-    +'<button id="ok-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px">&#8250;</button>'
+    +'<button id="ok-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Volgend jaar" title="Volgend jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>'
     +'</div>';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('onkosten')) h+='<input class="input" id="ok-zoek" placeholder="Zoek medewerker, categorie..." value="'+esc(safeZoek(_okZoek))+'" style="max-width:280px">';
@@ -19608,7 +19750,7 @@ function renderOnkosten() {
   h+='</div>';
 
   // Stats
-  h+='<div class="stats-grid" style="margin-bottom:16px">';
+  h+='<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
   h+=statCard('Open (alle jaren)',     ''+_matEuro(openBedrag), '#f59e0b', SVGS.alert);
   h+=statCard('Goedgekeurd '+jaarStr,  ''+_matEuro(goedBedrag), '#4a6cf7', SVGS.file);
   h+=statCard('Uitbetaald '+jaarStr,   ''+_matEuro(uitbBedrag), '#10b981', SVGS.file);
@@ -19661,6 +19803,10 @@ function renderOnkosten() {
   if(!okMedIds.length) {
     h += '<div style="text-align:center;padding:40px;color:var(--muted)">Geen onkosten gevonden</div>';
   }
+  // Telefoon: kaarten. Een monteur ziet zijn eigen lijst; een beheerder eerst wat er te beoordelen is.
+  var _mob = _hrMobiel();
+  if(_mob) h += _hrMobielBoven(lijst, okAlleenEigen, _okKaartHtml);
+  if(_mob && okAlleenEigen) okMedIds = [];
 
   okMedIds.forEach(function(mid){
     var m = getMed(mid);
@@ -19700,6 +19846,9 @@ function renderOnkosten() {
     if(!heeftItems) {
       h += '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Geen onkosten in '+jaarStr+'</div>';
     } else {
+      if(_mob){
+        h += '<div class="hr-groep-lijst">'+items.map(function(o){ return _okKaartHtml(o, false); }).join('')+'</div>';
+      } else {
       h += '<div class="table-wrap"><table style="width:100%"><thead><tr>';
       h += '<th>Datum</th><th>Categorie</th><th>Bedrag</th><th>Omschrijving</th><th>Status</th>';
       if(kanGoedkeuren) h += '<th style="width:120px">Actie</th>';
@@ -19732,6 +19881,7 @@ function renderOnkosten() {
         h += '</tr>';
       });
       h += '</tbody></table></div>';
+      }
     }
     h += '</div></div>';
   });
@@ -19769,6 +19919,7 @@ function renderOnkosten() {
   });
   el.querySelectorAll('.chip[data-ok-filter]').forEach(function(b){b.addEventListener('click',function(){_okFilter=b.dataset.okFilter;_okPage=1;renderOnkosten();});});
   el.querySelectorAll('.ok-rij').forEach(function(r){r.addEventListener('click',function(){openOnkostenPanel(r.dataset.id);});});
+  el.querySelectorAll('.ok-wijzig').forEach(function(b){b.addEventListener('click',function(){openOnkostenModal(b.dataset.id);});});
   el.querySelectorAll('.ok-goed-btn').forEach(function(b){b.addEventListener('click',function(){keurOnkosten(b.dataset.id,'goedgekeurd');});});
   el.querySelectorAll('.ok-af-btn').forEach(function(b){b.addEventListener('click',function(){keurOnkosten(b.dataset.id,'afgewezen');});});
   el.querySelectorAll('.ok-uitb-btn').forEach(function(b){b.addEventListener('click',function(){
