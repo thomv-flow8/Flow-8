@@ -444,6 +444,13 @@ body.light{--dash-g2:#f59e0b}
   .dash-vel-in{width:100%;height:auto;max-height:85vh;border-radius:20px 20px 0 0;border-left:none;padding:10px 16px calc(20px + var(--safe-bottom))}
   .dash-greep{display:block}
 }
+/* ── Agenda: periodekeuze in de lijst en deelnemers als aanvinkbare lijst ── */
+.ag-periode{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.ag-periode select{width:auto;min-height:44px;padding:8px 12px}
+.ag-deel{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
+.form-group .ag-deel label,.ag-deel label{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);cursor:pointer;font-family:inherit;font-size:14px;letter-spacing:0;text-transform:none;color:var(--text);font-weight:500}
+.ag-deel input{width:20px;height:20px;flex-shrink:0;accent-color:var(--accent-knop)}
+.ag-deel label:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface2))}
 /* ── Verlof, overuren, onkosten op de telefoon: kaarten, zie _hrKaart ── */
 .hr-sectie{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin:16px 2px 8px}
 .hr-sectie .n{font-size:12px;font-weight:600;padding:1px 8px;border-radius:var(--radius-pill);background:color-mix(in srgb,var(--orange) 16%,transparent);color:var(--orange-t)}
@@ -595,7 +602,7 @@ body.light{--dash-g2:#f59e0b}
 .ag-switcher{display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:3px;gap:2px}
 .ag-seg{border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);padding:6px 16px;border-radius:6px;cursor:pointer;transition:all .15s}
 .ag-seg:hover{color:var(--text)}
-.ag-seg.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(20,24,36,.1)}
+.ag-seg.active{background:var(--surface);color:var(--accent-t);box-shadow:0 1px 3px rgba(20,24,36,.1)}
 @media(max-width:768px){.ag-seg{padding:6px 11px;font-size:12px}}
 /* Weekweergave (tijdraster) */
 .agw-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
@@ -604,15 +611,16 @@ body.light{--dash-g2:#f59e0b}
 .agw-head > div:last-child{border-right:none}
 .agw-daglabel{font-weight:600;color:var(--muted);text-transform:capitalize}
 .agw-dagnum{font-weight:800;font-size:16px;margin-top:2px}
-.agw-head .agw-vandaag .agw-dagnum{background:var(--red);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center}
+.agw-head .agw-vandaag .agw-dagnum{background:var(--accent-knop);color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center}
 .agw-allday{display:grid;grid-template-columns:56px repeat(7,1fr);border-bottom:2px solid var(--border);min-height:26px}
-.agw-allday .agw-lbl{font-size:9px;color:var(--muted);padding:4px;text-align:right;border-right:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;font-weight:600}
+.agw-allday .agw-lbl{font-size:11px;color:var(--muted);padding:4px;text-align:right;border-right:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;font-weight:600}
 .agw-allday .agw-col{border-right:1px solid var(--border);padding:2px}
 .agw-allday .agw-col:last-child{border-right:none}
+.agw-allday .agw-chip:not(.agw-afsp){cursor:default}
 .agw-allday .agw-chip{font-size:11.5px;padding:3px 6px;border-radius:5px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;cursor:pointer}
 .agw-grid{display:grid;grid-template-columns:56px repeat(7,1fr)}
 .agw-timecol{border-right:1px solid var(--border)}
-.agw-timecol .agw-slot{font-size:10px;color:var(--muted);text-align:right;padding:2px 6px 0 0;position:relative;top:-7px}
+.agw-timecol .agw-slot{font-size:11px;color:var(--muted);text-align:right;padding:2px 6px 0 0;position:relative;top:-7px}
 .agw-daycol{border-right:1px solid var(--border);position:relative}
 .agw-daycol:last-child{border-right:none}
 .agw-daycol.agw-weekend{background:rgba(0,0,0,.012)}
@@ -620,15 +628,15 @@ body.light{--dash-g2:#f59e0b}
 .agw-daycol .agw-slot{cursor:pointer;transition:background .1s}
 .agw-daycol .agw-slot:hover{background:rgba(74,108,247,.06)}
 .agw-afspr{position:absolute;left:3px;right:3px;border-radius:5px;padding:4px 6px;font-size:11.5px;font-weight:600;overflow:hidden;cursor:pointer;line-height:1.4;border-left:3px solid}
-.agw-afspr .agw-tijd{font-size:10px;opacity:.85;font-weight:500}
+.agw-afspr .agw-tijd{font-size:11px;opacity:.85;font-weight:500}
 /* Dagweergave weekstrook (iPhone-patroon) */
 .agw-dagstrip{grid-template-columns:56px repeat(7,1fr)}
 .agw-dagstrip-dag{padding:6px 2px;text-align:center;cursor:pointer;border-radius:8px;transition:background .12s}
 .agw-dagstrip-dag:hover{background:rgba(74,108,247,.08)}
 .agw-dagstrip-num{font-weight:800;font-size:15px;margin-top:2px;width:28px;height:28px;line-height:28px;border-radius:50%;display:inline-block}
-.agw-dagstrip-dag.vandaag .agw-dagstrip-num{color:var(--red)}
+.agw-dagstrip-dag.vandaag .agw-dagstrip-num{color:var(--accent-t)}
 .agw-dagstrip-dag.sel .agw-dagstrip-num{background:var(--accent-knop);color:#fff}
-.agw-dagstrip-dag.sel.vandaag .agw-dagstrip-num{background:var(--red);color:#fff}
+.agw-dagstrip-dag.sel.vandaag .agw-dagstrip-num{background:var(--accent-knop);color:#fff}
 .chip:hover{color:var(--text);border-color:var(--muted)}
 .chip.active{background:var(--accent-knop);color:#fff;border-color:var(--accent-knop)}
 /* Search */
@@ -780,6 +788,11 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   #plan-prev,#plan-next{min-width:44px}
   #plan-prev,#plan-next,#plan-today,#plan-add-btn,#plan-dagplan-btn,#plan-kolom-toolbar-btn{min-height:44px}
   /* Goedkeuren, afwijzen en uitbetalen in verlof, overuren en onkosten */
+  /* Agenda */
+  .ag-seg{min-height:44px}
+  #ag-prev,#ag-next{min-width:44px}
+  #ag-prev,#ag-next,#ag-vandaag,#ag-add,#agp-ics,#agp-edit,#agp-del{min-height:44px}
+  .agw-allday .agw-chip{min-height:44px;display:flex;align-items:center}
   .btn.vl-gk,.btn.ou-goed-btn,.btn.ou-af-btn,.btn.ou-uitb-btn,.btn.ou-del-btn,.btn.ok-goed-btn,.btn.ok-af-btn,.btn.ok-uitb-btn,.btn.vl-del{min-height:44px}
 }
 .stat-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -20873,13 +20886,13 @@ function _agDagKaartjes(datum, filter) {
         var _agEersteMed = getMed(_agDeelIds[0]);
         if(_agEersteMed) {
           var _agAvKl = medKleur(_agEersteMed);
-          _agAvatarHtml = '<div style="width:32px;height:32px;border-radius:50%;background:'+_agAvKl+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">'+initials(_agEersteMed)+'</div>';
+          _agAvatarHtml = '<div style="width:32px;height:32px;border-radius:50%;background:'+_agAvKl+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+_tekstOpKleur(_agAvKl)+';flex-shrink:0">'+initials(_agEersteMed)+'</div>';
           if(_agDeelIds.length > 1) {
             _agAvatarHtml = '<div style="position:relative;width:32px;height:32px;flex-shrink:0">'+_agAvatarHtml;
             var _agTweedeMed = getMed(_agDeelIds[1]);
             if(_agTweedeMed) {
               var _agAv2Kl = medKleur(_agTweedeMed);
-              _agAvatarHtml += '<div style="position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:'+_agAv2Kl+';border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff">'+initials(_agTweedeMed)+'</div>';
+              _agAvatarHtml += '<div style="position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:'+_agAv2Kl+';border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:'+_tekstOpKleur(_agAv2Kl)+'">'+initials(_agTweedeMed)+'</div>';
             }
             _agAvatarHtml += '</div>';
           }
@@ -20891,13 +20904,13 @@ function _agDagKaartjes(datum, filter) {
     } else {
       _agAvatarHtml = '<div style="width:32px;height:32px;border-radius:8px;background:'+kl+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:'+kl+'">'+typeIco+'</div>';
     }
-    h += '<div class="ag-item" data-id="'+a.id+'" style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-left:4px solid '+kl+';border-radius:8px;margin-bottom:6px;cursor:'+(a.isStoringsdienst||a.isVerlof||a.isBlokkade?'default':'pointer')+'">';
+    h += '<div class="ag-item" data-id="'+a.id+'"'+((a.isStoringsdienst||a.isVerlof||a.isBlokkade)?'':' role="button" tabindex="0"')+' style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-left:4px solid '+kl+';border-radius:8px;margin-bottom:6px;cursor:'+(a.isStoringsdienst||a.isVerlof||a.isBlokkade?'default':'pointer')+'">';
     h += _agAvatarHtml;
     h += '<div style="flex:1">';
     h += '<div style="font-size:13px;font-weight:600">'+esc(a.titel||ti.l)+'</div>';
     if(tijdTekst) h += '<div style="font-size:12px;color:var(--muted)">'+tijdTekst+'</div>';
     h += '</div>';
-    h += '<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';font-size:10px;white-space:nowrap">'+typLabel+'</span>';
+    h += '<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';font-size:12px;white-space:nowrap">'+typLabel+'</span>';
     h += '</div>';
   });
   return h;
@@ -20958,7 +20971,7 @@ function renderAgenda() {
 
   // ── Navigatiebalk (‹ › + view-afhankelijke titel + Vandaag) — voor alle weergaves ──
   h += '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px">';
-  h += '<button class="btn btn-ghost btn-sm" id="ag-prev" style="padding:4px 10px">‹</button>';
+  h += '<button class="btn btn-ghost btn-sm" id="ag-prev" style="padding:4px 10px" aria-label="Vorige" title="Vorige"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
   var _agTitel = mndNamenLang[gridMnd-1]+' '+gridJaar;
   var _titelP = (_agView==='lijst') ? _agPeriode : _agView;
   if(_titelP==='dag') {
@@ -20976,8 +20989,8 @@ function renderAgenda() {
   }
   h += '<div style="font-weight:700;font-size:16px">'+_agTitel+'</div>';
   h += '<div style="display:flex;gap:6px;align-items:center">';
-  h += '<button class="btn btn-ghost btn-sm" id="ag-vandaag" style="font-size:11px;padding:3px 8px">Vandaag</button>';
-  h += '<button class="btn btn-ghost btn-sm" id="ag-next" style="padding:4px 10px">›</button>';
+  h += '<button class="btn btn-ghost btn-sm" id="ag-vandaag">Vandaag</button>';
+  h += '<button class="btn btn-ghost btn-sm" id="ag-next" style="padding:4px 10px" aria-label="Volgende" title="Volgende"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>';
   h += '</div></div>';
 
   // ── View-routing (Outlook-switcher) ──
@@ -21009,7 +21022,8 @@ function renderAgenda() {
     if(_dMaxU > 24) _dMaxU = 24;
     if(_dMinU < 0) _dMinU = 0;
     var _dUren = []; for(var _du=_dMinU; _du<=_dMaxU; _du++) _dUren.push(_du);
-    var _dSlotH = 44;
+    // Op een aanraakscherm een uur 60px hoog, zodat een halfuur-afspraak groot genoeg is om te tikken.
+    var _dSlotH = window.matchMedia('(pointer:coarse)').matches ? 60 : 44;
 
     h += '<div class="agw-wrap agw-dag">';
     // Weekstrook: dagen van de week (ma-zo), geselecteerde dag gemarkeerd, klikbaar
@@ -21022,7 +21036,7 @@ function renderAgenda() {
       var _dwDs = _dwD.getUTCFullYear()+'-'+('0'+(_dwD.getUTCMonth()+1)).slice(-2)+'-'+('0'+_dwD.getUTCDate()).slice(-2);
       var _dwVandaag = _dwDs===vandaag;
       var _dwSel = _dwDs===_dDs;
-      h += '<div class="agw-dagstrip-dag'+(_dwSel?' sel':'')+(_dwVandaag?' vandaag':'')+'" data-dagsel="'+_dwDs+'">';
+      h += '<div class="agw-dagstrip-dag'+(_dwSel?' sel':'')+(_dwVandaag?' vandaag':'')+'" data-dagsel="'+_dwDs+'" role="button" tabindex="0" aria-label="'+fmtD(_dwDs)+'">';
       h += '<div class="agw-daglabel">'+_dWkLbls[_dwi]+'</div>';
       h += '<div class="agw-dagstrip-num">'+_dwD.getUTCDate()+'</div>';
       h += '</div>';
@@ -21035,26 +21049,26 @@ function renderAgenda() {
       var kl = a.isVerlof ? '#f59e0b' : a.isStoringsdienst ? (a.medKleur||'#ef4444') : a.isBlokkade ? '#ef4444' : agTypeInfo(a.type).kleur;
       var titel = a.titel || agTypeInfo(a.type).l || 'Afspraak';
       var _bewerkb = !a.isVerlof && !a.isStoringsdienst && !a.isBlokkade;
-      h += '<div class="agw-chip'+(_bewerkb?' agw-afsp':'')+'"'+(_bewerkb?' data-afsp="'+esc(a.id)+'"':'')+' title="'+esc(titel)+'" style="background:'+_kleurTint(kl,'26')+';color:'+_klTekst(kl)+'">'+esc(titel)+'</div>';
+      h += '<div class="agw-chip'+(_bewerkb?' agw-afsp':'')+'"'+(_bewerkb?' data-afsp="'+esc(a.id)+'" role="button" tabindex="0"':'')+' title="'+esc(titel)+'" style="background:'+_kleurTint(kl,'26')+';color:'+_klTekst(kl)+'">'+esc(titel)+'</div>';
     });
     h += '</div></div>';
     // Tijdraster (één dagkolom)
     h += '<div class="agw-grid" style="grid-template-columns:56px 1fr">';
     h += '<div class="agw-timecol">';
-    _dUren.forEach(function(u){ h += '<div class="agw-slot">'+('0'+u).slice(-2)+':00</div>'; });
+    _dUren.forEach(function(u){ h += '<div class="agw-slot" style="height:'+_dSlotH+'px">'+('0'+u).slice(-2)+':00</div>'; });
     h += '</div>';
     h += '<div class="agw-daycol'+(_dWeekend?' agw-weekend':'')+'" data-datum="'+_dDs+'">';
-    _dUren.forEach(function(u){ h += '<div class="agw-slot" data-uur="'+('0'+u).slice(-2)+':00" data-datum="'+_dDs+'"></div>'; });
+    _dUren.forEach(function(u){ h += '<div class="agw-slot" style="height:'+_dSlotH+'px" data-uur="'+('0'+u).slice(-2)+':00" data-datum="'+_dDs+'"></div>'; });
     _dGetimed.forEach(function(a){
       var vu = parseInt(a.tijdVan.split(':')[0]), vm = parseInt(a.tijdVan.split(':')[1]||'0');
       var tEind = a.tijdTot || a.tijdVan;
       var tu = parseInt(tEind.split(':')[0]), tm = parseInt(tEind.split(':')[1]||'0');
       var top = ((vu-_dMinU)+vm/60)*_dSlotH;
-      var hoogte = Math.max(((tu-vu)+(tm-vm)/60)*_dSlotH-2, 22);
+      var hoogte = Math.max(((tu-vu)+(tm-vm)/60)*_dSlotH-2, 30);
       var kl = agTypeInfo(a.type).kleur;
       var titel = a.titel || agTypeInfo(a.type).l || 'Afspraak';
       var _tijdLabel = a.tijdVan + (a.tijdTot?' – '+a.tijdTot:'');
-      h += '<div class="agw-afspr" data-afsp="'+esc(a.id)+'" title="'+esc(_tijdLabel+' '+titel)+'" style="top:'+top+'px;height:'+hoogte+'px;background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';border-left-color:'+kl+'"><div class="agw-tijd">'+esc(_tijdLabel)+'</div>'+esc(titel)+'</div>';
+      h += '<div class="agw-afspr" data-afsp="'+esc(a.id)+'" role="button" tabindex="0" title="'+esc(_tijdLabel+' '+titel)+'" style="top:'+top+'px;height:'+hoogte+'px;background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';border-left-color:'+kl+'"><div class="agw-tijd">'+esc(_tijdLabel)+'</div>'+esc(titel)+'</div>';
     });
     h += '</div>';
     h += '</div>';
@@ -21119,7 +21133,7 @@ function renderAgenda() {
         var kl = a.isVerlof ? '#f59e0b' : a.isStoringsdienst ? (a.medKleur||'#ef4444') : a.isBlokkade ? '#ef4444' : agTypeInfo(a.type).kleur;
         var titel = a.titel || agTypeInfo(a.type).l || 'Afspraak';
         var _bewerkb = !a.isVerlof && !a.isStoringsdienst && !a.isBlokkade;
-        h += '<div class="agw-chip'+(_bewerkb?' agw-afsp':'')+'"'+(_bewerkb?' data-afsp="'+esc(a.id)+'"':'')+' title="'+esc(titel)+'" style="background:'+_kleurTint(kl,'26')+';color:'+_klTekst(kl)+'">'+esc(titel)+'</div>';
+        h += '<div class="agw-chip'+(_bewerkb?' agw-afsp':'')+'"'+(_bewerkb?' data-afsp="'+esc(a.id)+'" role="button" tabindex="0"':'')+' title="'+esc(titel)+'" style="background:'+_kleurTint(kl,'26')+';color:'+_klTekst(kl)+'">'+esc(titel)+'</div>';
       });
       h += '</div>';
     });
@@ -21141,7 +21155,7 @@ function renderAgenda() {
         var hoogte = Math.max(((tu-vu)+(tm-vm)/60)*_slotH-2, 22);
         var kl = agTypeInfo(a.type).kleur;
         var titel = a.titel || agTypeInfo(a.type).l || 'Afspraak';
-        h += '<div class="agw-afspr" data-afsp="'+esc(a.id)+'" title="'+esc(a.tijdVan+(a.tijdTot?'–'+a.tijdTot:'')+' '+titel)+'" style="top:'+top+'px;height:'+hoogte+'px;background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';border-left-color:'+kl+'"><div class="agw-tijd">'+esc(a.tijdVan)+'</div>'+esc(titel)+'</div>';
+        h += '<div class="agw-afspr" data-afsp="'+esc(a.id)+'" role="button" tabindex="0" title="'+esc(a.tijdVan+(a.tijdTot?'–'+a.tijdTot:'')+' '+titel)+'" style="top:'+top+'px;height:'+hoogte+'px;background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';border-left-color:'+kl+'"><div class="agw-tijd">'+esc(a.tijdVan)+'</div>'+esc(titel)+'</div>';
       });
       h += '</div>';
     });
@@ -21155,7 +21169,7 @@ function renderAgenda() {
 
   // Dag namen header — met weeknummer kolom
   h += '<div style="display:grid;grid-template-columns:34px repeat(7,1fr);border-bottom:1px solid var(--border)">';
-  h += '<div style="text-align:center;padding:6px 0;font-size:10px;font-weight:600;color:var(--muted);border-right:1px solid var(--border)">Wk</div>';
+  h += '<div style="text-align:center;padding:6px 0;font-size:11px;font-weight:600;color:var(--muted);border-right:1px solid var(--border)">Wk</div>';
   dagNamenKort.forEach(function(d,_di){
     h += '<div style="text-align:center;padding:6px 0;font-size:11px;font-weight:600;color:var(--muted)'+(_di<6?';border-right:1px solid var(--border)':'')+'">'+d+'</div>';
   });
@@ -21232,7 +21246,7 @@ function renderAgenda() {
     }
     h += '<div style="display:grid;grid-template-columns:34px repeat(7,1fr)">';
     // Weeknummer cel
-    h += '<div style="display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);opacity:.6;font-weight:600;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,.012)">'+wkNrRij+'</div>';
+    h += '<div style="display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);font-weight:600;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,.012)">'+wkNrRij+'</div>';
     // 7 dag-cellen
     for(var ci=rijIndex; ci<rijIndex+7; ci++) {
       var _celRand = 'border-right:1px solid var(--border);border-bottom:1px solid var(--border)';
@@ -21246,14 +21260,14 @@ function renderAgenda() {
         h += '<div style="'+_leegStyle+';'+_celRand+'"></div>';
         continue;
       }
-      var celBg = cel.isSelected ? (_agMobiel ? 'var(--accent)' : 'rgba(74,108,247,.12)') : (cel.isWeekend ? 'rgba(255,255,255,.015)' : 'transparent');
+      var celBg = cel.isSelected ? (_agMobiel ? 'var(--accent-knop)' : 'rgba(74,108,247,.12)') : (cel.isWeekend ? 'rgba(255,255,255,.015)' : 'transparent');
       var celClr = cel.isSelected ? (_agMobiel ? '#fff' : 'var(--text)') : cel.isWeekend ? 'var(--muted)' : 'var(--text)';
 
       if(!_agMobiel) {
         // ── Desktop: volledige titels, alle items, meegroeiende cel (min 4×2 regels) ──
-        h += '<div class="ag-dag-cel" data-datum="'+cel.dagStr+'" style="padding:4px 5px;min-height:150px;cursor:pointer;text-align:left;position:relative;background:'+celBg+';transition:background .15s;'+_celRand+'">';
+        h += '<div class="ag-dag-cel" data-datum="'+cel.dagStr+'" role="button" tabindex="0" aria-label="'+fmtD(cel.dagStr)+'" style="padding:4px 5px;min-height:150px;cursor:pointer;text-align:left;position:relative;background:'+celBg+';transition:background .15s;'+_celRand+'">';
         if(cel.isVandaag && !cel.isSelected) {
-          h += '<div style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font-weight:700;font-size:13px;margin-bottom:3px">'+cel.d+'</div>';
+          h += '<div style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent-knop);color:#fff;font-weight:700;font-size:13px;margin-bottom:3px">'+cel.d+'</div>';
         } else {
           h += '<div style="display:inline-block;font-size:13px;font-weight:'+(cel.isSelected?'700':'600')+';color:'+celClr+';margin-bottom:3px;padding-left:2px">'+cel.d+'</div>';
         }
@@ -21268,9 +21282,9 @@ function renderAgenda() {
         h += '</div>';
       } else {
         // ── Mobiel: stippen (ongewijzigd, compacte cel) ──
-        h += '<div class="ag-dag-cel" data-datum="'+cel.dagStr+'" style="padding:6px 0;min-height:48px;cursor:pointer;text-align:center;position:relative;background:'+celBg+';transition:background .15s;'+_celRand+'">';
+        h += '<div class="ag-dag-cel" data-datum="'+cel.dagStr+'" role="button" tabindex="0" aria-label="'+fmtD(cel.dagStr)+'" style="padding:6px 0;min-height:48px;cursor:pointer;text-align:center;position:relative;background:'+celBg+';transition:background .15s;'+_celRand+'">';
         if(cel.isVandaag && !cel.isSelected) {
-          h += '<div style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;font-weight:700;font-size:14px">'+cel.d+'</div>';
+          h += '<div style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--accent-knop);color:#fff;font-weight:700;font-size:14px">'+cel.d+'</div>';
         } else {
           h += '<div style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:14px;font-weight:'+(cel.isSelected?'700':'500')+';color:'+celClr+'">'+cel.d+'</div>';
         }
@@ -21303,7 +21317,7 @@ function renderAgenda() {
 
   h += '<div id="ag-dag-'+_selD+'" style="margin-top:16px">';
   h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0 8px;border-bottom:1px solid var(--border);margin-bottom:10px">';
-  h += '<div style="width:36px;height:36px;border-radius:50%;background:'+(_selIsVandaag?'var(--red)':'var(--accent)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+  h += '<div style="width:36px;height:36px;border-radius:50%;background:var(--accent-knop);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
   h += '<span style="font-weight:800;font-size:15px;color:#fff">'+parseInt(_selP[2])+'</span></div>';
   h += '<div><div style="font-weight:700;font-size:14px;text-transform:capitalize">'+_dagNamenVolAg[_selObj.getUTCDay()]+' '+parseInt(_selP[2])+' '+mndNamenLang[parseInt(_selP[1])-1]+(_selIsVandaag?' — vandaag':'')+'</div>';
   h += '<div style="font-size:11px;color:var(--muted)">'+_selAantal+' afspraak'+(_selAantal!==1?'en':'')+'</div></div>';
@@ -21351,11 +21365,10 @@ function renderAgenda() {
     var dagNamenVol = ['zo','ma','di','wo','do','vr','za'];
     // Periode-subkeuze (Dag · Week · Maand) + datum-range — 1x boven de lijst
     h += '<div style="display:flex;align-items:center;gap:12px;padding:6px 0 10px;margin-bottom:4px;flex-wrap:wrap">';
-    h += '<div class="ag-switcher">';
-    [['dag','Dag'],['week','Week'],['maand','Maand']].forEach(function(pv){
-      h += '<button class="ag-seg'+(_agPeriode===pv[0]?' active':'')+'" data-periode="'+pv[0]+'">'+pv[1]+'</button>';
-    });
-    h += '</div>';
+    // Eén keuzelijst i.p.v. een tweede schakelaar onder Dag/Maand/Lijst: dat las als dubbel.
+    h += '<label class="ag-periode">Periode <select class="input" id="ag-periode">'+[['dag','Dag'],['week','Week'],['maand','Maand']].map(function(pv){
+      return '<option value="'+pv[0]+'"'+(_agPeriode===pv[0]?' selected':'')+'>'+pv[1]+'</option>';
+    }).join('')+'</select></label>';
     h += '<div style="font-size:12px;color:var(--muted)">'+fmtD(pr.van)+(pr.van!==pr.tot?' – '+fmtD(pr.tot):'')+'</div>';
     h += '</div>';
 
@@ -21370,7 +21383,7 @@ function renderAgenda() {
       // Dag header
       h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0 6px;position:sticky;top:0;background:var(--bg);z-index:2;border-bottom:1px solid var(--border);margin-bottom:6px">';
       if(isVandaagLijst) {
-        h += '<div style="width:36px;height:36px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
+        h += '<div style="width:36px;height:36px;border-radius:50%;background:var(--accent-knop);display:flex;align-items:center;justify-content:center;flex-shrink:0">';
         h += '<span style="font-weight:800;font-size:15px;color:#fff">'+parseInt(dp[2])+'</span></div>';
       } else {
         h += '<div style="width:36px;height:36px;border-radius:50%;background:'+(isSelectedLijst?'var(--accent)':'var(--surface2)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">';
@@ -21410,12 +21423,8 @@ function renderAgenda() {
   });
 
   // Events: periode-subkeuze in lijst-view (Dag/Week/Maand)
-  el.querySelectorAll('.ag-seg[data-periode]').forEach(function(b){
-    b.addEventListener('click', function(){
-      _agPeriode = b.dataset.periode;
-      renderAgenda();
-    });
-  });
+  var agPer = el.querySelector('#ag-periode');
+  if(agPer) agPer.addEventListener('change', function(){ _agPeriode = agPer.value; renderAgenda(); });
 
   // Events: weekstrook in dagweergave — klik op dag toont die dag
   el.querySelectorAll('.agw-dagstrip-dag[data-dagsel]').forEach(function(d){
@@ -21569,8 +21578,8 @@ function openAgendaModal(id, prefillDatum, prefillTijd) {
   // Medewerker opties voor deelnemers
   var medOpts = '';
   APP.medewerkers.filter(function(m){return m.status!=='inactief';}).forEach(function(m){
-    var sel = (a.deelnemerIds||[]).indexOf(String(m.id))>=0 ? ' selected' : '';
-    medOpts += '<option value="'+m.id+'"'+sel+'>'+esc(m.voornaam+' '+m.achternaam)+'</option>';
+    var aan = (a.deelnemerIds||[]).indexOf(String(m.id))>=0 ? ' checked' : '';
+    medOpts += '<label><input type="checkbox" value="'+m.id+'"'+aan+'> '+esc(m.voornaam+' '+m.achternaam)+'</label>';
   });
 
   var typeOpts = Object.keys(AG_TYPES).map(function(k){
@@ -21592,12 +21601,11 @@ function openAgendaModal(id, prefillDatum, prefillTijd) {
   b += '</div>';
   b += fg('Locatie', finp('ag-locatie','text',a.locatie||'','Bijv. Vergaderzaal, Teams'));
   b += fgf('Omschrijving', ftxtAuto('ag-omschr', a.omschrijving||''));
-  b += fgf('Deelnemers', '<select class="input" id="ag-deelnemers" multiple size="5" style="height:auto">'+medOpts+'</select>');
-  b += '<div style="font-size:11px;color:var(--muted);grid-column:1/-1">Houd Ctrl (of Cmd) ingedrukt om meerdere deelnemers te selecteren</div>';
+  b += fgf('Deelnemers', '<div class="ag-deel" id="ag-deelnemers" role="group" aria-label="Deelnemers">'+medOpts+'</div>');
   b += '</div>';
 
   var f = '<button class="btn btn-ghost" id="ag-modal-cancel">Annuleren</button>';
-  if(!isNew) f += '<button class="btn btn-ghost" id="ag-modal-del" style="color:var(--red)">'+ICO.trash+' Verwijderen</button>';
+  if(!isNew) f += '<button class="btn btn-ghost" id="ag-modal-del" style="color:var(--red-t)">'+ICO.trash+' Verwijderen</button>';
   f += '<button class="btn btn-primary" id="ag-modal-save">Opslaan</button>';
   openModal(isNew?'Afspraak toevoegen':'Afspraak bewerken', b, f);
   bindAutoGrow(document.getElementById('ag-omschr'));
@@ -21635,8 +21643,7 @@ function saveAgenda(id) {
   var van = document.getElementById('ag-van').value;
   if(!van){toast('Datum is verplicht','error');return;}
   var tot = document.getElementById('ag-tot').value || van;
-  var deelSel = document.getElementById('ag-deelnemers');
-  var deelIds = Array.from(deelSel.selectedOptions).map(function(o){return o.value;});
+  var deelIds = Array.from(document.querySelectorAll('#ag-deelnemers input:checked')).map(function(o){return o.value;});
 
   var data = Object.assign({}, bestaand, {
     id:           id || uid(),
@@ -21697,7 +21704,7 @@ function openAgendaPanel(id) {
   h += '<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px;margin-top:8px">';
   h += '<button class="btn btn-primary" id="agp-ics" style="justify-content:center">'+ICO.kalender+' Stuur uitnodiging (ICS)</button>';
   h += '<button class="btn btn-ghost" id="agp-edit" style="justify-content:center">'+ICO.edit+' Bewerken</button>';
-  h += '<button class="btn btn-ghost" id="agp-del" style="justify-content:center;color:var(--red)">'+ICO.trash+' Verwijderen</button>';
+  h += '<button class="btn btn-ghost" id="agp-del" style="justify-content:center;color:var(--red-t)">'+ICO.trash+' Verwijderen</button>';
   h += '</div>';
 
   openPanel(a.titel||ti.l, h);
