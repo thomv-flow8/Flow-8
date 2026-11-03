@@ -449,7 +449,10 @@ body.light{--dash-g2:#f59e0b}
 .ag-periode select{width:auto;min-height:44px;padding:8px 12px}
 .ag-deel{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
 .form-group .ag-deel label,.ag-deel label{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);cursor:pointer;font-family:inherit;font-size:14px;letter-spacing:0;text-transform:none;color:var(--text);font-weight:500}
-.ag-deel input{width:20px;height:20px;flex-shrink:0;accent-color:var(--accent-knop)}
+/* !important: op een telefoon zet een algemene regel invoervelden op volle breedte. */
+.ag-deel input[type=checkbox],.ag-vink input[type=checkbox]{width:20px!important;min-width:20px;height:20px;min-height:20px;flex:0 0 auto;margin:0;accent-color:var(--accent-knop)}
+.ag-deel-alle{min-height:44px;margin-bottom:8px}
+.form-group .ag-vink,.ag-vink{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;font-family:inherit;font-size:14px;letter-spacing:0;text-transform:none;color:var(--text);font-weight:500}
 .ag-deel label:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface2))}
 /* ── Verlof, overuren, onkosten op de telefoon: kaarten, zie _hrKaart ── */
 .hr-sectie{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;margin:16px 2px 8px}
@@ -21594,14 +21597,16 @@ function openAgendaModal(id, prefillDatum, prefillTijd) {
   b += fg('Titel', finp('ag-titel','text',a.titel||'','Bijv. Maandelijks werkoverleg'));
   b += fg('Van (datum)', finp('ag-van','date',startDatum,''));
   b += fg('Tot (datum, leeg = zelfde dag)', finp('ag-tot','date',a.tot&&a.tot!==a.van?a.tot:'',''));
-  b += fg('Hele dag', '<label style="display:flex;align-items:center;gap:8px;margin-top:4px"><input type="checkbox" id="ag-heeldag"'+(a.heelDag||isVrijeDag?' checked':'')+' style="width:15px;height:15px"> <span style="font-size:13px">Hele dag</span></label>');
+  b += fg('Hele dag', '<label class="ag-vink"><input type="checkbox" id="ag-heeldag"'+(a.heelDag||isVrijeDag?' checked':'')+'> Hele dag</label>');
   b += '<div id="ag-tijd-wrap" style="'+(a.heelDag||isVrijeDag?'display:none':'')+'grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px">';
   b += fg('Begintijd', finp('ag-tijdvan','time',a.tijdVan||prefillTijd||'09:00',''));
   b += fg('Eindtijd',  finp('ag-tijdtot','time',a.tijdTot||'10:00',''));
   b += '</div>';
   b += fg('Locatie', finp('ag-locatie','text',a.locatie||'','Bijv. Vergaderzaal, Teams'));
   b += fgf('Omschrijving', ftxtAuto('ag-omschr', a.omschrijving||''));
-  b += fgf('Deelnemers', '<div class="ag-deel" id="ag-deelnemers" role="group" aria-label="Deelnemers">'+medOpts+'</div>');
+  var _agAlleAan = APP.medewerkers.filter(function(m){return m.status!=='inactief';}).every(function(m){ return (a.deelnemerIds||[]).indexOf(String(m.id))>=0; });
+  b += fgf('Deelnemers', '<button type="button" class="btn btn-ghost btn-sm ag-deel-alle" id="ag-deel-alle" onclick="_agDeelAlle()">'+(_agAlleAan?'Niemand selecteren':'Iedereen selecteren')+'</button>'
+    + '<div class="ag-deel" id="ag-deelnemers" role="group" aria-label="Deelnemers" onchange="_agDeelKnop()">'+medOpts+'</div>');
   b += '</div>';
 
   var f = '<button class="btn btn-ghost" id="ag-modal-cancel">Annuleren</button>';
@@ -21636,6 +21641,18 @@ function openAgendaModal(id, prefillDatum, prefillTijd) {
   }
 }
 
+// Deelnemers in één keer: iedereen aan, of (als iedereen al aan staat) iedereen uit.
+function _agDeelAlle(){
+  var vakjes = Array.prototype.slice.call(document.querySelectorAll('#ag-deelnemers input'));
+  var alle = vakjes.length && vakjes.every(function(v){ return v.checked; });
+  vakjes.forEach(function(v){ v.checked = !alle; });
+  _agDeelKnop();
+}
+function _agDeelKnop(){
+  var vakjes = Array.prototype.slice.call(document.querySelectorAll('#ag-deelnemers input'));
+  var k = document.getElementById('ag-deel-alle');
+  if(k) k.textContent = (vakjes.length && vakjes.every(function(v){ return v.checked; })) ? 'Niemand selecteren' : 'Iedereen selecteren';
+}
 function saveAgenda(id) {
   var isNew = !id;
   var bestaand = id ? (APP.agenda.find(function(x){return String(x.id)===String(id);})||{}) : {};
