@@ -835,7 +835,8 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 /* Instellingen: menu links op desktop, tabbladen bovenaan op mobiel */
 .inst-wrap{display:flex;gap:24px;align-items:flex-start}
 .inst-menu{flex:0 0 220px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0}
-.inst-menu-item{display:flex;align-items:center;padding:10px 12px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap}
+.inst-menu-item{display:flex;align-items:center;width:100%;padding:10px 12px;border:none;border-radius:9px;background:transparent;font:inherit;font-size:13.5px;font-weight:600;color:var(--muted);text-align:left;cursor:pointer;transition:all .12s;white-space:nowrap}
+.inst-menu-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .inst-menu-item:hover{background:rgba(74,108,247,.06);color:var(--text)}
 .inst-menu-item.active{background:var(--accent-knop);color:#fff}
 .inst-menu-item.active svg{stroke:#fff}
@@ -848,7 +849,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .inst-wrap{flex-direction:column;gap:0;align-items:stretch}
   .inst-menu{flex:none;width:100%;flex-direction:row;gap:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;border-bottom:2px solid var(--border);margin-bottom:20px;position:static}
   .inst-menu::-webkit-scrollbar{display:none}
-  .inst-menu-item{border-radius:0;padding:9px 14px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;background:none!important}
+  .inst-menu-item{width:auto;flex-shrink:0;border-radius:0;padding:9px 14px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;background:none!important}
   .inst-menu-item.active{background:none!important;color:var(--accent);border-bottom-color:var(--accent)}
   .inst-menu-item.active svg{stroke:var(--accent)}
   .inst-menu-item svg{width:13px!important;height:13px!important}
@@ -1032,6 +1033,9 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .rg-verplicht-lbl{display:none}
 .inst-acc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .inst-acc-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none}
+.inst-acc-hdr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:inherit}
+/* Dagregel bij Team & Verlof is zelf niet klikbaar (de algemene -rij-regel gaf een handje) */
+.ti-dag-rij{cursor:default}
 .inst-acc-hdr .inst-acc-ico{display:inline-flex;color:var(--accent);flex-shrink:0}
 .inst-acc-hdr .inst-acc-titel{flex:1;font-weight:700;font-size:15px}
 .inst-acc-hdr .inst-acc-sub{font-size:11px;color:var(--muted);font-weight:400}
@@ -8757,7 +8761,9 @@ function skStatusInfo(k) {
 }
 
 // Form helpers - geen onclick string concatenation meer
-function fg(lbl, inp)   { return '<div class="form-group" style="margin-bottom:0"><label>'+lbl+'</label>'+inp+'</div>'; }
+// Het label wijst naar het veld (for=id): klikken op het label zet de cursor erin en een
+// schermlezer leest de veldnaam voor. Alleen naar input/select/textarea, nooit naar een knop.
+function fg(lbl, inp)   { var m = /<(?:input|select|textarea)\b[^>]*\sid="([^"]+)"/.exec(inp||''); return '<div class="form-group" style="margin-bottom:0"><label'+(m?' for="'+m[1]+'"':'')+'>'+lbl+'</label>'+inp+'</div>'; }
 function fgf(lbl, inp)  { return '<div class="form-group form-full" style="margin-bottom:0"><label>'+lbl+'</label>'+inp+'</div>'; }
 function fsel(id, opts, val) {
   return '<select class="input" id="'+id+'">' + opts.map(function(o){
@@ -31155,6 +31161,23 @@ function renderRapStoringsdienst(el) {
 // ═══════════════════════════════════════════════════════════════
 var _instTab = 'bedrijf';
 
+// Schrijven in Instellingen: de melding pas na bevestiging van de database. Een losse .set()
+// met direct een toast meldde "opgeslagen" ook als de rules weigerden (Firebase draait de
+// wijziging dan stil terug) of als er geen verbinding was. Zonder melding: alleen fouten tonen.
+function _instBevestig(belofte, melding){
+  var online = _fbVerbonden;
+  if(!online && melding) toast('Geen verbinding: de wijziging wordt verstuurd zodra je weer online bent','info');
+  return (Array.isArray(belofte) ? Promise.all(belofte) : Promise.resolve(belofte)).then(function(){
+    if(melding && online) toast(melding,'success');
+    return true;
+  }).catch(function(e){
+    var m = String((e && (e.code||e.message)) || e || '');
+    toast('Opslaan mislukt: '+(/permission|denied/i.test(m) ? 'je hebt hier geen rechten voor' : m),'error');
+    log('WARN','INSTELLINGEN','Opslaan mislukt: '+m);
+    return false;
+  });
+}
+
 function renderInstellingen() {
   var el = document.getElementById('content');
 
@@ -31176,11 +31199,11 @@ function renderInstellingen() {
 
   var h = '<div class="inst-wrap">';
   // Menu (desktop = verticaal links, mobiel = horizontale tabbladen bovenaan)
-  h += '<div class="inst-menu">';
+  h += '<nav class="inst-menu" aria-label="Instellingen">';
   tabs.forEach(function(t){
-    h += '<div class="inst-menu-item'+(_instTab===t.k?' active':'')+'" data-inst-tab="'+t.k+'">'+t.l+'</div>';
+    h += '<button type="button" class="inst-menu-item'+(_instTab===t.k?' active':'')+'" data-inst-tab="'+t.k+'"'+(_instTab===t.k?' aria-current="page"':'')+'>'+t.l+'</button>';
   });
-  h += '</div>';
+  h += '</nav>';
   h += '<div class="inst-paneel"><div id="inst-content"></div></div>';
   h += '</div>';
   el.innerHTML = h;
@@ -31295,8 +31318,7 @@ function renderInstBedrijf(el) {
       var url = await storageUpload('instellingen/logo/bedrijf_logo.'+logo.file.name.split('.').pop(), logo.file);
       var data = Object.assign({}, APP.bedrijfGegevens || {}, { logo: url, logoBreedte: logo.breedte, logoHoogte: logo.hoogte });
       APP.bedrijfGegevens = data;
-      FB.ref(dbPath('instellingen','bedrijf')).set(data);
-      toast('Logo opgeslagen','success');
+      _instBevestig(FB.ref(dbPath('instellingen','bedrijf')).set(data), 'Logo opgeslagen');
       renderInstBedrijf(el);
     } catch(e) {
       toast('Fout bij uploaden: '+e.message,'error');
@@ -31315,8 +31337,7 @@ function renderInstBedrijf(el) {
     delete data.logoBreedte;
     delete data.logoHoogte;
     APP.bedrijfGegevens = data;
-    FB.ref(dbPath('instellingen','bedrijf')).set(data);
-    toast('Logo verwijderd','success');
+    _instBevestig(FB.ref(dbPath('instellingen','bedrijf')).set(data), 'Logo verwijderd');
     renderInstBedrijf(el);
   });
   // Kleurkiezer: presets + eigen kleur → live preview bijwerken
@@ -31358,9 +31379,8 @@ function renderInstBedrijf(el) {
     if(!data.logo) delete data.logo;
     if(!data.logo || !data.logoBreedte || !data.logoHoogte){ delete data.logoBreedte; delete data.logoHoogte; }
     APP.bedrijfGegevens = data;
-    FB.ref(dbPath('instellingen','bedrijf')).set(data);
+    _instBevestig(FB.ref(dbPath('instellingen','bedrijf')).set(data), 'Bedrijfsgegevens opgeslagen');
     _bedrijfIndexBijwerken(data.naam);
-    toast('Bedrijfsgegevens opgeslagen','success');
   });
 }
 
@@ -31432,7 +31452,7 @@ function renderInstNotificaties(el) {
       var key = cb.dataset.key;
       inst[key] = cb.checked;
       APP.notifInstellingen = inst;
-      FB.ref(dbPath('instellingen','notificaties')).set(inst);
+      _instBevestig(FB.ref(dbPath('instellingen','notificaties')).set(inst), cb.checked ? 'Notificatie ingeschakeld' : 'Notificatie uitgeschakeld');
       // Update toggle visueel
       var track = cb.nextElementSibling;
       if(track) {
@@ -31440,7 +31460,6 @@ function renderInstNotificaties(el) {
         var knop = track.firstElementChild;
         if(knop) knop.style.left = cb.checked ? '21px' : '3px';
       }
-      toast(cb.checked ? 'Notificatie ingeschakeld' : 'Notificatie uitgeschakeld', 'success');
     });
   });
 }
@@ -31659,7 +31678,7 @@ function renderInstContracten(el) {
   el.querySelectorAll('.ct-del').forEach(function(b){ b.addEventListener('click',function(){
     bevestigActie('Contracttype verwijderen','Weet je zeker dat je dit contracttype wilt verwijderen?',function(){
       APP.contracten = APP.contracten.filter(function(c){return c.id!==b.dataset.id;});
-      FB.ref(dbPath('contracten')).set(APP.contracten);
+      _instBevestig(FB.ref(dbPath('contracten')).set(APP.contracten));
       renderInstellingen();
     });
   }); });
@@ -31721,7 +31740,7 @@ function openContractModal(id) {
     var oudInterval = idx > -1 ? (APP.contracten[idx].intervalMaanden||0) : 0;
     if(idx>-1) APP.contracten[idx]=data; else APP.contracten.push(data);
     _invalideerConMap();
-    FB.ref(dbPath('contracten')).set(APP.contracten);
+    _instBevestig(FB.ref(dbPath('contracten')).set(APP.contracten));
 
     // Herberekening aanbieden als interval gewijzigd is
     var skMetContract = (APP.serviceklanten||[]).filter(function(k){
@@ -31791,7 +31810,7 @@ function renderInstOpdrachten(el) {
     sel.addEventListener('change',function(){
       var ot = APP.opdrachttypes.find(function(o){return o.id===sel.dataset.id;});
       var veld = sel.dataset.veld || 'mailTemplate';
-      if(ot){ ot[veld] = sel.value||null; FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes); toast('Opgeslagen','success'); }
+      if(ot){ ot[veld] = sel.value||null; _instBevestig(FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes), 'Opgeslagen'); }
     });
   });
   var _otAddBtn=el.querySelector('#ot-add'); if(_otAddBtn) _otAddBtn.addEventListener('click',function(){ openOpdrachtTypeModal(); });
@@ -31799,7 +31818,7 @@ function renderInstOpdrachten(el) {
   el.querySelectorAll('.ot-del').forEach(function(b){ b.addEventListener('click',function(){
     bevestigActie('Opdrachttype verwijderen','Weet je zeker dat je dit type wilt verwijderen?',function(){
       APP.opdrachttypes = APP.opdrachttypes.filter(function(o){return o.id!==b.dataset.id;});
-      FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes);
+      _instBevestig(FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes));
       renderInstellingen();
     });
   }); });
@@ -31864,8 +31883,8 @@ function openOpdrachtTypeModal(id) {
       if(bestaatAl){toast('Een type met dit ID bestaat al','error');return;}
     }
     if(idx>-1) APP.opdrachttypes[idx]=data; else APP.opdrachttypes.push(data);
-    FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes);
-    closeModal(); renderInstellingen(); toast('Opdrachttype opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes), 'Opdrachttype opgeslagen');
+    closeModal(); renderInstellingen();
   });
 }
 
@@ -32016,8 +32035,8 @@ function renderInstRollen(el) {
         var nieuweRollen = JSON.parse(JSON.stringify(APP.rollen||{}));
         delete nieuweRollen[b.dataset.rol];
         APP.rollen = nieuweRollen;
-        FB.ref(dbPath('rollen')).set(nieuweRollen);
-        renderInstellingen(); toast('Rol verwijderd','success');
+        _instBevestig(FB.ref(dbPath('rollen')).set(nieuweRollen), 'Rol verwijderd');
+        renderInstellingen();
       });
     });
   });
@@ -32062,8 +32081,7 @@ function renderInstRollen(el) {
       nieuweRechten[r].rechten[m].inzageAlle = cb.checked;
     });
     APP.rollen = nieuweRechten;
-    FB.ref(dbPath('rollen')).set(nieuweRechten);
-    toast('Rechten opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('rollen')).set(nieuweRechten), 'Rechten opgeslagen');
   });
 }
 
@@ -32087,9 +32105,8 @@ function openRolModal(rolId, rollen) {
       rechten: bestaand.rechten || {},
     });
     APP.rollen = nieuweRollen;
-    FB.ref(dbPath('rollen')).set(nieuweRollen);
+    _instBevestig(FB.ref(dbPath('rollen')).set(nieuweRollen), rolId?'Rol bijgewerkt':'Nieuwe rol aangemaakt: '+naam);
     closeModal(); renderInstellingen();
-    toast(rolId?'Rol bijgewerkt':'Nieuwe rol aangemaakt: '+naam,'success');
   });
 }
 
@@ -32099,7 +32116,7 @@ function openRolModal(rolId, rollen) {
 function instAcc(icoonSvg, titel, subLabel, bodyHtml, breed){
   var chev = '<svg class="inst-acc-chev" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
   var h = '<div class="inst-acc'+(breed?' vol':'')+'">';
-  h += '<div class="inst-acc-hdr">';
+  h += '<div class="inst-acc-hdr" role="button" tabindex="0" aria-expanded="false">';
   h += '<span class="inst-acc-ico">'+icoonSvg+'</span>';
   h += '<span class="inst-acc-titel">'+titel+(subLabel?' <span class="inst-acc-sub">— '+subLabel+'</span>':'')+'</span>';
   h += chev + '</div>';
@@ -32111,7 +32128,11 @@ function instAcc(icoonSvg, titel, subLabel, bodyHtml, breed){
 function bindInstAccordions(el){
   el.querySelectorAll('.inst-acc-hdr').forEach(function(hdr){
     if(hdr._accBound) return; hdr._accBound = true;
-    hdr.addEventListener('click', function(){ hdr.parentElement.classList.toggle('open'); });
+    hdr.setAttribute('aria-expanded', hdr.parentElement.classList.contains('open') ? 'true' : 'false');
+    hdr.addEventListener('click', function(){
+      var open = hdr.parentElement.classList.toggle('open');
+      hdr.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
   });
 }
 // Titel + optionele omschrijving voor een kaart binnen een accordion-groep.
@@ -32668,15 +32689,13 @@ function renderInstPlanning(el) {
   // Planrol opslaan
   el.querySelector('#planrol-save').addEventListener('click', function(){
     var r = Array.from(el.querySelectorAll('.planrol-cb:checked')).map(function(cb){return cb.dataset.rol;});
-    APP.planningRollen = r; FB.ref(dbPath('instellingen','planningRollen')).set(r);
-    toast('Planningrollen opgeslagen','success');
+    APP.planningRollen = r; _instBevestig(FB.ref(dbPath('instellingen','planningRollen')).set(r), 'Planningrollen opgeslagen');
   });
 
   // Beschikbaarheidsbalk opslaan
   el.querySelector('#beschikbrol-save').addEventListener('click', function(){
     var r = Array.from(el.querySelectorAll('.beschikbrol-cb:checked')).map(function(cb){return cb.dataset.rol;});
-    APP.beschikbaarheidRollen = r; FB.ref(dbPath('instellingen','beschikbaarheidRollen')).set(r);
-    toast('Beschikbaarheidsrollen opgeslagen','success');
+    APP.beschikbaarheidRollen = r; _instBevestig(FB.ref(dbPath('instellingen','beschikbaarheidRollen')).set(r), 'Beschikbaarheidsrollen opgeslagen');
   });
 
   // Werkdagen opslaan
@@ -32684,8 +32703,7 @@ function renderInstPlanning(el) {
     var d = Array.from(el.querySelectorAll('.werkdag-cb:checked')).map(function(cb){return cb.dataset.dag;});
     if(!APP.planningInst) APP.planningInst = {};
     APP.planningInst.werkdagen = d;
-    FB.ref(dbPath('instellingen','planningInst','werkdagen')).set(d);
-    toast('Werkdagen opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','planningInst','werkdagen')).set(d), 'Werkdagen opgeslagen');
   });
   // Werkdag checkbox stijl live updaten
   el.querySelectorAll('.werkdag-cb').forEach(function(cb){
@@ -32701,8 +32719,7 @@ function renderInstPlanning(el) {
     var s = Array.from(el.querySelectorAll('.servicetype-cb:checked')).map(function(cb){return cb.dataset.id;});
     if(!APP.planningInst) APP.planningInst = {};
     APP.planningInst.serviceTypes = s;
-    FB.ref(dbPath('instellingen','planningInst','serviceTypes')).set(s);
-    toast('Servicecontract types opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','planningInst','serviceTypes')).set(s), 'Servicecontract types opgeslagen');
   });
 
   // Vervallen marge opslaan
@@ -32710,8 +32727,7 @@ function renderInstPlanning(el) {
   if(margeSaveBtn) margeSaveBtn.addEventListener('click', function(){
     var m = parseInt(document.getElementById('plan-marge').value) || 1;
     APP.planningMarge = m;
-    FB.ref(dbPath('instellingen','planningMarge')).set(m);
-    toast('Vervallen marge opgeslagen: '+m+' maand(en)','success');
+    _instBevestig(FB.ref(dbPath('instellingen','planningMarge')).set(m), 'Vervallen marge opgeslagen: '+m+' maand(en)');
   });
 
   // Beschikbaarheid weken opslaan
@@ -32721,8 +32737,7 @@ function renderInstPlanning(el) {
     if(w<1) w=1; if(w>12) w=12;
     if(!APP.planningInst) APP.planningInst = {};
     APP.planningInst.beschikbaarheidWeken = w;
-    FB.ref(dbPath('instellingen','planningInst','beschikbaarheidWeken')).set(w);
-    toast('Beschikbaarheidsoverzicht: '+w+' weken vooruit','success');
+    _instBevestig(FB.ref(dbPath('instellingen','planningInst','beschikbaarheidWeken')).set(w), 'Beschikbaarheidsoverzicht: '+w+' weken vooruit');
   });
 
   // Speelruimte jaarplanner opslaan
@@ -32738,9 +32753,10 @@ function renderInstPlanning(el) {
     if(!APP.planningInst) APP.planningInst = {};
     APP.planningInst.speelruimte = sp;
     APP.planningInst.jaarplanPeriode = per;
-    FB.ref(dbPath('instellingen','planningInst','speelruimte')).set(sp);
-    FB.ref(dbPath('instellingen','planningInst','jaarplanPeriode')).set(per);
-    toast('Speelruimte opgeslagen','success');
+    _instBevestig([
+      FB.ref(dbPath('instellingen','planningInst','speelruimte')).set(sp),
+      FB.ref(dbPath('instellingen','planningInst','jaarplanPeriode')).set(per)
+    ], 'Speelruimte opgeslagen');
   });
 
   // Reistijd-bereik en bewaartermijn opslaan
@@ -32753,9 +32769,10 @@ function renderInstPlanning(el) {
     if(!APP.planningInst) APP.planningInst = {};
     APP.planningInst.reistijdDagenVooruit = v;
     APP.planningInst.reistijdCacheDagen   = c;
-    FB.ref(dbPath('instellingen','planningInst','reistijdDagenVooruit')).set(v);
-    FB.ref(dbPath('instellingen','planningInst','reistijdCacheDagen')).set(c);
-    toast('Reistijden: '+v+' dagen vooruit, '+c+' dagen bewaren','success');
+    _instBevestig([
+      FB.ref(dbPath('instellingen','planningInst','reistijdDagenVooruit')).set(v),
+      FB.ref(dbPath('instellingen','planningInst','reistijdCacheDagen')).set(c)
+    ], 'Reistijden: '+v+' dagen vooruit, '+c+' dagen bewaren');
   });
 
   // Reistijden opslaan
@@ -32765,9 +32782,10 @@ function renderInstPlanning(el) {
     APP.planningInst.reistijdStatussen = s;
     APP.planningInst.reistijdStatussenIngesteld = true; // markeer als bewust ingesteld (ook bij lege selectie)
     // Firebase bewaart lege arrays niet; schrijf daarom het hele object weg incl. de vlag.
-    FB.ref(dbPath('instellingen','planningInst','reistijdStatussen')).set(s);
-    FB.ref(dbPath('instellingen','planningInst','reistijdStatussenIngesteld')).set(true);
-    toast('Reistijdinstellingen opgeslagen','success');
+    _instBevestig([
+      FB.ref(dbPath('instellingen','planningInst','reistijdStatussen')).set(s),
+      FB.ref(dbPath('instellingen','planningInst','reistijdStatussenIngesteld')).set(true)
+    ], 'Reistijdinstellingen opgeslagen');
   });
 
   // Blokkadedag toevoegen
@@ -32777,10 +32795,9 @@ function renderInstPlanning(el) {
     if(!datum){toast('Kies een datum','error');return;}
     if(!APP.blokkadeDagen) APP.blokkadeDagen={};
     APP.blokkadeDagen[datum]={label:label||'Geblokkeerd'};
-    FB.ref(dbPath('instellingen','blokkadeDagen',datum)).set({label:label||'Geblokkeerd'});
+    _instBevestig(FB.ref(dbPath('instellingen','blokkadeDagen',datum)).set({label:label||'Geblokkeerd'}), 'Blokkadedag toegevoegd');
     document.getElementById('blok-datum').value='';
     document.getElementById('blok-label').value='';
-    toast('Blokkadedag toegevoegd','success');
     renderInstPlanning(el); var _ba=el.querySelector('#blokkade-lijst'); if(_ba){_ba=_ba.closest('.inst-acc'); if(_ba)_ba.classList.add('open');}
   });
 
@@ -32789,8 +32806,7 @@ function renderInstPlanning(el) {
     btn.addEventListener('click', function(){
       var datum = btn.dataset.datum;
       delete APP.blokkadeDagen[datum];
-      FB.ref(dbPath('instellingen','blokkadeDagen',datum)).remove();
-      toast('Blokkadedag verwijderd','success');
+      _instBevestig(FB.ref(dbPath('instellingen','blokkadeDagen',datum)).remove(), 'Blokkadedag verwijderd');
       renderInstPlanning(el); var _bd=el.querySelector('#blokkade-lijst'); if(_bd){_bd=_bd.closest('.inst-acc'); if(_bd)_bd.classList.add('open');}
     });
   });
@@ -32886,8 +32902,7 @@ function renderInstTeam(el) {
     var wu=parseFloat(document.getElementById('ti-urenperdag').value)||8;
     if(!APP.teamInstellingen) APP.teamInstellingen={};
     APP.teamInstellingen.verlofBasis=vb; APP.teamInstellingen.werkUrenPerDag=wu;
-    FB.ref(dbPath('instellingen','teamInstellingen')).update({verlofBasis:vb,werkUrenPerDag:wu});
-    toast('Verlofbasis opgeslagen','success'); renderInstTeam(el);
+    _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen')).update({verlofBasis:vb,werkUrenPerDag:wu}), 'Verlofbasis opgeslagen'); renderInstTeam(el);
   });
   el.querySelector('#ti-werktijd-save').addEventListener('click',function(){
     var nt={};
@@ -32898,8 +32913,7 @@ function renderInstTeam(el) {
     vs.forEach(function(v,i){if(v.value&&ts[i]&&ts[i].value)np.push({van:v.value,tot:ts[i].value});});
     if(!APP.teamInstellingen) APP.teamInstellingen={};
     APP.teamInstellingen.werktijdenPerDag=nt; APP.teamInstellingen.pauzes=np;
-    FB.ref(dbPath('instellingen','teamInstellingen')).update({werktijdenPerDag:nt,pauzes:np});
-    toast('Werktijden opgeslagen','success'); renderInstTeam(el);
+    _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen')).update({werktijdenPerDag:nt,pauzes:np}), 'Werktijden opgeslagen'); renderInstTeam(el);
   });
   el.querySelectorAll('.ti-dag-actief').forEach(function(cb){
     cb.addEventListener('change',function(){
@@ -32914,7 +32928,7 @@ function renderInstTeam(el) {
       pauzes.splice(parseInt(btn.dataset.idx),1);
       if(!APP.teamInstellingen) APP.teamInstellingen={};
       APP.teamInstellingen.pauzes=pauzes;
-      FB.ref(dbPath('instellingen','teamInstellingen','pauzes')).set(pauzes);
+      _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen','pauzes')).set(pauzes));
       renderInstTeam(el);
     });
   });
@@ -33334,8 +33348,7 @@ function renderInstGoedkeuring(el) {
       nieuw[medId][mod] = sel.value || null;
     });
     APP.goedkeuringInst = nieuw;
-    FB.ref(dbPath('instellingen','goedkeuring')).set(nieuw);
-    toast('Goedkeuringsinstellingen opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','goedkeuring')).set(nieuw), 'Goedkeuringsinstellingen opgeslagen');
   });
 }
 
@@ -33985,8 +33998,7 @@ function renderInstWerkbonnen(el) {
     var nieuw = Array.from(el.querySelectorAll('.wbi-urenrol-cb:checked')).map(function(cb){return cb.dataset.rol;});
     if(!APP.werkbonnenInst) APP.werkbonnenInst={};
     APP.werkbonnenInst.urenRollen = nieuw;
-    FB.ref(dbPath('instellingen','werkbonnenInst','urenRollen')).set(nieuw);
-    toast('Opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','werkbonnenInst','urenRollen')).set(nieuw), 'Opgeslagen');
   });
 
   // Globale prijzen-schakelaar (direct opslaan)
@@ -33994,8 +34006,7 @@ function renderInstWerkbonnen(el) {
   if(prijsCb) prijsCb.addEventListener('change', function(){
     if(!APP.werkbonnenInst) APP.werkbonnenInst={};
     APP.werkbonnenInst.prijzenTonen = prijsCb.checked;
-    FB.ref(dbPath('instellingen','werkbonnenInst','prijzenTonen')).set(prijsCb.checked);
-    toast('Opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','werkbonnenInst','prijzenTonen')).set(prijsCb.checked), 'Opgeslagen');
   });
 
   // Mailtemplate opslaan
@@ -34024,7 +34035,8 @@ function renderInstWerkbonnen(el) {
         FB.ref(dbPath('instellingen','werkbonnenInst','mailOnderwerp')).remove(),
         FB.ref(dbPath('instellingen','werkbonnenInst','mailBody')).remove(),
         FB.ref(dbPath('instellingen','werkbonnenInst','mailHandtekening')).remove()
-      ]).then(function(){ toast('Teruggezet naar standaard','success'); renderInstellingen(); });
+      ]).then(function(){ toast('Teruggezet naar standaard','success'); renderInstellingen(); })
+        .catch(function(e){ toast('Herstellen mislukt: '+(e&&e.message||e),'error'); });
     });
   });
   fsChecklistTemplatesLijst().then(function(templates){
@@ -37065,8 +37077,7 @@ function renderInstWerkorders(el) {
     var nieuw = Array.from(el.querySelectorAll('.woi-urenrol-cb:checked')).map(function(cb){return cb.dataset.rol;});
     if(!APP.werkordersInst) APP.werkordersInst={};
     APP.werkordersInst.urenRollen = nieuw;
-    FB.ref(dbPath('instellingen','werkordersInst','urenRollen')).set(nieuw);
-    toast('Opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','werkordersInst','urenRollen')).set(nieuw), 'Opgeslagen');
   });
 
   // Prijzen-schakelaar (direct opslaan)
@@ -37074,8 +37085,7 @@ function renderInstWerkorders(el) {
   if(prijsCb) prijsCb.addEventListener('change', function(){
     if(!APP.werkordersInst) APP.werkordersInst={};
     APP.werkordersInst.prijzenTonen = prijsCb.checked;
-    FB.ref(dbPath('instellingen','werkordersInst','prijzenTonen')).set(prijsCb.checked);
-    toast('Opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','werkordersInst','prijzenTonen')).set(prijsCb.checked), 'Opgeslagen');
   });
 
   // Dringend-termijn (direct opslaan)
@@ -37087,8 +37097,7 @@ function renderInstWerkorders(el) {
     dringInp.value = v;
     if(!APP.werkordersInst) APP.werkordersInst={};
     APP.werkordersInst.dringendDagen = v;
-    FB.ref(dbPath('instellingen','werkordersInst','dringendDagen')).set(v);
-    toast('Opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','werkordersInst','dringendDagen')).set(v), 'Opgeslagen');
   });
 
   // Mailtemplate opslaan
@@ -37101,8 +37110,7 @@ function renderInstWerkorders(el) {
     APP.werkordersInst.mailOnderwerp = ond;
     APP.werkordersInst.mailBody = bod;
     APP.werkordersInst.mailHandtekening = hnd;
-    FB.ref(dbPath('instellingen','werkordersInst')).update({ mailOnderwerp:ond, mailBody:bod, mailHandtekening:hnd });
-    toast('E-mailtemplate opgeslagen','success');
+    _instBevestig(FB.ref(dbPath('instellingen','werkordersInst')).update({ mailOnderwerp:ond, mailBody:bod, mailHandtekening:hnd }), 'E-mailtemplate opgeslagen');
   });
   var mailHerstel = el.querySelector('#woi-mail-herstel');
   if(mailHerstel) mailHerstel.addEventListener('click', function(){

@@ -516,6 +516,8 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       niet meer tijdens verticaal scrollen, geen luisteraars meer die zich per render opstapelen.
       Kaarten met toetsenbord (Enter opent, Delete verwijdert). Verwijderen alleen voor wie schrijf-
       of eigen-recht op werkbonnen heeft, net als de Firestore-rules.
+- [x] **Instellingen: eerlijke meldingen en toetsenbord** (3 november 2026) — 35 schrijfacties via `_instBevestig`: "opgeslagen" pas na bevestiging, anders "geen rechten" of "geen verbinding". Menu en inklapbare blokken als knoppen (toetsenbord, aria). `fg()` koppelt het label aan zijn veld (app-breed).
+- [ ] **Instellingen: wijzigingen bewaken, Rollen, telefoon** — volgens `instellingen-preview.html` (lokaal).
 - [ ] **Bonfoto's naar Firebase Storage** — staan nu (verkleind) als base64 in de RTDB-records van
       onkosten. Verhuizen raakt ook bestaande declaraties; eigen stap.
 - [x] **Rapportage: getallen en kleuren** (3 november 2026) — alle bedragen/uren via `_nlGetal`/`_nlAantal`/`_nlEuro` (komma, duizendtal-punt); verlof overal in uren; export als echte getallen; tekstkleuren in de `-t`-tokens, sorteerkop app-breed `--accent-t`; vaste kleur per onkostencategorie; verloftypen weer in kleur (data staat als "Vakantie"/"ATV"); "uur opgenomen" in het medewerkerpaneel telt alleen goedgekeurd verlof. Bovenste regel vaste hoogte.
