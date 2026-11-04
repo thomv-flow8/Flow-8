@@ -341,7 +341,7 @@ body.light{--dash-g2:#f59e0b}
 .btn.dash-aanpassen{min-height:44px;min-width:44px;justify-content:center;gap:6px;flex-shrink:0}
 /* Niet klikbaar: de algemene regel [class*="-rij"]{cursor:pointer} geldt hier niet. */
 .dash-rij,.dash-rij-k,.dash-rij-r,.dash-rij-ico,.dash-bez-rij,.plm-rij1,.plm-rij2{cursor:default}
-.dash-kolommen{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start}
+.dash-kolommen{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 .dash-kolom{display:flex;flex-direction:column;gap:16px;min-width:0}
 .dash-blok{padding:16px;min-width:0}
 .dash-blok-kop{display:flex;align-items:center;gap:8px;margin-bottom:12px}
@@ -9045,9 +9045,9 @@ var DASH_BLOKKEN = {
   dringend:     { n:'Dringende werkorders', u:'Te laat, hoge prioriteit of binnenkort',        mag:_dashMagWO },
   mijndag:      { n:'Mijn dag',             u:'Jouw opdrachten van vandaag',                   mag:_dashHeeftMed },
   mijnbonnen:   { n:'Mijn werkbonnen',      u:'Wat jij nog moet afronden',                     mag:_dashHeeftMed },
-  agenda:       { n:'Agenda',               u:'Vandaag en morgen · rechterkolom',              mag:function(){ return true; }, zij:1 },
-  afwezig:      { n:'Afwezig vandaag',      u:'Verlof en ziekte · rechterkolom',               mag:function(){ return true; }, zij:1 },
-  mijncijfers:  { n:'Mijn cijfers',         u:'Verlof, overuren, onkosten, verzuim · rechterkolom', mag:_dashHeeftMed, zij:1 }
+  agenda:       { n:'Agenda',               u:'Vandaag en morgen',              mag:function(){ return true; }, zij:1 },
+  afwezig:      { n:'Afwezig vandaag',      u:'Verlof en ziekte',               mag:function(){ return true; }, zij:1 },
+  mijncijfers:  { n:'Mijn cijfers',         u:'Verlof, overuren, onkosten, verzuim', mag:_dashHeeftMed, zij:1 }
 };
 var DASH_STANDAARD = {
   monteur: ['mijndag','mijnbonnen','agenda','mijncijfers'],
@@ -9381,9 +9381,22 @@ function renderDashboard() {
   h += _dashVelHtml(indeling);
 
   el.innerHTML = h;
+  _dashVerdeel(el);
   if(indeling.indexOf('werkorders') >= 0) _dashWerkordersVul();
   if(indeling.indexOf('dringend') >= 0) _dashDringendVul();
   _dashBind(el);
+}
+
+// Blokken over beide (even brede) kolommen verdelen: elk volgend blok, in de gekozen volgorde,
+// gaat naar de kolom die op dat moment het minst hoog is. Zo lopen links en rechts ongeveer
+// gelijk door, in plaats van een vaste linker- en rechterkolom waarvan er één leeg uitliep.
+// Op een telefoon (één kolom, volgorde via CSS order) doet dit niets.
+function _dashVerdeel(el){
+  var w = el.querySelector('.dash-kolommen'); if(!w || getComputedStyle(w).display !== 'grid') return;
+  var kol = w.querySelectorAll('.dash-kolom'); if(kol.length < 2) return;
+  var blokken = [].slice.call(w.querySelectorAll('.dash-blok')).sort(function(a, b){ return (+a.style.order) - (+b.style.order); });
+  var hoog = [0, 0];
+  blokken.forEach(function(b){ var i = hoog[0] <= hoog[1] ? 0 : 1; kol[i].appendChild(b); hoog[i] += b.getBoundingClientRect().height + 16; });
 }
 
 // Vel om blokken aan/uit te zetten en te verplaatsen.
@@ -20604,7 +20617,7 @@ function renderVerzuim() {
       if(kanBeheren) h += '<th style="width:120px">Actie</th>';
       h += '</tr></thead><tbody>';
       items.forEach(function(v){
-        var duren=v.van?telWerkdagen(v.van, v.tot&&v.tot<=vandaag?v.tot:vandaag):0;
+        var duren=v.van?telWerkdagen(v.van, v.tot&&v.tot<=vandaag?v.tot:null):0;
         var stKleur={actief:'var(--red)',langdurig:'var(--orange)',hersteld:'var(--green)'}[v.status]||'var(--muted)';
         var stTag='<span class="tag" style="background:'+_kleurTint(stKleur,'22')+';color:'+_klTekst(stKleur)+'">'+esc(v.status)+'</span>';
         var _vtmap={ziek:'Ziek',geoorloofd:'Geoorloofd',ongeoorloofd:'Ongeoorloofd',gedeeltelijk:'Gedeeltelijk'};
@@ -31108,10 +31121,12 @@ function roosterUren(m, van, tot){
 }
 function telWerkdagen(vanStr, totStr) {
   if(!vanStr) return 0;
-  // totStr = hersteldatum = eerste gezonde dag → laatste ziektedag = totStr - 1
+  // totStr = hersteldatum = eerste gezonde dag → laatste ziektedag = totStr - 1.
+  // Zonder hersteldatum (nog ziek) telt vandaag mee: wie vandaag ziek is, is vandaag ziek.
+  // Zo telt het gelijk op met verzuimUren.
   var van = new Date(vanStr + 'T00:00:00');
-  var tot = totStr ? new Date(totStr + 'T00:00:00') : new Date();
-  tot.setDate(tot.getDate() - 1); // hersteldatum uitsluiten
+  var tot = new Date((totStr || vandaagISO()) + 'T00:00:00');
+  if(totStr) tot.setDate(tot.getDate() - 1); // hersteldatum uitsluiten
   if(tot < van) return 0;
   var dagen = 0;
   var d = new Date(van);
