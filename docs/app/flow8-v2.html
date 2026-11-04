@@ -933,6 +933,10 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   #topbar-actions #rol-test-wrap{display:none}
   #topbar-actions{margin-left:auto;flex-shrink:0}
   .topbar{overflow:hidden}
+  /* Het meldingenpaneel hing onder de bovenbalk en werd daardoor afgeknipt: onzichtbaar op de
+     telefoon. Vast gepositioneerd valt het buiten die knip, over de volle breedte. */
+  #notif-panel{position:fixed!important;left:12px!important;right:12px!important;top:calc(64px + var(--safe-top,0px))!important;width:auto!important;max-height:72vh!important}
+  #notif-lijst{max-height:calc(72vh - 50px)!important}
 
   /* ── CONTENT: scrollbaar, niet breder dan scherm ── */
   .content{
@@ -1727,7 +1731,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
         </button>
         <!-- Notificatie bel -->
         <div style="position:relative" id="notif-wrapper">
-          <button id="notif-btn" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;position:relative" title="Notificaties">
+          <button id="notif-btn" aria-label="Meldingen" aria-expanded="false" aria-haspopup="true" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 8px;cursor:pointer;display:flex;align-items:center;position:relative" title="Notificaties">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
             <span id="notif-badge" style="position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:800;align-items:center;justify-content:center;line-height:1">0</span>
           </button>
@@ -1735,7 +1739,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
           <div id="notif-panel" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:340px;max-height:420px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:500;overflow:hidden;flex-direction:column">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)">
               <div style="font-weight:700;font-size:14px">Notificaties</div>
-              <button id="notif-alles-weg" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:2px 6px;border-radius:4px">Alles wissen</button>
+              <div style="display:flex;gap:4px"><button id="notif-alles-gelezen" style="background:none;border:none;font-size:12px;color:var(--accent-t);cursor:pointer;padding:6px 8px;border-radius:6px">Alles gelezen</button><button id="notif-alles-weg" style="background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;padding:6px 8px;border-radius:6px">Alles wissen</button></div>
             </div>
             <div id="notif-lijst" style="overflow-y:auto;max-height:340px"></div>
           </div>
@@ -13652,18 +13656,7 @@ function submitVerlof(bestaandId){
     var _aanvrager = getMed(medId);
     var _naam = _aanvrager ? (_aanvrager.voornaam||'')+' '+(_aanvrager.achternaam||'') : '';
     var _tekst = _naam + ' heeft verlof aangevraagd voor ' + fmtD(van);
-    var _gk = getGoedkeurderVoor(medId, 'verlof');
-    var _ontvangers = _gk ? [_gk] : APP.medewerkers.filter(function(m){
-      return m.status!=='inactief' && (APP.rollen[m.rol]||{}).rol === 'admin';
-    });
-    if(!_ontvangers.length) {
-      _ontvangers = APP.medewerkers.filter(function(m){
-        return m.status!=='inactief' && m.rol === 'admin';
-      });
-    }
-    _ontvangers.forEach(function(m){
-      if(String(m.id)!==String(medId)) stuurNotificatie(m.id,'verlof','Nieuwe verlofaanvraag',_tekst,'verlof');
-    });
+    notificeerGoedkeurders('verlof', medId, 'Nieuwe verlofaanvraag', _tekst);
   }
   toast(_vOud?'Verlofaanvraag bijgewerkt':'Verlofaanvraag ingediend','success');
 }
@@ -19964,6 +19957,10 @@ function saveOveruren(id) {
   if (isNew) APP.overuren.push(data);
   else { var idx=APP.overuren.findIndex(function(x){return String(x.id)===String(id);}); if(idx>-1) APP.overuren[idx]=data; }
   dbSaveItem('overuren', data.id, data);
+  if(isNew && data.status==='aangevraagd' && typeof notificeerGoedkeurders==='function'){
+    var _ouM = getMed(data.medId);
+    notificeerGoedkeurders('overuren', data.medId, 'Nieuwe overuren', (_ouM ? _ouM.voornaam+' '+_ouM.achternaam : 'Iemand')+' heeft '+_hrGetal(data.uren)+' uur overuren ingediend voor '+fmtD(data.datum)+'.');
+  }
   closeModal();
   renderOveruren();
   toast(isNew?'Overuren geregistreerd':'Overuren bijgewerkt','success');
@@ -20503,6 +20500,10 @@ function saveOnkosten(id){
   if(isNew) APP.onkosten.push(data);
   else{var idx=APP.onkosten.findIndex(function(x){return String(x.id)===String(id);});if(idx>-1)APP.onkosten[idx]=data;}
   dbSaveItem('onkosten',data.id,data);
+  if(isNew && data.status==='aangevraagd' && typeof notificeerGoedkeurders==='function'){
+    var _okM = getMed(data.medId);
+    notificeerGoedkeurders('onkosten', data.medId, 'Nieuwe onkostendeclaratie', (_okM ? _okM.voornaam+' '+_okM.achternaam : 'Iemand')+' heeft '+_matEuro(data.bedrag)+' gedeclareerd ('+(data.categorie||'onkosten')+').');
+  }
   closeModal(); renderOnkosten();
   toast(isNew?'Onkosten gedeclareerd':'Onkosten bijgewerkt','success');
 }
@@ -20946,10 +20947,11 @@ function saveVerzuim(id){
     // Notificatie naar beheerders als een monteur ziek is gemeld
     if(String(data.medId) !== String(getMijnMedId())) {
       var _vzNaam = _vzMed ? _vzMed.voornaam+' '+_vzMed.achternaam : 'Onbekend';
+      // Wie verzuim of de planning beheert moet het weten (de planning moet om de afwezigheid heen)
       APP.medewerkers.filter(function(m){
-        return (m.rol==='admin'||m.rol==='planner') && String(m.id)!==String(data.medId);
+        return String(m.id)!==String(data.medId) && (_medMagModule(m,'verzuim') || _medMagModule(m,'planning'));
       }).forEach(function(beheerder){
-        stuurNotificatie(beheerder.id,'verzuim',_vzTypeTekst+': '+esc(_vzNaam),
+        stuurNotificatie(beheerder.id,'verzuim',_vzTypeTekst+': '+_vzNaam,
           _vzNaam+' heeft zich ziek gemeld per '+fmtD(data.van)+'.','verzuim');
       });
     }
@@ -33899,8 +33901,15 @@ document.addEventListener('DOMContentLoaded', function() {
     var mijnId = getNotifId();
     if(!mijnId) return;
     var path = dbPath('notificaties', mijnId);
+    var _opgeruimd = false;
     FB.ref(path).on('value', function(snap){
       var data = snap.val()||{};
+      // Eén keer per sessie: meldingen ouder dan 60 dagen opruimen (bleven anders voor altijd staan)
+      if(!_opgeruimd){
+        _opgeruimd = true;
+        var grens = Date.now() - 60*86400000;
+        Object.keys(data).forEach(function(k){ if(data[k] && data[k].ts && data[k].ts < grens){ FB.ref(path+'/'+k).remove().catch(function(){}); delete data[k]; } });
+      }
       APP._notificaties = data;
       renderNotifBadge();
       if(_notifOpen) renderNotifLijst();
@@ -34003,6 +34012,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function sluitNotifPanel() {
     document.getElementById('notif-panel').style.display = 'none';
     _notifOpen = false;
+    var nb = document.getElementById('notif-btn'); if(nb) nb.setAttribute('aria-expanded','false');
   }
 
   // Zet notificatie-ontvanger ID om: medId → notifId (medId of uid)
@@ -34020,6 +34030,24 @@ document.addEventListener('DOMContentLoaded', function() {
     return String(medId);
   }
 
+  // Heeft deze medewerker (via zijn rol) schrijf-/beheerrecht op een module? Voor het kiezen
+  // van ontvangers: op rechten, niet op de naam van de rol ('admin'/'planner'), anders krijgt
+  // een eigen rol met goedkeurrecht niets.
+  function _medMagModule(m, mod){
+    if(!m || m.status==='inactief') return false;
+    var rol = (APP.rollen||{})[m.rol] || {};
+    if(m.rol==='admin' || rol.rol==='admin') return true;
+    var r = (rol.rechten||{})[mod];
+    return !!(r && (r.schrijven || r.beheren));
+  }
+  window._medMagModule = _medMagModule;
+  // Melding aan wie een aanvraag mag beoordelen: de ingestelde goedkeurder, anders iedereen
+  // met schrijfrecht op de module. Nooit aan de aanvrager zelf.
+  window.notificeerGoedkeurders = function(mod, medId, titel, tekst){
+    var gk = getGoedkeurderVoor(medId, mod);
+    var ontvangers = gk ? [gk] : APP.medewerkers.filter(function(m){ return _medMagModule(m, mod); });
+    ontvangers.forEach(function(m){ if(String(m.id)!==String(medId)) stuurNotificatie(m.id, mod, titel, tekst, mod); });
+  };
   window.stuurNotificatie = function(medId, type, titel, tekst, nav) {
     if(!APP.bedrijfId||!medId) return;
     var notifId = medIdNaarNotifId(medId);
@@ -34036,22 +34064,23 @@ document.addEventListener('DOMContentLoaded', function() {
     var panel = document.getElementById('notif-panel');
     _notifOpen = !_notifOpen;
     panel.style.display = _notifOpen ? 'flex' : 'none';
-    if(_notifOpen) {
-      renderNotifLijst();
-      // Markeer alle als gelezen na 2 sec
-      setTimeout(function(){
-        var data = APP._notificaties||{};
-        Object.keys(data).forEach(function(k){
-          if(!data[k].gelezen) markeerGelezen(k);
-        });
-      }, 2000);
-    }
+    notifBtn.setAttribute('aria-expanded', _notifOpen ? 'true' : 'false');
+    // Gelezen wordt een melding als je hem opent, of met 'Alles gelezen' — niet meer automatisch
+    // na twee seconden: dan verdween het bolletje ook als je niets had gezien.
+    if(_notifOpen) renderNotifLijst();
   });
 
   document.addEventListener('click', function(e){
     if(!e.target.closest('#notif-wrapper')) sluitNotifPanel();
   });
 
+  var allesGelezen = document.getElementById('notif-alles-gelezen');
+  if(allesGelezen) allesGelezen.addEventListener('click', function(e){
+    e.stopPropagation();
+    var data = APP._notificaties||{};
+    Object.keys(data).forEach(function(k){ if(!data[k].gelezen) markeerGelezen(k); });
+    renderNotifLijst();
+  });
   var allesWeg = document.getElementById('notif-alles-weg');
   if(allesWeg) allesWeg.addEventListener('click', function(){
     var mijnId = getNotifId();
@@ -34100,16 +34129,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var sd = (APP.storingsdienst||{})[sdKey];
     if(sd && String(sd.medId)===mijnId) {
       // Check of we al een notif hebben gestuurd deze week
-      var notifKey = 'sd_herinnering_'+sdKey;
-      var data = APP._notificaties||{};
-      var alGestuurd = Object.values(data).some(function(n){return n._key===notifKey||n.titel==='Storingsdienst week '+week;});
-      if(!alGestuurd) {
-        stuurNotificatie(mijnId, 'storingsdienst',
-          'Storingsdienst week '+week,
-          'Jij hebt deze week storingsdienst. Zorg dat je bereikbaar bent.',
-          'storingsdienst'
-        );
-      }
+      // Of de herinnering al gestuurd is, staat bij de gebruiker zelf; zo komt hij niet terug
+      // nadat je hem hebt verwijderd (de oude controle keek alleen naar bestaande meldingen).
+      var _uid = APP.profiel && APP.profiel.uid;
+      var _merk = _uid ? FB.ref('flow8/gebruikers/'+_uid+'/notifVerstuurd/sd_'+sdKey) : null;
+      var _stuur = function(){ stuurNotificatie(mijnId, 'storingsdienst', 'Storingsdienst week '+week, 'Jij hebt deze week storingsdienst. Zorg dat je bereikbaar bent.', 'storingsdienst'); };
+      if(!_merk){ var data = APP._notificaties||{}; if(!Object.values(data).some(function(n){ return n.titel==='Storingsdienst week '+week; })) _stuur(); }
+      else _merk.once('value').then(function(sn){ if(sn.exists()) return; _stuur(); return _merk.set(Date.now()); }).catch(function(){});
     }
   }
   window.checkStoringsdienst = checkStoringsdienst;
