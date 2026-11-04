@@ -858,7 +858,9 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .inst-kies>svg{margin-left:auto;color:var(--muted);flex-shrink:0}
   .inst-kies.vuil .inst-kies-lbl>span::after{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-left:8px;vertical-align:middle}
   .inst-menu{display:none;position:fixed;left:0;right:0;top:auto;bottom:0;z-index:720;flex-direction:column;gap:2px;max-height:80vh;overflow-y:auto;padding:12px 8px calc(16px + var(--safe-bottom,0px));background:var(--surface);border-radius:20px 20px 0 0;border-top:1px solid var(--border);box-shadow:0 -10px 30px rgba(0,0,0,.2)}
-  .inst-wrap.menu-open .inst-menu{display:flex}
+  .inst-wrap.menu-open .inst-menu{display:flex;max-height:calc(100dvh - 72px)}
+  /* Zolang het menu open is geen onderbalk: anders valt het laatste item (Werkorders) erachter. */
+  body:has(.inst-wrap.menu-open) #bottom-nav{display:none!important}
   .inst-wrap.menu-open .inst-menu-scherm{display:block;position:fixed;inset:0;z-index:719;background:rgba(10,12,20,.45)}
   .inst-menu-item{min-height:48px;font-size:15px;border-radius:10px}
   .inst-menu-item.active{background:var(--surface2);color:var(--accent-t)}
@@ -1508,6 +1510,91 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .mob-prijs small{display:block;font-size:12px;color:var(--muted);font-weight:400}
 .mob-mono{font-family:'Space Mono',monospace;font-size:13px}
 .mob-meer{padding:14px;text-align:center;color:var(--muted);font-size:13px}
+.sd-tel{color:var(--accent-t);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;min-height:28px}
+@media (pointer:coarse){.sd-tel{min-height:44px}}
+/* Storingsdienst op de telefoon */
+.sd-m-rij{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sd-m-seg{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px}
+.sd-m-seg .plan-view-btn{min-height:38px;padding:0 14px;border-radius:var(--radius-pill);font-size:14px}
+.sd-m-seg .plan-view-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.sd-m-nav{display:flex;align-items:center;gap:4px;margin-left:auto}
+.sd-m-nav b{font-size:15px;min-width:72px;text-align:center}
+.sd-m-pijl{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.sd-m-knop{min-height:44px;border-radius:var(--radius-pill);justify-content:center}
+.sd-m-dienst{background:rgba(74,108,247,.08);border:1px solid rgba(74,108,247,.28);border-radius:var(--radius-lg);padding:14px;margin-bottom:14px}
+.sd-m-lbl{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sd-m-dienst .mob-acties{border-top-color:rgba(74,108,247,.2)}
+.mob-acties>a.sd-m-bel{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}
+.sd-m-leeg{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--orange-t)}
+.sd-m-week{cursor:default}
+.sd-m-wkkop{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.sd-m-wkkop b{font-size:15px}
+.sd-m-wkkop small{font-size:13px;color:var(--muted)}
+.sd-m-wkkop .tag{margin-left:auto}
+.sd-m-dagen{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}
+.sd-m-dag{height:48px;border:none;border-radius:10px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:inherit;font-size:11px;color:var(--muted);padding:0}
+button.sd-m-dag{cursor:pointer}
+.sd-m-dag em{font-style:normal;font-weight:700;font-size:12px;color:var(--text)}
+.sd-m-dag.vandaag{outline:2px solid var(--accent);outline-offset:-2px}
+.sd-m-dag.wissel{background:rgba(245,158,11,.14);color:var(--orange-t)}
+.sd-m-dag.wissel em{color:var(--orange-t)}
+.sd-m-dag.leeg em{color:var(--muted);font-weight:400}
+.sd-m-wissel{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--orange-t);margin-top:10px}
+/* Klantmails op de telefoon */
+.km-m-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:10px;font-size:13px;color:var(--muted)}
+.km-m-meta:empty{display:none}
+.km-m-meta span,.km-m-mail{display:inline-flex;align-items:center;gap:6px}
+.km-m-mail{display:flex;margin-top:8px;font-size:13px;color:var(--accent-t);word-break:break-all}
+.km-m-mail.geen{color:var(--red-t)}
+.mob-acties>label.km-m-vink{flex:0 0 44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer}
+.km-m-vink input{width:22px;height:22px;margin:0;accent-color:var(--accent-knop);cursor:pointer}
+.mob-acties>button.km-m-stuur{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}
+.km-m-verstuurd{flex:1;display:inline-flex;align-items:center;gap:6px;color:var(--green-t);font-weight:600;font-size:14px}
+.mob-acties>button.km-m-opnieuw{flex:0 0 auto;padding:0 18px}
+.km-m-ruimte{height:76px}
+.km-m-selbalk{position:fixed;left:12px;right:12px;bottom:calc(78px + var(--safe-bottom));z-index:90;display:none;align-items:center;gap:10px;padding:8px 8px 8px 16px;background:var(--text);color:var(--bg);border-radius:var(--radius-lg);box-shadow:0 10px 30px rgba(0,0,0,.3);font-weight:700;font-size:14px}
+.km-m-selbalk.zichtbaar{display:flex}
+.km-m-selbalk .btn{margin-left:auto;min-height:44px;border-radius:var(--radius-pill)}
+@media (max-width:768px){
+  /* Ruimte rondom: anders snijdt de scrollrij de rand (outline) van de actieve tegel af */
+  .km-pils{flex:1 1 100%;min-width:0;flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;padding:4px}
+  .km-pils .km-pil{flex-shrink:0;white-space:nowrap;line-height:24px}
+  #mail-prev,#mail-next{min-width:44px;min-height:44px}
+}
+/* Kaartoverzicht op de telefoon */
+.loc-m-balk{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.loc-m-balk select{flex:1;min-width:0;min-height:44px}
+.loc-m-balk .btn{min-height:44px;border-radius:var(--radius-pill)}
+#loc-refresh{min-width:44px;justify-content:center}
+.loc-m-zoek{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.loc-m-veld{position:relative;flex:1;min-width:0;display:flex;gap:6px}
+.loc-m-veld[hidden]{display:none}
+.loc-m-veld .input{flex:1;min-width:0;min-height:44px}
+.loc-m-veld .btn{min-width:44px;min-height:44px;justify-content:center;border-radius:var(--radius-pill)}
+.loc-m-seg{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px;flex-shrink:0}
+.loc-m-modus{min-height:38px;padding:0 12px;border:none;border-radius:var(--radius-pill);background:transparent;font:600 13px inherit;font-family:inherit;color:var(--muted);cursor:pointer}
+.loc-m-modus.aan{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.loc-m-kaart{position:relative;height:calc(100dvh - 300px);min-height:360px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.loc-m-kaart #loc-map{position:absolute;inset:0}
+.loc-m-kaart #loc-afstand-resultaat{position:absolute;top:10px;left:10px;right:10px;z-index:2;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.loc-m-blad{position:absolute;left:0;right:0;bottom:0;z-index:2;background:var(--surface);border-top:1px solid var(--border);border-radius:18px 18px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.15);padding:0 14px 12px;max-height:70%;overflow-y:auto}
+.loc-m-bladkop{display:flex;align-items:center;gap:8px;width:100%;min-height:52px;padding:14px 0 6px;border:none;background:none;font:inherit;color:var(--text);text-align:left;cursor:pointer;position:relative}
+.loc-m-greep{position:absolute;top:6px;left:50%;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:var(--border)}
+.loc-m-bt{flex:1;min-width:0}
+.loc-m-bt b{font-size:15px}
+.loc-m-bt small{font-size:13px;color:var(--muted);margin-left:6px}
+.loc-m-chev{color:var(--muted);transition:transform .2s}
+.loc-m-blad.open .loc-m-chev{transform:rotate(180deg)}
+.loc-m-mont{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:4px}
+.loc-m-mont span{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border-radius:var(--radius-pill);background:var(--surface2);font-size:13px;font-weight:600}
+.loc-m-mont i{width:16px;height:4px;border-radius:2px}
+.loc-m-mont small{font-weight:400;color:var(--muted)}
+.loc-m-uitleg{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:12px;color:var(--muted)}
+.loc-m-uitleg span{display:inline-flex;align-items:center;gap:5px}
+.loc-m-uitleg i{width:10px;height:10px;border-radius:50%}
+.loc-m-gps{width:100%;min-height:44px;margin-top:12px;justify-content:center;border-radius:var(--radius-pill)}
+.loc-m-blad #loc-route-paneel{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+@media (prefers-reduced-motion:reduce){.loc-m-chev{transition:none}}
 @media (max-width:768px){
   /* Zoeken en "+" op één regel; cijfers als smalle scrollrij */
   #med-zoek,#vz-zoek,#mat-zoek,#pr-zoek{flex:1 1 140px;max-width:none!important;min-width:0!important}
@@ -14151,7 +14238,7 @@ function _renderDagplanning() {
 
       // Conflict indicator
       if(o._dpConflict) {
-        content += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:6px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;font-size:12px;color:#ef4444;font-weight:600">'
+        content += '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:6px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;font-size:12px;color:var(--red-t);font-weight:600">'
            + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> '
            + o._dpConflict+'</div>';
       }
@@ -14181,7 +14268,7 @@ function _renderDagplanning() {
       content += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
       content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:'+_kleurTint(typeObj.kleur,'22')+';color:'+_klTekst(typeObj.kleur)+'">'+esc(typeObj.label)+'</span>';
       if(_isSpoed(o)) {
-        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(239,68,68,0.15);color:#ef4444;display:inline-flex;align-items:center;gap:3px">'+ICO.zap+' Spoed</span>';
+        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(239,68,68,0.15);color:var(--red-t);display:inline-flex;align-items:center;gap:3px">'+ICO.zap+' Spoed</span>';
       }
       if(o.status === 'actie' || o.status === 'actie_vereist') {
         content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(245,158,11,0.15);color:var(--vast-t);display:inline-flex;align-items:center;gap:3px">⚠ '+(o.actietype||'Actie vereist')+'</span>';
@@ -14211,7 +14298,7 @@ function _renderDagplanning() {
       var eindMin = parseInt(laatsteOp._dpTot.split(':')[0])*60 + parseInt(laatsteOp._dpTot.split(':')[1]);
       if(eindMin > 17*60) {
         var over = eindMin - 17*60;
-        content += '<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;margin-top:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;font-size:12px;color:#ef4444;font-weight:600">'
+        content += '<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;margin-top:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;font-size:12px;color:var(--red-t);font-weight:600">'
            + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
            + ' Dag eindigt om '+laatsteOp._dpTot+' — '+over+' min na reguliere werktijd (17:00)</div>';
       }
@@ -14222,7 +14309,7 @@ function _renderDagplanning() {
       var retourVan = laatsteOp._dpTot || '';
       var retourMin = laatsteOp._dpRetourMin;
       var aankomstMin = (parseInt(retourVan.split(':')[0])*60 + parseInt(retourVan.split(':')[1]||0)) + retourMin;
-      content += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-top:8px;border-radius:10px;font-size:13px;font-weight:600;background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);color:var(--accent)">'
+      content += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-top:8px;border-radius:10px;font-size:13px;font-weight:600;background:rgba(74,108,247,0.08);border:1px solid rgba(74,108,247,0.2);color:var(--accent-t)">'
          + '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>'
          + minToTijd(aankomstMin)+' — Terug bij bedrijf · '+retourMin+' min retour</div>';
     }
@@ -14252,7 +14339,7 @@ function _renderDagplanning() {
   // Footer
   var f = '<button class="btn btn-ghost" id="dp-cancel">Annuleren</button>';
   if(_dpBerekend && _dpOpdrachten.length && !_dpVolgordeGewijzigd) {
-    f += '<button class="btn btn-primary" id="dp-overnemen" style="background:#22c55e">'
+    f += '<button class="btn btn-primary" id="dp-overnemen">'
        + '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
        + ' Tijden overnemen</button>';
   }
@@ -27377,9 +27464,14 @@ function renderStoringsdienst() {
   var huidigDagKey=huidigKey+'-'+dagIdx;
   var huidigeDienst=sd[huidigDagKey]||sd[huidigKey];
   var huidigeMed=huidigeDienst?getMed(huidigeDienst.medId):null;
+  // Wijzigen alleen met schrijfrecht; anders weigert de database en lijkt het toch opgeslagen.
+  var _sdMag=magSchrijven('storingsdienst');
 
+  var h;
+  if(_hrMobiel()) h=_sdMobiel(sd, huidigeMed, huidigDagKey, huidigKey, vandaag, _sdMag);
+  else {
   // ── Toolbar ──
-  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   // View switcher
   h+='<div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px">';
   [['kwartaal','Kwartaal'],['jaar','Jaar']].forEach(function(v){
@@ -27392,7 +27484,7 @@ function renderStoringsdienst() {
   h+='<button class="btn btn-ghost btn-sm" id="sd-next">›</button>';
   h+='<button class="btn btn-ghost btn-sm" id="sd-vandaag">Nu</button>';
   h+='<div style="flex:1"></div>';
-  h+='<button class="btn btn-primary btn-sm" id="sd-rouleer">'+ICO.refresh+' Voorstel genereren</button>';
+  if(_sdMag) h+='<button class="btn btn-primary btn-sm" id="sd-rouleer">'+ICO.refresh+' Voorstel genereren</button>';
   h+='</div>';
 
   // ── Huidige dienst banner ──
@@ -27404,7 +27496,7 @@ function renderStoringsdienst() {
     h+='<div style="display:flex;align-items:center;gap:10px;margin-top:6px">';
     h+='<div class="avatar" style="width:34px;height:34px;font-size:12px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(huidigeMed)+'</div>';
     h+='<div><div style="font-weight:700;font-size:15px">'+esc(huidigeMed.voornaam+' '+huidigeMed.achternaam)+'</div>';
-    h+='<div style="font-size:12px;color:var(--muted)">'+esc(huidigeMed.telefoon||huidigeMed.email||'')+'</div></div></div>';
+    h+='<div style="font-size:12px;color:var(--muted)">'+(huidigeMed.telefoon?_sdTel(huidigeMed.telefoon):esc(huidigeMed.email||''))+'</div></div></div>';
     if(sd[huidigDagKey]) h+='<div style="font-size:11px;color:var(--orange-t);margin-top:4px">'+ICO.zap+' Dagwissel actief</div>';
   } else {
     h+='<div style="font-weight:600;font-size:14px;color:var(--orange-t);margin-top:4px">'+ICO.warn+' Nog niet ingesteld</div>';
@@ -27490,7 +27582,7 @@ function renderStoringsdienst() {
       if(weekMed){
         h+='<div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(weekMed)+'</div>';
         h+='<div><div style="font-size:13px;font-weight:600">'+esc(weekMed.voornaam+' '+weekMed.achternaam)+'</div>';
-        h+='<div style="font-size:11px;color:var(--muted)">'+esc(weekMed.telefoon||'')+'</div></div></div>';
+        h+='<div style="font-size:11px;color:var(--muted)">'+_sdTel(weekMed.telefoon)+'</div></div></div>';
       } else {
         h+='<span style="color:var(--muted);font-size:13px">—</span>';
       }
@@ -27522,13 +27614,14 @@ function renderStoringsdienst() {
       }
 
       // Week wijzig knop
-      h+='<td style="padding:6px 8px"><button class="btn btn-ghost btn-sm sd-week-btn" data-week="'+w.key+'" data-weeknr="'+w.week+'" style="font-size:11px;display:inline-flex;align-items:center;gap:4px">'+ICO.edit+' Week</button></td>';
+      h+='<td style="padding:6px 8px">'+(!_sdMag?'':'<button class="btn btn-ghost btn-sm sd-week-btn" data-week="'+w.key+'" data-weeknr="'+w.week+'" style="font-size:11px;display:inline-flex;align-items:center;gap:4px">'+ICO.edit+' Week</button>')+'</td>';
       h+='</tr>';
     });
     h+='</tbody></table></div></div>';
     h+='<div style="font-size:12px;color:var(--muted);margin-top:8px">✓ = weekdienst · Oranje avatar = dagwissel · Klik op dag voor dagwissel</div>';
   }
 
+  }
   el.innerHTML=h;
 
   // Events
@@ -27536,11 +27629,12 @@ function renderStoringsdienst() {
   el.querySelector('#sd-prev').addEventListener('click',function(){ if(_sdView==='jaar'){_sdJaar--;} else{_sdKwart--;if(_sdKwart<1){_sdKwart=4;_sdJaar--;}} renderStoringsdienst(); });
   el.querySelector('#sd-next').addEventListener('click',function(){ if(_sdView==='jaar'){_sdJaar++;} else{_sdKwart++;if(_sdKwart>4){_sdKwart=1;_sdJaar++;}} renderStoringsdienst(); });
   el.querySelector('#sd-vandaag').addEventListener('click',function(){ _sdJaar=new Date().getFullYear();_sdKwart=Math.ceil((new Date().getMonth()+1)/3);renderStoringsdienst(); });
-  el.querySelector('#sd-rouleer').addEventListener('click',function(){
+  if(_sdMag) el.querySelector('#sd-rouleer').addEventListener('click',function(){
     var wk=getWekenInPeriode(_sdJaar,_sdView==='jaar'?0:_sdKwart);
     openRoulatieModal(wk,monteurs);
   });
   el.querySelectorAll('.sd-dag-cel').forEach(function(cel){
+    if(!_sdMag){ cel.style.cursor='default'; return; }
     cel.addEventListener('click',function(){ openSdDagModal(cel.dataset.datum,cel.dataset.weekkey,parseInt(cel.dataset.dagidx),monteurs); });
   });
   el.querySelectorAll('.sd-week-btn').forEach(function(btn){
@@ -27548,7 +27642,71 @@ function renderStoringsdienst() {
   });
 }
 
+// Telefoonweergave: de dienst van vandaag met een belknop, daarna per week een kaart met zeven
+// dagvakjes. Zelfde klassen en ids als de tabel (plan-view-btn, sd-dag-cel, sd-week-btn), zodat de
+// koppelingen onderaan renderStoringsdienst ook hier werken. Verstreken weken komen onderaan.
+function _sdMobiel(sd, huidigeMed, huidigDagKey, huidigKey, vandaag, mag){
+  var dagNamen=['ma','di','wo','do','vr','za','zo'];
+  function kort(d){ return d.getDate()+' '+_HR_MND[d.getMonth()]; }
+  function periode(ma, zo){ return ma.getMonth()===zo.getMonth() ? ma.getDate()+' – '+kort(zo) : kort(ma)+' – '+kort(zo); }
+  function av(m, px){ var kl=medKleur(m); return '<div class="avatar" style="width:'+px+'px;height:'+px+'px;font-size:'+(px>38?14:12)+'px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>'; }
+  var h='<div class="sd-m-rij"><div class="sd-m-seg">';
+  [['kwartaal','Kwartaal'],['jaar','Jaar']].forEach(function(v){ h+='<button type="button" class="plan-view-btn'+(_sdView===v[0]?' active':'')+'" data-sdview="'+v[0]+'">'+v[1]+'</button>'; });
+  h+='</div><div class="sd-m-nav"><button type="button" class="sd-m-pijl" id="sd-prev" aria-label="Vorige periode">'+'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>'+'</button>';
+  h+='<b>'+(_sdView==='jaar'?_sdJaar:'Q'+_sdKwart+' '+_sdJaar)+'</b>';
+  h+='<button type="button" class="sd-m-pijl" id="sd-next" aria-label="Volgende periode">'+'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>'+'</button></div></div>';
+  h+='<div class="sd-m-rij"><button type="button" class="btn btn-ghost sd-m-knop" id="sd-vandaag">Nu</button>';
+  if(mag) h+='<button type="button" class="btn btn-primary sd-m-knop" id="sd-rouleer" style="flex:1">'+ICO.refresh+' Voorstel genereren</button>';
+  h+='</div>';
+
+  h+='<div class="sd-m-dienst"><div class="sd-m-lbl">Dienst vandaag · week '+parseInt(huidigKey.split('-W')[1],10)+'</div>';
+  if(huidigeMed){
+    h+='<div class="mob-kop">'+av(huidigeMed,42)+'<div style="min-width:0"><span class="mob-titel" style="font-size:17px">'+esc(huidigeMed.voornaam+' '+huidigeMed.achternaam)+'</span>';
+    h+='<span class="mob-sub">'+(sd[huidigDagKey]?'Dagwissel, alleen vandaag':'Weekdienst')+'</span></div></div>';
+    var _tel=huidigeMed.telefoon||huidigeMed.mobiel||'';
+    if(_tel) h+='<div class="mob-acties"><a class="sd-m-bel" href="'+esc(_klTel(_tel))+'">'+'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>'+' Bel '+esc(_tel)+'</a></div>';
+  } else {
+    h+='<div class="sd-m-leeg">'+ICO.warn+' Nog niet ingesteld</div>';
+  }
+  h+='</div>';
+
+  var komend='', eerder='';
+  getWekenInPeriode(_sdJaar, _sdView==='jaar'?0:_sdKwart).forEach(function(w){
+    var weekDienst=sd[w.key], weekMed=weekDienst?getMed(weekDienst.medId):null;
+    var verleden=dateToStr(w.zo)<vandaag;
+    var k='<div class="mob-kaart sd-m-week">';
+    k+='<div class="sd-m-wkkop"><b>Week '+w.week+'</b><small>'+periode(w.ma,w.zo)+'</small>'+(w.key===huidigKey?'<span class="tag tag-blue">Nu</span>':'')+'</div>';
+    if(weekMed) k+='<div class="mob-kop">'+av(weekMed,36)+'<div style="min-width:0"><span class="mob-titel">'+esc(weekMed.voornaam+' '+weekMed.achternaam)+'</span>'+_sdTel(weekMed.telefoon||weekMed.mobiel)+'</div></div>';
+    else k+='<span class="mob-sub">Geen weekdienst ingesteld</span>';
+    k+='<div class="sd-m-dagen">';
+    var wissels=[];
+    for(var di=0;di<7;di++){
+      var dagKey=w.key+'-'+di, dagDienst=sd[dagKey], dagMed=dagDienst?getMed(dagDienst.medId):null;
+      var d=new Date(w.ma); d.setDate(w.ma.getDate()+di);
+      var ds=dateToStr(d), eff=dagMed||weekMed;
+      if(dagMed) wissels.push(dagNamen[di]+' '+kort(d)+': '+esc(dagMed.voornaam+' '+dagMed.achternaam));
+      var cl='sd-dag-cel sd-m-dag'+(dagMed?' wissel':'')+(ds===vandaag?' vandaag':'')+(eff?'':' leeg');
+      var lbl=dagNamen[di]+' '+kort(d)+': '+(eff?eff.voornaam+' '+eff.achternaam:'niemand')+(dagMed?' (dagwissel)':'');
+      var inh='<span>'+dagNamen[di]+'</span><em>'+(eff?initials(eff):'—')+'</em>';
+      k+= mag ? '<button type="button" class="'+cl+'" data-datum="'+ds+'" data-weekkey="'+w.key+'" data-dagidx="'+di+'" aria-label="'+esc(lbl)+'">'+inh+'</button>'
+              : '<div class="'+cl+'" role="img" aria-label="'+esc(lbl)+'">'+inh+'</div>';
+    }
+    k+='</div>';
+    wissels.forEach(function(t){ k+='<div class="sd-m-wissel">'+ICO.zap+' '+t.charAt(0).toUpperCase()+t.slice(1)+' (dagwissel)</div>'; });
+    if(mag) k+='<div class="mob-acties"><button type="button" class="sd-week-btn" data-week="'+w.key+'" data-weeknr="'+w.week+'">'+ICO.edit+' Wijzig week</button></div>';
+    k+='</div>';
+    if(verleden) eerder+=k; else komend+=k;
+  });
+  h+=komend;
+  if(eerder) h+='<div class="mob-groep">'+(_sdView==='jaar'?'Eerder dit jaar':'Eerder dit kwartaal')+'</div>'+eerder;
+  return h;
+}
+// Telefoonnummer als bel-link (tel:), zodat je vanaf de telefoon direct belt.
+function _sdTel(nr){
+  return String(nr||'').replace(/[^\d+]/g,'') ? '<a href="'+esc(_klTel(nr))+'" class="sd-tel">'+esc(nr)+'</a>' : '';
+}
 function openSdDagModal(datum, weekKey, dagIdx, monteurs) {
+  if(!magSchrijven('storingsdienst')) return;
   var dagNamen=['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
   var sd=APP.storingsdienst||{};
   var dagKey=weekKey+'-'+dagIdx;
@@ -27602,6 +27760,7 @@ function openSdDagModal(datum, weekKey, dagIdx, monteurs) {
 }
 
 function openSdWijzigModal(weekKey,weekNr,monteurs){
+  if(!magSchrijven('storingsdienst')) return;
   var sd=APP.storingsdienst||{};
   var huidig=sd[weekKey];
   var b='<div class="form-group"><label>Monteur voor hele week '+weekNr+'</label>';
@@ -27633,6 +27792,7 @@ function openSdWijzigModal(weekKey,weekNr,monteurs){
 }
 
 function openRoulatieModal(weken,monteurs){
+  if(!magSchrijven('storingsdienst')) return;
   if(!monteurs.length){toast('Geen monteurs beschikbaar','error');return;}
   var sd=APP.storingsdienst||{};
 
@@ -28700,21 +28860,104 @@ window.initialiseerKaart=function(){
   _locMap=new google.maps.Map(mapEl,{
     center:{lat:51.8336,lng:4.9756}, zoom:10,
     mapTypeId:google.maps.MapTypeId.ROADMAP,
+    // Telefoon: de kaart vult het scherm, dus slepen met één vinger verplaatst de kaart.
+    gestureHandling:_hrMobiel()?'greedy':'auto', mapTypeControl:!_hrMobiel(),
     styles:[{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]}],
   });
   laadKaartData();
 };
 
+// Korte naam voor de legenda: voornaam + eerste letter van het laatste deel van de achternaam
+// ("Tjep ter Veer" → "Tjep V."). Werkt ook zonder achternaam.
+function _locKortNaam(m){
+  var deel=String(m.achternaam||'').trim().split(/\s+/).pop()||'';
+  return (m.voornaam||'')+(deel?' '+deel.charAt(0).toUpperCase()+'.':'');
+}
+// Inhoud van de klant-spelden-knop (spelden zichtbaar / verborgen).
+var _LOC_SK_AAN = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:-2px"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Klanten';
+var _LOC_SK_UIT = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:-2px"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Klanten';
+// Telefoonweergave: één balk (monteur, klant-spelden, verversen), één zoekveld met een schakelaar
+// Klant/Afstand, de kaart tot de onderbalk en het route-overzicht als blad onderin. Zelfde ids als
+// de desktopweergave, zodat de koppelingen in renderLocatie ook hier werken.
+function _locMobielHtml(isTracking, actieveMonteurs){
+  var h='<div class="loc-m-balk"><select class="input" id="loc-monteur-filter" aria-label="Monteur">';
+  h+='<option value="alle">Alle monteurs</option>';
+  actieveMonteurs.forEach(function(m){ h+='<option value="'+m.id+'"'+(_locFilter===String(m.id)?' selected':'')+'>'+esc(m.voornaam+' '+m.achternaam)+'</option>'; });
+  h+='</select>';
+  h+='<button class="btn '+(_toonSkMarkers?'btn-ghost':'btn-primary')+' btn-sm" id="loc-sk-toggle" title="Serviceklant-spelden tonen of verbergen">'+(_toonSkMarkers?_LOC_SK_AAN:_LOC_SK_UIT)+'</button>';
+  h+='<button class="btn btn-ghost btn-sm" id="loc-refresh" title="Kaart verversen" aria-label="Kaart verversen">'+ICO.refresh+'</button></div>';
+  h+='<div class="loc-m-zoek">';
+  h+='<div class="loc-m-veld" data-modus="klant"><input type="text" class="input" id="loc-klant-zoek" placeholder="Zoek serviceklant…" autocomplete="off" enterkeyhint="search">';
+  h+='<div id="loc-klant-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:400;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-top:4px;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.25)"></div></div>';
+  h+='<div class="loc-m-veld" data-modus="afstand" hidden><input type="text" class="input" id="loc-afstand-input" placeholder="Adres of plaats" enterkeyhint="search">';
+  h+='<button class="btn btn-primary" id="loc-afstand-btn" aria-label="Bereken afstand">'+ICO.search+'</button></div>';
+  h+='<div class="loc-m-seg" role="group" aria-label="Zoeken naar"><button type="button" class="loc-m-modus aan" data-modus="klant" aria-pressed="true">Klant</button><button type="button" class="loc-m-modus" data-modus="afstand" aria-pressed="false">Afstand</button></div>';
+  h+='</div>';
+  // Kaart met daaronder het blad
+  var vandaag=vandaagISO(), perM={}, nOps=0;
+  APP.opdrachten.forEach(function(o){
+    if(o.datum!==vandaag||!o.adres) return;
+    nOps++;
+    var ids=Array.isArray(o.monteurIds)&&o.monteurIds.length?o.monteurIds:(o.monteurId?[o.monteurId]:[]);
+    ids.forEach(function(id){ perM[String(id)]=(perM[String(id)]||0)+1; });
+  });
+  var metWerk=actieveMonteurs.filter(function(m){ return perM[String(m.id)]; });
+  h+='<div class="loc-m-kaart"><div id="loc-map"></div><div id="loc-afstand-resultaat" style="display:none"></div>';
+  h+='<div class="loc-m-blad"><button type="button" class="loc-m-bladkop" id="loc-blad-kop" aria-expanded="false" aria-controls="loc-route-paneel"><span class="loc-m-greep"></span>';
+  h+='<span class="loc-m-bt"><b>Route vandaag</b><small>'+(nOps ? metWerk.length+' '+(metWerk.length===1?'monteur':'monteurs')+', '+nOps+' '+(nOps===1?'opdracht':'opdrachten') : 'geen opdrachten')+'</small></span>'+'<svg class="loc-m-chev" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>'+'</button>';
+  if(metWerk.length){
+    h+='<div class="loc-m-mont">';
+    metWerk.forEach(function(m){ h+='<span><i style="background:'+medKleur(m)+'"></i>'+esc(_locKortNaam(m))+' <small>'+perM[String(m.id)]+'</small></span>'; });
+    h+='</div>';
+  }
+  h+='<div class="loc-m-uitleg">';
+  [['#6b7694','Klaargezet'],['#f59e0b','Mee bezig'],['#ef4444','Actie vereist'],['#10b981','Afgehandeld']].forEach(function(st){ h+='<span><i style="background:'+st[0]+'"></i>'+st[1]+'</span>'; });
+  h+='</div>';
+  if(APP.profiel&&(APP.profiel.rol==='monteur'||APP.profiel.rol==='extern')){
+    h+= isTracking ? '<button class="btn btn-ghost loc-m-gps" id="loc-stop-gps" style="color:var(--red-t)">'+ICO.cross+' Stop locatie delen</button>'
+                   : '<button class="btn btn-primary loc-m-gps" id="loc-start-gps">'+ICO.locatie+' Deel mijn locatie</button>';
+  }
+  h+='<div id="loc-route-paneel" style="display:none"></div></div></div>';
+  return h;
+}
+function _locMobielKoppel(el, routePaneel){
+  var kaart=el.querySelector('.loc-m-kaart'), blad=el.querySelector('.loc-m-blad'), kop=el.querySelector('#loc-blad-kop');
+  // Kaart tot net boven de onderbalk: de pagina hoeft dan niet te scrollen.
+  function hoogte(){
+    if(!kaart||!document.body.contains(kaart)) return;
+    var bn=document.getElementById('bottom-nav'), bnH=(bn&&bn.offsetHeight)||0;
+    kaart.style.height=Math.max(360, Math.round(window.innerHeight-kaart.getBoundingClientRect().top-bnH-12))+'px';
+  }
+  hoogte(); setTimeout(hoogte, 50);
+  if(kop&&blad) kop.addEventListener('click', function(){
+    _locReistijdenZichtbaar=!_locReistijdenZichtbaar;
+    blad.classList.toggle('open', _locReistijdenZichtbaar);
+    kop.setAttribute('aria-expanded', _locReistijdenZichtbaar?'true':'false');
+    if(routePaneel){ routePaneel.style.display=_locReistijdenZichtbaar?'block':'none'; if(_locReistijdenZichtbaar) _updateRoutePaneel(); }
+  });
+  el.querySelectorAll('.loc-m-modus').forEach(function(b){
+    b.addEventListener('click', function(){
+      var m=b.dataset.modus;
+      el.querySelectorAll('.loc-m-modus').forEach(function(x){ x.classList.toggle('aan', x===b); x.setAttribute('aria-pressed', x===b?'true':'false'); });
+      el.querySelectorAll('.loc-m-veld').forEach(function(v){ v.hidden = v.dataset.modus!==m; });
+      var inp=el.querySelector(m==='klant'?'#loc-klant-zoek':'#loc-afstand-input'); if(inp) inp.focus();
+    });
+  });
+}
 function renderLocatie() {
   var el=document.getElementById('content');
-  // Storingsdienst: alle actieve medewerkers kunnen dienst draaien
-  var monteurs=APP.medewerkers.filter(function(m){return m.status!=='inactief';});
   var isTracking=!!_locGPSWatch;
   var planRollen3=APP.planningRollen||['monteur','extern'];
   var actieveMonteurs=APP.medewerkers.filter(function(m){return m.status!=='inactief'&&planRollen3.indexOf(m.rol)>=0;});
-  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+  // Bij elke opbouw dicht: anders onthoudt de vlag "open" terwijl het paneel dicht getekend wordt,
+  // en doet de eerste klik niets.
+  _locReistijdenZichtbaar=false;
+  var h;
+  if(_hrMobiel()) h=_locMobielHtml(isTracking, actieveMonteurs);
+  else {
+  h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
   if(APP.profiel&&(APP.profiel.rol==='monteur'||APP.profiel.rol==='extern')){
-    if(isTracking) h+='<button class="btn btn-ghost btn-sm" id="loc-stop-gps" style="color:var(--red)">⏹ Stop locatie delen</button>';
+    if(isTracking) h+='<button class="btn btn-ghost btn-sm" id="loc-stop-gps" style="color:var(--red-t)">'+ICO.cross+' Stop locatie delen</button>';
     else h+='<button class="btn btn-primary btn-sm" id="loc-start-gps">'+ICO.locatie+' Deel mijn locatie</button>';
   }
   // Dynamische route-legende per monteur
@@ -28724,7 +28967,7 @@ function renderLocatie() {
     var strokeKl = medKleur(m);
     h+='<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">';
     h+='<div style="width:24px;height:4px;border-radius:2px;background:'+strokeKl+';flex-shrink:0"></div>';
-    h+=esc(m.voornaam+' '+m.achternaam[0]+'.')+'</div>';
+    h+=esc(_locKortNaam(m))+'</div>';
   });
   h+='</div>';
   // Voortgang-legende: de rand en het bolletje op een opdracht-marker
@@ -28740,11 +28983,9 @@ function renderLocatie() {
   actieveMonteurs.forEach(function(m){h+='<option value="'+m.id+'"'+(_locFilter===String(m.id)?' selected':'')+'>'+esc(m.voornaam+' '+m.achternaam)+'</option>';});
   h+='</select>';
   h+='<button class="btn '+(_toonSkMarkers?'btn-ghost':'btn-primary')+' btn-sm" id="loc-sk-toggle" title="Serviceklant-spelden tonen of verbergen">'
-    + (_toonSkMarkers
-        ? '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:-2px"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Klanten'
-        : '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:-2px"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Klanten')
+    + (_toonSkMarkers ? _LOC_SK_AAN : _LOC_SK_UIT)
     + '</button>';
-  h+='<button class="btn btn-ghost btn-sm" id="loc-refresh">↻</button>';
+  h+='<button class="btn btn-ghost btn-sm" id="loc-refresh" title="Kaart verversen" aria-label="Kaart verversen">'+ICO.refresh+'</button>';
   h+='</div>';
 
   // ── Zoekbalk: klant-zoeker + afstandszoeker (onder de filterbalk) ──
@@ -28767,6 +29008,7 @@ function renderLocatie() {
   h+='<button class="btn btn-ghost btn-sm" id="loc-reistijd-btn">'+ICO.auto+' Toon route-overzicht</button>';
   h+='</div>';
   h+='<div id="loc-route-paneel" style="display:none;margin-top:8px;padding:14px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)"></div>';
+  }
   el.innerHTML=h;
   var startBtn=el.querySelector('#loc-start-gps'); if(startBtn) startBtn.addEventListener('click',function(){startLocatieTracking();renderLocatie();});
   var stopBtn=el.querySelector('#loc-stop-gps');   if(stopBtn)  stopBtn.addEventListener('click',function(){stopLocatieTracking();renderLocatie();});
@@ -28784,9 +29026,7 @@ function renderLocatie() {
     });
     // Knop-uiterlijk bijwerken
     skToggleBtn.className = 'btn '+(_toonSkMarkers?'btn-ghost':'btn-primary')+' btn-sm';
-    skToggleBtn.innerHTML = (_toonSkMarkers
-        ? '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:-2px"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Klanten'
-        : '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:-2px"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Klanten');
+    skToggleBtn.innerHTML = (_toonSkMarkers ? _LOC_SK_AAN : _LOC_SK_UIT);
   });
 
   // ── Klant-zoeker: dropdown met serviceklanten, navigeer naar marker op kaart ──
@@ -28830,7 +29070,8 @@ function renderLocatie() {
     }
     _lkInput.addEventListener('input',function(){ clearTimeout(_lkTimeout); _lkTimeout=setTimeout(function(){_lkRender(_lkInput.value);},200); });
     _lkInput.addEventListener('focus',function(){ if(_lkInput.value) _lkRender(_lkInput.value); });
-    document.addEventListener('click',function(e){ if(_lkInput && !_lkInput.contains(e.target) && _lkDrop && !_lkDrop.contains(e.target)) _lkDrop.style.display='none'; });
+    // Eén keer koppelen: bij elke opbouw van de pagina kwam er anders een luisteraar bij.
+    if(!window._lkDocKlik){ window._lkDocKlik=true; document.addEventListener('click',function(e){ var i=document.getElementById('loc-klant-zoek'), d=document.getElementById('loc-klant-dropdown'); if(i && d && !i.contains(e.target) && !d.contains(e.target)) d.style.display='none'; }); }
   }
 
   // ── Route-overzicht toggle ──
@@ -28840,10 +29081,13 @@ function renderLocatie() {
     reistijdBtn.addEventListener('click', function(){
       _locReistijdenZichtbaar = !_locReistijdenZichtbaar;
       routePaneel.style.display = _locReistijdenZichtbaar ? 'block' : 'none';
-      reistijdBtn.textContent = _locReistijdenZichtbaar ? ICO.auto+' Verberg route-overzicht' : ICO.auto+' Toon route-overzicht';
+      reistijdBtn.innerHTML = _locReistijdenZichtbaar ? ICO.auto+' Verberg route-overzicht' : ICO.auto+' Toon route-overzicht';
       if(_locReistijdenZichtbaar) _updateRoutePaneel();
     });
   }
+
+  // Telefoon: blad met route-overzicht, schakelaar klant/afstand en kaarthoogte tot de onderbalk.
+  if(_hrMobiel()) _locMobielKoppel(el, routePaneel);
 
   // ── Afstandszoeker logica ──
   var _afstandMarker = null;
@@ -28900,7 +29144,7 @@ function renderLocatie() {
           +'<span>'+ICO.auto+' <strong>'+esc(afstandTekst)+'</strong></span>'
           +'<span style="display:inline-flex;align-items:center;gap:4px">'+ICO.clock+' <strong>'+esc(tijdTekst)+'</strong></span>'
           +'<span style="color:var(--muted);font-size:11px">vanaf '+esc(bg.naam||bedrijfAdres)+'</span>'
-          +'<button id="loc-afstand-wis" class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:11px">✕ Wis</button>'
+          +'<button id="loc-afstand-wis" class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:11px">'+ICO.cross+' Wis</button>'
           +'</div>';
         // Route tekenen op kaart. In een try: gaat hier iets mis (bijvoorbeeld een
         // Maps-bibliotheek die niet geladen is), dan blijft het bij een route die ontbreekt
@@ -29195,6 +29439,48 @@ function openMailModal(opdrachtId) {
   document.querySelectorAll('.mail-send-btn').forEach(function(btn){btn.addEventListener('click',function(){stuurMail(btn.dataset.op,btn.dataset.tpl);});});
 }
 
+// E-mailadres voor een klantmail over deze opdracht: dat van de serviceklant, of van de debiteur
+// als de opdracht alleen aan een debiteur hangt. Bewust géén terugval naar de debiteur van een
+// serviceklant: dat is vaak een factuuradres, en een afspraakbevestiging hoort bij de locatie.
+// Tellers, lijst en versturen gebruiken alle drie deze functie, zodat ze altijd overeenkomen.
+function _opdKlantEmail(o){
+  var k=null;
+  if(o.skId) k=APP.serviceklanten.find(function(x){return String(x.id)===String(o.skId);});
+  if(!k && o.debId) k=APP.debiteuren.find(function(x){return String(x.id)===String(o.debId);});
+  return k ? (k.email||'') : '';
+}
+// Telefoonweergave van de planning-tab: per dag een groep, per opdracht een kaart met een groot
+// vinkvak en een verstuurknop. Zelfde klassen en ids als de tabel (mail-check, mail-bulk-btn,
+// mail-bulk-send), zodat de koppelingen in renderKlantmails ook hier werken.
+function _kmMobiel(lijst){
+  var dagen=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+  var mnd=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+  var h='', vorige='';
+  lijst.slice().sort(function(a,b){ return (a.datum+(a.tijdVan||'')).localeCompare(b.datum+(b.tijdVan||'')); }).forEach(function(o){
+    if(o.datum!==vorige){
+      vorige=o.datum;
+      var d=new Date(o.datum+'T00:00:00'), t=dagen[d.getDay()]+' '+d.getDate()+' '+mnd[d.getMonth()];
+      h+='<div class="mob-groep">'+t.charAt(0).toUpperCase()+t.slice(1)+'</div>';
+    }
+    var klant=o.skId ? APP.serviceklanten.find(function(k){return String(k.id)===String(o.skId);}) : null;
+    var email=_opdKlantEmail(o), monteur=o.monteurId?getMed(o.monteurId):null;
+    var verzonden=o.mailVerzonden&&o.mailVerzonden.length>0, laatste=verzonden?o.mailVerzonden[o.mailVerzonden.length-1]:null;
+    h+='<div class="mob-kaart mail-rij" data-id="'+esc(o.id)+'" style="cursor:default">';
+    h+='<div class="mob-kop"><div style="flex:1;min-width:0"><span class="mob-titel">'+esc(o.klantNaam||'—')+'</span>'+(klant&&klant.contactpersoon?'<span class="mob-sub">'+esc(klant.contactpersoon)+'</span>':'')+'</div>'+tagStatus(o.status)+'</div>';
+    h+='<div class="km-m-meta">'+(o.tijdVan?'<span>'+ICO.clock+' '+esc(o.tijdVan)+(o.tijdTot?' – '+esc(o.tijdTot):'')+'</span>':'')+(monteur?'<span>'+ICO.user+' '+esc(monteur.voornaam+' '+monteur.achternaam)+'</span>':'')+'</div>';
+    h+= email ? '<div class="km-m-mail">'+ICO.mail+' '+esc(email)+'</div>' : '<div class="km-m-mail geen">'+ICO.mail+' Geen e-mailadres</div>';
+    if(email){
+      h+='<div class="mob-acties">';
+      if(verzonden) h+='<span class="km-m-verstuurd">'+ICO.check+' Verstuurd '+fmtD(laatste.datum)+'</span><button type="button" class="mail-bulk-btn km-m-opnieuw" data-id="'+esc(o.id)+'">Opnieuw</button>';
+      else h+='<label class="km-m-vink"><input type="checkbox" class="mail-check" data-id="'+esc(o.id)+'" aria-label="Selecteer '+esc(o.klantNaam||'opdracht')+'"></label><button type="button" class="mail-bulk-btn km-m-stuur" data-id="'+esc(o.id)+'">'+ICO.mail+' Versturen</button>';
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  h+='<div class="km-m-ruimte"></div>';
+  h+='<div id="mail-selbalk" class="km-m-selbalk"><span id="mail-selected-count">0 geselecteerd</span><button type="button" class="btn btn-primary" id="mail-bulk-send" disabled>'+ICO.mail+' Verstuur selectie</button></div>';
+  return h;
+}
 function renderKlantmails() {
   var el = document.getElementById('content');
   var templates = getMailTemplates();
@@ -29233,7 +29519,7 @@ function renderKlantmails() {
 
   // ── Planning tab (bestaand) ──
   // Periode selector state
-  if (typeof _mailPeriode === 'undefined') window._mailPeriode = new Date().toISOString().slice(0,7); // YYYY-MM
+  if (typeof _mailPeriode === 'undefined') window._mailPeriode = vandaagISO().slice(0,7); // YYYY-MM
   if (typeof _mailSortKey === 'undefined') window._mailSortKey = 'datum';
   if (typeof _mailSortDir === 'undefined') window._mailSortDir = 1;
   if (typeof _mailStatusFilter === 'undefined') window._mailStatusFilter = '';
@@ -29274,23 +29560,7 @@ function renderKlantmails() {
   var nogTeDoen    = 0;
 
   opdrachtenMaand.forEach(function(o){
-    var klant = null;
-    if (o.skId)  klant = APP.serviceklanten.find(function(k){return String(k.id)===String(o.skId);});
-    if (!klant && o.debId) klant = APP.debiteuren.find(function(d){return String(d.id)===String(o.debId);});
-    var email = '';
-    if (klant) {
-      email = klant.email || '';
-      // Als SK geen email heeft, probeer debiteur email
-      if (!email && o.debId) {
-        var deb = APP.debiteuren.find(function(d){return String(d.id)===String(o.debId);});
-        if (deb) email = deb.email || '';
-      }
-      // Als we klant via skId hebben, probeer ook debiteur
-      if (!email && klant.debId) {
-        var deb2 = APP.debiteuren.find(function(d){return String(d.id)===String(klant.debId);});
-        if (deb2) email = deb2.email || '';
-      }
-    }
+    var email = _opdKlantEmail(o);
     if (email) metEmail++;
     if (o.mailVerzonden && o.mailVerzonden.length) alVerzonden++;
     else if (email) nogTeDoen++;
@@ -29307,7 +29577,7 @@ function renderKlantmails() {
   h += '</div>';
 
   // Stats
-  h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+  h += '<div class="km-pils" style="display:flex;gap:8px;flex-wrap:wrap">';
   var _af = function(f){ return _mailStatusFilter===f ? ';outline:2px solid currentColor;outline-offset:1px' : ''; };
   h += '<span class="km-pil" data-filter="" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer'+_af('')+'"><strong>'+totaal+'</strong> opdrachten</span>';
   if (nogTeDoen)  h += '<span class="km-pil tag tag-orange" data-filter="teversturen" style="padding:5px 12px;cursor:pointer'+_af('teversturen')+'"><strong>'+nogTeDoen+'</strong> te versturen</span>';
@@ -29325,6 +29595,8 @@ function renderKlantmails() {
       'Er zijn geen ingeplande opdrachten in deze maand. Voeg opdrachten toe via de Planning module.',
       '→ Naar Planning', 'mail-naar-planning'
     );
+  } else if (_hrMobiel()) {
+    h += _kmMobiel(opdrachtenMaand);
   } else {
     h += '<div class="card" style="padding:0"><div class="table-wrap"><table class="mail-tabel" style="width:100%"><thead><tr>';
     h += '<th class="mail-check-cel" style="width:36px;padding:8px 10px"><input type="checkbox" id="mail-select-all" title="Alles selecteren"></th>';
@@ -29340,7 +29612,7 @@ function renderKlantmails() {
       var klant = null;
       if (o.skId)  klant = APP.serviceklanten.find(function(k){return String(k.id)===String(o.skId);});
       if (!klant && o.debId) klant = APP.debiteuren.find(function(d){return String(d.id)===String(o.debId);});
-      var email      = klant ? (klant.email||'') : '';
+      var email      = _opdKlantEmail(o);
       var monteur    = o.monteurId ? getMed(o.monteurId) : null;
       var verzonden   = o.mailVerzonden && o.mailVerzonden.length > 0;
       var laasteMail  = verzonden ? o.mailVerzonden[o.mailVerzonden.length-1] : null;
@@ -29454,6 +29726,7 @@ function renderKlantmails() {
     var btn = el.querySelector('#mail-bulk-send');
     if(cnt) cnt.textContent = checked+' geselecteerd';
     if(btn) btn.disabled = checked === 0;
+    var balk = el.querySelector('#mail-selbalk'); if(balk) balk.classList.toggle('zichtbaar', checked > 0);
   }
 
   var selectAll = el.querySelector('#mail-select-all');

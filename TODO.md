@@ -33,7 +33,7 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       `MAIL_FROM` in `functions/.env` omzetten → `verstuurMail` deployen → testen met een ontvanger
       buiten het eigen domein. Aan de code hoeft dan niets meer te gebeuren.
       Later mogelijk: een veld `mailAfzender` per bedrijf voor klanten die hun eigen domein verifiëren.
-- [ ] **Mail-contrast deployen** (Thomas) — 4 november 2026: de grijze teksten in `bouwMailHtml`
+- [x] **Mail-contrast deployen** — gedeployd op 4 november 2026 (samen met de eerste deploy van `demoAanvraag`, het demoformulier van de site; ontvanger `DEMO_NAAR` = info@flow-8.nl, opgeslagen in `functions/.env.flow8-715de`, niet in git): de grijze teksten in `bouwMailHtml`
       (label in het gegevensvak, de twee voetregels en "verstuurd via Flow8") zijn van #8b96a6/#a2acba
       naar #5a6575 gegaan, contrast nu ruim 5:1. Live na `cd flow8-functions && firebase deploy --only functions`.
 - [x] **Werkbon-/werkorder-PDF en werkbonmail nagelopen** — 4 november 2026. In de werkbon-PDF ging tekst
@@ -537,6 +537,22 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
 - [x] **Verwijderknoppen gelijktrekken** (4 november 2026) — alle 41 prullenbakken met alleen een icoon (plus HR-kaarten en rollen) via `.btn-wis`: rond, dun kader, rood icoon (`--red-t`), 32px / 44px op een aanraakscherm, met aria-label. De 16 potloodknoppen ernaast via `.btn-icoon` (zelfde vorm, grijs). Knoppen met tekst ("Verwijderen" onderaan panelen, "Verwijder selectie") bewust ongewijzigd.
 - [x] **Meldingen: werking** (4 november 2026) — paneel op de telefoon zichtbaar (de bovenbalk knipte het af, al sinds de eerste versies; openen markeerde ze daarna als gelezen); niet meer alles automatisch gelezen na 2 s, knop "Alles gelezen"; melding aan de goedkeurder bij nieuwe overuren en onkosten (`notificeerGoedkeurders`, ook voor verlof); ontvangers op rechten (`_medMagModule`) i.p.v. rolnaam; geen dubbele escape in de verzuimtitel; storingsdienst-herinnering één keer per week (merker in gebruikers/<uid>/notifVerstuurd); meldingen ouder dan 60 dagen opgeruimd.
 - [x] **Meldingen: paneel vernieuwen** (4 november 2026) — volgens `meldingen-preview.html` (lokaal): kop "Meldingen · n nieuw" met Alles gelezen, Vandaag/Eerder, tijden "2 min / 1 uur / gisteren / 31 okt", eigen icoon per soort (ook verzuim), ongelezen getint met stip (gelezen niet meer doorzichtig), kruisje altijd zichtbaar (36px/44px), Alles wissen onderaan met bevestiging, Escape sluit. Bel 34px, 44px op een aanraakscherm; op de telefoon vult het paneel het scherm.
+- [x] **Storingsdienst, kaartoverzicht, klantmails, dagplanning** (4 november 2026) — audit doorgevoerd.
+      Storingsdienst: wijzigen alleen met schrijfrecht (knoppen weg, vensters geblokkeerd; voorheen meldde
+      de app "opgeslagen" terwijl de database weigerde), telefoonnummers als bel-link. Kaart: knop
+      route-overzicht toonde SVG-code als tekst, legenda liep vast op een lege achternaam (`_locKortNaam`),
+      klik-luisteraar stapelde zich op, paneelvlag na herbouw. Klantmails: tellers, lijst en versturen via één
+      `_opdKlantEmail` (alleen serviceklant, géén terugval naar de debiteur: dat is vaak een factuuradres);
+      maand in NL-tijd. Dagplanning: rood/paars/groen via tokens (contrast). Telefoon: eigen weergave voor
+      alle drie volgens `vier-mobiel-preview.html` (lokaal) — weekkaarten met dagvakjes en belknop, mailkaarten
+      per dag met selectiebalk, kaart tot de onderbalk met route-blad en één zoekveld Klant/Afstand.
+      Instellingen op mobiel: menu valt niet meer achter de onderbalk.
+- [ ] **Dagplanning: aannames zichtbaar** — einde werkdag staat vast op 17:00, starttijd alleen 06:00–10:00,
+      opdracht zonder duur telt als 1u30 zonder dat als schatting te tonen.
+- [ ] **Dagplanning: toegankelijkheid** — volgorde alleen met slepen (geen toetsenbord); tijdsturingsknop
+      heeft alleen een tooltip en een klein tikvlak.
+- [ ] **Google Maps-sleutel beperken (Thomas)** — controleren in Google Cloud dat de browsersleutel alleen
+      werkt op app.flow-8.nl en thomv-flow8.github.io.
 - [ ] **Meldingen afschermen per medewerker (privacy/AVG)** — meldingen staan onder `flow8/bedrijven/{id}/notificaties/{medId}`, en de bedrijfsbrede `.read` laat elke actieve gebruiker ze via de database lezen (o.a. "X heeft zich ziek gemeld"). RTDB-rechten cascaderen, dus intrekken kan daar niet: verhuizen naar een eigen tak buiten `bedrijven` (zoals `verzuimDetail`) met `.read` alleen voor `auth.token.medId === $medId`, schrijven voor actieve gebruikers van het bedrijf. Bestaande meldingen meeverhuizen. Rules door Thomas te deployen.
 - [ ] **Meldingen: account zonder medewerker** — zo'n account luistert op zijn uid, terwijl meldingen naar medewerker-id's gaan; komt alleen voor bij accounts die niet aan een medewerker gekoppeld zijn.
 - [x] **Inlogscherm: meldingen, iPhone, geen standaardbedrijf** (4 november 2026) — duidelijke NL/EN-meldingen (`_loginFoutTekst`; `auth/invalid-credential` gaf "Firebase: Error (...)"), één melding voor fout wachtwoord én onbekend adres, fout weg bij typen, wachtwoord vergeten met bevestiging in het formulier, iPhone-uitleg "Zet op beginscherm", installatieknop ook als de prompt later komt, Debug log pas na 5x tikken op het versienummer. Nieuwe accounts krijgen geen bedrijf meer (was 'demo'); zonder bedrijf of zonder activering volgt een melding en uitloggen (platformbeheer uitgezonderd).
