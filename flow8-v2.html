@@ -1457,6 +1457,43 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 @media (pointer:coarse){.btn-wis{width:44px;height:44px;min-width:44px;min-height:44px}}
 /* In de knoppenbalk van een HR-kaart: midden in de balk en vrij van de rand */
 .hr-acties .btn-wis{align-self:center;margin:4px 8px}
+/* Telefoonkaarten (medewerkers, verzuim, materialen, register) */
+.mob-kaart{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px;cursor:pointer;color:var(--text)}
+.mob-kaart:focus-visible,.mob-melding:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mob-kop{display:flex;align-items:center;gap:10px}
+.mob-titel{display:block;font-size:15px;font-weight:700}
+.mob-sub{display:block;font-size:13px;color:var(--muted)}
+.mob-chev{margin-left:auto;color:var(--muted);flex-shrink:0}
+.mob-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:12px}
+.mob-g small{display:block;font-size:12px;color:var(--muted)}
+.mob-g b{font-size:15px;font-variant-numeric:tabular-nums}
+.mob-balk{height:6px;border-radius:3px;background:var(--surface2);margin-top:5px;overflow:hidden}
+.mob-balk i{display:block;height:100%;border-radius:3px}
+.mob-acties{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.mob-acties>a,.mob-acties>button{flex:1;min-height:44px;border:1px solid var(--border);border-radius:var(--radius-pill);background:transparent;display:inline-flex;align-items:center;justify-content:center;gap:7px;font:600 14px 'Instrument Sans',sans-serif;color:var(--accent-t);text-decoration:none;cursor:pointer}
+.mob-acties svg{width:16px;height:16px}
+.mob-groep{font-size:13px;font-weight:700;color:var(--muted);margin:16px 2px 8px}
+.mob-melding{display:flex;gap:12px;align-items:flex-start;margin-top:12px;cursor:pointer;border-radius:10px}
+.mob-datum{width:48px;flex-shrink:0;text-align:center;background:var(--surface2);border-radius:10px;padding:6px 0}
+.mob-datum b{display:block;font-size:18px}
+.mob-datum small{font-size:11px;color:var(--muted);text-transform:uppercase}
+.mob-mi{flex:1;min-width:0}
+.mob-mi b{font-size:15px}
+.mob-mi div{font-size:13px;color:var(--muted);margin-top:2px}
+.mob-uren{text-align:right;flex-shrink:0}
+.mob-uren b{font-size:16px}
+.mob-uren small{display:block;font-size:12px;color:var(--muted)}
+.mob-prijs{margin-left:auto;text-align:right;font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;flex-shrink:0}
+.mob-prijs small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.mob-mono{font-family:'Space Mono',monospace;font-size:13px}
+.mob-meer{padding:14px;text-align:center;color:var(--muted);font-size:13px}
+@media (max-width:768px){
+  /* Zoeken en "+" op één regel; cijfers als smalle scrollrij */
+  #med-zoek,#vz-zoek,#mat-zoek,#pr-zoek{flex:1 1 140px;max-width:none!important;min-width:0!important}
+  #med-kolom-toolbar-btn{display:none}
+  #content[data-pagina="medewerkers"] .stats-grid,#content[data-pagina="verzuim"] .stats-grid,#content[data-pagina="materialen"] .stats-grid,#content[data-pagina="pompregister"] .stats-grid{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  #content[data-pagina="medewerkers"] .stat-card,#content[data-pagina="verzuim"] .stat-card,#content[data-pagina="materialen"] .stat-card,#content[data-pagina="pompregister"] .stat-card{flex-shrink:0;white-space:nowrap}
+}
 /* Foto-lijst met bijschrift (werkbon-invulbon) */
 .wbx-foto-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px}
 .wbx-foto-item .wbx-ftop{display:flex;gap:10px;align-items:center;margin-bottom:8px}
@@ -9506,6 +9543,97 @@ function _dashWerkordersVul(){
 var _medFilter='alle', _medZoek='', _medSortKey='achternaam', _medSortDir=1, _medPage=1, _medPS=25;
 var _medKol = { functie:true, contract:true, verlofOp:true, verlofGp:true, resterend:true, overuren:false };
 
+// ── Telefoonkaarten voor medewerkers, verzuim, materialen en register (tot 768px) ──
+// Zelfde opbouw als werkorders, HR en klanten: één kaart per regel, één tik opent hetzelfde
+// detail als nu een tabelrij. De kaarten dragen de klasse van die rij (med-row, vz-rij,
+// mat-rij, pr-pomp-rij), zodat de bestaande klikafhandeling ongewijzigd werkt.
+var _MOB_CHEV = '<svg class="mob-chev" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
+function _mobBalk(pct, kl){ return '<div class="mob-balk"><i style="width:'+pct+'%;background:'+kl+'"></i></div>'; }
+// Verlof over: dagen van het jaartegoed, met uren. Rood alleen bij een negatief saldo, oranje onder 3 dagen.
+function _medVerlofOver(m){
+  var _stdB = (APP.teamInstellingen && APP.teamInstellingen.verlofBasis != null) ? APP.teamInstellingen.verlofBasis : 25;
+  var b = parseFloat(m.verlofBasis), basis = isNaN(b) ? _stdB : b;
+  var tegoed = Math.round(basis * (parseInt(m.contractUren) || 40) / 40 * 10) / 10;
+  var su = getVerlofSaldoUren(m), sd = Math.round(verlofUrenNaarDagen(su, m) * 10) / 10;
+  return { dagen:sd, tegoed:tegoed, uren:su,
+    kl: sd < 0 ? 'var(--red)' : sd < 3 ? 'var(--orange)' : 'var(--green)',
+    tk: sd < 0 ? 'var(--red-t)' : sd < 3 ? 'var(--orange-t)' : 'var(--text)',
+    pct: tegoed > 0 ? Math.max(0, Math.min(100, Math.round(sd / tegoed * 100))) : 0 };
+}
+function _medKaart(m){
+  var kl = medKleur(m), r = (APP.rollen||{})[m.rol], vo = _medVerlofOver(m);
+  var sub = [m.functie, r ? r.naam : m.rol].filter(Boolean).map(esc).join(' · ');
+  var h = '<div class="mob-kaart med-row" data-id="'+esc(m.id)+'" role="button" tabindex="0" aria-label="'+esc(m.voornaam+' '+m.achternaam)+'">';
+  h += '<div class="mob-kop"><div class="avatar" style="width:36px;height:36px;font-size:12px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
+  h += '<div style="min-width:0"><span class="mob-titel">'+esc(m.voornaam+' '+m.achternaam)+'</span><span class="mob-sub">'+(sub||'—')+(m.status==='inactief'?' · inactief':'')+'</span></div>'+_MOB_CHEV+'</div>';
+  h += '<div class="mob-g"><div><small>Contract</small><b>'+(parseInt(m.contractUren)||40)+' u/wk</b></div>';
+  h += '<div><small>Verlof over</small><b style="color:'+vo.tk+'">'+_nlAantal(vo.dagen)+' d</b> <small style="display:inline">van '+_nlAantal(vo.tegoed)+'</small>'+_mobBalk(vo.pct, vo.kl)+'</div></div>';
+  var tel = m.telefoon || m.mobiel || '';
+  if(tel || m.email){
+    h += '<div class="mob-acties">';
+    if(tel) h += '<a href="'+esc(_klTel(tel))+'" onclick="event.stopPropagation()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg>Bellen</a>';
+    if(m.email) h += '<a href="mailto:'+esc(m.email)+'" onclick="event.stopPropagation()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>Mailen</a>';
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+// Verzuim: eerst wie nu ziek is, dan wie hersteld is; per medewerker een kaart met zijn meldingen.
+function _vzMobiel(medIds, groepen, jaarStr, kanBeheren){
+  var mnd = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  var _vtmap = { ziek:'Ziek', geoorloofd:'Geoorloofd afwezig', ongeoorloofd:'Ongeoorloofd afwezig', gedeeltelijk:'Gedeeltelijk' };
+  if(!medIds.length) return '';   // de melding 'geen verzuim' staat er dan al
+  var ziek = [], hersteld = [];
+  medIds.forEach(function(mid){
+    var items = groepen[mid] || []; if(!items.length || !getMed(mid)) return;
+    (items.some(function(v){ return v.status==='actief' || v.status==='langdurig'; }) ? ziek : hersteld).push(mid);
+  });
+  function kaart(mid){
+    var m = getMed(mid), kl = medKleur(m), items = groepen[mid];
+    var u = items.reduce(function(s,v){ return s + verzuimUren(v, jaarStr+'-01-01', jaarStr+'-12-31'); }, 0);
+    var lang = items.some(function(v){ return v.status==='langdurig'; });
+    var h = '<div class="mob-kaart" style="cursor:default"><div class="mob-kop"><div class="avatar" style="width:36px;height:36px;font-size:12px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
+    h += '<div style="min-width:0"><span class="mob-titel">'+esc(m.voornaam+' '+m.achternaam)+'</span><span class="mob-sub">'+_nlAantal(u)+' uur verzuim in '+jaarStr+'</span></div>';
+    if(lang) h += '<span class="tag" style="margin-left:auto;background:rgba(245,158,11,.15);color:var(--orange-t)">langdurig</span>';
+    h += '</div>';
+    items.forEach(function(v){
+      var d = new Date((v.van||'')+'T00:00:00'), open = v.status==='actief' || v.status==='langdurig';
+      var duren = telWerkdagen(v.van, v.tot || null);
+      var onder = v.type==='gedeeltelijk' ? ((v.urenZiek ? String(v.urenZiek).replace('.',',')+' uur per dag ziek' : 'halve dagen ziek')+(v.tot ? '' : ' · nog ziek'))
+                : (v.tot ? fmtD(v.van)+' t/m '+fmtD(_vzDagVoor(v.tot)) : 'sinds '+fmtD(v.van)+' · nog ziek');
+      h += '<div class="mob-melding vz-rij" data-id="'+esc(v.id)+'" role="button" tabindex="0">';
+      h += '<div class="mob-datum"><b>'+(isNaN(d) ? '—' : d.getDate())+'</b><small>'+(isNaN(d) ? '' : mnd[d.getMonth()])+'</small></div>';
+      h += '<div class="mob-mi"><b>'+esc(_vtmap[v.type] || v.type || 'Ziek')+'</b><div>'+esc(onder)+'</div></div>';
+      h += '<div class="mob-uren"><b>'+_nlAantal(verzuimUren(v))+' u</b><small>'+duren+' werkdag'+(duren===1?'':'en')+'</small></div></div>';
+      if(open && kanBeheren) h += '<div class="mob-acties"><button type="button" class="vz-herstel-btn" data-id="'+esc(v.id)+'" style="color:var(--green-t)">'+ICO.check+' Hersteld melden</button></div>';
+    });
+    return h + '</div>';
+  }
+  var h = '';
+  if(ziek.length) h += '<div class="mob-groep">Ziek op dit moment</div>' + ziek.map(kaart).join('');
+  if(hersteld.length) h += '<div class="mob-groep">Hersteld</div>' + hersteld.map(kaart).join('');
+  return h || '<div style="text-align:center;padding:40px;color:var(--muted)">Geen verzuim gevonden</div>';
+}
+function _vzDagVoor(iso){ var d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()-1); return dateToStr(d); }
+function _matKaartHtml(a){
+  var h = '<div class="mob-kaart mat-rij" data-id="'+esc(a.id)+'" role="button" tabindex="0"><div class="mob-kop" style="align-items:flex-start">';
+  h += '<div style="min-width:0"><span class="mob-mono" style="font-weight:700">'+esc(a.code||'—')+'</span><div style="font-size:14px;margin-top:2px">'+esc(a.omschrijving||'')+'</div>';
+  if(a.zichtbaarWerkbon===false) h += '<span class="tag" style="margin-top:6px;background:var(--surface2);color:var(--muted)">niet op werkbon</span>';
+  h += '</div><div class="mob-prijs">'+_matEuro(a.stuksprijs)+'<small>per '+esc(a.eenheid||'stuk')+(a.btw!=null && a.btw!=='' ? ' · '+esc(a.btw)+'%' : '')+'</small></div></div></div>';
+  return h;
+}
+// Register: klant bovenaan (daar zoek je op), daaronder wat er staat.
+function _prKaart(p){
+  var kNm = '', kPlaats = '';
+  if(p.debId){ var d = APP.debiteuren.find(function(x){ return String(x.id)===String(p.debId); }); if(d){ kNm = debNaam(d); kPlaats = d.plaats || ''; } }
+  if(!kNm){ kNm = p.klantnaam || ''; kPlaats = p.klantPlaats || p.plaats || ''; }
+  var besturing = [p.besturing, p.fabrikant].filter(Boolean).map(esc).join(' · ');
+  var h = '<div class="mob-kaart pr-pomp-rij" data-id="'+esc(p.id)+'" role="button" tabindex="0">';
+  h += '<div class="mob-kop" style="align-items:flex-start"><div style="min-width:0"><span class="mob-titel">'+esc(kNm || 'Geen klant')+'</span>'+(kPlaats ? '<span class="mob-sub">'+esc(kPlaats)+'</span>' : '')+'</div>'+_MOB_CHEV+'</div>';
+  h += '<div class="mob-g"><div><small>'+esc(registerItemEnkel(true))+'</small><b style="font-size:14px">'+esc(p.type||'—')+'</b><div class="mob-mono" style="font-size:12px;color:var(--muted);margin-top:1px">'+esc(p.serienummer||'—')+'</div></div>';
+  h += '<div><small>Besturing · fabrikant</small><b style="font-size:14px">'+(besturing||'—')+'</b></div></div></div>';
+  return h;
+}
+
 function renderMedewerkers() {
   try {
   var rol = APP.rollen;
@@ -9580,6 +9708,10 @@ function renderMedewerkers() {
   });
   h+='</div>';
 
+  if(_hrMobiel()){
+    h+='<div class="mob-lijst">'+(slice.length ? slice.map(_medKaart).join('') : '<div style="text-align:center;padding:40px;color:var(--muted)">Geen medewerkers gevonden</div>')+'</div>';
+    h+=pgHtml(totaal,_medPage,_medPS,'_medPage');
+  } else {
   h+='<div class="card" style="padding:0"><div class="table-wrap"><table class="med-tabel"><thead><tr>';
   // Kolommen definitie
   var medKolDef = [
@@ -9588,7 +9720,7 @@ function renderMedewerkers() {
     { k:'contract', l:'Contract',          d:true,      sort:'contractType' },
     { k:'verlofOp', l:'Verlof opgenomen',  d:true,      sort:'__verlofOp' },
     { k:'verlofGp', l:'Verlof gepland',    d:true,      sort:'__verlofGp' },
-    { k:'resterend',l:'Resterend',         d:true,      sort:'__resterend' },
+    { k:'resterend',l:'Verlof over',         d:true,      sort:'__resterend' },
     { k:'overuren', l:'Overuren',          d:false,     sort:'__ouSaldo' },
     { k:'status',   l:'Status',            always:true, sort:'status' },
   ];
@@ -9667,11 +9799,13 @@ function renderMedewerkers() {
 
     // Resterend
     if (_medKol.resterend !== false) {
-      var restKleur = resterend <= 3 ? 'var(--red)' : resterend <= 7 ? 'var(--orange)' : 'var(--green)';
+      // Eerst wat er over is in dagen, van hoeveel, met de uren eronder. Rood alleen bij een
+      // negatief saldo (stond rood bij alles onder 3 dagen, ook bij 0 aan het begin van het jaar).
+      var _vo = _medVerlofOver(m);
       h+='<td data-col="resterend">';
-      h+='<div style="font-weight:700;color:'+_klTekst(restKleur)+'">'+String(saldoUren).replace('.',',')+'u</div>';
-      h+='<div style="font-size:11px;color:var(--muted)">'+String(resterend).replace('.',',')+' dg \u00b7 tegoed: '+jaarTegoed+'d</div>';
-      h+='<div class="progress" style="width:80px;margin-top:3px" title="'+pctRest+'% van jaarTegoed resterend"><div class="progress-fill" style="width:'+pctRest+'%;background:'+balkKleur+'"></div></div>';
+      h+='<div style="font-weight:700;color:'+_vo.tk+'">'+_nlAantal(_vo.dagen)+' dagen <span style="font-size:12px;font-weight:400;color:var(--muted)">van '+_nlAantal(_vo.tegoed)+'</span></div>';
+      h+='<div style="font-size:12px;color:var(--muted)">'+_nlAantal(_vo.uren)+' uur</div>';
+      h+='<div class="progress" style="width:90px;margin-top:4px"><div class="progress-fill" style="width:'+_vo.pct+'%;background:'+_vo.kl+'"></div></div>';
       h+='</td>';
     }
 
@@ -9694,6 +9828,7 @@ function renderMedewerkers() {
   h+='</tbody></table></div>';
   h+=pgHtml(totaal,_medPage,_medPS,'_medPage');
   h+='</div>';
+  }
   el.innerHTML=h;
 
   // Events via delegation - geen inline onclick!
@@ -19008,14 +19143,32 @@ function _doSaveOpdracht(id, datum, type) {
   // (adres, tijd, of monteurbezetting). Dan berekent de planning weer live tot de dag
   // opnieuw via de slimme dagplanning is berekend. Bij ongewijzigde velden blijven de
   // reistijden staan (ze komen via Object.assign uit `bestaand` mee).
-  if(!isNew && bestaand.reistijden){
+  if(!isNew){
     var _routeGewijzigd =
       (String(bestaand.adres||'') !== String(data.adres||'')) ||
       (String(bestaand.postcode||'') !== String(data.postcode||'')) ||
       (String(bestaand.tijdVan||'') !== String(data.tijdVan||'')) ||
       (String(bestaand.tijdTot||'') !== String(data.tijdTot||'')) ||
       ((bestaand.monteurIds||[]).slice().sort().join(',') !== (data.monteurIds||[]).slice().sort().join(','));
-    if(_routeGewijzigd){ data.reistijden = null; }
+    if(_routeGewijzigd){
+      if(bestaand.reistijden) data.reistijden = null;
+      // De opgeslagen reistijd van een opdracht is die 'van de vorige'. Wijzigt het adres (of de
+      // tijd of monteur) van deze opdracht, dan klopt die van de opdrachten erna op die dag ook
+      // niet meer: anders toont de planning daar nog de oude minuten en kilometers. De volgorde
+      // en tijden blijven staan; de planning rekent tot de volgende dagplanning live.
+      var _rtMids = (bestaand.monteurIds||[bestaand.monteurId]).concat(data.monteurIds||[]).filter(Boolean).map(String);
+      var _rtDagen = [bestaand.datum, data.datum].filter(Boolean);
+      var _rtVanaf = [bestaand.tijdVan||'', data.tijdVan||''].sort()[0];
+      APP.opdrachten.forEach(function(x){
+        if(String(x.id)===String(data.id) || !x.reistijden || typeof x.reistijden!=='object') return;
+        if(_rtDagen.indexOf(x.datum) < 0 || String(x.tijdVan||'') < _rtVanaf) return;
+        _rtMids.forEach(function(mid){
+          if(!x.reistijden[mid]) return;
+          delete x.reistijden[mid];
+          FB.ref(dbPath('opdrachten', x.id, 'reistijden', mid)).remove().catch(function(e){ log('WARN','PLANNING','Reistijd wissen mislukt: '+(e&&e.message||e)); });
+        });
+      });
+    }
   }
 
   if (isNew) APP.opdrachten.push(data);
@@ -20569,7 +20722,8 @@ function renderVerzuim() {
     h += '<div style="text-align:center;padding:40px;color:var(--muted)">Geen verzuim gevonden</div>';
   }
 
-  vzMedIds.forEach(function(mid){
+  if(_hrMobiel()) h += _vzMobiel(vzMedIds, vzMedGroepen, jaarStr, kanBeheren);
+  else vzMedIds.forEach(function(mid){
     var m = getMed(mid);
     if(!m) return;
     var items = vzMedGroepen[mid];
@@ -23512,9 +23666,9 @@ function _matRijenHtml(gesorteerd, kanSchrijven){
   var zichtbaar = gesorteerd.slice(0, _MAT_LIMIET);
   var h = zichtbaar.map(function(a){ return _matRijHtml(a, kanSchrijven); }).join('');
   if(totaal > _MAT_LIMIET){
-    h += '<tr class="mat-meer-rij"><td colspan="9" style="padding:14px;text-align:center;color:var(--muted);font-size:12px;background:var(--surface2)">'
-      + 'Eerste ' + _MAT_LIMIET + ' van ' + totaal + ' artikelen. Zoek op code of omschrijving om te verfijnen.'
-      + '</td></tr>';
+    var _meer = 'Eerste ' + _MAT_LIMIET + ' van ' + totaal + ' artikelen. Zoek op code of omschrijving om te verfijnen.';
+    h += _hrMobiel() ? '<div class="mob-meer">'+_meer+'</div>'
+      : '<tr class="mat-meer-rij"><td colspan="9" style="padding:14px;text-align:center;color:var(--muted);font-size:12px;background:var(--surface2)">'+_meer+'</td></tr>';
   }
   return h;
 }
@@ -23586,6 +23740,9 @@ function renderMaterialen() {
         var pijl = actief ? (_matSortDir===1?' ▲':' ▼') : '';
         return '<th class="mat-sortkop'+(extraClass?' '+extraClass:'')+'" data-key="'+key+'" style="cursor:pointer;user-select:none'+(align?';text-align:'+align:'')+'">'+label+'<span style="color:var(--accent-t);font-size:12px">'+pijl+'</span></th>';
       }
+      if(_hrMobiel()){
+        h += '<div class="mob-lijst" id="mat-tbody">'+_matRijenHtml(gesorteerd, kanSchrijven)+'</div>';
+      } else {
       h += '<div class="card" style="padding:0;overflow:hidden">';
       h += '<div class="table-wrap"><table><thead><tr>';
       if(kanSchrijven) h += '<th class="hide-mobile" style="width:36px;text-align:center"><input type="checkbox" id="mat-check-all" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer"></th>';
@@ -23600,6 +23757,7 @@ function renderMaterialen() {
       h += '</tr></thead><tbody id="mat-tbody">';
       h += _matRijenHtml(gesorteerd, kanSchrijven);
       h += '</tbody></table></div></div>';
+      }
     }
     el.innerHTML = h;
 
@@ -23674,6 +23832,7 @@ function _matToonDocumenten(artikelId){
 
 // Bouwt één tabelrij voor een artikel.
 function _matRijHtml(a, kanSchrijven){
+  if(_hrMobiel()) return _matKaartHtml(a);
   if(kanSchrijven===undefined) kanSchrijven = isAdmin()||magSchrijven('materialen');
   var gesel = !!_matSelectie[a.id];
   var h = '<tr class="mat-rij" data-id="'+esc(a.id)+'" style="cursor:pointer'+(gesel?';background:rgba(74,108,247,.06)':'')+'">';
@@ -24908,6 +25067,9 @@ function renderPompLijst() {
       kanSchrijven ? '+ '+registerItemEnkel(true)+' registreren' : null, 'pr-add-empty'
     );
   } else {
+    if(_hrMobiel()){
+      h += '<div class="mob-lijst">'+pagina.map(_prKaart).join('')+'</div>';
+    } else {
     h += '<div class="card" style="padding:0"><div class="table-wrap"><table class="pr-pomp-tabel"><thead><tr>';
     _prKolom.forEach(function(c){
       if(!c.aan) return;
@@ -24963,6 +25125,7 @@ function renderPompLijst() {
       h += '</td></tr>';
     });
     h += '</tbody></table></div></div>';
+    }
 
     // Paginering
     if(paginas > 1) {
@@ -30134,21 +30297,8 @@ function renderRapOpdrachten(el) {
     return { mn: mn, totaal: opMnd.length, perType: perType };
   });
 
-  // Staafdiagrammen onder elkaar — volle breedte
-  var maxMnd = Math.max.apply(null, mndData.map(function(d){return d.totaal;})) || 1;
-  h += staafDiagram('Aantal opdrachten per maand — '+_rapJaar, mndData, maxMnd,
-    function(d){ return d.totaal ? String(d.totaal) : ''; },
-    function(d){
-      if(!d.totaal) return [];
-      var barH = Math.max(4, Math.round(d.totaal/maxMnd*120));
-      var afgH = d.afg ? Math.round(d.afg/d.totaal*barH) : 0;
-      var totH = barH - afgH;
-      var r = [];
-      if(totH > 0) r.push({h:totH, kl:'rgba(74,108,247,0.35)', tip:d.mn+' — Open: '+(d.totaal-d.afg)});
-      if(afgH > 0) r.push({h:afgH, kl:'#10b981', tip:d.mn+' — Afgehandeld: '+d.afg});
-      return r;
-    },
-    [{kl:'rgba(74,108,247,0.35)',l:'Open/gepland'},{kl:'#10b981',l:'Afgehandeld'}]);
+  // 'Aantal opdrachten per maand' is weggehaald: de grafiek per type toont dezelfde totalen,
+  // uitgesplitst; open en afgehandeld per maand staan in de tabel 'Per maand' eronder.
 
   // Staafdiagram per type per maand
   var maxTypeMnd = Math.max.apply(null, mndTypeData.map(function(d){return d.totaal;})) || 1;
