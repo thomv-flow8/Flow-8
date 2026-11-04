@@ -564,6 +564,13 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       Overuren/Declaratie/Verzuim. Rijknoppen `.btn-rij` 32px (Hersteld, Langdurig, + Verzuim, Week, + Opdracht).
       Verzuim: vaste kolombreedtes per groep. Medewerkers: verlof in dagen met uren eronder, potlood weg (rijklik
       opent), dubbele lege actiecel weg. Ook: pagina bouwt opnieuw op bij de grens van 768px (gepusht).
+- [x] **Werkbonnen en werkorders: werkbalk** (4 november 2026) — volgens `werkbon-werkorder-preview.html` (lokaal).
+      Werkbonnen: zoekveld (bonnummer, klant, adres, postcode, monteur) en statusfilters met aantallen (Alle ·
+      Klaargezet · Opgehaald · Te laat; "Klaargezet" niet voor wie alleen eigen bonnen ziet). Filteren gebeurt in
+      de geladen lijst (`_wbFilterToepassen`), zonder nieuwe Firestore-reads. Desktop: Archief en + Werkbon met
+      tekst, bonnummer op de kaart; telefoon: ronde icoonknoppen, filters als schuifrij, geen bonnummer.
+      Werkorders: + Werkorder in de werkbalk onder de tabbladen (stond los erboven), rijknoppen 32px. Het potlood
+      bleef: het is de enige plek om klant, deadline en details te wijzigen.
 - [ ] **Dagplanning: aannames zichtbaar** — einde werkdag staat vast op 17:00, starttijd alleen 06:00–10:00,
       opdracht zonder duur telt als 1u30 zonder dat als schatting te tonen.
 - [ ] **Dagplanning: toegankelijkheid** — volgorde alleen met slepen (geen toetsenbord); tijdsturingsknop

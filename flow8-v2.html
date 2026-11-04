@@ -1324,6 +1324,24 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbx-sign-bar{display:flex;gap:8px;padding:8px;border-top:1px solid var(--border)}
 /* Werkbonnen-lijst */
 .wbl-pagina{padding:16px;max-width:792px}
+.wbl-balk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.wbl-balk #wb-zoek{flex:1 1 160px;min-width:0}
+.wbl-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.wbl-filters:empty{display:none}
+.wbl-chip{min-height:32px;padding:0 12px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.wbl-chip span{color:var(--text);font-variant-numeric:tabular-nums}
+.wbl-chip.aan{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}
+.wbl-chip.aan span{color:#fff}
+.wbl-chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (pointer:coarse){.wbl-chip{min-height:40px}}
+.wbl-nr{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)}
+.wbl-geen{text-align:center;padding:40px 16px;color:var(--muted);font-size:14px}
+@media (max-width:768px){
+  /* Telefoon: filters als schuifrij; bonnummer is voor kantoor, de kaart blijft compact */
+  .wbl-filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .wbl-chip{flex-shrink:0}
+  .wbl-nr{display:none}
+}
 .wbl-ikn{width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius);border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer}
 .wbl-ikn.pri{border:none;background:var(--accent-knop);color:#fff}
 @media (pointer:coarse){.wbl-ikn{width:44px;height:44px}}
@@ -27494,6 +27512,25 @@ function _wbAfrondDatum(b){
   return null;
 }
 
+// Zoekterm en statusfilter toepassen op de al geladen werkbonnenlijst: kaarten verbergen die
+// niet passen, en dagkoppen waaronder niets overblijft.
+function _wbFilterToepassen(){
+  var lijst = document.getElementById('wb-lijst'); if(!lijst) return;
+  var woorden = _gzNorm(window._wbZoek||'').split(/\s+/).filter(Boolean), f = window._wbFilterSt||'';
+  var groep = null, inGroep = 0, totaal = 0;
+  function sluit(){ if(groep) groep.style.display = inGroep ? '' : 'none'; }
+  Array.prototype.forEach.call(lijst.children, function(el){
+    if(el.classList.contains('wbl-groep')){ sluit(); groep = el; inGroep = 0; return; }
+    var k = el.classList.contains('wbl-kaart') ? el : el.querySelector('.wbl-kaart');
+    if(!k) return;
+    var zoek = k.dataset.zoek || '';
+    var ok = (!f || k.dataset.f === f) && woorden.every(function(w){ return zoek.indexOf(w) >= 0; });
+    el.style.display = ok ? '' : 'none';
+    if(ok){ inGroep++; totaal++; }
+  });
+  sluit();
+  var leeg = document.getElementById('wb-geen'); if(leeg) leeg.hidden = totaal > 0;
+}
 function renderWerkbonnen() {
   var el = document.getElementById('content');
   var statusLbl = { klaargezet:'Klaargezet', opgehaald:'Opgehaald', afgehandeld:'Afgehandeld', verwerkt:'Verwerkt' };
@@ -27505,31 +27542,48 @@ function renderWerkbonnen() {
   // bonnen geldt — dezelfde verdeling als de Firestore-rules (rch.werkbonnen 's' of 'e').
   var _magVerwijderen = isAdmin() || magSchrijven('werkbonnen') || magEigen('werkbonnen');
 
-  var _topRechts;
-  if(isHist){
-    _topRechts = '<span style="font-size:12px;color:var(--muted);align-self:center;margin-right:2px">laatste '+WB_HIST_DAGEN+' dagen</span>';
-  } else {
-    _topRechts = ''
-      + '<button type="button" id="wb-archief" class="wbl-ikn" title="Archief (afgehandeld)" aria-label="Archief: afgehandelde werkbonnen">'
-      + '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9"/><line x1="10" y1="13" x2="14" y2="13"/></svg></button>'
-      + '<button type="button" id="wb-nieuw" class="wbl-ikn pri" title="Nieuwe werkbon" aria-label="Nieuwe werkbon">'
-      + '<svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>';
+  // Werkbalk: zoekveld links, rechts Archief en + Werkbon. Desktop met tekst, telefoon als
+  // ronde iconen van 44px. Zoeken en filteren gebeuren in de al geladen lijst (_wbFilterToepassen),
+  // zonder bij elke toetsaanslag opnieuw uit Firestore te halen.
+  var _mob = _hrMobiel();
+  var _icoArch = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9"/><line x1="10" y1="13" x2="14" y2="13"/></svg>';
+  var _icoPlus = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  var _knoppen = '';
+  if(!isHist){
+    _knoppen = _mob
+      ? '<button type="button" id="wb-archief" class="wbl-ikn" title="Archief (afgehandeld)" aria-label="Archief: afgehandelde werkbonnen">'+_icoArch+'</button>'
+        + '<button type="button" id="wb-nieuw" class="wbl-ikn pri" title="Nieuwe werkbon" aria-label="Nieuwe werkbon">'+_icoPlus+'</button>'
+      : '<button type="button" id="wb-archief" class="btn btn-ghost btn-sm" title="Afgehandelde werkbonnen">'+_icoArch+' Archief</button>'
+        + '<button type="button" id="wb-nieuw" class="btn btn-primary btn-sm">'+_icoPlus+' Werkbon</button>';
   }
   var _titel = isHist
-    ? '<div style="display:flex;align-items:center;gap:8px">'
+    ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">'
       + '<button type="button" id="wb-archief-terug" class="wbl-ikn" title="Terug" aria-label="Terug naar openstaande werkbonnen">'
       + '<svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>'
-      + '<span style="font-weight:700;font-size:18px">Archief</span></div>'
+      + '<span style="font-weight:700;font-size:18px">Archief</span>'
+      + '<span style="font-size:12px;color:var(--muted);margin-left:auto">laatste '+WB_HIST_DAGEN+' dagen</span></div>'
     : '';
 
   el.innerHTML =
     '<div class="wbl-pagina">'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">'+
     _titel+
-    '<div style="display:flex;align-items:center;gap:8px;margin-left:auto">'+_topRechts+'</div>'+
+    '<div class="werkbalk wbl-balk">'+
+    '<input type="search" class="input" id="wb-zoek" placeholder="Zoek bon, klant of adres…" value="'+esc(safeZoek(window._wbZoek||''))+'" autocomplete="off" aria-label="Werkbonnen zoeken">'+
+    '<div style="flex:1"></div>'+_knoppen+
     '</div>'+
+    '<div id="wb-filters" class="wbl-filters"></div>'+
     '<div id="wb-lijst"><div style="text-align:center;padding:40px;color:var(--muted)">Werkbonnen laden…</div></div>'+
     '</div>';
+
+  var _wbZoekEl = document.getElementById('wb-zoek');
+  if(_wbZoekEl) _wbZoekEl.addEventListener('input', function(){ window._wbZoek = _wbZoekEl.value; _wbFilterToepassen(); });
+  var _wbFiltEl = document.getElementById('wb-filters');
+  if(_wbFiltEl) _wbFiltEl.addEventListener('click', function(e){
+    var c = e.target.closest('[data-wbf]'); if(!c) return;
+    window._wbFilterSt = c.dataset.wbf;
+    _wbFiltEl.querySelectorAll('[data-wbf]').forEach(function(x){ var aan = x === c; x.classList.toggle('aan', aan); x.setAttribute('aria-pressed', aan ? 'true' : 'false'); });
+    _wbFilterToepassen();
+  });
 
   var archiefBtn = document.getElementById('wb-archief');
   if(archiefBtn) archiefBtn.addEventListener('click', function(){ window._wbTab='afgehandeld'; renderWerkbonnen(); });
@@ -27596,6 +27650,7 @@ function renderWerkbonnen() {
     });
 
     if(!zichtbaar.length){
+      if(_wbFiltEl) _wbFiltEl.innerHTML = '';
       lijst.innerHTML = '<div style="text-align:center;padding:48px 16px;color:var(--muted)">'+
         (ICO.clipboard||'')+'<div style="margin-top:12px">'+(isHist?('Geen afgehandelde werkbonnen in de laatste '+WB_HIST_DAGEN+' dagen'):'Geen openstaande werkbonnen')+'</div>'+
         (isHist?'<div style="margin-top:6px;font-size:12px">Oudere bonnen vind je straks terug bij de debiteur.</div>':'')+'</div>';
@@ -27634,6 +27689,25 @@ function renderWerkbonnen() {
       return isHist ? b.localeCompare(a) : a.localeCompare(b);
     });
 
+    // Filtersleutel per bon: te laat gaat voor op de status. Aantallen voor de chips.
+    function _wbFsleutel(b){ return (b.status==='klaargezet' && _isLaat(b.datum)) ? 'telaat' : b.status; }
+    if(_wbFiltEl){
+      if(isHist){ _wbFiltEl.innerHTML = ''; window._wbFilterSt = ''; }
+      else {
+        var _tel = { klaargezet:0, opgehaald:0, telaat:0 };
+        zichtbaar.forEach(function(b){ var k = _wbFsleutel(b); if(_tel[k] != null) _tel[k]++; });
+        // Wie alleen eigen bonnen ziet: "Klaargezet" zegt dan niets (gewone stand), dus weg.
+        var _chips = [['', 'Alle', zichtbaar.length]];
+        if(!_wbAlleenEigen) _chips.push(['klaargezet', 'Klaargezet', _tel.klaargezet]);
+        _chips.push(['opgehaald', 'Opgehaald', _tel.opgehaald], ['telaat', 'Te laat', _tel.telaat]);
+        if(!_chips.some(function(c){ return c[0] === (window._wbFilterSt||''); })) window._wbFilterSt = '';
+        _wbFiltEl.innerHTML = _chips.map(function(c){
+          var aan = (window._wbFilterSt||'') === c[0];
+          return '<button type="button" class="wbl-chip'+(aan?' aan':'')+'" data-wbf="'+c[0]+'" aria-pressed="'+(aan?'true':'false')+'">'+c[1]+' <span>'+c[2]+'</span></button>';
+        }).join('');
+      }
+    }
+
     var h = '';
     dagVolgorde.forEach(function(d){
       h += groepKop(d);
@@ -27656,7 +27730,8 @@ function renderWerkbonnen() {
         // oogopslag ziet om wat voor werk het gaat. Status staat in het label rechts,
         // dezelfde rolverdeling als op de planningkaart: rand = type, badge = status.
         var _otB = _otVanType(b.typeWerk);
-        h += '<div class="wbl-kaart" data-id="'+esc(b.id)+'" role="button" tabindex="0" aria-label="'+esc(_aria)+'"'
+        var _zoekMont = (Array.isArray(b.monteurIds) ? b.monteurIds : (b.monteurId?[b.monteurId]:[])).map(function(mid){ var mi = (typeof _wbMedInfo==='function') ? _wbMedInfo(mid) : null; return mi && mi.naam ? mi.naam : ''; }).join(' ');
+        h += '<div class="wbl-kaart" data-id="'+esc(b.id)+'" data-f="'+esc(_wbFsleutel(b))+'" data-zoek="'+esc(_gzNorm([b.bonnummer, b.klantNaam, adr, b.werkAdres && b.werkAdres.postcode, String((b.werkAdres && b.werkAdres.postcode)||'').replace(/\s+/g,''), _zoekMont].join(' ')))+'" role="button" tabindex="0" aria-label="'+esc(_aria)+'"'
            + (_kanVerwijderen?' aria-keyshortcuts="Delete"':'')+' style="border-left:4px solid '+_otB.kleur+'">';
         // Tijdkolom
         h += '<div class="wbl-tijd">';
@@ -27673,6 +27748,7 @@ function renderWerkbonnen() {
         if(adr) h += '<div class="wbl-adres">'+esc(adr)+'</div>';
         h += '<div class="wbl-meta"><span class="wbl-type" style="color:'+_klTekst(_otB.kleur)+'">'+(b.typeWerk?getOtSvg(_otB.icon):'')+esc(_otB.label)+'</span>';
         if(objAantal>0) h += '<span class="wbl-obj">'+(ICO.pin||'')+' '+objAantal+' object'+(objAantal>1?'en':'')+'</span>';
+        if(b.bonnummer) h += '<span class="wbl-nr">'+esc(b.bonnummer)+'</span>';
         // Toegewezen monteur(s) — alleen tonen voor wie meer dan zijn eigen bonnen ziet;
         // voor een monteur die alleen eigen werk ziet is het overbodige ruis. (M10)
         if(!_wbAlleenEigen){
@@ -27695,7 +27771,9 @@ function renderWerkbonnen() {
         if(_kanVerwijderen) h += '</div>';   // sluit .wbl-swipe-wrap
       });
     });
+    h += '<div id="wb-geen" class="wbl-geen" hidden>Geen werkbonnen gevonden.</div>';
     lijst.innerHTML = h;
+    _wbFilterToepassen();
 
     // Eén set luisteraars op de lijst zelf (verdwijnt mee bij de volgende render), in plaats
     // van per kaart en op window — die stapelden zich bij elke render op.
@@ -35443,11 +35521,6 @@ function renderWerkorders() {
 
   var h = '';
   // Kop + nieuwe-knop
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap">';
-
-  if(kanBeheren) h += '<button class="btn btn-primary btn-sm" id="wo-nieuw-btn" style="margin-left:auto"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:5px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span style="vertical-align:middle">Nieuwe werkorder</span></button>';
-  h += '</div>';
-
   // Tabs: de werkorderlijst en de bedrijfsbrede werkdocumenten-map
   h += '<div class="tabs" style="margin-bottom:18px;border-bottom:2px solid var(--border)">';
   h += '<div class="tab'+(_woPaginaTab==='docs'?'':' active')+'" id="wo-tab-lijst">Werkorders</div>';
@@ -35511,9 +35584,11 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
     'archief':    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg>'
   };
   // ── Toolbar: zoekveld, boven de statkaarten net als in de andere modules ──
-  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h += '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h += '<input class="input" id="wo-zoek" placeholder="Zoek op nummer, klant of details\u2026" value="'+esc(safeZoek(_woZoek))+'" style="max-width:260px">';
   h += '<div style="flex:1"></div>';
+  // Hoort bij de lijst (stond los boven de tabbladen).
+  if(kanBeheren) h += '<button type="button" class="btn btn-primary btn-sm" id="wo-nieuw-btn"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Werkorder</button>';
   h += '</div>';
 
   h += '<div class="stats-grid" style="margin-bottom:16px">';
@@ -35635,9 +35710,9 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
       if(kanBeheren){
         h += '<td data-col="acties" style="padding:11px;white-space:nowrap;text-align:right">';
         if(inArchief){
-          h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-terug" data-id="'+esc(w.id)+'" title="Terughalen uit archief" aria-label="Terughalen uit archief" style="padding:6px 9px">'+ICO.undo+'</button>';
+          h += '<button type="button" class="btn btn-ghost btn-sm btn-icoon wo-rij-terug" data-id="'+esc(w.id)+'" title="Terughalen uit archief" aria-label="Terughalen uit archief">'+ICO.undo+'</button>';
         } else {
-          h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-prio" data-id="'+esc(w.id)+'" title="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" aria-label="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" style="padding:6px 9px'+(isHoog?';color:var(--red);border-color:rgba(239,68,68,.4)':'')+'">'+ICO.flag+'</button>';
+          h += '<button type="button" class="btn btn-ghost btn-sm btn-icoon wo-rij-prio" data-id="'+esc(w.id)+'" title="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" aria-label="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'"'+(isHoog?' style="color:var(--red-t);border-color:rgba(239,68,68,.4)"':'')+'>'+ICO.flag+'</button>';
         }
         h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-edit btn-icoon" data-id="'+esc(w.id)+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button>';
         h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-del btn-wis" data-id="'+esc(w.id)+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button></td>';
@@ -35692,6 +35767,8 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
     });
   });
   // Rij-klik naar detail
+  var _woNieuw = wrap.querySelector('#wo-nieuw-btn');
+  if(_woNieuw) _woNieuw.addEventListener('click', _woKiesTypeEnMaak);
   wrap.querySelectorAll('.wo-rij').forEach(function(r){
     r.addEventListener('click', function(){ _woOpenDetail(r.dataset.id); });
   });
