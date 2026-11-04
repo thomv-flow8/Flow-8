@@ -556,6 +556,14 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       "Toon alle", pijltjes/Enter/Esc; op de telefoon schermvullend met Annuleer en filterchips. Een opdracht
       openen springt de planning naar die dag. Planning: zelfde zoekregels, en bij een zoekterm het blok
       "Buiten <periode>" (`_planBuitenHtml`) dat naar de dag springt en de opdracht opent.
+- [x] **Desktop: één werkbalk en gelijke rijen** (4 november 2026) — volgens `desktop-werkbalk-preview.html` (lokaal).
+      `.werkbalk` in 12 modules: zoekveld en knoppen 38px, zoekveld 300px links, periode ernaast (`_periodeNav`,
+      SVG-pijlen; op de telefoon blijft de jaarkeuze op een eigen regel), rechts Kolommen · Export · ⋯ · hoofdknop.
+      Menu "⋯" (`_meerMenu`) voor Import/Contracten (debiteuren), Jaarplanning/Datums invoeren (serviceklanten),
+      Import (materialen), Jaar bijschrijven (verlof). Korte hoofdknoppen: + Medewerker/Debiteur/Pomp/Verlof/
+      Overuren/Declaratie/Verzuim. Rijknoppen `.btn-rij` 32px (Hersteld, Langdurig, + Verzuim, Week, + Opdracht).
+      Verzuim: vaste kolombreedtes per groep. Medewerkers: verlof in dagen met uren eronder, potlood weg (rijklik
+      opent), dubbele lege actiecel weg. Ook: pagina bouwt opnieuw op bij de grens van 768px (gepusht).
 - [ ] **Dagplanning: aannames zichtbaar** — einde werkdag staat vast op 17:00, starttijd alleen 06:00–10:00,
       opdracht zonder duur telt als 1u30 zonder dat als schatting te tonen.
 - [ ] **Dagplanning: toegankelijkheid** — volgorde alleen met slepen (geen toetsenbord); tijdsturingsknop

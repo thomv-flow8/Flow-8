@@ -1512,6 +1512,28 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .mob-meer{padding:14px;text-align:center;color:var(--muted);font-size:13px}
 .sd-tel{color:var(--accent-t);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;min-height:28px}
 @media (pointer:coarse){.sd-tel{min-height:44px}}
+/* Werkbalk: zelfde opbouw in elke module (desktop). Telefoon houdt zijn eigen indeling. */
+.periode-nav{display:inline-flex;align-items:center;gap:2px;min-height:38px;border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface);padding:0 3px;flex-shrink:0}
+.periode-nav b{font-size:14px;min-width:56px;padding:0 4px;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.periode-nav button{width:32px;height:32px;border:none;border-radius:50%;background:none;color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.periode-nav button:hover{background:var(--surface2)}
+.periode-nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+@media (pointer:coarse){.periode-nav button{width:44px;height:44px}}
+.meer-wrap{position:relative;display:inline-flex}
+.meer-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 12px 30px rgba(0,0,0,.18);padding:6px;display:flex;flex-direction:column}
+.meer-menu[hidden]{display:none}
+.meer-item{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 10px;border:none;border-radius:8px;background:none;font:inherit;font-size:13.5px;color:var(--text);text-align:left;cursor:pointer;white-space:nowrap}
+.meer-item:hover,.meer-item:focus-visible{background:var(--surface2);outline:none}
+.meer-item svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}
+.btn.btn-rij{min-height:32px;padding:0 12px;font-size:12.5px;gap:6px}
+.btn-rij svg{width:14px;height:14px}
+@media (min-width:769px){
+  .werkbalk>input.input{height:38px;padding-top:0;padding-bottom:0;flex:0 1 300px!important;width:300px;max-width:300px!important;min-width:0!important}
+  .werkbalk select.input{height:38px;padding-top:0;padding-bottom:0}
+  .werkbalk .btn{min-height:38px;padding:0 14px;font-size:13.5px}
+  .werkbalk .meer-knop{width:38px;padding:0}
+  .werkbalk .plan-view-btn{min-height:30px}
+}
 /* Zoeken (bovenin) */
 .gz-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:60px 16px 16px}
 .gz-paneel{max-width:620px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100dvh - 90px)}
@@ -1616,7 +1638,6 @@ button.sd-m-dag{cursor:pointer}
   /* Ruimte rondom: anders snijdt de scrollrij de rand (outline) van de actieve tegel af */
   .km-pils{flex:1 1 100%;min-width:0;flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;padding:4px}
   .km-pils .km-pil{flex-shrink:0;white-space:nowrap;line-height:24px}
-  #mail-prev,#mail-next{min-width:44px;min-height:44px}
 }
 /* Kaartoverzicht op de telefoon */
 .loc-m-balk{display:flex;gap:8px;align-items:center;margin-bottom:10px}
@@ -10067,12 +10088,12 @@ function renderMedewerkers() {
   }).length;
 
   var h='';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h+='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h+='<input class="input" id="med-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_medZoek))+'" style="max-width:260px">';
   h+='<div style="flex:1"></div>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="med-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="med-export-btn">'+ICO.download+' Export</button>';
-  if (magSchrijven('medewerkers')) h+='<button class="btn btn-primary btn-sm" id="med-add-btn">+ Toevoegen</button>';
+  if (magSchrijven('medewerkers')) h+='<button class="btn btn-primary btn-sm" id="med-add-btn">+ Medewerker</button>';
   h+='</div>';
 
   h+='<div class="stats-grid" style="margin-bottom:16px">';
@@ -10112,7 +10133,7 @@ function renderMedewerkers() {
     var _act = c.sort && _medSortKey===c.sort; var sortIco = c.sort ? sortArrow(_act,_medSortDir) : '';
     h += '<th data-col="'+c.k+'"'+(c.sort?' class="'+sortCls(_act)+'" style="cursor:pointer" data-sort="'+c.sort+'"':'')+'>'+c.l+sortIco+'</th>';
   });
-  if (magSchrijven('medewerkers')) h+='<th data-col="_acties" style="width:70px"></th>';
+  if (magSchrijven('medewerkers')) h+='<th data-col="_acties" style="width:56px"></th>';
   h+='</tr></thead><tbody>';
 
   if (!slice.length) h+='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)">Geen medewerkers gevonden</td></tr>';
@@ -10166,17 +10187,17 @@ function renderMedewerkers() {
 
     // Verlof opgenomen
     if (_medKol.verlofOp !== false) {
-      h+='<td data-col="verlofOp" style="font-size:12px">';
-      h+='<div>'+String(opgenomen).replace('.',',')+' uur</div>';
-      h+='<div style="color:var(--muted)">('+String(verlofUrenNaarDagen(opgenomen, m)).replace('.',',')+' dg)</div>';
+      h+='<td data-col="verlofOp">';
+      h+='<div style="font-weight:600">'+_nlAantal(verlofUrenNaarDagen(opgenomen, m))+' d</div>';
+      h+='<div style="font-size:12px;color:var(--muted)">'+_nlAantal(opgenomen)+' uur</div>';
       h+='</td>';
     }
 
     // Verlof gepland
     if (_medKol.verlofGp !== false) {
-      h+='<td data-col="verlofGp" style="font-size:12px">';
-      h+='<div>'+String(gepland).replace('.',',')+' uur</div>';
-      h+='<div style="color:var(--muted)">('+String(verlofUrenNaarDagen(gepland, m)).replace('.',',')+' dg)</div>';
+      h+='<td data-col="verlofGp">';
+      h+='<div style="font-weight:600">'+_nlAantal(verlofUrenNaarDagen(gepland, m))+' d</div>';
+      h+='<div style="font-size:12px;color:var(--muted)">'+_nlAantal(gepland)+' uur</div>';
       h+='</td>';
     }
 
@@ -10186,7 +10207,7 @@ function renderMedewerkers() {
       // negatief saldo (stond rood bij alles onder 3 dagen, ook bij 0 aan het begin van het jaar).
       var _vo = _medVerlofOver(m);
       h+='<td data-col="resterend">';
-      h+='<div style="font-weight:700;color:'+_vo.tk+'">'+_nlAantal(_vo.dagen)+' dagen <span style="font-size:12px;font-weight:400;color:var(--muted)">van '+_nlAantal(_vo.tegoed)+'</span></div>';
+      h+='<div style="font-weight:700;color:'+_vo.tk+'">'+_nlAantal(_vo.dagen)+' d <span style="font-size:12px;font-weight:400;color:var(--muted)">van '+_nlAantal(_vo.tegoed)+'</span></div>';
       h+='<div style="font-size:12px;color:var(--muted)">'+_nlAantal(_vo.uren)+' uur</div>';
       h+='<div class="progress" style="width:90px;margin-top:4px"><div class="progress-fill" style="width:'+_vo.pct+'%;background:'+_vo.kl+'"></div></div>';
       h+='</td>';
@@ -10204,8 +10225,7 @@ function renderMedewerkers() {
     // Status
     h+='<td data-col="status">'+tagMedStatus(m.status)+'</td>';
 
-    if (magSchrijven('medewerkers')) h+='<td data-col="_acties" onclick="event.stopPropagation()" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon med-edit-btn btn-icoon" data-id="'+m.id+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button> <button class="btn btn-ghost btn-sm btn-icon med-del-btn btn-wis" data-id="'+m.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button></td>';
-    h+='<td data-col="_acties"></td>';
+    if (magSchrijven('medewerkers')) h+='<td data-col="_acties" onclick="event.stopPropagation()" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon med-del-btn btn-wis" data-id="'+m.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button></td>';
     h+='</tr>';
   });
   h+='</tbody></table></div>';
@@ -10924,15 +10944,14 @@ function renderServiceklanten() {
   var totaal=lijst.length,slice=lijst.slice((_skPage-1)*_skPS,_skPage*_skPS);
   var el=document.getElementById('content');
 
-  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  var h='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h+='<input class="input" id="sk-zoek" placeholder="Zoek serviceklant..." value="'+esc(safeZoek(_skZoek))+'" style="flex:1;min-width:160px;max-width:320px">';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
   // Jaarplanning en datums invoeren zijn beheerwerk; een monteur ziet ze niet.
   var _skBeheer = isAdmin() || magSchrijven('serviceklanten');
-  if(_skBeheer) h+='<button class="btn btn-ghost btn-sm" id="sk-jaarplanner-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Jaarplanning</button>';
-  if(_skBeheer) h+='<button class="btn btn-ghost btn-sm" id="sk-snelinvoer-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg> Datums invoeren</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="sk-export-btn">'+ICO.download+' Export</button>';
+  if(_skBeheer) h+=_meerMenu([{id:'sk-jaarplanner-btn', label:'Jaarplanning', icon:ICO.kalender}, {id:'sk-snelinvoer-btn', label:'Datums invoeren', icon:ICO.edit}]);
   h+='</div></div>';
   // Info banner: aanmaken via debiteuren (sluitbaar)
   var _skBannerGesloten = false;
@@ -11657,14 +11676,13 @@ function renderDebiteuren(){
   var metBContract=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&klantAanvulling(k);}).length;
   var el=document.getElementById('content');
 
-  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  var h='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h+='<input class="input" id="deb-zoek" placeholder="Zoek debiteur..." value="'+esc(safeZoek(_debZoek))+'" style="flex:1;min-width:160px;max-width:320px">';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
-  h+='<button class="btn btn-ghost btn-sm hide-mobile" id="deb-import-btn">'+ICO.download+' Import</button>';
-  h+='<button class="btn btn-ghost btn-sm hide-mobile" id="deb-contract-import-btn">'+ICO.download+' Contracten</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="deb-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="deb-export-btn">'+ICO.download+' Export</button>';
-  if(magSchrijven('debiteuren')) h+='<button class="btn btn-primary btn-sm" id="deb-add-btn">+ Toevoegen</button>';
+  h+=_meerMenu([{id:'deb-import-btn', label:'Debiteuren importeren', icon:ICO.upload}, {id:'deb-contract-import-btn', label:'Contracten importeren', icon:ICO.upload}], true);
+  if(magSchrijven('debiteuren')) h+='<button class="btn btn-primary btn-sm" id="deb-add-btn">+ Debiteur</button>';
   h+='</div></div>';
 
   h+='<div class="stats-grid" style="margin-bottom:16px">';
@@ -13360,6 +13378,44 @@ var _vlSaldoOpen = {}; // welke medewerker-accordions open zijn in saldo-histori
 // ok-uitb-btn, …), zodat de bestaande bindingen, bevestigingen en rechtencontroles gelden.
 // Een monteur ziet zijn eigen aanvragen als lijst; een beheerder eerst "Te beoordelen".
 var _HR_MND = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+// ── Werkbalk (desktop) ───────────────────────────────────────────
+// Eén opbouw voor alle modules: zoekveld links, periode ernaast, rechts Kolommen · Export · ⋯ ·
+// hoofdknop. Hoogtes en breedtes zitten in de CSS van .werkbalk; hier alleen de onderdelen.
+var _PIJL_L = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>';
+var _PIJL_R = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
+var _MEER_SVG = '<svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+// Periodekeuze ‹ 2026 ›. Zelfde knop-ids als voorheen, dus de bestaande koppelingen blijven werken.
+function _periodeNav(idVorige, idVolgende, label, lblVorige, lblVolgende){
+  return '<span class="periode-nav"><button type="button" id="'+idVorige+'" aria-label="'+lblVorige+'" title="'+lblVorige+'">'+_PIJL_L+'</button>'
+    + '<b>'+esc(String(label))+'</b>'
+    + '<button type="button" id="'+idVolgende+'" aria-label="'+lblVolgende+'" title="'+lblVolgende+'">'+_PIJL_R+'</button></span>';
+}
+// Menu "⋯" voor zeldzame acties. De items houden de ids van de oude knoppen, zodat hun
+// klik-afhandeling ongewijzigd blijft. verbergMobiel: zoals de knoppen die het vervangt.
+function _meerMenu(items, verbergMobiel){
+  items = (items||[]).filter(Boolean);
+  if(!items.length) return '';
+  var h = '<span class="meer-wrap'+(verbergMobiel?' hide-mobile':'')+'"><button type="button" class="btn btn-ghost btn-sm meer-knop" aria-haspopup="menu" aria-expanded="false" aria-label="Meer acties" title="Meer acties">'+_MEER_SVG+'</button>';
+  h += '<span class="meer-menu" role="menu" hidden>';
+  items.forEach(function(it){ h += '<button type="button" role="menuitem" class="meer-item" id="'+it.id+'">'+(it.icon||'')+'<span>'+esc(it.label)+'</span></button>'; });
+  return h + '</span></span>';
+}
+function _meerSluit(behalve){
+  document.querySelectorAll('.meer-menu:not([hidden])').forEach(function(m){
+    if(m === behalve) return;
+    m.hidden = true;
+    var k = m.previousElementSibling; if(k) k.setAttribute('aria-expanded','false');
+  });
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest) return;
+  var knop = e.target.closest('.meer-knop');
+  var menu = knop ? knop.nextElementSibling : null;
+  _meerSluit(menu);
+  if(menu){ menu.hidden = !menu.hidden; knop.setAttribute('aria-expanded', menu.hidden ? 'false' : 'true'); }
+});
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') _meerSluit(null); });
+
 function _hrMobiel(){ return window.innerWidth <= 768; }
 // Open aanvragen die jij mag goedkeuren maar die niet in de getoonde lijst staan (ander jaar,
 // statusfilter of zoekterm). De melding op het dashboard telt álle jaren; zonder deze balk
@@ -13494,20 +13550,20 @@ function renderVerlof(){
   var gemSaldo = actieveMedVl.length ? Math.round(actieveMedVl.reduce(function(s,m){return s+getVerlofSaldoUren(m);},0)/actieveMedVl.length*10)/10 : 0;
   var negSaldo = actieveMedVl.filter(function(m){return getVerlofSaldoUren(m)<0;}).length;
 
-  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+  // Desktop: jaarkeuze in de werkbalk naast het zoekveld; telefoon: eigen regel zoals voorheen.
+  var h=!_hrMobiel() ? '' : '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
     +'<button id="vl-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Vorig jaar" title="Vorig jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>'
     +'<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+jaarStr+'</div>'
     +'<button id="vl-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Volgend jaar" title="Volgend jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>'
     +'</div>';
   // Toolbar in dezelfde opzet als verzuim, onkosten en overuren.
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h+='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('verlof')) h+='<input class="input" id="vl-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_vlZoek))+'" style="max-width:260px">';
+  if(!_hrMobiel()) h+=_periodeNav('vl-prev-jaar', 'vl-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar');
   h+='<div style="flex:1"></div>';
-  if(isAdmin() || magSchrijven('verlof')) {
-    h+='<button class="btn btn-ghost btn-sm hide-mobile" id="vl-bijschrijf-btn" style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Jaar bijschrijven</button>';
-  }
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="vl-export-btn">'+ICO.download+' Export</button>';
-  h+='<button class="btn btn-primary btn-sm" id="vl-add-btn">+ Aanvragen</button>';
+  if(isAdmin() || magSchrijven('verlof')) h+=_meerMenu([{id:'vl-bijschrijf-btn', label:'Jaar bijschrijven', icon:ICO.clock}], true);
+  h+='<button class="btn btn-primary btn-sm" id="vl-add-btn">+ Verlof</button>';
   h+='</div>';
 
   h+='<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
@@ -16738,7 +16794,7 @@ function renderPlanning() {
   });
 
   // ── Toolbar ──
-  var h = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  var h = '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
 
   // Zoekbalk
   // Op een telefoon staat "+ Opdracht" naast Vandaag; op desktop rechts in de eerste rij.
@@ -16770,7 +16826,7 @@ function renderPlanning() {
   h += '</div>'; // sluit toolbar flex
 
   // Monteur filter + opdracht knop op eigen rij
-  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h += '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:16px">';
   h += '<button class="btn btn-ghost btn-sm" id="plan-prev" aria-label="Vorige periode" title="Vorige periode" style="flex-shrink:0;padding:5px 10px"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
   h += '<div id="plan-periode-label" style="font-weight:700;font-size:13px;flex:1;text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>';
@@ -17685,7 +17741,7 @@ function renderPlanLijst(monteurs) {
     if(kanSchrijven && !blokkadeLijst && datum !== '_geen') {
       var prefillDatum = datum;
       var prefillMont = _planFilter !== 'alle' ? _planFilter : '';
-      h += '<button class="btn btn-ghost btn-sm plan-add-dag" data-datum="'+esc(prefillDatum)+'" data-monteur="'+esc(prefillMont)+'" style="font-size:11px;padding:2px 8px;margin-left:4px">+ Opdracht</button>';
+      h += '<button class="btn btn-ghost btn-sm btn-rij plan-add-dag" data-datum="'+esc(prefillDatum)+'" data-monteur="'+esc(prefillMont)+'" style="margin-left:4px">+ Opdracht</button>';
     }
     // (de beschikbaarheidsbalk hieronder staat in dezelfde kolom; sluiting volgt daarna)
 
@@ -20039,18 +20095,19 @@ function renderOveruren() {
   var h = '';
 
   // ── Jaarnavigatie ──
-  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+  if(_hrMobiel()) h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
     + '<button id="ou-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Vorig jaar" title="Vorig jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>'
     + '<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+jaarStr+'</div>'
     + '<button id="ou-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Volgend jaar" title="Volgend jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>'
     + '</div>';
 
   // ── Toolbar ──
-  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h += '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('overuren')) h += '<input class="input" id="ou-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_ouZoek))+'" style="max-width:260px">';
+  if(!_hrMobiel()) h += _periodeNav('ou-prev-jaar', 'ou-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar');
   h += '<div style="flex:1"></div>';
   h += '<button class="btn btn-ghost btn-sm hide-mobile" id="ou-export-btn">'+ICO.download+' Export</button>';
-  h += '<button class="btn btn-primary btn-sm" id="ou-add-btn">+ Overuren registreren</button>';
+  h += '<button class="btn btn-primary btn-sm" id="ou-add-btn">+ Overuren</button>';
   h += '</div>';
 
   // ── Stats ──
@@ -20597,16 +20654,17 @@ function renderOnkosten() {
   var totBedrag  = Math.round((goedBedrag + uitbBedrag) * 100) / 100;
 
   var h='';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+  if(_hrMobiel()) h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
     +'<button id="ok-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Vorig jaar" title="Vorig jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>'
     +'<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+jaarStr+'</div>'
     +'<button id="ok-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px" aria-label="Volgend jaar" title="Volgend jaar"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>'
     +'</div>';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h+='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('onkosten')) h+='<input class="input" id="ok-zoek" placeholder="Zoek medewerker, categorie..." value="'+esc(safeZoek(_okZoek))+'" style="max-width:280px">';
+  if(!_hrMobiel()) h+=_periodeNav('ok-prev-jaar', 'ok-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar');
   h+='<div style="flex:1"></div>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="ok-export-btn">'+ICO.download+' Export</button>';
-  h+='<button class="btn btn-primary btn-sm" id="ok-add-btn">+ Onkosten declareren</button>';
+  h+='<button class="btn btn-primary btn-sm" id="ok-add-btn">+ Declaratie</button>';
   h+='</div>';
 
   // Stats
@@ -21076,16 +21134,17 @@ function renderVerzuim() {
   var totUren=zichtbaarVZ.reduce(function(s,v){ return s+verzuimUren(v, jaarStr+'-01-01', jaarStr+'-12-31'); },0);
 
   var h='';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+  if(_hrMobiel()) h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
     +'<button id="vz-prev-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px">&#8249;</button>'
     +'<div style="font-weight:700;font-size:15px;min-width:60px;text-align:center">'+jaarStr+'</div>'
     +'<button id="vz-next-jaar" class="btn btn-ghost btn-sm" style="padding:4px 10px">&#8250;</button>'
     +'</div>';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h+='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('verzuim')) h+='<input class="input" id="vz-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_vzZoek))+'" style="max-width:260px">';
+  if(!_hrMobiel()) h+=_periodeNav('vz-prev-jaar', 'vz-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar');
   h+='<div style="flex:1"></div>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="vz-export-btn">'+ICO.download+' Export</button>';
-  if(kanBeheren) h+='<button class="btn btn-primary btn-sm" id="vz-add-btn">+ Verzuim registreren</button>';
+  if(kanBeheren) h+='<button class="btn btn-primary btn-sm" id="vz-add-btn">+ Verzuim</button>';
   h+='</div>';
 
   h+='<div class="stats-grid" style="margin-bottom:16px">';
@@ -21177,7 +21236,7 @@ function renderVerzuim() {
       h += '<div style="background:rgba(245,158,11,0.15);color:var(--orange-t);font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0">'+langdurigItems+' langdurig</div>';
     }
     if(kanBeheren) {
-      h += '<button class="btn btn-ghost btn-sm vz-add-med" data-mid="'+mid+'" title="Verzuim registreren voor '+esc(m.voornaam)+'" style="flex-shrink:0;font-size:12px;padding:5px 10px;white-space:nowrap">+ Verzuim</button>';
+      h += '<button class="btn btn-ghost btn-sm btn-rij vz-add-med" data-mid="'+mid+'" title="Verzuim registreren voor '+esc(m.voornaam)+'" style="flex-shrink:0;white-space:nowrap">+ Verzuim</button>';
     }
     h += '<div class="vz-acc-chev" style="color:var(--muted);flex-shrink:0;transition:transform .2s;transform:rotate('+(isOpen?'90':'0')+'deg)">'
        + '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>';
@@ -21187,9 +21246,10 @@ function renderVerzuim() {
     if(!heeftItems) {
       h += '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Geen verzuim in '+jaarStr+'</div>';
     } else {
-      h += '<div class="table-wrap"><table style="width:100%"><thead><tr>';
-      h += '<th>Van</th><th>Type</th><th>Tot/Hersteld</th><th>Duur</th><th>Status</th>';
-      if(kanBeheren) h += '<th style="width:120px">Actie</th>';
+      // Vaste kolombreedtes: anders kreeg elke medewerker eigen breedtes en stonden de kolommen scheef.
+      h += '<div class="table-wrap"><table class="vz-tabel" style="width:100%;table-layout:fixed"><colgroup><col style="width:14%"><col style="width:28%"><col style="width:16%"><col style="width:16%"><col style="width:14%">'+(kanBeheren?'<col style="width:210px">':'')+'</colgroup><thead><tr>';
+      h += '<th>Van</th><th>Type</th><th>Tot / hersteld</th><th>Duur</th><th>Status</th>';
+      if(kanBeheren) h += '<th></th>';
       h += '</tr></thead><tbody>';
       items.forEach(function(v){
         var duren=v.van?telWerkdagen(v.van, v.tot&&v.tot<=vandaag?v.tot:null):0;
@@ -21207,10 +21267,10 @@ function renderVerzuim() {
         h += '<td style="font-weight:700;color:'+(duren>42?'var(--orange-t)':'var(--text)')+'">'+_nlAantal(verzuimUren(v))+' u<div style="font-size:12px;font-weight:400;color:var(--muted)">'+duren+' werkdag'+(duren===1?'':'en')+'</div></td>';
         h += '<td>'+stTag+'</td>';
         if(kanBeheren){
-          h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
+          h += '<td style="white-space:nowrap;text-align:right" onclick="event.stopPropagation()">';
           if(v.status==='actief'||v.status==='langdurig'){
-            h += '<button class="btn btn-ghost btn-sm vz-herstel-btn" data-id="'+v.id+'" style="color:var(--green-t);font-size:11px">✓ Hersteld</button>';
-            if(v.status==='actief'&&duren>42) h += '<button class="btn btn-ghost btn-sm vz-lang-btn" data-id="'+v.id+'" style="color:var(--orange-t);font-size:11px">⚠ Langdurig</button>';
+            h += '<button class="btn btn-ghost btn-sm btn-rij vz-herstel-btn" data-id="'+v.id+'" style="color:var(--green-t)">'+ICO.check+' Hersteld</button>';
+            if(v.status==='actief'&&duren>42) h += ' <button class="btn btn-ghost btn-sm btn-rij vz-lang-btn" data-id="'+v.id+'" style="color:var(--orange-t)">'+ICO.warn+' Langdurig</button>';
           } else h += '<span style="color:var(--muted)">—</span>';
           h += '</td>';
         }
@@ -24142,13 +24202,13 @@ function renderMaterialen() {
     });
 
     var h = '';
-    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+    h += '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
     h += '<input type="text" class="input" id="mat-zoek" placeholder="Zoek op code of omschrijving…" value="'+esc(_matZoek)+'" style="max-width:260px">';
 
     h += '<div style="flex:1"></div>';
     h += '<button class="btn btn-ghost btn-sm hide-mobile" id="mat-export-btn">'+ICO.download+' Export</button>';
     if(kanSchrijven){
-      h += '<button class="btn btn-ghost btn-sm hide-mobile" id="mat-import">'+ICO.upload+' Import</button>';
+      h += _meerMenu([{id:'mat-import', label:'Artikelen importeren', icon:ICO.upload}], true);
       h += '<button class="btn btn-primary btn-sm" id="mat-add">+ Artikel</button>';
     }
     h += '</div>';
@@ -25482,13 +25542,13 @@ function renderPompLijst() {
   var h = '';
 
   // ── Toolbar ──
-  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h += '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h += '<input class="input" id="pr-zoek" placeholder="Zoek op type, serienummer of klant" title="Zoekt ook op debiteurnummer en adres" value="'+esc(safeZoek(_prZoek))+'" style="flex:1;min-width:160px;max-width:320px">';
   h += '<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
   h += '<button class="btn btn-ghost btn-sm" id="pr-objecten-btn" style="display:inline-flex;align-items:center;gap:4px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Objecten</button>';
   h += '<button class="btn btn-ghost btn-sm hide-mobile" id="pr-kolom-btn">'+ICO.settings+' Kolommen</button>';
   h += '<button class="btn btn-ghost btn-sm hide-mobile" id="pr-export-btn">'+ICO.download+' Export</button>';
-  if(kanSchrijven) h += '<button class="btn btn-primary btn-sm" id="pr-add-btn">+ Pomp registreren</button>';
+  if(kanSchrijven) h += '<button class="btn btn-primary btn-sm" id="pr-add-btn">+ Pomp</button>';
   h += '</div></div>';
 
   // ── Statkaartjes ──
@@ -27729,7 +27789,7 @@ function renderStoringsdienst() {
   if(_hrMobiel()) h=_sdMobiel(sd, huidigeMed, huidigDagKey, huidigKey, vandaag, _sdMag);
   else {
   // ── Toolbar ──
-  h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  h='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   // View switcher
   h+='<div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px">';
   [['kwartaal','Kwartaal'],['jaar','Jaar']].forEach(function(v){
@@ -27737,9 +27797,7 @@ function renderStoringsdienst() {
   });
   h+='</div>';
   // Jaar/kwartaal navigator
-  h+='<button class="btn btn-ghost btn-sm" id="sd-prev">‹</button>';
-  h+='<div style="font-weight:700;font-size:14px;min-width:120px;text-align:center">'+(_sdView==='jaar'?_sdJaar:'Q'+_sdKwart+' '+_sdJaar)+'</div>';
-  h+='<button class="btn btn-ghost btn-sm" id="sd-next">›</button>';
+  h+=_periodeNav('sd-prev', 'sd-next', (_sdView==='jaar' ? _sdJaar : 'Q'+_sdKwart+' '+_sdJaar), 'Vorige periode', 'Volgende periode');
   h+='<button class="btn btn-ghost btn-sm" id="sd-vandaag">Nu</button>';
   h+='<div style="flex:1"></div>';
   if(_sdMag) h+='<button class="btn btn-primary btn-sm" id="sd-rouleer">'+ICO.refresh+' Voorstel genereren</button>';
@@ -27872,7 +27930,7 @@ function renderStoringsdienst() {
       }
 
       // Week wijzig knop
-      h+='<td style="padding:6px 8px">'+(!_sdMag?'':'<button class="btn btn-ghost btn-sm sd-week-btn" data-week="'+w.key+'" data-weeknr="'+w.week+'" style="font-size:11px;display:inline-flex;align-items:center;gap:4px">'+ICO.edit+' Week</button>')+'</td>';
+      h+='<td style="padding:6px 8px">'+(!_sdMag?'':'<button class="btn btn-ghost btn-sm btn-rij sd-week-btn" data-week="'+w.key+'" data-weeknr="'+w.week+'">'+ICO.edit+' Week</button>')+'</td>';
       h+='</tr>';
     });
     h+='</tbody></table></div></div>';
@@ -29828,11 +29886,7 @@ function renderKlantmails() {
 
   // ── Toolbar ──────────────────────────────────────────────────
   h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">';
-  h += '<div style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px">';
-  h += '<button class="btn btn-ghost btn-sm" id="mail-prev">‹</button>';
-  h += '<div style="font-weight:700;font-size:14px;min-width:160px;text-align:center">'+periodeLabel+'</div>';
-  h += '<button class="btn btn-ghost btn-sm" id="mail-next">›</button>';
-  h += '</div>';
+  h += _periodeNav('mail-prev', 'mail-next', periodeLabel, 'Vorige maand', 'Volgende maand');
 
   // Stats
   h += '<div class="km-pils" style="display:flex;gap:8px;flex-wrap:wrap">';
