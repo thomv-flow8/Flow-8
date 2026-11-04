@@ -547,6 +547,15 @@ iconen 1.8 + radius-tokens). Volledig klaar. Zie `flow8-werklijst-fase2.md` voor
       alle drie volgens `vier-mobiel-preview.html` (lokaal) — weekkaarten met dagvakjes en belknop, mailkaarten
       per dag met selectiebalk, kaart tot de onderbalk met route-blad en één zoekveld Klant/Afstand.
       Instellingen op mobiel: menu valt niet meer achter de onderbalk.
+- [x] **Zoeken** (4 november 2026) — audit doorgevoerd. Eerst: geen vastloper meer op een debiteurnummer dat als
+      getal is opgeslagen (`.includes` op een getal), alleen modules waarvoor je rechten hebt (een monteur vond
+      medewerkers en opende hun gegevens), toetsenbord direct op iPhone (focus zonder timeout), slimmer zoeken
+      (`_gzNorm`/`_gzPast`: alle woorden, postcode met/zonder spatie, zonder accenten). Daarna volgens
+      `zoeken-preview.html` (lokaal): werkbonnen (Firestore, pas bij eerste zoekactie, max. eens per 5 min),
+      werkorders en register erbij; opdrachten uit elke periode (komend eerst, dan meest recent); markering,
+      "Toon alle", pijltjes/Enter/Esc; op de telefoon schermvullend met Annuleer en filterchips. Een opdracht
+      openen springt de planning naar die dag. Planning: zelfde zoekregels, en bij een zoekterm het blok
+      "Buiten <periode>" (`_planBuitenHtml`) dat naar de dag springt en de opdracht opent.
 - [ ] **Dagplanning: aannames zichtbaar** — einde werkdag staat vast op 17:00, starttijd alleen 06:00–10:00,
       opdracht zonder duur telt als 1u30 zonder dat als schatting te tonen.
 - [ ] **Dagplanning: toegankelijkheid** — volgorde alleen met slepen (geen toetsenbord); tijdsturingsknop
