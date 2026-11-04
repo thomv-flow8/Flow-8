@@ -1445,6 +1445,18 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .hr-verborgen>svg{width:16px;height:16px;color:var(--orange-t);flex-shrink:0}
 .hr-verborgen span{flex:1;min-width:180px}
 .hr-verborgen .btn{margin-left:auto}
+/* Bewerkknop met alleen een potlood: zelfde vorm als de verwijderknop, grijs icoon */
+.btn-icoon{width:32px;height:32px;min-width:32px;min-height:32px;padding:0!important;margin:0;gap:0;border:1px solid var(--border)!important;background:transparent!important;color:var(--muted)!important;font-size:0!important;flex-shrink:0}
+.btn-icoon:hover{color:var(--text)!important;border-color:var(--muted2)!important}
+.btn-icoon svg{width:15px;height:15px;flex-shrink:0}
+@media (pointer:coarse){.btn-icoon{width:44px;height:44px;min-width:44px;min-height:44px}}
+/* Verwijderknop met alleen een prullenbak: overal dezelfde (rond, dun kader, rood icoon) */
+.btn-wis{width:32px;height:32px;min-width:32px;min-height:32px;padding:0!important;margin:0;gap:0;border:1px solid var(--border)!important;background:transparent!important;color:var(--red-t)!important;font-size:0!important;flex-shrink:0}
+.btn-wis:hover{background:rgba(239,68,68,.08)!important;border-color:rgba(239,68,68,.45)!important}
+.btn-wis svg{width:15px;height:15px;flex-shrink:0}
+@media (pointer:coarse){.btn-wis{width:44px;height:44px;min-width:44px;min-height:44px}}
+/* In de knoppenbalk van een HR-kaart: midden in de balk en vrij van de rand */
+.hr-acties .btn-wis{align-self:center;margin:4px 8px}
 /* Foto-lijst met bijschrift (werkbon-invulbon) */
 .wbx-foto-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:8px}
 .wbx-foto-item .wbx-ftop{display:flex;gap:10px;align-items:center;margin-bottom:8px}
@@ -3797,7 +3809,7 @@ function _wbRenderUren(state){
     var _tijdLbl = (u.tijdVan && u.tijdTot) ? (u.tijdVan+'\u2013'+u.tijdTot+' \u00b7 ') : '';
     h += '<span class="wbx-det"><span class="wbx-n">'+esc(naam)+'</span><br><span class="wbx-t">'+esc(_tijdLbl)+esc(u.omschrijving||'\u2014')+'</span></span>';
     h += '<span class="wbx-amt">'+esc(String(u.uren||0).replace('.',','))+' u</span>';
-    if(state.bewerkbaar) h += '<button type="button" class="wbx-del wb-uur-del" data-id="'+esc(u.id)+'" title="Verwijderen" aria-label="Uurregel verwijderen">'+ICO.trash+'</button>';
+    if(state.bewerkbaar) h += '<button type="button" class="wbx-del wb-uur-del btn btn-ghost btn-wis" data-id="'+esc(u.id)+'" title="Verwijderen" aria-label="Uurregel verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
   });
   lijst.innerHTML = h;
@@ -3897,7 +3909,7 @@ function _wbRenderFotos(state){
     h += '</div>';
     h += '<div class="wbx-fnum">Foto '+(i+1)+'</div>';
     if(state.bewerkbaar) h += '<button class="wbx-ftekenbtn wb-foto-teken" data-id="'+esc(f.id)+'" title="Tekenen op foto"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></button>';
-    if(state.bewerkbaar) h += '<button type="button" class="wbx-fdelbtn wb-foto-del" data-id="'+esc(f.id)+'" data-url="'+esc(f.url)+'" title="Verwijderen" aria-label="Foto verwijderen">'+ICO.trash+'</button>';
+    if(state.bewerkbaar) h += '<button type="button" class="wbx-fdelbtn wb-foto-del btn btn-ghost btn-wis" data-id="'+esc(f.id)+'" data-url="'+esc(f.url)+'" title="Verwijderen" aria-label="Foto verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
     if(state.bewerkbaar){
       h += '<textarea class="wbx-fcap wb-foto-cap" data-id="'+esc(f.id)+'" rows="2" placeholder="Bijschrift (optioneel)\u2026">'+esc(f.bijschrift||'')+'</textarea>';
@@ -4014,7 +4026,7 @@ function _wbRenderDocumenten(state){
     h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.naam||'bestand')+'</div>';
     h += '<div style="font-size:11px;color:var(--muted)">'+esc(_wbFormatBytes(d.grootte))+'</div></div>';
     h += '<button class="wb-doc-open" data-url="'+esc(d.url)+'" data-naam="'+esc(d.naam||'')+'" data-mime="'+esc(d.mime||'')+'" title="Openen" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:4px;display:flex"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></button>';
-    if(state.bewerkbaar) h += '<button class="wb-doc-verwijder" data-id="'+esc(d.id)+'" data-url="'+esc(d.url)+'" data-naam="'+esc(d.naam||'')+'" title="Verwijderen" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;display:flex">'+ICO.trash+'</button>';
+    if(state.bewerkbaar) h += '<button class="wb-doc-verwijder btn btn-ghost btn-wis" data-id="'+esc(d.id)+'" data-url="'+esc(d.url)+'" data-naam="'+esc(d.naam||'')+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
   });
   h += '</div>';
@@ -4120,7 +4132,7 @@ function _wbRenderMaterialen(state){
                 : '<div style="width:40px;height:40px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>';
     h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;line-height:1.3">'+esc(m.omschrijving||'')+'</div>';
     h += '<div style="font-size:12px;color:var(--muted);margin-top:1px">'+esc(m.code||'')+(toonPrijs?(' \u00b7 '+_matEuro(m.stuksprijs)+' /'+esc(m.eenheid||'stuk')):'')+'</div></div>';
-    if(state.bewerkbaar) h += '<button class="wb-mat-verwijder" data-mi="'+mi+'" aria-label="Materiaal verwijderen" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;min-width:44px;min-height:44px;margin:-8px -8px 0 0;display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:flex-start">'+ICO.trash+'</button>';
+    if(state.bewerkbaar) h += '<button class="wb-mat-verwijder btn btn-ghost btn-wis" data-mi="'+mi+'" aria-label="Materiaal verwijderen" style="flex-shrink:0;align-self:flex-start" title="Verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
     // Onderste regel: stepper links, regelbedrag rechts
     h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
@@ -4366,7 +4378,7 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
         (v.kolommen||[]).forEach(function(k,ki){
           h += '<td style="padding:4px 6px"><input type="text" class="input cl-tabel-cel" data-ci="'+ci+'" data-vi="'+vi+'" data-ri="'+ri+'" data-ki="'+ki+'" value="'+esc(rij[k]||'')+'"'+dis+' style="min-width:100px"></td>';
         });
-        if(bewerkbaar) h += '<td><button type="button" class="btn btn-ghost btn-sm cl-tabel-rij-verwijder" data-ci="'+ci+'" data-vi="'+vi+'" data-ri="'+ri+'" style="color:var(--red)">'+ICO.trash+'</button></td>';
+        if(bewerkbaar) h += '<td><button type="button" class="btn btn-ghost btn-sm cl-tabel-rij-verwijder btn-wis" data-ci="'+ci+'" data-vi="'+vi+'" data-ri="'+ri+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
         h += '</tr>';
       });
       h += '</tbody></table></div>';
@@ -4389,8 +4401,8 @@ function _wbRenderChecklists(state){
     h += '<span style="flex:1;font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(cl.naam||'Checklist')+'</span>';
     // Met meerdere formulieren op één bon staat er drie keer dezelfde sjabloonnaam;
     // een eigen omschrijving maakt duidelijk om welke installatie het gaat.
-    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-hernoem" data-ci="'+ci+'" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;min-width:44px;min-height:44px;margin:-10px 0;display:flex;align-items:center;justify-content:center" title="Naam aanpassen" aria-label="Naam aanpassen">'+ICO.edit+'</button>';
-    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-verwijder" data-ci="'+ci+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;min-width:44px;min-height:44px;margin:-10px 0;display:flex;align-items:center;justify-content:center" title="Checklist verwijderen" aria-label="Checklist verwijderen">'+ICO.trash+'</button>';
+    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-hernoem btn btn-ghost btn-icoon" data-ci="'+ci+'" title="Naam aanpassen" aria-label="Naam aanpassen">'+ICO.edit+'</button>';
+    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-verwijder btn btn-ghost btn-wis" data-ci="'+ci+'" title="Checklist verwijderen" aria-label="Checklist verwijderen">'+ICO.trash+'</button>';
     h += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="transform:rotate('+(open?'180':'0')+'deg)"><path d="M6 9l6 6 6-6"/></svg>';
     h += '</div>';
     h += '<div class="wbx-cl-body" style="display:'+(open?'':'none')+';padding:12px">';
@@ -9662,7 +9674,7 @@ function renderMedewerkers() {
     // Status
     h+='<td data-col="status">'+tagMedStatus(m.status)+'</td>';
 
-    if (magSchrijven('medewerkers')) h+='<td data-col="_acties" onclick="event.stopPropagation()" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon med-edit-btn" data-id="'+m.id+'" title="Bewerken">'+ICO.edit+'</button> <button class="btn btn-ghost btn-sm btn-icon med-del-btn" data-id="'+m.id+'" style="color:var(--red)" title="Verwijderen">'+ICO.trash+'</button></td>';
+    if (magSchrijven('medewerkers')) h+='<td data-col="_acties" onclick="event.stopPropagation()" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon med-edit-btn btn-icoon" data-id="'+m.id+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button> <button class="btn btn-ghost btn-sm btn-icon med-del-btn btn-wis" data-id="'+m.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button></td>';
     h+='<td data-col="_acties"></td>';
     h+='</tr>';
   });
@@ -10498,8 +10510,8 @@ function renderServiceklanten() {
       // Passieve klant terugzetten. reactiverenSk bestond al, maar er was nooit een knop
       // die hem aanriep — een klant kon dus wel op passief, maar niet meer terug.
       if(k.status==='passief') h+='<button class="btn btn-ghost btn-sm sk-act-btn" data-id="'+k.id+'" title="Weer activeren" style="color:var(--green-t);font-size:11px;padding:4px 9px">Activeren</button>';
-      h+='<button class="btn btn-ghost btn-sm btn-icon sk-edit-btn" data-id="'+k.id+'">'+ICO.edit+'</button>';
-      h+='<button class="btn btn-ghost btn-sm btn-icon sk-del-btn" data-id="'+k.id+'" style="color:var(--red)">'+ICO.trash+'</button>';
+      h+='<button class="btn btn-ghost btn-sm btn-icon sk-edit-btn btn-icoon" data-id="'+k.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button>';
+      h+='<button class="btn btn-ghost btn-sm btn-icon sk-del-btn btn-wis" data-id="'+k.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
       h+='</td>';
     }
     h+='<td></td>';
@@ -11019,7 +11031,7 @@ function renderMemoSectie(debId, inPanel) {
       h += '<span style="font-size:10px;color:var(--muted)">'+esc(m.auteur||'')+'  ·  '+fmtD(m.datum)+'</span>';
       if(magSchrijven('debiteuren')) {
         h += '<button class="memo-oplossen-btn" data-memoid="'+m.id+'" style="font-size:15px;color:var(--green-t);background:none;border:none;cursor:pointer;font-weight:700;padding:2px 7px;border-radius:6px;line-height:1" title="Markeer als opgelost">✓</button>';
-        h += '<button class="btn-icon memo-del-btn" data-memoid="'+m.id+'" style="font-size:18px;color:var(--red)" title="Verwijderen">'+ICO.trash+'</button>';
+        h += '<button class="btn-icon memo-del-btn btn btn-ghost btn-wis" data-memoid="'+m.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
       }
       h += '</div></div>';
       h += '<div style="font-size:13px;line-height:1.5">'+esc(m.tekst)+'</div>';
@@ -11033,7 +11045,7 @@ function renderMemoSectie(debId, inPanel) {
         h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
         h += '<div style="font-size:10px;color:var(--green-t);font-weight:700">✓ OPGELOST</div>';
         h += '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;color:var(--muted)">'+esc(m.auteur||'')+'</span>';
-        if(magSchrijven('debiteuren')) h += '<button class="btn-icon memo-del-btn" data-memoid="'+m.id+'" style="font-size:18px;color:var(--muted)" title="Verwijderen">'+ICO.trash+'</button>';
+        if(magSchrijven('debiteuren')) h += '<button class="btn-icon memo-del-btn btn btn-ghost btn-wis" data-memoid="'+m.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
         h += '</div></div>';
         h += '<div style="font-size:12px;color:var(--muted)">'+esc(m.tekst)+'</div></div>';
       });
@@ -11186,7 +11198,7 @@ function renderDebiteuren(){
         }
       }
     });
-    if(magSchrijven('debiteuren')) h+='<td data-col="_acties" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon deb-edit-btn" data-id="'+d.id+'">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm btn-icon deb-del-btn" data-id="'+d.id+'" style="color:var(--red)">'+ICO.trash+'</button></td>';
+    if(magSchrijven('debiteuren')) h+='<td data-col="_acties" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon deb-edit-btn btn-icoon" data-id="'+d.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm btn-icon deb-del-btn btn-wis" data-id="'+d.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
     h+='<td></td>';
     h+='</tr>';
   });
@@ -11413,8 +11425,8 @@ function openDebPanel(id, opties){
       h+='</div>';
       if(magSchrijven('debiteuren')){
         h+='<div style="display:flex;gap:4px;flex-shrink:0">';
-        h+='<button class="btn-icon dp-ct-edit" data-ci="'+ci+'" title="Bewerken" style="font-size:16px;color:var(--muted)">'+ICO.edit+'</button>';
-        h+='<button class="btn-icon dp-ct-del" data-ci="'+ci+'" title="Verwijderen" style="font-size:18px;color:var(--red)">'+ICO.trash+'</button>';
+        h+='<button class="btn-icon dp-ct-edit btn btn-ghost btn-icoon" data-ci="'+ci+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button>';
+        h+='<button class="btn-icon dp-ct-del btn btn-ghost btn-wis" data-ci="'+ci+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
         h+='</div>';
       }
       h+='</div>';
@@ -11454,8 +11466,8 @@ function openDebPanel(id, opties){
       h+='</div>';
       h+='<div style="display:flex;gap:4px">';
       // Zelfde knoppen als bij contactpersonen: SVG uit de ICO-set, niet de oude tekst-tekens.
-      h+='<button class="btn-icon dp-loc-edit" data-locid="'+loc.id+'" title="Bewerken" style="font-size:16px;color:var(--muted)">'+ICO.edit+'</button>';
-      h+='<button class="btn-icon dp-loc-del" data-locid="'+loc.id+'" title="Verwijderen" style="font-size:18px;color:var(--red)">'+ICO.trash+'</button>';
+      h+='<button class="btn-icon dp-loc-edit btn btn-ghost btn-icoon" data-locid="'+loc.id+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button>';
+      h+='<button class="btn-icon dp-loc-del btn btn-ghost btn-wis" data-locid="'+loc.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
       h+='</div></div>';
     });
   }
@@ -11891,7 +11903,7 @@ function openDebModal(id){
         b+='<div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc([loc.adres,loc.postcode,loc.plaats].filter(Boolean).join(', '))+'</div>';
         b+='</div>';
         if(!loc.isStandaard) b+='<button type="button" class="btn btn-ghost btn-sm df-loc-stdaard" data-locid="'+esc(loc.id)+'" style="font-size:11px;white-space:nowrap;flex-shrink:0">★ Standaard</button>';
-        b+='<button type="button" class="btn btn-ghost btn-sm df-loc-edit" data-locid="'+esc(loc.id)+'" style="flex-shrink:0">'+ICO.edit+'</button>';
+        b+='<button type="button" class="btn btn-ghost btn-sm df-loc-edit btn-icoon" data-locid="'+esc(loc.id)+'" style="flex-shrink:0" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button>';
         b+='</div>';
       });
     }
@@ -12850,7 +12862,7 @@ function _hrWacht(medId, mod){
 function _hrKnop(cls, id, inhoud, soort, extra){
   return '<button type="button" class="hr-actie'+(soort ? ' '+soort : '')+' '+cls+'" data-id="'+esc(id)+'"'+(extra || '')+'>'+inhoud+'</button>';
 }
-function _hrPrullenbak(cls, id){ return _hrKnop(cls, id, ICO.trash, 'smal', ' title="Verwijderen" aria-label="Verwijderen"'); }
+function _hrPrullenbak(cls, id){ return '<button type="button" class="btn btn-ghost btn-wis '+cls+'" data-id="'+esc(id)+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>'; }
 // k: { cls (klikbare rijklasse, bv. ou-rij), id, datum, titel, bedrag, sub, status, meta, extra, med, acties }
 function _hrKaart(k){
   var d = k.datum ? new Date(k.datum+'T00:00:00') : null;
@@ -13217,7 +13229,7 @@ function renderVerlof(){
             }
           }
           if(_vlBeheer){
-            h += '<button class="btn btn-ghost btn-sm btn-icon vl-del" data-id="'+v.id+'" title="Verwijderen" aria-label="Verwijderen" style="color:var(--red)">'+ICO.trash+'</button>';
+            h += '<button class="btn btn-ghost btn-sm btn-icon vl-del btn-wis" data-id="'+v.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
           } else if(String(v.medId)===String(mijnId) && v.status==='aangevraagd'){
             // Eigen, nog niet getekende aanvraag: wijzigen of terugtrekken.
             h += '<button class="btn btn-ghost btn-sm vl-eigen-edit" data-id="'+v.id+'" style="font-size:11px">'+ICO.edit+' Wijzig</button>';
@@ -17425,8 +17437,8 @@ function renderPlanLijst(monteurs) {
         // Acties
         if (magSchrijven('planning')) {
           h += '<td data-col="_acties" onclick="event.stopPropagation()" style="padding:4px 6px;white-space:nowrap;text-align:right">';
-          h += '<button class="btn btn-ghost btn-sm btn-icon opdracht-edit-btn" data-id="'+o.id+'">'+ICO.edit+'</button>';
-          h += '<button class="btn btn-ghost btn-sm btn-icon opdracht-del-btn" data-id="'+o.id+'" style="color:var(--red-t)">'+ICO.trash+'</button>';
+          h += '<button class="btn btn-ghost btn-sm btn-icon opdracht-edit-btn btn-icoon" data-id="'+o.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button>';
+          h += '<button class="btn btn-ghost btn-sm btn-icon opdracht-del-btn btn-wis" data-id="'+o.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
           h += '</td>';
         }
         h += '</tr>';
@@ -19596,12 +19608,12 @@ function renderOveruren() {
               var _gk = getGoedkeurderVoor(mid, 'overuren');
               h += '<span style="font-size:11px;color:var(--muted)" title="Alleen de ingestelde goedkeurder kan tekenen">Wacht op '+esc(_gk?(_gk.voornaam||'')+' '+(_gk.achternaam||''):'beheerder')+'</span> ';
             }
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen" style="color:var(--red)">'+ICO.trash+'</button>';
+            h += '<button class="btn btn-ghost btn-sm ou-del-btn btn-wis" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
           } else if(o.status==='gecompenseerd'||o.status==='goedgekeurd') {
             h += '<button class="btn btn-ghost btn-sm ou-uitb-btn" data-id="'+o.id+'">'+ICO.euro+' Uitbetalen</button>';
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen" style="color:var(--red)">'+ICO.trash+'</button>';
+            h += '<button class="btn btn-ghost btn-sm ou-del-btn btn-wis" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
           } else if(o.status==='afgewezen') {
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen" style="color:var(--red)">'+ICO.trash+'</button>';
+            h += '<button class="btn btn-ghost btn-sm ou-del-btn btn-wis" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
           }
           h += '</td>';
         }
@@ -23667,7 +23679,7 @@ function _matRijHtml(a, kanSchrijven){
   h += '<td class="hide-mobile">'+esc(a.eenheid||'stuk')+'</td>';
   h += '<td style="text-align:right">'+_matEuro(a.stuksprijs)+'</td>';
   h += '<td class="hide-mobile" style="text-align:right;color:var(--muted)">'+(a.btw!=null?a.btw+'%':'—')+'</td>';
-  h += '<td class="hide-mobile">'+(kanSchrijven?'<button class="mat-verwijder" data-id="'+esc(a.id)+'" data-naam="'+esc(a.code||'')+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px">'+ICO.trash+'</button>':'')+'</td>';
+  h += '<td class="hide-mobile">'+(kanSchrijven?'<button class="mat-verwijder btn btn-ghost btn-wis" data-id="'+esc(a.id)+'" data-naam="'+esc(a.code||'')+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>':'')+'</td>';
   h += '</tr>';
   return h;
 }
@@ -23924,7 +23936,7 @@ function _openArtikelEditor(artikel){
         + '<span style="width:8px;height:8px;border-radius:50%;background:'+kl+';flex-shrink:0"></span>'
         + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.naam||'Document')+'</div>'
         + '<div style="font-size:11px;color:var(--muted)">'+esc(_docTypeLabels[d.type]||'Overig')+'</div></div>'
-        + '<button type="button" class="art-doc-del" data-i="'+i+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px">'+ICO.trash+'</button>'
+        + '<button type="button" class="art-doc-del btn btn-ghost btn-wis" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>'
         + '</div>';
     }).join('');
     wrap.querySelectorAll('.art-doc-del').forEach(function(btn){
@@ -24218,8 +24230,8 @@ function renderPompObjecten() {
       h += '<td class="hide-mobile" style="font-size:12px;color:var(--muted)">'+esc(obj.besturing||'—')+'</td>';
       h += '<td><span class="tag" style="background:rgba(79,110,245,.13);color:var(--accent)">'+pompen.length+' pomp'+(pompen.length!==1?'en':'')+'</span></td>';
       h += '<td style="white-space:nowrap">';
-      h += '<button class="btn btn-ghost btn-sm pr-obj-edit" data-id="'+esc(obj.id)+'" style="padding:4px 8px" title="Bewerken">'+ICO.edit+'</button>';
-      if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-obj-del" data-id="'+esc(obj.id)+'" data-naam="'+esc(obj.naam||'')+'" style="padding:4px 8px;color:var(--red)" title="Verwijderen">'+ICO.trash+'</button>';
+      h += '<button class="btn btn-ghost btn-sm pr-obj-edit btn-icoon" data-id="'+esc(obj.id)+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button>';
+      if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-obj-del btn-wis" data-id="'+esc(obj.id)+'" data-naam="'+esc(obj.naam||'')+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
       h += '</td>';
       h += '</tr>';
     });
@@ -24933,8 +24945,8 @@ function renderPompLijst() {
         }
       });
       h += '<td data-col="_acties" style="text-align:right;white-space:nowrap">';
-      if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-edit-btn" data-id="'+esc(p.id)+'" style="padding:3px 8px;font-size:11px" title="Bewerken">'+ICO.edit+'</button> ';
-      if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-del-btn" data-id="'+esc(p.id)+'" data-type="'+esc(p.type||'')+'" data-sn="'+esc(p.serienummer||'')+'" style="padding:3px 8px;font-size:11px;color:var(--red)" title="Verwijderen">'+ICO.trash+'</button>';
+      if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-edit-btn btn-icoon" data-id="'+esc(p.id)+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button> ';
+      if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-del-btn btn-wis" data-id="'+esc(p.id)+'" data-type="'+esc(p.type||'')+'" data-sn="'+esc(p.serienummer||'')+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
       h += '</td></tr>';
     });
     h += '</tbody></table></div></div>';
@@ -25098,7 +25110,7 @@ function renderPompDetail() {
   }
   h += '<div style="flex:1"></div>';
   if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm" id="pr-edit-detail" style="display:inline-flex;align-items:center;gap:5px;flex-shrink:0">'+ICO.edit+' Bewerken</button>';
-  if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm" id="pr-del-detail" style="color:var(--red-t);flex-shrink:0;min-width:36px;min-height:36px" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
+  if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm btn-wis" id="pr-del-detail" style="flex-shrink:0" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
   h += '</div>';
   // Rij 2: pompnaam + SN (volle breedte, niet afgekapt)
   h += '<div style="font-family:\'Instrument Sans\',sans-serif;font-weight:800;font-size:20px;line-height:1.2">'+esc(pomp.type||'Onbekend type')+'</div>';
@@ -25505,7 +25517,7 @@ function renderPompDocumenten(pomp, kanUpload) {
         h += '</div>';
         h += '<div style="display:flex;gap:4px;flex-shrink:0">';
         if(doc.url) h += '<button class="btn btn-ghost btn-sm pr-doc-open" data-url="'+esc(doc.url)+'" data-naam="'+esc(doc.naam||'Document')+'" data-bn="'+esc(doc.bestandsnaam||doc.url)+'" style="font-size:11px;padding:3px 8px">Openen</button>';
-        if(kanUpload) h += '<button class="btn btn-ghost btn-sm pr-doc-del" data-id="'+esc(doc.id)+'" data-url="'+esc(doc.url||'')+'" style="font-size:11px;padding:4px 6px;color:var(--red)">'+ICO.trash+'</button>';
+        if(kanUpload) h += '<button class="btn btn-ghost btn-sm pr-doc-del btn-wis" data-id="'+esc(doc.id)+'" data-url="'+esc(doc.url||'')+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
         h += '</div>';
         h += '</div>';
       });
@@ -25644,7 +25656,7 @@ function renderPompOnderdelen(pomp, kanSchrijven) {
       h += '<td><div style="font-weight:500">'+esc(o.omschrijving||'—')+'</div>'+(o.specificatie?'<div style="font-size:11px;color:var(--muted)">'+esc(o.specificatie)+'</div>':'')+'</td>';
       h += '<td style="text-align:right;font-weight:600">'+esc(String(o.standaardAantal||o.aantal||''))+'</td>';
       h += '<td style="color:var(--muted)">'+esc(o.eenheid||'ST')+'</td>';
-      if(kanSchrijven) h += '<td style="text-align:right"><button class="btn btn-ghost btn-sm pr-ond-del" data-id="'+esc(o.id)+'" style="color:var(--red)">'+ICO.trash+'</button></td>';
+      if(kanSchrijven) h += '<td style="text-align:right"><button class="btn btn-ghost btn-sm pr-ond-del btn-wis" data-id="'+esc(o.id)+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
       h += '</tr>';
     });
     h += '</tbody></table></div></div>';
@@ -29324,7 +29336,7 @@ function _renderMailTemplatesTab() {
     h += '</div>';
     h += '<div style="display:flex;gap:6px;flex-shrink:0">';
     h += '<button class="btn btn-ghost btn-sm tpl-edit" data-id="'+esc(tpl.id)+'" style="display:inline-flex;align-items:center;gap:4px">'+ICO.edit+' Bewerken</button>';
-    if(!isStandaard) h += '<button class="btn btn-ghost btn-sm tpl-del" data-id="'+esc(tpl.id)+'" style="color:var(--red)">'+ICO.trash+'</button>';
+    if(!isStandaard) h += '<button class="btn btn-ghost btn-sm tpl-del btn-wis" data-id="'+esc(tpl.id)+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
     h += '</div>';
     h += '</div>';
@@ -31902,7 +31914,7 @@ function renderInstContracten(el) {
     h += '<td style="padding:10px 14px;font-size:12px;color:var(--muted)">'+(ct.intervalMaanden?ct.intervalMaanden+' mnd':'Op aanvraag')+'</td>';
     h += '<td style="padding:10px 14px;font-size:12px;color:var(--muted)">'+(ct.aantalMonteurs||1)+' man</td>';
     h += '<td style="padding:10px 14px"><div style="width:24px;height:24px;border-radius:50%;background:'+ct.kleur+'"></div></td>';
-    h += '<td style="padding:6px 10px;white-space:nowrap"><button class="btn btn-ghost btn-sm ct-edit" data-id="'+ct.id+'">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm ct-del" data-id="'+ct.id+'" style="color:var(--red)">'+ICO.trash+'</button></td>';
+    h += '<td style="padding:6px 10px;white-space:nowrap"><button class="btn btn-ghost btn-sm ct-edit btn-icoon" data-id="'+ct.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm ct-del btn-wis" data-id="'+ct.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
     h += '</tr>';
   });
   h += '</tbody></table></div></div>';
@@ -32036,7 +32048,7 @@ function renderInstOpdrachten(el) {
     h += '<option value="">— Geen —</option>';
     tplOpties2.forEach(function(t){ h += '<option value="'+esc(t.id)+'"'+(ot.mailTemplate===t.id?' selected':'')+'>'+esc(t.naam||t.id)+'</option>'; });
     h += '</select></td>';
-    h += '<td style="padding:6px 10px;white-space:nowrap"><button class="btn btn-ghost btn-sm ot-edit" data-id="'+ot.id+'">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm ot-del" data-id="'+ot.id+'" style="color:var(--red)">'+ICO.trash+'</button></td></tr>';
+    h += '<td style="padding:6px 10px;white-space:nowrap"><button class="btn btn-ghost btn-sm ot-edit btn-icoon" data-id="'+ot.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm ot-del btn-wis" data-id="'+ot.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td></tr>';
   });
   h += '</tbody></table></div></div>';
   el.innerHTML = h;
@@ -32176,8 +32188,8 @@ function renderInstRollen(el) {
     h += '<div style="width:10px;height:10px;border-radius:50%;background:'+kl+';flex-shrink:0"></div>';
     h += '<span style="font-size:13px;font-weight:600">'+esc(r)+'</span>';
     if(r!=='admin') {
-      h += '<button type="button" class="ikn-knop rol-bewerk" data-rol="'+r+'" title="Bewerken" aria-label="Rol '+esc(r)+' bewerken">'+ICO.edit+'</button>';
-      h += '<button type="button" class="ikn-knop weg rol-verwijder" data-rol="'+r+'" title="Verwijderen" aria-label="Rol '+esc(r)+' verwijderen"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>';
+      h += '<button type="button" class="ikn-knop rol-bewerk btn btn-ghost btn-icoon" data-rol="'+r+'" title="Bewerken" aria-label="Rol '+esc(r)+' bewerken">'+ICO.edit+'</button>';
+      h += '<button type="button" class="btn btn-ghost btn-wis rol-verwijder" data-rol="'+r+'" title="Verwijderen" aria-label="Rol '+esc(r)+' verwijderen"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>';
     } else {
       h += '<span style="margin-left:4px;display:inline-flex;align-items:center"><svg width="12" height="12" fill="var(--accent)" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>';
     }
@@ -32626,7 +32638,7 @@ function renderInstRegister(el) {
       h += '<span class="sleep-greep" title="Sleep om te verplaatsen"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>';
       h += '<button class="btn btn-ghost btn-sm rg-up" data-i="'+i+'" title="Omhoog"'+(i===0?' disabled':'')+' style="padding:3px 6px">&#9650;</button>';
       h += '<button class="btn btn-ghost btn-sm rg-down" data-i="'+i+'" title="Omlaag"'+(i===velden.length-1?' disabled':'')+' style="padding:3px 6px">&#9660;</button>';
-      h += '<button class="btn btn-ghost btn-sm rg-del" data-i="'+i+'" style="color:var(--red);padding:3px 6px">'+ICO.trash+'</button>';
+      h += '<button class="btn btn-ghost btn-sm rg-del btn-wis" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
       h += '</td></tr>';
     });
     h += '</tbody></table></div>';
@@ -32833,7 +32845,7 @@ function renderInstPlanning(el) {
     pb+='<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:8px">';
     pb+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+fmtD(datum)+'</div>';
     pb+='<div style="font-size:12px;color:var(--muted)">'+esc(blokkades[datum].label||'Geblokkeerd')+'</div></div>';
-    pb+='<button class="btn btn-ghost btn-sm blok-del" data-datum="'+datum+'" style="color:var(--red)">'+ICO.trash+'</button></div>';
+    pb+='<button class="btn btn-ghost btn-sm blok-del btn-wis" data-datum="'+datum+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></div>';
   });
   if(!bdKeys.length) h+='<div style="font-size:13px;color:var(--muted)">Geen blokkadedagen ingesteld</div>';
   pb+='</div>';
@@ -33270,7 +33282,7 @@ function renderInstGebruikers(el) {
       html+='<td><button class="btn btn-sm gb-actief" data-key="'+esc(gb._key)+'" data-nu="'+(isActief?'1':'0')+'" '
            +'style="background:'+(isActief?'#10b98122':'#6b769422')+';color:'+(isActief?'#10b981':'#6b7694')+';border:none;font-size:11px;padding:4px 10px">'
            +(isActief?'Actief':'Geblokkeerd')+'</button></td>';
-      html+='<td><button class="btn btn-ghost btn-sm gb-del" data-key="'+esc(gb._key)+'" style="color:var(--red)">'+ICO.trash+'</button></td>';
+      html+='<td><button class="btn btn-ghost btn-sm gb-del btn-wis" data-key="'+esc(gb._key)+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
       html+='</tr>';
     });
     html+='</tbody></table></div>';
@@ -34332,8 +34344,8 @@ function _woRenderWerkdocs(wrap, kanSchrijven){
         if(d.grootte) h += '<div style="font-size:11px;color:var(--muted)">'+esc(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.grootte):(Math.round(d.grootte/1024)+' KB'))+'</div>';
         h += '</div>';
         if(kanSchrijven){
-          h += '<button type="button" class="wo-wd-edit" data-id="'+esc(d.id)+'" title="Naam wijzigen" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;display:flex">'+ICO.edit+'</button>';
-          h += '<button type="button" class="wo-wd-del" data-id="'+esc(d.id)+'" title="Verwijderen" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;display:flex">'+ICO.trash+'</button>';
+          h += '<button type="button" class="wo-wd-edit btn btn-ghost btn-icoon" data-id="'+esc(d.id)+'" title="Naam wijzigen" aria-label="Bewerken">'+ICO.edit+'</button>';
+          h += '<button type="button" class="wo-wd-del btn btn-ghost btn-wis" data-id="'+esc(d.id)+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
         }
         h += '</div>';
       });
@@ -34718,8 +34730,8 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
         } else {
           h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-prio" data-id="'+esc(w.id)+'" title="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" aria-label="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" style="padding:6px 9px'+(isHoog?';color:var(--red);border-color:rgba(239,68,68,.4)':'')+'">'+ICO.flag+'</button>';
         }
-        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-edit" data-id="'+esc(w.id)+'" title="Bewerken" aria-label="Bewerken" style="padding:6px 9px">'+ICO.edit+'</button>';
-        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-del" data-id="'+esc(w.id)+'" title="Verwijderen" aria-label="Verwijderen" style="padding:6px 9px;color:var(--red)">'+ICO.trash+'</button></td>';
+        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-edit btn-icoon" data-id="'+esc(w.id)+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button>';
+        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-del btn-wis" data-id="'+esc(w.id)+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button></td>';
       }
       h += '</tr>';
 
@@ -35018,7 +35030,7 @@ function _woToonAanmaakForm(){
       b += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:8px;margin-bottom:5px">';
       b += '<input type="text" class="input wo-nieuw-doc-naam" data-di="'+di+'" value="'+esc(d.naam)+'" style="flex:1;min-width:0;font-size:12px;padding:6px 9px">';
       if(d.file && d.file.size) b += '<span style="font-size:11px;color:var(--muted);white-space:nowrap">'+(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.file.size):(Math.round(d.file.size/1024)+' KB'))+'</span>';
-      b += '<button type="button" class="wo-nieuw-doc-del" data-di="'+di+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:2px">'+ICO.trash+'</button>';
+      b += '<button type="button" class="wo-nieuw-doc-del btn btn-ghost btn-wis" data-di="'+di+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
       b += '</div>';
     });
   }
@@ -36204,7 +36216,7 @@ function _woUrenSectieHtml(scope, data){
       h += '<option value="'+esc(m.id)+'"'+(String(u.medewerkerId||'')===String(m.id)?' selected':'')+'>'+esc(naam)+'</option>';
     });
     h += '</select>';
-    if(bew) h += '<button type="button" class="wox-uur-del" data-scope="'+esc(scope)+'" data-ui="'+ui+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:2px">'+ICO.trash+'</button>';
+    if(bew) h += '<button type="button" class="wox-uur-del btn btn-ghost btn-wis" data-scope="'+esc(scope)+'" data-ui="'+ui+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
     // Rij 2: datum + van + tot + uren
     h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">';
@@ -36240,7 +36252,7 @@ function _woMatSectieHtml(scope, data){
     h += '</div>';
     // Aantal-stepper
     h += '<input type="number" step="1" min="0" class="wox-mat-aantal" data-scope="'+esc(scope)+'" data-mi="'+mi+'" value="'+esc(m.aantal!=null?m.aantal:1)+'"'+(bew?'':' disabled')+' style="width:64px;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text)">';
-    if(bew) h += '<button type="button" class="wox-mat-del" data-scope="'+esc(scope)+'" data-mi="'+mi+'" style="background:none;border:none;color:var(--red);cursor:pointer;padding:2px">'+ICO.trash+'</button>';
+    if(bew) h += '<button type="button" class="wox-mat-del btn btn-ghost btn-wis" data-scope="'+esc(scope)+'" data-mi="'+mi+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
   });
   if(bew) h += '<button type="button" class="wox-mat-kies btn btn-ghost btn-sm" data-scope="'+esc(scope)+'" style="margin-top:4px">+ Materiaal uit catalogus</button>';
@@ -36319,9 +36331,9 @@ function _woDocSectieHtml(scope, data){
     if(d._pending){
       h += '<span style="font-size:11px;color:var(--orange-t)">uploaden…</span>';
     } else if(bew){
-      h += '<button type="button" class="wox-doc-edit" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Naam wijzigen" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;display:flex">'+ICO.edit+'</button>';
+      h += '<button type="button" class="wox-doc-edit btn btn-ghost btn-icoon" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Naam wijzigen" aria-label="Bewerken">'+ICO.edit+'</button>';
     }
-    if(bew && !d._pending) h += '<button type="button" class="wox-doc-del" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Verwijderen" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;display:flex">'+ICO.trash+'</button>';
+    if(bew && !d._pending) h += '<button type="button" class="wox-doc-del btn btn-ghost btn-wis" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
   });
   if(bew){
@@ -38230,7 +38242,7 @@ function _renderChecklistTemplateLijst(el){
     h += '<div style="font-size:11px;color:var(--muted)">'+aantal+(aantal===1?' vraag':' vragen')+(t.omschrijving?(' \u00b7 '+esc(t.omschrijving)):'')+'</div>';
     h += '</div>';
     h += '<button class="btn btn-ghost btn-sm wbi-cl-bewerk" data-id="'+esc(t.id)+'">Bewerken</button>';
-    h += '<button class="btn btn-ghost btn-sm wbi-cl-verwijder" data-id="'+esc(t.id)+'" style="color:var(--red)">'+ICO.trash+'</button>';
+    h += '<button class="btn btn-ghost btn-sm wbi-cl-verwijder btn-wis" data-id="'+esc(t.id)+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
   });
   h += '</div>';
@@ -38400,7 +38412,7 @@ function _clVeldRow(v, i, totaal){
 h += '<span class="sleep-greep" title="Sleep om te verplaatsen"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>';
     h += '<button type="button" class="btn btn-ghost btn-sm cl-veld-omhoog" data-i="'+i+'"'+(i===0?' disabled':'')+' title="Omhoog">\u2191</button>';
   h += '<button type="button" class="btn btn-ghost btn-sm cl-veld-omlaag" data-i="'+i+'"'+(i===totaal-1?' disabled':'')+' title="Omlaag">\u2193</button>';
-  h += '<button type="button" class="btn btn-ghost btn-sm cl-veld-verwijder" data-i="'+i+'" style="color:var(--red)">'+ICO.trash+'</button>';
+  h += '<button type="button" class="btn btn-ghost btn-sm cl-veld-verwijder btn-wis" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
   h += '</div>';
 
   if(v.type==='paginaeinde'){
@@ -38597,7 +38609,7 @@ function _pdfWerkorderUIhtml(){
   b += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
   b += '<div id="pto-logo-preview" style="height:40px;min-width:60px;border:1px solid var(--border);border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px">'+(t.logoData?'<img src="'+esc(t.logoData)+'" style="max-height:34px;max-width:100px;object-fit:contain">':'<span style="font-size:11px;color:var(--muted)">Bedrijfslogo</span>')+'</div>';
   b += '<button class="btn btn-ghost btn-sm" id="pto-logo-upload">Eigen logo</button>';
-  b += '<button class="btn btn-ghost btn-sm" id="pto-logo-wis" style="color:var(--red)'+(t.logoData?'':';display:none')+'">'+ICO.trash+'</button>';
+  b += '<button class="btn btn-ghost btn-sm btn-wis" id="pto-logo-wis" style="color:var(--red)'+(t.logoData?'':';display:none')+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
   b += '<input type="file" id="pto-logo-file" accept="image/png,image/jpeg" style="display:none">';
   b += '</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Leeg = het bedrijfslogo uit Bedrijfsgegevens.</div></div>';
   b += '<label style="font-size:12px;color:var(--muted);display:block;margin:12px 0 4px">Voettekst (leeg = bedrijfsnaam + adres)</label>';
@@ -38712,7 +38724,7 @@ function _pdfWerkbonUIhtml(){
   b += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
   b += '<div id="ptw-logo-preview" style="height:40px;min-width:60px;border:1px solid var(--border);border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px">'+(t.logoData?'<img src="'+esc(t.logoData)+'" style="max-height:34px;max-width:100px;object-fit:contain">':'<span style="font-size:11px;color:var(--muted)">Bedrijfslogo</span>')+'</div>';
   b += '<button class="btn btn-ghost btn-sm" id="ptw-logo-upload">Eigen logo</button>';
-  b += '<button class="btn btn-ghost btn-sm" id="ptw-logo-wis" style="color:var(--red)'+(t.logoData?'':';display:none')+'">'+ICO.trash+'</button>';
+  b += '<button class="btn btn-ghost btn-sm btn-wis" id="ptw-logo-wis" style="color:var(--red)'+(t.logoData?'':';display:none')+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
   b += '<input type="file" id="ptw-logo-file" accept="image/png,image/jpeg" style="display:none">';
   b += '</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Leeg = het bedrijfslogo uit Bedrijfsgegevens.</div></div>';
   b += '<div style="font-weight:600;font-size:13px;margin:8px 0 8px">Secties (aan/uit)</div>';
