@@ -935,8 +935,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .topbar{overflow:hidden}
   /* Het meldingenpaneel hing onder de bovenbalk en werd daardoor afgeknipt: onzichtbaar op de
      telefoon. Vast gepositioneerd valt het buiten die knip, over de volle breedte. */
-  #notif-panel{position:fixed!important;left:12px!important;right:12px!important;top:calc(64px + var(--safe-top,0px))!important;width:auto!important;max-height:72vh!important}
-  #notif-lijst{max-height:calc(72vh - 50px)!important}
+  #notif-panel{position:fixed!important;left:0!important;right:0!important;top:calc(64px + var(--safe-top,0px))!important;bottom:0!important;width:auto!important;max-height:none!important;border-radius:0!important;border-width:1px 0 0!important}
 
   /* ── CONTENT: scrollbaar, niet breder dan scherm ── */
   .content{
@@ -1041,16 +1040,34 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 /* ── Notificaties ── */
 #notif-badge{display:none}
 #notif-badge.heeft-notifs{display:flex!important}
-.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+#notif-btn{width:34px;height:34px;padding:0!important;justify-content:center;border-radius:8px!important}
+#notif-btn #notif-badge{min-width:18px!important;width:auto!important;height:18px!important;padding:0 5px;border-radius:9px!important;font-size:11px!important;top:-6px!important;right:-6px!important;border:2px solid var(--surface)}
+@media (pointer:coarse){#notif-btn{width:44px;height:44px;border-radius:12px!important}}
+.notif-kop{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--border)}
+.notif-kop h3{font-size:16px;font-weight:700;margin-right:auto}
+.notif-kop h3 small{font-size:13px;font-weight:600;color:var(--muted);margin-left:6px}
+.notif-tk{min-height:40px;padding:0 12px;border:none;background:none;border-radius:10px;font:600 13px 'Instrument Sans',sans-serif;color:var(--accent-t);cursor:pointer}
+.notif-tk:hover{background:var(--surface2)}
+.notif-voet{border-top:1px solid var(--border);padding:4px 8px;display:flex;justify-content:center}
+.notif-voet .notif-tk{color:var(--muted)}
+.notif-groep{font-size:13px;font-weight:700;color:var(--muted);padding:14px 16px 6px}
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:12px 8px 12px 16px;position:relative;cursor:pointer;transition:background .15s}
 .notif-item:hover{background:var(--surface2)}
-.notif-item.gelezen{opacity:.5}
-.notif-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+/* Ongelezen: lichte tint en een stip; gelezen blijft gewoon leesbaar (stond op halve doorzichtigheid) */
+.notif-item.nieuw{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.notif-item.nieuw::before{content:'';position:absolute;left:5px;top:26px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.notif-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .notif-tekst{flex:1;min-width:0}
-.notif-titel{font-size:13px;font-weight:600;margin-bottom:2px}
-.notif-sub{font-size:11px;color:var(--muted)}
-.notif-tijd{font-size:10px;color:var(--muted);white-space:nowrap;margin-left:4px;flex-shrink:0}
-.notif-del{background:none;border:none;cursor:pointer;color:var(--muted);padding:2px 4px;opacity:0;transition:opacity .15s;flex-shrink:0}
-.notif-item:hover .notif-del{opacity:1}
+.notif-titel{font-size:14px;font-weight:500;line-height:1.3}
+.notif-item.nieuw .notif-titel{font-weight:600}
+.notif-sub{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.4}
+.notif-tijd{font-size:12px;color:var(--muted);margin-top:4px}
+.notif-del{width:36px;height:36px;border:none;background:none;border-radius:50%;color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.notif-del:hover{background:var(--surface2);color:var(--text)}
+@media (pointer:coarse){.notif-del{width:44px;height:44px}}
+.notif-leeg{padding:48px 24px;text-align:center;color:var(--muted);font-size:14px}
+.notif-leeg svg{opacity:.6;margin-bottom:8px}
 
 /* ── Instellingen accordions (globaal: desktop én mobiel) ── */
 .inst-acc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
@@ -1736,12 +1753,13 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
             <span id="notif-badge" style="position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:800;align-items:center;justify-content:center;line-height:1">0</span>
           </button>
           <!-- Notificatie dropdown -->
-          <div id="notif-panel" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:340px;max-height:420px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:500;overflow:hidden;flex-direction:column">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)">
-              <div style="font-weight:700;font-size:14px">Notificaties</div>
-              <div style="display:flex;gap:4px"><button id="notif-alles-gelezen" style="background:none;border:none;font-size:12px;color:var(--accent-t);cursor:pointer;padding:6px 8px;border-radius:6px">Alles gelezen</button><button id="notif-alles-weg" style="background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;padding:6px 8px;border-radius:6px">Alles wissen</button></div>
+          <div id="notif-panel" role="dialog" aria-label="Meldingen" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:380px;max-height:560px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:500;overflow:hidden;flex-direction:column">
+            <div class="notif-kop">
+              <h3>Meldingen<small id="notif-kop-n"></small></h3>
+              <button type="button" id="notif-alles-gelezen" class="notif-tk">Alles gelezen</button>
             </div>
-            <div id="notif-lijst" style="overflow-y:auto;max-height:340px"></div>
+            <div id="notif-lijst" style="overflow-y:auto;flex:1;min-height:0"></div>
+            <div class="notif-voet" id="notif-voet"><button type="button" id="notif-alles-weg" class="notif-tk">Alles wissen</button></div>
           </div>
         </div>
         <!-- Administratie switcher (alleen admin) -->
@@ -33872,11 +33890,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function notifIcoon(type) {
     var icons = {
-      verlof:      {svg:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',  kl:'#4a6cf7'},
+      verlof:      {svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>', kl:'#4a6cf7'},
+      verzuim:     {svg:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>', kl:'#ef4444'},
       overuren:    {svg:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',                                    kl:'#f59e0b'},
       onkosten:    {svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',       kl:'#10b981'},
       storingsdienst:{svg:'<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>', kl:'#8b5cf6'},
-      verjaardag:  {svg:'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',                      kl:'#ef4444'},
+      verjaardag:  {svg:'<path d="M20 21v-8a2 2 0 00-2-2H6a2 2 0 00-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3M12 8v3M17 8v3"/>', kl:'#ec4899'},
     };
     return icons[type] || {svg:'<circle cx="12" cy="12" r="10"/>',kl:'#6b7694'};
   }
@@ -33936,26 +33955,31 @@ document.addEventListener('DOMContentLoaded', function() {
     var data = APP._notificaties||{};
     var items = Object.keys(data).map(function(k){return Object.assign({_key:k},data[k]);});
     items.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+    // Kop: aantal nieuw + 'Alles gelezen' alleen als er iets ongelezen is; voet alleen met meldingen
+    var nNieuw = items.filter(function(n){ return !n.gelezen; }).length;
+    var kopN = document.getElementById('notif-kop-n'); if(kopN) kopN.textContent = nNieuw ? nNieuw+' nieuw' : '';
+    var ag = document.getElementById('notif-alles-gelezen'); if(ag) ag.style.display = nNieuw ? '' : 'none';
+    var voet = document.getElementById('notif-voet'); if(voet) voet.style.display = items.length ? '' : 'none';
     if(!items.length) {
-      lijst.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">Geen notificaties</div>';
+      lijst.innerHTML = '<div class="notif-leeg"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><div>Geen meldingen</div></div>';
       return;
     }
-    var h = '';
-    items.forEach(function(n){
+    var begin = new Date(); begin.setHours(0,0,0,0);
+    var vandaag = items.filter(function(n){ return (n.ts||0) >= begin.getTime(); });
+    var eerder  = items.filter(function(n){ return (n.ts||0) <  begin.getTime(); });
+    function item(n){
       var ic = notifIcoon(n.type);
-      var tijdStr = n.ts ? tijdGeleden(n.ts) : '';
-      h += '<div class="notif-item'+(n.gelezen?' gelezen':'')+'" data-key="'+n._key+'">';
-      h += '<div class="notif-icon" style="background:'+ic.kl+'22;color:'+ic.kl+'">';
-      h += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+ic.svg+'</svg></div>';
-      h += '<div class="notif-tekst">';
-      h += '<div class="notif-titel">'+esc(n.titel||'')+'</div>';
-      h += '<div class="notif-sub">'+esc(n.tekst||'')+'</div></div>';
-      h += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">';
-      h += '<span class="notif-tijd">'+tijdStr+'</span>';
-      h += '<button class="notif-del" data-key="'+n._key+'" title="Verwijderen">'+
-           '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
-      h += '</div></div>';
-    });
+      return '<div class="notif-item'+(n.gelezen?'':' nieuw')+'" data-key="'+esc(n._key)+'" role="button" tabindex="0" aria-label="'+esc((n.gelezen?'':'Nieuw: ')+(n.titel||''))+'">'
+        + '<div class="notif-icon" style="background:'+ic.kl+'1f;color:'+ic.kl+'"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+ic.svg+'</svg></div>'
+        + '<div class="notif-tekst"><div class="notif-titel">'+esc(n.titel||'')+'</div>'
+        + (n.tekst ? '<div class="notif-sub">'+esc(n.tekst)+'</div>' : '')
+        + (n.ts ? '<div class="notif-tijd">'+tijdGeleden(n.ts)+'</div>' : '') + '</div>'
+        + '<button type="button" class="notif-del" data-key="'+esc(n._key)+'" title="Verwijderen" aria-label="Melding verwijderen">'
+        + '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+    }
+    var h = '';
+    if(vandaag.length) h += '<div class="notif-groep">Vandaag</div>' + vandaag.map(item).join('');
+    if(eerder.length)  h += '<div class="notif-groep">Eerder</div>'  + eerder.map(item).join('');
     lijst.innerHTML = h;
 
     // Events: klik op item → markeer gelezen + navigeer
@@ -33984,10 +34008,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function tijdGeleden(ts) {
     var diff = Math.floor((Date.now()-ts)/1000);
-    if(diff<60) return 'Nu';
-    if(diff<3600) return Math.floor(diff/60)+'m';
-    if(diff<86400) return Math.floor(diff/3600)+'u';
-    return Math.floor(diff/86400)+'d';
+    if(diff < 60) return 'zojuist';
+    if(diff < 3600) return Math.floor(diff/60)+' min';
+    var d = new Date(ts), nu = new Date();
+    var begin = new Date(nu); begin.setHours(0,0,0,0);
+    if(ts >= begin.getTime()) return Math.floor(diff/3600)+' uur';
+    var gisteren = new Date(begin); gisteren.setDate(gisteren.getDate()-1);
+    if(ts >= gisteren.getTime()) return 'gisteren';
+    var mnd = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    return d.getDate()+' '+mnd[d.getMonth()]+(d.getFullYear()!==nu.getFullYear() ? ' '+d.getFullYear() : '');
   }
 
   function markeerGelezen(key) {
@@ -34082,15 +34111,19 @@ document.addEventListener('DOMContentLoaded', function() {
     renderNotifLijst();
   });
   var allesWeg = document.getElementById('notif-alles-weg');
-  if(allesWeg) allesWeg.addEventListener('click', function(){
+  if(allesWeg) allesWeg.addEventListener('click', function(e){
+    e.stopPropagation();
     var mijnId = getNotifId();
-    if(mijnId) {
+    if(!mijnId) return;
+    bevestigActie('Alle meldingen wissen', 'Alle meldingen worden verwijderd. Dit kan niet ongedaan worden.', function(){
       FB.ref(dbPath('notificaties', mijnId)).remove();
       APP._notificaties = {};
       renderNotifLijst();
       renderNotifBadge();
-    }
+    });
   });
+  // Escape sluit het paneel
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && _notifOpen){ sluitNotifPanel(); var nb=document.getElementById('notif-btn'); if(nb) nb.focus(); } });
 
   // ── Automatische notificaties bij triggers ────────────────────
   function checkVerjaardag() {
