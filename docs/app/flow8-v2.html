@@ -7525,6 +7525,34 @@ function toonPagina(id) {
 // ═══════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════
+// Telefoon ↔ desktop: pagina's kiezen hun weergave bij het opbouwen (_hrMobiel, _planIsMobiel).
+// Schuift het venster over de grens van 768px (iPad draaien, Mac-venster smaller maken), dan
+// de huidige pagina opnieuw opbouwen. Niet terwijl er een formulier (modal) open staat: dan pas
+// zodra dat dicht is. Instellingen met niet-opgeslagen wijzigingen blijven ongemoeid.
+(function(){
+  if(!window.matchMedia) return;
+  var mq = window.matchMedia('(max-width: 768px)'), wachtT = null;
+  function opnieuw(){
+    var app = document.getElementById('app');
+    if(!APP.activePage || !app || app.classList.contains('hidden')) return;
+    if(APP.activePage === 'instellingen' && typeof _instIsVuil === 'function' && _instIsVuil()) return;
+    if(document.querySelector('.modal-overlay.open')){
+      if(!wachtT) wachtT = setInterval(function(){
+        if(document.querySelector('.modal-overlay.open')) return;
+        clearInterval(wachtT); wachtT = null; opnieuw();
+      }, 400);
+      return;
+    }
+    try { toonPagina(APP.activePage); } catch(e){ log('WARN','UI','Opnieuw opbouwen na breedtewissel mislukt: '+(e.message||e)); }
+  }
+  // Alleen bij een echte wissel van stand: onthoud de laatste, en luister naar zowel het
+  // media-signaal als resize (oudere Safari-versies kennen alleen addListener).
+  var laatste = mq.matches, rt = null;
+  function check(){ var nu = mq.matches; if(nu === laatste) return; laatste = nu; opnieuw(); }
+  if(mq.addEventListener) mq.addEventListener('change', check); else if(mq.addListener) mq.addListener(check);
+  window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(check, 150); }, { passive:true });
+})();
+
 function toonLogin() {
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').classList.add('hidden');
