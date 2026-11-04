@@ -7867,7 +7867,8 @@ function openGlobaalZoek() {
   var input   = document.getElementById('global-zoek-input');
   if(!overlay) return;
   overlay.style.display = 'block';
-  setTimeout(function(){ if(input) input.focus(); }, 50);
+  // Direct focussen, niet na een timeout: iOS opent het toetsenbord alleen binnen de tik zelf.
+  if(input) input.focus();
 }
 function sluitGlobaalZoek(e) {
   if(e && e.target !== document.getElementById('global-zoek-overlay')) return;
@@ -7877,39 +7878,55 @@ function sluitGlobaalZoek(e) {
   var res = document.getElementById('global-zoek-resultaten');
   if(res) res.innerHTML = '';
 }
+// Zoektekst vergelijkbaar maken: kleine letters, zonder accenten, en altijd een string
+// (een debiteurnummer kan als getal zijn opgeslagen; .includes op een getal brak het zoeken af).
+function _gzNorm(v){ return String(v==null?'':v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+// Komen alle zoekwoorden ergens in deze velden voor? "jansen nieuwegein" vindt zo ook een
+// klant met de naam in het ene veld en de plaats in het andere, en "3433AB" vindt "3433 AB".
+function _gzPast(woorden, velden){
+  if(!woorden.length) return false;
+  var hooi = velden.map(_gzNorm).join(' ');
+  hooi += ' ' + hooi.replace(/(\d{4})\s+([a-z]{2})\b/g, '$1$2');
+  return woorden.every(function(w){ return hooi.indexOf(w) >= 0; });
+}
 function globaalZoeken(q) {
   var res = document.getElementById('global-zoek-resultaten');
   if(!res) return;
   if(!q || q.length < 1) { res.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Typ om te zoeken...</div>'; return; }
-  var ql = q.toLowerCase();
+  var woorden = _gzNorm(q).split(/\s+/).filter(Boolean);
   var resultaten = [];
+  // Alleen modules die je mag zien: anders vond een monteur medewerkers op e-mailadres en
+  // opende hun gegevens, terwijl de pagina erachter "Geen toegang" toonde.
+  function mag(mod){ return isAdmin() || magLezen(mod); }
 
   // Serviceklanten
-  APP.serviceklanten.filter(function(k){ return k.status!=='passief'; }).forEach(function(k){
-    if((k.naam||'').toLowerCase().includes(ql)||(k.debNr||'').includes(ql)||(k.postcode||'').toLowerCase().includes(ql)||(k.plaats||'').toLowerCase().includes(ql)) {
+  if(mag('serviceklanten')) APP.serviceklanten.filter(function(k){ return k.status!=='passief'; }).forEach(function(k){
+    var ka = (typeof _apKlantAdres==='function') ? (_apKlantAdres(k)||{}) : {};
+    if(_gzPast(woorden, [k.naam, k.debNr, k.adres, k.postcode, k.plaats, ka.adres, ka.postcode, ka.plaats, k.contactpersoon])) {
       resultaten.push({ type:'serviceklant', icon:ICO.wrench, label:k.naam, sub:(k.contractType||'')+(k.plaats?' · '+k.plaats:''), id:k.id, nav:'serviceklanten' });
     }
   });
 
   // Debiteuren
-  APP.debiteuren.forEach(function(d){
-    if((d.naam||'').toLowerCase().includes(ql)||(d.nr||'').includes(ql)||(d.postcode||'').toLowerCase().includes(ql)||(d.plaats||'').toLowerCase().includes(ql)||(d.email||'').toLowerCase().includes(ql)) {
-      resultaten.push({ type:'debiteur', icon:ICO.pdf, label:debNaam(d), sub:(d.nr?'Deb.'+d.nr+' · ':'')+( d.plaats||''), id:d.id, nav:'debiteuren' });
+  if(mag('debiteuren')) APP.debiteuren.forEach(function(d){
+    if(_gzPast(woorden, [debNaam(d), d.nr, d.adres, d.postcode, d.plaats, d.email])) {
+      resultaten.push({ type:'debiteur', icon:ICO.gebouw, label:debNaam(d), sub:(d.nr?'Deb. '+d.nr+' · ':'')+(d.plaats||''), id:d.id, nav:'debiteuren' });
     }
   });
 
   // Medewerkers
-  APP.medewerkers.forEach(function(m){
+  if(mag('medewerkers')) APP.medewerkers.forEach(function(m){
     var naam = (m.voornaam||'')+' '+(m.achternaam||'');
-    if(naam.toLowerCase().includes(ql)||(m.email||'').toLowerCase().includes(ql)||(m.functie||'').toLowerCase().includes(ql)) {
+    if(_gzPast(woorden, [naam, m.email, m.functie])) {
       resultaten.push({ type:'medewerker', icon:ICO.user, label:naam.trim(), sub:(m.functie||m.rol||''), id:m.id, nav:'medewerkers' });
     }
   });
 
   // Opdrachten
-  APP.opdrachten.filter(function(o){ var d=new Date(); d.setDate(d.getDate()-30); return o.datum && o.datum >= (d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')); }).forEach(function(o){
-    if((o.klantNaam||'').toLowerCase().includes(ql)||(o.adres||'').toLowerCase().includes(ql)||(o.postcode||'').toLowerCase().includes(ql)) {
-      resultaten.push({ type:'opdracht', icon:ICO.kalender, label:o.klantNaam||'Opdracht', sub:fmtD(o.datum)+(o.tijdVan?' '+o.tijdVan:'')+(o.status?' · '+o.status:''), id:o.id, nav:'planning' });
+  if(mag('planning')) APP.opdrachten.filter(function(o){ var d=new Date(); d.setDate(d.getDate()-30); return o.datum && o.datum >= (d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')); }).forEach(function(o){
+    if(_gzPast(woorden, [o.klantNaam, o.adres, o.postcode, o.plaats, o.externNummer])) {
+      var st = o.status ? tagStatus(o.status).replace(/<[^>]*>/g,'').trim() : '';
+      resultaten.push({ type:'opdracht', icon:ICO.kalender, label:o.klantNaam||'Opdracht', sub:fmtD(o.datum)+(o.tijdVan?' '+o.tijdVan:'')+(st?' · '+st:''), id:o.id, nav:'planning' });
     }
   });
 
