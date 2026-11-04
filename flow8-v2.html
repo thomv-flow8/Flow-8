@@ -1587,6 +1587,10 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
         <span style="width:20px;height:20px;border-radius:50%;background:rgba(239,68,68,.18);color:#f98a8a;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:11px;height:11px"><path d="M12 8v5M12 16.5h.01"></path></svg></span>
         <span id="login-err-txt" style="font-size:13px;line-height:1.45;color:#f8a9a9"></span>
       </div>
+      <div id="login-info" role="status" style="display:none;align-items:flex-start;gap:10px;background:rgba(79,110,245,.1);border:1px solid rgba(79,110,245,.35);border-radius:var(--radius);padding:12px 13px">
+        <span style="width:20px;height:20px;border-radius:50%;background:rgba(79,110,245,.2);color:#9fb0ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><path d="M2 6h20v12H2z"/></svg></span>
+        <span id="login-info-txt" style="font-size:13px;line-height:1.45;color:#c9d2ff"></span>
+      </div>
 
       <label style="display:flex;flex-direction:column;gap:7px">
         <span id="login-t-email" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#868da3">E-mailadres</span>
@@ -1637,9 +1641,11 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
       <span style="margin-left:auto;color:#6f7688;font-size:18px">›</span>
     </button>
 
+    <div id="login-ios-uitleg" style="display:none;width:100%;margin-top:8px;padding:12px 15px;border:1px solid #262b3d;border-radius:var(--radius-lg);background:rgba(255,255,255,.035);font-size:13.5px;line-height:1.5;color:#c9ccd6"></div>
+
     <!-- Footer -->
     <div style="display:flex;align-items:center;gap:14px;margin-top:20px;font-family:'Space Mono',monospace;font-size:11px;color:#868da3">
-      <span id="login-versie">v2.0</span><span style="opacity:.4">·</span><button type="button" id="login-support" class="login-raak" style="color:#868da3;background:none;border:none;cursor:pointer;font-family:inherit;font-size:11px">Support</button><span style="opacity:.4">·</span><button type="button" id="login-debug" class="login-raak" style="color:#868da3;background:none;border:none;cursor:pointer;font-family:inherit;font-size:11px">Debug log</button>
+      <span id="login-versie">v2.0</span><span style="opacity:.4">·</span><button type="button" id="login-support" class="login-raak" style="color:#868da3;background:none;border:none;cursor:pointer;font-family:inherit;font-size:11px">Support</button><span id="login-debug-wrap" style="display:none;gap:14px;align-items:center"><span style="opacity:.4">·</span><button type="button" id="login-debug" class="login-raak" style="color:#868da3;background:none;border:none;cursor:pointer;font-family:inherit;font-size:11px">Debug log</button></span>
     </div>
   </div>
 
@@ -6293,6 +6299,23 @@ var _LOGIN_EN = {
   installT:'Add to home screen', installP:'Works like an app, no app store',
   pwShow:'Show password', pwHide:'Hide password'
 };
+// Meldingen op het inlogscherm, in de gekozen taal. Bewust één melding voor een verkeerd
+// wachtwoord én een onbekend adres: twee verschillende teksten verraden welke adressen een
+// account hebben. Firebase geeft daarvoor tegenwoordig 'auth/invalid-credential'; die ontbrak,
+// waardoor de gebruiker 'Firebase: Error (auth/invalid-credential).' te zien kreeg.
+var _LOGIN_MELD = {
+  nl:{ cred:'E-mailadres of wachtwoord klopt niet.', net:'Geen verbinding. Controleer je internet en probeer het opnieuw.', blok:'Je account is geblokkeerd. Neem contact op met je beheerder.', veel:'Te vaak geprobeerd. Wacht een paar minuten en probeer het opnieuw.', mail:'Dit is geen geldig e-mailadres.', leeg:'Vul je e-mailadres en wachtwoord in.', anders:'Inloggen lukt nu niet. Probeer het opnieuw.', eerstMail:'Vul eerst je e-mailadres in.', reset:'Als dit adres bij ons bekend is, ontvang je binnen een paar minuten een e-mail om een nieuw wachtwoord in te stellen. Kijk ook in je spam.', activatie:'Je account wacht op activatie door een beheerder.', geenBedrijf:'Je account is nog niet aan een bedrijf gekoppeld. Neem contact op met je beheerder.', popup:'Het Google-venster werd gesloten voordat je was ingelogd.', iosT:'Zet Flow8 op je beginscherm', iosP:'Werkt dan als app, zonder app store', iosUitleg:'Tik onderin Safari op <b>Deel</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:15px;height:15px;vertical-align:-2px"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg> en kies <b>Zet op beginscherm</b>.' },
+  en:{ cred:'Email address or password is incorrect.', net:'No connection. Check your internet and try again.', blok:'Your account is blocked. Contact your administrator.', veel:'Too many attempts. Wait a few minutes and try again.', mail:'This is not a valid email address.', leeg:'Enter your email address and password.', anders:'Signing in is not possible right now. Please try again.', eerstMail:'Enter your email address first.', reset:'If this address is known to us, you will receive an email to set a new password within a few minutes. Also check your spam folder.', activatie:'Your account is waiting for activation by an administrator.', geenBedrijf:'Your account is not linked to a company yet. Contact your administrator.', popup:'The Google window was closed before you signed in.', iosT:'Add Flow8 to your home screen', iosP:'Works like an app, no app store', iosUitleg:'Tap <b>Share</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:15px;height:15px;vertical-align:-2px"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg> at the bottom of Safari and choose <b>Add to Home Screen</b>.' }
+};
+function _lm(k){ return (_LOGIN_MELD[_loginLang] || _LOGIN_MELD.nl)[k]; }
+function _loginFoutTekst(code){
+  var k = { 'auth/invalid-credential':'cred', 'auth/invalid-login-credentials':'cred', 'auth/wrong-password':'cred', 'auth/user-not-found':'cred',
+    'auth/network-request-failed':'net', 'auth/internal-error':'net', 'auth/user-disabled':'blok', 'auth/too-many-requests':'veel',
+    'auth/invalid-email':'mail', 'auth/popup-closed-by-user':'popup', 'auth/cancelled-popup-request':'popup' }[code];
+  return _lm(k || 'anders');
+}
+// iPhone/iPad in Safari, nog niet als app geopend: daar bestaat geen installatieprompt
+function _loginIsIosBrowser(){ return /iphone|ipad|ipod/i.test(navigator.userAgent||'') && !window.navigator.standalone; }
 var _loginLang = 'nl', _loginShowPw = false;
 var _LOGIN_EYE = 'M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z M12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z';
 var _LOGIN_EYE_OFF = 'M1 1l22 22 M10.6 10.7a2 2 0 0 0 2.8 2.8 M6.7 6.8C4.6 8.1 3 10 2 12c1.8 3.6 5.4 6 10 6 1.7 0 3.2-.3 4.6-.9 M9.9 5.2A9.7 9.7 0 0 1 12 5c4.6 0 8.2 2.4 10 6-.6 1.2-1.4 2.3-2.3 3.2';
@@ -6302,7 +6325,10 @@ function _loginTaal(){
   var set = function(id,val){ var el=document.getElementById(id); if(el) el.textContent=val; };
   set('login-title', t.title); set('login-t-email', t.email); set('login-t-pw', t.pw);
   set('login-t-remember', t.remember); set('login-t-or', t.or); set('login-t-google', t.google);
-  set('login-t-offline', t.offline); set('login-t-installT', t.installT); set('login-t-installP', t.installP);
+  set('login-t-offline', t.offline);
+  var _ios = _loginIsIosBrowser();
+  set('login-t-installT', _ios ? _lm('iosT') : t.installT); set('login-t-installP', _ios ? _lm('iosP') : t.installP);
+  var _iu = document.getElementById('login-ios-uitleg'); if(_iu && _iu.style.display==='block') _iu.innerHTML = _lm('iosUitleg');
   var fg = document.getElementById('pw-vergeten-btn'); if(fg) fg.textContent = t.forgot;
   var bt = document.querySelector('#login-btn .login-btn-text'); if(bt) bt.textContent = t.button;
   var tg = document.getElementById('login-pw-toggle'); if(tg) tg.setAttribute('aria-label', _loginShowPw?t.pwHide:t.pwShow);
@@ -6370,17 +6396,28 @@ function _initNieuweLogin(){
     var pers = onthoud ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
     AUTH.setPersistence(pers).catch(function(){}).then(function(){
       AUTH.signInWithPopup(GOOGLE_PROVIDER).catch(function(e){
-        _loginToonFout('Google login mislukt: ' + (e.message||'onbekende fout'));
+        log('WARN','LOGIN','Google: '+(e&&e.code));
+        _loginToonFout(_loginFoutTekst(e && e.code));
       });
     });
   });
+
+  // Typen wist een eerdere foutmelding en de rode rand
+  ['login-email','login-pass'].forEach(function(id){ var el=document.getElementById(id); if(el) el.addEventListener('input', function(){ if(document.getElementById('login-err').style.display!=='none') _loginToonFout(''); }); });
 
   // Wachtwoord vergeten
   var fg=document.getElementById('pw-vergeten-btn');
   if(fg) fg.addEventListener('click',function(){
     var email=document.getElementById('login-email').value.trim();
-    if(!email){ _loginToonFout('Voer eerst je e-mailadres in.'); return; }
-    AUTH.sendPasswordResetEmail(email).then(function(){ toast('Reset e-mail verstuurd','success'); }).catch(function(e){ toast('Mislukt: '+e.message,'error'); });
+    if(!email){ _loginToonFout(_lm('eerstMail')); return; }
+    _loginToonFout('');
+    AUTH.sendPasswordResetEmail(email).then(function(){ _loginToonInfo(_lm('reset')); })
+      .catch(function(e){
+        log('WARN','LOGIN','Resetmail: '+(e&&e.code));
+        // Een onbekend adres meldt Firebase niet altijd; dan dezelfde bevestiging, zodat niet te zien is welke adressen bestaan
+        if(e && e.code==='auth/user-not-found') _loginToonInfo(_lm('reset'));
+        else _loginToonFout(_loginFoutTekst(e && e.code));
+      });
   });
 
   // Footer: versie uit APP_VERSION, zoals de zijbalk — er stond vast "v2.0".
@@ -6390,6 +6427,8 @@ function _initNieuweLogin(){
   // Footer: Support / Debug log
   var sup=document.getElementById('login-support');
   if(sup) sup.addEventListener('click',function(){ window.location.href='mailto:support@flow-8.nl'; });
+  // Debug log is voor ondersteuning, niet voor gebruikers: tik 5x op het versienummer om hem te tonen
+  if(ver){ var _tik=0; ver.addEventListener('click', function(){ if(++_tik>=5){ var w=document.getElementById('login-debug-wrap'); if(w) w.style.display='inline-flex'; } }); }
   var dbg=document.getElementById('login-debug');
   if(dbg) dbg.addEventListener('click',function(){
     var lp=document.getElementById('log-panel');
@@ -6399,8 +6438,10 @@ function _initNieuweLogin(){
   // PWA-installatieknop: koppelen aan het bestaande install-prompt-mechanisme
   var inst=document.getElementById('login-install');
   if(inst){
-    if(typeof _pwaInstallPrompt!=='undefined' && _pwaInstallPrompt) inst.style.display='flex';
+    if((typeof _pwaInstallPrompt!=='undefined' && _pwaInstallPrompt) || _loginIsIosBrowser()) inst.style.display='flex';
     inst.addEventListener('click',function(){
+      // iPhone: geen installatieprompt, wel uitleg hoe het via Safari moet
+      if(_loginIsIosBrowser()){ var u=document.getElementById('login-ios-uitleg'); if(u){ u.innerHTML=_lm('iosUitleg'); u.style.display = u.style.display==='block' ? 'none' : 'block'; } return; }
       if(typeof _pwaInstallPrompt!=='undefined' && _pwaInstallPrompt){
         _pwaInstallPrompt.prompt();
         _pwaInstallPrompt.userChoice.then(function(r){ if(r.outcome==='accepted') inst.style.display='none'; _pwaInstallPrompt=null; });
@@ -6467,7 +6508,7 @@ async function doLogin() {
   var btn   = document.getElementById('login-btn');
   _loginToonFout('');
   if (!email || !pass) {
-    _loginToonFout('Vul e-mail en wachtwoord in.');
+    _loginToonFout(_lm('leeg'));
     return;
   }
   btn.classList.add('loading'); btn.disabled = true;
@@ -6477,18 +6518,29 @@ async function doLogin() {
     log('OK', 'LOGIN', 'Auth geslaagd');
   } catch(e) {
     log('ERROR', 'LOGIN', 'Auth mislukt: ' + e.code, { msg: e.message });
-    var msgs = { 'auth/user-not-found': 'E-mail niet gevonden.', 'auth/wrong-password': 'Onjuist wachtwoord.', 'auth/too-many-requests': 'Te veel pogingen. Wacht even.', 'auth/invalid-email': 'Ongeldig e-mailadres.', 'auth/internal-error': 'Verbindingsfout. Probeer het opnieuw.' };
-    _loginToonFout(msgs[e.code] || 'Inloggen mislukt: ' + e.message);
+    _loginToonFout(_loginFoutTekst(e.code));
     btn.classList.remove('loading'); btn.disabled = false;
   }
 }
 
+// Bevestiging in het formulier (o.a. wachtwoord vergeten); een toast onderin viel weg.
+function _loginToonInfo(msg){
+  var box = document.getElementById('login-info');
+  if(!box) return;
+  box.style.display = msg ? 'flex' : 'none';
+  var t = document.getElementById('login-info-txt'); if(t) t.textContent = msg || '';
+}
 // Toon of verberg de foutmelding in de nieuwe login (icon + tekst-element).
 function _loginToonFout(msg){
   var box = document.getElementById('login-err');
   var txt = document.getElementById('login-err-txt');
   if(!box) return;
-  if(!msg){ box.style.display='none'; if(txt) txt.textContent=''; return; }
+  if(!msg){
+    box.style.display='none'; if(txt) txt.textContent='';
+    ['login-email','login-pass'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.borderColor=''; });
+    return;
+  }
+  _loginToonInfo('');
   if(txt) txt.textContent = msg; else box.textContent = msg;
   box.style.display='flex';
   box.style.animation='loginShake .4s ease';
@@ -6520,6 +6572,10 @@ async function laadProfiel(uid) {
     var snap = await FB.ref('flow8/gebruikers/' + uid).once('value');
     if (snap.exists()) {
       APP.profiel   = snap.val();
+      // Geen standaardbedrijf: zonder bedrijf of zonder activering niet verder (de app viel terug op
+      // 'demo', het bedrijf van de testtenant). Alleen platformbeheer houdt de oude terugval.
+      if(!APP.profiel.bedrijfId && !APP.profiel.platformBeheer){ _loginToonFout(_lm('geenBedrijf')); await AUTH.signOut(); return; }
+      if(APP.profiel.actief !== true && !APP.profiel.platformBeheer){ _loginToonFout(_lm('activatie')); await AUTH.signOut(); return; }
       APP.bedrijfId = APP.profiel.bedrijfId || 'demo';
       log('OK', 'PROFIEL', 'Gevonden', { naam: APP.profiel.naam, rol: APP.profiel.rol, bedrijfId: APP.bedrijfId });
       // Bedrijf + rol op het token zetten voordat Firestore-data wordt geladen,
@@ -6532,11 +6588,12 @@ async function laadProfiel(uid) {
       log('WARN', 'PROFIEL', 'Nieuw - eerste login');
       var email = APP.user.email;
       var naam  = email.split('@')[0].replace(/[._-]/g,' ').split(' ').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ');
-      APP.profiel   = { uid: uid, naam: naam, email: email, rol: 'monteur', bedrijfId: 'demo', actief: false };
-      APP.bedrijfId = 'demo';
+      // Zonder bedrijf: een beheerder (platformbeheer) koppelt het bedrijf bij het activeren.
+      APP.profiel   = { uid: uid, naam: naam, email: email, rol: 'monteur', actief: false };
+      APP.bedrijfId = null;
       await FB.ref('flow8/gebruikers/' + uid).set(APP.profiel);
       log('WARN', 'PROFIEL', 'Nieuw profiel aangemaakt voor ' + email + ' — wacht op activatie door admin');
-      _loginToonFout('Je account wacht op activatie door een beheerder.');
+      _loginToonFout(_lm('activatie'));
       await AUTH.signOut();
       return;
     }
@@ -34328,6 +34385,8 @@ window.addEventListener('beforeinstallprompt', function(e) {
   // Toon install knop als beschikbaar
   var btn = document.getElementById('pwa-install-btn');
   if(btn) btn.style.display = 'flex';
+  // Ook op het inlogscherm (de prompt komt vaak pas ná het opbouwen van dat scherm)
+  var lb = document.getElementById('login-install'); if(lb) lb.style.display = 'flex';
 });
 
 window.addEventListener('appinstalled', function() {
