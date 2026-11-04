@@ -22846,6 +22846,21 @@ function genereerWerkbonPDF(werkbonId, uitvoer, naGeneratie, pdfActie) {
   }).catch(function(e){ toast('PDF voorbereiden mislukt: '+(e.message||e),'error'); });
 }
 
+// PDF-tekst is geen HTML: esc() zette '&' en '"' om in '&amp;' en '&quot;', die zo op de PDF kwamen.
+function _pdfTxt(s){ return s == null ? '' : String(s); }
+// Voettekst van een PDF: naam, adres en contact op regel 1, KvK en btw op regel 2 (alleen wat is ingevuld).
+function _pdfVoetRegels(bg, tpl){
+  if(tpl && tpl.voettekst) return [tpl.voettekst];
+  bg = bg || {};
+  var r1 = [bg.naam, [bg.adres, [bg.postcode, bg.plaats].filter(Boolean).join(' ')].filter(Boolean).join(', '), bg.telefoon, bg.email].filter(Boolean).join(' \u00b7 ');
+  var r2 = [bg.kvk ? 'KvK '+bg.kvk : '', bg.btw ? 'Btw '+bg.btw : ''].filter(Boolean).join(' \u00b7 ');
+  return r2 ? [r1, r2] : [r1];
+}
+function _pdfZetVoet(doc, bg, tpl){
+  var r = _pdfVoetRegels(bg, tpl);
+  doc.text(r[0], 105, r.length > 1 ? 287 : 290, {align:'center'});
+  if(r[1]) doc.text(r[1], 105, 291, {align:'center'});
+}
 function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfActie) {
   try {
     var { jsPDF } = window.jspdf;
@@ -22869,8 +22884,7 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
       var pnr; try{ pnr = doc.internal.getCurrentPageInfo().pageNumber; }catch(e){ pnr = 'p'+(doc.getNumberOfPages?doc.getNumberOfPages():0); }
       if(_voetGezet[pnr]) return; _voetGezet[pnr]=true;
       doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(grijs[0],grijs[1],grijs[2]);
-      var vt = _tpl.voettekst || ((bg.naam||'')+(bg.adres?(' \u00b7 '+bg.adres):'')+(bg.telefoon?(' \u00b7 '+bg.telefoon):''));
-      doc.text(vt, 105, 290, {align:'center'});
+      _pdfZetVoet(doc, bg, _tpl);
     }
     function _nieuwePagina(){ doc.addPage(); return 20; }
     function _ruimte(y, nodig){ if(y+nodig>282){ _voet(); return _nieuwePagina(); } return y; }
@@ -22906,7 +22920,7 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
       // Bedrijfsadres rechts
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(donker[0],donker[1],donker[2]);
       var adr=[bg.naam||'', bg.adres||'', [(bg.postcode||''),(bg.plaats||'')].filter(Boolean).join(' '), bg.land||''].filter(Boolean);
-      var ay=afmY+2; adr.forEach(function(r){ doc.text(esc(r), RM, ay, {align:'right'}); ay+=4.5; });
+      var ay=afmY+2; adr.forEach(function(r){ doc.text(_pdfTxt(r), RM, ay, {align:'right'}); ay+=4.5; });
       return Math.max(logoOnderY+4, ay+2);
     }
 
@@ -22923,7 +22937,7 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
       doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(grijs[0],grijs[1],grijs[2]);
       doc.text(String(label), x, y);
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(donker[0],donker[1],donker[2]);
-      var lijnen=doc.splitTextToSize(esc(String(waarde||'\u2014')), totBr-labelBr);
+      var lijnen=doc.splitTextToSize(_pdfTxt(String(waarde||'\u2014')), totBr-labelBr);
       doc.text(lijnen, x+labelBr, y);
       return y + Math.max(5, lijnen.length*4.4);
     }
@@ -23017,8 +23031,8 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
         var _isReis = u.type === 'reis';
         doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(donker[0],donker[1],donker[2]);
         doc.text(fmtD(wb.datum||''),LM,y);
-        doc.text(esc(u.tijdVan||'\u2014'),52,y);
-        doc.text(esc(u.tijdTot||'\u2014'),72,y);
+        doc.text(_pdfTxt(u.tijdVan||'\u2014'),52,y);
+        doc.text(_pdfTxt(u.tijdTot||'\u2014'),72,y);
         doc.text(String(u.uren||0).replace('.',',')+' u',92,y);
         if(_heeftReis){
           doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
@@ -23026,11 +23040,11 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
           doc.text(_isReis?'Reistijd':'Werktijd',118,y);
           doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(donker[0],donker[1],donker[2]);
         }
-        doc.text(esc(mi.naam||'\u2014'),_heeftReis?142:120,y);
+        doc.text(_pdfTxt(mi.naam||'\u2014'),_heeftReis?142:120,y);
         y+=5;
         if(u.omschrijving){
           doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(grijs[0],grijs[1],grijs[2]);
-          var ul=doc.splitTextToSize(esc(u.omschrijving),BREEDTE-4); y=_ruimte(y,ul.length*4);
+          var ul=doc.splitTextToSize(_pdfTxt(u.omschrijving),BREEDTE-4); y=_ruimte(y,ul.length*4);
           doc.text(ul,LM+4,y); y+=ul.length*4+1.5;
         }
         if(_isReis) totReis+=parseFloat(u.uren)||0; else totU+=parseFloat(u.uren)||0;
@@ -23052,13 +23066,13 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
     if(_secAan('werk') && wb.omschrijving){
       y=_ruimte(y,16); y=_sectie(y,'Omschrijving werk');
       doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(donker[0],donker[1],donker[2]);
-      var ol=doc.splitTextToSize(esc(wb.omschrijving),BREEDTE); y=_ruimte(y,ol.length*4.6); doc.text(ol,LM,y); y+=ol.length*4.6+3;
+      var ol=doc.splitTextToSize(_pdfTxt(wb.omschrijving),BREEDTE); y=_ruimte(y,ol.length*4.6); doc.text(ol,LM,y); y+=ol.length*4.6+3;
     }
     // ── Bevindingen monteur ──
     if(_secAan('werk') && wb.bevindingen){
       y=_ruimte(y,16); y=_sectie(y,'Bevindingen monteur');
       doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(donker[0],donker[1],donker[2]);
-      var bl=doc.splitTextToSize(esc(wb.bevindingen),BREEDTE); y=_ruimte(y,bl.length*4.6); doc.text(bl,LM,y); y+=bl.length*4.6+3;
+      var bl=doc.splitTextToSize(_pdfTxt(wb.bevindingen),BREEDTE); y=_ruimte(y,bl.length*4.6); doc.text(bl,LM,y); y+=bl.length*4.6+3;
     }
 
     // ── Gebruikte materialen ──
@@ -23077,22 +23091,22 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
           y=_ruimte(y,7);
           var regel=(Number(m.aantal)||0)*(Number(m.stuksprijs)||0);
           doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(donker[0],donker[1],donker[2]);
-          doc.text(esc(m.code||''),LM,y);
-          var oms=doc.splitTextToSize(esc(m.omschrijving||''),74); doc.text(oms,44,y);
-          doc.text(String(m.aantal!=null?m.aantal:1).replace('.',',')+' '+esc(m.eenheid||''),122,y);
-          if(toonPrijs){ doc.text(_matEuro(m.stuksprijs).replace('\u20ac ','\u20ac'),150,y); doc.text(_matEuro(regel).replace('\u20ac ','\u20ac'),RM,y,{align:'right'}); }
+          doc.text(_pdfTxt(m.code||''),LM,y);
+          var oms=doc.splitTextToSize(_pdfTxt(m.omschrijving||''),74); doc.text(oms,44,y);
+          doc.text(String(m.aantal!=null?m.aantal:1).replace('.',',')+' '+_pdfTxt(m.eenheid||''),122,y);
+          if(toonPrijs){ doc.text(_matEuro(m.stuksprijs),150,y); doc.text(_matEuro(regel),RM,y,{align:'right'}); }
           y+=Math.max(6, oms.length*4.4);
         });
         if(toonPrijs && typeof _wbMateriaalTotalen==='function'){
           var mt=_wbMateriaalTotalen(mats);
           y+=1; doc.line(LM,y,RM,y); y+=5;
           doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(grijs[0],grijs[1],grijs[2]);
-          doc.text('Subtotaal (excl. btw)',120,y); doc.text(_matEuro(mt.subtotaal).replace('\u20ac ','\u20ac'),RM,y,{align:'right'}); y+=5;
+          doc.text('Subtotaal (excl. btw)',120,y); doc.text(_matEuro(mt.subtotaal),RM,y,{align:'right'}); y+=5;
           Object.keys(mt.btwPerTarief).sort().forEach(function(tar){
-            doc.text('Btw '+tar+'%',120,y); doc.text(_matEuro(mt.btwPerTarief[tar]).replace('\u20ac ','\u20ac'),RM,y,{align:'right'}); y+=5;
+            doc.text('Btw '+tar+'%',120,y); doc.text(_matEuro(mt.btwPerTarief[tar]),RM,y,{align:'right'}); y+=5;
           });
           doc.setFont('helvetica','bold'); doc.setTextColor(donker[0],donker[1],donker[2]);
-          doc.text('Totaal (incl. btw)',120,y); doc.text(_matEuro(mt.totaal).replace('\u20ac ','\u20ac'),RM,y,{align:'right'}); y+=6;
+          doc.text('Totaal (incl. btw)',120,y); doc.text(_matEuro(mt.totaal),RM,y,{align:'right'}); y+=6;
         }
       }
     }
@@ -23125,7 +23139,7 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
       y+=26;
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(donker[0],donker[1],donker[2]);
       var _ktNaam = wb.klantHandtekeningNaam || wb.contactNaam || '';
-      doc.text('Getekend door: '+esc(_ktNaam),LM,y); y+=6;
+      doc.text('Getekend door: '+_pdfTxt(_ktNaam),LM,y); y+=6;
     }
     _voet();
 
@@ -23153,7 +23167,7 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
             doc.addImage(data,'JPEG',fx,py,mmW,mmH);
             if(f.bijschrift){
               doc.setFont('helvetica','italic');doc.setFontSize(9);doc.setTextColor(grijs[0],grijs[1],grijs[2]);
-              var cl=doc.splitTextToSize(esc(f.bijschrift),BREEDTE); doc.text(cl,LM,py+mmH+6);
+              var cl=doc.splitTextToSize(_pdfTxt(f.bijschrift),BREEDTE); doc.text(cl,LM,py+mmH+6);
             }
             _voet();
           }catch(e){console.error('Foto PDF:',e);}
@@ -23174,7 +23188,7 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
         var cl=_checklists[ci];
         y=_nieuwePagina();
         doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(blauw[0],blauw[1],blauw[2]);
-        doc.text(esc(cl.naam||'Checklist'),LM,y);
+        doc.text(_pdfTxt(cl.naam||'Checklist'),LM,y);
         doc.setDrawColor(donker[0],donker[1],donker[2]); doc.setLineWidth(0.4); doc.line(LM,y+2,RM,y+2);
         y+=8;
         var fotoVelden=[];
@@ -23183,14 +23197,14 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
           if(v.type==='header'){
             y=_ruimte(y,14); y+=3;
             doc.setFont('helvetica','bold');doc.setFontSize(10.5);doc.setTextColor(blauw[0],blauw[1],blauw[2]);
-            doc.text(esc(v.label||''),LM,y);
+            doc.text(_pdfTxt(v.label||''),LM,y);
             y+=2.2;
             doc.setDrawColor(lijnKl[0],lijnKl[1],lijnKl[2]); doc.setLineWidth(0.4);
             doc.line(LM,y,LM+BREEDTE,y);
             doc.setLineWidth(0.2);
             y+=6.5; return;
           }
-          if(v.type==='paragraaf'){ y=_ruimte(y,8); doc.setFont('helvetica','italic');doc.setFontSize(9);doc.setTextColor(grijs[0],grijs[1],grijs[2]); var pl=doc.splitTextToSize(esc(v.label||''),BREEDTE); doc.text(pl,LM,y); y+=pl.length*4.4+2; return; }
+          if(v.type==='paragraaf'){ y=_ruimte(y,8); doc.setFont('helvetica','italic');doc.setFontSize(9);doc.setTextColor(grijs[0],grijs[1],grijs[2]); var pl=doc.splitTextToSize(_pdfTxt(v.label||''),BREEDTE); doc.text(pl,LM,y); y+=pl.length*4.4+2; return; }
           if(v.type==='paginaeinde'){ return; }
           if(v.type==='foto'){ if(Array.isArray(ant)&&ant.length) fotoVelden.push({label:v.label,fotos:ant}); return; }
           // gewone vraag -> antwoord
@@ -23204,12 +23218,12 @@ function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfAc
           y=_ruimte(y,9);
           doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(donker[0],donker[1],donker[2]);
           // Vraag vet, antwoord normaal — dat leest sneller dan één doorlopende regel.
-          var _vraag = esc(v.label||'')+': ';
+          var _vraag = _pdfTxt(v.label||'')+': ';
           doc.setFont('helvetica','bold');
           var _vb = doc.getTextWidth(_vraag);
           doc.text(_vraag, LM, y);
           doc.setFont('helvetica','normal');
-          var rl=doc.splitTextToSize(esc(waarde), BREEDTE-_vb);
+          var rl=doc.splitTextToSize(_pdfTxt(waarde), BREEDTE-_vb);
           doc.text(rl, LM+_vb, y);
           y += rl.length*4.8 + 3.4;
         });
@@ -23303,7 +23317,7 @@ function _wbVerstuurMail(werkbonId, wb, emailOverride, naVerzonden){
 // Standaard mailteksten voor de werkbon (gebruikt als er niks is ingesteld).
 var WB_MAIL_DEFAULT = {
   onderwerp: 'Werkbon {bonnummer} — {klantNaam}',
-  body: 'Beste {contactNaam},\n\nHierbij ontvangt u de werkbon van de uitgevoerde werkzaamheden van {datum}.\n\nIn de bijlage vindt u alle details.',
+  body: 'Beste {contactNaam},\n\nHierbij ontvangt u de werkbon van de uitgevoerde werkzaamheden.\n\n{samenvatting}\n\nIn de bijlage vindt u alle details.',
   handtekening: 'Met vriendelijke groet,\n{bedrijfsnaam}'
 };
 var WO_MAIL_DEFAULT = {
@@ -23330,6 +23344,13 @@ function _wbMailVul(tekst, wb, bonNr){
     bonnummer:   bonNr || wb.bonnummer || '',
     typeWerk:    opdrachtTypeLabel(wb.typeWerk) || '',
     monteur:     monteur,
+    // Korte samenvatting voor in de mail; de mailopmaak maakt van 'Label: waarde' een gegevensblok
+    samenvatting: [
+      bonNr || wb.bonnummer ? 'Werkbon: '+(bonNr || wb.bonnummer) : '',
+      wb.datum ? 'Datum: '+fmtD(wb.datum) : '',
+      wb.werkAdres ? (function(a){ var t=[a.adres, [a.postcode, a.plaats].filter(Boolean).join(' ')].filter(Boolean).join(', '); return t ? 'Adres: '+t : ''; })(wb.werkAdres) : '',
+      monteur ? 'Uitgevoerd door: '+monteur : ''
+    ].filter(Boolean).join('\n'),
     bedrijfsnaam:(APP.bedrijfGegevens&&APP.bedrijfGegevens.naam)||''
   };
   var t = tekst;
@@ -35532,8 +35553,7 @@ function _genereerWoPDFsync(opties, _woFotoCache){
 
     function _voet(){
       doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(grijs[0],grijs[1],grijs[2]);
-      var vt = _tpl.voettekst || ((bg.naam||'')+(bg.adres?(' \u00b7 '+bg.adres):'')+(bg.telefoon?(' \u00b7 '+bg.telefoon):''));
-      doc.text(vt, 105, 290, {align:'center'});
+      _pdfZetVoet(doc, bg, _tpl);
     }
     function _nieuwePagina(){ doc.addPage(); return 20; }
     // Voettekst staat op 290; content stopt op 274 zodat er nooit overlap ontstaat.

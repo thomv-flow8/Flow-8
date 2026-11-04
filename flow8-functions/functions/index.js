@@ -239,7 +239,7 @@ function _bodyNaarHtml(body, accent) {
       html += '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + klVlak + ';border:1px solid ' + klRand + ';border-left:4px solid ' + klTekst + ';border-radius:12px;margin:4px 0 24px;"><tr><td style="padding:20px 22px;">';
       rijen.forEach(function(r, idx){
         if (idx > 0) html += '<div style="height:1px;background:' + klLijn + ';margin:14px 0;"></div>';
-        html += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#8b96a6;font-weight:700;">' + _esc(r.label) + '</div>';
+        html += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#5a6575;font-weight:700;">' + _esc(r.label) + '</div>';
         html += '<div style="font-size:15px;color:#16202e;font-weight:600;margin-top:3px;line-height:1.45;">' + _inline(r.waarde, klTekst) + '</div>';
       });
       html += '</td></tr></table>';
@@ -316,12 +316,12 @@ function bouwMailHtml(gegevens, onderwerp, bodyTekst, label) {
 // footer
 '<tr><td style="background:' + _metWit(accent, 0.94) + ';padding:26px 32px;border-top:1px solid ' + _metWit(accent, 0.80) + ';">' +
 '<div style="font-size:13px;font-weight:700;color:#16202e;">' + naam + '</div>' +
-(adresregel ? '<div style="font-size:12px;color:#8b96a6;margin-top:3px;line-height:1.5;">' + _esc(adresregel) + '</div>' : '') +
-(contactregel ? '<div style="font-size:12px;color:#8b96a6;margin-top:2px;line-height:1.5;">' + contactregel + '</div>' : '') +
+(adresregel ? '<div style="font-size:12px;color:#5a6575;margin-top:3px;line-height:1.5;">' + _esc(adresregel) + '</div>' : '') +
+(contactregel ? '<div style="font-size:12px;color:#5a6575;margin-top:2px;line-height:1.5;">' + contactregel + '</div>' : '') +
 '</td></tr>' +
 '</table>' +
 '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;"><tr><td align="center" style="padding:14px 20px;">' +
-'<span style="font-size:11px;color:#a2acba;">Deze e-mail is verstuurd via Flow8 namens ' + naam + '.</span>' +
+'<span style="font-size:11px;color:#5a6575;">Deze e-mail is verstuurd via Flow8 namens ' + naam + '.</span>' +
 '</td></tr></table>' +
 '</td></tr></table></body></html>';
 }

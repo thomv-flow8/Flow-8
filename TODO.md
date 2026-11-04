@@ -33,6 +33,14 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       `MAIL_FROM` in `functions/.env` omzetten → `verstuurMail` deployen → testen met een ontvanger
       buiten het eigen domein. Aan de code hoeft dan niets meer te gebeuren.
       Later mogelijk: een veld `mailAfzender` per bedrijf voor klanten die hun eigen domein verifiëren.
+- [ ] **Mail-contrast deployen** (Thomas) — 4 november 2026: de grijze teksten in `bouwMailHtml`
+      (label in het gegevensvak, de twee voetregels en "verstuurd via Flow8") zijn van #8b96a6/#a2acba
+      naar #5a6575 gegaan, contrast nu ruim 5:1. Live na `cd flow8-functions && firebase deploy --only functions`.
+- [x] **Werkbon-/werkorder-PDF en werkbonmail nagelopen** — 4 november 2026. In de werkbon-PDF ging tekst
+      door `esc()`, waardoor "Jansen &amp; Zn." en 2&quot; letterlijk zo in de PDF kwamen; nu `_pdfTxt()`.
+      De voettekst van beide PDF's staat op twee regels (naam, adres en contact; daaronder KvK en btw, alleen
+      wat is ingevuld) via `_pdfZetVoet`. Bedragen tonen weer "€ 64,20" met spatie. De standaardtekst van de
+      werkbonmail heeft een samenvatting (`{samenvatting}`: bonnummer, datum, adres, uitgevoerd door).
 - [x] **Afzendernaam en antwoordadres in de mail** — 23 september 2026, gedeployd. Het adres komt uit
       `MAIL_FROM`, de naam ervoor uit `instellingen/bedrijf/naam`, dus de ontvanger leest de naam van het
       bedrijf en niet Flow8. Nieuw is `reply_to`: het algemene adres van het bedrijf, met de verzender als
