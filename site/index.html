@@ -759,7 +759,8 @@ svg{display:block;flex-shrink:0}
 .bk-uren{display:flex;flex-direction:column;gap:34px;font:400 11px 'Space Mono',monospace;color:#4b5163;margin-right:40px}
 .bk-klant{width:300px;border-radius:14px;padding:14px;background:linear-gradient(#f5f7fb,#e9ecf3);color:#0d0f14;box-shadow:0 30px 70px rgba(0,0,0,.55);position:relative;z-index:2;animation:bkZweef 10s ease-in-out -4s infinite}
 .bk-regel{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:9px 4px;border-top:1px solid #e1e4eb;font-size:13px}
-.bk-regel small{width:100%;font-size:11px;color:#6d7384}
+.bk-regel small{width:100%;font-size:11px;color:#565c6b}
+.bk-klant .bk-kk span,.bk-kolom.hoofd .bk-kk span{color:#565c6b}
 .bk-regel.laatst .pil{margin-left:auto}
 .bk-knop{display:inline-block;margin-top:10px;padding:7px 13px;border-radius:100px;background:#e6ebff;color:#2f4bc8;font-size:12.5px;font-weight:600}
 .bk-zweef{position:absolute;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);font-size:13px;color:#d6d9e2;opacity:.6;filter:blur(.6px)}
@@ -804,8 +805,8 @@ svg{display:block;flex-shrink:0}
 .nav .r{gap:10px;font-size:14.5px}
 .nav .r .inl{display:inline-flex;align-items:center;min-height:38px;padding:0 18px;border-radius:100px;border:1px solid rgba(255,255,255,.16);color:#e8ebf3;transition:border-color .2s ease,background-color .2s ease}
 .nav .r .inl:hover{border-color:rgba(255,255,255,.34);background:rgba(255,255,255,.05)}
-.nav .knop,.nav.op-licht .knop{min-height:38px;padding:0 18px;font-size:14.5px;background:#4f6ef5;color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 6px 20px rgba(79,110,245,.35)}
-.nav .knop:hover{background:#5d7bff}
+.nav .knop,.nav.op-licht .knop{min-height:38px;padding:0 18px;font-size:14.5px;background:#4565ec;color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 6px 18px rgba(0,0,0,.3)}
+.nav .knop:hover{background:#3d5be0}
 .nav.gescrold{background:rgba(9,11,17,.55);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);border-bottom-color:rgba(255,255,255,.06)}
 .nav.op-licht.gescrold{background:rgba(243,244,247,.72);border-bottom-color:rgba(13,15,20,.07)}
 .nav.op-licht .r .inl{border-color:rgba(13,15,20,.16);color:#0d0f14}
@@ -900,7 +901,7 @@ svg{display:block;flex-shrink:0}
 .mu-reg b{display:block;font-size:13.5px}.mu-reg small{font-size:11.5px;color:#626876}
 .mu-reg.schim{width:150px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#9aa1b3;font-size:12px;box-shadow:none;filter:blur(.8px);opacity:.6;animation:none;z-index:0}
 .mu-tijd{display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid #e1e4eb}
-.mu-tijd span{display:flex;flex-direction:column;align-items:center;gap:4px;font:400 9.5px 'Space Mono',monospace;color:#6d7384}
+.mu-tijd span{display:flex;flex-direction:column;align-items:center;gap:4px;font:400 9.5px 'Space Mono',monospace;color:#565c6b}
 .mu-tijd i{width:7px;height:7px;border-radius:50%;background:#c3c8d4}
 .mu-tijd .nu i{background:#4f6ef5;box-shadow:0 0 0 3px rgba(79,110,245,.2)}
 /* rapportage */
@@ -936,7 +937,7 @@ svg{display:block;flex-shrink:0}
 .mm-acties{margin-top:auto;padding-top:28px;display:grid;gap:10px}
 .mm-acties a{display:flex;align-items:center;justify-content:center;height:52px;border-radius:100px;font-size:16px;font-weight:600}
 .mm-inl{border:1px solid rgba(255,255,255,.18);color:#f4f6fb}
-.mm-demo{background:#4f6ef5;color:#fff}
+.mm-demo{background:#4565ec;color:#fff}
 @media (min-width:821px){.mobiel-menu{display:none!important}}
 /* de lichtvlek bij de slotzin mag nooit voor horizontaal scrollen zorgen (mobiel) */
 .landing,main.rust{overflow-x:clip}
@@ -958,7 +959,7 @@ svg{display:block;flex-shrink:0}
 .zk-kop{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:8px}
 .zk-kop b{font-size:14.5px}
 .zk-kop .mono,.zk-rij2 .mono{font:400 11px 'Space Mono',monospace;color:#4f5565;white-space:nowrap}
-.zk-knop{padding:4px 10px;border-radius:100px;background:#4f6ef5;color:#fff;font-size:11px;font-weight:600}
+.zk-knop{padding:4px 10px;border-radius:100px;background:#4565ec;color:#fff;font-size:11px;font-weight:600}
 .zk-rij{display:flex;flex-direction:column;gap:2px;padding:8px 2px;border-top:1px solid #e1e4eb;font-size:13px}
 .zk-rij small{font-size:11px;color:#565c6b}
 .zk-rij2{display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px solid #e1e4eb;font-size:13px}
@@ -1003,7 +1004,7 @@ svg{display:block;flex-shrink:0}
 .bk-stap{position:absolute;left:24px;top:22px;z-index:3;display:inline-flex;align-items:center;gap:10px}
 .bk-stap b{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#7fe0f5,#4f6ef5);color:#05060a;font-size:14px}
 .bk-stap .mono{font:400 11.5px 'Space Mono',monospace;color:#c6cad6}
-.ov-chip{display:flex;align-items:center;gap:9px;padding:8px 6px;border-top:1px solid #e1e4eb;font-size:13px;color:#6d7384}
+.ov-chip{display:flex;align-items:center;gap:9px;padding:8px 6px;border-top:1px solid #e1e4eb;font-size:13px;color:#565c6b}
 .ov-chip.aan{color:#0d0f14}
 .ov-chip i{width:9px;height:9px;border-radius:3px;opacity:.35}
 .ov-chip.aan i{opacity:1}
