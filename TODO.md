@@ -661,3 +661,18 @@ kloppen met het bestand — dat was de fout die het hero-beeld eerder vier keer 
       Dit is de enige sectie die echt om een nieuwe opname vraagt — en het is wel de helft van
       de belofte "de brug tussen planner en monteur".
 - [ ] Geen sectie voor het **dashboard**: daar is ook geen opname van.
+
+
+**Bijgewerkt 6 november 2026 — nieuwe site uit de 3D-preview.** `site/index.html` is vervangen door
+de goedgekeurde preview (`site-3d-draai-preview.html`, lokaal, niet in git): de staande 3D-8 met de
+reis van een opdracht, de lichtbundel in Huly-stijl, bento-blokken in alle lichte banden, het menu
+met uitklapmenu en hamburgermenu, Inter Tight voor de koppen. Omgezet naar de strenge CSP van de site:
+alle code in eigen bestanden (`vroeg.js`, `site.js`, `wereld.js`), three.js 0.160 zelf gehost in
+`site/vendor/three/` (imports herschreven, geen import map), Inter Tight zelf gehost. Het contactformulier
+gaat net als voorheen naar `demoAanvraag` (met lokaasveld). Getest met de CSP als meta-tag: geen blokkades.
+`leven.js` wordt niet meer gebruikt, maar staat er nog voor een eventuele terugval.
+
+- [ ] **Inlogscherm in de app** in de nieuwe stijl (`inloggen-preview.html`, lokaal): inbouwen in
+      `flow8-v2.html`, gekoppeld aan de bestaande Firebase-inlog. Volgende stap.
+- [ ] **Licht thema van de nieuwe site nalopen** (alleen het donkere thema is getest).
+- [ ] **Bij een volgende wijziging aan de site:** die gebeurt voortaan in `site/` zelf, niet meer in de preview.
