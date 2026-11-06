@@ -438,8 +438,6 @@ body.light{--dash-g2:#f59e0b}
 .dash-keuze{display:flex;align-items:center;gap:6px;min-height:56px;border-bottom:1px solid var(--border)}
 .dash-keuze-n{flex:1;min-width:0;font-size:14px;font-weight:600}
 .dash-keuze-n small{display:block;font-size:12px;color:var(--muted);font-weight:500}
-.dash-pijl{width:40px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0}
-.dash-pijl:disabled{opacity:.35;cursor:default}
 .dash-schuif{width:56px;height:44px;flex-shrink:0;border:none;background:none;position:relative;cursor:pointer;padding:0}
 .dash-schuif::before{content:"";position:absolute;left:5px;top:8px;width:46px;height:28px;border-radius:14px;background:var(--border)}
 .dash-schuif::after{content:"";position:absolute;left:8px;top:11px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
@@ -447,6 +445,31 @@ body.light{--dash-g2:#f59e0b}
 .dash-schuif.aan::after{left:26px}
 .dash-vel-onder{display:flex;gap:8px;margin-top:14px}
 .dash-vel-onder .btn{flex:1;justify-content:center;min-height:44px}
+/* Bewerkstand van het dashboard: blokken slepen, links of rechts */
+.dash-bewerkbalk{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;margin:0 0 16px;border-radius:var(--radius-lg);background:var(--surface);border:1px solid var(--accent);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.dash-bewerkbalk p{flex:1;min-width:220px;font-size:13px;line-height:1.4;color:var(--muted)}
+.dash-bewerkbalk p b{display:block;font-size:14px;color:var(--text)}
+.dash-bewerkbalk .btn{min-height:44px}
+.dash-bewerk .dash-blok{position:relative;cursor:grab;outline:2px dashed color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:-2px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.dash-bewerk .dash-blok > :not(.dash-blok-bewerk){pointer-events:none}
+.dash-bewerk .dash-link{visibility:hidden}
+.dash-blok-bewerk{position:absolute;top:6px;right:6px;z-index:2;display:flex;gap:6px}
+.dash-sleep-greep,.dash-blok-verberg{width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;padding:0}
+.dash-sleep-greep{cursor:grab;touch-action:none}
+.dash-blok-verberg{cursor:pointer}
+.dash-blok-verberg:hover{color:var(--red-t,var(--red));border-color:currentColor}
+.dash-sleep-greep:focus-visible,.dash-blok-verberg:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dash-blok.sleept{position:fixed;z-index:9000;margin:0;cursor:grabbing;pointer-events:none;opacity:.97;box-shadow:0 22px 48px rgba(0,0,0,.28);transform:rotate(.6deg) scale(1.015)}
+.dash-blok-plek{border:2px dashed var(--accent);border-radius:var(--radius-lg);background:color-mix(in srgb,var(--accent) 7%,transparent)}
+html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-select:none;user-select:none}
+/* Desktop: de plek in de kolom bepaalt de volgorde (CSS order is alleen voor de telefoon) */
+@media(min-width:769px){.dash-kolom > .dash-blok,.dash-kolom > .dash-blok-plek{order:0!important}}
+@media(max-width:768px){
+  .dash-bewerkbalk{top:0;padding:10px 12px}
+  .dash-bewerkbalk p{min-width:100%}
+  .dash-bewerkbalk .btn{flex:1;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){.dash-blok.sleept{transform:none}}
 .dash-tip{position:fixed;pointer-events:none;z-index:9000;background:#15171d;color:#f4f6fb;font-size:12.5px;padding:6px 9px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.25);display:none;white-space:nowrap}
 @media(max-width:768px){
   .dash-kolommen{display:flex;flex-direction:column;align-items:stretch;gap:12px}
@@ -6523,8 +6546,8 @@ var _LOGIN_EN = {
 // account hebben. Firebase geeft daarvoor tegenwoordig 'auth/invalid-credential'; die ontbrak,
 // waardoor de gebruiker 'Firebase: Error (auth/invalid-credential).' te zien kreeg.
 var _LOGIN_MELD = {
-  nl:{ cred:'E-mailadres of wachtwoord klopt niet.', net:'Geen verbinding. Controleer je internet en probeer het opnieuw.', blok:'Je account is geblokkeerd. Neem contact op met je beheerder.', veel:'Te vaak geprobeerd. Wacht een paar minuten en probeer het opnieuw.', mail:'Dit is geen geldig e-mailadres.', leeg:'Vul je e-mailadres en wachtwoord in.', anders:'Inloggen lukt nu niet. Probeer het opnieuw.', eerstMail:'Vul eerst je e-mailadres in.', reset:'Als dit adres bij ons bekend is, ontvang je binnen een paar minuten een e-mail om een nieuw wachtwoord in te stellen. Kijk ook in je spam.', activatie:'Je account wacht op activatie door een beheerder.', geenBedrijf:'Je account is nog niet aan een bedrijf gekoppeld. Neem contact op met je beheerder.', popup:'Het Google-venster werd gesloten voordat je was ingelogd.', iosT:'Zet Flow8 op je beginscherm', iosP:'Werkt dan als app, zonder app store', iosUitleg:'Tik onderin Safari op <b>Deel</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:15px;height:15px;vertical-align:-2px"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg> en kies <b>Zet op beginscherm</b>.' },
-  en:{ cred:'Email address or password is incorrect.', net:'No connection. Check your internet and try again.', blok:'Your account is blocked. Contact your administrator.', veel:'Too many attempts. Wait a few minutes and try again.', mail:'This is not a valid email address.', leeg:'Enter your email address and password.', anders:'Signing in is not possible right now. Please try again.', eerstMail:'Enter your email address first.', reset:'If this address is known to us, you will receive an email to set a new password within a few minutes. Also check your spam folder.', activatie:'Your account is waiting for activation by an administrator.', geenBedrijf:'Your account is not linked to a company yet. Contact your administrator.', popup:'The Google window was closed before you signed in.', iosT:'Add Flow8 to your home screen', iosP:'Works like an app, no app store', iosUitleg:'Tap <b>Share</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:15px;height:15px;vertical-align:-2px"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg> at the bottom of Safari and choose <b>Add to Home Screen</b>.' }
+  nl:{ elders:'Je bent uitgelogd: je account is op een ander apparaat ingelogd.', cred:'E-mailadres of wachtwoord klopt niet.', net:'Geen verbinding. Controleer je internet en probeer het opnieuw.', blok:'Je account is geblokkeerd. Neem contact op met je beheerder.', veel:'Te vaak geprobeerd. Wacht een paar minuten en probeer het opnieuw.', mail:'Dit is geen geldig e-mailadres.', leeg:'Vul je e-mailadres en wachtwoord in.', anders:'Inloggen lukt nu niet. Probeer het opnieuw.', eerstMail:'Vul eerst je e-mailadres in.', reset:'Als dit adres bij ons bekend is, ontvang je binnen een paar minuten een e-mail om een nieuw wachtwoord in te stellen. Kijk ook in je spam.', activatie:'Je account wacht op activatie door een beheerder.', geenBedrijf:'Je account is nog niet aan een bedrijf gekoppeld. Neem contact op met je beheerder.', popup:'Het Google-venster werd gesloten voordat je was ingelogd.', iosT:'Zet Flow8 op je beginscherm', iosP:'Werkt dan als app, zonder app store', iosUitleg:'Tik onderin Safari op <b>Deel</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:15px;height:15px;vertical-align:-2px"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg> en kies <b>Zet op beginscherm</b>.' },
+  en:{ elders:'You were signed out: your account was signed in on another device.', cred:'Email address or password is incorrect.', net:'No connection. Check your internet and try again.', blok:'Your account is blocked. Contact your administrator.', veel:'Too many attempts. Wait a few minutes and try again.', mail:'This is not a valid email address.', leeg:'Enter your email address and password.', anders:'Signing in is not possible right now. Please try again.', eerstMail:'Enter your email address first.', reset:'If this address is known to us, you will receive an email to set a new password within a few minutes. Also check your spam folder.', activatie:'Your account is waiting for activation by an administrator.', geenBedrijf:'Your account is not linked to a company yet. Contact your administrator.', popup:'The Google window was closed before you signed in.', iosT:'Add Flow8 to your home screen', iosP:'Works like an app, no app store', iosUitleg:'Tap <b>Share</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:15px;height:15px;vertical-align:-2px"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg> at the bottom of Safari and choose <b>Add to Home Screen</b>.' }
 };
 function _lm(k){ return (_LOGIN_MELD[_loginLang] || _LOGIN_MELD.nl)[k]; }
 function _loginFoutTekst(code){
@@ -6614,6 +6637,7 @@ function _initNieuweLogin(){
     var onthoud = !rm2 || rm2.checked;
     var pers = onthoud ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION;
     AUTH.setPersistence(pers).catch(function(){}).then(function(){
+      _sessieClaim = true;
       AUTH.signInWithPopup(GOOGLE_PROVIDER).catch(function(e){
         log('WARN','LOGIN','Google: '+(e&&e.code));
         _loginToonFout(_loginFoutTekst(e && e.code));
@@ -6881,6 +6905,7 @@ async function doLogin() {
   btn.classList.add('loading'); btn.disabled = true;
   log('INFO', 'LOGIN', 'Poging voor ' + email);
   try {
+    _sessieClaim = true;
     await AUTH.signInWithEmailAndPassword(email, pass);
     log('OK', 'LOGIN', 'Auth geslaagd');
   } catch(e) {
@@ -6917,8 +6942,14 @@ function _loginToonFout(msg){
   setTimeout(function(){ box.style.animation=''; },420);
 }
 
-async function doUitloggen() {
+async function doUitloggen(verdrongen) {
   log('INFO', 'AUTH', 'Uitloggen');
+  if(verdrongen !== true && _sessieRef && APP.user){
+    var _ref = _sessieRef, _mijn = _sessieApparaatId();
+    _sessieStop();
+    try { var _s = await Promise.race([ _ref.once('value'), new Promise(function(r){ setTimeout(function(){ r(null); }, 2000); }) ]); if(_s && _s.exists() && _s.val().id === _mijn) await _ref.remove(); } catch(e){}
+  }
+  _sessieStop();
   dbUnlistenAll();
   APP.dataLoaded = false;
   ['medewerkers','medewerkersArchief','serviceklanten','debiteuren','opdrachten','verlof','overuren','onkosten','verzuim','agenda','storingsDienst','blokkadeDagen']
@@ -6931,6 +6962,59 @@ async function doUitloggen() {
   } catch(e) {}
   // Hard reload — leegt geheugen en service worker cache volledig
   window.location.href = window.location.pathname;
+}
+
+// ── Eén apparaat per gebruiker ──────────────────────────────────────────────
+// Bij een bewuste inlog (formulier of Google) claimt dit apparaat de sessie in
+// flow8/sessies/{uid}; een ander apparaat met hetzelfde account ziet dat en logt uit.
+// Bij het herstellen van een onthouden sessie (herladen) wordt niet geclaimd: is de
+// sessie intussen elders geclaimd, dan logt dít apparaat uit. Tabbladen in dezelfde
+// browser delen het apparaat-id en zitten elkaar dus niet in de weg.
+// Platformbeheer is uitgezonderd (beheer vanaf meerdere plekken).
+var _sessieClaim = false, _sessieRef = null, _sessieLuister = null;
+function _sessieApparaatId(){
+  try {
+    var id = localStorage.getItem('f8_apparaat');
+    if(!id){ id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2)); localStorage.setItem('f8_apparaat', id); }
+    return id;
+  } catch(e){ return 'geen-opslag'; }
+}
+function _sessieApparaatNaam(){
+  var ua = navigator.userAgent || '';
+  var soort = /iphone/i.test(ua) ? 'iPhone' : /ipad/i.test(ua) ? 'iPad' : /android/i.test(ua) ? 'Android' : /mac os/i.test(ua) ? 'Mac' : /windows/i.test(ua) ? 'Windows' : 'Onbekend';
+  return soort + (window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches) ? ' (app)' : ' (browser)');
+}
+async function _sessieStart(uid){
+  _sessieStop();
+  var mijn = _sessieApparaatId(), ref = FB.ref('flow8/sessies/' + uid), claim = _sessieClaim;
+  _sessieClaim = false;
+  var record = { id: mijn, sinds: firebase.database.ServerValue.TIMESTAMP, apparaat: _sessieApparaatNaam() };
+  if(!claim){
+    // Herstelde sessie: eerst kijken wie de sessie heeft. Zonder verbinding niet blijven hangen.
+    var snap = await Promise.race([ ref.once('value'), new Promise(function(r){ setTimeout(function(){ r(null); }, 4000); }) ]).catch(function(){ return null; });
+    if(snap && snap.exists() && snap.val().id && snap.val().id !== mijn){
+      log('WARN', 'SESSIE', 'Sessie is elders geclaimd (' + (snap.val().apparaat || '?') + ') — uitloggen');
+      _sessieVerdrongen();
+      return false;
+    }
+    if(snap && !snap.exists()) claim = true;
+  }
+  if(claim) await ref.set(record).catch(function(e){ log('WARN', 'SESSIE', 'Claimen mislukt: ' + (e && e.message)); });
+  _sessieRef = ref;
+  _sessieLuister = ref.child('id').on('value', function(s){
+    if(s.exists() && s.val() !== mijn) _sessieVerdrongen();
+  }, function(e){ log('WARN', 'SESSIE', 'Luisteren mislukt: ' + (e && e.message)); });
+  log('OK', 'SESSIE', (claim ? 'Geclaimd' : 'Hersteld') + ' op ' + record.apparaat);
+  return true;
+}
+function _sessieStop(){
+  if(_sessieRef && _sessieLuister) _sessieRef.child('id').off('value', _sessieLuister);
+  _sessieRef = null; _sessieLuister = null;
+}
+function _sessieVerdrongen(){
+  _sessieStop();
+  try { sessionStorage.setItem('f8_loginMelding', 'elders'); } catch(e){}
+  doUitloggen(true);
 }
 
 async function laadProfiel(uid) {
@@ -6964,6 +7048,7 @@ async function laadProfiel(uid) {
       await AUTH.signOut();
       return;
     }
+    if (!APP.profiel.platformBeheer && !(await _sessieStart(uid))) return;
     await laadData();
     toonApp();
   } catch(e) {
@@ -7772,6 +7857,7 @@ function toonLogin() {
   // Canvas-animatie hervatten als de login opnieuw getoond wordt.
   _loginCanvasRetry = 0;
   if(typeof _initLogin3D === 'function') { try { _initLogin3D(); } catch(e){} }
+  try { var _melding = sessionStorage.getItem('f8_loginMelding'); if(_melding){ sessionStorage.removeItem('f8_loginMelding'); _loginToonInfo(_lm(_melding)); } } catch(e){}
 }
 
 // ── Logo dark/light mode ─────────────────────────────────────
@@ -9630,6 +9716,7 @@ function _dashHerteken() {
   clearTimeout(_dashHertekenTimer);
   _dashHertekenTimer = setTimeout(function(){
     if (APP.activePage !== 'dashboard') return;
+    if (_dashSleep) { _dashHerteken(); return; }
     var c = document.getElementById('content');
     var y = c ? c.scrollTop : 0;
     renderDashboard();
@@ -9646,7 +9733,10 @@ function _dashHerteken() {
 // gekozen volgorde (CSS: display:contents + order).
 var _dashOpen = {};        // per monteurgroep in "Opdrachten vandaag": alles tonen of de eerste 3
 var _dashVelOpen = false;
+var _dashBewerk = false;  // bewerkstand: blokken slepen en verbergen op het dashboard zelf
 var _DASH_ICO = {
+  greep:   '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+  verberg: '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10 10 0 0 1 12 20c-7 0-10-8-10-8a18 18 0 0 1 4.1-5.9M9.9 4.2A9 9 0 0 1 12 4c7 0 10 8 10 8a18 18 0 0 1-2.2 3.2M1 1l22 22"/></svg>',
   dag:     '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   bon:     '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
   plan:    '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
@@ -9657,8 +9747,6 @@ var _DASH_ICO = {
   alarm:   '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>',
   storing: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg>',
   indeling:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></svg>',
-  op:      '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>',
-  neer:    '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
   vink:    '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
 };
 function _dashMagPlanning(){ return isAdmin() || magLezen('planning'); }
@@ -9691,12 +9779,20 @@ function _dashIndeling(){
   var eigen = APP.profiel && Array.isArray(APP.profiel.dashboard) ? APP.profiel.dashboard : null;
   return (eigen || _dashStandaard()).filter(function(id, i, a){ return DASH_BLOKKEN[id] && a.indexOf(id) === i && DASH_BLOKKEN[id].mag(); });
 }
-function _dashBewaar(lijst){
+// Blokken in de rechterkolom, zoals de gebruiker ze heeft gesleept. Zonder (nog nooit gesleept)
+// verdeelt _dashVerdeel de blokken automatisch over beide kolommen.
+function _dashRechts(){
+  return APP.profiel && Array.isArray(APP.profiel.dashboardRechts) ? APP.profiel.dashboardRechts : null;
+}
+// rechts: undefined = ongewijzigd laten, null = terug naar automatisch verdelen
+function _dashBewaar(lijst, rechts){
   if(!APP.profiel) return;
+  var fout = function(e){ log('WARN','DASH','Indeling opslaan mislukt: '+(e && e.message || e)); toast('Indeling kon niet worden opgeslagen','error'); };
   APP.profiel.dashboard = lijst ? lijst.slice() : null;
+  if(rechts !== undefined) APP.profiel.dashboardRechts = rechts ? rechts.slice() : null;
   if(!APP.profiel.uid || typeof FB === 'undefined') return;
-  FB.ref('flow8/gebruikers/'+APP.profiel.uid+'/dashboard').set(lijst ? lijst.slice() : null)
-    .catch(function(e){ log('WARN','DASH','Indeling opslaan mislukt: '+(e && e.message || e)); toast('Indeling kon niet worden opgeslagen','error'); });
+  FB.ref('flow8/gebruikers/'+APP.profiel.uid+'/dashboard').set(lijst ? lijst.slice() : null).catch(fout);
+  if(rechts !== undefined) FB.ref('flow8/gebruikers/'+APP.profiel.uid+'/dashboardRechts').set(rechts ? rechts.slice() : null).catch(fout);
 }
 
 function _dashKop(ico, titel, doel, linkTekst){
@@ -9999,19 +10095,25 @@ function renderDashboard() {
   h += '<button type="button" class="dash-dienst'+(sdIk ? ' ik' : !sdMed ? ' leeg' : '')+'" data-nav="storingsdienst"><span class="dash-dienst-ico">'+_DASH_ICO.storing+'</span><span>'
     + (sdIk ? '<b>Jij hebt deze week storingsdienst</b>' : sdMed ? 'Storingsdienst week '+getISOWeek(vandaag)+': <b>'+esc(sdMed.voornaam+' '+sdMed.achternaam)+'</b>'+(sdMed.telefoon ? ' · '+esc(sdMed.telefoon) : '') : 'Storingsdienst week '+getISOWeek(vandaag)+': <b>niet ingesteld</b>')
     + '</span></button>';
-  h += '<button type="button" class="btn btn-ghost btn-sm dash-aanpassen" id="dash-aanpassen" aria-label="Indeling aanpassen" title="Indeling aanpassen">'+_DASH_ICO.indeling+'<span>Indeling aanpassen</span></button>';
+  h += '<button type="button" class="btn btn-ghost btn-sm dash-aanpassen" id="dash-aanpassen" aria-label="Indeling aanpassen" title="Indeling aanpassen" aria-pressed="'+_dashBewerk+'">'+_DASH_ICO.indeling+'<span>Indeling aanpassen</span></button>';
   h += '</div></div>';
+  if(_dashBewerk) h += '<div class="dash-bewerkbalk"><p><b>Sleep de blokken naar de plek die je wilt</b>Op de telefoon: blok even vasthouden en dan slepen, of pak het greepje.</p>'
+    + '<button type="button" class="btn btn-ghost" id="dash-kies">Blokken kiezen</button><button type="button" class="btn btn-ghost" id="dash-standaard">Standaard</button><button type="button" class="btn btn-primary" id="dash-bewerk-klaar">Klaar</button></div>';
 
   // Blokken: twee kolommen op desktop, één kolom (gekozen volgorde) op een telefoon
   var indeling = _dashIndeling();
-  var blok = function(id){ return '<section class="card dash-blok" data-blok="'+id+'" style="order:'+indeling.indexOf(id)+'">'+DASH_RENDER[id](c)+'</section>'; };
+  var bewerkKnoppen = function(id){ var n = esc(DASH_BLOKKEN[id].n);
+    return '<div class="dash-blok-bewerk"><button type="button" class="dash-sleep-greep" aria-label="'+n+' verplaatsen (pijltjestoetsen)" title="Slepen om te verplaatsen">'+_DASH_ICO.greep+'</button>'
+      + '<button type="button" class="dash-blok-verberg" data-verberg="'+id+'" aria-label="'+n+' verbergen" title="Verbergen">'+_DASH_ICO.verberg+'</button></div>'; };
+  var blok = function(id){ return '<section class="card dash-blok" data-blok="'+id+'" style="order:'+indeling.indexOf(id)+'">'+(_dashBewerk ? bewerkKnoppen(id) : '')+DASH_RENDER[id](c)+'</section>'; };
   if(!indeling.length) h += '<div class="dash-leeg" style="padding:24px 0">Je hebt alle blokken uitgezet. Kies via "Indeling aanpassen" wat je wilt zien.</div>';
-  h += '<div class="dash-kolommen"><div class="dash-kolom">'+indeling.filter(function(id){ return !DASH_BLOKKEN[id].zij; }).map(blok).join('')+'</div>'
-     + '<div class="dash-kolom zij">'+indeling.filter(function(id){ return DASH_BLOKKEN[id].zij; }).map(blok).join('')+'</div></div>';
+  var rechts = _dashRechts(), naarRechts = function(id){ return rechts ? rechts.indexOf(id) >= 0 : !!DASH_BLOKKEN[id].zij; };
+  h += '<div class="dash-kolommen'+(_dashBewerk ? ' dash-bewerk' : '')+'"><div class="dash-kolom">'+indeling.filter(function(id){ return !naarRechts(id); }).map(blok).join('')+'</div>'
+     + '<div class="dash-kolom zij">'+indeling.filter(naarRechts).map(blok).join('')+'</div></div>';
   h += _dashVelHtml(indeling);
 
   el.innerHTML = h;
-  _dashVerdeel(el);
+  if(!rechts) _dashVerdeel(el);
   if(indeling.indexOf('werkorders') >= 0) _dashWerkordersVul();
   if(indeling.indexOf('dringend') >= 0) _dashDringendVul();
   _dashBind(el);
@@ -10034,38 +10136,38 @@ function _dashVelHtml(indeling){
   var beschikbaar = Object.keys(DASH_BLOKKEN).filter(function(id){ return DASH_BLOKKEN[id].mag(); });
   var lijst = indeling.concat(beschikbaar.filter(function(id){ return indeling.indexOf(id) < 0; }));
   var h = '<div class="dash-vel'+(_dashVelOpen ? ' open' : '')+'" id="dash-vel"><div class="dash-vel-in" role="dialog" aria-label="Indeling aanpassen">';
-  h += '<div class="dash-greep"></div><h2>Indeling aanpassen</h2><p class="dash-vel-uitleg">Zet blokken aan of uit en zet ze in de volgorde die jij wilt. Wordt bewaard voor jouw account, op elk apparaat.</p><div class="dash-keuzes">';
+  h += '<div class="dash-greep"></div><h2>Blokken kiezen</h2><p class="dash-vel-uitleg">Zet blokken aan of uit. Waar ze staan, bepaal je door ze op het dashboard te slepen. Wordt bewaard voor jouw account, op elk apparaat.</p><div class="dash-keuzes">';
   lijst.forEach(function(id){
-    var b = DASH_BLOKKEN[id], aan = indeling.indexOf(id) >= 0, pos = indeling.indexOf(id);
+    var b = DASH_BLOKKEN[id], aan = indeling.indexOf(id) >= 0;
     h += '<div class="dash-keuze"><span class="dash-keuze-n">'+esc(b.n)+'<small>'+esc(b.u)+'</small></span>'
-      + '<button type="button" class="dash-pijl" data-op="'+id+'" aria-label="'+esc(b.n)+' omhoog"'+(!aan || pos === 0 ? ' disabled' : '')+'>'+_DASH_ICO.op+'</button>'
-      + '<button type="button" class="dash-pijl" data-neer="'+id+'" aria-label="'+esc(b.n)+' omlaag"'+(!aan || pos === indeling.length-1 ? ' disabled' : '')+'>'+_DASH_ICO.neer+'</button>'
       + '<button type="button" class="dash-schuif'+(aan ? ' aan' : '')+'" data-sw="'+id+'" role="switch" aria-checked="'+aan+'" aria-label="'+esc(b.n)+' tonen"></button></div>';
   });
-  h += '</div><div class="dash-vel-onder"><button type="button" class="btn btn-ghost" id="dash-standaard">Standaard herstellen</button><button type="button" class="btn btn-primary" id="dash-klaar">Klaar</button></div></div></div>';
+  h += '</div><div class="dash-vel-onder"><button type="button" class="btn btn-primary" id="dash-klaar">Klaar</button></div></div></div>';
   return h;
 }
 
 function _dashBind(el){
-  el.querySelectorAll('[data-nav]').forEach(function(b){ b.addEventListener('click', function(){ navigateTo(b.dataset.nav); }); });
+  el.querySelectorAll('[data-nav]').forEach(function(b){ b.addEventListener('click', function(){ _dashBewerk = false; navigateTo(b.dataset.nav); }); });
   var vb = el.querySelector('#dash-verlof-btn'); if(vb) vb.addEventListener('click', function(){ openVerlofBijschrijfModal(); });
   el.querySelectorAll('[data-opdracht]').forEach(function(item){ item.addEventListener('click', function(){ openOpdrachtPanel(item.dataset.opdracht); }); });
   el.querySelectorAll('.dash-meer').forEach(function(b){ b.addEventListener('click', function(){ _dashOpen[b.dataset.groep] = !_dashOpen[b.dataset.groep]; _dashHertekenNu(); }); });
   // Indeling aanpassen
   var vel = el.querySelector('#dash-vel');
   var zet = function(lijst){ _dashBewaar(lijst); _dashHertekenNu(); };
-  el.querySelector('#dash-aanpassen').addEventListener('click', function(){ _dashVelOpen = true; vel.classList.add('open'); });
+  el.querySelector('#dash-aanpassen').addEventListener('click', function(){ _dashBewerk = !_dashBewerk; _dashHertekenNu(); });
   el.querySelector('#dash-klaar').addEventListener('click', function(){ _dashVelOpen = false; vel.classList.remove('open'); });
   vel.addEventListener('click', function(e){ if(e.target === vel){ _dashVelOpen = false; vel.classList.remove('open'); } });
-  el.querySelector('#dash-standaard').addEventListener('click', function(){ zet(null); });
+  if(_dashBewerk){
+    el.querySelector('#dash-kies').addEventListener('click', function(){ _dashVelOpen = true; vel.classList.add('open'); });
+    el.querySelector('#dash-bewerk-klaar').addEventListener('click', function(){ _dashBewerk = false; _dashHertekenNu(); });
+    el.querySelector('#dash-standaard').addEventListener('click', function(){ _dashBewaar(null, null); _dashHertekenNu(); });
+    el.querySelectorAll('[data-verberg]').forEach(function(b){ b.addEventListener('click', function(){
+      var l = _dashIndeling(), i = l.indexOf(b.dataset.verberg); if(i >= 0){ l.splice(i, 1); zet(l); }
+    }); });
+    _dashSleepBind(el, function(volgorde, rechts){ _dashBewaar(volgorde, rechts); _dashHertekenNu(); });
+  }
   el.querySelectorAll('.dash-schuif').forEach(function(b){ b.addEventListener('click', function(){
     var l = _dashIndeling(), i = l.indexOf(b.dataset.sw); if(i >= 0) l.splice(i, 1); else l.push(b.dataset.sw); zet(l);
-  }); });
-  el.querySelectorAll('[data-op]').forEach(function(b){ b.addEventListener('click', function(){
-    var l = _dashIndeling(), i = l.indexOf(b.dataset.op); if(i > 0){ l.splice(i, 1); l.splice(i-1, 0, b.dataset.op); zet(l); }
-  }); });
-  el.querySelectorAll('[data-neer]').forEach(function(b){ b.addEventListener('click', function(){
-    var l = _dashIndeling(), i = l.indexOf(b.dataset.neer); if(i >= 0 && i < l.length-1){ l.splice(i, 1); l.splice(i+1, 0, b.dataset.neer); zet(l); }
   }); });
   _dashTipBind();
 }
@@ -10077,6 +10179,165 @@ function _dashHertekenNu(){
   if(c) c.scrollTop = y;
   var k2 = document.querySelector('.dash-keuzes'); if(k2) k2.scrollTop = ky;
 }
+// Slepen in de bewerkstand: pak een blok en zet het neer waar je wilt, links of rechts.
+// Muis: direct slepen. Telefoon: blok even vasthouden (of het greepje pakken), dan slepen.
+// Een gestippelde plek laat zien waar het blok landt. Op een telefoon (één kolom, volgorde
+// via CSS order) schuift alleen de volgorde; op desktop telt ook de kolom.
+// klaar(volgorde, rechts) krijgt de nieuwe volgorde en, op desktop, de blokken in de rechterkolom.
+var _dashSleep = null;
+function _dashSleepBind(el, klaar){
+  var wrap = el.querySelector('.dash-kolommen'); if(!wrap) return;
+  var enkel = function(){ return getComputedStyle(wrap).display !== 'grid'; };
+  if(!window._dashSleepTouch){
+    window._dashSleepTouch = true;
+    // Tijdens het slepen niet scrollen (iOS: alleen een touchmove met preventDefault houdt de pagina stil)
+    document.addEventListener('touchmove', function(e){ if(_dashSleep) e.preventDefault(); }, { passive:false });
+  }
+  wrap.querySelectorAll('.dash-blok').forEach(function(b){
+    b.addEventListener('pointerdown', function(e){
+      if(e.button > 0 || _dashSleep || e.target.closest('.dash-blok-verberg')) return;
+      var sx = e.clientX, sy = e.clientY, pid = e.pointerId, timer = null, bezig = false;
+      var direct = e.pointerType === 'mouse' || !!e.target.closest('.dash-sleep-greep');
+      var start = function(ev){ bezig = true; _dashSleepStart(b, ev, wrap, enkel()); };
+      if(!direct) timer = setTimeout(function(){ timer = null; start({ clientX:sx, clientY:sy }); try { navigator.vibrate && navigator.vibrate(12); } catch(x){} }, 320);
+      var beweeg = function(ev){
+        if(ev.pointerId !== pid) return;
+        if(!bezig){
+          var d = Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy);
+          if(timer){ if(d > 10){ clearTimeout(timer); timer = null; weg(); } return; }   // scrollen, geen slepen
+          if(d > 5) start(ev); else return;
+        }
+        ev.preventDefault();
+        _dashSleepBeweeg(ev);
+      };
+      var los = function(ev){
+        if(ev.pointerId !== pid) return;
+        if(timer){ clearTimeout(timer); timer = null; }
+        weg();
+        if(bezig) _dashSleepLos(klaar);
+      };
+      var weg = function(){ document.removeEventListener('pointermove', beweeg); document.removeEventListener('pointerup', los); document.removeEventListener('pointercancel', los); };
+      document.addEventListener('pointermove', beweeg, { passive:false });
+      document.addEventListener('pointerup', los);
+      document.addEventListener('pointercancel', los);
+    });
+    // Toetsenbord: greepje focussen en met de pijltjes verplaatsen
+    var g = b.querySelector('.dash-sleep-greep');
+    if(g) g.addEventListener('keydown', function(e){
+      var k = e.key; if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].indexOf(k) < 0) return;
+      e.preventDefault();
+      _dashSleepToets(b, k, wrap, enkel(), klaar);
+    });
+  });
+}
+function _dashSleepStart(b, e, wrap, enkel){
+  var r = b.getBoundingClientRect();
+  var plek = document.createElement('div');
+  plek.className = 'dash-blok-plek';
+  plek.style.height = r.height + 'px';
+  plek.style.order = b.style.order;
+  b.parentNode.insertBefore(plek, b);
+  document.body.appendChild(b);
+  b.classList.add('sleept');
+  b.style.width = r.width + 'px'; b.style.left = r.left + 'px'; b.style.top = r.top + 'px';
+  _dashSleep = { b:b, plek:plek, wrap:wrap, enkel:enkel, dx:e.clientX - r.left, dy:e.clientY - r.top, x:e.clientX, y:e.clientY, rol:0 };
+  document.documentElement.classList.add('dash-sleept');
+  _dashSleepRol();
+}
+function _dashSleepBeweeg(e){
+  var s = _dashSleep; if(!s) return;
+  s.x = e.clientX; s.y = e.clientY;
+  s.b.style.left = (s.x - s.dx) + 'px'; s.b.style.top = (s.y - s.dy) + 'px';
+  _dashSleepPlaats();
+}
+// De gestippelde plek verplaatsen naar waar het blok nu boven hangt
+function _dashSleepPlaats(){
+  var s = _dashSleep; if(!s) return;
+  if(s.enkel){
+    var items = [].slice.call(s.wrap.querySelectorAll('.dash-blok')).sort(function(a, b){ return (+a.style.order) - (+b.style.order); });
+    // Vergelijk met waar de blokken zouden staan zonder de gestippelde plek ertussen
+    var ph = s.plek.getBoundingClientRect().height + (parseFloat(getComputedStyle(s.wrap).rowGap) || 0), po = +s.plek.style.order;
+    var na = items.length;
+    for(var i = 0; i < items.length; i++){ var r = items[i].getBoundingClientRect(), op = +items[i].style.order > po ? ph : 0; if(s.y < r.top - op + r.height / 2){ na = i; break; } }
+    items.splice(na, 0, s.plek);
+    items.forEach(function(it, n){ it.style.order = n; });
+    return;
+  }
+  var kol = [].slice.call(s.wrap.querySelectorAll('.dash-kolom'));
+  var doel = kol[0], best = 1e9;
+  kol.forEach(function(k){ var r = k.getBoundingClientRect(), d = s.x < r.left ? r.left - s.x : s.x > r.right ? s.x - r.right : 0; if(d < best){ best = d; doel = k; } });
+  var voor = null, kinderen = [].slice.call(doel.children).filter(function(c){ return c !== s.plek && c.classList.contains('dash-blok'); });
+  var ph = s.plek.parentNode === doel ? s.plek.getBoundingClientRect().height + (parseFloat(getComputedStyle(doel).rowGap) || 0) : 0;
+  for(var j = 0; j < kinderen.length; j++){
+    var rk = kinderen[j].getBoundingClientRect(), op = ph && (s.plek.compareDocumentPosition(kinderen[j]) & Node.DOCUMENT_POSITION_FOLLOWING) ? ph : 0;
+    if(s.y < rk.top - op + rk.height / 2){ voor = kinderen[j]; break; }
+  }
+  if(s.plek.parentNode === doel && s.plek.nextElementSibling === voor) return;
+  if(!voor && s.plek.parentNode === doel && s.plek === doel.lastElementChild) return;
+  doel.insertBefore(s.plek, voor);
+}
+// Meescrollen bij de boven- of onderrand
+function _dashSleepRol(){
+  var s = _dashSleep; if(!s) return;
+  var sc = document.getElementById('content') || document.scrollingElement;
+  var r = sc.getBoundingClientRect ? sc.getBoundingClientRect() : { top:0, bottom:innerHeight };
+  var top = Math.max(r.top, 0), bodem = Math.min(r.bottom, innerHeight), v = 0;
+  if(s.y < top + 70) v = -Math.ceil((top + 70 - s.y) / 5);
+  else if(s.y > bodem - 70) v = Math.ceil((s.y - (bodem - 70)) / 5);
+  if(v){ sc.scrollTop += v; _dashSleepPlaats(); }
+  s.rol = requestAnimationFrame(_dashSleepRol);
+}
+function _dashSleepLos(klaar){
+  var s = _dashSleep; if(!s) return;
+  cancelAnimationFrame(s.rol);
+  s.plek.parentNode.insertBefore(s.b, s.plek);
+  s.b.style.order = s.plek.style.order;
+  s.plek.remove();
+  s.b.classList.remove('sleept');
+  s.b.style.width = s.b.style.left = s.b.style.top = '';
+  document.documentElement.classList.remove('dash-sleept');
+  _dashSleep = null;
+  _dashSleepUitkomst(s.wrap, s.enkel, klaar);
+}
+function _dashSleepUitkomst(wrap, enkel, klaar){
+  var blokken = [].slice.call(wrap.querySelectorAll('.dash-blok'));
+  if(enkel){
+    blokken.sort(function(a, b){ return (+a.style.order) - (+b.style.order); });
+    klaar(blokken.map(function(b){ return b.dataset.blok; }), undefined);
+    return;
+  }
+  // Volgorde voor de telefoon: zoals je leest, van boven naar beneden (bij gelijke hoogte links eerst)
+  var pos = blokken.map(function(b){ var r = b.getBoundingClientRect(); return { id:b.dataset.blok, t:Math.round(r.top), l:r.left }; });
+  pos.sort(function(a, b){ return a.t - b.t || a.l - b.l; });
+  var kol = wrap.querySelectorAll('.dash-kolom');
+  var rechts = kol[1] ? [].slice.call(kol[1].querySelectorAll('.dash-blok')).map(function(b){ return b.dataset.blok; }) : [];
+  klaar(pos.map(function(p){ return p.id; }), rechts);
+}
+// Met het toetsenbord: omhoog/omlaag binnen de kolom, links/rechts naar de andere kolom
+function _dashSleepToets(b, k, wrap, enkel, klaar){
+  var id = b.dataset.blok;
+  if(enkel){
+    if(k === 'ArrowLeft' || k === 'ArrowRight') return;
+    var items = [].slice.call(wrap.querySelectorAll('.dash-blok')).sort(function(a, c){ return (+a.style.order) - (+c.style.order); });
+    var i = items.indexOf(b), n = k === 'ArrowUp' ? i - 1 : i + 1;
+    if(n < 0 || n >= items.length) return;
+    items.splice(i, 1); items.splice(n, 0, b);
+    items.forEach(function(it, m){ it.style.order = m; });
+  } else {
+    var kol = [].slice.call(wrap.querySelectorAll('.dash-kolom')), hier = b.parentNode;
+    if(k === 'ArrowLeft' || k === 'ArrowRight'){
+      var ander = kol[k === 'ArrowLeft' ? 0 : 1]; if(!ander || ander === hier) return;
+      ander.appendChild(b);
+    } else if(k === 'ArrowUp'){
+      var vorige = b.previousElementSibling; if(!vorige) return; hier.insertBefore(b, vorige);
+    } else {
+      var volgende = b.nextElementSibling; if(!volgende) return; hier.insertBefore(volgende, b);
+    }
+  }
+  _dashSleepUitkomst(wrap, enkel, klaar);
+  setTimeout(function(){ var nb = document.querySelector('.dash-blok[data-blok="' + id + '"] .dash-sleep-greep'); if(nb) nb.focus(); }, 0);
+}
+
 // Tooltip bij grafieken en bezettingsbalken: muis (hover) of tik (telefoon). Eén keer binden.
 function _dashTipBind(){
   if(window._dashTipGebonden) return;

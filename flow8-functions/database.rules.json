@@ -127,6 +127,17 @@
           }
         }
       },
+      "sessies": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['id', 'sinds'])",
+          "id": { ".validate": "newData.isString() && newData.val().length <= 64" },
+          "sinds": { ".validate": "newData.isNumber()" },
+          "apparaat": { ".validate": "newData.isString() && newData.val().length <= 120" },
+          "$overig": { ".validate": false }
+        }
+      },
       "verzuimDetail": {
         "$bedrijfId": {
           ".read": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && ( root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin' || root.child('flow8/bedrijven/'+$bedrijfId+'/rollen/'+root.child('flow8/gebruikers/'+auth.uid+'/rol').val()+'/rechten/verzuim/inzageAlle').val() === true )",
