@@ -202,7 +202,7 @@ const straalMat2 = new THREE.ShaderMaterial({ uniforms: straalU, transparent: tr
         vec3 kRook = mix(mix(vec3(0.16, 0.24, 0.6), vec3(0.1, 0.16, 0.48), naar), vec3(0.3, 0.24, 0.66), rook);
         vec3 kWaaier = mix(vec3(0.85, 0.96, 1.0), vec3(1.0, 0.78, 0.66), warm * 0.6);
         // van donker bovenin naar licht onderin: wolken en waas worden pas naar onder toe helder
-        float verloop = mix(0.18, 1.0, smoothstep(0.05, 0.8, hoog));
+        float verloop = mix(0.04, 1.0, smoothstep(0.14, 0.85, hoog));
         col = (kB * waas * (0.3 + 0.95 * wolk) * raster * 0.85 + kRook * rook * rookZone * mix(0.42, 0.38, naar)) * verloop + kWaaier * waaier * 0.9;
       }
       col += vec3(0.92, 0.98, 1.0) * (kern * 1.2 + kernZacht + puls * 1.2);
@@ -210,9 +210,9 @@ const straalMat2 = new THREE.ShaderMaterial({ uniforms: straalU, transparent: tr
     }`,
   defines: { OCT: SMAL ? 3 : 4 } });
 const straal2 = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), straalMat2); straal2.frustumCulled = false; straal2.renderOrder = -3; scene.add(straal2);
-const nevelMat = new THREE.ShaderMaterial({ uniforms: { tijd: tijdU, donker: donkerU }, transparent: true, depthWrite: false, depthTest: false,
+const nevelMat = new THREE.ShaderMaterial({ uniforms: { tijd: tijdU, donker: donkerU, res: straalU.res }, transparent: true, depthWrite: false, depthTest: false,
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-  fragmentShader: `uniform float tijd; uniform float donker; varying vec2 vUv;
+  fragmentShader: `uniform float tijd; uniform float donker; uniform vec2 res; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(41.3, 289.1))) * 45758.5); }
     float ruis(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
     float fbm(vec2 p){ float s = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { s += a * ruis(p); p *= 2.03; a *= 0.5; } return s; }
@@ -221,6 +221,7 @@ const nevelMat = new THREE.ShaderMaterial({ uniforms: { tijd: tijdU, donker: don
       float midden = exp(-pow((vUv.x - 0.5) * 2.4, 2.0)) * smoothstep(0.0, 0.7, vUv.y + 0.2);
       vec3 c = mix(vec3(0.05, 0.09, 0.30), vec3(0.19, 0.13, 0.46), w);
       float a = smoothstep(0.35, 0.85, w) * (0.03 + 0.08 * midden) * donker * mix(1.0, 0.2, smoothstep(0.45, 0.72, vUv.y));   // bovenin donkerder
+      a *= mix(1.0, 0.06, smoothstep(0.4, 0.88, gl_FragCoord.y / max(res.y, 1.0)));   // bovenste deel van het scherm bijna zwart, alle aandacht naar de straal
       a *= 0.85 + 0.3 * h(floor(gl_FragCoord.xy) + floor(tijd * 10.0));
       gl_FragColor = vec4(c, a);
       #include <colorspace_fragment>
