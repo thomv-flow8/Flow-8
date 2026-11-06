@@ -172,6 +172,49 @@ const bundelMat = new THREE.ShaderMaterial({ uniforms: { tijd: tijdU, donker: do
       #include <colorspace_fragment>
     }`, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
 const lichtbundel = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 20), bundelMat); lichtbundel.renderOrder = -1; scene.add(lichtbundel);
+
+// ── De lichtstraal in schermruimte (donker thema): kern, waas met stromende wolken en belichte rook ──
+const straalU = { tijd: tijdU, res: { value: new THREE.Vector2(1, 1) }, css: { value: new THREE.Vector2(1, 1) }, bx: { value: -1e4 }, snij: { value: 1e5 }, sterkte: { value: 0 }, warm: { value: 0 } };
+const straalMat2 = new THREE.ShaderMaterial({ uniforms: straalU, transparent: true, depthTest: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  vertexShader: 'void main(){ gl_Position = vec4(position.xy, 0.99999, 1.0); }', // achter alles: de 8 dekt de straal af
+  fragmentShader: `uniform float tijd; uniform vec2 res; uniform vec2 css; uniform float bx; uniform float snij; uniform float sterkte; uniform float warm;
+    float h21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float ruis(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h21(i), h21(i + vec2(1.0, 0.0)), f.x), mix(h21(i + vec2(0.0, 1.0)), h21(i + vec2(1.0, 1.0)), f.x), f.y); }
+    float fbm(vec2 p){ float s = 0.0, a = 0.5; for (int i = 0; i < OCT; i++) { s += a * ruis(p); p *= 2.03; a *= 0.5; } return s; }
+    void main(){
+      vec2 cp = gl_FragCoord.xy / res * css; cp.y = css.y - cp.y;           // css-pixels, oorsprong linksboven
+      float dx = cp.x - bx, dy = snij - cp.y, hoog = clamp(cp.y / css.y, 0.0, 1.0);
+      float landt = step(snij, 9e4), boven = mix(1.0, smoothstep(-2.0, 6.0, dy), landt), bovenZacht = mix(1.0, smoothstep(-160.0, 40.0, dy), landt);
+      // naar het raakpunt (of naar onderen) waaiert de straal uit
+      float naar = mix(smoothstep(0.25, 1.0, hoog), exp(-max(dy, 0.0) / 230.0), landt);
+      float bw = 20.0 + 250.0 * naar;
+      float kern = exp(-dx * dx / 3.0) * boven * (0.6 + 0.4 * hoog), kernZacht = exp(-dx * dx / 70.0) * boven * 0.3;
+      float puls = pow(0.5 + 0.5 * cos(6.2832 * (-cp.y / 700.0 - tijd * 0.1)), 12.0) * exp(-dx * dx / 8.0) * boven;
+      float waas = exp(-dx * dx / (bw * bw)) * bovenZacht * (0.22 + 0.78 * naar);
+      float rookZone = exp(-abs(dx) / 230.0) * bovenZacht;
+      float waaier = landt * exp(-abs(dy) / 30.0) * exp(-dx * dx / (230.0 * 230.0));
+      vec3 col = vec3(0.0);
+      if (waas + rookZone + waaier > 0.01) {
+        // stromende wolken in de waas (zakken omlaag) en een fijn raster in plaats van korrel
+        vec2 q = vec2(dx * 0.010, (cp.y - tijd * 40.0) * 0.005);
+        float wolk = smoothstep(0.22, 0.86, fbm(q + 0.8 * fbm(q * 1.6 + vec2(0.0, tijd * 0.05))));
+        vec2 bin = abs(fract(cp / 3.0) - 0.5); float raster = 1.0 - 0.32 * step(0.36, max(bin.x, bin.y));
+        // grote, trage rookwolken rond de straal, door het licht beschenen
+        vec2 q2 = vec2(cp.x * 0.0021 + tijd * 0.004, cp.y * 0.0027 - tijd * 0.011);
+        float rook = smoothstep(0.46, 0.95, fbm(q2 + 0.7 * fbm(q2 * 2.1 - vec2(tijd * 0.008))));
+        float bt = clamp(abs(dx) / max(bw, 1.0), 0.0, 1.0);
+        vec3 kB = mix(vec3(0.8, 0.96, 1.0), vec3(0.3, 0.62, 1.0), smoothstep(0.0, 0.5, bt));
+        kB = mix(kB, vec3(0.5, 0.36, 1.0), smoothstep(0.5, 1.0, bt));
+        kB = mix(kB, vec3(1.0, 0.54, 0.39), warm * 0.55 * naar * smoothstep(0.25, 0.95, bt));
+        vec3 kRook = mix(vec3(0.1, 0.16, 0.48), vec3(0.26, 0.2, 0.62), rook);
+        vec3 kWaaier = mix(vec3(0.85, 0.96, 1.0), vec3(1.0, 0.78, 0.66), warm * 0.6);
+        col = kB * waas * (0.3 + 0.95 * wolk) * raster * 0.85 + kRook * rook * rookZone * (0.35 + 0.65 * naar) * 0.38 + kWaaier * waaier * 0.9;
+      }
+      col += vec3(0.92, 0.98, 1.0) * (kern * 1.2 + kernZacht + puls * 1.2);
+      gl_FragColor = vec4(col * sterkte * 1.35, 1.0);
+    }`,
+  defines: { OCT: SMAL ? 3 : 4 } });
+const straal2 = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), straalMat2); straal2.frustumCulled = false; straal2.renderOrder = -3; scene.add(straal2);
 // zachte nevel achter alles: trage wolken in blauw en violet, met korrel
 const nevelMat = new THREE.ShaderMaterial({ uniforms: { tijd: tijdU, donker: donkerU }, transparent: true, depthWrite: false, depthTest: false,
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
@@ -183,7 +226,7 @@ const nevelMat = new THREE.ShaderMaterial({ uniforms: { tijd: tijdU, donker: don
       float w = fbm(p + vec2(t, -t * 0.6) + fbm(p * 0.7 - t));
       float midden = exp(-pow((vUv.x - 0.5) * 2.4, 2.0)) * smoothstep(0.0, 0.7, vUv.y + 0.2);
       vec3 c = mix(vec3(0.05, 0.09, 0.30), vec3(0.19, 0.13, 0.46), w);
-      float a = smoothstep(0.35, 0.85, w) * (0.05 + 0.13 * midden) * donker;
+      float a = smoothstep(0.35, 0.85, w) * (0.03 + 0.08 * midden) * donker;
       a *= 0.85 + 0.3 * h(floor(gl_FragCoord.xy) + floor(tijd * 10.0));
       gl_FragColor = vec4(c, a);
       #include <colorspace_fragment>
@@ -361,9 +404,9 @@ function opdrachtU(p) {
 }
 
 // ── Nevel en bloom ──
-const NEVEL = new THREE.Color(0x04050a);
+const NEVEL = new THREE.Color(0x030407);
 let composer = null, bloom = null;
-function maakComposer() { if (SMAL) return; composer = new EffectComposer(renderer); composer.setPixelRatio(Math.min(1.5, PR)); composer.addPass(new RenderPass(scene, camera)); bloom = new UnrealBloomPass(new THREE.Vector2(doek.clientWidth, doek.clientHeight), 0.6, 0.45, 0.82); composer.addPass(bloom); composer.addPass(new OutputPass()); }
+function maakComposer() { if (SMAL) return; composer = new EffectComposer(renderer); composer.setPixelRatio(Math.min(1.5, PR)); composer.addPass(new RenderPass(scene, camera)); bloom = new UnrealBloomPass(new THREE.Vector2(doek.clientWidth, doek.clientHeight), 0.3, 0.45, 0.84); composer.addPass(bloom); composer.addPass(new OutputPass()); }
 
 // ── Camerapad ──
 const K = [[0.00, -0.45, SMAL ? 0.85 : 0.05, SMAL ? 6.6 : 5.4], [0.12, -0.05, 0.75, SMAL ? 5.2 : 3.6]];
@@ -426,7 +469,7 @@ document.querySelectorAll('#meer .sectie').forEach((el, i) => {
   g.quaternion.setFromRotationMatrix(basis); scene.add(g);
   formaties.push({ el, g, binnen, kant: i % 2 ? 1 : -1 });
 });
-const bgKleur = new THREE.Color(), RUSTK = new THREE.Color(0x0d111b);
+const bgKleur = new THREE.Color(), RUSTK = new THREE.Color(0x08090e);
 // ── Het weekrooster onder de 8: dagen naast elkaar (langs RE), monteurs achter elkaar (langs NA) ──
 const VLOER = -2.2, VAK = 0.8, roosterO = new THREE.Vector3(0, VLOER, 0).addScaledVector(NA, rE * 0.9 - 1.6);
 const roosterG = new THREE.Group(); roosterG.position.copy(roosterO); roosterG.quaternion.setFromRotationMatrix(basis); scene.add(roosterG); // lokaal: x = dagen, z = monteurs (naar de camera)
@@ -561,8 +604,14 @@ function teken(nu) {
       if (Math.abs(nbx - (landingBlok._bx ?? -99)) > 0.4) { landingBlok._bx = nbx; landingBlok.style.setProperty('--bx', nbx.toFixed(1) + '%'); }
       if (nl !== landingBlok._l) { landingBlok._l = nl; landingBlok.style.setProperty('--licht', nl.toFixed(2)); }
       bundelMat.uniforms.snij.value.set(rb.top < innerHeight + 200 ? rb.top : 1e5, snedeU.value.w); }
-    doek.style.opacity = (1 - THREE.MathUtils.smoothstep(extra, innerHeight * 1.2, innerHeight * 2.3)).toFixed(3); lichtbundel.visible = bundelMat.uniforms.sterkte.value > 0.01; }
-  if (bloom) bloom.strength = 0.5 - 0.18 * THREE.MathUtils.smoothstep(zak, 0, 1.5); // in de wereld minder gloed
+    { // de straal in schermruimte volgt de 3D-bundel: zelfde plek, sterkte en warmte
+      proj.copy(lichtbundel.position).project(camera); const pr = snedeU.value.w, W2 = maatU.value.x, H2 = maatU.value.y;
+      straalU.bx.value = (proj.x * .5 + .5) * W2; straalU.res.value.set(W2 * pr, H2 * pr); straalU.css.value.set(W2, H2);
+      straalU.sterkte.value = bundelMat.uniforms.sterkte.value; straalU.warm.value = bundelMat.uniforms.warm.value;
+      const rbT = landingBlok ? landingBlok.getBoundingClientRect().top : 1e5; straalU.snij.value = rbT < innerHeight + 200 ? rbT : 1e5; }
+    doek.style.opacity = (1 - THREE.MathUtils.smoothstep(extra, innerHeight * 1.2, innerHeight * 2.3)).toFixed(3);
+    { const aan = bundelMat.uniforms.sterkte.value > 0.01, donkerNu = html.dataset.thema === 'donker'; lichtbundel.visible = aan && !donkerNu; straal2.visible = aan && donkerNu; } }
+  if (bloom) bloom.strength = 0.3 - 0.1 * THREE.MathUtils.smoothstep(zak, 0, 1.5); // in de wereld minder gloed
   { const k2 = kPx(), zicht = innerHeight * k2;
     for (const fm of formaties) {
       const b = fm.el.getBoundingClientRect(), ys = yE - ((b.top + scrollY + b.height / 2 - innerHeight / 2) - reisEind()) * k2;

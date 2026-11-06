@@ -27,7 +27,7 @@
 @font-face{font-family:'Inter Tight';src:url(fonts/InterTight-500.woff2) format('woff2');font-weight:500;font-display:swap}
 @font-face{font-family:'Inter Tight';src:url(fonts/InterTight-600.woff2) format('woff2');font-weight:600;font-display:swap}
 :root{--bg:#eef0f4;--bg-rand:#dde1e8;--vlak:#fff;--vlak2:#f2f4f8;--lijn:#e2e5eb;--tekst:#0d0f14;--zacht:#565c6b;--zacht2:#6d7384;--knop:#0d0f14;--knop-tekst:#fff;--acc:#4f6ef5;--acc-t:#2f4bc8;--cyaan:#1a9fc2;--glas:rgba(255,255,255,.82);--glas-lijn:rgba(13,15,20,.08)}
-[data-thema="donker"]{--bg:#0a0d15;--bg-rand:#04050a;--vlak:#12151e;--vlak2:#1a1e2b;--lijn:#262b3d;--tekst:#f4f6fb;--zacht:#a8aec0;--zacht2:#868da3;--knop:#f4f6fb;--knop-tekst:#0d0f14;--acc-t:#93a6ff;--cyaan:#7fe0f5;--glas:rgba(10,13,21,.62);--glas-lijn:rgba(255,255,255,.1)}
+[data-thema="donker"]{--bg:#07080d;--bg-rand:#030407;--vlak:#12151e;--vlak2:#1a1e2b;--lijn:#262b3d;--tekst:#f4f6fb;--zacht:#a8aec0;--zacht2:#868da3;--knop:#f4f6fb;--knop-tekst:#0d0f14;--acc-t:#93a6ff;--cyaan:#7fe0f5;--glas:rgba(10,13,21,.62);--glas-lijn:rgba(255,255,255,.1)}
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
@@ -282,7 +282,7 @@ svg{display:block;flex-shrink:0}
 
 /* Overgang: de camera duikt het licht in, daarna een rustige achtergrond */
 :root{--rust:#f4f5f8;--rust-gloed:rgba(79,110,245,.10)}
-[data-thema="donker"]{--rust:#0d111b;--rust-gloed:rgba(127,224,245,.16)}
+[data-thema="donker"]{--rust:#08090e;--rust-gloed:rgba(127,224,245,.16)}
 .overgang{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;backdrop-filter:blur(6px) saturate(125%);-webkit-backdrop-filter:blur(6px) saturate(125%);background:radial-gradient(55% 45% at 50% 50%,var(--rust-gloed),transparent 70%),color-mix(in srgb,var(--rust) 72%,transparent)}
 .outro .pijl-neer{display:inline-flex;margin-top:22px;color:var(--zacht)}
 
@@ -872,7 +872,7 @@ svg{display:block;flex-shrink:0}
 .rond-nr{font:600 clamp(84px,8vw,118px)/.9 'Inter Tight',sans-serif;letter-spacing:-.06em;color:#f4f6fb;margin:4px 0 6px}
 .rond-naam{font-size:13px;font-weight:600;color:#fff}
 .rond-tekst{margin-top:4px;font-size:12px;line-height:1.35;color:#9aa1b3;max-width:17ch}
-.rond-plus{position:absolute;right:0;bottom:2%;width:58px;height:58px;border-radius:50%;background:#0b0d13;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 7px #0d111b,0 0 0 8px rgba(255,255,255,.1)}
+.rond-plus{position:absolute;right:0;bottom:2%;width:58px;height:58px;border-radius:50%;background:#0b0d13;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 7px #08090e,0 0 0 8px rgba(255,255,255,.1)}
 .rond-plus .ic{width:30px;height:30px}
 /* kaart */
 .mu-kaart{width:min(100%,240px);height:auto;border-radius:14px}
