@@ -6765,7 +6765,7 @@ function _bouwLogin3D(THREE){
       float fbm(vec2 p){ float s = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { s += a * ruis(p); p *= 2.03; a *= 0.5; } return s; }
       void main(){ vec2 p = vUv * vec2(3.2, 2.0); float t = tijd * 0.018; float w = fbm(p + vec2(t, -t * 0.6) + fbm(p * 0.7 - t));
         float midden = exp(-pow((vUv.x - 0.5) * 2.4, 2.0)) * smoothstep(0.0, 0.7, vUv.y + 0.2);
-        vec3 c = mix(vec3(0.05, 0.09, 0.30), vec3(0.19, 0.13, 0.46), w); float a = smoothstep(0.35, 0.85, w) * (0.05 + 0.13 * midden);
+        vec3 c = mix(vec3(0.05, 0.09, 0.30), vec3(0.19, 0.13, 0.46), w); float a = smoothstep(0.35, 0.85, w) * (0.05 + 0.13 * midden) * mix(1.0, 0.2, smoothstep(0.45, 0.72, vUv.y));
         gl_FragColor = vec4(c, a);
         #include <colorspace_fragment>
       }` }));
@@ -6801,14 +6801,15 @@ function _bouwLogin3D(THREE){
         float waaier = exp(-max(dyS, 0.0) / 34.0) * exp(-dxS * dxS / (hb.x * hb.x * 0.7)) * smoothstep(-10.0, 0.0, dyS) * step(0.0, dSm);
         // randlicht: loopt ver om het blok heen, met kleurbanden die langs de rand stromen
         float stroom = 0.78 + 0.22 * sin(sPad * 0.018 - tijd * 1.1);
-        float rand = exp(-max(dSm, 0.0) / 20.0) * step(0.0, dSm) * (0.32 + 0.68 * exp(-sPad / (L * 0.85))) * stroom;
-        float randBreed = exp(-max(dSm, 0.0) / 60.0) * step(0.0, dSm) * (0.2 + 0.8 * exp(-sPad / (L * 0.7)));
+        // het licht vloeit ver over de randen van het blok uit
+        float rand = exp(-max(dSm, 0.0) / 30.0) * step(0.0, dSm) * (0.45 + 0.55 * exp(-sPad / (L * 1.1))) * stroom;
+        float randBreed = exp(-max(dSm, 0.0) / 110.0) * step(0.0, dSm) * (0.3 + 0.7 * exp(-sPad / (L * 0.9)));
         float puls = pow(0.5 + 0.5 * cos(6.2832 * (sPad / 560.0 - tijd * (0.08 + snel * 0.6))), 7.0) * exp(-max(dSm, 0.0) / 16.0) * step(0.0, dSm);
         float pulsB = pow(0.5 + 0.5 * cos(6.2832 * (-dyS / 700.0 - tijd * (0.12 + snel * 0.9))), 12.0) * exp(-dxS * dxS / 6.0) * boven;
         // waas rond de bundel (wijder bij het raakpunt) en rond het blok, met stromende wolken
         float bw = 18.0 + 240.0 * exp(-max(dyS, 0.0) / 130.0);
         float waasB = exp(-dxS * dxS / (bw * bw)) * smoothstep(-6.0, 4.0, dyS) * (0.14 + 0.86 * exp(-max(dyS, 0.0) / 280.0));
-        float waasR = exp(-max(dSm, 0.0) / 85.0) * step(0.0, dSm) * (0.1 + 0.9 * exp(-sPad / (L * 0.6)));
+        float waasR = exp(-max(dSm, 0.0) / 120.0) * step(0.0, dSm) * (0.15 + 0.85 * exp(-sPad / (L * 0.75)));
         float waas = (waasB * 0.9 + waasR) * sterkte;
         float zacht = 0.0, wolk = 0.5;
         if (waas > 0.006) {
@@ -6830,6 +6831,14 @@ function _bouwLogin3D(THREE){
         vec3 col = cKern * (kern * 1.15 + pulsB * 1.4) * sterkte * 1.3
                  + kleur(t) * (rand * 1.15 + randBreed * 0.45 + waaier * 0.95 + puls * 1.0) * sterkte * 1.25
                  + kWaas * zacht * 0.75;
+        // zoals de hero: trage rookwolken rond de straal en het blok, van donker bovenin naar licht bij het blok
+        float rookZone = max(exp(-abs(dxS) / 420.0) * smoothstep(-120.0, 60.0, dyS), exp(-max(dSm, 0.0) / 220.0)) * step(0.0, dSm);
+        if (rookZone > 0.01) {
+          vec2 q2 = vec2(cp.x * 0.0021 + tijd * 0.004, cp.y * 0.0027 - tijd * 0.011);
+          float rook = smoothstep(0.34, 0.92, fbm(q2 + 0.7 * fbm(q2 * 2.1 - vec2(tijd * 0.008))));
+          float verloop = mix(0.18, 1.0, smoothstep(0.0, kaart.y + hb.y, cp.y));
+          col += mix(vec3(0.12, 0.2, 0.55), vec3(0.32, 0.24, 0.68), rook) * rook * rookZone * 0.42 * verloop * sterkte;
+        }
         if (dSm < 0.0) col = vec3(0.0);
         gl_FragColor = vec4(col, 1.0);
       }`,
