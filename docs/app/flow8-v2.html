@@ -258,7 +258,7 @@ body .plan-tabel tbody tr:hover td{background:rgba(79,110,245,.09)}
 #login-kop h2{font:500 clamp(26px,2.4vw,38px)/1.05 'Inter Tight','Instrument Sans',sans-serif;letter-spacing:-.04em;color:#f4f6fb;text-wrap:balance}
 #login-kop p{margin-top:10px;color:#a8aec0;font-size:15px;max-width:34ch}
 @media (max-width:1100px),(max-height:720px){#login-kop{display:none}}
-@media (max-width:900px){#login-screen.login-3d-aan{justify-content:flex-start;padding-top:180px}#login-screen #login-logo{filter:drop-shadow(0 2px 10px rgba(5,6,10,.95)) drop-shadow(0 0 22px rgba(5,6,10,.8))}}
+@media (max-width:900px){#login-screen.login-3d-aan{padding-top:110px}#login-screen #login-logo{filter:drop-shadow(0 2px 10px rgba(5,6,10,.95)) drop-shadow(0 0 22px rgba(5,6,10,.8))}}
 @media (prefers-reduced-motion:reduce){#login-screen #login-form::before{animation:none}}
 @keyframes loginFlowArc{to{stroke-dashoffset:-100}}
 @keyframes loginGlowPulse{0%,100%{opacity:.85}50%{opacity:1}}
@@ -6721,7 +6721,7 @@ function _initLoginCanvas(){
   document.addEventListener('focusout',function(e){if(!e.target.matches('#login-screen input'))return;setTimeout(function(){if(!document.querySelector('#login-screen input:focus'))canvas.style.opacity='.82';},60);});
 }
 
-// ── Inlogscherm in 3D (november 2026): de liggende 8 en een lichtbundel die op het inlogblok valt ──
+// ── Inlogscherm (november 2026): een lichtbundel die op het inlogblok valt en langs de randen wegvloeit ──
 // three.js wordt pas geladen als het inlogscherm in beeld is, en alleen het kernbestand (geen addons).
 // Lukt dat niet (oude browser, geen WebGL, geen verbinding), dan blijft het deeltjeseffect van hierboven.
 var _login3d = null, _login3dBezig = false;
@@ -6747,55 +6747,15 @@ function _initLogin3D(){
   }).then(function(){ _login3dBezig = false; });
 }
 function _bouwLogin3D(THREE){
+  // Alleen licht: een bundel die van boven op het inlogblok valt en langs de randen wegvloeit, met nevel erachter.
   const doek = document.getElementById('login-3d'), scherm = document.getElementById('login-screen'), kaartEl = document.getElementById('login-form');
-  const rustig = matchMedia('(prefers-reduced-motion: reduce)').matches, SMAL = innerWidth <= 900, TAU = Math.PI * 2;
-  const renderer = new THREE.WebGLRenderer({ canvas: doek, antialias: true, alpha: true, powerPreference: 'high-performance' });
+  const rustig = matchMedia('(prefers-reduced-motion: reduce)').matches, SMAL = innerWidth <= 900;
+  const renderer = new THREE.WebGLRenderer({ canvas: doek, antialias: false, alpha: true, powerPreference: 'high-performance' });
   const PR = Math.min(SMAL ? 1.75 : 2, devicePixelRatio || 1);
   renderer.setPixelRatio(PR); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
   const scene = new THREE.Scene();
-  { // een eenvoudige lichtkamer als omgeving, zodat glas en metaal iets te weerspiegelen hebben
-    const omg = new THREE.Scene();
-    omg.add(new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshBasicMaterial({ color: 0x1c2233, side: THREE.BackSide })));
-    [[0, 4.8, 0, 4, 4, 5], [-4.8, 1, 1, 3, 5, 2.5], [4.8, 0, -1, 3, 4, 2]].forEach(function(l){ const m = new THREE.Mesh(new THREE.PlaneGeometry(l[3], l[4]), new THREE.MeshBasicMaterial({ color: new THREE.Color(l[5], l[5], l[5]), side: THREE.DoubleSide })); m.position.set(l[0], l[1], l[2]); m.lookAt(0, 0, 0); omg.add(m); });
-    scene.environment = new THREE.PMREMGenerator(renderer).fromScene(omg, 0.04).texture;
-  }
-  const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 80); scene.add(camera);
-  const CYAAN = new THREE.Color(0x7fe0f5), BLAUW = new THREE.Color(0x4f6ef5);
-  const kleurOp = function(u, uit){ return (uit || new THREE.Color()).copy(CYAAN).lerp(BLAUW, 0.5 - 0.5 * Math.cos(u * TAU)); };
-  const tijdU = { value: 0 };
-  // de 8 (zelfde vorm als op de site), als dik lint
-  const S8 = 1.18, D = 2.3;
-  function acht(t, uit){ const s = Math.sin(t), c = Math.cos(t), d = 1 + s * s; const y = c / d * 1.15, h = (s * c / d) * 1.05; const dr = (1 - y / 1.15) * 0.25 * Math.PI; return (uit || new THREE.Vector3()).set(h * Math.cos(dr) * S8, y * S8, (h * Math.sin(dr) + 0.12 * s) * S8); }
-  class Acht extends THREE.Curve { getPoint(u, uit){ return acht(u * TAU, uit); } }
-  const curve = new Acht(), TSEG = SMAL ? 420 : 800, RSEG = 28;
-  function buisMet(radius){ const g = new THREE.TubeGeometry(curve, TSEG, radius, RSEG, true); const n = g.attributes.position.count, kl = new Float32Array(n * 3), c = new THREE.Color(); for(let i = 0; i <= TSEG; i++) for(let j = 0; j <= RSEG; j++){ const k = i * (RSEG + 1) + j; if(k < n){ kleurOp(i / TSEG, c); kl.set([c.r, c.g, c.b], k * 3); } } g.setAttribute('color', new THREE.BufferAttribute(kl, 3)); return g; }
-  const groefTex = (function(){ const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d'), img = g.createImageData(256, 64); for(let y = 0; y < 64; y++) for(let x = 0; x < 256; x++){ const h = Math.pow(0.5 + 0.5 * Math.sin((x / 256 + y / 64) * TAU * 3), 3) * 255, i = (y * 256 + x) * 4; img.data[i] = img.data[i + 1] = img.data[i + 2] = h; img.data[i + 3] = 255; } g.putImageData(img, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(SMAL ? 90 : 150, 1); return t; })();
-  const acht8 = new THREE.Group(); acht8.scale.setScalar(SMAL ? 0.9 : 2.25); scene.add(acht8);
-  acht8.add(new THREE.Mesh(buisMet(0.062 * D), new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.12, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.05, emissive: 0x1a2a6e, emissiveIntensity: 0.35, transmission: SMAL ? 0 : 0.55, thickness: 0.16, ior: 1.45, bumpMap: groefTex, bumpScale: 0.9 })));
-  acht8.add(new THREE.Mesh(buisMet(0.028 * D), new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false })));
-  { // gevlochten metalen mantel met dunne banden
-    const vlechtMat = new THREE.MeshPhysicalMaterial({ color: 0x9cc4ff, metalness: 0.7, roughness: 0.25, clearcoat: 0.5, emissive: 0x18306e, emissiveIntensity: 0.4 });
-    const NF = SMAL ? 1200 : 2400, FR = curve.computeFrenetFrames(NF, true), P = []; for(let i = 0; i <= NF; i++) P.push(curve.getPointAt(i / NF));
-    const n = SMAL ? 4 : 6, draaien = SMAL ? 30 : 42;
-    for(let k = 0; k < n; k++){ const rich = k % 2 ? 1 : -1, fase = Math.floor(k / 2) / (n / 2) * TAU, p = []; for(let i = 0; i < NF; i += 2){ const a = fase + rich * draaien * TAU * (i / NF); p.push(P[i].clone().addScaledVector(FR.normals[i], 0.064 * D * Math.cos(a)).addScaledVector(FR.binormals[i], 0.064 * D * Math.sin(a))); } acht8.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p, true), SMAL ? 800 : 1500, 0.0028 * D, 5, true), vlechtMat)); }
-    const band = new THREE.TorusGeometry(0.066 * D, 0.0045 * D, 10, 48);
-    for(let i = 0; i < 12; i++){ const u = (i + 0.5) / 12, q = curve.getPointAt(u), m = new THREE.Mesh(band, vlechtMat); m.position.copy(q); m.lookAt(q.clone().add(curve.getTangentAt(u))); acht8.add(m); }
-  }
-  // gloedschil met een lichtspoor dat rustig rond de 8 loopt
-  const kopU = { value: 0 }, spoorU = { value: 1 };
-  const gloedMat = new THREE.ShaderMaterial({ uniforms: { tijd: tijdU, kop: kopU, spoor: spoorU },
-    vertexShader: 'varying float vU; varying vec3 vN; varying vec3 vV; void main(){ vU=uv.x; vec4 mv=modelViewMatrix*vec4(position,1.0); vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz); gl_Position=projectionMatrix*mv; }',
-    fragmentShader: `uniform float kop; uniform float spoor; varying float vU; varying vec3 vN; varying vec3 vV;
-      void main(){ float rand=pow(1.0-abs(dot(vN,vV)),2.2); vec3 c=mix(vec3(0.50,0.88,0.96),vec3(0.31,0.43,0.96),0.5-0.5*cos(vU*6.2832));
-        float staart=(1.0-smoothstep(0.0,0.12,fract(kop-vU)))*spoor; float a=rand*0.22+staart*(0.28+rand*0.4);
-        gl_FragColor=vec4(mix(c,vec3(0.9,0.98,1.0),staart*0.5)*1.1,a);
-        #include <colorspace_fragment>
-      }`, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-  acht8.add(new THREE.Mesh(buisMet(0.1 * D), gloedMat));
-  // de opdracht: een lichtpunt dat over de 8 reist
-  const stip = (function(){ const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), r = g.createRadialGradient(32, 32, 0, 32, 32, 32); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(.2, 'rgba(255,255,255,.7)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
-  const opdracht = new THREE.Sprite(new THREE.SpriteMaterial({ map: stip, color: 0xdff8ff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.7 })); opdracht.scale.set(0.55, 0.55, 1); acht8.add(opdracht);
-  const sterkteU = { value: 0.8 };
+  const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 80); camera.position.set(0, 0, 7); scene.add(camera);
+  const tijdU = { value: 0 }, sterkteU = { value: 0.8 };
   // zachte nevel achter alles
   const nevel = new THREE.Mesh(new THREE.PlaneGeometry(60, 34), new THREE.ShaderMaterial({ uniforms: { tijd: tijdU }, transparent: true, depthWrite: false, depthTest: false,
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
@@ -6878,26 +6838,24 @@ function _bouwLogin3D(THREE){
   function zetKaart(){ const r = kaartEl.getBoundingClientRect(); lichtU.kaart.value.set(r.left, r.top, r.width, r.height); }
   function maat(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); lichtU.res.value.set(w * PR, h * PR); lichtU.css.value.set(w, h); zetKaart(); }
   addEventListener('resize', maat); maat();
-  // rustige beweging; bij focus in het formulier wordt het licht iets helderder, bij inloggen lopen de pulsen sneller
-  let doelSterkte = 0.8, opU = 0, opSnel = 0.05, getypt = 0, snelTot = 0, laatst = performance.now(), loopt = false;
+  // bij focus in het formulier wordt het licht iets helderder, bij inloggen lopen de pulsen sneller
+  let doelSterkte = 0.8, getypt = 0, snelTot = 0, laatst = performance.now(), loopt = false;
   document.addEventListener('focusin', function(e){ if(e.target.matches('#login-screen input')) doelSterkte = 1.0; });
   document.addEventListener('focusout', function(e){ if(e.target.matches('#login-screen input')) doelSterkte = 0.8; });
   document.addEventListener('input', function(e){ if(e.target.matches('#login-screen input')) getypt = performance.now(); });
   kaartEl.addEventListener('submit', function(){ snelTot = performance.now() + 1600; });
-  function zet8(sec){ camera.position.set(0, 0, 7); camera.lookAt(0, 0, 0); acht8.rotation.set(0.2 + Math.sin(sec * 0.07) * 0.06, Math.sin(sec * 0.1) * 0.2, Math.PI / 2 + 0.06); acht8.position.set(SMAL ? 0.15 : 0.1, SMAL ? 1.12 : 0.22, 0); }
   function teken(nu){
     if(scherm.style.display === 'none'){ loopt = false; return; }   // na het inloggen: stoppen, geen GPU meer gebruiken
     requestAnimationFrame(teken);
     if(SMAL && nu - getypt < 900) return;                            // op een telefoon pauzeren tijdens het typen
-    const dt = Math.min(0.05, (nu - laatst) / 1000); laatst = nu; const sec = nu / 1000; tijdU.value = sec;
+    const dt = Math.min(0.05, (nu - laatst) / 1000); laatst = nu; tijdU.value = nu / 1000;
     const snel = nu < snelTot;
-    zet8(sec); zetKaart(); lichtU.snel.value += ((snel ? 1 : 0) - lichtU.snel.value) * 0.1;
-    opU = (opU + dt * (snel ? 0.5 : opSnel)) % 1; kopU.value = opU; opdracht.position.copy(curve.getPointAt(opU));
+    zetKaart(); lichtU.snel.value += ((snel ? 1 : 0) - lichtU.snel.value) * 0.1;
     sterkteU.value += ((snel ? 1.0 : doelSterkte) - sterkteU.value) * (1 - Math.exp(-dt * 3));
     renderer.render(scene, camera);
   }
   return { start: function(){
-    if(rustig){ maat(); tijdU.value = 0; zet8(0); opdracht.position.copy(curve.getPointAt(0.2)); renderer.render(scene, camera); return; }
+    if(rustig){ maat(); tijdU.value = 0; renderer.render(scene, camera); return; }
     if(loopt) return; loopt = true; laatst = performance.now(); maat(); requestAnimationFrame(teken);
   } };
 }
