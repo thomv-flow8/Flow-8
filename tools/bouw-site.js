@@ -83,6 +83,11 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
   <FilesMatch "\\.html$">
     Header set Cache-Control "public, max-age=0, must-revalidate"
   </FilesMatch>
+  # JavaScript altijd opnieuw laten controleren (een 304 kost bijna niets); de HTML verwijst er
+  # bovendien met ?v=<hash> naar, zodat een nieuwe versie direct een nieuwe URL heeft.
+  <FilesMatch "\\.js$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
   <FilesMatch "\\.(webp|png|jpg|svg|woff2|css)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
@@ -151,7 +156,20 @@ try {
     throw new Error('afmetingen kloppen niet met het bestand:\n     ' + scheef.join('\n     '));
   }
 
-  for (const rel of lijst) schrijf(rel, fs.readFileSync(path.join(BRON, rel)));
+  // Cachebreker: elke verwijzing naar een eigen .js- of .css-bestand krijgt ?v=<inhoudshash>.
+  // De HTML wordt altijd opnieuw gecontroleerd (max-age=0), dus een gewijzigd script heeft meteen
+  // een nieuwe URL. Zonder dit hield een browser het oude wereld.js vast, omdat Apache voor .js geen
+  // Cache-Control meestuurt en de browser dan zelf gokt hoe lang het bestand vers blijft.
+  const crypto = require('crypto');
+  const metVersie = (rel, html) => html.replace(/((?:^|[\s])(?:src|href)=")([^"#?:]+\.(?:js|css))"/g, (m, voor, v) => {
+    const vol = path.join(BRON, path.dirname(rel), v);
+    if (!fs.existsSync(vol)) return m;
+    return voor + v + '?v=' + crypto.createHash('sha1').update(fs.readFileSync(vol)).digest('hex').slice(0, 10) + '"';
+  });
+  for (const rel of lijst) {
+    const inhoud = fs.readFileSync(path.join(BRON, rel));
+    schrijf(rel, rel.endsWith('.html') ? Buffer.from(metVersie(rel, inhoud.toString('utf8'))) : inhoud);
+  }
   schrijf('.htaccess', Buffer.from(HTACCESS));
 
   if (ALLEEN_CONTROLE) {
