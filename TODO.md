@@ -702,5 +702,13 @@ Werkplaats, Klant) en eindigt langs de kabel bij de lichtstraal eronder, die vas
 plaats van schermafbeeldingen (AVG): weekplanning, kaart met routes, agenda en storingsdienst, rapportage,
 jaarplanning (spreiden van onderhoud), medewerkers, debiteuren en materialen.
 
+- [x] **Site liep op de iPhone halverwege vast en herlaadde** (opgelost 6 november 2026, getest door Thomas).
+      Oorzaak: Safari liep vol in het grafisch geheugen. Op telefoons staan nu uit: glas-effecten
+      (backdrop-filter), vervaging op lichtwolken, het diepte-effect bij scrollen, animaties buiten beeld; secties
+      buiten beeld worden niet getekend (content-visibility) en de 3D stopt zodra hij uit beeld is.
+      **Les:** nieuwe effecten op de site eerst op een echte iPhone proberen; blur/backdrop-filter/3D-kanteling
+      op grote vlakken kost daar per element een eigen geheugenlaag.
+- [ ] **Site opdelen in pagina's** (idee 6 november 2026): Home (hero + reis), Product, Prijzen, Overstappen,
+      Vragen, Contact. Lichter per pagina en beter vindbaar; eerst een preview van de indeling.
 - [ ] **Kabelbundel-hero op een echte iPhone nalopen** (vloeiendheid; bij minder dan 40 beelden per seconde
       gaat de resolutie omlaag, onder 28 vervalt de gloed).
