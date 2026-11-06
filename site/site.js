@@ -67,7 +67,8 @@
   // menu: donkere tekst boven een licht vlak, ook meteen bij het laden (pagina's die met een lichte band beginnen)
   const nav = document.querySelector('.nav'), banden = [...document.querySelectorAll('.band-licht')];
   const navStand = () => { nav.classList.toggle('gescrold', scrollY > 12); nav.classList.toggle('op-licht', banden.some(bd => { const r = bd.getBoundingClientRect(); return r.top <= 34 && r.bottom >= 34; })); };
-  addEventListener('scroll', navStand, { passive: true }); navStand();
+  addEventListener('scroll', navStand, { passive: true });
+  nav.style.transition = 'none'; navStand(); void nav.offsetWidth; nav.style.transition = '';   // bij het laden zonder overgang, geen wit-naar-donker-flits
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const meer = document.getElementById('meer'); if (!meer) return;
   if (innerWidth <= 820) return;   // diepte-effect alleen op grote schermen (geheugen op telefoons)
