@@ -672,7 +672,10 @@ alle code in eigen bestanden (`vroeg.js`, `site.js`, `wereld.js`), three.js 0.16
 gaat net als voorheen naar `demoAanvraag` (met lokaasveld). Getest met de CSP als meta-tag: geen blokkades.
 `leven.js` wordt niet meer gebruikt, maar staat er nog voor een eventuele terugval.
 
-- [ ] **Inlogscherm in de app** in de nieuwe stijl (`inloggen-preview.html`, lokaal): inbouwen in
-      `flow8-v2.html`, gekoppeld aan de bestaande Firebase-inlog. Volgende stap.
+- [x] **Inlogscherm in de app** in de nieuwe stijl (6 november 2026): liggende 3D-8 met lichtval op het
+      inlogblok, "Welkom terug" (NL/EN), groot logo linksboven. Alle id's en de inlogcode zijn ongewijzigd.
+      three.js (alleen het kernbestand) wordt pas op het inlogscherm geladen via jsdelivr; lukt dat niet,
+      dan valt het terug op het oude deeltjeseffect. Stopt na het inloggen, pauzeert op telefoons tijdens typen.
+- [ ] **Inlogscherm op een echte iPhone nalopen** en één keer echt inloggen (kon lokaal niet).
 - [ ] **Licht thema van de nieuwe site nalopen** (alleen het donkere thema is getest).
 - [ ] **Bij een volgende wijziging aan de site:** die gebeurt voortaan in `site/` zelf, niet meer in de preview.
