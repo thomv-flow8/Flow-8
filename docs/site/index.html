@@ -331,6 +331,29 @@ svg{display:block;flex-shrink:0}
 .m .orij:last-child{border-bottom:none}
 .m .orij .mono{font-size:9.5px;color:#626876;min-width:30px}
 .m .orij .m-pil{margin-left:auto;height:17px;font-size:9px}
+.m-dash .orij{padding:4px 0 4px 2px}
+.m-dash .o2{display:flex;flex-direction:column;min-width:0;line-height:1.2}
+.m-dash .o2 b{font-weight:600;font-size:10.5px}
+.m-dash .o2 small{font-size:9px;color:#626876}
+.m-dash .orij .av{width:20px;height:20px;font-size:7.5px}
+.m-dash .db-r{margin-left:auto;font-size:9.5px;white-space:nowrap}
+.m-dash .kolom .orij b{white-space:nowrap;font-weight:600}
+.m-dash .dash-kol{grid-template-columns:1.12fr 1fr;padding:9px 14px}
+.m-dash .vak{padding:8px 10px}
+.m-dash .vak .h5{margin-bottom:4px}
+.db-dienst{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px;border:1px solid #e6e8ee;border-radius:100px;font-size:9.5px;color:#4a5060}
+.db-dienst b{color:#0d0f14;font-weight:600}
+.db-cijfers{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.db-cijfers span{padding:4px 7px;border-radius:8px;background:#f4f5f8;font-size:8.5px;color:#626876}
+.db-cijfers b{display:block;font-size:12px;color:#0d0f14}
+.db-w{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;height:34px;margin-top:6px;border-bottom:1px solid #e6e8ee}
+.db-w i{height:var(--h);border-radius:3px 3px 0 0;background:#a9b8fb;transform-origin:bottom}
+.db-w i.nu{background:#4f6ef5}
+.beeld.toon .db-w i{transform:scaleY(.08)}
+.beeld.zichtbaar .db-w i{animation:dbGroei .9s cubic-bezier(.2,.8,.2,1) calc(.3s + var(--d)) forwards}
+@keyframes dbGroei{to{transform:none}}
+.db-wk{display:flex;justify-content:space-between;margin-top:3px;font:400 8px 'Space Mono',monospace;color:#626876}
+@media (prefers-reduced-motion:reduce){.beeld.toon .db-w i{transform:none;animation:none}}
 
 /* Klantkaart-mock */
 .m-klant{width:600px;height:360px}
@@ -1187,7 +1210,7 @@ svg{display:block;flex-shrink:0}
 .mt-pr{text-align:right;font-weight:600;white-space:nowrap}
 @media (max-width:640px){.db-r{grid-template-columns:.7fr 2fr .9fr}.db-p{display:none}.db-kpi span:last-child{display:none}.mt-r{grid-template-columns:24px 1fr auto}.mt-code,.mt-eh{display:none}}
 @media (max-width:980px){.bento .bk-half{grid-column:span 1}}
-@media (max-width:640px){.bento .bk-half{grid-column:auto}.wp{font-size:8.5px}.wp-kop,.wp-rij{grid-template-columns:44px repeat(5,1fr);gap:3px}.wp-o{padding:4px}.rp-onder{grid-template-columns:80px 1fr}.rp-leg{display:none}.ag-d{min-height:34px}.ag-c{display:none}}
+@media (max-width:640px){.bento .bk-half{grid-column:auto}.wp{font-size:8.5px}.wp-kop,.wp-rij{grid-template-columns:44px repeat(4,1fr);gap:3px}.wp-kop > :nth-child(2),.wp-rij > :nth-child(2){display:none}.wp-o{padding:4px}.rp-onder{grid-template-columns:80px 1fr}.rp-leg{display:none}.ag-d{min-height:34px}.ag-c{display:none}}
 @media (prefers-reduced-motion:reduce){.wp-flip,.wp-flip .s1,.wp-flip .s2,.kaart-svg .rt,.kaart-svg .st,.ag-b,.rp-donut svg,.rp-staaf{animation:none!important}.kaart-svg .rt{stroke-dashoffset:0}.kaart-svg .st,.ag-b{opacity:1;transform:none}.rp-staaf{transform:none}}
 @media (max-height:780px) and (min-width:821px){.uitleg ul{display:none}}
 @media (max-width:820px){
@@ -1493,22 +1516,25 @@ svg{display:block;flex-shrink:0}
           <li>Dringende werkorders bovenaan</li>
         </ul>
       </div>
-      <div class="beeld toon"><div class="schaal" data-b="620" data-h="396" role="img" aria-label="Voorbeeld van het dashboard: opdrachten van vandaag per monteur, agenda, afwezigen en open werkorders"><div class="binnen"><div class="m m-dash">
-        <div class="m-kop"><span class="titel">Dashboard</span><div class="r"><span class="zacht" style="font-size:11px">Dinsdag 4 november</span></div></div>
-        <div class="tegels"><div><b data-tel="11">11</b><span>opdrachten vandaag</span></div><div><b data-tel="2">2</b><span>afwezig</span></div><div><b>6,5 u</b><span>overuren deze week</span></div><div><b data-tel="4">4</b><span>werkorders open</span></div></div>
+      <div class="beeld toon"><div class="schaal" data-b="620" data-h="396" role="img" aria-label="Voorbeeld van het dashboard: opdrachten van vandaag per monteur, storingsdienst, afwezigen en afgeronde opdrachten per week"><div class="binnen"><div class="m m-dash">
+        <div class="m-kop"><span class="titel">Goedemorgen, Eva</span><span class="zacht" style="font-size:10.5px">vrijdag 6 november</span><div class="r"><span class="db-dienst"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Storingsdienst week 45: <b>Lotte Smit</b></span></div></div>
+        <div class="tegels"><div><b data-tel="18">18</b><span>opdrachten</span></div><div><b>7/18</b><span>afgerond</span></div><div><b data-tel="4">4</b><span>monteurs op pad</span></div><div><b data-tel="2" style="color:#c2410c">2</b><span>afwezig</span></div></div>
         <div class="dash-kol">
-          <div class="vak"><div class="h5">Opdrachten vandaag</div>
-            <div class="mrij"><span class="av" style="background:#047857">DV</span><b>Daan Visser</b><span class="zacht">2 opdrachten</span></div>
-            <div class="orij"><span class="mono">08:30</span>Servicebeurt · Houten<span class="m-pil" style="background:#dbe4ff;color:#2f4bc8">Klaargezet</span></div>
-            <div class="orij"><span class="mono">11:15</span>Installatie · Nieuwegein<span class="m-pil" style="background:#f0f1f4;color:#4a5060">Ingepland</span></div>
-            <div class="mrij"><span class="av" style="background:#3a56d4">SB</span><b>Sem Bakker</b><span class="zacht">2 opdrachten</span></div>
-            <div class="orij"><span class="mono">08:00</span>Installatie · Utrecht<span class="m-pil" style="background:#d1f2e2;color:#047857">Afgerond</span></div>
-            <div class="orij"><span class="mono">09:15</span>Servicebeurt · IJsselstein<span class="m-pil" style="background:#fdf1dc;color:#92400e">Onderweg</span></div>
+          <div class="vak"><div class="h5">Opdrachten vandaag · 18</div>
+            <div class="mrij"><span class="av" style="background:#047857">DV</span><b>Daan Visser</b><span class="zacht">2 van 4 af</span></div>
+            <div class="orij"><span class="mono">08:30</span><span class="o2"><b>Fam. de Wit</b><small>Servicebeurt · Houten</small></span><span class="m-pil" style="background:#d1f2e2;color:#047857">Afgerond</span></div>
+            <div class="orij"><span class="mono">10:15</span><span class="o2"><b>Hotel De Brug</b><small>Servicebeurt · Woerden</small></span><span class="m-pil" style="background:#dbe4ff;color:#2f4bc8">Bezig</span></div>
+            <div class="mrij"><span class="av" style="background:#3a56d4">SB</span><b>Sem Bakker</b><span class="zacht">1 van 3 af</span></div>
+            <div class="orij"><span class="mono">07:45</span><span class="o2"><b>Bakkerij Smit</b><small>Storing · Vianen</small></span><span class="m-pil" style="background:#d1f2e2;color:#047857">Afgerond</span></div>
+            <div class="orij"><span class="mono">11:00</span><span class="o2"><b>Rijnzicht Vastgoed</b><small>Installatie · Utrecht</small></span><span class="m-pil" style="background:#eef1f6;color:#4a5060">Ingepland</span></div>
           </div>
           <div class="kolom">
-            <div class="vak"><div class="h5">Agenda</div><div class="orij"><span class="mono">week</span>Storingsdienst · Lotte Smit</div></div>
-            <div class="vak"><div class="h5">Afwezig vandaag</div><div class="orij">Mark Jansen<span class="m-pil" style="background:#e8eeff;color:#2f4bc8">Verlof</span></div><div class="orij">Eva de Boer<span class="m-pil" style="background:#fdeaea;color:#b91c1c">Ziek</span></div></div>
-            <div class="vak"><div class="h5">Werkorders</div><div class="orij"><b class="mono" style="color:#2f4bc8">3</b>Reparatie</div><div class="orij"><b class="mono" style="color:#2f4bc8">1</b>Assemblage</div></div>
+            <div class="vak"><div class="h5">Afwezig vandaag · 2</div><div class="orij"><span class="av" style="background:#b91c1c">MJ</span><b>Mark Jansen</b><span class="zacht db-r">Verlof</span></div><div class="orij"><span class="av" style="background:#0e7490">NP</span><b>Noah Peters</b><span class="zacht db-r">Verlof vanaf 13:00</span></div></div>
+            <div class="vak"><div class="h5">Afgeronde opdrachten</div>
+              <div class="db-cijfers"><span><b>41</b>deze week</span><span><b>33</b>vorige week</span><span><b style="color:#047857">+24%</b>verschil</span></div>
+              <div class="db-w"><i style="--h:100%;--d:0.00s"></i><i style="--h:82%;--d:0.06s"></i><i style="--h:86%;--d:0.12s"></i><i style="--h:91%;--d:0.18s"></i><i style="--h:70%;--d:0.24s"></i><i style="--h:84%;--d:0.30s"></i><i style="--h:75%;--d:0.36s"></i><i class="nu" style="--h:93%;--d:0.42s"></i></div>
+              <div class="db-wk"><span>wk 38</span><span>wk 45</span></div>
+            </div>
           </div>
         </div>
       </div></div></div></div>
@@ -1525,7 +1551,7 @@ svg{display:block;flex-shrink:0}
         <article class="mb-k bk-cyaan toon"><div class="bk-licht" aria-hidden="true"></div><p class="mb-kop"><svg class="ic" aria-hidden="true"><use href="#ic-werkbon"/></svg><span><b>Werkbonnen.</b> Op de telefoon, met checklist, foto’s en handtekening.</span></p>
           <div class="mb-ui" aria-hidden="true"><div class="mu-tel"><b>WB-2026-0142</b><span class="v">Ketel gereinigd</span><span class="v">Druk gecontroleerd</span><span class="v">Foto’s toegevoegd</span><svg viewBox="0 0 120 30" class="hand"><path d="M4 22c10-14 16-14 18-4s8 8 14-6 10-6 12 4 10 4 18-8 12-2 16 6 10 2 30-6"/></svg></div></div>
         </article>
-        <article class="mb-k rond toon"><div class="rond-in"><span class="rond-wk">Week</span><b class="rond-nr">46</b><span class="rond-naam">Storingsdienst · Lotte Smit</span><span class="rond-tekst">Zie wie er dienst heeft, deze week en de volgende.</span></div><span class="rond-plus" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#ic-storing"/></svg></span></article>
+        <article class="mb-k rond toon"><div class="rond-in"><span class="rond-wk">Week</span><b class="rond-nr">45</b><span class="rond-naam">Storingsdienst · Lotte Smit</span><span class="rond-tekst">Zie wie er dienst heeft, deze week en de volgende.</span></div><span class="rond-plus" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#ic-storing"/></svg></span></article>
         <article class="mb-k bk-paars toon"><div class="bk-licht" aria-hidden="true"></div><p class="mb-kop"><svg class="ic" aria-hidden="true"><use href="#ic-kaart"/></svg><span><b>Kaartoverzicht.</b> Alle klanten en opdrachten op de kaart, gekleurd naar status.</span></p>
           <div class="mb-ui" aria-hidden="true"><svg class="mu-kaart" viewBox="0 0 220 130"><rect width="220" height="130" rx="14" fill="#0e1422"/><g stroke="#1c2639" stroke-width="5" fill="none"><path d="M0 40 220 28"/><path d="M60 0 72 130"/><path d="M150 0 166 130"/><path d="M0 92 220 84"/></g><g><circle cx="40" cy="62" r="5" fill="#34d99f"/><circle cx="96" cy="44" r="5" fill="#f2b544"/><circle cx="124" cy="96" r="5" fill="#34d99f"/><circle cx="182" cy="56" r="5" fill="#ef4444" class="knip"/><circle cx="70" cy="108" r="5" fill="#8b93ab"/><circle cx="196" cy="104" r="5" fill="#34d99f"/></g></svg></div>
         </article>
