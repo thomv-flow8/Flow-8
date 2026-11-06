@@ -720,6 +720,8 @@ jaarplanning (spreiden van onderhoud), medewerkers, debiteuren en materialen.
       Excel/csv (`_openDebImport`, `_openContractImport`, `_openArtikelImport`); installaties en medewerkers nog niet.
 - [ ] **Incasso instellen** (Thomas): betalen via automatische incasso, per maand of per jaar. Licenties aanpassen
       bij een maandabonnement per maand, bij een jaarabonnement per jaar (zie ook H12 credits/licenties).
+- [ ] **Resend: regio controleren** (Thomas): wordt mail in de EU of in de VS verwerkt, en is er een verwerkersovereenkomst met Resend? Daarna de privacyverklaring (/privacy/) en Bijlage C van de verwerkersovereenkomst aanvullen.
+- [x] **Privacyverklaring** op /privacy/ (6 november 2026), gelinkt in de footer en onder het contactformulier. Bewaartermijn aanvragen: twaalf maanden na het laatste contact.
 - [ ] **Verwerkersovereenkomst** (AVG art. 28): Flow 8 is verwerker van persoonsgegevens van klanten. Concept
       concept staat klaar (6 november 2026): https://claude.ai/artifact/EbSMEvBR53SLFVhDFk8cxw — eerst de open
       punten onderaan invullen, dan laten nakijken door een jurist. Daarna de vraag erover terug op /vragen/.

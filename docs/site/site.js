@@ -81,17 +81,18 @@
   let loopt = false;
   function stap() {
     const vh = innerHeight;
-    for (const l of lagen) {
-      const b = l.el.getBoundingClientRect(); if (b.bottom < -200 || b.top > vh + 200) continue;
+    const maten = lagen.map(l => l.el.getBoundingClientRect());   // eerst alles lezen…
+    lagen.forEach((l, i) => {                                      // …dan alles schrijven
+      const b = maten[i]; if (b.bottom < -200 || b.top > vh + 200) return;
       const q = Math.max(-1.2, Math.min(1.2, ((b.top + b.height / 2) - vh / 2) / vh)); // -1 boven, 0 midden, 1 onder
       if (l.zij) { // beelden komen vanaf hun eigen kant binnen en draaien in 3D bij
         if (l.kant === undefined) l.kant = l.el.closest('.omgekeerd') ? -1 : 1;
         const a = Math.min(1, Math.max(0, Math.abs(q) - 0.35) * 1.6); // in het midden van het scherm staat het blok recht en stil
-        l.el.style.translate = `${(l.kant * a * a * 7).toFixed(2)}vw ${(q * l.y * 0.6).toFixed(1)}px`; l.el.style.rotate = `y ${(l.kant * a * 10).toFixed(2)}deg`; continue;
+        l.el.style.translate = `${(l.kant * a * a * 7).toFixed(2)}vw ${(q * l.y * 0.6).toFixed(1)}px`; l.el.style.rotate = `y ${(l.kant * a * 10).toFixed(2)}deg`; return;
       }
       l.el.style.translate = `0 ${(q * l.y).toFixed(1)}px`;
       if (l.kantel) l.el.style.rotate = `x ${(q * l.kantel).toFixed(2)}deg`;
-    }
+    });
     if (loopt) requestAnimationFrame(stap);
   }
   new IntersectionObserver(e => { if (e[0].isIntersecting) { if (!loopt) { loopt = true; requestAnimationFrame(stap); } } else loopt = false; }).observe(meer);
@@ -151,10 +152,18 @@
   const zet = open => {
     clearTimeout(dicht); knop.setAttribute('aria-expanded', open); knop.setAttribute('aria-label', open ? 'Menu sluiten' : 'Menu openen');
     nav.classList.toggle('menu-open', open); document.body.style.overflow = open ? 'hidden' : '';
-    if (open) { paneel.hidden = false; requestAnimationFrame(() => paneel.classList.add('open')); }
+    if (open) { paneel.hidden = false; const eerste = paneel.querySelector('button, a'); if (eerste) eerste.focus({ preventScroll: true }); requestAnimationFrame(() => paneel.classList.add('open')); }
     else { paneel.classList.remove('open'); dicht = setTimeout(() => { paneel.hidden = true; }, 300); }
   };
-  knop.addEventListener('click', () => zet(knop.getAttribute('aria-expanded') !== 'true'));
+  // Tab blijft binnen het open menu (en de menuknop om het te sluiten)
+  const rondTab = e => {
+    if (e.key !== 'Tab' || knop.getAttribute('aria-expanded') !== 'true') return;
+    const items = [...paneel.querySelectorAll('button, a')].filter(el => el.offsetParent !== null).concat(knop);
+    const i = items.indexOf(document.activeElement), volgende = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : (i === items.length - 1 ? 0 : i + 1);
+    e.preventDefault(); items[volgende].focus();
+  };
+  paneel.addEventListener('keydown', rondTab); knop.addEventListener('keydown', rondTab);
+  knop.addEventListener('click', () => { const open = knop.getAttribute('aria-expanded') !== 'true'; zet(open); if (!open) knop.focus(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && knop.getAttribute('aria-expanded') === 'true') { zet(false); knop.focus(); } });
   paneel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => zet(false)));
   const sk = paneel.querySelector('.mm-sub-knop'), sub = document.getElementById('mm-product');
