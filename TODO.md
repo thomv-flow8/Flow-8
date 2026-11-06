@@ -672,10 +672,21 @@ alle code in eigen bestanden (`vroeg.js`, `site.js`, `wereld.js`), three.js 0.16
 gaat net als voorheen naar `demoAanvraag` (met lokaasveld). Getest met de CSP als meta-tag: geen blokkades.
 `leven.js` wordt niet meer gebruikt, maar staat er nog voor een eventuele terugval.
 
-- [x] **Inlogscherm in de app** in de nieuwe stijl (6 november 2026): liggende 3D-8 met lichtval op het
-      inlogblok, "Welkom terug" (NL/EN), groot logo linksboven. Alle id's en de inlogcode zijn ongewijzigd.
+- [x] **Inlogscherm in de app** in de nieuwe stijl (6 november 2026): lichtval op het inlogblok die over de
+      randen vloeit, rookwolken en verloop zoals de hero, "Welkom terug" (NL/EN). De 8 is eruit (te druk); het
+      logo staat in het blok zelf, zodat het niet wegvalt in de lichtbundel. Alle id's en de inlogcode zijn ongewijzigd.
       three.js (alleen het kernbestand) wordt pas op het inlogscherm geladen via jsdelivr; lukt dat niet,
       dan valt het terug op het oude deeltjeseffect. Stopt na het inloggen, pauzeert op telefoons tijdens typen.
 - [ ] **Inlogscherm op een echte iPhone nalopen** en één keer echt inloggen (kon lokaal niet).
 - [ ] **Licht thema van de nieuwe site nalopen** (alleen het donkere thema is getest).
 - [ ] **Bij een volgende wijziging aan de site:** die gebeurt voortaan in `site/` zelf, niet meer in de preview.
+
+**Bijgewerkt 6 november 2026 — kabelbundel-hero en nagebouwde app-schermen.** De hero is nu een liggende 8
+als bundel kabels met trage pulsen; de camera reist erdoorheen langs de vier stations (Kantoor, Monteur,
+Werkplaats, Klant) en eindigt langs de kabel bij de lichtstraal eronder, die vast in het midden staat
+(wolkenwas bovenin, donker naar licht). Acht app-schermen zijn in code nagebouwd met verzonnen gegevens, in
+plaats van schermafbeeldingen (AVG): weekplanning, kaart met routes, agenda en storingsdienst, rapportage,
+jaarplanning (spreiden van onderhoud), medewerkers, debiteuren en materialen.
+
+- [ ] **Kabelbundel-hero op een echte iPhone nalopen** (vloeiendheid; bij minder dan 40 beelden per seconde
+      gaat de resolutie omlaag, onder 28 vervalt de gloed).
