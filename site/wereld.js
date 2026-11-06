@@ -35,9 +35,11 @@ function schaalSchermen() {
   schermen.forEach(s => {
     const b = +s.dataset.b, h = +s.dataset.h, staand = h > b;
     let sc;
-    if (innerWidth <= 820) { const ruimteH = innerHeight - 128 - 250; sc = Math.min((innerWidth - 32) / b, ruimteH / h); }
+    const ruimte = innerWidth - 32;
+    if (innerWidth <= 820) { const ruimteH = innerHeight - 128 - 250; sc = Math.min(ruimte / b, ruimteH / h); if (!staand && innerWidth <= 640) sc = Math.min(Math.max(sc, 0.8), ruimteH / h); }
     else sc = staand ? Math.min(innerHeight * 0.66 / h, 1.1) : Math.min(innerWidth * 0.42 / b, innerHeight * 0.62 / h, 1.25);
-    s.style.setProperty('--s', sc.toFixed(3)); s.style.width = b * sc + 'px'; s.style.height = h * sc + 'px';
+    const snij = innerWidth <= 640 && b * sc > ruimte + 1; s.classList.toggle('bijgesneden', snij);
+    s.style.setProperty('--s', sc.toFixed(3)); s.style.width = (snij ? ruimte : b * sc) + 'px'; s.style.height = h * sc + 'px';
     if (innerWidth > 820) s.style.right = staand ? '12vw' : '4vw';
   });
 }

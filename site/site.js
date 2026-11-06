@@ -10,8 +10,12 @@
 
   // vaste mockups schalen naar de breedte van hun kolom
   const schalen = [...document.querySelectorAll('.schaal')];
-  function schaal() { schalen.forEach(s => { const b = +s.dataset.b, h = +s.dataset.h, cs = getComputedStyle(s.parentElement), w = (s.parentElement.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) || b, sc = Math.min(w / b, 1.4); s.style.setProperty('--s', sc.toFixed(3)); s.style.width = b * sc + 'px'; s.style.height = h * sc + 'px'; }); }
+  function schaal() { schalen.forEach(s => { const mob = innerWidth <= 640 && s.dataset.bm, b = +(mob ? s.dataset.bm : s.dataset.b), h = +(mob ? s.dataset.hm : s.dataset.h), cs = getComputedStyle(s.parentElement), w = (s.parentElement.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) || b, sc = Math.min(w / b, 1.4); s.style.setProperty('--s', sc.toFixed(3)); s.style.width = b * sc + 'px'; s.style.height = h * sc + 'px'; }); }
   schaal(); addEventListener('resize', schaal);
+  // de kaart: op mobiel ingezoomd op de routes, met grotere plaatsnamen
+  const kaart = document.querySelector('.kaart-svg');
+  function kaartMaat() { if (!kaart) return; const m = innerWidth <= 640, leg = kaart.querySelector('.kaart-route-leg'); kaart.setAttribute('viewBox', m ? '250 50 970 632' : '0 0 1600 650'); if (leg) leg.setAttribute('transform', m ? 'translate(276 628)' : 'translate(26 612)'); }
+  kaartMaat(); addEventListener('resize', kaartMaat);
 
   // tabs met pijltjestoetsen
   document.querySelectorAll('[role=tablist]').forEach(lijst => {
@@ -113,7 +117,7 @@
   if (!doel || !bron) return;
   doel.innerHTML = bron.innerHTML;
   const schaal = doel.parentElement;
-  const maat = () => { const w = Math.min(1100, innerWidth - 48), sc = w / 600; schaal.style.width = w + 'px'; schaal.style.height = 384 * sc + 'px'; doel.style.transform = 'scale(' + sc + ')'; doel.style.transformOrigin = '0 0'; };
+  const maat = () => { const w = Math.min(1100, innerWidth - 48), sc = innerWidth <= 640 ? Math.max(w / 600, 0.82) : w / 600; schaal.classList.toggle('bijgesneden', 600 * sc > w + 1); schaal.style.width = w + 'px'; schaal.style.height = 384 * sc + 'px'; doel.style.transform = 'scale(' + sc + ')'; doel.style.transformOrigin = '0 0'; };
   maat(); addEventListener('resize', maat);
   if ('IntersectionObserver' in window) { const io = new IntersectionObserver(e => { if (e[0].isIntersecting) { doel.firstElementChild.classList.add('speel'); doel.classList.add('speel'); io.disconnect(); } }, { threshold: 0.4 }); io.observe(schaal); }
 })();

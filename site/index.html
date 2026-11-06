@@ -1094,7 +1094,7 @@ svg{display:block;flex-shrink:0}
 @keyframes wpUit{0%,40%{opacity:1}50%,90%{opacity:0}100%{opacity:1}}
 @keyframes wpAan{0%,40%{opacity:0}50%,90%{opacity:1}100%{opacity:0}}
 .kaartbeeld .kaart-svg{width:100%;height:auto;display:block;border-radius:20px;border:1px solid var(--lijn);box-shadow:0 0 0 1px var(--glas-rand),0 40px 90px -40px rgba(0,0,0,.6)}
-.kaart-svg .kaart-label text{font:500 15px 'Instrument Sans',sans-serif;fill:#6d7487}
+.kaart-svg .kaart-label text{font:500 15px 'Instrument Sans',sans-serif;fill:#949bb0}
 .kaart-svg .kaart-route-leg text{font:500 13px 'Instrument Sans',sans-serif;fill:#a3a8b8}
 .kaart-svg .st text{font:700 14px 'Instrument Sans',sans-serif;fill:#fff;text-anchor:middle}
 .kaart-svg .rt{stroke-dasharray:900;stroke-dashoffset:900}
@@ -1212,6 +1212,39 @@ svg{display:block;flex-shrink:0}
 @media (max-width:980px){.bento .bk-half{grid-column:span 1}}
 @media (max-width:640px){.bento .bk-half{grid-column:auto}.wp{font-size:8.5px}.wp-kop,.wp-rij{grid-template-columns:44px repeat(4,1fr);gap:3px}.wp-kop > :nth-child(2),.wp-rij > :nth-child(2){display:none}.wp-o{padding:4px}.rp-onder{grid-template-columns:80px 1fr}.rp-leg{display:none}.ag-d{min-height:34px}.ag-c{display:none}}
 @media (prefers-reduced-motion:reduce){.wp-flip,.wp-flip .s1,.wp-flip .s2,.kaart-svg .rt,.kaart-svg .st,.ag-b,.rp-donut svg,.rp-staaf{animation:none!important}.kaart-svg .rt{stroke-dashoffset:0}.kaart-svg .st,.ag-b{opacity:1;transform:none}.rp-staaf{transform:none}}
+/* ── Mobiel leesbaar: eigen opbouw per voorbeeldscherm, niets onder ±9 px ── */
+@media (max-width:820px){
+  .intro::before{content:'';position:absolute;z-index:-1;left:-6%;right:-6%;top:-14%;bottom:-16%;background:radial-gradient(closest-side,rgba(3,4,7,.88),rgba(3,4,7,.62) 62%,transparent);pointer-events:none}
+  .intro p{color:#d6dae4;text-shadow:0 1px 14px rgba(3,4,7,.95)}
+  .intro h1,.intro .link-pijl{text-shadow:0 2px 22px rgba(3,4,7,.85)}
+  .menu3d{padding:4px 0 10px;background:linear-gradient(rgba(3,4,7,.84),rgba(3,4,7,.55) 70%,transparent);border-radius:10px}
+  .menu3d button{text-shadow:0 1px 10px rgba(3,4,7,.95)}
+}
+@media (max-width:640px){
+  .scherm.bijgesneden,.landing-schaal.bijgesneden{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent)}
+  .m-dash{width:380px;height:370px}
+  .m-dash .m-kop .r,.m-dash .kolom{display:none}
+  .m-dash .m-kop .titel{font-size:16px}
+  .m-dash .dash-kol{grid-template-columns:1fr}
+  .m-dash .tegels b{font-size:19px}.m-dash .tegels span{font-size:10.5px}
+  .m-dash .vak .h5{font-size:11.5px}.m-dash .mrij{font-size:12px}.m-dash .mrij .zacht{font-size:11px}
+  .m-dash .o2 b{font-size:12px}.m-dash .o2 small{font-size:10px}.m-dash .orij .mono{font-size:10.5px}.m-dash .orij .m-pil{font-size:10px;height:19px}
+  .m-reg{width:300px;height:420px}
+  .reg-lijnen,.reg-bon .m-pil{display:none}
+  .reg-klant{left:0;top:0;width:300px}
+  .reg-dossier{left:0;top:96px;width:300px;height:auto}
+  .reg-bon{left:0;top:300px;width:146px}
+  .reg-wp{left:154px;top:300px;width:146px}
+  .reg-bon .orij .mono{min-width:40px}
+  .kaart-svg .kaart-label text{font-size:30px}
+  .kaart-svg .kaart-route-leg text{font-size:28px}
+  .kaart-svg .st{scale:1.6}
+  .wp{font-size:9.5px}.wp-kop span{font-size:9px}.wp-m{font-size:10px}.wp-o b{font-size:10px}.wp-o small{font-size:9px}
+  .jp-m span{font-size:9px}.jp-leg{font-size:10px}.jp-tegels span{font-size:10px}.jp-cap span{font-size:9px}
+  .rp-tegels span{font-size:10.5px}.rp-b{font-size:10.5px}.rp-donut span{font-size:9.5px}
+  .ag-namen span{font-size:9.5px}.ag-d span{font-size:10.5px}.ag-b{font-size:9.5px}.ag-tabs em{font-size:10.5px}
+  .mw-k,.db-k,.db-k .db-p{font-size:9.5px}
+}
 @media (max-height:780px) and (min-width:821px){.uitleg ul{display:none}}
 @media (max-width:820px){
   .nav{padding:0 16px}.nav .links,.nav .r .inl{display:none}
@@ -1516,7 +1549,7 @@ svg{display:block;flex-shrink:0}
           <li>Dringende werkorders bovenaan</li>
         </ul>
       </div>
-      <div class="beeld toon"><div class="schaal" data-b="620" data-h="396" role="img" aria-label="Voorbeeld van het dashboard: opdrachten van vandaag per monteur, storingsdienst, afwezigen en afgeronde opdrachten per week"><div class="binnen"><div class="m m-dash">
+      <div class="beeld toon"><div class="schaal" data-b="620" data-h="396" data-bm="380" data-hm="370" role="img" aria-label="Voorbeeld van het dashboard: opdrachten van vandaag per monteur, storingsdienst, afwezigen en afgeronde opdrachten per week"><div class="binnen"><div class="m m-dash">
         <div class="m-kop"><span class="titel">Goedemorgen, Eva</span><span class="zacht" style="font-size:10.5px">vrijdag 6 november</span><div class="r"><span class="db-dienst"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Storingsdienst week 45: <b>Lotte Smit</b></span></div></div>
         <div class="tegels"><div><b data-tel="18">18</b><span>opdrachten</span></div><div><b>7/18</b><span>afgerond</span></div><div><b data-tel="4">4</b><span>monteurs op pad</span></div><div><b data-tel="2" style="color:#c2410c">2</b><span>afwezig</span></div></div>
         <div class="dash-kol">
@@ -1666,7 +1699,7 @@ svg{display:block;flex-shrink:0}
           <li>Type, serienummer en documenten op één plek</li>
         </ul>
       </div>
-      <div class="beeld toon reg-beeld"><div class="schaal" data-b="640" data-h="400" role="img" aria-label="Voorbeeld van het dossier van een dompelpomp, gekoppeld aan de klant, de werkbonnen en een werkorder in de werkplaats"><div class="binnen"><div class="m-reg">
+      <div class="beeld toon reg-beeld"><div class="schaal" data-b="640" data-h="400" data-bm="300" data-hm="420" role="img" aria-label="Voorbeeld van het dossier van een dompelpomp, gekoppeld aan de klant, de werkbonnen en een werkorder in de werkplaats"><div class="binnen"><div class="m-reg">
         <svg class="reg-lijnen" viewBox="0 0 640 400" width="640" height="400" fill="none" aria-hidden="true">
           <path class="l1" d="M220 170 C195 170 205 55 180 55"/><path class="l2" d="M220 232 C195 232 205 335 180 335"/><path class="l3" d="M440 200 C455 200 455 195 470 195"/>
           <path class="s1" d="M220 170 C195 170 205 55 180 55"/><path class="s2" d="M220 232 C195 232 205 335 180 335"/><path class="s3" d="M440 200 C455 200 455 195 470 195"/>
