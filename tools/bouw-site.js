@@ -99,22 +99,44 @@ try {
   const lijst = bestanden(BRON)
     .filter(f => !f.split('/').some(deel => deel.startsWith('_')));
 
+  // ── Gedeelde delen invoegen ───────────────────────────────────────────────
+  // Menu, footer en de gemeenschappelijke kop staan één keer in site/_delen/. Een pagina zegt
+  // <!-- deel:naam --> en krijgt hier de inhoud. {{w}} is het pad naar de wortel ('./' of '../'),
+  // zodat dezelfde delen in elke map kloppen; data-pagina="x" wordt aria-current op de eigen pagina.
+  const DELEN = path.join(BRON, '_delen');
+  const deel = naam => {
+    const vol = path.join(DELEN, naam + '.html');
+    if (!fs.existsSync(vol)) throw new Error('deel ontbreekt: _delen/' + naam + '.html');
+    return fs.readFileSync(vol, 'utf8').replace(/\n$/, '');
+  };
+  const uitgevouwen = {};
+  const html = rel => {
+    if (uitgevouwen[rel] !== undefined) return uitgevouwen[rel];
+    const diepte = rel.split('/').length - 1, w = diepte ? '../'.repeat(diepte) : './';
+    const pagina = diepte ? rel.split('/')[0] : 'home';
+    const h = fs.readFileSync(path.join(BRON, rel), 'utf8')
+      .replace(/<!-- deel:([a-z]+) -->/g, (m, naam) => deel(naam))
+      .replace(/\{\{w\}\}/g, w)
+      .replace(/ data-pagina="([a-z]+)"/g, (m, p) => p === pagina ? ' aria-current="page"' : '');
+    return (uitgevouwen[rel] = h);
+  };
+
   // ── Elke verwijzing in de HTML moet bestaan ───────────────────────────────
   const ontbreekt = [];
   for (const rel of lijst.filter(f => f.endsWith('.html'))) {
-    const html = fs.readFileSync(path.join(BRON, rel), 'utf8');
+    const inhoud = html(rel);
     // De attribuutnaam moet aan een spatie of tagbegin grenzen: anders wordt
     // data-navhref="modules" als href gelezen en zoekt het script een bestand
     // dat nooit bestaan heeft.
-    const verwijzingen = [...html.matchAll(/(?:^|[\s])(?:src|href)="([^"#?:][^"]*)"/g)].map(m => m[1])
-      .concat([...html.matchAll(/url\(([^)'"]+)\)/g)].map(m => m[1]));
+    const verwijzingen = [...inhoud.matchAll(/(?:^|[\s])(?:src|href)="([^"#?:][^"]*)"/g)].map(m => m[1])
+      .concat([...inhoud.matchAll(/url\(([^)'"]+)\)/g)].map(m => m[1]));
     for (const v of new Set(verwijzingen)) {
       // Overslaan: absolute paden, ankers, schema's (http:, data:) en alles wat
       // uit een percent-gecodeerde data-URI komt (daarin staat url(%23g) voor een
       // anker binnen dezelfde SVG, geen bestand).
       if (v.startsWith('/') || v.startsWith('#') || /^[a-z]+:/.test(v)) continue;
       if (v.includes('%')) continue;
-      if (!fs.existsSync(path.join(BRON, path.dirname(rel), v))) ontbreekt.push(rel + ' → ' + v);
+      if (!fs.existsSync(path.join(BRON, path.dirname(rel), v.split('#')[0] || '.'))) ontbreekt.push(rel + ' → ' + v);
     }
   }
   // Ook de CSS nalopen: die verwijst naar de lettertypes.
@@ -123,6 +145,7 @@ try {
     for (const m of css.matchAll(/url\(([^)'"]+)\)/g)) {
       const v = m[1].trim();
       if (/^(data:|https?:|\/)/.test(v)) continue;
+      if (v.startsWith('#') || v.includes('%')) continue;   // anker binnen een ingebouwde SVG, geen bestand
       if (!fs.existsSync(path.join(BRON, path.dirname(rel), v))) ontbreekt.push(rel + ' → ' + v);
     }
   }
@@ -136,9 +159,9 @@ try {
   // beeld vier keer te hoog uit. Sindsdien controleert het script het zelf.
   const scheef = [];
   for (const rel of lijst.filter(f => f.endsWith('.html'))) {
-    const html = fs.readFileSync(path.join(BRON, rel), 'utf8');
+    const inhoud = html(rel);
     const re = /<(?:img|source)[^>]*?(?:src|srcset)="([^"]+\.(?:webp|png|jpg|jpeg))"[^>]*?width="(\d+)"[^>]*?height="(\d+)"/g;
-    for (const m of html.matchAll(re)) {
+    for (const m of inhoud.matchAll(re)) {
       const vol = path.join(BRON, path.dirname(rel), m[1]);
       let W, H;
       try {
@@ -168,7 +191,7 @@ try {
   });
   for (const rel of lijst) {
     const inhoud = fs.readFileSync(path.join(BRON, rel));
-    schrijf(rel, rel.endsWith('.html') ? Buffer.from(metVersie(rel, inhoud.toString('utf8'))) : inhoud);
+    schrijf(rel, rel.endsWith('.html') ? Buffer.from(metVersie(rel, html(rel))) : inhoud);
   }
   schrijf('.htaccess', Buffer.from(HTACCESS));
 

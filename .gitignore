@@ -23,3 +23,5 @@ site-preview.html
 
 # Werkbestanden in site/ (vergelijkingsbladen, proefjes) — zie tools/bouw-site.js
 site/_*
+# behalve de gedeelde delen (menu, footer, kop): die bouwt tools/bouw-site.js in elke pagina in
+!site/_delen/

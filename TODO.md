@@ -708,7 +708,11 @@ jaarplanning (spreiden van onderhoud), medewerkers, debiteuren en materialen.
       buiten beeld worden niet getekend (content-visibility) en de 3D stopt zodra hij uit beeld is.
       **Les:** nieuwe effecten op de site eerst op een echte iPhone proberen; blur/backdrop-filter/3D-kanteling
       op grote vlakken kost daar per element een eigen geheugenlaag.
-- [ ] **Site opdelen in pagina's** (idee 6 november 2026): Home (hero + reis), Product, Prijzen, Overstappen,
-      Vragen, Contact. Lichter per pagina en beter vindbaar; eerst een preview van de indeling.
+- [x] **Site opgedeeld in pagina's** (6 november 2026): Home (hero + reis + modules), /product/, /prijzen/,
+      /overstappen/, /vragen/, /contact/. Opbouw in `site/`: elke pagina een eigen map met index.html; menu,
+      footer en de gemeenschappelijke kop staan één keer in `site/_delen/` (in de pagina: `<!-- deel:naam -->`;
+      `{{w}}` = pad naar de wortel, `data-pagina` = huidige pagina in het menu). De stijl staat in `site/stijl.css`.
+      Oude links als flow-8.nl/#prijzen sturen door naar de nieuwe pagina (vroeg.js).
+- [ ] **Sitemap en robots.txt** toevoegen nu er meerdere pagina's zijn, en de pagina's aanmelden in Google Search Console.
 - [ ] **Kabelbundel-hero op een echte iPhone nalopen** (vloeiendheid; bij minder dan 40 beelden per seconde
       gaat de resolutie omlaag, onder 28 vervalt de gloed).
