@@ -683,15 +683,15 @@ gaat net als voorheen naar `demoAanvraag` (met lokaasveld). Getest met de CSP al
       inlogscherm. Herladen claimt niet (anders zouden twee apparaten elkaar steeds afwisselen). Tabbladen
       in dezelfde browser delen een apparaat-id. Platformbeheer is uitgezonderd. Zolang de rules niet zijn
       gedeployed, werkt de app gewoon door zonder deze controle.
-- [ ] **Rules deployen voor `sessies`** (Thomas): `firebase deploy --only database --dry-run`, daarna zonder.
-- [ ] **Eén apparaat per gebruiker testen**: inloggen op de computer, daarna op de iPhone met hetzelfde
+- [x] **Rules voor `sessies` gedeployed** (6 november 2026, door Thomas).
+- [x] **Eén apparaat per gebruiker getest** (6 november 2026, werkt): inloggen op de computer, daarna op de iPhone met hetzelfde
       account; de computer moet uitloggen met de melding. Ook: herladen op de iPhone mag niet uitloggen.
 - [x] **Dashboard-indeling door te slepen** (6 november 2026): "Indeling aanpassen" zet het dashboard in een
       bewerkstand; blokken slepen naar links of rechts (muis direct, telefoon vasthouden of het greepje),
       verbergen met het oog-icoon, "Blokken kiezen" voor aan/uit. Pijltjestoetsen op het greepje werken
       ook. De kolom per blok staat in `gebruikers/{uid}/dashboardRechts`; zonder die keuze verdeelt het
       dashboard de blokken nog automatisch.
-- [ ] **Dashboard slepen testen** op de computer en de iPhone (lokaal alleen in een preview getest).
+- [x] **Dashboard slepen getest** (6 november 2026, werkt).
 - [ ] **Licht thema van de nieuwe site nalopen** (alleen het donkere thema is getest).
 - [ ] **Bij een volgende wijziging aan de site:** die gebeurt voortaan in `site/` zelf, niet meer in de preview.
 

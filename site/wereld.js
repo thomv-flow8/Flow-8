@@ -83,7 +83,7 @@ if (!renderer) { html.classList.add('geen-3d'); document.querySelectorAll('.uitl
 else start3d();
 
 function start3d() {
-const PR = Math.min(SMAL ? 1.75 : 2, devicePixelRatio || 1);
+const PR = Math.min(SMAL ? 1.5 : 2, devicePixelRatio || 1);
 renderer.setPixelRatio(PR); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
 const scene = new THREE.Scene(), bgKleur = new THREE.Color(0x030407); scene.background = bgKleur;
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
@@ -285,13 +285,15 @@ function overlay(p) {
   for (let i = 1; i <= 4; i++) { proj.copy(stationPos[i]).project(camera); const x = (proj.x * .5 + .5) * doek.clientWidth, y = (-proj.y * .5 + .5) * doek.clientHeight; labels[i].style.transform = `translate(${x}px,${y - 34}px) translate(-50%,-100%)`; labels[i].style.opacity = proj.z < 1 && p > 0.1 && p < 0.9 && !actief ? 1 : 0; }
   return actief;
 }
-function maat() { const w = doek.clientWidth, h = doek.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); if (composer) { composer.setSize(w, h); bloom.resolution.set(w, h); } maatU.value.set(w, h); snedeU.value.w = composer ? composer._pixelRatio : renderer.getPixelRatio(); }
+let maatW = 0, maatH = 0, maatPR = 0;
+function maat() { const w = doek.clientWidth, h = doek.clientHeight, pr0 = renderer.getPixelRatio(); if (w === maatW && h === maatH && pr0 === maatPR) return; maatW = w; maatH = h; maatPR = pr0; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); if (composer) { composer.setSize(w, h); bloom.resolution.set(w, h); } maatU.value.set(w, h); snedeU.value.w = composer ? composer._pixelRatio : renderer.getPixelRatio(); }
 addEventListener('resize', () => { if ((innerWidth <= 820) !== SMAL) location.reload(); else maat(); }); maat();
 
 let laatst = performance.now(), loopt = false, opU = U_START, start0 = 0, n0 = 0, verlaagd = false;
 function teken(nu) {
   const dt = Math.min(0.05, (nu - laatst) / 1000); laatst = nu; const sec = nu / 1000; tijdU.value = sec;
   const p = voortgang(), extra = Math.max(0, scrollY - reisEind());
+  if (extra > innerHeight * 2.4) { loopt = false; doek.style.visibility = 'hidden'; return; } // ver onder de hero: de 3D staat stil
   const k = 1 - Math.exp(-dt * 3.5);
   // de opdracht volgt de scroll met een beetje vertraging; in het openingsbeeld drijft hij rustig rond
   if (p < 0.1) opU += dt * 0.02; else { const doel = opdrachtU(p), d = doel + Math.round(opU - doel); opU += (d - opU) * (1 - Math.exp(-dt * 5)); }
@@ -323,8 +325,9 @@ function teken(nu) {
   if (!verlaagd) { if (!start0) start0 = nu; n0++; if (nu - start0 > 2000) { verlaagd = true; const fps = n0 / ((nu - start0) / 1000); if (fps < 40) { renderer.setPixelRatio(1); if (composer) composer.setPixelRatio(1); maat(); } if (fps < 28) composer = null; } }
   if (loopt) requestAnimationFrame(teken);
 }
-function begin() { if (loopt) return; loopt = true; laatst = performance.now(); requestAnimationFrame(teken); }
+function begin() { if (loopt) return; loopt = true; laatst = performance.now(); if (!verlaagd) { start0 = 0; n0 = 0; } doek.style.visibility = ''; requestAnimationFrame(teken); }
 begin();
+addEventListener('scroll', () => { if (!loopt && !document.hidden && scrollY - reisEind() <= innerHeight * 2.4) begin(); }, { passive: true });
 document.addEventListener('visibilitychange', () => document.hidden ? (loopt = false) : begin());
 window.__f8 = { scene, camera, renderer };
 }

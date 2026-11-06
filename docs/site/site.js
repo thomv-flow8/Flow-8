@@ -14,7 +14,8 @@
   schaal(); addEventListener('resize', schaal);
   // de kaart: op mobiel ingezoomd op de routes, met grotere plaatsnamen
   const kaart = document.querySelector('.kaart-svg');
-  function kaartMaat() { if (!kaart) return; const m = innerWidth <= 640, leg = kaart.querySelector('.kaart-route-leg'); kaart.setAttribute('viewBox', m ? '250 50 970 632' : '0 0 1600 650'); if (leg) leg.setAttribute('transform', m ? 'translate(276 628)' : 'translate(26 612)'); }
+  let kaartMob = null;
+  function kaartMaat() { if (!kaart || (innerWidth <= 640) === kaartMob) return; kaartMob = innerWidth <= 640; const m = kaartMob, leg = kaart.querySelector('.kaart-route-leg'); kaart.setAttribute('viewBox', m ? '250 50 970 632' : '0 0 1600 650'); if (leg) leg.setAttribute('transform', m ? 'translate(276 628)' : 'translate(26 612)'); }
   kaartMaat(); addEventListener('resize', kaartMaat);
 
   // tabs met pijltjestoetsen
@@ -65,6 +66,8 @@
 (function () {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const meer = document.getElementById('meer'); if (!meer) return;
+  const nav0 = document.querySelector('.nav'), banden0 = [...document.querySelectorAll('.band-licht')];
+  if (innerWidth <= 820) { addEventListener('scroll', () => { nav0.classList.toggle('gescrold', scrollY > 12); nav0.classList.toggle('op-licht', banden0.some(bd => { const r = bd.getBoundingClientRect(); return r.top <= 34 && r.bottom >= 34; })); }, { passive: true }); return; }
   const lagen = [];
   meer.querySelectorAll('.sectie').forEach(sec => {
     sec.querySelectorAll('.beeld').forEach(el => lagen.push({ el, y: 50, kantel: 0, zij: true }));
