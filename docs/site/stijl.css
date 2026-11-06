@@ -1272,6 +1272,7 @@ svg{display:block;flex-shrink:0}
 .pagina-kop p{margin-top:18px;font-size:18.5px;color:var(--zacht);max-width:36em}
 .pagina-kop + .sectie{border-top:0}
 .nav a[aria-current=page],.mm-lijst a[aria-current=page]{color:var(--tekst)}
+.nav.op-licht a[aria-current=page]{color:#0d0f14}
 .verder{position:relative;z-index:6;padding:96px 0;text-align:center}
 .verder h2{font:500 clamp(32px,4vw,52px)/1.05 'Inter Tight',sans-serif;letter-spacing:-.04em;max-width:18ch;margin:0 auto;text-wrap:balance}
 .verder p{margin:16px auto 0;color:var(--zacht);font-size:18px;max-width:34em}

@@ -64,10 +64,13 @@
 
 // ── Diepte bij het scrollen: beelden, kaarten en tekst bewegen met eigen snelheid en kantelen licht ──
 (function () {
+  // menu: donkere tekst boven een licht vlak, ook meteen bij het laden (pagina's die met een lichte band beginnen)
+  const nav = document.querySelector('.nav'), banden = [...document.querySelectorAll('.band-licht')];
+  const navStand = () => { nav.classList.toggle('gescrold', scrollY > 12); nav.classList.toggle('op-licht', banden.some(bd => { const r = bd.getBoundingClientRect(); return r.top <= 34 && r.bottom >= 34; })); };
+  addEventListener('scroll', navStand, { passive: true }); navStand();
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const meer = document.getElementById('meer'); if (!meer) return;
-  const nav0 = document.querySelector('.nav'), banden0 = [...document.querySelectorAll('.band-licht')];
-  if (innerWidth <= 820) { addEventListener('scroll', () => { nav0.classList.toggle('gescrold', scrollY > 12); nav0.classList.toggle('op-licht', banden0.some(bd => { const r = bd.getBoundingClientRect(); return r.top <= 34 && r.bottom >= 34; })); }, { passive: true }); return; }
+  if (innerWidth <= 820) return;   // diepte-effect alleen op grote schermen (geheugen op telefoons)
   const lagen = [];
   meer.querySelectorAll('.sectie').forEach(sec => {
     sec.querySelectorAll('.beeld').forEach(el => lagen.push({ el, y: 50, kantel: 0, zij: true }));
@@ -75,9 +78,6 @@
     sec.querySelectorAll('.tegel, .stappen3 li, .pakketten article, .reken, .kaartbeeld, .formulier, .waarom, .vragen, .modules').forEach((el, i) => lagen.push({ el, y: 36 + (i % 3) * 18, kantel: 3 }));
   });
   let loopt = false;
-  const nav = document.querySelector('.nav');
-  const banden = [...document.querySelectorAll('.band-licht')];
-  addEventListener('scroll', () => { nav.classList.toggle('gescrold', scrollY > 12); nav.classList.toggle('op-licht', banden.some(bd => { const r = bd.getBoundingClientRect(); return r.top <= 34 && r.bottom >= 34; })); }, { passive: true });
   function stap() {
     const vh = innerHeight;
     for (const l of lagen) {
