@@ -713,6 +713,16 @@ jaarplanning (spreiden van onderhoud), medewerkers, debiteuren en materialen.
       footer en de gemeenschappelijke kop staan één keer in `site/_delen/` (in de pagina: `<!-- deel:naam -->`;
       `{{w}}` = pad naar de wortel, `data-pagina` = huidige pagina in het menu). De stijl staat in `site/stijl.css`.
       Oude links als flow-8.nl/#prijzen sturen door naar de nieuwe pagina (vroeg.js).
+- [ ] **Back-ups controleren in Firebase** (Thomas): staan er automatische back-ups aan voor de Realtime Database,
+      Firestore en Storage? In de app-code zit alleen een handmatige export (Instellingen). De zin "dagelijkse back-ups"
+      gaat van de site af zodra de uitgebreide pagina's live gaan, en komt pas terug als het klopt.
+- [ ] **Import voor installaties en medewerkers bouwen** (app): debiteuren, contracten en artikelen kunnen al via
+      Excel/csv (`_openDebImport`, `_openContractImport`, `_openArtikelImport`); installaties en medewerkers nog niet.
+- [ ] **Incasso instellen** (Thomas): betalen via automatische incasso, per maand of per jaar. Licenties aanpassen
+      bij een maandabonnement per maand, bij een jaarabonnement per jaar (zie ook H12 credits/licenties).
+- [ ] **Verwerkersovereenkomst** (AVG art. 28): Flow 8 is verwerker van persoonsgegevens van klanten. Concept
+      concept staat klaar (6 november 2026): https://claude.ai/artifact/EbSMEvBR53SLFVhDFk8cxw — eerst de open
+      punten onderaan invullen, dan laten nakijken door een jurist. Daarna de vraag erover terug op /vragen/.
 - [ ] **Sitemap en robots.txt** toevoegen nu er meerdere pagina's zijn, en de pagina's aanmelden in Google Search Console.
 - [ ] **Kabelbundel-hero op een echte iPhone nalopen** (vloeiendheid; bij minder dan 40 beelden per seconde
       gaat de resolutie omlaag, onder 28 vervalt de gloed).
