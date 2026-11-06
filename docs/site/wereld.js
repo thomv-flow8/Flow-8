@@ -184,7 +184,7 @@ const straalMat2 = new THREE.ShaderMaterial({ uniforms: straalU, transparent: tr
       float puls = pow(0.5 + 0.5 * cos(6.2832 * (-cp.y / 700.0 - tijd * 0.1)), 12.0) * exp(-dx * dx / 8.0) * boven;
       // bovenin vooral een was van wolken rond de straal, onderaan de waas met het fijne raster
       float waas = exp(-dx * dx / (bw * bw)) * bovenZacht * (0.05 + 0.95 * naar);
-      float rookZone = exp(-abs(dx) / mix(460.0, 230.0, naar)) * bovenZacht;
+      float rookZone = exp(-abs(dx) / mix(170.0, 140.0, naar)) * bovenZacht;   // rook alleen dicht bij de straal, de zijkanten blijven donker
       float waaier = landt * exp(-abs(dy) / 30.0) * exp(-dx * dx / (230.0 * 230.0));
       vec3 col = vec3(0.0);
       if (waas + rookZone + waaier > 0.01) {
@@ -221,7 +221,8 @@ const nevelMat = new THREE.ShaderMaterial({ uniforms: { tijd: tijdU, donker: don
       float midden = exp(-pow((vUv.x - 0.5) * 2.4, 2.0)) * smoothstep(0.0, 0.7, vUv.y + 0.2);
       vec3 c = mix(vec3(0.05, 0.09, 0.30), vec3(0.19, 0.13, 0.46), w);
       float a = smoothstep(0.35, 0.85, w) * (0.03 + 0.08 * midden) * donker * mix(1.0, 0.2, smoothstep(0.45, 0.72, vUv.y));   // bovenin donkerder
-      a *= mix(1.0, 0.06, smoothstep(0.4, 0.88, gl_FragCoord.y / max(res.y, 1.0)));   // bovenste deel van het scherm bijna zwart, alle aandacht naar de straal
+      a *= mix(1.0, 0.06, smoothstep(0.4, 0.88, gl_FragCoord.y / max(res.y, 1.0)));
+      a *= exp(-pow((gl_FragCoord.x / max(res.x, 1.0) - 0.5) * 3.4, 2.0));   // alleen rond het midden, links en rechts geen rook   // bovenste deel van het scherm bijna zwart, alle aandacht naar de straal
       a *= 0.85 + 0.3 * h(floor(gl_FragCoord.xy) + floor(tijd * 10.0));
       gl_FragColor = vec4(c, a);
       #include <colorspace_fragment>

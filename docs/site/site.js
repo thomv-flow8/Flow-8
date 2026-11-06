@@ -106,6 +106,12 @@
     const io = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; io.unobserve(e.target); const doel = +e.target.dataset.tot, t0 = performance.now(), duur = 1400; const stap = nu => { const f = Math.min(1, (nu - t0) / duur), w = 1 - Math.pow(1 - f, 3); e.target.textContent = Math.round(doel * w).toLocaleString('nl-NL'); if (f < 1) requestAnimationFrame(stap); }; requestAnimationFrame(stap); }), { threshold: 0.6 });
     tellers.forEach(t => io.observe(t));
   }
+  // telefoons: animaties in secties buiten beeld pauzeren (scheelt geheugen en batterij)
+  if (innerWidth <= 820 && 'IntersectionObserver' in window) {
+    const blokken = [...document.querySelectorAll('#meer > .sectie, #meer > .landing, .voet')];
+    const iob = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('uit-beeld', !e.isIntersecting)), { rootMargin: '300px 0px' });
+    blokken.forEach(b => { b.classList.add('uit-beeld'); iob.observe(b); });
+  }
   const stappen = document.querySelector('.stappen3');
   if (stappen) {
     const lis = [...stappen.children];

@@ -1245,6 +1245,20 @@ svg{display:block;flex-shrink:0}
   .ag-namen span{font-size:9.5px}.ag-d span{font-size:10.5px}.ag-b{font-size:9.5px}.ag-tabs em{font-size:10.5px}
   .mw-k,.db-k,.db-k .db-p{font-size:9.5px}
 }
+/* ── Telefoons: zuinig met geheugen. Elk glas-effect, elke vervaging en elke doorlopende animatie kost
+   op een iPhone een eigen laag; samen liep Safari daardoor vol en herlaadde de pagina halverwege. ── */
+@media (max-width:820px){
+  *,*::before,*::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  *::before,*::after{filter:none!important}
+  .scherm{filter:none!important}
+  #dashboard .beeld .schaal::before,.bk-kring::before,.kaartbeeld::before{display:none}   /* zonder vervaging harde vlakken */
+  .nav.gescrold,.nav.open{background:rgba(9,11,17,.94)!important}
+  .sub{background:#0b0d13!important}
+  .tegel,.stappen3 li,.reken,.pakketten article,.formulier,.waarom,.licht-kaart{background:#0f121b!important}
+  .feiten span{background:rgba(12,14,20,.9)!important}
+  #meer > .sectie,.voet{content-visibility:auto;contain-intrinsic-size:auto 1100px}
+  .uit-beeld,.uit-beeld *,.uit-beeld *::before,.uit-beeld *::after{animation-play-state:paused!important}
+}
 @media (max-height:780px) and (min-width:821px){.uitleg ul{display:none}}
 @media (max-width:820px){
   .nav{padding:0 16px}.nav .links,.nav .r .inl{display:none}
@@ -1906,8 +1920,8 @@ svg{display:block;flex-shrink:0}
 </div>
 
 
-<script type="module" src="wereld.js?v=c95164b7b7"></script>
-<script src="site.js?v=4727ac94eb"></script>
+<script type="module" src="wereld.js?v=87f024efa8"></script>
+<script src="site.js?v=ac5445a155"></script>
 @@SITEJS@@
 @@SITEJS@@
 @@SITEJS@@
