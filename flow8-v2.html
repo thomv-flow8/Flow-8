@@ -342,6 +342,8 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
 .lf-rij:has(> .lf-w > .lf-tekst) > .lf-w > .lf-tekst{width:100%}
 @media(min-width:769px){
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px 132px minmax(0,1fr)}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-pc){grid-template-columns:36px 132px minmax(0,1fr)}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-pc) > .lf-w{justify-self:start}
 }
 /* Grote formulieren op de telefoon: label klein boven het vak, zodat lange namen passen */
 @media(max-width:768px){
@@ -13406,8 +13408,9 @@ function openDebModal(id){
   b += lfRij(ICO.gebouw, 'Naam', _dfT('df-nm', d.naam, '', 'text', ' required'), {verplicht:true, voor:'df-nm'});
   b += '</div></div>';
   b += '<div class="lf-groep">Adres</div><div class="lf-blok-kaart">';
-  b += lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="df-pc" value="'+esc(d.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="df-huisnr" placeholder="Nr." aria-label="Huisnummer"><span class="lf-hint">adres wordt aangevuld</span>');
-  b += '<div class="lf-twee">'+lfRij('', 'Adres', _dfT('df-adr', d.adres, 'Wordt automatisch ingevuld'), {voor:'df-adr'})+lfRij('', 'Plaats', _dfT('df-pl', d.plaats, ''), {voor:'df-pl'})+'</div>';
+  b += '<div class="lf-twee">'+lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="df-pc" value="'+esc(d.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="df-huisnr" placeholder="Nr." aria-label="Huisnummer">')
+    + lfRij('', 'Plaats', _dfT('df-pl', d.plaats, ''), {voor:'df-pl'})+'</div>';
+  b += lfRij('', 'Adres', _dfT('df-adr', d.adres, 'Wordt automatisch ingevuld via postcode en nummer'), {voor:'df-adr'});
   b += '</div>';
   // Deze drie velden horen bij de standaardcontactpersoon. Zijn er meer contactpersonen,
   // dan staat dat eronder vermeld — beheren gebeurt in het detailoverzicht.
@@ -20051,8 +20054,10 @@ function openOpdrachtModal(id, prefill) {
   b += '<div id="op-contact-wrap" style="'+(_opCts.length>1?'':'display:none')+'">'+lfKies(ICO.user, 'Contactpersoon', '<select class="input" id="op-contact">'+_opContactOpties(_opCts, o.contactNaam)+'</select>')+'</div>';
   b += '</div>';
   b += '<input type="hidden" id="op-contact-tel" value="'+esc(o.contactTel||'')+'">';
-  b += lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="op-pc" value="'+esc(o.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="op-huisnr" placeholder="Nr." aria-label="Huisnummer" title="Huisnummer voor adres-aanvulling"><span class="lf-hint">adres wordt aangevuld</span>');
-  b += '<div class="lf-twee">'+lfRij('', 'Adres', _opT('op-adres', o.adres, 'Wordt automatisch ingevuld'), {voor:'op-adres'})+lfRij('', 'Plaats', _opT('op-pl', o.plaats, ''), {voor:'op-pl'})+'</div>';
+  // Postcode en plaats naast elkaar (de postcode vult ze samen in), het adres over de volle breedte
+  b += '<div class="lf-twee">'+lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="op-pc" value="'+esc(o.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="op-huisnr" placeholder="Nr." aria-label="Huisnummer" title="Huisnummer voor adres-aanvulling">')
+    + lfRij('', 'Plaats', _opT('op-pl', o.plaats, ''), {voor:'op-pl'})+'</div>';
+  b += lfRij('', 'Adres', _opT('op-adres', o.adres, 'Wordt automatisch ingevuld via postcode en nummer'), {voor:'op-adres'});
   b += '<button type="button" class="wbx-chip-add" id="op-add-locatie"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Extra locatie</button>';
   b += '</div>';
 
