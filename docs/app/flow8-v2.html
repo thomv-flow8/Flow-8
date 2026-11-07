@@ -390,6 +390,15 @@ label.lf-rij{cursor:pointer}
 .lf-art-kort{display:grid;grid-template-columns:minmax(0,1fr)}
 .lf-klap-twee{align-items:start}
 .lf-doc-rij > .lf-l .lf-tekst{text-align:left!important;width:100%;padding:4px 0}
+.lf-kleur{width:56px;height:34px;padding:3px;border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface2);cursor:pointer}
+.lf-kleur::-webkit-color-swatch-wrapper{padding:0}
+.lf-kleur::-webkit-color-swatch{border:0;border-radius:var(--radius-pill)}
+.lf-kleur::-moz-color-swatch{border:0;border-radius:var(--radius-pill)}
+.lf-ico-kies{display:flex;flex-wrap:wrap;gap:8px}
+.lf-ico-opt{width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
+.lf-ico-opt.aan{border-color:var(--accent);background:rgba(79,110,245,.14);color:var(--accent-t)}
+.lf .lf-tekst[readonly]{color:var(--muted)}
+.lf .lf-notitie.lf-mono{font:12.5px/1.5 'Space Mono',monospace;resize:vertical}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
 .lf-wis:hover{background:var(--red);color:#fff}
@@ -10034,6 +10043,7 @@ function _lfOpdrachtNaam(opId){
 var _LF_TEL  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>';
 var _LF_MAIL = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>';
 var _LF_EAN  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12M8 6v12M11 6v12M15 6v12M18 6v12M21 6v12"/></svg>';
+var _LF_KLEUR = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 1 9-9c0 2-1.6 3-3.5 3H15a2 2 0 0 0-1.5 3.3A1.6 1.6 0 0 1 12 21z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg>';
 var _LF_STER = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 // Kop met de klant (debiteur) bovenaan een klantvenster.
 function _lfKlantKop(d){
@@ -31318,15 +31328,12 @@ function _bindMailTemplatesTab(el) {
 }
 
 function openMailTemplateNieuw() {
-  var b = '<div class="form-grid">';
-  b += fg('Naam', finp('ntpl-naam','text','','bijv. Bevestiging installatie'));
-  b += fg('ID (intern, geen spaties)', finp('ntpl-id','text','','bijv. bevestiging_installatie'));
-  b += fgf('Onderwerp', '<input class="input" id="ntpl-onderwerp" type="text" placeholder="bijv. Bevestiging – {klantNaam}">');
-  b += '</div>';
-  b += '<div style="margin-top:12px">'+fgf('Inhoud', '<textarea class="input" id="ntpl-body" rows="8" style="font-family:\'Space Mono\',monospace;font-size:12px;resize:vertical"></textarea>')+'</div>';
-  var f = '<button class="btn btn-ghost" id="ntpl-cancel">Annuleren</button><button class="btn btn-primary" id="ntpl-save">Opslaan</button>';
-  openModal('Nieuwe template', b, f);
-  document.getElementById('ntpl-cancel').addEventListener('click', closeModal);
+  var _ntT = function(id2, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var b = lfRij(ICO.edit, 'Naam', _ntT('ntpl-naam', 'Bijv. Bevestiging installatie', ' required'), {verplicht:true, voor:'ntpl-naam'});
+  b += lfRij(ICO.flag, 'ID', _ntT('ntpl-id', 'Bijv. bevestiging_installatie', ' required autocapitalize="off"'), {verplicht:true, voor:'ntpl-id', sub:'Intern, zonder spaties'});
+  b += lfRij(ICO.mail, 'Onderwerp', _ntT('ntpl-onderwerp', 'Bijv. Bevestiging \u2013 {klantNaam}'), {voor:'ntpl-onderwerp'});
+  b += lfRij(ICO.clipboard, 'Inhoud', '<textarea class="lf-notitie lf-mono" id="ntpl-body" rows="8" placeholder="Beste {contactpersoon},"></textarea>', {blok:true, voor:'ntpl-body', sub:'Plaatshouders zoals {klantNaam} worden bij verzenden ingevuld'});
+  lfOpen('Nieuwe template', b, 'Opslaan', 'ntpl-save');
   document.getElementById('ntpl-save').addEventListener('click',function(){
     var id = (document.getElementById('ntpl-id').value||'').trim().replace(/\s+/g,'_');
     var naam = (document.getElementById('ntpl-naam').value||'').trim();
@@ -33878,34 +33885,30 @@ function renderInstContracten(el) {
 function openContractModal(id) {
   var ct = id ? getContracten().find(function(c){return c.id===id;}) : {};
   ct = ct || {};
-  var b = '<div class="form-grid">';
-  b += fg('Code (bijv. A10)', finp('ct-code','text',ct.code||'',''));
-  b += fg('Naam', finp('ct-naam','text',ct.naam||'',''));
-  b += fg('Soort', '<select class="input" id="ct-soort">'
-     + '<option value="basis"'+(ct.soort==='aanvulling'?'':' selected')+'>Basiscontract — levert geplande beurten op</option>'
-     + '<option value="aanvulling"'+(ct.soort==='aanvulling'?' selected':'')+'>Aanvulling — geldt bovenop een basiscontract</option>'
-     + '</select>');
-  b += fg('Frequentie/jaar <span style="font-size:11px;color:var(--muted);font-weight:400">(0 = op aanvraag)</span>',
-    finp('ct-freq','number',(ct.frequentie!==undefined&&ct.frequentie!==null?ct.frequentie:1),''));
-  b += fg('Aantal monteurs <span style="font-size:11px;color:var(--muted);font-weight:400">(per beurt)</span>',
-    '<input class="input" type="number" id="ct-monteurs" min="1" max="10" step="1" value="'+(ct.aantalMonteurs!==undefined&&ct.aantalMonteurs!==null?ct.aantalMonteurs:1)+'">');
-  b += fg('Kleur', '<input type="color" id="ct-kleur" value="'+(ct.kleur||'#4a6cf7')+'" style="width:60px;height:36px;border:none;border-radius:6px;cursor:pointer;background:none">');
-  b += fgf('Standaard werkomschrijving', '<textarea class="input" id="ct-werk" rows="3">'+esc(ct.werkomschrijving||'')+'</textarea>');
-  b += '</div>';
-  // Toelichting interval
-  var freq = ct.frequentie||0;
-  var intervalTekst = freq > 0 ? 'Interval: elke <strong>'+Math.round(12/freq)+'</strong> maanden ('+freq+'× per jaar)' : 'Geen automatisch voorstel (op aanvraag)';
-  b += '<div id="ct-interval-uitleg" style="margin-top:8px;padding:8px 12px;background:rgba(74,108,247,.08);border-radius:8px;font-size:12px;color:var(--muted)">'+intervalTekst+'</div>';
-  var f = '<button class="btn btn-ghost" id="ct-cancel">Annuleren</button><button class="btn btn-primary" id="ct-save">Opslaan</button>';
-  openModal(id?'Contracttype bewerken':'Nieuw contracttype', b, f);
-  document.getElementById('ct-cancel').addEventListener('click', closeModal);
+  var _ctT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var _ctSoort = ct.soort==='aanvulling' ? 'aanvulling' : 'basis';
+  var _ctFreq = (ct.frequentie!==undefined&&ct.frequentie!==null) ? ct.frequentie : 1;
+  var _ctMont = (ct.aantalMonteurs!==undefined&&ct.aantalMonteurs!==null) ? ct.aantalMonteurs : 1;
+  var b = lfRij(ICO.flag, 'Code', _ctT('ct-code', ct.code, 'Bijv. A10', ' required autocapitalize="characters"'), {verplicht:true, voor:'ct-code'});
+  b += lfRij(ICO.edit, 'Naam', _ctT('ct-naam', ct.naam, 'Bijv. Jaarlijks, 1 man'), {voor:'ct-naam'});
+  b += lfRij(ICO.clipboard, 'Soort', '<input type="hidden" id="ct-soort" value="'+_ctSoort+'"><span class="lf-seg" role="radiogroup" aria-label="Soort contract" data-lf-seg="ct-soort">'
+    + '<button type="button" role="radio" data-waarde="basis" aria-checked="'+(_ctSoort==='basis')+'"'+(_ctSoort==='basis'?' class="aan"':'')+'>Basis</button>'
+    + '<button type="button" role="radio" data-waarde="aanvulling" aria-checked="'+(_ctSoort==='aanvulling')+'"'+(_ctSoort==='aanvulling'?' class="aan"':'')+'>Aanvulling</button></span>', {sub:'Een aanvulling geldt bovenop een basiscontract'});
+  b += lfRij(ICO.refresh, 'Beurten per jaar', '<span class="lf-stap"><button type="button" data-lf-stap="-1" aria-label="Minder">'+_LF_MIN+'</button><input type="number" inputmode="numeric" id="ct-freq" value="'+esc(String(_ctFreq))+'" min="0" max="52" step="1"><button type="button" data-lf-stap="1" aria-label="Meer">'+_LF_PLUS+'</button></span>', {voor:'ct-freq', sub:'0 = op aanvraag'});
+  b += lfRij(ICO.users, 'Monteurs per beurt', '<span class="lf-stap"><button type="button" data-lf-stap="-1" aria-label="Minder">'+_LF_MIN+'</button><input type="number" inputmode="numeric" id="ct-monteurs" value="'+esc(String(_ctMont))+'" min="1" max="10" step="1"><button type="button" data-lf-stap="1" aria-label="Meer">'+_LF_PLUS+'</button></span>', {voor:'ct-monteurs'});
+  var freq = _ctFreq;
+  var intervalTekst = freq > 0 ? 'Interval: elke <strong>'+Math.round(12/freq)+'</strong> maanden ('+freq+'\u00d7 per jaar)' : 'Geen automatisch voorstel (op aanvraag)';
+  b += '<div class="lf-samen" id="ct-interval-uitleg">'+intervalTekst+'</div>';
+  b += lfRij(_LF_KLEUR, 'Kleur', '<input type="color" class="lf-kleur" id="ct-kleur" value="'+esc(ct.kleur||'#4a6cf7')+'" aria-label="Kleur">', {voor:'ct-kleur'});
+  b += lfRij(ICO.edit, 'Standaard werkomschrijving', '<textarea class="lf-notitie" id="ct-werk" rows="3" placeholder="Komt in nieuwe opdrachten met dit contract">'+esc(ct.werkomschrijving||'')+'</textarea>', {blok:true, voor:'ct-werk'});
+  lfOpen(id?'Contracttype bewerken':'Nieuw contracttype', b, 'Opslaan', 'ct-save');
 
   // Live interval toelichting bij frequentie invoer
   var freqEl = document.getElementById('ct-freq');
   var uitlegEl = document.getElementById('ct-interval-uitleg');
   freqEl.addEventListener('input', function(){
     var f = parseFloat(freqEl.value)||0;
-    if(f > 0) uitlegEl.innerHTML = 'Interval: elke <strong>'+Math.round(12/f)+'</strong> maanden ('+f+'× per jaar)';
+    if(f > 0) uitlegEl.innerHTML = 'Interval: elke <strong>'+Math.round(12/f)+'</strong> maanden ('+f+'\u00d7 per jaar)';
     else uitlegEl.innerHTML = 'Geen automatisch voorstel (op aanvraag)';
   });
 
@@ -34018,9 +34021,9 @@ function renderInstOpdrachten(el) {
 function openOpdrachtTypeModal(id) {
   var ot = id ? getOpdrachttypes().find(function(o){return o.id===id;}) : {};
   ot = ot||{};
-  var b = '<div class="form-grid">';
-  b += fg('ID (intern, geen spaties)', finp('ot-id','text',ot.id||'','bijv. inspectie'));
-  b += fg('Label', finp('ot-label','text',ot.label||'','bijv. Inspectie'));
+  var _otT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var b = lfRij(ICO.edit, 'Naam', _otT('ot-label', ot.label, 'Bijv. Inspectie', ' required'), {verplicht:true, voor:'ot-label'});
+  b += lfRij(ICO.flag, 'ID', _otT('ot-id', ot.id, 'Bijv. inspectie', ' required autocapitalize="off"'), {verplicht:true, voor:'ot-id', sub:'Intern, zonder spaties'});
   // SVG icoon keuze voor opdrachttypes
   var otIcoonOpties = [
     {id:'servicebeurt',svg:'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>'},
@@ -34033,31 +34036,25 @@ function openOpdrachtTypeModal(id) {
     {id:'klant',     svg:'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'},
   ];
   var huidigIcon = ot.icon||'servicebeurt';
-  b += fgf('Icoon', '<div style="display:flex;flex-wrap:wrap;gap:8px" id="ot-icon-picker">'+
+  b += lfRij(ICO.ster, 'Icoon', '<div class="lf-ico-kies" id="ot-icon-picker" role="group" aria-label="Icoon">'+
     otIcoonOpties.map(function(opt){
       var isActief = huidigIcon===opt.id;
-      return '<button type="button" class="ot-icon-opt" data-icon="'+opt.id+'" style="width:40px;height:40px;border-radius:8px;border:2px solid '+(isActief?'var(--accent)':'var(--border)')+';background:'+(isActief?'rgba(74,108,247,.15)':'var(--surface2)')+';cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)">'+opt.svg+'</button>';
+      return '<button type="button" class="ot-icon-opt lf-ico-opt'+(isActief?' aan':'')+'" data-icon="'+opt.id+'" aria-label="'+opt.id+'" aria-pressed="'+isActief+'">'+opt.svg+'</button>';
     }).join('')+
-    '</div><input type="hidden" id="ot-icon" value="'+esc(huidigIcon)+'">');
-  b += fg('Kleur', '<input type="color" id="ot-kleur" value="'+(ot.kleur||'#6b7694')+'" style="width:60px;height:36px;border:none;border-radius:6px;cursor:pointer;background:none">');
-  b += '</div>';
+    '</div><input type="hidden" id="ot-icon" value="'+esc(huidigIcon)+'">', {blok:true});
+  b += lfRij(_LF_KLEUR, 'Kleur', '<input type="color" class="lf-kleur" id="ot-kleur" value="'+esc(ot.kleur||'#6b7694')+'" aria-label="Kleur">', {voor:'ot-kleur'});
   // Mail template koppeling
   var tplOpties = Object.values(getMailTemplates()).filter(function(t){return !t.categorie||t.categorie==='planning';});
-  b += fgf('Mail template',
-    '<select class="input" id="ot-mail-tpl"><option value="">— Geen koppeling —</option>'
+  b += lfKies(ICO.mail, 'Mailtemplate',
+    '<select class="input" id="ot-mail-tpl"><option value="">Geen koppeling</option>'
     +tplOpties.map(function(t){return '<option value="'+esc(t.id)+'"'+(ot.mailTemplate===t.id?' selected':'')+'>'+esc(t.naam||t.id)+'</option>';}).join('')
-    +'</select>');
+    +'</select>', {sub:'Voorgesteld bij het mailen van de klant'});
 
-  var f = '<button class="btn btn-ghost" id="ot-cancel">Annuleren</button><button class="btn btn-primary" id="ot-save">Opslaan</button>';
-  openModal(id?'Opdrachttype bewerken':'Nieuw opdrachttype', b, f);
-  document.getElementById('ot-cancel').addEventListener('click', closeModal);
+  lfOpen(id?'Opdrachttype bewerken':'Nieuw opdrachttype', b, 'Opslaan', 'ot-save');
   // Icon picker events — BUITEN save handler
   document.querySelectorAll('.ot-icon-opt').forEach(function(btn){
     btn.addEventListener('click',function(){
-      document.querySelectorAll('.ot-icon-opt').forEach(function(b2){
-        b2.style.borderColor='var(--border)'; b2.style.background='var(--surface2)';
-      });
-      btn.style.borderColor='var(--accent)'; btn.style.background='rgba(74,108,247,.15)';
+      document.querySelectorAll('.ot-icon-opt').forEach(function(b2){ var aan = b2===btn; b2.classList.toggle('aan', aan); b2.setAttribute('aria-pressed', aan); });
       document.getElementById('ot-icon').value=btn.dataset.icon;
     });
   });
@@ -34294,14 +34291,10 @@ function renderInstRollen(el) {
 
 function openRolModal(rolId, rollen) {
   var bestaand = rolId ? (rollen[rolId]||{}) : {};
-  var b = '<div class="form-grid">';
-  b += fg('Rolnaam (intern, geen spaties)', '<input class="input" id="rm-naam" value="'+esc(rolId||'')+'"'+(rolId?' readonly style="opacity:.6"':'')+' placeholder="bijv. teamleider">');
-  b += fg('Weergavenaam', finp('rm-label','text',bestaand.naam||rolId||'','bijv. Teamleider'));
-  b += fg('Kleur', '<input type="color" id="rm-kleur" value="'+(bestaand.kleur||'#6b7694')+'" style="width:60px;height:36px;border:none;border-radius:6px;cursor:pointer">');
-  b += '</div>';
-  var f = '<button class="btn btn-ghost" id="rm-cancel">Annuleren</button><button class="btn btn-primary" id="rm-save">Opslaan</button>';
-  openModal(rolId?'Rol bewerken':'Nieuwe rol aanmaken', b, f);
-  document.getElementById('rm-cancel').addEventListener('click', closeModal);
+  var b = lfRij(ICO.user, 'Weergavenaam', '<input class="lf-tekst" type="text" id="rm-label" value="'+esc(bestaand.naam||rolId||'')+'" placeholder="Bijv. Teamleider">', {voor:'rm-label'});
+  b += lfRij(ICO.flag, 'Rolnaam', '<input class="lf-tekst" type="text" id="rm-naam" value="'+esc(rolId||'')+'"'+(rolId?' readonly':' required')+' placeholder="Bijv. teamleider" autocapitalize="off">', {verplicht:!rolId, voor:'rm-naam', sub:rolId ? 'Vast na aanmaken' : 'Intern, zonder spaties'});
+  b += lfRij(_LF_KLEUR, 'Kleur', '<input type="color" class="lf-kleur" id="rm-kleur" value="'+esc(bestaand.kleur||'#6b7694')+'" aria-label="Kleur">', {voor:'rm-kleur'});
+  lfOpen(rolId?'Rol bewerken':'Nieuwe rol', b, 'Opslaan', 'rm-save');
   document.getElementById('rm-save').addEventListener('click', function(){
     var naam = document.getElementById('rm-naam').value.trim().toLowerCase().replace(/\s+/g,'_');
     if(!naam){toast('Rolnaam is verplicht','error');return;}
