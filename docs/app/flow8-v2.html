@@ -348,6 +348,12 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-twee > .lf-rij:nth-child(2):has(> .lf-w > .lf-tekst){grid-template-columns:36px 112px minmax(0,1fr)}
   /* Artikel: EAN en eenheid naast elkaar in de rechterkolom, labels zo smal als ze zijn. */
   .modal-lf-groot .lf-art-kort{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);column-gap:16px}
+  .modal-lf-groot .lf-kolommen{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .modal-lf-groot .lf-kolommen.tpl{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+  .modal-lf-groot .lf-kolommen .tpl-preview-kol{position:sticky;top:0}
+  /* Waarde direct na de labelkolom in plaats van tegen de rechterrand (prijs + btw). */
+  .modal-lf-groot .lf-rij.lf-links{grid-template-columns:36px 132px minmax(0,1fr)}
+  .modal-lf-groot .lf-rij.lf-links > .lf-w{justify-self:start}
   .modal-lf-groot .lf-art-kort > .lf-rij{border-top:0}
   .modal-lf-groot .lf-art-kort > .lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px auto minmax(0,1fr)}
   .modal-lf-groot .lf-art-kort > .lf-rij:has(> .lf-ic:empty){grid-template-columns:auto minmax(0,1fr)}
@@ -399,6 +405,24 @@ label.lf-rij{cursor:pointer}
 .lf-ico-opt.aan{border-color:var(--accent);background:rgba(79,110,245,.14);color:var(--accent-t)}
 .lf .lf-tekst[readonly]{color:var(--muted)}
 .lf .lf-notitie.lf-mono{font:12.5px/1.5 'Space Mono',monospace;resize:vertical}
+.lf-kolommen{display:grid;grid-template-columns:minmax(0,1fr);column-gap:24px;align-items:start}
+.lf-kleur-kies{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.lf-swatch{width:32px;height:32px;border-radius:10px;border:0;padding:0;background:var(--k);cursor:pointer;box-shadow:0 0 0 2px var(--surface),0 0 0 2px transparent}
+.lf-swatch.rond{border-radius:50%}
+.lf-swatch.aan{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--k)}
+.lf-volgorde{display:inline-flex;gap:2px;margin-right:4px}
+.lf-volgorde button{width:30px;height:30px;border-radius:50%;border:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer;padding:0}
+.lf-volgorde button:disabled{opacity:.3;cursor:default}
+.lf-nr-ic{font:700 13px 'Space Mono',monospace;color:var(--accent-t)}
+.lf-fmt-balk{display:flex;gap:6px;flex-wrap:wrap;padding:12px 0 8px}
+.lf-fmt-balk button{min-width:40px;height:34px;padding:0 12px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface2);color:var(--text);font:600 13px 'Instrument Sans',sans-serif;cursor:pointer}
+.lf-blok-kaart > .lf-fmt-balk + .lf-notitie{margin-bottom:4px}
+.lf-vars{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 12px}
+.lf-var{font:12px 'Space Mono',monospace;padding:5px 10px;border-radius:var(--radius-pill);border:0;background:rgba(79,110,245,.14);color:var(--accent-t);cursor:pointer}
+.lf-groep-knop .lf-hint{font-family:'Instrument Sans',sans-serif;text-transform:none;letter-spacing:0}
+.tpl-voorbeeld{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:#e9ecf1}
+.tpl-voorbeeld iframe{width:100%;height:560px;border:0;display:block}
+.lf-tussen{margin-left:18px;cursor:pointer}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
 .lf-wis:hover{background:var(--red);color:#fff}
@@ -1826,6 +1850,8 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .werkbalk select.input{height:38px;padding-top:0;padding-bottom:0}
   .werkbalk .btn{min-height:38px;padding:0 14px;font-size:13.5px}
   .werkbalk .meer-knop{width:38px;padding:0}
+  /* Instellingen: de blauwe knoppen zo groot als de hoofdknoppen elders in de app */
+  .inst-wrap .btn.btn-primary.btn-sm{min-height:38px;padding:0 16px;font-size:13.5px}
   .werkbalk #loc-klant-zoek{height:38px;padding-top:0;padding-bottom:0}
   .werkbalk .plan-view-btn{min-height:30px}
 }
@@ -8905,6 +8931,9 @@ function openModal(title, bodyHtml, footerHtml, breed, xl) {
   var _ov = document.getElementById('modal-overlay');
   var _md = _ov ? _ov.querySelector('.modal') : null;
   if(_md) _md.classList.remove('closing');
+  // Een terugknop (lfTerug) geldt maar voor één venster.
+  var _mc = document.getElementById('modal-close');
+  if(_mc && _mc._lfTerug){ _mc.removeEventListener('click', _mc._lfTerug, true); _mc._lfTerug = null; _mc.innerHTML = _mc._lfOrig; _mc.setAttribute('aria-label', 'Sluiten'); _mc.title = 'Sluiten'; }
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = bodyHtml;
   document.getElementById('modal-footer').innerHTML = footerHtml || '';
@@ -9891,10 +9920,10 @@ function _lfLabel(label, o){
 function _lfSel(selectHtml){ return String(selectHtml).replace('<select class="input"', '<select class="lf-sel" tabindex="-1" aria-hidden="true"'); }
 function _lfInit(naam){ var p = String(naam||'').trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p.length>1 ? p[p.length-1] : '')[0]||'')).toUpperCase(); }
 function _lfDatum(iso){ if(!iso) return ''; try { return new Date(iso+'T00:00:00').toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'}).replace(/\./g,''); } catch(e){ return iso; } }
-// o: { verplicht, voor (id voor het label), sub (kleine tekst), blok (waarde op eigen regel), id, verborgen }
+// o: { verplicht, voor (id voor het label), sub (kleine tekst), blok (waarde op eigen regel), id, verborgen, cls (extra klasse) }
 function lfRij(ico, label, waarde, o){
   o = o || {};
-  return '<div class="lf-rij'+(o.blok ? ' lf-blok' : '')+'"'+(o.id ? ' id="'+o.id+'"' : '')+(o.verborgen ? ' hidden' : '')+'>'
+  return '<div class="lf-rij'+(o.blok ? ' lf-blok' : '')+(o.cls ? ' '+o.cls : '')+'"'+(o.id ? ' id="'+o.id+'"' : '')+(o.verborgen ? ' hidden' : '')+'>'
     +_lfIco(ico)+_lfLabel(label, o)+(o.blok ? waarde : '<span class="lf-w">'+waarde+'</span>')+'</div>';
 }
 function lfKies(ico, label, selectHtml, o){
@@ -9933,6 +9962,27 @@ function _lfArtikelRij(cls, a, prijsTekst){
     +(a.foto ? '<span class="lf-ic lf-ic-foto" aria-hidden="true"><img src="'+esc(a.foto)+'" alt=""></span>' : _lfIco(_LF_PAKKET))
     +'<span class="lf-l">'+esc(a.omschrijving||'Artikel')+'<small>'+esc(a.code||'')+(prijsTekst ? ' · '+esc(prijsTekst) : '')+'</small></span>'
     +'<span class="lf-art-plus" aria-hidden="true">'+_LF_PLUS+'</span></button>';
+}
+// Tikbare rij die naar een volgend scherm gaat: label, regel eronder, aantal en een pijl.
+function _lfNavRij(id, ico, label, sub, waarde){
+  return '<button type="button" class="lf-rij lf-kies" id="'+id+'">'+_lfIco(ico)+'<span class="lf-l">'+label+(sub ? '<small>'+esc(sub)+'</small>' : '')+'</span><span class="lf-w"><span class="lf-kw">'+esc(waarde||'')+'</span>'+_LF_CHEV+'</span></button>';
+}
+// Pijltjes om een rij in een lijst omhoog of omlaag te zetten (klassen voor-up en voor-down).
+function _lfVolgorde(voor, i, n){
+  var pijl = function(d){ return '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="'+d+'"/></svg>'; };
+  return '<span class="lf-volgorde"><button type="button" class="'+voor+'-up" data-i="'+i+'" aria-label="Omhoog"'+(i===0 ? ' disabled' : '')+'>'+pijl('m18 15-6-6-6 6')+'</button>'
+    + '<button type="button" class="'+voor+'-down" data-i="'+i+'" aria-label="Omlaag"'+(i===n-1 ? ' disabled' : '')+'>'+pijl('m6 9 6 6 6-6')+'</button></span>';
+}
+// Maakt van het kruisje een terugknop, alleen voor het venster dat nu open is: openModal
+// zet hem bij het volgende venster weer terug.
+function lfTerug(fn){
+  var mc = document.getElementById('modal-close'); if(!mc) return;
+  if(!mc._lfOrig) mc._lfOrig = mc.innerHTML;
+  if(mc._lfTerug) mc.removeEventListener('click', mc._lfTerug, true);
+  mc._lfTerug = function(e){ e.stopImmediatePropagation(); e.preventDefault(); fn(); };
+  mc.addEventListener('click', mc._lfTerug, true);
+  mc.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
+  mc.setAttribute('aria-label', 'Terug'); mc.title = 'Terug';
 }
 function lfSchakel(id, aan){ return '<label class="lf-sw"><input type="checkbox" role="switch" id="'+id+'"'+(aan ? ' checked' : '')+'><i></i></label>'; }
 function lfOpen(titel, body, knopTekst, knopId, opts){
@@ -10044,6 +10094,7 @@ var _LF_TEL  = '<svg width="18" height="18" fill="none" stroke="currentColor" st
 var _LF_MAIL = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>';
 var _LF_EAN  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12M8 6v12M11 6v12M15 6v12M18 6v12M21 6v12"/></svg>';
 var _LF_KLEUR = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 1 9-9c0 2-1.6 3-3.5 3H15a2 2 0 0 0-1.5 3.3A1.6 1.6 0 0 1 12 21z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg>';
+var _LF_FLOW = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/><path d="M7.5 12h9"/></svg>';
 var _LF_STER = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 // Kop met de klant (debiteur) bovenaan een klantvenster.
 function _lfKlantKop(d){
@@ -25622,8 +25673,8 @@ function _openArtikelEditor(artikel){
   b += lfRij(ICO.info, 'Notitie', '<textarea class="lf-notitie" id="art-notitie" rows="2" placeholder="Optionele uitgebreide omschrijving\u2026">'+esc(a.notitie||'')+'</textarea>', {blok:true, voor:'art-notitie'});
   b += '</div>';
   b += '<div class="lf-groep">Prijs en werkbon</div><div class="lf-blok-kaart">';
-  b += '<div class="lf-twee">'+lfRij(ICO.euro, 'Stuksprijs', '<span class="lf-voor">\u20ac</span><input class="lf-veld lf-prijs" type="number" inputmode="decimal" step="0.01" min="0" id="art-prijs" value="'+(a.stuksprijs!=null?esc(String(a.stuksprijs)):'')+'" placeholder="0,00">', {voor:'art-prijs'})
-     + lfRij('', 'Btw', '<input class="lf-veld lf-nr2" type="number" inputmode="decimal" step="1" min="0" id="art-btw" value="'+(a.btw!=null?esc(String(a.btw)):'21')+'"><span class="lf-voor">%</span>', {voor:'art-btw'})+'</div>';
+  b += lfRij(ICO.euro, 'Stuksprijs', '<span class="lf-voor">\u20ac</span><input class="lf-veld lf-prijs" type="number" inputmode="decimal" step="0.01" min="0" id="art-prijs" value="'+(a.stuksprijs!=null?esc(String(a.stuksprijs)):'')+'" placeholder="0,00">'
+     + '<label class="lf-voor lf-tussen" for="art-btw">Btw</label><input class="lf-veld lf-nr2" type="number" inputmode="decimal" step="1" min="0" id="art-btw" value="'+(a.btw!=null?esc(String(a.btw)):'21')+'"><span class="lf-voor">%</span>', {voor:'art-prijs', cls:'lf-links'});
   b += lfRij(ICO.check, 'Zichtbaar op werkbon', lfSchakel('art-zichtbaar', a.zichtbaarWerkbon!==false), {voor:'art-zichtbaar', sub:'Monteurs kunnen dit artikel als materiaal kiezen'});
   b += '</div>';
 
@@ -31402,59 +31453,37 @@ function openMailTemplateEditor(tplId) {
 
   // Twee kolommen op een breed scherm, onder elkaar op een smal scherm. De preview staat
   // dus op mobiel onder het formulier in plaats van ernaast.
-  var b = '<div class="tpl-editor-grid">';
-  b += '<div>';
-  b += '<div class="form-grid">';
-  b += fgf('Naam template', finp('tpl-naam','text',tpl.naam,''));
-  b += fgf('Onderwerp', finp('tpl-onderwerp','text',tpl.onderwerp,''));
-  b += '</div>';
-  b += '<div style="margin-top:12px"><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:6px">Tekst</label>';
+  var links = '<div class="lf-groep">Template</div><div class="lf-blok-kaart">'
+    + lfRij(ICO.edit, 'Naam', '<input class="lf-tekst" type="text" id="tpl-naam" value="'+esc(tpl.naam||'')+'">', {voor:'tpl-naam'})
+    + lfRij(_LF_MAIL, 'Onderwerp', '<input class="lf-tekst" type="text" id="tpl-onderwerp" value="'+esc(tpl.onderwerp||'')+'">', {voor:'tpl-onderwerp'})
+    + '</div>';
+  links += '<div class="lf-groep">Tekst</div><div class="lf-blok-kaart">';
   // Opmaak-werkbalk: voegt markdown-achtige tekens in die de mailwrapper rendert.
-  b += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px">';
-  b += '<button type="button" class="tpl-fmt btn btn-ghost btn-sm" data-fmt="vet" title="Vet" style="font-weight:800;min-width:34px">B</button>';
-  b += '<button type="button" class="tpl-fmt btn btn-ghost btn-sm" data-fmt="cursief" title="Cursief" style="font-style:italic;min-width:34px">I</button>';
-  b += '<button type="button" class="tpl-fmt btn btn-ghost btn-sm" data-fmt="kop" title="Kopje"><span style="display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M6 12h12"/></svg>Kop</span></button>';
-  b += '<button type="button" class="tpl-fmt btn btn-ghost btn-sm" data-fmt="lijst" title="Opsomming"><span style="display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Lijst</span></button>';
-  b += '<button type="button" class="tpl-fmt btn btn-ghost btn-sm" data-fmt="link" title="Link invoegen"><span style="display:inline-flex;align-items:center;gap:4px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>Link</span></button>';
-  b += '</div>';
-  b += '<textarea class="input" id="tpl-body" rows="14" style="font-family:\'Space Mono\',monospace;font-size:12px;resize:vertical;width:100%">'+esc(tpl.body)+'</textarea>';
-  b += '</div>';
-  b += '<div style="margin-top:10px;background:rgba(74,108,247,.08);border:1px solid rgba(74,108,247,.2);border-radius:8px;padding:10px">';
-  b += '<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">Klik op een variabele om te kopiëren:</div>';
-  b += '<div style="display:flex;gap:5px;flex-wrap:wrap">';
+  links += '<div class="lf-fmt-balk" role="toolbar" aria-label="Opmaak">'
+    + '<button type="button" class="tpl-fmt" data-fmt="vet" title="Vet" style="font-weight:800">B</button>'
+    + '<button type="button" class="tpl-fmt" data-fmt="cursief" title="Cursief" style="font-style:italic">I</button>'
+    + '<button type="button" class="tpl-fmt" data-fmt="kop" title="Kopje">Kopje</button>'
+    + '<button type="button" class="tpl-fmt" data-fmt="lijst" title="Opsomming">Lijst</button>'
+    + '<button type="button" class="tpl-fmt" data-fmt="link" title="Link invoegen">Link</button></div>';
+  links += '<textarea class="lf-notitie lf-mono" id="tpl-body" rows="14" aria-label="Tekst van de mail">'+esc(tpl.body)+'</textarea>';
+  links += '<div class="lf-sub-kaart"><div class="lf-sub-kt">Plaatshouders</div><p>Tik om in te voegen op de plek van de cursor.</p><div class="lf-vars">';
   varsStr.split(' ').forEach(function(v){
-    b += '<span class="tpl-var-chip" data-var="'+esc(v)+'" style="font-family:\'Space Mono\',monospace;font-size:11px;padding:3px 8px;background:rgba(74,108,247,.15);color:var(--accent);border-radius:4px;cursor:pointer;border:1px solid rgba(74,108,247,.3)" title="Klik om in te voegen">'+esc(v)+'</span>';
+    links += '<button type="button" class="tpl-var-chip lf-var" data-var="'+esc(v)+'">'+esc(v)+'</button>';
   });
-  b += '</div></div>';
-  b += '<div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.7">'
-     + 'Opmaak: <code style="background:var(--surface2);padding:1px 5px;border-radius:4px">**vet**</code> · '
-     + '<code style="background:var(--surface2);padding:1px 5px;border-radius:4px">*cursief*</code> · '
-     + '<code style="background:var(--surface2);padding:1px 5px;border-radius:4px"># Kopje</code> · '
-     + '<code style="background:var(--surface2);padding:1px 5px;border-radius:4px">- lijst</code> · '
-     + '<code style="background:var(--surface2);padding:1px 5px;border-radius:4px">[tekst](https://...)</code>. '
-     + 'Regels als <code style="background:var(--surface2);padding:1px 5px;border-radius:4px">Label: waarde</code> worden een net gegevensblok.'
-     + '</div>';
-  b += '</div>';   // sluit de linkerkolom
+  links += '</div></div>';
+  links += '<p class="lf-hint" style="padding:0 0 12px;line-height:1.7">Opmaak: **vet** \u00b7 *cursief* \u00b7 # Kopje \u00b7 - lijst \u00b7 [tekst](https://\u2026). Regels als Label: waarde worden een net gegevensblok.</p>';
+  links += '</div>';
 
   // Rechterkolom: de preview. De iframe staat in een sandbox zonder rechten — de inhoud is
   // weliswaar je eigen tekst, maar hij wordt als HTML uitgevoerd en dan is dichtzetten de
   // enige verstandige stand.
-  b += '<div class="tpl-preview-kol">';
-  b += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px">';
-  b += '<label style="font-size:12px;color:var(--muted);font-weight:600">Voorbeeld</label>';
-  b += '<span id="tpl-preview-status" style="font-size:11px;color:var(--muted)"></span>';
-  b += '</div>';
-  b += '<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#e9ecf1">';
-  b += '<iframe id="tpl-preview" sandbox="" title="Voorbeeld van de mail" style="width:100%;height:520px;border:0;display:block"></iframe>';
-  b += '</div>';
-  b += '<div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6">Met voorbeeldgegevens ingevuld. De opmaak komt van de server, dus dit is wat de klant krijgt.</div>';
-  b += '</div>';
-  b += '</div>';   // sluit het grid
+  var rechts = '<div class="lf-groep lf-groep-knop"><span>Voorbeeld</span><span id="tpl-preview-status" class="lf-hint"></span></div>';
+  rechts += '<div class="tpl-voorbeeld"><iframe id="tpl-preview" sandbox="" title="Voorbeeld van de mail"></iframe></div>';
+  rechts += '<p class="lf-hint" style="padding-top:8px;line-height:1.6">Met voorbeeldgegevens ingevuld. De opmaak komt van de server: dit is wat de klant krijgt.</p>';
 
-  var f = '<button class="btn btn-ghost" id="tpl-cancel">Annuleren</button><button class="btn btn-primary" id="tpl-save">Opslaan</button>';
-  openModal('Template bewerken — '+esc(tpl.naam), b, f, false, true);
-
-  document.getElementById('tpl-cancel').addEventListener('click', closeModal);
+  // Twee kolommen op een breed scherm, onder elkaar op een smal scherm.
+  var b = '<div class="lf-kolommen tpl"><div>'+links+'</div><div class="tpl-preview-kol">'+rechts+'</div></div>';
+  lfOpen('Template bewerken', b, 'Opslaan', 'tpl-save', {groot:true});
 
   // ── Preview bijwerken ──
   // Ruim debouncen: elke verversing is een aanroep van de Cloud Function, en tijdens het
@@ -35072,10 +35101,10 @@ function renderInstTeam(el) {
     h += '<div class="ti-dag-rij" data-dag="'+dag.id+'" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:8px">';
     h += '<input type="checkbox" class="ti-dag-actief" '+(wt.actief?'checked':'')+' style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0">';
     h += '<span style="font-size:13px;font-weight:500;width:72px;flex-shrink:0">'+dag.naam+'</span>';
-    h += '<input type="time" class="input ti-dag-van" value="'+(wt.van||'')+'" style="flex:1;min-width:110px;'+(wt.actief?'':'opacity:.35;pointer-events:none')+'">';
+    h += '<input type="time" class="input ti-dag-van" value="'+(wt.van||'')+'" style="flex:1 1 0;min-width:0;'+(wt.actief?'':'opacity:.35;pointer-events:none')+'">';
     h += '<span style="font-size:11px;color:var(--muted);flex-shrink:0">t/m</span>';
-    h += '<input type="time" class="input ti-dag-tot" value="'+(wt.tot||'')+'" style="flex:1;min-width:110px;'+(wt.actief?'':'opacity:.35;pointer-events:none')+'">';
-    h += '<span style="font-size:11px;color:var(--muted);width:24px;text-align:right;flex-shrink:0">'+(uren?uren+'u':'\u2014')+'</span>';
+    h += '<input type="time" class="input ti-dag-tot" value="'+(wt.tot||'')+'" style="flex:1 1 0;min-width:0;'+(wt.actief?'':'opacity:.35;pointer-events:none')+'">';
+    h += '<span style="font-size:11px;color:var(--muted);min-width:30px;text-align:right;white-space:nowrap;flex-shrink:0">'+(uren?uren+'u':'\u2014')+'</span>';
     h += '</div>';
   });
   h += '</div>';
@@ -39389,121 +39418,97 @@ function _openWerkorderTypeEditor(type) {
   var isNew = !type;
   var t = type || { naam:'', labelEnkelvoud:'', labelMeervoud:'', icoon:'wrench', actief:true };
 
-  var b = '';
-  b += fg('Naam van het type', finp('wo-type-naam','text', t.naam||'', 'Bijv. Reparatie'));
-  b += '<div style="font-size:11px;color:var(--muted);margin:3px 0 12px">De interne naam van dit werkorder-type.</div>';
-
-  b += '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:10px">';
-  b += fg('Label enkelvoud', finp('wo-type-lbl-enk','text', t.labelEnkelvoud||'', 'Bijv. werkorder'));
-  b += fg('Label meervoud', finp('wo-type-lbl-mv','text', t.labelMeervoud||'', 'Bijv. werkorders'));
-  b += '</div>';
-  b += '<div style="font-size:11px;color:var(--muted);margin:3px 0 14px">Hoe dit type in de interface genoemd wordt (instelbaar per bedrijf).</div>';
-
-  // Icoon-keuze
-  b += '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">Icoon</div>';
-  b += '<div id="wo-type-iconen" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
+  var _wtT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var links = '<div class="lf-groep">Type</div><div class="lf-blok-kaart">';
+  links += lfRij(ICO.edit, 'Naam', _wtT('wo-type-naam', t.naam, 'Bijv. Reparatie', ' required'), {verplicht:true, voor:'wo-type-naam'});
+  links += lfRij('', 'Enkelvoud', _wtT('wo-type-lbl-enk', t.labelEnkelvoud, 'Bijv. werkorder'), {voor:'wo-type-lbl-enk', sub:'Hoe het type heet in de app'});
+  links += lfRij('', 'Meervoud', _wtT('wo-type-lbl-mv', t.labelMeervoud, 'Bijv. werkorders'), {voor:'wo-type-lbl-mv'});
+  var _wtIco = '<div class="lf-ico-kies" id="wo-type-iconen" role="group" aria-label="Icoon">';
   Object.keys(WO_ICONEN).forEach(function(k){
     var sel = (t.icoon||'wrench')===k;
-    b += '<button type="button" class="wo-ico-keuze'+(sel?' sel':'')+'" data-ico="'+k+'" style="width:44px;height:44px;border-radius:10px;border:2px solid '+(sel?'var(--accent)':'var(--border)')+';background:'+(sel?'rgba(74,108,247,.08)':'var(--surface)')+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:'+(sel?'var(--accent)':'var(--muted)')+'">'+_woTypeIcoon(k)+'</button>';
+    _wtIco += '<button type="button" class="wo-ico-keuze lf-ico-opt'+(sel?' aan':'')+'" data-ico="'+k+'" aria-label="'+k+'"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">'+WO_ICONEN[k]+'</svg></button>';
   });
-  b += '</div>';
-
+  _wtIco += '</div>';
+  links += lfRij(ICO.ster, 'Icoon', _wtIco, {blok:true});
   // Kleur-keuze (voor herkenbaarheid in lijsten, grafieken en rapportage)
   var _woTypeKleur = t.kleur || '#6b7694';
   var _woKleurPresets = ['#4a6cf7','#10b981','#f59e0b','#ef4444','#8b5cf6','#0f766e','#e11d48','#6b7694'];
-  b += '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">Kleur</div>';
-  b += '<div id="wo-type-kleuren" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px">';
+  var _wtKl = '<div class="lf-kleur-kies" id="wo-type-kleuren">';
   _woKleurPresets.forEach(function(kl){
     var sel = _woTypeKleur.toLowerCase()===kl.toLowerCase();
-    b += '<button type="button" class="wo-kleur-keuze" data-kleur="'+kl+'" style="width:30px;height:30px;border-radius:8px;background:'+kl+';border:2px solid '+(sel?'var(--text)':'transparent')+';cursor:pointer;padding:0" title="'+kl+'"></button>';
+    _wtKl += '<button type="button" class="wo-kleur-keuze lf-swatch'+(sel?' aan':'')+'" data-kleur="'+kl+'" style="--k:'+kl+'" aria-label="Kleur '+kl+'"></button>';
   });
-  b += '<label style="display:inline-flex;align-items:center;gap:6px;margin-left:4px;cursor:pointer;font-size:12px;color:var(--muted)"><input type="color" id="wo-type-kleur" value="'+_woTypeKleur+'" style="width:34px;height:30px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;padding:2px">Eigen kleur</label>';
-  b += '</div>';
+  _wtKl += '<input type="color" class="lf-kleur" id="wo-type-kleur" value="'+esc(_woTypeKleur)+'" aria-label="Eigen kleur"></div>';
+  links += lfRij(_LF_KLEUR, 'Kleur', _wtKl, {blok:true, sub:'Voor lijsten, grafieken en rapportage'});
+  links += lfRij(ICO.check, 'Actief', lfSchakel('wo-type-actief', t.actief!==false), {voor:'wo-type-actief', sub:'Zichtbaar en bruikbaar bij nieuwe werkorders'});
+  links += '</div>';
 
-  // Actief-schakelaar
-  b += '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:4px"><input type="checkbox" id="wo-type-actief"'+(t.actief!==false?' checked':'')+'><span style="font-size:13px">Actief (zichtbaar en bruikbaar)</span></label>';
-
-  // Statussen-beheer (alleen bij een bestaand, opgeslagen type)
+  var rechts = '';
   if(!isNew){
-    var _aantalStatus = Array.isArray(t.statussen) ? t.statussen.length : 0;
-    b += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px">';
-    b += '<div style="font-size:13px;font-weight:700;margin-bottom:4px">Statusflow</div>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">De statussen die een '+esc(t.labelEnkelvoud||'werkorder')+' van dit type kan doorlopen.</div>';
-    b += '<button type="button" class="btn btn-ghost btn-sm" id="wo-type-statussen" style="width:100%;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Statussen beheren</span><span style="display:inline-flex;align-items:center;gap:8px;color:var(--muted)">'+(_aantalStatus?('<span class="tag tag-blue" style="font-size:10px">'+_aantalStatus+'</span>'):'<span style="font-size:11px">nog geen</span>')+'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span></button>';
-    b += '</div>';
+    // ── Nummering (per type instelbaar) ──
+    links += '<div class="lf-groep">Nummering</div><div class="lf-blok-kaart">';
+    links += lfRij(ICO.flag, 'Prefix', _wtT('wo-nummer-prefix', t.nummerPrefix, 'Bijv. REP', ' maxlength="8" autocapitalize="characters"'), {voor:'wo-nummer-prefix', sub:'Optioneel'});
+    links += lfRij('', 'Startnummer', '<input class="lf-veld lf-nr2" type="number" inputmode="numeric" id="wo-nummer-start" min="1" value="'+esc(String(t.nummerStart!=null?t.nummerStart:1))+'">', {voor:'wo-nummer-start'});
+    links += '<div class="lf-samen" id="wo-nummer-vb" style="margin:10px 0 0"></div>';
+    links += '<p class="lf-uitleg">Elk type heeft een eigen reeks: het volgende nummer is het hoogste van dit type plus \u00e9\u00e9n en wordt nooit hergebruikt. Bestaande werkorders houden hun nummer.</p>';
+    links += '</div>';
 
-    // ── Opbouw: simpel (velden) óf gefaseerd (blokken) ──
+    // ── Opbouw: simpel (velden) óf gefaseerd (blokken), met de statusflow erbij ──
+    var _wtSt = Array.isArray(t.statussen) ? t.statussen : [];
+    var _wtStNamen = _wtSt.map(function(x){ return x.naam; }).filter(Boolean);
+    var _wtStSub = !_wtStNamen.length ? 'Nog geen statussen'
+      : (_wtStNamen.length > 4 ? _wtStNamen.slice(0,2).join(' \u2192 ')+' \u2192 \u2026 \u2192 '+_wtStNamen[_wtStNamen.length-1] : _wtStNamen.join(' \u2192 '));
     var _aantalVeld = Array.isArray(t.veldTemplate) ? t.veldTemplate.length : 0;
     var _aantalBlok = Array.isArray(t.blokken) ? t.blokken.length : 0;
     var _modus = (_aantalBlok>0) ? 'gefaseerd' : 'simpel';   // afgeleid uit de data
-    b += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px">';
-    b += '<div style="font-size:13px;font-weight:700;margin-bottom:4px">Opbouw</div>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-bottom:12px">Kies hoe dit type is opgebouwd: <strong>simpel</strong> met losse velden, of <strong>gefaseerd</strong> met blokken (zoals een reparatie met binnenkomst, diagnose en reparatie).</div>';
-    // Segmented control
-    b += '<div id="wo-opbouw-keuze" style="display:flex;gap:0;margin-bottom:14px;border:1px solid var(--border);border-radius:9px;overflow:hidden">';
-    b += '<button type="button" class="wo-opbouw-btn" data-modus="simpel" style="flex:1;padding:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:'+(_modus==='simpel'?'var(--accent)':'var(--surface)')+';color:'+(_modus==='simpel'?'#fff':'var(--text)')+'">Simpel (velden)</button>';
-    b += '<button type="button" class="wo-opbouw-btn" data-modus="gefaseerd" style="flex:1;padding:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;background:'+(_modus==='gefaseerd'?'var(--accent)':'var(--surface)')+';color:'+(_modus==='gefaseerd'?'#fff':'var(--text)')+'">Gefaseerd (blokken)</button>';
-    b += '</div>';
-    // Simpel → velden beheren
-    b += '<div id="wo-opbouw-simpel" style="'+(_modus==='simpel'?'':'display:none')+'">';
-    b += '<button type="button" class="btn btn-ghost btn-sm" id="wo-type-velden" style="width:100%;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="12" width="18" height="4" rx="1"/><line x1="7" y1="20" x2="17" y2="20"/></svg>Velden beheren</span><span style="display:inline-flex;align-items:center;gap:8px;color:var(--muted)">'+(_aantalVeld?('<span class="tag tag-blue" style="font-size:10px">'+_aantalVeld+'</span>'):'<span style="font-size:11px">nog geen</span>')+'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span></button>';
-    b += '</div>';
-    // Gefaseerd → blokken beheren
-    b += '<div id="wo-opbouw-gefaseerd" style="'+(_modus==='gefaseerd'?'':'display:none')+'">';
-    b += '<button type="button" class="btn btn-ghost btn-sm" id="wo-type-blokken" style="width:100%;justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="6" rx="1"/><rect x="3" y="11" width="18" height="6" rx="1"/><rect x="3" y="19" width="18" height="2" rx="1"/></svg>Blokken beheren</span><span style="display:inline-flex;align-items:center;gap:8px;color:var(--muted)">'+(_aantalBlok?('<span class="tag tag-blue" style="font-size:10px">'+_aantalBlok+'</span>'):'<span style="font-size:11px">nog geen</span>')+'<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span></button>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-top:6px">Elk blok is een fase met eigen velden en secties. Bij gefaseerd worden losse velden genegeerd.</div>';
-    b += '</div>';
-    b += '</div>';
+    var _wtBlNamen = (t.blokken||[]).map(function(x){ return x.naam; }).filter(Boolean).join(', ');
+    rechts += '<div class="lf-groep">Opbouw en statussen</div><div class="lf-blok-kaart">';
+    rechts += _lfNavRij('wo-type-statussen', _LF_FLOW, 'Statusflow', _wtStSub, String(_wtSt.length));
+    rechts += lfRij(ICO.clipboard, 'Opbouw', '<span class="lf-seg" role="radiogroup" aria-label="Opbouw">'
+      + [['simpel','Simpel'],['gefaseerd','Gefaseerd']].map(function(m){ return '<button type="button" role="radio" class="wo-opbouw-btn'+(_modus===m[0]?' aan':'')+'" data-modus="'+m[0]+'" aria-checked="'+(_modus===m[0])+'">'+m[1]+'</button>'; }).join('')
+      + '</span>', {sub:'Gefaseerd: in blokken, elk met een eigen afronding'});
+    rechts += '<div id="wo-opbouw-simpel"'+(_modus==='simpel'?'':' style="display:none"')+'>'+_lfNavRij('wo-type-velden', ICO.edit, 'Velden', 'Losse velden en secties', String(_aantalVeld))+'</div>';
+    rechts += '<div id="wo-opbouw-gefaseerd"'+(_modus==='gefaseerd'?'':' style="display:none"')+'>'+_lfNavRij('wo-type-blokken', _LF_PAKKET, 'Blokken', _wtBlNamen || 'Nog geen blokken', String(_aantalBlok))+'</div>';
+    rechts += '</div>';
 
-    // ── Weergave-opties (inhoud-secties zitten nu bij 'Velden beheren' als sectie-items) ──
+    // Klant-koppeling (apart, want beïnvloedt het aanmaken — levert mailadres/naam)
+    var _klantInst = t.klant || {};
+    rechts += '<div class="lf-groep">Klant</div><div class="lf-blok-kaart">';
+    rechts += lfRij(ICO.gebouw, 'Klant koppelen', lfSchakel('wo-klant-aan', !!_klantInst.aan), {voor:'wo-klant-aan', sub:'Bij aanmaken kies je een debiteur; levert het mailadres en het adres op de PDF'});
+    rechts += lfRij('', 'T.b.v. voorraad toestaan', lfSchakel('wo-klant-voorraad', !!_klantInst.voorraad), {voor:'wo-klant-voorraad', sub:'Aanmaken zonder klant'});
+    rechts += '</div>';
+
+    // Weergave-opties (inhoud-secties zitten bij 'Velden' als sectie-items)
     var sec = t.secties || {};
     var _secDef = [
-      { k:'infoblok',     l:'Informatie',        u:'Aangemaakt door/op, deadline, toegewezen aan', d:true },
-      { k:'handtekening', l:'Handtekening',      u:'Handtekening bij afronden', d:false },
-      { k:'mail',         l:'Mail versturen',    u:'Mailknop met sjabloon', d:false },
-      { k:'pdf',          l:'PDF',               u:'PDF genereren van de werkorder', d:false },
+      { k:'infoblok',     l:'Informatie',     u:'Aangemaakt door en op, deadline, toegewezen aan', d:true,  i:ICO.info },
+      { k:'handtekening', l:'Handtekening',   u:'Handtekening bij afronden', d:false, i:ICO.edit },
+      { k:'mail',         l:'Mail versturen', u:'Mailknop met sjabloon', d:false, i:ICO.mail },
+      { k:'pdf',          l:'PDF',            u:'PDF genereren van de werkorder', d:false, i:ICO.pdf },
     ];
-    // Klant-koppeling (aparte, want beïnvloedt het aanmaken — levert mailadres/naam)
-    var _klantInst = t.klant || {};
-    b += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px">';
-    b += '<div style="font-size:13px;font-weight:700;margin-bottom:4px">Klant</div>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-bottom:12px">Koppel een debiteur aan een '+esc(t.labelEnkelvoud||'werkorder')+'. Dit levert het mailadres (voor blok-mails) en de naam/adres op de PDF.</div>';
-    b += '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:8px 0;border-bottom:1px solid var(--border)"><input type="checkbox" id="wo-klant-aan"'+(_klantInst.aan?' checked':'')+' style="margin-top:2px"><span style="flex:1"><span style="font-size:13px;font-weight:600;display:block">Klant koppelen</span><span style="font-size:11px;color:var(--muted)">Bij aanmaken kies je een debiteur</span></span></label>';
-    b += '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:8px 0;border-bottom:1px solid var(--border)"><input type="checkbox" id="wo-klant-voorraad"'+(_klantInst.voorraad?' checked':'')+' style="margin-top:2px"><span style="flex:1"><span style="font-size:13px;font-weight:600;display:block">T.b.v. voorraad toestaan</span><span style="font-size:11px;color:var(--muted)">Mogelijkheid om zonder klant aan te maken (voor voorraad)</span></span></label>';
-    b += '</div>';
-    // ── Nummering (per type instelbaar) ──
-    b += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px">';
-    b += '<div style="font-size:13px;font-weight:700;margin-bottom:4px">Nummering</div>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-bottom:12px">Elk type heeft een eigen doorlopende reeks. Het volgende nummer is altijd het hoogste bestaande nummer van dit type plus \u00e9\u00e9n \u2014 nummers worden nooit hergebruikt.</div>';
-    b += '<div style="display:flex;gap:12px;flex-wrap:wrap">';
-    b += '<div><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Startnummer</label>';
-    b += '<input class="input" type="number" id="wo-nummer-start" min="1" value="'+esc(String(t.nummerStart!=null?t.nummerStart:1))+'" style="width:130px"></div>';
-    b += '<div><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Prefix (optioneel)</label>';
-    b += '<input class="input" type="text" id="wo-nummer-prefix" maxlength="8" placeholder="bijv. REP" value="'+esc(t.nummerPrefix||'')+'" style="width:130px"></div>';
-    b += '</div>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Met prefix wordt een nummer getoond als <strong>REP-1001</strong>, zonder prefix als <strong>#1001</strong>. Bestaande werkorders houden hun huidige nummer.</div>';
-    b += '</div>';
-    b += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px">';
-    b += '<div style="font-size:13px;font-weight:700;margin-bottom:4px">Weergave-opties</div>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-bottom:12px">Algemene onderdelen. Inhoud (foto\'s, uren, materialen, register, onderdelen, documenten) beheer je bij <strong>Velden</strong> — daar sleep je secties tussen de velden.</div>';
-    _secDef.forEach(function(s){
-      var aan = (sec[s.k]!==undefined) ? sec[s.k] : s.d;
-      b += '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:8px 0;border-bottom:1px solid var(--border)">';
-      b += '<input type="checkbox" class="wo-sectie-cb" data-k="'+s.k+'"'+(aan?' checked':'')+' style="margin-top:2px">';
-      b += '<span style="flex:1"><span style="font-size:13px;font-weight:600;display:block">'+esc(s.l)+'</span><span style="font-size:11px;color:var(--muted)">'+esc(s.u)+'</span></span>';
-      b += '</label>';
+    rechts += '<div class="lf-groep">Weergave</div><div class="lf-blok-kaart">';
+    _secDef.forEach(function(x){
+      var aan = (sec[x.k]!==undefined) ? sec[x.k] : x.d;
+      rechts += lfRij(x.i, x.l, '<label class="lf-sw"><input type="checkbox" role="switch" class="wo-sectie-cb" data-k="'+x.k+'"'+(aan?' checked':'')+' aria-label="'+esc(x.l)+'"><i></i></label>', {sub:x.u});
     });
-    b += '</div>';
+    rechts += '</div>';
   } else {
-    b += '<div style="margin-top:14px;font-size:11px;color:var(--muted);font-style:italic">Sla het type eerst op om de statusflow in te stellen.</div>';
+    rechts += '<p class="lf-uitleg" style="padding-top:44px">Sla het type eerst op; daarna stel je de statusflow, de opbouw, de klant en de nummering in.</p>';
   }
 
-  var f = '';
-  if(!isNew) f += '<button class="btn btn-ghost btn-sm" id="wo-type-del" style="color:var(--red);margin-right:auto">Verwijderen</button>';
-  f += '<button class="btn btn-ghost" id="wo-type-annuleer">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="wo-type-opslaan">'+(isNew?'Toevoegen':'Opslaan')+'</button>';
+  var b = '<div class="lf-kolommen"><div>'+links+'</div><div>'+rechts+'</div></div>';
+  if(!isNew) b += '<button type="button" class="lf-verwijder" id="wo-type-del">'+ICO.trash+' Type verwijderen</button>';
+  lfOpen(isNew?'Werkorder-type toevoegen':'Werkorder-type bewerken', b, isNew?'Toevoegen':'Opslaan', 'wo-type-opslaan', {groot:true});
 
-  openModal(isNew?'Werkorder-type toevoegen':'Werkorder-type bewerken', b, f);
+  // Voorbeeld van de nummerweergave, rekent mee met prefix en startnummer.
+  function _woNrVb(){
+    var el = document.getElementById('wo-nummer-vb'); if(!el) return;
+    var p = (document.getElementById('wo-nummer-prefix').value||'').trim();
+    var n = parseInt(document.getElementById('wo-nummer-start').value, 10) || 1;
+    el.textContent = 'Wordt getoond als '+(p ? p+'-'+n : '#'+n);
+  }
+  ['wo-nummer-prefix','wo-nummer-start'].forEach(function(id){ var e = document.getElementById(id); if(e) e.addEventListener('input', _woNrVb); });
+  _woNrVb();
 
   // Statussen-knop
   var statBtn = document.getElementById('wo-type-statussen');
@@ -39520,8 +39525,7 @@ function _openWerkorderTypeEditor(type) {
       var modus = btn.dataset.modus;
       document.querySelectorAll('#modal .wo-opbouw-btn').forEach(function(x){
         var sel = x.dataset.modus===modus;
-        x.style.background = sel?'var(--accent)':'var(--surface)';
-        x.style.color = sel?'#fff':'var(--text)';
+        x.classList.toggle('aan', sel); x.setAttribute('aria-checked', sel);
       });
       var simpelDiv = document.getElementById('wo-opbouw-simpel');
       var gefaseerdDiv = document.getElementById('wo-opbouw-gefaseerd');
@@ -39535,10 +39539,7 @@ function _openWerkorderTypeEditor(type) {
     btn.addEventListener('click', function(){
       gekozenIco = btn.dataset.ico;
       document.querySelectorAll('#modal .wo-ico-keuze').forEach(function(x){
-        var s = x.dataset.ico===gekozenIco;
-        x.style.borderColor = s?'var(--accent)':'var(--border)';
-        x.style.background = s?'rgba(74,108,247,.08)':'var(--surface)';
-        x.style.color = s?'var(--accent)':'var(--muted)';
+        x.classList.toggle('aan', x.dataset.ico===gekozenIco);
       });
     });
   });
@@ -39550,7 +39551,7 @@ function _openWerkorderTypeEditor(type) {
     var inp = document.getElementById('wo-type-kleur');
     if(inp) inp.value = kl;
     document.querySelectorAll('#modal .wo-kleur-keuze').forEach(function(b){
-      b.style.borderColor = (b.dataset.kleur.toLowerCase()===kl.toLowerCase()) ? 'var(--text)' : 'transparent';
+      b.classList.toggle('aan', b.dataset.kleur.toLowerCase()===kl.toLowerCase());
     });
   }
   document.querySelectorAll('#modal .wo-kleur-keuze').forEach(function(btn){
@@ -39559,7 +39560,6 @@ function _openWerkorderTypeEditor(type) {
   var _woKleurInp = document.getElementById('wo-type-kleur');
   if(_woKleurInp) _woKleurInp.addEventListener('input', function(){ _woZetKleur(_woKleurInp.value); });
 
-  document.getElementById('wo-type-annuleer').addEventListener('click', closeModal);
 
   document.getElementById('wo-type-opslaan').addEventListener('click', function(){
     var naam = (document.getElementById('wo-type-naam').value||'').trim();
@@ -39642,93 +39642,74 @@ function _openWerkorderStatusEditor(type){
   function tekenLijst(){
     var wrap = document.getElementById('wo-status-lijst'); if(!wrap) return;
     if(!statussen.length){
-      wrap.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:16px;background:var(--surface2);border-radius:10px;text-align:center">Nog geen statussen. Voeg de eerste status toe (bijv. "Binnengekomen").</div>';
+      wrap.innerHTML = '<p class="lf-leeg">Nog geen statussen. Voeg de eerste toe, bijvoorbeeld \u201cBinnengekomen\u201d.</p>';
       return;
     }
-    var h = '<div style="display:flex;flex-direction:column;gap:8px">';
-    statussen.forEach(function(s, i){
-      h += '<div class="wo-status-rij" data-i="'+i+'" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:10px">';
-      // Kleur-stip
-      h += '<span style="width:14px;height:14px;border-radius:50%;background:'+_woStatusKleurC(s.kleur)+';flex-shrink:0"></span>';
-      // Naam + markeringen
-      h += '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">'+esc(s.naam||'Naamloos')+'</div>';
+    wrap.innerHTML = statussen.map(function(s, i){
       var mk = [];
-      if(s.isStart) mk.push('start');
-      if(s.isEind) mk.push('eind');
-      if(mk.length) h += '<div style="font-size:10px;color:var(--muted)">'+mk.join(' · ')+'</div>';
+      if(s.isStart) mk.push('Start');
+      if(s.isEind) mk.push('Eind');
       // Toon de toegestane overgangen (namen van de 'naar'-statussen)
-      if(Array.isArray(s.naar) && s.naar.length){
-        var naarNamen = s.naar.map(function(k){ var st=statussen.find(function(z){return z.key===k;}); return st?st.naam:null; }).filter(Boolean);
-        if(naarNamen.length) h += '<div style="font-size:10px;color:var(--accent);margin-top:2px">→ '+esc(naarNamen.join(', '))+'</div>';
-      }
-      h += '</div>';
-      // Omhoog/omlaag
-      h += '<button type="button" class="wo-st-up" data-i="'+i+'" '+(i===0?'disabled':'')+' style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;opacity:'+(i===0?'.3':'1')+'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></button>';
-      h += '<button type="button" class="wo-st-down" data-i="'+i+'" '+(i===statussen.length-1?'disabled':'')+' style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;opacity:'+(i===statussen.length-1?'.3':'1')+'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>';
-      // Bewerken
-      h += '<button type="button" class="wo-st-edit" data-i="'+i+'" style="background:none;border:none;cursor:pointer;color:var(--accent);padding:2px"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
-      // Verwijderen
-      h += '<button type="button" class="wo-st-del" data-i="'+i+'" style="background:none;border:none;cursor:pointer;color:var(--red);padding:2px"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>';
-      h += '</div>';
+      var naarNamen = Array.isArray(s.naar) ? s.naar.map(function(k){ var st=statussen.find(function(z){return z.key===k;}); return st?st.naam:null; }).filter(Boolean) : [];
+      mk.push(naarNamen.length ? '\u2192 '+naarNamen.join(', ') : 'Vrije volgorde');
+      return '<div class="lf-rij lf-kies wo-st-rij" role="button" tabindex="0" data-i="'+i+'"><span class="lf-ic" aria-hidden="true"><span class="lf-stip" style="background:'+_woStatusKleurC(s.kleur)+'"></span></span>'
+        + '<span class="lf-l">'+esc(s.naam||'Naamloos')+'<small>'+esc(mk.join(' \u00b7 '))+'</small></span>'
+        + '<span class="lf-w">'+_lfVolgorde('wo-st', i, statussen.length)+_LF_CHEV+'</span></div>';
+    }).join('');
+    wrap.querySelectorAll('.wo-st-up').forEach(function(b){ b.addEventListener('click', function(e){ e.stopPropagation(); var i=+b.dataset.i; if(i>0){ var tmp=statussen[i]; statussen[i]=statussen[i-1]; statussen[i-1]=tmp; tekenLijst(); } }); });
+    wrap.querySelectorAll('.wo-st-down').forEach(function(b){ b.addEventListener('click', function(e){ e.stopPropagation(); var i=+b.dataset.i; if(i<statussen.length-1){ var tmp=statussen[i]; statussen[i]=statussen[i+1]; statussen[i+1]=tmp; tekenLijst(); } }); });
+    wrap.querySelectorAll('.wo-st-rij').forEach(function(r){
+      var open = function(){
+        var i = +r.dataset.i;
+        _statusRijDialoog(statussen[i], function(res){ statussen[i]=res; tekenLijst(); }, function(){ statussen.splice(i,1); tekenLijst(); });
+      };
+      r.addEventListener('click', open);
+      r.addEventListener('keydown', function(e){ if(e.target===r && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); open(); } });
     });
-    h += '</div>';
-    wrap.innerHTML = h;
-    // Handlers
-    wrap.querySelectorAll('.wo-st-up').forEach(function(b){ b.addEventListener('click', function(){ var i=+b.dataset.i; if(i>0){ var tmp=statussen[i]; statussen[i]=statussen[i-1]; statussen[i-1]=tmp; tekenLijst(); } }); });
-    wrap.querySelectorAll('.wo-st-down').forEach(function(b){ b.addEventListener('click', function(){ var i=+b.dataset.i; if(i<statussen.length-1){ var tmp=statussen[i]; statussen[i]=statussen[i+1]; statussen[i+1]=tmp; tekenLijst(); } }); });
-    wrap.querySelectorAll('.wo-st-edit').forEach(function(b){ b.addEventListener('click', function(){ _statusRijDialoog(statussen[+b.dataset.i], function(res){ statussen[+b.dataset.i]=res; tekenLijst(); }); }); });
-    wrap.querySelectorAll('.wo-st-del').forEach(function(b){ b.addEventListener('click', function(){ statussen.splice(+b.dataset.i,1); tekenLijst(); }); });
   }
 
-  // Kleine dialoog om één status te bewerken (naam, kleur, start/eind)
-  function _statusRijDialoog(status, opCallback){
+  // Kleine dialoog om één status te bewerken (naam, kleur, start/eind, wat daarna mag)
+  function _statusRijDialoog(status, opCallback, opVerwijder){
     var s = status || { key:'', naam:'', kleur:'blue', isStart:false, isEind:false };
     var isNieuw = !status;
-    var bb = '';
-    bb += fg('Naam', finp('wost-naam','text', s.naam||'', 'Bijv. In reparatie'));
-    bb += '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">Kleur</div>';
-    bb += '<div id="wost-kleuren" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
-    WO_STATUS_KLEUREN.forEach(function(kl){
-      var sel = (s.kleur||'blue')===kl.k;
-      bb += '<button type="button" class="wost-kl" data-k="'+kl.k+'" title="'+kl.naam+'" style="width:36px;height:36px;border-radius:9px;border:2px solid '+(sel?'var(--text)':'transparent')+';background:'+kl.c+';cursor:pointer;opacity:'+(sel?'1':'.65')+'"></button>';
+    var bb = lfRij(ICO.edit, 'Naam', '<input class="lf-tekst" type="text" id="wost-naam" value="'+esc(s.naam||'')+'" placeholder="Bijv. In reparatie" required>', {verplicht:true, voor:'wost-naam'});
+    var kl = '<div class="lf-kleur-kies" id="wost-kleuren">';
+    WO_STATUS_KLEUREN.forEach(function(k){
+      var sel = (s.kleur||'blue')===k.k;
+      kl += '<button type="button" class="wost-kl lf-swatch rond'+(sel?' aan':'')+'" data-k="'+k.k+'" style="--k:'+k.c+'" aria-label="'+k.naam+'" title="'+k.naam+'"></button>';
     });
-    bb += '</div>';
-    bb += '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="wost-start"'+(s.isStart?' checked':'')+'><span style="font-size:13px">Startstatus (nieuwe werkorder begint hier)</span></label>';
-    bb += '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:4px"><input type="checkbox" id="wost-eind"'+(s.isEind?' checked':'')+'><span style="font-size:13px">Eindstatus (werkorder is afgerond)</span></label>';
+    kl += '</div>';
+    bb += lfRij(_LF_KLEUR, 'Kleur', kl, {blok:true});
+    bb += lfRij(ICO.flag, 'Startstatus', lfSchakel('wost-start', !!s.isStart), {voor:'wost-start', sub:'Een nieuwe werkorder begint hier'});
+    bb += lfRij(ICO.check, 'Eindstatus', lfSchakel('wost-eind', !!s.isEind), {voor:'wost-eind', sub:'De werkorder is hiermee afgerond'});
 
-    // Workflow-regels: welke statussen mogen hierna komen.
-    // Andere statussen dan deze (op key vergeleken).
+    // Workflow-regels: welke statussen mogen hierna komen (op key vergeleken).
     var _dezeKey = s.key || null;
     var _anderen = statussen.filter(function(x){ return x.key && x.key !== _dezeKey; });
     if(_anderen.length){
       var _huidigeNaar = Array.isArray(s.naar) ? s.naar : [];
-      bb += '<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">';
-      bb += '<div style="font-size:12px;font-weight:600;margin-bottom:3px">Hierna toegestaan</div>';
-      bb += '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">Naar welke statussen mag deze status doorgaan? Laat alles leeg om vrije volgorde toe te staan.</div>';
+      bb += '<div class="lf-groep">Hierna toegestaan</div>';
+      bb += '<p class="lf-uitleg" style="padding-top:0">Naar welke statussen mag deze status doorgaan? Laat alles uit voor een vrije volgorde.</p>';
       _anderen.forEach(function(a){
         var aan = _huidigeNaar.indexOf(a.key) >= 0;
-        bb += '<label style="display:flex;align-items:center;gap:9px;cursor:pointer;padding:5px 0"><input type="checkbox" class="wost-naar" data-key="'+esc(a.key)+'"'+(aan?' checked':'')+'>';
-        bb += '<span style="width:11px;height:11px;border-radius:50%;background:'+_woStatusKleurC(a.kleur)+';flex-shrink:0"></span>';
-        bb += '<span style="font-size:13px">'+esc(a.naam)+'</span></label>';
+        bb += '<div class="lf-rij"><span class="lf-ic" aria-hidden="true"><span class="lf-stip" style="background:'+_woStatusKleurC(a.kleur)+'"></span></span><span class="lf-l">'+esc(a.naam)+'</span>'
+          + '<span class="lf-w"><label class="lf-sw"><input type="checkbox" role="switch" class="wost-naar" data-key="'+esc(a.key)+'"'+(aan?' checked':'')+' aria-label="'+esc(a.naam)+'"><i></i></label></span></div>';
       });
-      bb += '</div>';
     }
+    if(!isNieuw && opVerwijder) bb += '<button type="button" class="lf-verwijder" id="wost-del">'+ICO.trash+' Status verwijderen</button>';
 
-    var ff = '<button class="btn btn-ghost" id="wost-annuleer">Annuleren</button><button class="btn btn-primary" id="wost-ok">'+(isNieuw?'Toevoegen':'Opslaan')+'</button>';
-    openModal(isNieuw?'Status toevoegen':'Status bewerken', bb, ff);
+    lfOpen(isNieuw?'Status toevoegen':'Status bewerken', bb, isNieuw?'Toevoegen':'Klaar', 'wost-ok');
+    lfTerug(function(){ closeModal(); _heropenStatusLijst(); });
 
     var gekozenKl = s.kleur||'blue';
     document.querySelectorAll('#modal .wost-kl').forEach(function(btn){
       btn.addEventListener('click', function(){
         gekozenKl = btn.dataset.k;
-        document.querySelectorAll('#modal .wost-kl').forEach(function(x){
-          var sl = x.dataset.k===gekozenKl;
-          x.style.borderColor = sl?'var(--text)':'transparent';
-          x.style.opacity = sl?'1':'.65';
-        });
+        document.querySelectorAll('#modal .wost-kl').forEach(function(x){ x.classList.toggle('aan', x.dataset.k===gekozenKl); });
       });
     });
-    document.getElementById('wost-annuleer').addEventListener('click', function(){ closeModal(); _heropenStatusLijst(); });
+    var delBtn = document.getElementById('wost-del');
+    if(delBtn) delBtn.addEventListener('click', function(){ closeModal(); _heropenStatusLijst(); opVerwijder(); });
     document.getElementById('wost-ok').addEventListener('click', function(){
       var naam = (document.getElementById('wost-naam').value||'').trim();
       if(!naam){ toast('Geef de status een naam','warning'); return; }
@@ -39751,15 +39732,13 @@ function _openWerkorderStatusEditor(type){
 
   // Het statussen-hoofdscherm (her)openen
   function _heropenStatusLijst(){
-    var b = '';
-    b += '<div style="font-size:12px;color:var(--muted);margin-bottom:14px">Statussen voor <strong>'+esc(type.naam||'')+'</strong>. De volgorde bepaalt de weergave; markeer start- en eindstatus. Bewerk een status om in te stellen welke statussen daarna mogen komen (leeg = vrije volgorde).</div>';
+    var b = '<p class="lf-uitleg" style="padding-top:0">De statussen van '+esc(type.naam||'dit type')+', in deze volgorde. Tik op een status om naam, kleur en de volgende statussen in te stellen.</p>';
     b += '<div id="wo-status-lijst"></div>';
-    b += '<button type="button" class="btn btn-ghost btn-sm" id="wo-status-nieuw" style="margin-top:12px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:5px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span style="vertical-align:middle">Status toevoegen</span></button>';
-    var f = '<button class="btn btn-ghost" id="wo-status-terug">Terug</button><button class="btn btn-primary" id="wo-status-opslaan">Opslaan</button>';
-    openModal('Statusflow — '+esc(type.naam||''), b, f);
+    b += '<button type="button" class="wbx-chip-add" id="wo-status-nieuw">'+_LF_PLUS+'Status toevoegen</button>';
+    lfOpen('Statusflow \u00b7 '+(type.naam||''), b, 'Opslaan', 'wo-status-opslaan');
+    lfTerug(function(){ closeModal(); _openWerkorderTypeEditor(type); });
     tekenLijst();
     document.getElementById('wo-status-nieuw').addEventListener('click', function(){ _statusRijDialoog(null, function(res){ statussen.push(res); tekenLijst(); }); });
-    document.getElementById('wo-status-terug').addEventListener('click', function(){ closeModal(); _openWerkorderTypeEditor(type); });
     document.getElementById('wo-status-opslaan').addEventListener('click', function(){
       // Volgorde-index meeschrijven
       statussen.forEach(function(s,i){ s.volgorde = i; });
@@ -39981,15 +39960,13 @@ function _openWerkorderBlokEditor(type){
 
 function _woHeropenBlokLijst(){
   var st = _woBlokState; var type = st.type;
-  var b = '';
-  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:14px">Blokken voor <strong>'+esc(type.naam||'')+'</strong>. Elk blok is een invul-fase met eigen velden, secties en afronding (handtekening/mail). Sleep-volgorde bepaalt de volgorde in het werkorder-scherm.</div>';
+  var b = '<p class="lf-uitleg" style="padding-top:0">Elk blok is een fase van '+esc(type.naam||'dit type')+' met eigen velden en een eigen afronding (handtekening of mail). Tik op een blok om het te bewerken.</p>';
   b += '<div id="wo-blok-lijst"></div>';
-  b += '<button type="button" class="btn btn-ghost btn-sm" id="wo-blok-nieuw" style="margin-top:12px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:5px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span style="vertical-align:middle">Blok toevoegen</span></button>';
-  var f = '<button class="btn btn-ghost" id="wo-blok-terug">Terug</button><button class="btn btn-primary" id="wo-blok-opslaan">Opslaan</button>';
-  openModal('Blokken — '+esc(type.naam||''), b, f);
+  b += '<button type="button" class="wbx-chip-add" id="wo-blok-nieuw">'+_LF_PLUS+'Blok toevoegen</button>';
+  lfOpen('Blokken \u00b7 '+(type.naam||''), b, 'Opslaan', 'wo-blok-opslaan');
+  lfTerug(function(){ closeModal(); _openWerkorderTypeEditor(type); });
   _woTekenBlokLijst();
   document.getElementById('wo-blok-nieuw').addEventListener('click', function(){ _woBlokDialoog(null); });
-  document.getElementById('wo-blok-terug').addEventListener('click', function(){ closeModal(); _openWerkorderTypeEditor(type); });
   document.getElementById('wo-blok-opslaan').addEventListener('click', function(){
     st.blokken.forEach(function(bl,i){ bl.volgorde = i; });
     fsWerkorderTypeBijwerken(type.id, { blokken: _fsSchoon(st.blokken) }).then(function(){
@@ -40004,35 +39981,27 @@ function _woTekenBlokLijst(){
   var st = _woBlokState;
   var wrap = document.getElementById('wo-blok-lijst'); if(!wrap) return;
   if(!st.blokken.length){
-    wrap.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:16px;background:var(--surface2);border-radius:10px;text-align:center">Nog geen blokken. Voeg het eerste blok toe (bijv. "Binnenkomst").</div>';
+    wrap.innerHTML = '<p class="lf-leeg">Nog geen blokken. Voeg het eerste toe, bijvoorbeeld \u201cBinnenkomst\u201d.</p>';
     return;
   }
-  var h = '<div style="display:flex;flex-direction:column;gap:8px">';
-  st.blokken.forEach(function(bl, i){
+  var _stNaam = function(key){ var x = (st.type.statussen||[]).find(function(z){ return z.key===key; }); return x ? x.naam : ''; };
+  wrap.innerHTML = st.blokken.map(function(bl, i){
     var aantalVeld = Array.isArray(bl.velden) ? bl.velden.length : 0;
-    var afr = [];
-    if(bl.afronding && bl.afronding.handtekening) afr.push('handtekening');
-    if(bl.afronding && bl.afronding.mail) afr.push('mail → '+(bl.afronding.mailNaar||'kantoor'));
-    h += '<div class="wo-blok-rij" data-i="'+i+'" style="display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surface2);border-radius:10px">';
-    h += '<span style="width:24px;height:24px;border-radius:7px;background:var(--accent-knop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">'+(i+1)+'</span>';
-    h += '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">'+esc(bl.naam||'Naamloos blok')+'</div>';
     var meta = [];
     if(aantalVeld) meta.push(aantalVeld+' veld'+(aantalVeld===1?'':'en'));
-    if(afr.length) meta.push(afr.join(' + '));
-    if(meta.length) h += '<div style="font-size:11px;color:var(--muted)">'+esc(meta.join(' · '))+'</div>';
-    h += '</div>';
-    h += '<button type="button" class="wo-blok-up" data-i="'+i+'" '+(i===0?'disabled':'')+' style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;opacity:'+(i===0?'.3':'1')+'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></button>';
-    h += '<button type="button" class="wo-blok-down" data-i="'+i+'" '+(i===st.blokken.length-1?'disabled':'')+' style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;opacity:'+(i===st.blokken.length-1?'.3':'1')+'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>';
-    h += '<button type="button" class="wo-blok-edit" data-i="'+i+'" style="background:none;border:none;cursor:pointer;color:var(--accent);padding:2px"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
-    h += '<button type="button" class="wo-blok-del" data-i="'+i+'" style="background:none;border:none;cursor:pointer;color:var(--red);padding:2px"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>';
-    h += '</div>';
+    if(bl.afronding && bl.afronding.handtekening) meta.push('handtekening');
+    if(bl.afronding && bl.afronding.mail) meta.push('mail naar '+({klant:'klant', kantoor:'kantoor', beide:'klant en kantoor'}[bl.afronding.mailNaar||'kantoor']||'kantoor'));
+    if(bl.zetStatus && _stNaam(bl.zetStatus)) meta.push('daarna '+_stNaam(bl.zetStatus));
+    return '<div class="lf-rij lf-kies wo-blok-rij" role="button" tabindex="0" data-i="'+i+'"><span class="lf-ic lf-nr-ic" aria-hidden="true">'+(i+1)+'</span>'
+      + '<span class="lf-l">'+esc(bl.naam||'Naamloos blok')+(meta.length ? '<small>'+esc(meta.join(' \u00b7 '))+'</small>' : '')+'</span>'
+      + '<span class="lf-w">'+_lfVolgorde('wo-blok', i, st.blokken.length)+_LF_CHEV+'</span></div>';
+  }).join('');
+  wrap.querySelectorAll('.wo-blok-up').forEach(function(bt){ bt.addEventListener('click', function(e){ e.stopPropagation(); var i=+bt.dataset.i; if(i>0){ var a=st.blokken; var t=a[i-1]; a[i-1]=a[i]; a[i]=t; _woTekenBlokLijst(); } }); });
+  wrap.querySelectorAll('.wo-blok-down').forEach(function(bt){ bt.addEventListener('click', function(e){ e.stopPropagation(); var i=+bt.dataset.i; var a=st.blokken; if(i<a.length-1){ var t=a[i+1]; a[i+1]=a[i]; a[i]=t; _woTekenBlokLijst(); } }); });
+  wrap.querySelectorAll('.wo-blok-rij').forEach(function(r){
+    r.addEventListener('click', function(){ _woBlokDialoog(+r.dataset.i); });
+    r.addEventListener('keydown', function(e){ if(e.target===r && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); _woBlokDialoog(+r.dataset.i); } });
   });
-  h += '</div>';
-  wrap.innerHTML = h;
-  wrap.querySelectorAll('.wo-blok-up').forEach(function(bt){ bt.addEventListener('click', function(){ var i=+bt.dataset.i; if(i>0){ var a=st.blokken; var t=a[i-1]; a[i-1]=a[i]; a[i]=t; _woTekenBlokLijst(); } }); });
-  wrap.querySelectorAll('.wo-blok-down').forEach(function(bt){ bt.addEventListener('click', function(){ var i=+bt.dataset.i; var a=st.blokken; if(i<a.length-1){ var t=a[i+1]; a[i+1]=a[i]; a[i]=t; _woTekenBlokLijst(); } }); });
-  wrap.querySelectorAll('.wo-blok-edit').forEach(function(bt){ bt.addEventListener('click', function(){ _woBlokDialoog(+bt.dataset.i); }); });
-  wrap.querySelectorAll('.wo-blok-del').forEach(function(bt){ bt.addEventListener('click', function(){ st.blokken.splice(+bt.dataset.i,1); _woTekenBlokLijst(); }); });
 }
 
 // Editor voor één blok (naam, secties, afronding, status-koppeling). Velden via aparte knop.
@@ -40043,37 +40012,33 @@ function _woBlokDialoog(idx){
   if(!bl.afronding) bl.afronding = {handtekening:false,mail:false,mailNaar:'kantoor'};
   if(!bl.secties) bl.secties = {};
 
-  var bb = '';
-  bb += fg('Naam van het blok', finp('wo-blok-naam','text', bl.naam||'', 'Bijv. Binnenkomst, Diagnose, Reparatie'));
-
-  // Velden-knop (opent de veld-editor voor dit blok)
+  var bb = lfRij(ICO.edit, 'Naam', '<input class="lf-tekst" type="text" id="wo-blok-naam" value="'+esc(bl.naam||'')+'" placeholder="Bijv. Binnenkomst, Diagnose" required>', {verplicht:true, voor:'wo-blok-naam'});
+  // Velden (opent de veld-editor voor dit blok); secties horen daar als sectie-items bij.
   var aantalVeld = Array.isArray(bl.velden) ? bl.velden.length : 0;
-  bb += '<button type="button" class="btn btn-ghost btn-sm" id="wo-blok-velden" style="width:100%;justify-content:space-between;margin-bottom:14px"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="12" width="18" height="4" rx="1"/><line x1="7" y1="20" x2="17" y2="20"/></svg>Velden van dit blok</span><span style="color:var(--muted)">'+(aantalVeld?('<span class="tag tag-blue" style="font-size:10px">'+aantalVeld+'</span>'):'<span style="font-size:11px">nog geen</span>')+'</span></button>';
-
-  // Secties horen nu bij "Velden beheren" (als sectie-items tussen de velden).
-  bb += '<div style="font-size:11px;color:var(--muted);margin-bottom:16px;padding:10px 12px;background:var(--surface2);border-radius:8px">Secties (foto\'s, uren, materialen, register, onderdelen, documenten) voeg je toe via <strong>Velden van dit blok</strong> — daar sleep je ze tussen de velden op de gewenste plek.</div>';
+  bb += _lfNavRij('wo-blok-velden', ICO.clipboard, 'Velden', 'Ook secties zoals foto\u2019s, uren en materialen', String(aantalVeld));
 
   // Afronding
-  bb += '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">Afronding van dit blok</div>';
-  bb += '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="wo-blok-htk"'+(bl.afronding.handtekening?' checked':'')+'><span style="font-size:13px">Handtekening vragen</span></label>';
-  bb += '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="wo-blok-mail"'+(bl.afronding.mail?' checked':'')+'><span style="font-size:13px">Mail versturen bij afronden</span></label>';
-  bb += '<div id="wo-blok-mailnaar-wrap" style="margin-left:28px;margin-bottom:14px'+(bl.afronding.mail?'':';display:none')+'">';
-  bb += '<div style="font-size:11px;color:var(--muted);margin-bottom:5px">Mail naar:</div>';
-  bb += '<select class="input" id="wo-blok-mailnaar" style="max-width:200px"><option value="klant"'+(bl.afronding.mailNaar==='klant'?' selected':'')+'>Klant</option><option value="kantoor"'+(bl.afronding.mailNaar==='kantoor'||!bl.afronding.mailNaar?' selected':'')+'>Kantoor</option><option value="beide"'+(bl.afronding.mailNaar==='beide'?' selected':'')+'>Beide (klant + kantoor)</option></select>';
-  bb += '</div>';
+  bb += '<div class="lf-groep">Afronding</div>';
+  bb += lfRij(ICO.edit, 'Handtekening', lfSchakel('wo-blok-htk', !!bl.afronding.handtekening), {voor:'wo-blok-htk', sub:'Vragen bij het afronden van dit blok'});
+  bb += lfRij(ICO.mail, 'Mail versturen', lfSchakel('wo-blok-mail', !!bl.afronding.mail), {voor:'wo-blok-mail', sub:'Bij het afronden van dit blok'});
+  var _mn = ['klant','kantoor','beide'].indexOf(bl.afronding.mailNaar) >= 0 ? bl.afronding.mailNaar : 'kantoor';
+  bb += '<div id="wo-blok-mailnaar-wrap"'+(bl.afronding.mail?'':' style="display:none"')+'>'
+    + lfRij('', 'Mail naar', '<input type="hidden" id="wo-blok-mailnaar" value="'+_mn+'"><span class="lf-seg" role="radiogroup" aria-label="Mail naar" data-lf-seg="wo-blok-mailnaar">'
+      + [['klant','Klant'],['kantoor','Kantoor'],['beide','Beide']].map(function(o){ return '<button type="button" role="radio" data-waarde="'+o[0]+'" aria-checked="'+(_mn===o[0])+'"'+(_mn===o[0]?' class="aan"':'')+'>'+o[1]+'</button>'; }).join('')
+      + '</span>')+'</div>';
 
   // Status koppelen
   if(Array.isArray(type.statussen) && type.statussen.length){
-    bb += '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;margin-top:6px">Bij afronden status wijzigen naar</div>';
-    bb += '<select class="input" id="wo-blok-status" style="max-width:260px"><option value="">— Niet wijzigen —</option>';
-    type.statussen.forEach(function(s){
-      bb += '<option value="'+esc(s.key)+'"'+(bl.zetStatus===s.key?' selected':'')+'>'+esc(s.naam)+'</option>';
-    });
-    bb += '</select>';
+    bb += lfKies(ICO.refresh, 'Status daarna', '<select class="input" id="wo-blok-status"><option value="">Niet wijzigen</option>'
+      + type.statussen.map(function(x){ return '<option value="'+esc(x.key)+'"'+(bl.zetStatus===x.key?' selected':'')+'>'+esc(x.naam)+'</option>'; }).join('')
+      + '</select>', {sub:'Bij het afronden van dit blok'});
   }
+  if(!isNieuw) bb += '<button type="button" class="lf-verwijder" id="wo-blok-del">'+ICO.trash+' Blok verwijderen</button>';
 
-  var ff = '<button class="btn btn-ghost" id="wo-blok-annuleer">Annuleren</button><button class="btn btn-primary" id="wo-blok-ok">'+(isNieuw?'Toevoegen':'Opslaan')+'</button>';
-  openModal(isNieuw?'Blok toevoegen':'Blok bewerken', bb, ff);
+  lfOpen(isNieuw?'Blok toevoegen':'Blok bewerken', bb, isNieuw?'Toevoegen':'Klaar', 'wo-blok-ok');
+  lfTerug(function(){ closeModal(); _woHeropenBlokLijst(); });
+  var _blDel = document.getElementById('wo-blok-del');
+  if(_blDel) _blDel.addEventListener('click', function(){ st.blokken.splice(idx,1); closeModal(); _woHeropenBlokLijst(); });
 
   // Mail-naar tonen/verbergen
   document.getElementById('wo-blok-mail').addEventListener('change', function(){
@@ -40095,7 +40060,6 @@ function _woBlokDialoog(idx){
     _woBlokVeldEditor(st.blokken[effIdx], effIdx);
   });
 
-  document.getElementById('wo-blok-annuleer').addEventListener('click', function(){ closeModal(); _woHeropenBlokLijst(); });
   document.getElementById('wo-blok-ok').addEventListener('click', function(){
     var naam = (document.getElementById('wo-blok-naam').value||'').trim();
     if(!naam){ toast('Geef het blok een naam','warning'); return; }
