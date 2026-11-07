@@ -423,6 +423,34 @@ label.lf-rij{cursor:pointer}
 .tpl-voorbeeld{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:#e9ecf1}
 .tpl-voorbeeld iframe{width:100%;height:560px;border:0;display:block}
 .lf-tussen{margin-left:18px;cursor:pointer}
+.lf-verwijder.lf-neutraal{border-color:var(--border);color:var(--text)}
+.lf-pillen{display:flex;gap:6px;flex-wrap:wrap;padding:0 0 8px}
+.lf-pillen button{height:34px;padding:0 14px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface2);color:var(--text);font:600 13px 'Instrument Sans',sans-serif;cursor:pointer}
+.lf-rou-wissel{flex-direction:column;align-items:flex-end;gap:1px;text-align:right}
+.lf-rou-wissel s{font-size:12px;color:var(--muted)}
+.lf-rou-wissel b{font-weight:600}
+.lf-rou-wissel b.nieuw{color:var(--accent-t)}
+.lf-batch-lijst{max-height:280px;overflow-y:auto}
+.lf-chips-veld{display:flex;flex-wrap:wrap;gap:6px;border:1px solid var(--border);border-radius:var(--radius);padding:7px;background:var(--surface2);cursor:text}
+.lf-chips-veld:focus-within{border-color:var(--accent)}
+.lf-chips-veld input{border:0;outline:0;flex:1;min-width:140px;font:15px 'Instrument Sans',sans-serif;padding:4px;background:transparent;color:var(--text)}
+.lf-bulk-mail{display:flex;align-items:center;gap:10px}
+.lf-bulk-mail .lf-veld{flex:1;min-width:0;width:auto!important;text-align:left}
+.lf-bulk-lijst{max-height:52vh;overflow-y:auto}
+.lf-sw input:disabled{cursor:not-allowed}
+.lf-sw input:disabled + i{opacity:.4}
+.lf-melding{margin:4px 0 8px;padding:12px 14px;border-radius:var(--radius);background:rgba(245,158,11,.12);color:var(--orange-t);font-size:13.5px;font-weight:600}
+.lf-tpl-kaart{margin-bottom:10px}
+.lf-tpl-kaart > .lf-rij{border-top:0}
+.lf-details{border-top:1px solid var(--border);padding:8px 0 10px}
+.lf-details summary{font-size:12.5px;color:var(--muted);cursor:pointer}
+.lf-details pre{font:12.5px/1.5 'Instrument Sans',sans-serif;white-space:pre-wrap;margin:8px 0 0;padding:10px 12px;background:var(--surface2);border-radius:var(--radius)}
+.lf-stappen{display:flex;gap:4px;margin:0 0 6px;padding:4px;border-radius:var(--radius-pill);background:var(--surface2)}
+.lf-stappen span{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:34px;border-radius:var(--radius-pill);font-size:13px;font-weight:600;color:var(--muted)}
+.lf-stappen span b{font:700 11px 'Space Mono',monospace}
+.lf-stappen span svg{width:14px;height:14px}
+.lf-stappen span.klaar{color:var(--green-t)}
+.lf-stappen span.aan{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
 .lf-wis:hover{background:var(--red);color:#fff}
@@ -17165,36 +17193,19 @@ function _jpRenderStap3(voorkeurMaand){
   }
   var gekozen = (voorkeurMaand && per[voorkeurMaand]) ? voorkeurMaand : maanden[0];
 
-  var b = '';
-  b += '<div style="display:flex;gap:0;margin-bottom:16px;background:var(--surface2);border-radius:10px;padding:3px">';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green-t)">✓ Periode</div>';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green-t)">✓ Voorstel</div>';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent-knop);color:#fff">3. Dagen</div>';
-  b += '</div>';
+  var maandOpts3 = maanden.map(function(m){ return '<option value="'+m+'"'+(m===gekozen?' selected':'')+'>'+_jpMaandLabel(m)+' \u2014 '+per[m]+' klanten</option>'; }).join('');
+  var links = '<div class="lf-groep">Maand</div><div class="lf-blok-kaart">';
+  links += lfKies(ICO.kalender, 'Maand', '<select class="input" id="jp3-maand">'+maandOpts3+'</select>', {titel:'Welke maand plan je in?'});
+  links += '<div class="lf-samen" id="jp3-info" style="margin:10px 0 12px"></div></div>';
+  var rechts = '<div class="lf-groep">Werkdag</div><div class="lf-blok-kaart">';
+  rechts += lfRij(ICO.clock, 'Max uren per dag', '<span class="lf-stap"><button type="button" data-lf-stap="-1" aria-label="Minder">'+_LF_MIN+'</button><input type="number" inputmode="numeric" id="jp3-maxuren" value="'+_apMaxUren+'" min="4" max="10" step="1"><button type="button" data-lf-stap="1" aria-label="Meer">'+_LF_PLUS+'</button></span>', {voor:'jp3-maxuren', sub:'Inclusief reistijd'});
+  rechts += lfKies('', 'Starttijd', '<select class="input" id="jp3-starttijd"><option value="07:00">07:00</option><option value="07:30">07:30</option><option value="08:00" selected>08:00</option><option value="08:30">08:30</option><option value="09:00">09:00</option></select>');
+  rechts += lfRij(ICO.users, 'Max monteurs per dag', '<input class="lf-veld lf-nr2" type="number" inputmode="numeric" id="jp3-maxmonteurs" min="1" max="20" step="1" placeholder="auto">', {voor:'jp3-maxmonteurs', sub:'Leeg = de volledige beschikbaarheid'});
+  rechts += '<p class="lf-uitleg">Opdrachten krijgen nog geen vaste monteur; die wijs je in de planning toe.</p></div>';
 
-  b += '<div class="inst-plan-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
-  b += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.kalender+' Maand</div>';
-  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Welke maand uit de vastgelegde verdeling wil je inplannen?</div>';
-  b += '<select class="input" id="jp3-maand">';
-  maanden.forEach(function(m){
-    b += '<option value="'+m+'"'+(m===gekozen?' selected':'')+'>'+_jpMaandLabel(m)+' — '+per[m]+' klanten</option>';
-  });
-  b += '</select><div id="jp3-info" style="font-size:12px;color:var(--muted);margin-top:10px"></div></div>';
-
-  b += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.clock+' Werkdag</div>';
-  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Maximaal aantal uren per dag (inclusief reistijd) en de starttijd.</div>';
-  b += '<div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">';
-  b += fg('Max uren','<input type="number" class="input" id="jp3-maxuren" value="'+_apMaxUren+'" min="4" max="10" style="width:80px">');
-  b += fg('Starttijd','<select class="input" id="jp3-starttijd" style="width:90px"><option value="07:00">07:00</option><option value="07:30">07:30</option><option value="08:00" selected>08:00</option><option value="08:30">08:30</option><option value="09:00">09:00</option></select>');
-  b += fg('Max monteurs/dag','<input type="number" class="input" id="jp3-maxmonteurs" min="1" max="20" step="1" placeholder="auto" style="width:90px">');
-  b += '</div>';
-  b += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Leeg = de volledige beschikbaarheid van die dag gebruiken. Opdrachten krijgen nog geen vaste monteur; die wijs je in de planning toe.</div>';
-  b += '</div></div>';
-
-  var f = '<button class="btn btn-ghost" id="jp3-terug">← Voorstel</button>'
-        + '<button class="btn btn-ghost" id="jp3-sluit">Sluiten</button>'
-        + '<button class="btn btn-primary" id="jp3-start">Dagen berekenen →</button>';
-  openModal('Jaarplanning — dagen inplannen', b, f, true);
+  var b = _jpStappen(3) + '<div class="lf-kolommen"><div>'+links+'</div><div>'+rechts+'</div></div>';
+  lfOpen('Jaarplanning \u00b7 dagen', b, 'Dagen berekenen', 'jp3-start', {groot:true});
+  lfTerug(function(){ if(_jpResultaat) _jpRenderStap2(); else _jpRenderStap1(); });
 
   function infoBijwerken(){
     var m = document.getElementById('jp3-maand').value;
@@ -17208,8 +17219,6 @@ function _jpRenderStap3(voorkeurMaand){
   }
   infoBijwerken();
   document.getElementById('jp3-maand').addEventListener('change', infoBijwerken);
-  document.getElementById('jp3-terug').addEventListener('click', function(){ if(_jpResultaat) _jpRenderStap2(); else _jpRenderStap1(); });
-  document.getElementById('jp3-sluit').addEventListener('click', closeModal);
   document.getElementById('jp3-start').addEventListener('click', function(){
     var lijst = infoBijwerken();
     if(!lijst.length){ toast('Geen klanten om in te plannen in deze maand','warning'); return; }
@@ -17238,6 +17247,14 @@ function openJaarplanner(){
   _jpRenderStap1();
 }
 
+// Stappenbalk boven de jaarplanning: wat klaar is, waar je bent, wat nog komt.
+function _jpStappen(nu){
+  return '<div class="lf-stappen">'+['Periode','Voorstel','Dagen'].map(function(t, i){
+    var n = i+1, cls = n < nu ? 'klaar' : (n === nu ? 'aan' : '');
+    return '<span'+(cls ? ' class="'+cls+'"' : '')+'>'+(n < nu ? ICO.check : '<b>'+n+'</b>')+t+'</span>';
+  }).join('')+'</div>';
+}
+
 function _jpRenderStap1(){
   var zonderDatum = (APP.serviceklanten||[]).filter(function(k){ return k.status!=='passief' && !k.volgendeDatum; }).length;
   var maandOpts = '';
@@ -17246,39 +17263,23 @@ function _jpRenderStap1(){
     var m = _jpMaandPlus(nu.getFullYear()+'-'+('0'+(nu.getMonth()+1)).slice(-2), i);
     maandOpts += '<option value="'+m+'"'+(m===_jpStartMaand?' selected':'')+'>'+_jpMaandLabel(m)+'</option>';
   }
-  var b = '';
-  b += '<div style="display:flex;gap:0;margin-bottom:18px;background:var(--surface2);border-radius:10px;padding:3px">';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent-knop);color:#fff">1. Periode</div>';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted)">2. Voorstel</div>';
-  b += '</div>';
-  b += '<div class="inst-plan-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
-  b += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.kalender+' Periode</div>';
-  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Over welke periode wil je de servicebeurten verdelen?</div>';
-  b += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">';
-  b += fg('Vanaf','<select class="input" id="jp-start" style="width:130px">'+maandOpts+'</select>');
-  b += fg('Aantal maanden','<input class="input" type="number" id="jp-maanden" value="'+_jpPeriodeMaanden+'" min="2" max="24" step="1" style="width:100px">');
-  b += '</div>';
-  b += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">';
-  [3,6,12].forEach(function(m){ b += '<button type="button" class="btn btn-ghost btn-sm jp-snel" data-m="'+m+'">'+m+' maanden</button>'; });
-  b += '</div></div>';
-  b += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:4px">'+ICO.users+' Klanten</div>';
-  b += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">De speelruimte per contract staat bij Instellingen → Planning: halfjaarlijks '+getSpeelruimteDagen(6)+' dagen, jaarlijks '+getSpeelruimteDagen(12)+' dagen, 2 jaar '+getSpeelruimteDagen(24)+' dagen.</div>';
-  b += '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer;margin-bottom:8px">';
-  b += '<input type="checkbox" id="jp-achterstallig"'+(_jpMetAchterstallig?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0">';
-  b += '<div><div style="font-size:13px;font-weight:600">Achterstallige beurten meenemen</div>';
-  b += '<div style="font-size:11px;color:var(--muted)">Beurten die vóór deze periode hadden gemoeten, worden in de eerste maand ingepland.</div></div></label>';
-  b += '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-  b += '<input type="checkbox" id="jp-zonderdatum"'+(_jpMetZonderDatum?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0">';
-  b += '<div><div style="font-size:13px;font-weight:600">Klanten zonder datum meeverdelen</div>';
-  b += '<div style="font-size:11px;color:var(--muted)">'+zonderDatum+' klanten hebben nog geen laatste beurt. Zonder vinkje blijven ze buiten de verdeling.</div></div></label>';
-  b += '</div></div>';
-
   var alGepland = Object.keys(_jpMaandenMetPlan()).length;
-  var f = '<button class="btn btn-ghost" id="jp-cancel">Annuleren</button>'
-        + (alGepland ? '<button class="btn btn-ghost" id="jp-naar-dagen">Dagen inplannen →</button>' : '')
-        + '<button class="btn btn-primary" id="jp-bereken">Berekenen →</button>';
-  openModal('Jaarplanning', b, f, true);
-  document.getElementById('jp-cancel').addEventListener('click', closeModal);
+  var links = '<div class="lf-groep">Periode</div><div class="lf-blok-kaart">';
+  links += lfKies(ICO.kalender, 'Vanaf', '<select class="input" id="jp-start">'+maandOpts+'</select>', {titel:'Vanaf welke maand?'});
+  links += lfRij(ICO.clock, 'Aantal maanden', '<span class="lf-stap"><button type="button" data-lf-stap="-1" aria-label="Minder">'+_LF_MIN+'</button><input type="number" inputmode="numeric" id="jp-maanden" value="'+_jpPeriodeMaanden+'" min="2" max="24" step="1"><button type="button" data-lf-stap="1" aria-label="Meer">'+_LF_PLUS+'</button></span>', {voor:'jp-maanden'});
+  links += '<div class="lf-pillen" style="padding:4px 0 12px">';
+  [3,6,12].forEach(function(m){ links += '<button type="button" class="jp-snel" data-m="'+m+'">'+m+' maanden</button>'; });
+  links += '</div></div>';
+
+  var rechts = '<div class="lf-groep">Klanten</div><div class="lf-blok-kaart">';
+  rechts += lfRij(ICO.warn, 'Achterstallige beurten', lfSchakel('jp-achterstallig', !!_jpMetAchterstallig), {voor:'jp-achterstallig', sub:'Beurten die v\u00f3\u00f3r deze periode hadden gemoeten, komen in de eerste maand'});
+  rechts += lfRij(ICO.users, 'Klanten zonder datum', lfSchakel('jp-zonderdatum', !!_jpMetZonderDatum), {voor:'jp-zonderdatum', sub:zonderDatum+' klanten hebben nog geen laatste beurt; uit = buiten de verdeling'});
+  rechts += '<p class="lf-uitleg">De speelruimte per contract staat bij Instellingen \u2192 Planning: halfjaarlijks '+getSpeelruimteDagen(6)+' dagen, jaarlijks '+getSpeelruimteDagen(12)+' dagen, 2 jaar '+getSpeelruimteDagen(24)+' dagen.</p>';
+  rechts += '</div>';
+  if(alGepland) rechts += '<div class="lf-blok-kaart" style="margin-top:12px">'+_lfNavRij('jp-naar-dagen', ICO.kalender, 'Dagen inplannen', 'Met de verdeling die al is vastgelegd', '')+'</div>';
+
+  var b = _jpStappen(1) + '<div class="lf-kolommen"><div>'+links+'</div><div>'+rechts+'</div></div>';
+  lfOpen('Jaarplanning', b, 'Berekenen', 'jp-bereken', {groot:true});
   var naarDagen = document.getElementById('jp-naar-dagen');
   if(naarDagen) naarDagen.addEventListener('click', function(){ _jpRenderStap3(null); });
   document.querySelectorAll('.jp-snel').forEach(function(btn){
@@ -17313,11 +17314,7 @@ function _jpStaven(res, sleutel, kleur){
 
 function _jpRenderStap2(){
   var res = _jpResultaat;
-  var b = '';
-  b += '<div style="display:flex;gap:0;margin-bottom:16px;background:var(--surface2);border-radius:10px;padding:3px">';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:600;color:var(--green-t)">✓ Periode</div>';
-  b += '<div style="flex:1;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent-knop);color:#fff">2. Voorstel</div>';
-  b += '</div>';
+  var b = _jpStappen(2);
 
   var daling = res.piekVoor ? Math.round((1 - res.piekNa/res.piekVoor) * 100) : 0;
   b += '<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
@@ -17374,13 +17371,9 @@ function _jpRenderStap2(){
 
   b += '<div style="font-size:12px;color:var(--muted);margin-top:14px">Dit is een voorstel. Met <strong>Verdeling vastleggen</strong> krijgt elke klant zijn geplande maand; de contractdatums blijven staan en er worden nog geen opdrachten aangemaakt.</div>';
 
-  var f = '<button class="btn btn-ghost" id="jp-terug">← Periode</button>'
-        + '<button class="btn btn-ghost" id="jp-sluit">Sluiten</button>'
-        + (Object.keys(_jpMaandenMetPlan()).length ? '<button class="btn btn-ghost" id="jp-dagen">Dagen inplannen →</button>' : '')
-        + '<button class="btn btn-primary" id="jp-vastleggen">Verdeling vastleggen</button>';
-  openModal('Jaarplanning — voorstel', b, f, true);
-  document.getElementById('jp-terug').addEventListener('click', _jpRenderStap1);
-  document.getElementById('jp-sluit').addEventListener('click', closeModal);
+  if(Object.keys(_jpMaandenMetPlan()).length) b += '<div class="lf-blok-kaart" style="margin-top:14px">'+_lfNavRij('jp-dagen', ICO.kalender, 'Dagen inplannen', 'Met de verdeling die al is vastgelegd', '')+'</div>';
+  lfOpen('Jaarplanning \u00b7 voorstel', b, 'Verdeling vastleggen', 'jp-vastleggen', {groot:true});
+  lfTerug(_jpRenderStap1);
   document.getElementById('jp-vastleggen').addEventListener('click', _jpVastleggen);
   var jpDagenBtn = document.getElementById('jp-dagen');
   if(jpDagenBtn) jpDagenBtn.addEventListener('click', function(){ _jpRenderStap3(res.maanden[0]); });
@@ -21031,15 +21024,9 @@ function openActieModal(opId) {
   var actieOpts = ['Niet thuis','Opnieuw inplannen','Offerte maken','Werk afmaken','Contact opnemen','Wacht op klant'].map(function(a){
     return '<option value="'+a+'"'+(o.actietype===a?' selected':'')+'>'+a+'</option>';
   }).join('');
-  var b = '<div class="form-group"><label>Type actie</label>';
-  b += '<select class="input" id="am-type"><option value="">— Kies —</option>'+actieOpts+'</select></div>';
-  b += '<div class="form-group"><label>Toelichting (optioneel)</label>';
-  b += finp('am-tekst','text',o.actietekst||'','Bijv. offerte sturen voor pomp X');
-  b += '</div>';
-  var f = '<button class="btn btn-ghost" id="am-cancel">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="am-save">Opslaan</button>';
-  openModal('Actie vereist — ' + esc(o.klantNaam||'opdracht'), b, f);
-  document.getElementById('am-cancel').addEventListener('click', closeModal);
+  var b = lfKies(ICO.warn, 'Actie', '<select class="input" id="am-type"><option value="">Kies een actie</option>'+actieOpts+'</select>', {titel:'Welke actie is nodig?'});
+  b += lfRij(ICO.edit, 'Toelichting', '<input class="lf-tekst" type="text" id="am-tekst" value="'+esc(o.actietekst||'')+'" placeholder="Bijv. offerte sturen voor pomp X">', {voor:'am-tekst', sub:'Optioneel'});
+  lfOpen('Actie vereist', '<p class="lf-uitleg" style="padding-top:0">'+esc(o.klantNaam||'Opdracht')+(o.datum ? ' \u00b7 '+fmtD(o.datum) : '')+'</p>'+b, 'Opslaan', 'am-save');
   document.getElementById('am-save').addEventListener('click', function(){
     o.status      = 'actie';
     o.actietype   = document.getElementById('am-type').value;
@@ -21102,34 +21089,25 @@ function openBatchInplanModal(skIds) {
   // Monteur opties
   var planRollen = APP.planningRollen || ['monteur','extern'];
   var monteurs = APP.medewerkers.filter(function(m){ return m.status!=='inactief' && planRollen.indexOf(m.rol)>=0; });
-  var montOpts = '<option value="">— Kies monteur —</option>';
+  var montOpts = '<option value="">Nog niet toewijzen</option>';
   monteurs.forEach(function(m){ montOpts += '<option value="'+m.id+'">'+esc(m.voornaam+' '+m.achternaam)+'</option>'; });
 
-  var b = '<div class="form-grid">';
-  b += fg('Datum *', finp('bi-datum','date', vandaagISO(), ''));
-  b += fg('Starttijd', '<select class="input" id="bi-tijd"><option value="08:00">08:00</option><option value="09:00">09:00</option><option value="10:00">10:00</option><option value="11:00">11:00</option><option value="12:00">12:00</option><option value="13:00">13:00</option><option value="14:00">14:00</option><option value="15:00">15:00</option></select>');
-  b += fg('Monteur', '<select class="input" id="bi-monteur">'+montOpts+'</select>');
-  b += fg('Type opdracht', '<select class="input" id="bi-type">'+getOpdrachttypes().map(function(t){return '<option value="'+t.id+'">'+t.label+'</option>';}).join('')+'</select>');
-  b += '</div>';
+  var b = lfRij(ICO.kalender, 'Datum', '<input class="lf-veld" type="date" id="bi-datum" value="'+vandaagISO()+'" required>', {verplicht:true, voor:'bi-datum'});
+  b += lfKies(ICO.clock, 'Starttijd', '<select class="input" id="bi-tijd"><option value="08:00">08:00</option><option value="09:00">09:00</option><option value="10:00">10:00</option><option value="11:00">11:00</option><option value="12:00">12:00</option><option value="13:00">13:00</option><option value="14:00">14:00</option><option value="15:00">15:00</option></select>');
+  b += lfKies(ICO.user, 'Monteur', '<select class="input" id="bi-monteur">'+montOpts+'</select>');
+  b += lfKies(ICO.wrench, 'Type opdracht', '<select class="input" id="bi-type">'+getOpdrachttypes().map(function(t){return '<option value="'+t.id+'">'+t.label+'</option>';}).join('')+'</select>');
 
   // Overzicht geselecteerde klanten
-  b += '<div style="margin-top:12px;background:var(--surface2);border-radius:8px;padding:10px 12px">';
-  b += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">'+klanten.length+' klanten worden ingepland</div>';
-  b += '<div style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:4px">';
+  b += '<div class="lf-groep">'+klanten.length+' klant'+(klanten.length===1?'':'en')+' worden ingepland</div>';
+  b += '<div class="lf-blok-kaart lf-batch-lijst">';
   klanten.forEach(function(k){
-    b += '<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">';
-    b += '<span style="font-weight:600">'+esc(k.naam)+'</span>';
-    b += '<span style="color:var(--muted)">'+esc(k.contractType||'')+(klantAanvulling(k)?' + '+esc(klantAanvulling(k)):'')+(k.volgendeDatum?' · '+fmtD(k.volgendeDatum):'')+'</span>';
-    b += '</div>';
+    var sub = [ (k.contractType||'')+(klantAanvulling(k)?' + '+klantAanvulling(k):''), k.volgendeDatum ? 'gepland '+fmtD(k.volgendeDatum) : '' ].filter(Boolean).join(' \u00b7 ');
+    b += '<div class="lf-rij">'+_lfIco(ICO.gebouw)+'<span class="lf-l">'+esc(k.naam)+(sub ? '<small>'+esc(sub)+'</small>' : '')+'</span><span class="lf-w"><span class="lf-hint">'+esc(String(k.duurUren||1.5).replace('.',','))+' u</span></span></div>';
   });
-  b += '</div></div>';
-  b += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Elke klant krijgt een aparte opdracht. De starttijd wordt automatisch verspreid op basis van de serviceduur (standaard 1,5u per opdracht).</div>';
+  b += '</div>';
+  b += '<p class="lf-uitleg">Elke klant krijgt een eigen opdracht. De tijden lopen achter elkaar door op basis van de serviceduur (standaard 1,5 uur), met 15 minuten reistijd ertussen.</p>';
 
-  var f = '<button class="btn btn-ghost" id="bi-cancel">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="bi-save">'+klanten.length+' opdrachten aanmaken</button>';
-  openModal('Batch inplannen', b, f);
-
-  document.getElementById('bi-cancel').addEventListener('click', closeModal);
+  lfOpen('Batch inplannen', b, klanten.length+' opdracht'+(klanten.length===1?'':'en')+' aanmaken', 'bi-save');
   document.getElementById('bi-save').addEventListener('click', function(){
     var datum   = document.getElementById('bi-datum').value;
     var montId  = document.getElementById('bi-monteur').value;
@@ -24098,35 +24076,24 @@ function openMailVerzendModal(opts) {
   var directAan = !!(APP.werkplaatsInst && APP.werkplaatsInst.directMailAan);
 
   function chipsVeldHtml(id, label, hint){
-    var hh='<div style="margin-bottom:14px"><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">'+label+'</label>';
-    hh+='<div id="'+id+'-wrap" style="display:flex;flex-wrap:wrap;gap:6px;border:1px solid var(--border);border-radius:8px;padding:7px;background:var(--surface);cursor:text">';
-    hh+='<input id="'+id+'-inp" type="text" placeholder="E-mailadres toevoegen…" style="border:none;outline:none;flex:1;min-width:140px;font-family:inherit;font-size:13px;padding:4px;background:transparent;color:var(--text)">';
-    hh+='</div>'+(hint?'<div style="font-size:11px;color:var(--muted);margin-top:5px">'+hint+'</div>':'')+'</div>';
-    return hh;
+    return lfRij(_LF_MAIL, label, '<div id="'+id+'-wrap" class="lf-chips-veld"><input id="'+id+'-inp" type="text" inputmode="email" autocapitalize="off" placeholder="E-mailadres toevoegen\u2026" aria-label="'+label+'"></div>', {blok:true, sub:hint});
   }
 
   var b = '';
-  b += chipsVeldHtml('mv-aan','Aan','Enter of komma om een adres toe te voegen');
+  b += chipsVeldHtml('mv-aan','Aan','Enter of komma voegt een adres toe');
   if(heeftCc) b += chipsVeldHtml('mv-cc','CC','');
-  b += '<div style="margin-bottom:14px"><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Onderwerp</label>';
-  b += '<input class="input" id="mv-ond" value="'+esc(opts.onderwerp||'')+'"></div>';
+  b += lfRij(ICO.edit, 'Onderwerp', '<input class="lf-tekst" type="text" id="mv-ond" value="'+esc(opts.onderwerp||'')+'">', {voor:'mv-ond'});
   var verbergBericht = (typeof opts.previewBron==='function');
   if(verbergBericht){
     // Mail met PDF-bijlage: berichtveld verborgen — standaardtekst gaat wel mee als body
     b += '<textarea id="mv-body" style="display:none">'+esc(opts.body||'')+'</textarea>';
   } else {
-    b += '<div><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Bericht</label>';
-    b += '<textarea class="input" id="mv-body" rows="4" style="resize:vertical">'+esc(opts.body||'')+'</textarea></div>';
+    b += lfRij(ICO.clipboard, 'Bericht', '<textarea class="lf-notitie" id="mv-body" rows="5">'+esc(opts.body||'')+'</textarea>', {blok:true, voor:'mv-body'});
   }
-
-
-  var f = '<button class="btn btn-ghost" id="mv-cancel">Annuleren</button>';
   var heeftPreview = (typeof opts.previewBron==='function');
-  if(heeftPreview) f += '<button class="btn btn-ghost" id="mv-preview" style="display:inline-flex;align-items:center;gap:5px">'+(ICO.pdf||'')+' Preview</button>';
-  if(directAan) f += '<button class="btn btn-primary" id="mv-send-direct" style="display:inline-flex;align-items:center;gap:5px">'+ICO.mail+' Verzenden</button>';
-  else f += '<button class="btn btn-primary" id="mv-send" style="display:inline-flex;align-items:center;gap:5px">'+ICO.mail+' Verzenden</button>';
+  if(heeftPreview) b += _lfNavRij('mv-preview', ICO.pdf, 'Bijlage bekijken', 'De PDF die met deze mail meegaat', '');
 
-  openModal(opts.titel||'Mail versturen', b, f);
+  lfOpen(opts.titel||'Mail versturen', b, 'Verzenden', directAan ? 'mv-send-direct' : 'mv-send');
 
   function bindChipsVeld(id, adressen){
     var wrap = document.getElementById(id+'-wrap');
@@ -24180,7 +24147,6 @@ function openMailVerzendModal(opts) {
     };
   }
 
-  document.getElementById('mv-cancel').addEventListener('click', closeModal);
 
   // ── Reparatie-PDF: gekozen secties → generator (voor preview of bijlage) ──
   // Preview-knop: toont de PDF in een wegklikbare pop-up (popup-modus)
@@ -29178,25 +29144,16 @@ function openSdDagModal(datum, weekKey, dagIdx, monteurs) {
   var dagDienst=sd[dagKey];
   var weekMed=weekDienst?getMed(weekDienst.medId):null;
 
-  var b='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px">';
-  b+='<div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:2px">Weekdienst</div>';
-  b+=(weekMed?'<strong>'+esc(weekMed.voornaam+' '+weekMed.achternaam)+'</strong>':'<span style="color:var(--muted)">Niet ingesteld</span>');
-  b+='</div>';
-  b+='<div class="form-group"><label>Dagwissel '+dagNamen[dagIdx]+' '+fmtD(datum)+'</label>';
-  b+='<select class="input" id="sd-dag-sel">';
-  b+='<option value="">— Geen dagwissel (gebruik weekdienst) —</option>';
+  var b = lfRij(ICO.user, 'Weekdienst', weekMed ? '<span class="lf-kw">'+esc(weekMed.voornaam+' '+weekMed.achternaam)+'</span>' : '<span class="lf-kw leeg">Niet ingesteld</span>');
+  var dagOpts = '<option value="">Geen, de weekdienst geldt</option>';
   monteurs.forEach(function(m){
     var sel=dagDienst&&String(dagDienst.medId)===String(m.id)?' selected':'';
-    b+='<option value="'+m.id+'"'+sel+'>'+esc(m.voornaam+' '+m.achternaam)+'</option>';
+    dagOpts += '<option value="'+m.id+'"'+sel+'>'+esc(m.voornaam+' '+m.achternaam)+'</option>';
   });
-  b+='</select></div>';
+  b += lfKies(ICO.refresh, 'Dagwissel', '<select class="input" id="sd-dag-sel">'+dagOpts+'</select>', {titel:'Wie heeft dienst op '+dagNamen[dagIdx].toLowerCase()+'?', sub:'Alleen voor deze dag'});
+  if(dagDienst) b += '<button type="button" class="lf-verwijder lf-neutraal" id="sdd-reset">'+ICO.undo+' Terug naar de weekdienst</button>';
 
-  var f='<button class="btn btn-ghost" id="sdd-cancel">Annuleren</button>';
-  if(dagDienst) f+='<button class="btn btn-ghost" id="sdd-reset" style="color:var(--orange-t)">↩ Reset naar week</button>';
-  f+='<button class="btn btn-primary" id="sdd-save">Opslaan</button>';
-
-  openModal(dagNamen[dagIdx]+' '+fmtD(datum)+' — Dagwissel',b,f);
-  document.getElementById('sdd-cancel').addEventListener('click',closeModal);
+  lfOpen(dagNamen[dagIdx]+' '+fmtD(datum), b, 'Opslaan', 'sdd-save');
 
   var resetBtn=document.getElementById('sdd-reset');
   if(resetBtn) resetBtn.addEventListener('click',function(){
@@ -29227,16 +29184,13 @@ function openSdWijzigModal(weekKey,weekNr,monteurs){
   if(!magSchrijven('storingsdienst')) return;
   var sd=APP.storingsdienst||{};
   var huidig=sd[weekKey];
-  var b='<div class="form-group"><label>Monteur voor hele week '+weekNr+'</label>';
-  b+='<select class="input" id="sd-med-sel"><option value="">— Geen —</option>';
+  var wkOpts = '<option value="">Niemand</option>';
   monteurs.forEach(function(m){
-    b+='<option value="'+m.id+'"'+(huidig&&String(huidig.medId)===String(m.id)?' selected':'')+'>'+esc(m.voornaam+' '+m.achternaam)+'</option>';
+    wkOpts += '<option value="'+m.id+'"'+(huidig&&String(huidig.medId)===String(m.id)?' selected':'')+'>'+esc(m.voornaam+' '+m.achternaam)+'</option>';
   });
-  b+='</select></div>';
-  b+='<div style="font-size:12px;color:var(--muted);margin-top:8px">'+ICO.info+' Individuele dagwissels overschrijven het weekrooster.</div>';
-  var f='<button class="btn btn-ghost" id="sd-wij-cancel">Annuleren</button><button class="btn btn-primary" id="sd-wij-save">Opslaan</button>';
-  openModal('Storingsdienst week '+weekNr,b,f);
-  document.getElementById('sd-wij-cancel').addEventListener('click',closeModal);
+  var b = lfKies(ICO.user, 'Monteur', '<select class="input" id="sd-med-sel">'+wkOpts+'</select>', {titel:'Storingsdienst week '+weekNr, sub:'Voor de hele week'});
+  b += '<p class="lf-uitleg">Een dagwissel op een losse dag gaat voor op het weekrooster.</p>';
+  lfOpen('Storingsdienst week '+weekNr, b, 'Opslaan', 'sd-wij-save');
   document.getElementById('sd-wij-save').addEventListener('click',function(){
     var medId=document.getElementById('sd-med-sel').value;
     if(!APP.storingsdienst) APP.storingsdienst={};
@@ -29260,95 +29214,64 @@ function openRoulatieModal(weken,monteurs){
   if(!monteurs.length){toast('Geen monteurs beschikbaar','error');return;}
   var sd=APP.storingsdienst||{};
 
-  // Stap 0: Monteur selectie
-  var b0='<p style="color:var(--muted);font-size:13px;margin-bottom:12px">Kies welke monteurs meedoen in de roulatie. De volgorde bepaalt wie wanneer dienst heeft.</p>';
-  b0+='<div id="rou-mont-lijst" style="display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto">';
-  monteurs.forEach(function(m,i){
-    var kl=medKleur(m);
-    b0+='<div class="rou-mont-item" draggable="true" data-id="'+m.id+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:8px;cursor:grab;border:1px solid var(--border)">';
-    b0+='<span style="color:var(--muted);font-size:16px">⠿</span>';
-    b0+='<input type="checkbox" class="rou-mont-cb" data-id="'+m.id+'" checked style="width:15px;height:15px;cursor:pointer">';
-    b0+='<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>';
-    b0+='<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
-    b0+='<div style="font-size:11px;color:var(--muted)">'+esc(m.functie||m.rol||'')+'</div></div>';
-    b0+='<span style="font-size:11px;color:var(--muted)">#'+(i+1)+'</span>';
-    b0+='</div>';
-  });
-  b0+='</div>';
-  b0+='<div style="margin-top:8px;font-size:11px;color:var(--muted)">Sleep rijen om de volgorde te wijzigen · volgorde bepaalt de roulatie</div>';
+  // Stap 1: welke monteurs doen mee, en in welke volgorde. De volgorde bepaalt wie wanneer dienst heeft.
+  var volgorde = monteurs.map(function(m){ return String(m.id); });
+  var doetMee = {}; volgorde.forEach(function(id){ doetMee[id] = true; });
 
-  var f0='<button class="btn btn-ghost" id="rou0-cancel">Annuleren</button>';
-  f0+='<button class="btn btn-primary" id="rou0-next">Weken kiezen →</button>';
-  openModal('Stap 1 van 3 — Monteurs kiezen',b0,f0);
-  document.getElementById('rou0-cancel').addEventListener('click',closeModal);
+  var b0 = '<p class="lf-uitleg" style="padding-top:0">Kies wie meedoet. De volgorde bepaalt wie wanneer dienst heeft; zet iemand hoger of lager met de pijltjes.</p>';
+  b0 += '<div id="rou-mont-lijst"></div>';
+  lfOpen('Roulatie \u00b7 stap 1 van 3', b0, 'Weken kiezen', 'rou0-next');
 
-  // Drag & drop volgorde
-  var lijst0=document.getElementById('rou-mont-lijst');
-  var drag0=null;
-  lijst0.querySelectorAll('.rou-mont-item').forEach(function(item){
-    item.addEventListener('dragstart',function(){ drag0=item; setTimeout(function(){item.style.opacity='0.4';},0); });
-    item.addEventListener('dragend',function(){ item.style.opacity='1'; drag0=null; lijst0.querySelectorAll('.rou-mont-item').forEach(function(i){i.style.background='var(--surface2)';}); });
-    item.addEventListener('dragover',function(e){
-      e.preventDefault(); if(!drag0||drag0===item) return;
-      item.style.background='rgba(74,108,247,.15)';
-      var na=e.clientY>item.getBoundingClientRect().top+item.getBoundingClientRect().height/2;
-      if(na) lijst0.insertBefore(drag0,item.nextSibling); else lijst0.insertBefore(drag0,item);
-    });
-    item.addEventListener('dragleave',function(){ item.style.background='var(--surface2)'; });
-    item.addEventListener('drop',function(e){ e.preventDefault(); item.style.background='var(--surface2)'; });
-  });
+  function tekenMonteurs(){
+    var lijst = document.getElementById('rou-mont-lijst'); if(!lijst) return;
+    var nr = 0;
+    lijst.innerHTML = volgorde.map(function(id, i){
+      var m = getMed(id); if(!m) return '';
+      var kl = medKleur(m);
+      var plek = doetMee[id] ? '#'+(++nr) : 'doet niet mee';
+      return '<div class="lf-rij rou-mont-item" data-id="'+esc(id)+'"><span class="lf-av klein" style="background:'+kl+';color:'+_tekstOpKleur(kl)+'" aria-hidden="true">'+initials(m)+'</span>'
+        + '<span class="lf-l">'+esc(m.voornaam+' '+m.achternaam)+'<small>'+esc(plek)+(m.functie||m.rol ? ' \u00b7 '+esc(m.functie||m.rol) : '')+'</small></span>'
+        + '<span class="lf-w">'+_lfVolgorde('rou', i, volgorde.length)
+        + '<label class="lf-sw"><input type="checkbox" role="switch" class="rou-mont-cb" data-id="'+esc(id)+'"'+(doetMee[id]?' checked':'')+' aria-label="'+esc(m.voornaam)+' doet mee"><i></i></label></span></div>';
+    }).join('');
+    lijst.querySelectorAll('.rou-up').forEach(function(bt){ bt.addEventListener('click', function(){ var i=+bt.dataset.i; if(i>0){ var t=volgorde[i-1]; volgorde[i-1]=volgorde[i]; volgorde[i]=t; tekenMonteurs(); } }); });
+    lijst.querySelectorAll('.rou-down').forEach(function(bt){ bt.addEventListener('click', function(){ var i=+bt.dataset.i; if(i<volgorde.length-1){ var t=volgorde[i+1]; volgorde[i+1]=volgorde[i]; volgorde[i]=t; tekenMonteurs(); } }); });
+    lijst.querySelectorAll('.rou-mont-cb').forEach(function(cb){ cb.addEventListener('change', function(){ doetMee[cb.dataset.id] = cb.checked; tekenMonteurs(); }); });
+  }
+  tekenMonteurs();
 
   document.getElementById('rou0-next').addEventListener('click',function(){
-    // Bouw geordende monteurlijst op basis van volgorde + aanvinken
-    var geselecteerdeMonteurs=[];
-    lijst0.querySelectorAll('.rou-mont-item').forEach(function(item){
-      var cb=item.querySelector('.rou-mont-cb');
-      if(cb&&cb.checked){
-        var m=getMed(item.dataset.id); if(m) geselecteerdeMonteurs.push(m);
-      }
-    });
+    // Geordende monteurlijst op basis van volgorde + aanzetten
+    var geselecteerdeMonteurs = volgorde.filter(function(id){ return doetMee[id]; }).map(getMed).filter(Boolean);
     if(!geselecteerdeMonteurs.length){toast('Selecteer minstens 1 monteur','error');return;}
     openRoulatieStap1(weken,geselecteerdeMonteurs,sd);
   });
 }
 
 function openRoulatieStap1(weken,monteurs,sd){
-  // Stap 1: Weekselectie modal
-  var b='<p style="color:var(--muted);font-size:13px;margin-bottom:12px">Vink de weken aan die meegenomen worden in het nieuwe voorstel. Bestaande toewijzingen worden <strong>overschreven</strong> voor aangevinkte weken.</p>';
-  b+='<div style="display:flex;gap:8px;margin-bottom:10px">';
-  b+='<button class="btn btn-ghost btn-sm" id="rou-sel-all">Alles selecteren</button>';
-  b+='<button class="btn btn-ghost btn-sm" id="rou-sel-leeg">Alleen lege weken</button>';
-  b+='<button class="btn btn-ghost btn-sm" id="rou-sel-none">Deselecteren</button>';
-  b+='</div>';
-  b+='<div style="max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:5px" id="rou-week-lijst">';
+  // Stap 2: welke weken krijgen een nieuw voorstel
+  var b = '<p class="lf-uitleg" style="padding-top:0">Zet de weken aan die in het voorstel komen. Bestaande toewijzingen in die weken worden <strong>overschreven</strong>.</p>';
+  b += '<div class="lf-pillen"><button type="button" id="rou-sel-all">Alles</button><button type="button" id="rou-sel-leeg">Alleen lege weken</button><button type="button" id="rou-sel-none">Niets</button></div>';
+  b += '<div id="rou-week-lijst">';
   weken.forEach(function(w){
     var bestaand=sd[w.key];
     var med=bestaand?getMed(bestaand.medId):null;
     var isLeeg=!bestaand;
-    b+='<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:7px;cursor:pointer;border-left:3px solid '+(isLeeg?'var(--border)':'var(--accent)')+'" data-leeg="'+isLeeg+'">';
-    b+='<input type="checkbox" class="rou-week-cb" data-key="'+w.key+'"'+(isLeeg?' checked':'')+' style="width:15px;height:15px;cursor:pointer">';
-    b+='<div style="flex:1"><div style="font-size:12px;font-weight:700">Week '+w.week+' <span style="font-weight:400;color:var(--muted)">'+fmtD(dateToStr(w.ma))+'</span></div>';
-    if(med) b+='<div style="font-size:11px;color:var(--muted)">Huidig: '+esc(med.voornaam+' '+med.achternaam)+'</div>';
-    else    b+='<div style="font-size:11px;color:var(--muted)">Leeg</div>';
-    b+='</div>';
-    if(med) b+='<span style="font-size:10px;color:var(--accent)">wordt overschreven</span>';
-    b+='</label>';
+    b += '<div class="lf-rij" data-leeg="'+isLeeg+'"><span class="lf-ic" aria-hidden="true"><span class="lf-stip" style="background:'+(isLeeg?'var(--border)':'var(--accent)')+'"></span></span>'
+      + '<span class="lf-l">Week '+w.week+'<small>'+fmtD(dateToStr(w.ma))+' \u00b7 '+(med ? 'nu '+esc(med.voornaam+' '+med.achternaam) : 'leeg')+'</small></span>'
+      + '<span class="lf-w"><label class="lf-sw"><input type="checkbox" role="switch" class="rou-week-cb" data-key="'+w.key+'"'+(isLeeg?' checked':'')+' aria-label="Week '+w.week+'"><i></i></label></span></div>';
   });
-  b+='</div>';
-  b+='<div style="margin-top:10px;font-size:12px;color:var(--muted)">Roulatie: '+monteurs.map(function(m){return esc(m.voornaam);}).join(' → ')+'</div>';
-
-  var f='<button class="btn btn-ghost" id="rou-cancel">Annuleren</button>';
-  f+='<button class="btn btn-primary" id="rou-preview">Voorstel bekijken →</button>';
-  openModal('Stap 2 van 3 — Weken kiezen',b,f);
+  b += '</div>';
+  b += '<div class="lf-samen">Roulatie: '+monteurs.map(function(m){return esc(m.voornaam);}).join(' \u2192 ')+'</div>';
+  lfOpen('Roulatie \u00b7 stap 2 van 3', b, 'Voorstel bekijken', 'rou-preview');
 
   // Selectie knoppen
-  document.getElementById('rou-cancel').addEventListener('click',closeModal);
   document.getElementById('rou-sel-all').addEventListener('click',function(){
     document.querySelectorAll('.rou-week-cb').forEach(function(cb){cb.checked=true;});
   });
   document.getElementById('rou-sel-leeg').addEventListener('click',function(){
     document.querySelectorAll('.rou-week-cb').forEach(function(cb){
-      var lbl=cb.closest('label'); cb.checked=lbl&&lbl.dataset.leeg==='true';
+      var rij=cb.closest('[data-leeg]'); cb.checked=rij&&rij.dataset.leeg==='true';
     });
   });
   document.getElementById('rou-sel-none').addEventListener('click',function(){
@@ -29376,29 +29299,19 @@ function openRoulatieStap2(weken,monteurs,geselecteerd,sd){
     });
 
     // Bouw preview
-    var b2='<p style="color:var(--muted);font-size:13px;margin-bottom:12px">'+geselecteerd.length+' weken worden bijgewerkt:</p>';
-    b2+='<div style="max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:5px">';
+    var b2='<p class="lf-uitleg" style="padding-top:0">'+geselecteerd.length+' week'+(geselecteerd.length===1?'':'en')+' worden bijgewerkt. Oranje is een wijziging.</p>';
     weken.filter(function(w){return geselecteerd.indexOf(w.key)>=0;}).forEach(function(w){
       var oudMed=sd[w.key]?getMed(sd[w.key].medId):null;
       var nieuwMed=voorstel[w.key];
       var gewijzigd=!oudMed||(oudMed.id!==nieuwMed.id);
-      b2+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:7px;border-left:3px solid '+(gewijzigd?'var(--orange)':'var(--border)')+'">';
-      b2+='<div><div style="font-size:12px;font-weight:700">Week '+w.week+'</div>';
-      b2+='<div style="font-size:11px;color:var(--muted)">'+fmtD(dateToStr(w.ma))+'</div></div>';
-      b2+='<div style="text-align:right">';
-      if(oudMed&&gewijzigd) b2+='<div style="font-size:11px;color:var(--muted);text-decoration:line-through">'+esc(oudMed.voornaam+' '+oudMed.achternaam)+'</div>';
-      b2+='<div style="font-size:13px;font-weight:600;color:'+(gewijzigd?'var(--accent)':'var(--text)')+'">'+esc(nieuwMed.voornaam+' '+nieuwMed.achternaam)+'</div>';
-      b2+='</div></div>';
+      b2 += '<div class="lf-rij"><span class="lf-ic" aria-hidden="true"><span class="lf-stip" style="background:'+(gewijzigd?'var(--orange)':'var(--border)')+'"></span></span>'
+        + '<span class="lf-l">Week '+w.week+'<small>'+fmtD(dateToStr(w.ma))+'</small></span>'
+        + '<span class="lf-w lf-rou-wissel">'+(oudMed&&gewijzigd ? '<s>'+esc(oudMed.voornaam+' '+oudMed.achternaam)+'</s>' : '')
+        + '<b'+(gewijzigd?' class="nieuw"':'')+'>'+esc(nieuwMed.voornaam+' '+nieuwMed.achternaam)+'</b></span></div>';
     });
-    b2+='</div>';
 
-    var f2='<button class="btn btn-ghost" id="rou2-terug">← Terug</button>';
-    f2+='<button class="btn btn-primary" id="rou2-save">'+ICO.check+' Toepassen</button>';
-    openModal('Stap 3 van 3 — Voorstel bevestigen',b2,f2);
-
-    document.getElementById('rou2-terug').addEventListener('click',function(){
-      openRoulatieStap1(weken,monteurs,sd);
-    });
+    lfOpen('Roulatie \u00b7 stap 3 van 3', b2, 'Toepassen', 'rou2-save');
+    lfTerug(function(){ openRoulatieStap1(weken,monteurs,sd); });
     document.getElementById('rou2-save').addEventListener('click',function(){
       if(!APP.storingsdienst) APP.storingsdienst={};
       Object.keys(voorstel).forEach(function(key){
@@ -30797,24 +30710,19 @@ function openBulkMailModal(opdrachtIds) {
 
   if(!rijen.length){ toast('Geen geldige opdrachten geselecteerd','warning'); return; }
 
-  var b = '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Controleer de ontvangers en verstuur alles in één keer. Het onderwerp en de inhoud komen uit de template per opdrachttype.</div>';
-  b += '<div style="max-height:52vh;overflow-y:auto;border:1px solid var(--border);border-radius:10px">';
+  var b = '<p class="lf-uitleg" style="padding-top:0">Controleer de ontvangers en verstuur alles in \u00e9\u00e9n keer. Onderwerp en inhoud komen uit de template per opdrachttype.</p>';
+  b += '<div class="lf-bulk-lijst">';
   rijen.forEach(function(r, i){
     var geenMail = !r.email;
-    b += '<div class="bulkmail-rij" data-i="'+i+'" style="padding:11px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">';
-    b += '<input type="checkbox" class="bulkmail-cb" data-i="'+i+'" '+(geenMail?'':'checked')+' '+(geenMail?'disabled':'')+' style="width:16px;height:16px;flex-shrink:0;accent-color:var(--accent)">';
-    b += '<div style="flex:1;min-width:0">';
-    b += '<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.klantNaam)+' <span style="font-weight:400;color:var(--muted);font-size:11px">· '+esc(r.tplNaam)+'</span></div>';
-    b += '<input type="email" class="input bulkmail-email" data-i="'+i+'" value="'+esc(r.email)+'" placeholder="'+(geenMail?'Geen e-mailadres bekend — vul in':'e-mailadres')+'" style="margin-top:5px;font-size:12px;padding:5px 8px'+(geenMail?';border-color:var(--red)':'')+'">';
-    b += '</div>';
-    b += '</div>';
+    b += '<div class="lf-rij lf-blok bulkmail-rij" data-i="'+i+'">'+_lfIco(_LF_MAIL)
+      + '<span class="lf-l">'+esc(r.klantNaam)+'<small>'+esc(r.tplNaam)+'</small></span>'
+      + '<div class="lf-bulk-mail"><input type="email" class="lf-veld bulkmail-email" data-i="'+i+'" value="'+esc(r.email)+'" inputmode="email" autocapitalize="off" placeholder="'+(geenMail?'Geen e-mailadres bekend, vul in':'E-mailadres')+'" aria-label="E-mailadres '+esc(r.klantNaam)+'">'
+      + '<label class="lf-sw"><input type="checkbox" role="switch" class="bulkmail-cb" data-i="'+i+'" '+(geenMail?'':'checked')+' '+(geenMail?'disabled':'')+' aria-label="Versturen naar '+esc(r.klantNaam)+'"><i></i></label></div></div>';
   });
   b += '</div>';
-  b += '<div id="bulkmail-status" style="font-size:12px;color:var(--muted);margin-top:12px;min-height:18px"></div>';
+  b += '<div id="bulkmail-status" class="lf-hint" style="min-height:18px;padding-top:10px"></div>';
 
-  var f = '<button class="btn btn-ghost" id="bulkmail-cancel">Annuleren</button>'
-        + '<button class="btn btn-primary" id="bulkmail-send">'+ICO.mail+' Verstuur alle</button>';
-  openModal('Mails versturen ('+rijen.length+')', b, f);
+  lfOpen('Mails versturen ('+rijen.length+')', b, 'Alles versturen', 'bulkmail-send');
 
   // E-mailadres per rij live bijwerken + checkbox in-/uitschakelen op geldig adres
   document.querySelectorAll('.bulkmail-email').forEach(function(inp){
@@ -30831,7 +30739,6 @@ function openBulkMailModal(opdrachtIds) {
     cb.addEventListener('change', function(){ cb.dataset.touched='1'; });
   });
 
-  document.getElementById('bulkmail-cancel').addEventListener('click', closeModal);
 
   document.getElementById('bulkmail-send').addEventListener('click', async function(){
     var teVersturen = rijen.filter(function(r,i){
@@ -30841,9 +30748,8 @@ function openBulkMailModal(opdrachtIds) {
     if(!teVersturen.length){ toast('Selecteer minimaal één geldige ontvanger','warning'); return; }
 
     var sendBtn = document.getElementById('bulkmail-send');
-    var cancelBtn = document.getElementById('bulkmail-cancel');
     var statusEl = document.getElementById('bulkmail-status');
-    sendBtn.disabled = true; cancelBtn.disabled = true;
+    sendBtn.disabled = true;
 
     var ok = 0, mislukt = 0, eersteFout = '';
     for(var i=0;i<teVersturen.length;i++){
@@ -30875,38 +30781,23 @@ function openMailModal(opdrachtId) {
   var templates = getMailTemplates();
   var b = '';
   if (!email) {
-    b += '<div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px">Geen e-mailadres bekend bij deze klant.</div>';
+    b += '<div class="lf-melding">Geen e-mailadres bekend bij deze klant.</div>';
   } else {
-    b += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:14px">';
-    b += '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Aan</div>';
-    b += '<strong>'+esc(klant?(klant.contactpersoon||klant.naam):o.klantNaam)+'</strong> <span style="color:var(--accent)">'+esc(email)+'</span></div>';
+    b += lfRij(_LF_MAIL, 'Aan', '<span class="lf-kw">'+esc(klant?(klant.contactpersoon||klant.naam):o.klantNaam)+'</span>', {sub:email});
   }
-  b += '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Kies template</div>';
-  b += '<div style="display:flex;flex-direction:column;gap:10px">';
+  b += '<div class="lf-groep">Kies een template</div>';
   Object.values(templates).forEach(function(tpl){
     var alVerzonden = o.mailVerzonden&&o.mailVerzonden.find(function(m){return m.template===tpl.id;});
-    b += '<div style="border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--surface2)">';
-    b += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">';
-    b += '<div><div style="font-weight:600;font-size:13px">'+esc(tpl.naam)+'</div>';
-    b += '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+esc(vulMailIn(tpl.onderwerp,o))+'</div>';
-    if(alVerzonden) b += '<div style="font-size:11px;color:var(--green-t);margin-top:4px">✓ Verstuurd op '+fmtD(alVerzonden.datum)+'</div>';
-    b += '</div>';
-    b += '<button class="btn btn-primary btn-sm mail-send-btn" data-tpl="'+tpl.id+'" data-op="'+opdrachtId+'">'+ICO.mail+' Openen</button>';
-    b += '</div>';
-    b += '<details style="margin-top:8px"><summary style="font-size:11px;color:var(--muted);cursor:pointer">Voorbeeld tonen</summary>';
-    b += '<pre style="font-size:11px;white-space:pre-wrap;margin-top:8px;padding:8px;background:var(--surface);border-radius:6px;font-family:inherit">'+esc(vulMailIn(tpl.body,o))+'</pre>';
-    b += '</details></div>';
+    b += '<div class="lf-blok-kaart lf-tpl-kaart"><div class="lf-rij">'+_lfIco(alVerzonden ? ICO.check : _LF_MAIL)
+      + '<span class="lf-l">'+esc(tpl.naam)+'<small>'+esc(vulMailIn(tpl.onderwerp,o))+(alVerzonden ? ' \u00b7 verstuurd op '+fmtD(alVerzonden.datum) : '')+'</small></span>'
+      + '<span class="lf-w"><button type="button" class="btn btn-primary btn-sm mail-send-btn" data-tpl="'+tpl.id+'" data-op="'+opdrachtId+'">Openen</button></span></div>';
+    b += '<details class="lf-details"><summary>Voorbeeld tonen</summary><pre>'+esc(vulMailIn(tpl.body,o))+'</pre></details></div>';
   });
-  b += '</div>';
   if(o.mailVerzonden&&o.mailVerzonden.length){
-    b += '<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">';
-    b += '<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Verzendhistorie</div>';
-    o.mailVerzonden.forEach(function(m){var t=templates[m.template];b+='<div style="font-size:12px;color:var(--muted);margin-bottom:3px">'+ICO.mail+' '+esc(t?t.naam:m.template)+' · '+fmtD(m.datum)+' · door '+esc(m.door)+'</div>';});
-    b += '</div>';
+    b += '<div class="lf-groep">Verzonden</div>';
+    o.mailVerzonden.forEach(function(m){ var t=templates[m.template]; b += lfRij(ICO.check, esc(t?t.naam:m.template), '<span class="lf-hint">'+fmtD(m.datum)+'</span>', {sub:'door '+esc(m.door||'')}); });
   }
-  var f = '<button class="btn btn-ghost" id="mail-modal-close">Sluiten</button>';
-  openModal('Mail versturen — '+esc(o.klantNaam||'klant'), b, f);
-  document.getElementById('mail-modal-close').addEventListener('click', closeModal);
+  lfOpen('Mail versturen', '<p class="lf-uitleg" style="padding-top:0">'+esc(o.klantNaam||'Klant')+'</p>'+b);
   document.querySelectorAll('.mail-send-btn').forEach(function(btn){btn.addEventListener('click',function(){stuurMail(btn.dataset.op,btn.dataset.tpl);});});
 }
 
