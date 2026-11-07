@@ -4010,6 +4010,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
 
   // Interne memo auto-save (eigen debounce-timer) + terugkoppeling naar de opdracht in de planning
   var memoEl = document.getElementById('wb-interne-memo');
+  _memoMeegroeien(memoEl);
   if(memoEl && bewerkbaar){
     var _memoTimer = null;
     memoEl.addEventListener('input', function(){
@@ -10052,6 +10053,20 @@ function bindAutoGrow(el) {
   function pasHoogteAan(){ el.style.height='auto'; el.style.height=(el.scrollHeight)+'px'; }
   el.addEventListener('input', pasHoogteAan);
   pasHoogteAan();
+}
+// Zoals bindAutoGrow, maar ook voor een veld in een dichte of verborgen sectie: daar is de
+// hoogte bij het opbouwen 0. Een ResizeObserver meet opnieuw zodra het veld een breedte
+// krijgt (sectie open, ander scherm, draaien). De rand telt mee, anders valt de onderste regel half weg.
+function _memoMeegroeien(el){
+  if(!el) return;
+  el.style.overflow = 'hidden'; el.style.resize = 'none';
+  function pas(){ if(!el.clientWidth) return; el.style.height = 'auto'; el.style.height = (el.scrollHeight + el.offsetHeight - el.clientHeight)+'px'; }
+  el.addEventListener('input', pas);
+  pas();
+  if(typeof ResizeObserver === 'function'){
+    var laatsteBreedte = 0;
+    new ResizeObserver(function(){ var b = el.clientWidth; if(b && b !== laatsteBreedte){ laatsteBreedte = b; pas(); } }).observe(el);
+  }
 }
 
 // ── Lijstformulier (HR-invulvensters) ──
@@ -38736,6 +38751,7 @@ function _woBindDetail(fullscreen){
   if(!fullscreen && _wdSec && _wdSec.classList.contains('open')) _wdVul();
   // Interne memo: automatisch opslaan (eigen vertraging), zoals op de werkbon
   var memoEl = root.querySelector('.wox-memo');
+  _memoMeegroeien(memoEl);
   if(memoEl && st.bewerkbaar){
     var _memoTimer = null;
     memoEl.addEventListener('input', function(){
