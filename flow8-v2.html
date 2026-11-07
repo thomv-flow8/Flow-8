@@ -38160,6 +38160,7 @@ function _woSectiesHtml(secties, scope, dataObj){
   if(secties.register)   h += _woRegisterSectieHtml(scope, dataObj);
   if(secties.onderdelen) h += _woOnderdelenSectieHtml(scope, dataObj);
   if(secties.documenten) h += _woDocSectieHtml(scope, dataObj);
+  if(secties.tijdklok)   h += _woTijdklokHtml(scope);
   return h;
 }
 
@@ -38172,6 +38173,7 @@ function _woEenSectieHtml(sectieKey, scope, dataObj){
     case 'register':   return _woRegisterSectieHtml(scope, dataObj);
     case 'onderdelen': return _woOnderdelenSectieHtml(scope, dataObj);
     case 'documenten': return _woDocSectieHtml(scope, dataObj);
+    case 'tijdklok':   return _woTijdklokHtml(scope);
     default: return '';
   }
 }
@@ -38274,12 +38276,84 @@ function _woUrenSectieHtml(scope, data){
 
 // Uren toevoegen of wijzigen in een klein venster, net als op de werkbon. Met een datum,
 // want een werkorder loopt vaak over meerdere dagen. ui = index van de regel (null = nieuw).
-function _woUurDialoog(scope, ui){
+// voorinvul (optioneel): waarden voor een nieuwe regel (vanuit de tijdklok); naOpslaan: vervolg na opslaan.
+// ── Tijdklok (sectie in werkorder-velden) ──
+// Zelfde kaart als op de werkbon. De starttijd staat in de werkorder (timerActief.<medId>),
+// zodat de klok doorloopt als je de werkorder sluit, herlaadt of een ander toestel pakt.
+// Bij stoppen opent het urenvenster met van, tot en datum al ingevuld.
+var _woTimerInterval = null;
+function _woTijdklokHtml(scope){
+  var st = _woDetailState; if(!st) return '';
+  var mij = (typeof getMijnMedId==='function') ? getMijnMedId() : null;
+  var actief = (mij && st.wo.timerActief) ? st.wo.timerActief[mij] : null;
+  var h = '<div class="wox-sectie wo-sectie lf"><div class="wo-sub">Tijdklok</div>';
+  if(!mij){
+    return h + '<p class="lf-leeg">De tijdklok werkt voor medewerkers; je account is niet aan een medewerker gekoppeld.</p></div>';
+  }
+  var elders = actief && actief.scope && actief.scope !== scope;
+  h += '<div class="wb-timer-compact wbt'+(actief?' loopt':'')+'">'
+    + '<div><span class="wbt-lbl"><i></i>Werktijd'+(actief?' loopt':' \u00b7 niet gestart')+'</span><b class="wo-timer-tijd">'+_wbTimerElapsedStr(actief && actief.startOp)+'</b>'
+    + (actief && actief.startTijd ? '<small class="wbt-sub">gestart '+esc(actief.startTijd)+(elders ? ' \u00b7 in een andere fase' : '')+'</small>' : '')+'</div>';
+  if(st.bewerkbaar){
+    h += '<button type="button" class="wbt-knop wox-timer-knop" data-scope="'+esc(scope)+'" aria-label="'+(actief?'Werktijd stoppen':'Werktijd starten')+'">'
+      + (actief ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="3"/></svg>Stoppen'
+                : '<svg width="15" height="15" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Starten')+'</button>';
+  }
+  return h + '</div></div>';
+}
+// Live teller: loopt zolang er een klok in beeld is.
+function _woTimerTik(){
+  if(_woTimerInterval){ clearInterval(_woTimerInterval); _woTimerInterval = null; }
+  var st = _woDetailState; if(!st) return;
+  var mij = (typeof getMijnMedId==='function') ? getMijnMedId() : null;
+  var actief = (mij && st.wo.timerActief) ? st.wo.timerActief[mij] : null;
+  if(!actief) return;
+  _woTimerInterval = setInterval(function(){
+    var els = document.querySelectorAll('.wo-timer-tijd');
+    if(!els.length || !_woDetailState){ clearInterval(_woTimerInterval); _woTimerInterval = null; return; }
+    var tekst = _wbTimerElapsedStr(actief.startOp);
+    els.forEach(function(el){ el.textContent = tekst; });
+  }, 1000);
+}
+function _woTimerKnop(scope){
+  var st = _woDetailState; if(!st) return;
+  var mij = (typeof getMijnMedId==='function') ? getMijnMedId() : null; if(!mij) return;
+  var actief = st.wo.timerActief ? st.wo.timerActief[mij] : null;
+  var veld = {};
+  if(!actief){
+    // Start: direct wegschrijven, zodat sluiten of herladen de klok niet kwijtraakt.
+    var nu = new Date();
+    var start = { startOp: nu.toISOString(), startTijd: String(nu.getHours()).padStart(2,'0')+':'+String(nu.getMinutes()).padStart(2,'0'), scope: scope };
+    veld['timerActief.'+mij] = start;
+    fsWerkorderBijwerken(st.id, veld).then(function(){
+      st.wo.timerActief = st.wo.timerActief || {};
+      st.wo.timerActief[mij] = start;
+      _woRenderDetail();
+      toast('Werktijd gestart','success');
+    }).catch(function(e){ toast('Mislukt: '+(e.message||e),'error'); });
+    return;
+  }
+  // Stop: urenvenster met van/tot/datum vooringevuld; pas na opslaan gaat de klok uit.
+  var eind = new Date(), begin = new Date(actief.startOp);
+  var iso = function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  var doelScope = actief.scope || scope;
+  _woUurDialoog(doelScope, null, {
+    medewerkerId: mij, datum: iso(begin), van: actief.startTijd || '',
+    tot: String(eind.getHours()).padStart(2,'0')+':'+String(eind.getMinutes()).padStart(2,'0')
+  }, function(){
+    veld['timerActief.'+mij] = firebase.firestore.FieldValue.delete();
+    fsWerkorderBijwerken(st.id, veld).catch(function(e){ toast('Klok stoppen mislukt: '+(e.message||e),'error'); });
+    if(st.wo.timerActief) delete st.wo.timerActief[mij];
+    _woRenderDetail();
+  });
+}
+
+function _woUurDialoog(scope, ui, voorinvul, naOpslaan){
   var st = _woDetailState; if(!st) return;
   var data = _woScopeData(st.antwoorden, scope);
   data._uren = Array.isArray(data._uren) ? data._uren : [];
   var bestaand = (ui!==null && ui!==undefined) ? data._uren[ui] : null;
-  var u = bestaand || {};
+  var u = bestaand || voorinvul || {};
   var mij = (typeof getMijnMedId==='function') ? getMijnMedId() : null;
   var gekozen = String(u.medewerkerId || mij || '');
   var meds = _woUrenMedewerkers().sort(function(a,b){ return ((a.voornaam||'')+' '+(a.achternaam||'')).localeCompare((b.voornaam||'')+' '+(b.achternaam||'')); });
@@ -38294,12 +38368,13 @@ function _woUurDialoog(scope, ui){
   b += lfRij('', 'Uren', '<span class="lf-stap"><button type="button" data-lf-stap="-0.25" aria-label="Kwartier minder">'+_LF_MIN+'</button><input type="number" inputmode="decimal" id="wo-uur-aantal" value="'+esc(u.uren!=null&&u.uren!==''?String(u.uren):'')+'" min="0" step="0.25" placeholder="0"><button type="button" data-lf-stap="0.25" aria-label="Kwartier meer">'+_LF_PLUS+'</button></span>', {voor:'wo-uur-aantal', sub:'Rekent mee met van en tot'});
   b += lfRij(ICO.edit, 'Omschrijving', '<input class="lf-tekst" type="text" id="wo-uur-oms" value="'+esc(u.omschrijving||'')+'" placeholder="Bijv. diagnose, demontage">', {voor:'wo-uur-oms'});
   if(bestaand) b += '<button type="button" class="lf-verwijder" id="wo-uur-del">'+ICO.trash+' Uurregel verwijderen</button>';
-  lfOpen(bestaand ? 'Uren wijzigen' : 'Uren toevoegen', b, bestaand ? 'Opslaan' : 'Toevoegen', 'wo-uur-ok');
+  lfOpen(bestaand ? 'Uren wijzigen' : (voorinvul ? 'Werktijd stoppen' : 'Uren toevoegen'), b, bestaand ? 'Opslaan' : (voorinvul ? 'Werktijd opslaan' : 'Toevoegen'), 'wo-uur-ok');
 
   var vanEl = document.getElementById('wo-uur-van'), totEl = document.getElementById('wo-uur-tot'), aantalEl = document.getElementById('wo-uur-aantal');
   var reken = function(){ var x = _wbUurVanTot(vanEl.value, totEl.value); if(x > 0) aantalEl.value = x; };
   vanEl.addEventListener('input', reken);
   totEl.addEventListener('input', reken);
+  if(voorinvul) reken();
 
   document.getElementById('wo-uur-ok').addEventListener('click', function(){
     var van = vanEl.value, tot = totEl.value;
@@ -38314,8 +38389,9 @@ function _woUurDialoog(scope, ui){
     };
     if(bestaand) data._uren[ui] = Object.assign({}, bestaand, regel); else data._uren.push(regel);
     closeModal();
-    _woBewaarAntwoorden(); _woRenderDetail();
-    toast(bestaand ? 'Uren bijgewerkt' : 'Uren toegevoegd','success');
+    _woBewaarAntwoorden();
+    if(typeof naOpslaan === 'function') naOpslaan(); else _woRenderDetail();
+    toast(bestaand ? 'Uren bijgewerkt' : (voorinvul ? 'Werktijd toegevoegd aan uren' : 'Uren toegevoegd'),'success');
   });
   var del = document.getElementById('wo-uur-del');
   if(del) del.addEventListener('click', function(){
@@ -38737,6 +38813,11 @@ function _woBindDetail(fullscreen){
       _woUurDialoog(bt.dataset.scope, null);
     });
   });
+  // Tijdklok: starten of stoppen, en de live teller
+  root.querySelectorAll('.wox-timer-knop').forEach(function(bt){
+    bt.addEventListener('click', function(){ _woTimerKnop(bt.dataset.scope); });
+  });
+  _woTimerTik();
   // Tik op een uurregel: wijzigen in hetzelfde venster
   root.querySelectorAll('.wo-uur-rij').forEach(function(rij){
     var open = function(e){ if(e && e.target.closest('.wox-uur-del')) return; _woUurDialoog(rij.dataset.scope, +rij.dataset.ui); };
@@ -39814,6 +39895,7 @@ function _openWerkorderStatusEditor(type){
 
 // Inhoud-secties die als sleepbaar item tussen de velden kunnen staan.
 var WO_INHOUD_SECTIES = [
+  { k:'tijdklok',   l:'Tijdklok',      ico:'M12 2a10 10 0 100 20 10 10 0 000-20z|M12 7v5l3 2|M9 2h6' },
   { k:'fotos',      l:"Foto's",        ico:'M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z|M12 17a4 4 0 100-8 4 4 0 000 8z' },
   { k:'uren',       l:'Uren',          ico:'M12 2a10 10 0 100 20 10 10 0 000-20z|M12 6v6l4 2' },
   { k:'materialen', l:'Materialen',    ico:'M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z' },
