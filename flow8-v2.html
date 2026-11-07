@@ -168,6 +168,7 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 body.light .lf{color-scheme:light}
 .lf-rij{width:100%;display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;column-gap:12px;min-height:58px;padding:9px 0;border-bottom:1px solid var(--border);color:var(--text);text-align:left;position:relative}
 .lf-rij[hidden]{display:none}
+button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;font:inherit;color:inherit;margin:0}
 .lf-kies{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
 .lf-kies:active{background:var(--surface2)}
 .lf-kies:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--radius)}
@@ -268,6 +269,7 @@ body.light .lf{color-scheme:light}
 .lf-blok-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:0 14px}
 .lf-blok-kaart > .lf-rij:first-child,.lf-blok-kaart > .lf-twee:first-child > .lf-rij,.lf-blok-kaart > .lf-twee:first-child > .lf-kies{border-top:0}
 .lf-blok-kaart .lf-rij{border-bottom:0;border-top:1px solid var(--border)}
+.lf-blok-kaart > .lf-art:first-child{border-top:0}
 .lf-blok-kaart > .lf-groep:first-child{margin-top:12px}
 .lf-twee{display:grid;grid-template-columns:minmax(0,1fr)}
 .lf-drie{display:grid;grid-template-columns:minmax(0,1fr)}
@@ -36964,13 +36966,12 @@ function _woKiesTypeEnMaak() {
     if(!actief.length){ toast('Maak eerst een werkorder-type aan in de instellingen','warning'); return; }
     // Eén type → meteen aanmaken. Meerdere → keuzemenu.
     if(actief.length===1){ _woMaakAan(actief[0]); return; }
-    var b = '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Welk type werkorder wil je aanmaken?</div>';
-    b += '<div style="display:flex;flex-direction:column;gap:8px">';
+    var b = '<p class="lf-uitleg" style="margin:4px 2px 10px">Welk type werkorder wil je aanmaken?</p><div class="lf-blok-kaart">';
     actief.forEach(function(t){
-      b += '<button type="button" class="wo-kies-type btn btn-ghost" data-id="'+esc(t.id)+'" style="justify-content:flex-start;gap:10px;padding:12px 14px"><span style="color:var(--accent);display:flex">'+_woTypeIcoon(t.icoon)+'</span><span style="font-weight:600">'+esc(t.naam)+'</span></button>';
+      b += '<button type="button" class="lf-art wo-kies-type" data-id="'+esc(t.id)+'"><span class="lf-ic" aria-hidden="true" style="color:var(--accent-t)">'+String(_woTypeIcoon(t.icoon)).replace(/width="\d+" height="\d+"/, 'width="18" height="18"')+'</span><span class="lf-l">'+esc(t.naam)+'</span>'+_LF_CHEV+'</button>';
     });
     b += '</div>';
-    openModal('Nieuwe werkorder', b, '<button class="btn btn-ghost" onclick="closeModal()">Annuleren</button>');
+    lfOpen('Nieuwe werkorder', b);
     document.querySelectorAll('#modal .wo-kies-type').forEach(function(btn){
       btn.addEventListener('click', function(){
         var t = actief.find(function(x){ return String(x.id)===String(btn.dataset.id); });
@@ -37035,23 +37036,14 @@ function _woBewerkModal(id, wo){
     function teken(){
       var b = '';
       if(klantInst.aan){
-        b += '<div style="margin-bottom:16px"><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Klant</label>';
-        if(_st.debId || _st.tbvVoorraad){
-          var lbl = _st.tbvVoorraad ? 'T.b.v. voorraad (geen klant)' : (_st.klantnaam||'Gekozen klant');
-          b += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:8px">';
-          b += '<span style="font-size:13px;font-weight:600'+(_st.tbvVoorraad?';font-style:italic;color:var(--muted)':'')+'">'+esc(lbl)+'</span>';
-          b += '<button type="button" class="btn btn-ghost btn-sm" id="wobe-klant-wijzig" style="font-size:11px">Wijzigen</button></div>';
-        } else {
-          b += '<button type="button" class="btn btn-ghost" id="wobe-klant-kies" style="width:100%;justify-content:center">Klant kiezen</button>';
-        }
-        b += '</div>';
+        var _kLbl = _st.tbvVoorraad ? 'T.b.v. voorraad' : (_st.debId ? (_st.klantnaam||'Gekozen klant') : '');
+        b += '<button type="button" class="lf-rij lf-kies" id="'+((_st.debId||_st.tbvVoorraad)?'wobe-klant-wijzig':'wobe-klant-kies')+'">'+_lfIco(ICO.gebouw)
+          + '<span class="lf-l">Klant</span><span class="lf-w"><span class="lf-kw'+(_kLbl?'':' leeg')+'">'+esc(_kLbl||'Kies klant')+'</span>'+_LF_CHEV+'</span></button>';
       }
-      b += '<div style="margin-bottom:16px"><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Deadline</label>';
-      b += '<input type="date" class="input" id="wobe-deadline" value="'+esc(_st.deadline||'')+'" style="max-width:200px"></div>';
-      b += '<div style="margin-bottom:8px"><label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Details (omschrijving werkzaamheden)</label>';
-      b += '<textarea class="input" id="wobe-details" rows="3" placeholder="Wat moet er gebeuren?" style="width:100%;box-sizing:border-box;resize:vertical">'+esc(_st.details||'')+'</textarea></div>';
-      var f = '<button class="btn btn-ghost" onclick="closeModal()">Annuleren</button><button class="btn btn-primary" id="wobe-opslaan">Opslaan</button>';
-      openModal('Werkorder bewerken'+(wo.nummer?(' '+_woNummerLabel(wo)):''), b, f);
+      b += lfRij(ICO.kalender, 'Deadline', '<input class="lf-veld" type="date" id="wobe-deadline" value="'+esc(_st.deadline||'')+'">', {voor:'wobe-deadline'});
+      b += lfRij(ICO.edit, 'Details', '<textarea class="lf-notitie" id="wobe-details" rows="3" placeholder="Wat moet er gebeuren?">'+esc(_st.details||'')+'</textarea>', {blok:true, voor:'wobe-details', sub:'Omschrijving van de werkzaamheden'});
+      lfOpen('Werkorder bewerken'+(wo.nummer?(' '+_woNummerLabel(wo)):''), b, 'Opslaan', 'wobe-opslaan');
+      bindAutoGrow(document.getElementById('wobe-details'));
 
       function bewaarVelden(){ var d=document.getElementById('wobe-deadline'); if(d)_st.deadline=d.value; var dt=document.getElementById('wobe-details'); if(dt)_st.details=dt.value; }
       var kk = document.getElementById('wobe-klant-kies'); if(kk) kk.addEventListener('click', function(){ bewaarVelden(); kiesDeb(); });
@@ -37074,16 +37066,17 @@ function _woBewerkModal(id, wo){
 
     function kiesDeb(){
       var debiteuren = (APP.debiteuren||[]).slice().sort(function(a,b){ return (a.naam||'').localeCompare(b.naam||''); });
-      var b = '<input type="text" id="wobe-deb-zoek" class="input" placeholder="Zoek debiteur..." style="margin-bottom:10px;width:100%;box-sizing:border-box" autofocus>';
-      if(klantInst.voorraad) b += '<button type="button" class="btn btn-ghost btn-sm" id="wobe-deb-voorraad" style="width:100%;justify-content:center;margin-bottom:10px">T.b.v. voorraad (geen klant)</button>';
-      b += '<div id="wobe-deb-res" style="max-height:44vh;overflow-y:auto"></div>';
-      openModal('Klant kiezen', b, '<button class="btn btn-ghost" id="wobe-deb-terug">Terug</button>');
+      var b = _lfZoek('wobe-deb-zoek', 'Zoek op naam of plaats');
+      if(klantInst.voorraad) b += '<button type="button" class="wbx-chip-add" id="wobe-deb-voorraad"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/></svg> T.b.v. voorraad (geen klant)</button>';
+      b += '<div id="wobe-deb-res"></div>';
+      lfOpen('Klant kiezen', b);
+      document.getElementById('modal-footer').innerHTML = '<button type="button" class="btn btn-ghost lf-knop" id="wobe-deb-terug">Terug</button>';
       document.getElementById('wobe-deb-terug').addEventListener('click', teken);
       var zoek=document.getElementById('wobe-deb-zoek'), res=document.getElementById('wobe-deb-res');
       function tk(filter){
         filter=(filter||'').toLowerCase().trim();
         var lijst=debiteuren.filter(function(d){ if(!filter)return true; return ((d.naam||'').toLowerCase().indexOf(filter)>=0)||((d.plaats||'').toLowerCase().indexOf(filter)>=0); }).slice(0,50);
-        res.innerHTML = lijst.length ? lijst.map(function(d){ return '<div class="wobe-deb-opt" data-id="'+esc(d.id)+'" style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border);cursor:pointer"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(d.naam||'—')+'</div><div style="font-size:11px;color:var(--muted)">'+esc([d.adres,d.plaats].filter(Boolean).join(', '))+'</div></div></div>'; }).join('') : '<div style="font-size:13px;color:var(--muted);padding:16px;text-align:center">Geen debiteuren gevonden.</div>';
+        res.innerHTML = lijst.length ? lijst.map(function(d){ return '<button type="button" class="lf-art wobe-deb-opt" data-id="'+esc(d.id)+'">'+_lfIco(ICO.gebouw)+'<span class="lf-l">'+esc(d.naam||'\u2014')+'<small>'+esc([d.adres,d.plaats].filter(Boolean).join(', '))+'</small></span>'+_LF_CHEV+'</button>'; }).join('') : '<p class="lf-leeg">Geen debiteuren gevonden.</p>';
         res.querySelectorAll('.wobe-deb-opt').forEach(function(row){ row.addEventListener('click', function(){ var d=debiteuren.find(function(x){return String(x.id)===String(row.dataset.id);}); _st.debId=row.dataset.id; _st.klantnaam=d?d.naam:''; _st.tbvVoorraad=false; teken(); }); });
       }
       tk('');
