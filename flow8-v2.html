@@ -346,18 +346,17 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-pc) > .lf-w{justify-self:start}
   /* Rechterkolom: korte labels (naam, plaats, telefoon), dus een smallere labelkolom en meer ruimte voor het veld. */
   .modal-lf-groot .lf-twee > .lf-rij:nth-child(2):has(> .lf-w > .lf-tekst){grid-template-columns:36px 112px minmax(0,1fr)}
-  /* Artikel: EAN en eenheid naast elkaar in de rechterkolom, labels zo smal als ze zijn. */
-  .modal-lf-groot .lf-art-kort{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);column-gap:16px}
+  /* Artikel: smaller venster; de eenheid staat compact achter de omschrijving. */
+  .modal.modal-lf-groot.modal-lf-middel{width:min(860px,95vw)}
+  .modal-lf-groot .lf-art-oms{grid-template-columns:minmax(0,1fr) 190px;column-gap:16px}
+  .modal-lf-groot .lf-art-oms > .lf-rij:last-child:has(> .lf-w > .lf-tekst){grid-template-columns:auto minmax(0,1fr)}
+  .modal-lf-groot .lf-art-oms > .lf-rij:last-child > .lf-ic:empty{display:none}
   .modal-lf-groot .lf-kolommen{grid-template-columns:repeat(2,minmax(0,1fr))}
   .modal-lf-groot .lf-kolommen.tpl{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
   .modal-lf-groot .lf-kolommen .tpl-preview-kol{position:sticky;top:0}
   /* Waarde direct na de labelkolom in plaats van tegen de rechterrand (prijs + btw). */
   .modal-lf-groot .lf-rij.lf-links{grid-template-columns:36px 132px minmax(0,1fr)}
   .modal-lf-groot .lf-rij.lf-links > .lf-w{justify-self:start}
-  .modal-lf-groot .lf-art-kort > .lf-rij{border-top:0}
-  .modal-lf-groot .lf-art-kort > .lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px auto minmax(0,1fr)}
-  .modal-lf-groot .lf-art-kort > .lf-rij:has(> .lf-ic:empty){grid-template-columns:auto minmax(0,1fr)}
-  .modal-lf-groot .lf-art-kort > .lf-rij > .lf-ic:empty{display:none}
 }
 /* Grote formulieren op de telefoon: label klein boven het vak, zodat lange namen passen */
 @media(max-width:768px){
@@ -393,7 +392,7 @@ label.lf-rij{cursor:pointer}
 .lf-tel:empty{display:none!important}
 .lf-stip{width:10px;height:10px;border-radius:50%}
 .lf-klap-b > .lf-zoek-res + .lf-rij,.lf-klap-b > #art-doc-lijst + .lf-rij{border-top:1px solid var(--border)}
-.lf-art-kort{display:grid;grid-template-columns:minmax(0,1fr)}
+.lf-art-oms{display:grid;grid-template-columns:minmax(0,1fr)}
 .lf-klap-twee{align-items:start}
 .lf-doc-rij > .lf-l .lf-tekst{text-align:left!important;width:100%;padding:4px 0}
 .lf-kleur{width:56px;height:34px;padding:3px;border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface2);cursor:pointer}
@@ -508,6 +507,14 @@ label.lf-rij{cursor:pointer}
   .vt-links-dicht{width:32px;height:32px;border-radius:50%;border:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
   .vt-rij,.vt-sectie{grid-template-columns:auto 32px minmax(0,1fr) auto;column-gap:8px}
 }
+/* Op een breed scherm moet de pagina de hoogte van het venster volgen, anders scrolt de rechterkolom niet. */
+#wb-fullscreen .wbx-fs-inner > .wox-pagina{display:flex;flex-direction:column;flex:1;min-height:0}
+.wo-overzicht{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:0 0 14px}
+.wo-ovz-deel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2px 14px 12px}
+.wo-ovz-kop{font:700 10.5px 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 0 4px}
+#wb-fullscreen .wo-overzicht{grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:18px}
+#wb-fullscreen .wbx-md-detailbody > .wo-beheer{margin:18px 0 8px}
+.wox-pagina > .wo-beheer{margin:14px 0 8px}
 .wox-pagina .wo-kop{display:flex;align-items:center;gap:12px;margin:-8px -4px 4px}
 .wo-titel{flex:1;min-width:0;font-size:18px;font-weight:600}
 .wo-titel span{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
@@ -536,8 +543,28 @@ label.lf-rij{cursor:pointer}
 .wo-afronding{margin-top:6px}
 .wo-afgerond{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--green-t);font-weight:600}
 .wo-kaal{background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;padding:12px 14px;min-height:44px}
-/* Secties (foto's, uren, materialen, ...) krijgen dezelfde kopjes als de rest van de pagina */
-.wox-pagina .wox-sectie > div:first-child{font:700 10.5px 'Space Mono',monospace!important;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wo-sectie .wo-sub{margin-top:18px}
+.wo-fotos{display:flex;gap:8px;flex-wrap:wrap}
+.wo-foto{position:relative;width:76px;height:76px;border-radius:var(--radius);overflow:hidden;background:var(--surface2)}
+.wo-foto img{width:100%;height:100%;object-fit:cover;cursor:pointer;display:block}
+.wo-foto-leeg{width:100%;height:100%;display:grid;place-items:center;color:var(--muted)}
+.wo-foto-wacht{position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center}
+.wo-foto-x{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+.wo-foto-plus{width:76px;height:76px;border-radius:var(--radius);border:1px dashed var(--border);display:grid;place-items:center;color:var(--accent-t);background:rgba(79,110,245,.06);cursor:pointer}
+.wo-uur{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;margin-bottom:8px}
+.wo-uur-kop{display:flex;align-items:center;gap:10px}
+.wo-uur .wbx-who{width:32px;height:32px;border-radius:50%;background:var(--accent-knop);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+.lf .lf-veld.wo-uur-med{flex:1;min-width:0;width:auto!important;text-align:left}
+.wo-uur-tijd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+.wo-uur-van-tot{display:inline-flex;align-items:center;gap:4px;color:var(--muted)}
+.wo-uur-aantal{display:inline-flex;align-items:center;gap:4px;margin-left:auto;color:var(--muted);font-size:13px}
+.wo-uur .lf-notitie{background:var(--surface)}
+.wo-doc{cursor:pointer}
+.wo-doc .lf-w{gap:2px}
+.wo-doc-knop{color:var(--muted)}
+.wo-ond span small{display:block;font-size:12px;color:var(--muted);margin-top:2px;font-weight:400}
+.wo-link-knop{border:0;background:none;color:var(--accent-t);font:600 13.5px 'Instrument Sans',sans-serif;cursor:pointer;padding:8px 0}
+button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--border);background:none;font:inherit;color:var(--text);text-align:left;cursor:pointer}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
 .lf-wis:hover{background:var(--red);color:#fff}
@@ -9061,6 +9088,7 @@ function openModal(title, bodyHtml, footerHtml, breed, xl) {
   if(_md) _md.classList.toggle('modal-xl', !!xl);
   if(_md) _md.classList.remove('modal-lf');
   if(_md) _md.classList.remove('modal-lf-groot');
+  if(_md) _md.classList.remove('modal-lf-middel');
   document.getElementById('modal-overlay').classList.add('open');
   // Wis eventuele oude validatiestijlen
   wisValidatieStijlen();
@@ -25721,12 +25749,11 @@ function _openArtikelEditor(artikel){
   var _fotoData = a.foto || '';
   var _arT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
   var b = '<div class="lf-groep">Artikel</div><div class="lf-blok-kaart">';
-  // Code links; EAN en eenheid zijn kort en delen samen de rechterkolom. De omschrijving
-  // is vaak lang en krijgt daaronder de volle breedte.
+  // Code en EAN naast elkaar; de omschrijving is vaak lang en krijgt de ruimte, de eenheid staat er compact achter.
   b += '<div class="lf-twee">'+lfRij(_LF_PAKKET, 'Artikelcode', _arT('art-code', a.code, 'Bijv. PMP-4823', ' required autocapitalize="characters"'), {verplicht:true, voor:'art-code'})
-     + '<div class="lf-art-kort">'+lfRij(_LF_EAN, 'EAN', _arT('art-ean', a.ean, 'Optioneel', ' inputmode="numeric"'), {voor:'art-ean'})
-     + lfRij('', 'Eenheid', _arT('art-eenheid', a.eenheid||'stuk', 'stuk'), {voor:'art-eenheid'})+'</div></div>';
-  b += lfRij(ICO.edit, 'Omschrijving', _arT('art-oms', a.omschrijving, 'Bijv. Dompelpomp TP48', ' required'), {verplicht:true, voor:'art-oms'});
+     + lfRij(_LF_EAN, 'EAN', _arT('art-ean', a.ean, 'Optioneel', ' inputmode="numeric"'), {voor:'art-ean'})+'</div>';
+  b += '<div class="lf-art-oms">'+lfRij(ICO.edit, 'Omschrijving', _arT('art-oms', a.omschrijving, 'Bijv. Dompelpomp TP48', ' required'), {verplicht:true, voor:'art-oms'})
+     + lfRij('', 'Eenheid', _arT('art-eenheid', a.eenheid||'stuk', 'stuk'), {voor:'art-eenheid'})+'</div>';
   b += lfRij(ICO.info, 'Notitie', '<textarea class="lf-notitie" id="art-notitie" rows="2" placeholder="Optionele uitgebreide omschrijving\u2026">'+esc(a.notitie||'')+'</textarea>', {blok:true, voor:'art-notitie'});
   b += '</div>';
   b += '<div class="lf-groep">Prijs en werkbon</div><div class="lf-blok-kaart">';
@@ -25766,6 +25793,7 @@ function _openArtikelEditor(artikel){
   b += '</div>';
 
   lfOpen(isNew?'Artikel toevoegen':'Artikel bewerken', b, 'Opslaan', 'art-save', {groot:true});
+  var _artMd = document.getElementById('modal'); if(_artMd) _artMd.classList.add('modal-lf-middel');
 
   // Accordion-toggles (Foto, Documenten) — standaard dicht
   document.querySelectorAll('#modal .art-acc .art-acc-hdr').forEach(function(hdr){
@@ -37786,8 +37814,6 @@ function _woRenderDetail(){
       + '<div class="wbx-body pt">'+body+'</div></div>';
   };
   var _rij = function(k, v){ return '<div class="wbx-row"><span class="wbx-k">'+k+'</span><span class="wbx-v">'+v+'</span></div>'; };
-  var I_INFO = '<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>';
-  var I_KLANT = '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>';
   var I_MAP = '<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>';
   var I_VELDEN = '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>';
   var I_NR = function(n){ return '<text x="12" y="18.5" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" stroke="none" font-family="Space Mono, monospace">'+n+'</text>'; };
@@ -37815,7 +37841,9 @@ function _woRenderDetail(){
        + _opties.map(function(x){ return '<option value="'+esc(x.key)+'">'+esc(x.naam)+'</option>'; }).join('')+'</select>' : '')
      + '</div></div>';
 
-  h += '<div class="wbx-secties">';
+  // Informatie en klant staan altijd in beeld: op een breed scherm boven de gekozen fase,
+  // op een telefoon direct onder de status. Beheer (prioriteit, verwijderen) komt onderaan.
+  var _ovzInfo = '', _ovzKlant = '', _beheerHtml = '';
   // Informatie
   if(secties.infoblok !== false){
     var _datum = '';
@@ -37826,14 +37854,14 @@ function _woRenderDetail(){
       + '<div class="wbx-field-lbl">Details</div><textarea class="wbx-field area wox-details" placeholder="Omschrijving van de werkzaamheden"'+dis+'>'+esc(wo.details||'')+'</textarea>';
     if(kanBeheren){
       var _isHoog = wo.prioriteit==='hoog';
-      info += '<div class="wo-beheer"><button type="button" class="wbx-chip-add wox-prio'+(_isHoog?' hoog':'')+'">'+ICO.flag+(_isHoog?'Hoge prioriteit uitzetten':'Markeren als hoge prioriteit')+'</button>'
+      _beheerHtml = '<div class="wo-beheer"><button type="button" class="wbx-chip-add wox-prio'+(_isHoog?' hoog':'')+'">'+ICO.flag+(_isHoog?'Hoge prioriteit uitzetten':'Markeren als hoge prioriteit')+'</button>'
         + '<button type="button" class="lf-verwijder wox-verwijder">'+ICO.trash+' Werkorder verwijderen</button></div>';
     }
-    h += _sec('info', I_INFO, 'Informatie', '', info);
+    _ovzInfo = info;
   }
   // Klant
   if(wo.tbvVoorraad){
-    h += _sec('klant', I_KLANT, 'Klant', '', _rij('Klant', '<i>T.b.v. voorraad</i>'));
+    _ovzKlant = _rij('Klant', '<i>T.b.v. voorraad</i>');
   } else if(wo.debId || wo.klantnaam){
     var deb = wo.debId ? (APP.debiteuren||[]).find(function(d){ return String(d.id)===String(wo.debId); }) : null;
     var kn = wo.klantnaam || (deb&&deb.naam) || (typeof debNaam==='function' ? debNaam(wo.debId) : '') || '';
@@ -37849,9 +37877,16 @@ function _woRenderDetail(){
       if(deb.telefoon) _snel += '<a href="tel:'+esc(String(deb.telefoon).replace(/\s/g,''))+'">'+_LF_TEL+'Bellen</a>';
       if(_snel) kl += '<div class="wbx-snel">'+_snel+'</div>';
     }
-    h += _sec('klant', I_KLANT, 'Klant', '', kl);
+    _ovzKlant = kl;
   }
-  // Werkdocumenten: centrale documentenmap. Inhoud wordt pas geladen bij het openen (scheelt reads).
+  if(_ovzInfo || _ovzKlant){
+    h += '<div class="wo-overzicht">'
+      + (_ovzInfo ? '<div class="wo-ovz-deel"><div class="wo-ovz-kop">Informatie</div>'+_ovzInfo+'</div>' : '')
+      + (_ovzKlant ? '<div class="wo-ovz-deel"><div class="wo-ovz-kop">Klant</div>'+_ovzKlant+'</div>' : '')
+      + '</div>';
+  }
+  h += '<div class="wbx-secties">';
+  // Werkdocumenten: centrale documentenmap, bovenaan om te raadplegen. Inhoud wordt pas geladen bij het openen (scheelt reads).
   h += _sec('werkdocumenten', I_MAP, 'Werkdocumenten', '', '<div id="wox-wd-body"></div>');
 
   if(heeftBlokken){
@@ -37891,6 +37926,7 @@ function _woRenderDetail(){
     h += _sec('velden', I_VELDEN, 'Invullen', '', vb);
   }
   h += '</div>';   // wbx-secties
+  h += _beheerHtml;
 
   // Onderaan (op brede schermen onderin de navigatiekolom): de volledige PDF
   h += '<div class="wbx-actiebar"><button type="button" class="btn btn-ghost wox-pdf-volledig"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg> PDF van de werkorder</button></div>';
@@ -37912,6 +37948,14 @@ function _woRenderDetail(){
       st.mdIdx = i;
       if(sec && sec.getAttribute('data-sec')==='werkdocumenten' && st._wdVul) st._wdVul();
     }});
+    // Overzicht en de titel van de fase bovenaan de rechterkolom, beheer onderaan; ze scrollen mee.
+    var _db = fs.querySelector('.wbx-md-detailbody'), _tt = fs.querySelector('.wbx-md-titel');
+    var _ovz = fs.querySelector('.wo-overzicht'), _bh = fs.querySelector('.wo-beheer');
+    if(_db){
+      if(_ovz) _db.insertBefore(_ovz, _db.firstChild);
+      if(_tt) _db.insertBefore(_tt, _ovz ? _ovz.nextSibling : _db.firstChild);
+      if(_bh) _db.appendChild(_bh);
+    }
   } else {
     // Eigen kop met terugknop staat al in h; de paneelkop erboven zou een tweede
     // titelbalk met sluitknop opleveren. Zelfde aanpak als de werkbon.
@@ -38165,25 +38209,25 @@ function _woScopeData(antw, scope){
 function _woFotoSectieHtml(scope, data){
   data = data || {};
   var fotos = Array.isArray(data._fotos) ? data._fotos : [];
-  var h = '<div class="wox-sectie" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Foto\'s'+(fotos.length?(' ('+fotos.length+')'):'')+'</div>';
-  h += '<div class="wox-foto-grid" data-scope="'+esc(scope)+'" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
+  var bew = _woDetailState.bewerkbaar;
+  var h = '<div class="wox-sectie wo-sectie lf"><div class="wo-sub">Foto\'s'+(fotos.length?(' \u00b7 '+fotos.length):'')+'</div>';
+  h += '<div class="wox-foto-grid wo-fotos" data-scope="'+esc(scope)+'">';
   fotos.forEach(function(f, fi){
     // Een foto die nog op upload wacht heeft geen URL in de werkorder staan; de
     // voorbeeldweergave komt uit de lokale queue en bestaat alleen op dit apparaat.
     // Ontbreekt die (ander toestel, ander tabblad), dan een leeg vlak i.p.v. een kapot plaatje.
     var bron = f._pending ? _fqVoorbeeldUrl(f._localId) : f.url;
-    h += '<div style="position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#222">';
-    if(bron) h += '<img class="wox-foto-thumb" data-scope="'+esc(scope)+'" data-fi="'+fi+'" src="'+esc(bron)+'" style="width:100%;height:100%;object-fit:cover;cursor:pointer'+(f._pending?';opacity:.6':'')+'">';
-    else h += '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted)"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
-    if(f._pending) h += '<span title="Wacht op upload — wordt verstuurd zodra er verbinding is" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--orange);color:#1a1200;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
-    if(_woDetailState.bewerkbaar) h += '<button type="button" class="wox-foto-del" data-scope="'+esc(scope)+'" data-fi="'+fi+'" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;line-height:1">\u00d7</button>';
+    h += '<div class="wo-foto">';
+    if(bron) h += '<img class="wox-foto-thumb" data-scope="'+esc(scope)+'" data-fi="'+fi+'" src="'+esc(bron)+'" alt="Foto '+(fi+1)+'">';
+    else h += '<div class="wo-foto-leeg">'+ICO.foto+'</div>';
+    if(f._pending) h += '<span class="wo-foto-wacht" title="Wacht op upload \u2014 wordt verstuurd zodra er verbinding is"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
+    if(bew) h += '<button type="button" class="wox-foto-del wo-foto-x" data-scope="'+esc(scope)+'" data-fi="'+fi+'" aria-label="Foto verwijderen">\u00d7</button>';
     h += '</div>';
   });
+  if(bew) h += '<label class="wo-foto-plus" aria-label="Foto toevoegen">'+_LF_PLUS+'<input type="file" accept="image/*" multiple class="wox-foto-input" data-scope="'+esc(scope)+'" hidden></label>';
   h += '</div>';
-  if(_woDetailState.bewerkbaar) h += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">'+ICO.foto+' Foto toevoegen<input type="file" accept="image/*" multiple class="wox-foto-input" data-scope="'+esc(scope)+'" style="display:none"></label>';
-  h += '</div>';
-  return h;
+  if(!fotos.length && !bew) h += '<p class="lf-leeg">Geen foto\'s.</p>';
+  return h + '</div>';
 }
 
 // UREN — met medewerker-keuze, uren en omschrijving (zoals werkbon)
@@ -38192,6 +38236,7 @@ function _woUrenSectieHtml(scope, data){
   var uren = Array.isArray(data._uren) ? data._uren : [];
   var totaal = uren.reduce(function(s,u){ return s + (parseFloat(u.uren)||0); }, 0);
   var bew = _woDetailState.bewerkbaar;
+  var dis = bew ? '' : ' disabled';
   var _urenRollen = (APP.werkordersInst && APP.werkordersInst.urenRollen) || ['monteur','magazijn'];
   var meds = (APP.medewerkers||[]).filter(function(m){
     if(m.status==='inactief') return false;
@@ -38200,39 +38245,26 @@ function _woUrenSectieHtml(scope, data){
     var mr = Array.isArray(m.rollen) ? m.rollen : (m.rol ? [m.rol] : []);
     return mr.some(function(r){ return _urenRollen.indexOf(r)>=0; });
   });
-  var inpStyle = 'box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text)';
-  var h = '<div class="wox-sectie" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Uren'+(totaal?(' ('+String(Math.round(totaal*100)/100).replace('.',',')+' u)'):'')+'</div>';
+  var a = function(cls, ui){ return 'class="'+cls+'" data-scope="'+esc(scope)+'" data-ui="'+ui+'"'; };
+  // Het eerste div is de kop: de koppelcode werkt de urenteller daarin bij.
+  var h = '<div class="wox-sectie wo-sectie lf"><div class="wo-sub">Uren'+(totaal?(' ('+String(Math.round(totaal*100)/100).replace('.',',')+' u)'):'')+'</div>';
   uren.forEach(function(u, ui){
-    h += '<div style="background:var(--surface2);border-radius:9px;padding:10px;margin-bottom:8px">';
-    // Rij 1: medewerker + verwijderknop
-    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
-    h += '<select class="wox-uur-med" data-scope="'+esc(scope)+'" data-ui="'+ui+'"'+(bew?'':' disabled')+' style="flex:1;'+inpStyle+'">';
-    h += '<option value="">— Medewerker —</option>';
-    meds.forEach(function(m){
-      var naam = ((m.voornaam||'')+' '+(m.achternaam||'')).trim()||m.email||'?';
-      h += '<option value="'+esc(m.id)+'"'+(String(u.medewerkerId||'')===String(m.id)?' selected':'')+'>'+esc(naam)+'</option>';
-    });
-    h += '</select>';
-    if(bew) h += '<button type="button" class="wox-uur-del btn btn-ghost btn-wis" data-scope="'+esc(scope)+'" data-ui="'+ui+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-    h += '</div>';
-    // Rij 2: datum + van + tot + uren
-    h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">';
-    h += '<input type="date" class="wox-uur-datum" data-scope="'+esc(scope)+'" data-ui="'+ui+'" value="'+esc(u.datum||'')+'"'+(bew?'':' disabled')+' style="flex:1;min-width:130px;'+inpStyle+'">';
-    h += '<div style="display:flex;align-items:center;gap:4px">';
-    h += '<input type="time" class="wox-uur-van" data-scope="'+esc(scope)+'" data-ui="'+ui+'" value="'+esc(u.van||'')+'" title="Van"'+(bew?'':' disabled')+' style="width:96px;'+inpStyle+'">';
-    h += '<span style="font-size:12px;color:var(--muted)">–</span>';
-    h += '<input type="time" class="wox-uur-tot" data-scope="'+esc(scope)+'" data-ui="'+ui+'" value="'+esc(u.tot||'')+'" title="Tot"'+(bew?'':' disabled')+' style="width:96px;'+inpStyle+'">';
-    h += '</div>';
-    h += '<div style="display:flex;align-items:center;gap:4px"><input type="number" step="0.25" class="wox-uur-aantal" data-scope="'+esc(scope)+'" data-ui="'+ui+'" value="'+esc(u.uren!=null?u.uren:'')+'" placeholder="0"'+(bew?'':' disabled')+' style="width:64px;'+inpStyle+'"><span style="font-size:12px;color:var(--muted)">u</span></div>';
-    h += '</div>';
-    // Rij 3: omschrijving
-    h += '<input type="text" class="wox-uur-oms" data-scope="'+esc(scope)+'" data-ui="'+ui+'" value="'+esc(u.omschrijving||'')+'" placeholder="Omschrijving werkzaamheden"'+(bew?'':' disabled')+' style="width:100%;'+inpStyle+'">';
+    var m = u.medewerkerId ? getMed(u.medewerkerId) : null;
+    h += '<div class="wo-uur">';
+    h += '<div class="wo-uur-kop"><span class="wbx-who">'+(m ? esc(initials(m)) : '?')+'</span>'
+      + '<select '+a('lf-veld wo-uur-med wox-uur-med', ui)+dis+' aria-label="Medewerker"><option value="">Medewerker kiezen</option>'
+      + meds.map(function(x){ var naam = ((x.voornaam||'')+' '+(x.achternaam||'')).trim()||x.email||'?'; return '<option value="'+esc(x.id)+'"'+(String(u.medewerkerId||'')===String(x.id)?' selected':'')+'>'+esc(naam)+'</option>'; }).join('')
+      + '</select>'
+      + (bew ? '<button type="button" '+a('vt-wis wox-uur-del', ui)+' aria-label="Uurregel verwijderen" title="Verwijderen">'+ICO.trash+'</button>' : '')+'</div>';
+    h += '<div class="wo-uur-tijd"><input type="date" '+a('lf-veld wox-uur-datum', ui)+' value="'+esc(u.datum||'')+'"'+dis+' aria-label="Datum">'
+      + '<span class="wo-uur-van-tot"><input type="time" '+a('lf-veld wox-uur-van', ui)+' value="'+esc(u.van||'')+'"'+dis+' aria-label="Van"><span>\u2013</span><input type="time" '+a('lf-veld wox-uur-tot', ui)+' value="'+esc(u.tot||'')+'"'+dis+' aria-label="Tot"></span>'
+      + '<span class="wo-uur-aantal"><input type="number" step="0.25" inputmode="decimal" '+a('lf-veld lf-kort wox-uur-aantal', ui)+' value="'+esc(u.uren!=null?u.uren:'')+'" placeholder="0"'+dis+' aria-label="Aantal uren">u</span></div>';
+    h += '<input type="text" '+a('lf-notitie wox-uur-oms', ui)+' value="'+esc(u.omschrijving||'')+'" placeholder="Omschrijving werkzaamheden"'+dis+'>';
     h += '</div>';
   });
-  if(bew) h += '<button type="button" class="wox-uur-add btn btn-ghost btn-sm" data-scope="'+esc(scope)+'" style="margin-top:4px">+ Uur toevoegen</button>';
-  h += '</div>';
-  return h;
+  if(bew) h += '<button type="button" class="wbx-chip-add wox-uur-add" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' Uren toevoegen</button>';
+  else if(!uren.length) h += '<p class="lf-leeg">Geen uren.</p>';
+  return h + '</div>';
 }
 
 // MATERIALEN — kiezen uit de artikelcatalogus (zoals werkbon)
@@ -38241,21 +38273,22 @@ function _woMatSectieHtml(scope, data){
   var mats = Array.isArray(data._materialen) ? data._materialen : [];
   var bew = _woDetailState.bewerkbaar;
   var toonPrijs = !(APP.werkordersInst && APP.werkordersInst.prijzenTonen===false);
-  var h = '<div class="wox-sectie" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Materialen'+(mats.length?(' ('+mats.length+')'):'')+'</div>';
+  var a = function(cls, mi){ return 'class="'+cls+'" data-scope="'+esc(scope)+'" data-mi="'+mi+'"'; };
+  var h = '<div class="wox-sectie wo-sectie lf"><div class="wo-sub">Materialen'+(mats.length?(' \u00b7 '+mats.length):'')+'</div>';
+  // Zelfde regels als de materialen op de werkbon
   mats.forEach(function(m, mi){
-    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;background:var(--surface2);border-radius:9px;padding:8px 10px">';
-    h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(m.omschrijving||m.naam||'Artikel')+'</div>';
-    if(m.code) h += '<div style="font-size:11px;color:var(--muted)">'+esc(m.code)+((toonPrijs&&m.prijs!=null)?(' · \u20ac '+String(m.prijs).replace('.',',')):'')+'</div>';
-    h += '</div>';
-    // Aantal-stepper
-    h += '<input type="number" step="1" min="0" class="wox-mat-aantal" data-scope="'+esc(scope)+'" data-mi="'+mi+'" value="'+esc(m.aantal!=null?m.aantal:1)+'"'+(bew?'':' disabled')+' style="width:64px;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text)">';
-    if(bew) h += '<button type="button" class="wox-mat-del btn btn-ghost btn-wis" data-scope="'+esc(scope)+'" data-mi="'+mi+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-    h += '</div>';
+    var sub = [m.code, (toonPrijs && m.prijs!=null) ? '\u20ac '+String(m.prijs).replace('.',',')+' /'+(m.eenheid||'stuk') : ''].filter(Boolean).join(' \u00b7 ');
+    h += '<div class="wbm"><span class="wbm-ic" aria-hidden="true">'+_LF_PAKKET+'</span><span class="wbm-n">'+esc(m.omschrijving||m.naam||'Artikel')+(sub ? '<small>'+esc(sub)+'</small>' : '')+'</span>'
+      + (bew ? '<button type="button" '+a('wox-mat-del btn btn-ghost btn-wis', mi)+' aria-label="Materiaal verwijderen" title="Verwijderen">'+ICO.trash+'</button>' : '')
+      + '<div class="wbm-o"><span class="wbm-stap">'
+      + (bew ? '<button type="button" '+a('wo-mat-stap', mi)+' data-d="-1" aria-label="E\u00e9n minder">\u2212</button>' : '')
+      + '<input type="number" step="1" min="0" inputmode="decimal" '+a('wox-mat-aantal', mi)+' value="'+esc(m.aantal!=null?m.aantal:1)+'"'+(bew?'':' disabled')+' aria-label="Aantal">'
+      + (bew ? '<button type="button" '+a('wo-mat-stap', mi)+' data-d="1" aria-label="E\u00e9n meer">+</button>' : '')
+      + '</span><span class="wbm-eenh">'+esc(m.eenheid||'stuk')+'</span></div></div>';
   });
-  if(bew) h += '<button type="button" class="wox-mat-kies btn btn-ghost btn-sm" data-scope="'+esc(scope)+'" style="margin-top:4px">+ Materiaal uit catalogus</button>';
-  h += '</div>';
-  return h;
+  if(bew) h += '<button type="button" class="wbx-chip-add wox-mat-kies" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' Materiaal uit catalogus</button>';
+  else if(!mats.length) h += '<p class="lf-leeg">Geen materialen.</p>';
+  return h + '</div>';
 }
 
 // Catalogus-picker voor werkorder-materialen
@@ -38313,32 +38346,20 @@ function _woDocSectieHtml(scope, data){
   data = data || {};
   var docs = Array.isArray(data._documenten) ? data._documenten : [];
   var bew = _woDetailState.bewerkbaar;
-  var h = '<div class="wox-sectie" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Documenten'+(docs.length?(' ('+docs.length+')'):'')+'</div>';
+  var h = '<div class="wox-sectie wo-sectie lf"><div class="wo-sub">Documenten'+(docs.length?(' \u00b7 '+docs.length):'')+'</div>';
   docs.forEach(function(d, di){
     // De hele rij is klikbaar en opent het document direct (Outsmart-stijl).
-    h += '<div class="wox-doc-rij" data-scope="'+esc(scope)+'" data-di="'+di+'" style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--surface2);border-radius:8px;margin-bottom:6px'+(d._pending?'':';cursor:pointer')+'">';
-    h += '<span style="flex-shrink:0;color:var(--accent)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+(typeof _wbDocIcoon==='function'?_wbDocIcoon(d.mime,d.naam):'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>')+'</svg></span>';
-    h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.naam||'bestand')+'</div>';
-    if(d.grootte) h += '<div style="font-size:11px;color:var(--muted)">'+esc(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.grootte):(Math.round(d.grootte/1024)+' KB'))+'</div>';
-    h += '</div>';
-    if(d._pending){
-      h += '<span style="font-size:11px;color:var(--orange-t)">uploaden…</span>';
-    } else if(bew){
-      h += '<button type="button" class="wox-doc-edit btn btn-ghost btn-icoon" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Naam wijzigen" aria-label="Bewerken">'+ICO.edit+'</button>';
-    }
-    if(bew && !d._pending) h += '<button type="button" class="wox-doc-del btn btn-ghost btn-wis" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
-    h += '</div>';
+    h += '<div class="wox-doc-rij lf-rij wo-doc" data-scope="'+esc(scope)+'" data-di="'+di+'" role="button" tabindex="0">'
+      + '<span class="lf-ic" aria-hidden="true"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+(typeof _wbDocIcoon==='function'?_wbDocIcoon(d.mime,d.naam):'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>')+'</svg></span>'
+      + '<span class="lf-l">'+esc(d.naam||'bestand')+(d.grootte ? '<small>'+esc(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.grootte):(Math.round(d.grootte/1024)+' KB'))+'</small>' : '')+'</span><span class="lf-w">';
+    if(d._pending) h += '<span class="lf-hint">uploaden\u2026</span>';
+    else if(bew) h += '<button type="button" class="wox-doc-edit vt-wis wo-doc-knop" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Naam wijzigen" aria-label="Naam wijzigen">'+ICO.edit+'</button>'
+      + '<button type="button" class="wox-doc-del vt-wis" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
+    h += '</span></div>';
   });
-  if(bew){
-    h += '<label class="wox-doc-drop" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:14px;border:1.5px dashed var(--border);border-radius:10px;cursor:pointer;text-align:center;margin-top:4px">';
-    h += '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color:var(--muted)"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>';
-    h += '<span style="font-size:12px;font-weight:600">Bestand toevoegen</span>';
-    h += '<input type="file" class="wox-doc-input" data-scope="'+esc(scope)+'" multiple style="display:none">';
-    h += '</label>';
-  }
-  h += '</div>';
-  return h;
+  if(bew) h += '<label class="wox-doc-drop wbx-chip-add">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' Bestand toevoegen<input type="file" class="wox-doc-input" data-scope="'+esc(scope)+'" multiple hidden></label>';
+  else if(!docs.length) h += '<p class="lf-leeg">Geen documenten.</p>';
+  return h + '</div>';
 }
 
 // Documenten uploaden naar een werkorder-blok
@@ -38420,34 +38441,24 @@ function _woOnderdelenSectieHtml(scope, data){
   var gekozen = data._onderdelen && typeof data._onderdelen==='object' ? data._onderdelen : {};
   var selCount = Object.keys(gekozen).filter(function(id){ return gekozen[id]; }).length;
 
-  var h = '<div class="wox-sectie" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Onderdelen voor prijsopgave'+(selCount?(' ('+selCount+' geselecteerd)'):'')+'</div>';
+  var h = '<div class="wox-sectie wo-sectie lf"><div class="wo-sub">Onderdelen voor prijsopgave'+(selCount?(' \u00b7 '+selCount+' gekozen'):'')+'</div>';
   if(!pomp){
-    h += '<div style="font-size:12px;color:var(--muted);padding:10px;background:var(--surface2);border-radius:8px">Koppel eerst een pomp (in de Register-sectie) om de onderdelenlijst te tonen.</div>';
+    h += '<p class="lf-leeg">Koppel eerst een '+registerItemEnkel(false)+' (in de Register-sectie) om de onderdelenlijst te tonen.</p>';
   } else if(!onderdelen.length){
-    h += '<div style="font-size:12px;color:var(--muted);padding:10px;background:var(--surface2);border-radius:8px">Geen onderdelenlijst beschikbaar voor deze pomp. Voeg onderdelen toe in het register.</div>';
+    h += '<p class="lf-leeg">Geen onderdelenlijst beschikbaar. Voeg onderdelen toe in het register.</p>';
   } else {
-    h += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Vink aan welke onderdelen nodig zijn voor de reparatie.</div>';
-    h += '<div style="display:flex;flex-direction:column;gap:2px">';
+    h += '<p class="lf-uitleg" style="padding-top:0">Zet aan welke onderdelen nodig zijn voor de reparatie.</p>';
     onderdelen.forEach(function(o){
       var sel = !!gekozen[o.id];
-      h += '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:'+(sel?'rgba(74,108,247,.08)':'var(--surface2)')+';border-radius:8px;cursor:pointer">';
-      h += '<input type="checkbox" class="wox-ond-cb" data-scope="'+esc(scope)+'" data-id="'+esc(o.id)+'"'+(sel?' checked':'')+(bew?'':' disabled')+' style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0">';
-      h += '<div style="flex:1;min-width:0">';
-      h += '<div style="font-size:13px;font-weight:500">'+esc(o.omschrijving||'Onderdeel')+'</div>';
       var meta = [];
       if(o.positie) meta.push('pos. '+o.positie);
       if(o.artikelnr) meta.push(o.artikelnr);
-      var aantal = o.standaardAantal||o.aantal||1;
-      meta.push(aantal+' '+(o.eenheid||'ST'));
-      h += '<div style="font-size:11px;color:var(--muted)">'+esc(meta.join(' · '))+'</div>';
-      if(o.specificatie) h += '<div style="font-size:10px;color:var(--muted)">'+esc(o.specificatie)+'</div>';
-      h += '</div></label>';
+      meta.push((o.standaardAantal||o.aantal||1)+' '+(o.eenheid||'ST'));
+      h += '<label class="wbx-cl-opt wo-ond"><span>'+esc(o.omschrijving||'Onderdeel')+'<small>'+esc(meta.join(' \u00b7 '))+'</small>'+(o.specificatie ? '<small>'+esc(o.specificatie)+'</small>' : '')+'</span>'
+        + '<span class="lf-sw"><input type="checkbox" class="wox-ond-cb" data-scope="'+esc(scope)+'" data-id="'+esc(o.id)+'"'+(sel?' checked':'')+(bew?'':' disabled')+'><i></i></span></label>';
     });
-    h += '</div>';
   }
-  h += '</div>';
-  return h;
+  return h + '</div>';
 }
 
 // REGISTER — pomp koppelen uit het pompregister (wp_pompen) en gegevens tonen
@@ -38455,58 +38466,37 @@ function _woRegisterSectieHtml(scope, data){
   data = data || {};
   var bew = _woDetailState.bewerkbaar;
   var pomp = data._pompId ? (APP.wp_pompen||[]).find(function(p){ return String(p.id)===String(data._pompId); }) : null;
-  var h = '<div class="wox-sectie" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Pomp uit register</div>';
+  var h = '<div class="wox-sectie wo-sectie lf"><div class="wo-sub">'+esc(registerItemEnkel(true))+' uit register</div>';
   if(pomp){
-    h += '<div style="background:var(--surface2);border-radius:10px;padding:12px 14px">';
-    h += '<div style="display:flex;align-items:flex-start;gap:10px">';
-    h += '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">'+esc(pomp.type||'Pomp')+'</div>';
-    if(pomp.serienummer) h += '<div style="font-size:12px;color:var(--muted);font-family:\'Space Mono\',monospace">SN: '+esc(pomp.serienummer)+'</div>';
-    h += '</div>';
-    if(bew) h += '<button type="button" class="wox-pomp-ontkoppel" data-scope="'+esc(scope)+'" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px;padding:2px">Ontkoppelen</button>';
-    h += '</div>';
+    h += '<div class="lf-rij wo-pomp">'+_lfIco(_LF_PAKKET)+'<span class="lf-l">'+esc(pomp.type||registerItemEnkel(true))+(pomp.serienummer ? '<small>SN: '+esc(pomp.serienummer)+'</small>' : '')+'</span>'
+      + '<span class="lf-w">'+(bew ? '<button type="button" class="wox-pomp-ontkoppel wo-link-knop" data-scope="'+esc(scope)+'">Ontkoppelen</button>' : '')+'</span></div>';
     var gegevens = [
       ['Fabrikant', pomp.fabrikant],
       ['Merk', pomp.merk],
       ['Besturing', pomp.besturing],
-      ['Waaier Ø', pomp.waaierD ? pomp.waaierD+' mm' : null],
+      ['Waaier \u00d8', pomp.waaierD ? pomp.waaierD+' mm' : null],
       ['Vermogen', pomp.vermogen ? pomp.vermogen+' kW' : null],
       ['I nominaal', pomp.iNom ? pomp.iNom+' A' : null],
       ['U nominaal', pomp.uNom ? pomp.uNom+' V' : null],
       ['Bouwjaar', pomp.bouwjaar],
     ].filter(function(g){ return g[1]; });
-    if(gegevens.length){
-      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
-      gegevens.forEach(function(g){
-        h += '<div><div style="font-size:10px;color:var(--muted)">'+esc(g[0])+'</div><div style="font-size:12px;font-weight:500">'+esc(g[1])+'</div></div>';
-      });
-      h += '</div>';
-    }
+    gegevens.forEach(function(g){ h += '<div class="wbx-row"><span class="wbx-k">'+esc(g[0])+'</span><span class="wbx-v">'+esc(g[1])+'</span></div>'; });
     // Pomp-documenten (samengesteld zoals in het register: artikel-docs + pomp-eigen, minus verborgen)
     var pdocs = _woPompDocumenten(pomp);
     if(pdocs.length){
       var typeLabels = {handleiding:'Handleiding',explosietekening:'Explosietekening',onderdelenlijst:'Onderdelenlijst',certificaat:'Certificaat',overig:'Document'};
       var typeKleuren = {handleiding:'#4a6cf7',explosietekening:'#10b981',onderdelenlijst:'#f59e0b',certificaat:'#8b5cf6',overig:'#6b7694'};
-      h += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
-      h += '<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">Documenten</div>';
       pdocs.forEach(function(doc, pi){
-        var lbl = typeLabels[doc.type]||typeLabels.overig;
-        var kl = typeKleuren[doc.type]||typeKleuren.overig;
-        h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0">';
-        h += '<div style="display:flex;align-items:center;gap:8px;min-width:0"><span style="width:8px;height:8px;border-radius:50%;background:'+kl+';flex-shrink:0"></span><span style="font-size:12px;font-weight:600">'+esc(lbl)+'</span><span style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(doc.naam||doc.bestandsnaam||'')+'</span></div>';
-        h += '<button type="button" class="wox-pompdoc-open" data-scope="'+esc(scope)+'" data-pi="'+pi+'" style="background:none;border:none;color:'+_klTekst(kl)+';cursor:pointer;font-size:11px;padding:2px;flex-shrink:0;display:inline-flex;align-items:center;gap:3px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>Openen</button>';
-        h += '</div>';
+        h += '<button type="button" class="lf-rij wo-pompdoc wox-pompdoc-open" data-scope="'+esc(scope)+'" data-pi="'+pi+'"><span class="lf-ic" aria-hidden="true"><span class="lf-stip" style="background:'+(typeKleuren[doc.type]||typeKleuren.overig)+'"></span></span>'
+          + '<span class="lf-l">'+esc(doc.naam||doc.bestandsnaam||'')+'<small>'+esc(typeLabels[doc.type]||typeLabels.overig)+'</small></span><span class="lf-w">'+_LF_CHEV+'</span></button>';
       });
-      h += '</div>';
     }
-    h += '</div>';
   } else if(bew){
-    h += '<button type="button" class="wox-pomp-koppel btn btn-ghost btn-sm" data-scope="'+esc(scope)+'"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:5px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span style="vertical-align:middle">'+registerItemEnkel(true)+' koppelen</span></button>';
+    h += '<button type="button" class="wbx-chip-add wox-pomp-koppel" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' '+esc(registerItemEnkel(true))+' koppelen uit het register</button>';
   } else {
-    h += '<div style="font-size:12px;color:var(--muted)">Geen '+registerItemEnkel(false)+' gekoppeld</div>';
+    h += '<p class="lf-leeg">Geen '+registerItemEnkel(false)+' gekoppeld.</p>';
   }
-  h += '</div>';
-  return h;
+  return h + '</div>';
 }
 
 // Pomp-picker: kies een pomp uit het register
@@ -38735,6 +38725,13 @@ function _woBindDetail(fullscreen){
   });
   root.querySelectorAll('.wox-mat-aantal').forEach(function(inp){
     inp.addEventListener('input', function(){ var d=_woScopeData(st.antwoorden,inp.dataset.scope); if(d._materialen&&d._materialen[+inp.dataset.mi]){ d._materialen[+inp.dataset.mi].aantal=inp.value; _woBewaarAntwoorden(); } });
+  });
+  root.querySelectorAll('.wo-mat-stap').forEach(function(bt){
+    bt.addEventListener('click', function(){
+      var inp = bt.parentNode.querySelector('.wox-mat-aantal'); if(!inp) return;
+      inp.value = Math.max(0, (parseFloat(inp.value)||0) + parseFloat(bt.dataset.d));
+      inp.dispatchEvent(new Event('input', {bubbles:true}));
+    });
   });
   root.querySelectorAll('.wox-mat-del').forEach(function(bt){
     bt.addEventListener('click', function(){ var d=_woScopeData(st.antwoorden,bt.dataset.scope); if(d._materialen){ d._materialen.splice(+bt.dataset.mi,1); _woBewaarAntwoorden(); _woRenderDetail(); } });
@@ -38991,38 +38988,13 @@ function _woBlokHandtekening(bi){
   var bl = st.blokken[bi]; if(!bl) return;
   var skey = 'blok_'+bl.key;
   st.antwoorden[skey] = st.antwoorden[skey] || {};
-  var body = '<div style="border:2px dashed rgba(74,108,247,.35);border-radius:8px;overflow:hidden;background:#fafafa;position:relative;touch-action:none">'
-    +'<canvas id="wox-sign-canvas" width="700" height="180" style="width:100%;height:180px;display:block;cursor:crosshair;background:#fafafa"></canvas>'
-    +'<div id="wox-sign-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#bbb;font-size:14px">Teken hier met muis of vinger</div>'
-    +'</div>';
-  var footer = '<button class="btn btn-ghost" id="wox-sign-clear">✕ Wissen</button>'
-    +'<button class="btn btn-ghost" onclick="closeModal()">Annuleren</button>'
-    +'<button class="btn btn-primary" id="wox-sign-save">Opslaan</button>';
-  openModal('Handtekening — '+esc(bl.naam||'blok'), body, footer);
-  setTimeout(function(){
-    var canvas = document.getElementById('wox-sign-canvas'); if(!canvas) return;
-    var hint = document.getElementById('wox-sign-hint');
-    var ctx = canvas.getContext('2d');
-    var tekening = false;
-    ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    function getPos(e){ var r=canvas.getBoundingClientRect(); var sx=canvas.width/r.width, sy=canvas.height/r.height; var s=e.touches?e.touches[0]:e; return {x:(s.clientX-r.left)*sx, y:(s.clientY-r.top)*sy}; }
-    function start(e){ e.preventDefault(); tekening=true; if(hint) hint.style.display='none'; var p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
-    function move(e){ if(!tekening) return; e.preventDefault(); var p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
-    function stop(){ tekening=false; }
-    canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move);
-    canvas.addEventListener('mouseup',stop); canvas.addEventListener('mouseleave',stop);
-    canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false});
-    canvas.addEventListener('touchend',stop);
-    var cb=document.getElementById('wox-sign-clear'); if(cb) cb.addEventListener('click',function(){ ctx.clearRect(0,0,canvas.width,canvas.height); if(hint) hint.style.display=''; });
-    var sb=document.getElementById('wox-sign-save'); if(sb) sb.addEventListener('click',function(){
-      var d = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-      if(d.every(function(v){return v===0;})){ toast('Teken eerst een handtekening','error'); return; }
-      st.antwoorden[skey]._handtekening = handtekeningNaarJpeg(canvas);
-      closeModal();
-      _woBewaarAntwoorden(); _woRenderDetail();
-      toast('Handtekening opgeslagen','success');
-    });
-  }, 60);
+  // Zelfde tekenvlak als de werkbon: schaalt mee met de pixeldichtheid, dus even scherp.
+  _wbTekenOverlay(st.antwoorden[skey]._handtekening || null, function(data){
+    if(!data) return;   // geannuleerd of leeg gelaten
+    st.antwoorden[skey]._handtekening = data;
+    _woBewaarAntwoorden(); _woRenderDetail();
+    toast('Handtekening opgeslagen','success');
+  });
 }
 
 // Blok afronden: (evt.) handtekening vereisen, status zetten, mailen, markeren als afgerond.
@@ -39147,38 +39119,13 @@ function _woBlokMailVersturen(bl, mailNaar){
 // ── Afronding voor simpele types (op werkorder-niveau, scope 'v') ──
 function _woSimpelHandtekening(){
   var st = _woDetailState; if(!st) return;
-  var body = '<div style="border:2px dashed rgba(74,108,247,.35);border-radius:8px;overflow:hidden;background:#fafafa;position:relative;touch-action:none">'
-    +'<canvas id="wox-sign-canvas" width="700" height="180" style="width:100%;height:180px;display:block;cursor:crosshair;background:#fafafa"></canvas>'
-    +'<div id="wox-sign-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#bbb;font-size:14px">Teken hier met muis of vinger</div>'
-    +'</div>';
-  var footer = '<button class="btn btn-ghost" id="wox-sign-clear">✕ Wissen</button>'
-    +'<button class="btn btn-ghost" onclick="closeModal()">Annuleren</button>'
-    +'<button class="btn btn-primary" id="wox-sign-save">Opslaan</button>';
-  openModal('Handtekening', body, footer);
-  setTimeout(function(){
-    var canvas = document.getElementById('wox-sign-canvas'); if(!canvas) return;
-    var hint = document.getElementById('wox-sign-hint');
-    var ctx = canvas.getContext('2d');
-    var tekening = false;
-    ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    function getPos(e){ var r=canvas.getBoundingClientRect(); var sx=canvas.width/r.width, sy=canvas.height/r.height; var s=e.touches?e.touches[0]:e; return {x:(s.clientX-r.left)*sx, y:(s.clientY-r.top)*sy}; }
-    function start(e){ e.preventDefault(); tekening=true; if(hint) hint.style.display='none'; var p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
-    function move(e){ if(!tekening) return; e.preventDefault(); var p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
-    function stop(){ tekening=false; }
-    canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move);
-    canvas.addEventListener('mouseup',stop); canvas.addEventListener('mouseleave',stop);
-    canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false});
-    canvas.addEventListener('touchend',stop);
-    var cb=document.getElementById('wox-sign-clear'); if(cb) cb.addEventListener('click',function(){ ctx.clearRect(0,0,canvas.width,canvas.height); if(hint) hint.style.display=''; });
-    var sb=document.getElementById('wox-sign-save'); if(sb) sb.addEventListener('click',function(){
-      var d = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-      if(d.every(function(v){return v===0;})){ toast('Teken eerst een handtekening','error'); return; }
-      st.antwoorden._handtekening = handtekeningNaarJpeg(canvas);
-      closeModal();
-      _woBewaarAntwoorden(); _woRenderDetail();
-      toast('Handtekening opgeslagen','success');
-    });
-  }, 60);
+  // Zelfde tekenvlak als de werkbon: schaalt mee met de pixeldichtheid, dus even scherp.
+  _wbTekenOverlay(st.antwoorden._handtekening || null, function(data){
+    if(!data) return;   // geannuleerd of leeg gelaten
+    st.antwoorden._handtekening = data;
+    _woBewaarAntwoorden(); _woRenderDetail();
+    toast('Handtekening opgeslagen','success');
+  });
 }
 
 function _woSimpelAfronden(zonderMail){
