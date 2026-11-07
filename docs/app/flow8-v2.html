@@ -1882,7 +1882,7 @@ button.sd-m-dag{cursor:pointer}
 .wbx-snel a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;text-decoration:none}
 .wbx-snel a:active{background:var(--border)}
 .wbx-uur-regel{background:none;border:0;border-top:1px solid var(--border);border-radius:0;padding:10px 0;margin:0;gap:12px}
-.wbx-uur-regel .wbx-who{width:36px;height:36px;font-size:12px}
+.wbx-uur-regel .wbx-who{width:36px;height:36px;font-size:12px;font-weight:600}
 .wbx-uur-regel .wbx-det{font-size:15px;line-height:1.3}
 .wbx-uur-regel .wbx-det .wbx-n{font-weight:500}
 .wbx-uur-regel .wbx-det .wbx-t{font-size:12.5px}
@@ -1941,13 +1941,13 @@ button.sd-m-dag{cursor:pointer}
 .wbm-o{grid-column:2/-1;display:flex;align-items:center;gap:8px;margin-top:8px}
 .wbm-o .wbm-bedrag{margin-left:auto;white-space:nowrap;font-family:'Space Mono',monospace;font-weight:700;font-size:14px}
 .wbm-stap{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px}
-.wbm-stap button{width:36px;height:36px;border-radius:50%;border:0;background:var(--surface);color:var(--text);font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer}
+.wbm-stap button{font-family:inherit;width:36px;height:36px;border-radius:50%;border:0;background:var(--surface);color:var(--text);font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer}
 .wbm-stap input{width:48px;text-align:center;border:0;background:none;color:var(--text);font:700 14px 'Space Mono',monospace;padding:0;-moz-appearance:textfield}
 .wbm-stap input::-webkit-inner-spin-button,.wbm-stap input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .wbm-eenh{font-size:12.5px;color:var(--muted)}
 .wbm-tot{border-top:1px solid var(--border);margin-top:2px}
 .wbm-tot .wbx-row:first-child{border-top:0}
-.wbm-tot .wbm-eind{font-weight:700}
+.wbm-tot .wbm-eind{font-weight:600}
 .wbm-tot .wbm-eind .wbx-k{color:var(--text)}
 .wbm-tot .wbm-eind .wbx-v{font-family:'Space Mono',monospace;font-weight:700}
 @media (max-width:768px){.wbm-stap input{width:48px!important;min-width:0!important;font-size:14px!important}}
@@ -1962,7 +1962,7 @@ button.sd-m-dag{cursor:pointer}
 .wbx-cl-opt{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;border-top:1px solid var(--border);font-size:15px;cursor:pointer}
 .wbx-cl-opt:first-of-type{border-top:0}
 .wbx-cl-opt input[type=radio]{width:22px;height:22px;accent-color:var(--accent-knop);flex-shrink:0;margin:0}
-.wbx-cl-kop{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:16px 0 6px}
+.wbx-cl-kop{font-family:'Space Mono',monospace;font-size:11px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:16px 0 6px}
 .wbx-cl-veld textarea.lf-notitie{overflow:auto}
 /* desktop: lijst links */
 #wb-fullscreen .wbx-md-navitem{gap:12px;padding:8px 10px;min-height:52px;border-radius:var(--radius);font-size:15px}
@@ -3431,12 +3431,12 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   var bonNr = wb.bonnummer || wb.nummer || (wb.planningId ? ('#'+String(wb.planningId).slice(-6)) : '');
   h += '<div id="wb-kop" style="display:flex;align-items:center;gap:12px;margin:-8px -4px 16px">';
   h += '<button id="wb-terug" class="wbx-terug" title="Terug" aria-label="Terug"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
-  h += '<div style="flex:1;min-width:0"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px">Werkbon <span style="font-size:13px;font-weight:600;color:var(--muted)">'+esc(bonNr)+'</span></div></div>';
+  h += '<div style="flex:1;min-width:0"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px">Werkbon <span style="font-size:13px;font-weight:600;color:var(--muted)">'+esc(bonNr)+'</span></div></div>';
   h += '<span style="flex-shrink:0;font-size:12px;font-weight:600;color:'+_klTekst(kl)+';background:'+_kleurTint(kl,'26')+';padding:4px 10px;border-radius:var(--radius-pill)">'+(_statusLbl[wb.status]||wb.status)+'</span>';
   h += '</div>';
   // Subkop: klant + type + tijden
   h += '<div style="margin-bottom:14px">';
-  h += '<div style="font-size:16px;font-weight:700">'+esc(wb.klantNaam||'\u2014')+'</div>';
+  h += '<div style="font-size:16px;font-weight:600">'+esc(wb.klantNaam||'\u2014')+'</div>';
   h += '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+esc(_typeLbl)+(wb.datum?(' \u00b7 '+fmtD(wb.datum)):'')+(_tijden?(' \u00b7 '+esc(_tijden)):'')+'</div>';
   h += '</div>';
 
@@ -4860,7 +4860,7 @@ function _wbRenderChecklists(state){
     var open = state.clOpenIndex === ci;
     h += '<div class="wbx-cl-item" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden">';
     h += '<div class="wbx-cl-hdr" data-ci="'+ci+'" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);cursor:pointer">';
-    h += '<span style="flex:1;font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(cl.naam||'Checklist')+'</span>';
+    h += '<span style="flex:1;font-size:14px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(cl.naam||'Checklist')+'</span>';
     // Met meerdere formulieren op één bon staat er drie keer dezelfde sjabloonnaam;
     // een eigen omschrijving maakt duidelijk om welke installatie het gaat.
     if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-hernoem btn btn-ghost btn-icoon" data-ci="'+ci+'" title="Naam aanpassen" aria-label="Naam aanpassen">'+ICO.edit+'</button>';
@@ -5403,13 +5403,13 @@ function _wbAfrondDialoog(state){
   // Kop met terug-pijl
   h += '<div style="display:flex;align-items:center;gap:12px;margin:-8px -4px 16px">';
   h += '<button id="wb-af-terug" class="wbx-terug" title="Terug" aria-label="Terug"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
-  h += '<div style="flex:1;font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:800">Ondertekenen &amp; versturen</div>';
+  h += '<div style="flex:1;font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:600">Ondertekenen &amp; versturen</div>';
   h += '</div>';
 
   // Klantinformatie
   h += '<div class="wbx-field-lbl">Klant informatie</div>';
   h += '<div class="wbx-kaart">';
-  h += '<div style="font-weight:700;font-size:14px">'+esc(wb.klantNaam||'\u2014')+'</div>';
+  h += '<div style="font-weight:600;font-size:15px">'+esc(wb.klantNaam||'\u2014')+'</div>';
   h += '<div style="font-size:12px;color:var(--muted);margin-top:3px">'+esc([(wa.adres||''),(wa.plaats||'')].filter(Boolean).join(', '))+'</div>';
   h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
   h += '<span style="font-size:12px;color:var(--muted)">Verzenden naar</span>';
