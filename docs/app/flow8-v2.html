@@ -29964,6 +29964,13 @@ function _updateRoutePaneel() {
   paneel.innerHTML = h;
 }
 
+// Google roept dit aan als de Maps-sleutel geweigerd wordt, bijvoorbeeld op een domein dat niet
+// in de sleutelbeperking staat. Zonder melding blijven kaart en reistijden stil leeg.
+window.gm_authFailure = function() {
+  console.warn('Google Maps: sleutel geweigerd op ' + location.host);
+  toast('De kaart en reistijden konden niet laden. Meld dit bij de beheerder.', 'warning');
+};
+
 // Neutrale callback als Maps geladen wordt via reistijden (geen kaart nodig)
 window._gmapsGereed = function() {
   // Maps is geladen — als planning open is, herrender zodat reistijden berekend worden
