@@ -346,6 +346,12 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-pc) > .lf-w{justify-self:start}
   /* Rechterkolom: korte labels (naam, plaats, telefoon), dus een smallere labelkolom en meer ruimte voor het veld. */
   .modal-lf-groot .lf-twee > .lf-rij:nth-child(2):has(> .lf-w > .lf-tekst){grid-template-columns:36px 112px minmax(0,1fr)}
+  /* Artikel: EAN en eenheid naast elkaar in de rechterkolom, labels zo smal als ze zijn. */
+  .modal-lf-groot .lf-art-kort{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);column-gap:16px}
+  .modal-lf-groot .lf-art-kort > .lf-rij{border-top:0}
+  .modal-lf-groot .lf-art-kort > .lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px auto minmax(0,1fr)}
+  .modal-lf-groot .lf-art-kort > .lf-rij:has(> .lf-ic:empty){grid-template-columns:auto minmax(0,1fr)}
+  .modal-lf-groot .lf-art-kort > .lf-rij > .lf-ic:empty{display:none}
 }
 /* Grote formulieren op de telefoon: label klein boven het vak, zodat lange namen passen */
 @media(max-width:768px){
@@ -381,6 +387,8 @@ label.lf-rij{cursor:pointer}
 .lf-tel:empty{display:none!important}
 .lf-stip{width:10px;height:10px;border-radius:50%}
 .lf-klap-b > .lf-zoek-res + .lf-rij,.lf-klap-b > #art-doc-lijst + .lf-rij{border-top:1px solid var(--border)}
+.lf-art-kort{display:grid;grid-template-columns:minmax(0,1fr)}
+.lf-klap-twee{align-items:start}
 .lf-doc-rij > .lf-l .lf-tekst{text-align:left!important;width:100%;padding:4px 0}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
@@ -25595,10 +25603,12 @@ function _openArtikelEditor(artikel){
   var _fotoData = a.foto || '';
   var _arT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
   var b = '<div class="lf-groep">Artikel</div><div class="lf-blok-kaart">';
+  // Code links; EAN en eenheid zijn kort en delen samen de rechterkolom. De omschrijving
+  // is vaak lang en krijgt daaronder de volle breedte.
   b += '<div class="lf-twee">'+lfRij(_LF_PAKKET, 'Artikelcode', _arT('art-code', a.code, 'Bijv. PMP-4823', ' required autocapitalize="characters"'), {verplicht:true, voor:'art-code'})
-     + lfRij(ICO.edit, 'Omschrijving', _arT('art-oms', a.omschrijving, 'Bijv. Dompelpomp TP48', ' required'), {verplicht:true, voor:'art-oms'})+'</div>';
-  b += '<div class="lf-twee">'+lfRij(_LF_EAN, 'EAN-code', _arT('art-ean', a.ean, 'Optioneel', ' inputmode="numeric"'), {voor:'art-ean'})
-     + lfRij('', 'Eenheid', _arT('art-eenheid', a.eenheid||'stuk', 'stuk'), {voor:'art-eenheid'})+'</div>';
+     + '<div class="lf-art-kort">'+lfRij(_LF_EAN, 'EAN', _arT('art-ean', a.ean, 'Optioneel', ' inputmode="numeric"'), {voor:'art-ean'})
+     + lfRij('', 'Eenheid', _arT('art-eenheid', a.eenheid||'stuk', 'stuk'), {voor:'art-eenheid'})+'</div></div>';
+  b += lfRij(ICO.edit, 'Omschrijving', _arT('art-oms', a.omschrijving, 'Bijv. Dompelpomp TP48', ' required'), {verplicht:true, voor:'art-oms'});
   b += lfRij(ICO.info, 'Notitie', '<textarea class="lf-notitie" id="art-notitie" rows="2" placeholder="Optionele uitgebreide omschrijving\u2026">'+esc(a.notitie||'')+'</textarea>', {blok:true, voor:'art-notitie'});
   b += '</div>';
   b += '<div class="lf-groep">Prijs en werkbon</div><div class="lf-blok-kaart">';
@@ -25610,6 +25620,8 @@ function _openArtikelEditor(artikel){
   // Foto en documenten: inklapbaar, standaard dicht.
   var _artKlapKop = function(ico, titel, telHtml){ return '<div class="art-acc-hdr lf-klap-kop" role="button" tabindex="0">'+_lfIco(ico)+'<span class="lf-klap-t">'+titel+'</span>'+telHtml+'<svg class="art-acc-chev lf-chev" style="transition:transform .2s" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>'; };
   var _heeftFoto = !!_fotoData;
+  // Op desktop naast elkaar; een open blok groeit alleen in zijn eigen kolom.
+  b += '<div class="lf-twee lf-klap-twee">';
   b += '<div class="art-acc lf-klap" id="art-acc-foto">'+_artKlapKop(ICO.foto, 'Foto', '<span class="art-acc-tel lf-tel" id="art-acc-foto-tel">'+(_heeftFoto?'\u2713':'')+'</span>');
   b += '<div class="art-acc-body lf-klap-b" style="display:none">';
   b += '<div id="art-foto-preview" style="margin-bottom:8px">'+(_fotoData?'<img src="'+esc(_fotoData)+'" class="art-editor-foto" data-url="'+esc(_fotoData)+'" style="max-width:120px;max-height:120px;border-radius:8px;object-fit:cover;cursor:pointer">':'<div style="font-size:12px;color:var(--muted)">Geen foto</div>')+'</div>';
@@ -25633,6 +25645,7 @@ function _openArtikelEditor(artikel){
   b += '<label class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Bestand kiezen<input type="file" id="art-doc-file" accept=".pdf,.jpg,.jpeg,.png,.webp" hidden></label>';
   b += '<span id="art-doc-status" class="lf-hint"></span>';
   b += '</div></div>';
+  b += '</div>';
 
   lfOpen(isNew?'Artikel toevoegen':'Artikel bewerken', b, 'Opslaan', 'art-save', {groot:true});
 
