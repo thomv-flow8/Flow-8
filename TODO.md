@@ -716,8 +716,12 @@ jaarplanning (spreiden van onderhoud), medewerkers, debiteuren en materialen.
 - [ ] **Back-ups controleren in Firebase** (Thomas): staan er automatische back-ups aan voor de Realtime Database,
       Firestore en Storage? In de app-code zit alleen een handmatige export (Instellingen). De zin "dagelijkse back-ups"
       gaat van de site af zodra de uitgebreide pagina's live gaan, en komt pas terug als het klopt.
-- [ ] **Import voor installaties en medewerkers bouwen** (app): debiteuren, contracten en artikelen kunnen al via
-      Excel/csv (`_openDebImport`, `_openContractImport`, `_openArtikelImport`); installaties en medewerkers nog niet.
+- [x] **Import voor installaties en medewerkers** (7 november 2026): knop Importeren in het register en bij Medewerkers,
+      via de gedeelde `_excelImport` (kolommen koppelen, voorbeeld, overgeslagen rijen). Installaties koppelen op
+      debiteurnummer, bestaand serienummer wordt bijgewerkt. Medewerkers: alleen het record (geen inlog), herkend op
+      e-mail of naam; verlofsaldo alleen bij nieuwe medewerkers.
+- [ ] **Imports testen in de echte app** (Thomas) met een klein testbestand, daarna de site bijwerken: op /overstappen/ en
+      /vragen/ staat nu dat alleen debiteuren, contracten en artikelen via Excel gaan.
 - [ ] **Incasso instellen** (Thomas): betalen via automatische incasso, per maand of per jaar. Licenties aanpassen
       bij een maandabonnement per maand, bij een jaarabonnement per jaar (zie ook H12 credits/licenties).
 - [ ] **Resend: regio controleren** (Thomas): wordt mail in de EU of in de VS verwerkt, en is er een verwerkersovereenkomst met Resend? Daarna de privacyverklaring (/privacy/) en Bijlage C van de verwerkersovereenkomst aanvullen.

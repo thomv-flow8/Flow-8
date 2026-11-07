@@ -10545,6 +10545,7 @@ function renderMedewerkers() {
   h+='<input class="input" id="med-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_medZoek))+'" style="max-width:260px">';
   h+='<div style="flex:1"></div>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="med-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
+  if (magSchrijven('medewerkers')) h+='<button class="btn btn-ghost btn-sm hide-mobile" id="med-import-btn">'+ICO.upload+' Importeren</button>';
   h+='<button class="btn btn-ghost btn-sm hide-mobile" id="med-export-btn">'+ICO.download+' Export</button>';
   if (magSchrijven('medewerkers')) h+='<button class="btn btn-primary btn-sm" id="med-add-btn">+ Medewerker</button>';
   h+='</div>';
@@ -10701,6 +10702,7 @@ function renderMedewerkers() {
   el.querySelectorAll('.med-del-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();verwijderMed(b.dataset.id);});});
   el.querySelectorAll('.pg-btn[data-pg]').forEach(function(b){b.addEventListener('click',function(){_medPage=parseInt(b.dataset.pg);renderMedewerkers();});});
   var addBtn=el.querySelector('#med-add-btn'); if(addBtn) addBtn.addEventListener('click',function(){openMedModal(null);});
+  var impBtnMed=el.querySelector('#med-import-btn'); if(impBtnMed) impBtnMed.addEventListener('click',_openMedewerkerImport);
   var medKolBtn = el.querySelector('#med-kolom-btn'); if(medKolBtn) medKolBtn.addEventListener('click', openMedKolomKiezer);
   var medKolToolbarBtn = el.querySelector('#med-kolom-toolbar-btn'); if(medKolToolbarBtn) medKolToolbarBtn.addEventListener('click', openMedKolomKiezer);
   var medExpBtn=el.querySelector('#med-export-btn'); if(medExpBtn) medExpBtn.addEventListener('click',function(){
@@ -13688,6 +13690,306 @@ function _openContractImport(){
         }, 400);
       }
     });
+  });
+}
+
+// ── Gedeelde Excel/csv-import ───────────────────────────────────
+// Zelfde stappen als de debiteuren- en contractenimport: bestand kiezen, kolommen koppelen
+// (met automatische herkenning op de kolomkop), een voorbeeld vooraf en een lijst van wat
+// is overgeslagen. o = { titel, uitleg, velden:[{k,l,verplicht,match}], analyseer(rijen, map),
+// regel(item), uitvoeren(a) → {nieuw, bij}, naAfloop() }. analyseer krijgt per rij een functie
+// w(veldKey) die de opgeschoonde celwaarde geeft, en geeft {nieuw:[], bij:[], over:[{tekst}]}
+// terug, of {fout:'...'} als de koppeling nog niet klopt.
+function _excelImport(o){
+  var b = '<p style="font-size:13px;color:var(--muted);margin-bottom:14px">'+o.uitleg+'</p>';
+  b += '<label class="btn btn-ghost" style="cursor:pointer;width:100%;justify-content:center;padding:14px;border:1.5px dashed var(--border)">Bestand kiezen (.xlsx / .csv)<input type="file" id="ximp-file" accept=".xlsx,.xls,.csv" style="display:none"></label>';
+  b += '<div id="ximp-stap2" style="display:none;margin-top:16px"></div>';
+  var f = '<button class="btn btn-ghost" id="ximp-cancel">Annuleren</button><button class="btn btn-primary" id="ximp-doen" style="display:none">Importeren</button>';
+  openModal(o.titel, b, f);
+
+  var _rijen = [], _kolommen = [];
+  document.getElementById('ximp-cancel').addEventListener('click', closeModal);
+  document.getElementById('ximp-file').addEventListener('change', function(){
+    var file = this.files && this.files[0]; if(!file) return;
+    if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    var rd = new FileReader();
+    rd.onload = function(e){
+      try {
+        var wb = XLSX.read(e.target.result, {type:'array'});
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var arr = XLSX.utils.sheet_to_json(ws, {defval:''});
+        if(!arr.length){ toast('Geen rijen gevonden in het bestand','warning'); return; }
+        _rijen = arr; _kolommen = Object.keys(arr[0]); _toonMapping();
+      } catch(err){ toast('Inlezen mislukt: '+(err.message||err),'error'); }
+    };
+    rd.readAsArrayBuffer(file);
+  });
+
+  function _autoMatch(namen){
+    var lc = _kolommen.map(function(k){ return k.toLowerCase(); });
+    for(var i=0;i<namen.length;i++){
+      var idx = lc.findIndex(function(k){ return k.indexOf(namen[i])>=0; });
+      if(idx>=0) return _kolommen[idx];
+    }
+    return '';
+  }
+  function _kolOpties(sel){
+    var opt = '<option value="">— niet importeren —</option>';
+    _kolommen.forEach(function(k){ opt += '<option value="'+esc(k)+'"'+(k===sel?' selected':'')+'>'+esc(k)+'</option>'; });
+    return opt;
+  }
+  function _toonMapping(){
+    var h = '<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+_rijen.length+' rijen gevonden</div>';
+    h += '<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Koppel de kolommen uit je bestand aan de velden:</p>';
+    h += '<div style="display:flex;flex-direction:column;gap:8px">';
+    var gebruikt = [];
+    o.velden.forEach(function(v){
+      var kies = _autoMatch(v.match||[]);
+      if(gebruikt.indexOf(kies) >= 0) kies = '';   // één kolom niet aan twee velden koppelen
+      if(kies) gebruikt.push(kies);
+      h += '<div style="display:flex;align-items:center;gap:10px"><span style="flex:0 0 150px;font-size:13px">'+esc(v.l)+(v.verplicht?' *':'')+'</span>';
+      h += '<select class="input ximp-map" data-veld="'+esc(v.k)+'" style="flex:1">'+_kolOpties(kies)+'</select></div>';
+    });
+    h += '</div><div id="ximp-preview" style="margin-top:14px"></div>';
+    document.getElementById('ximp-stap2').style.display = '';
+    document.getElementById('ximp-stap2').innerHTML = h;
+    document.getElementById('ximp-doen').style.display = '';
+    document.querySelectorAll('.ximp-map').forEach(function(s){ s.addEventListener('change', _preview); });
+    _preview();
+  }
+  function _analyse(){
+    var map = {}; document.querySelectorAll('.ximp-map').forEach(function(s){ map[s.dataset.veld] = s.value; });
+    var mist = o.velden.filter(function(v){ return v.verplicht && !map[v.k]; });
+    if(mist.length) return { fout:'Koppel eerst: '+mist.map(function(v){ return v.l; }).join(', ')+'.' };
+    var rijen = _rijen.map(function(r){
+      return function(k){ var kol = map[k]; if(!kol) return ''; var v = r[kol]; return v==null ? '' : (typeof v==='string' ? v.trim() : v); };
+    });
+    return o.analyseer(rijen, map);
+  }
+  function _preview(){
+    var a = _analyse(), el2 = document.getElementById('ximp-preview'); if(!el2) return;
+    if(a.fout){ el2.innerHTML = '<div style="font-size:12px;color:var(--orange-t)">'+esc(a.fout)+'</div>'; return; }
+    var h = '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:10px 12px;line-height:1.7">';
+    h += '<div><strong style="color:var(--accent)">'+a.nieuw.length+'</strong> nieuw</div>';
+    h += '<div><strong style="color:var(--green-t)">'+a.bij.length+'</strong> bestaand, worden bijgewerkt</div>';
+    if(a.over.length) h += '<div><strong style="color:var(--orange-t)">'+a.over.length+'</strong> overgeslagen (na de import zie je welke)</div>';
+    h += '</div>';
+    var vb = a.nieuw.concat(a.bij).slice(0,3);
+    if(vb.length){
+      h += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Voorbeeld (eerste 3):</div><div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-top:4px">';
+      h += vb.map(function(x){ return esc(o.regel(x)); }).join('<br>') + '</div>';
+    }
+    el2.innerHTML = h;
+  }
+  document.getElementById('ximp-doen').addEventListener('click', function(){
+    var a = _analyse();
+    if(a.fout){ toast(a.fout,'error'); return; }
+    if(!a.nieuw.length && !a.bij.length){ toast('Niets om te importeren','warning'); return; }
+    var vraag = a.nieuw.length+' nieuw aanmaken en '+a.bij.length+' bestaand bijwerken?' + (a.over.length ? ' '+a.over.length+' rij(en) worden overgeslagen.' : '');
+    bevestigActie(o.titel, vraag, function(){
+      var r = o.uitvoeren(a);
+      closeModal();
+      toast(r.nieuw+' aangemaakt · '+r.bij+' bijgewerkt','success');
+      if(o.naAfloop) o.naAfloop();
+      if(a.over.length){
+        var lijst = '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze rijen zijn niet geïmporteerd. Pas het bestand aan en importeer opnieuw; wat al is geïmporteerd wordt dan bijgewerkt, niet dubbel aangemaakt.</p>';
+        lijst += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;max-height:260px;overflow:auto">' + a.over.map(function(x){ return esc(x.tekst); }).join('<br>') + '</div>';
+        setTimeout(function(){ openModal('Overgeslagen bij import ('+a.over.length+')', lijst, '<button class="btn btn-primary" onclick="closeModal()">Sluiten</button>'); }, 400);
+      }
+    });
+  });
+}
+
+// Celwaarden uit Excel: getallen (ook 1.234,5), ja/nee en datums (Excel-datumgetal of dd-mm-jjjj).
+function _impGetal(v){
+  if(v === '' || v == null) return '';
+  if(typeof v === 'number') return v;
+  var s = String(v).trim();
+  s = /^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s) ? s.replace(/\./g,'').replace(',','.') : s.replace(',','.');
+  var n = parseFloat(s); return isNaN(n) ? '' : n;
+}
+function _impJaNee(v){ return /^(ja|j|yes|y|1|x|waar|true)$/i.test(String(v).trim()); }
+function _impDatum(v){
+  if(v === '' || v == null) return '';
+  if(typeof v === 'number' && v > 20000 && v < 80000) return new Date(Math.round((v - 25569) * 86400000)).toISOString().slice(0,10);
+  var s = String(v).trim(), m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);
+  if(m) return m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);
+  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0,10) : '';
+}
+// Debiteur zoeken op nummer; voorloopnullen tellen niet mee (Excel laat ze vaak vallen).
+function _impDebOpNr(nr){
+  var s = String(nr == null ? '' : nr).trim(); if(!s) return null;
+  var kaal = s.replace(/^0+/, '');
+  return (APP.debiteuren||[]).find(function(d){
+    var n = String(d.nr || d.debNr || '').trim();
+    return n && (n === s || (kaal && n.replace(/^0+/, '') === kaal));
+  }) || null;
+}
+
+// ── Installaties importeren (register) ──────────────────────────
+// Koppeling aan de klant via het debiteurnummer. Een serienummer dat al in het register staat
+// wordt bijgewerkt in plaats van dubbel aangemaakt; dat maakt opnieuw importeren veilig.
+function _openInstallatieImport(){
+  var rv = getRegisterVelden();
+  var velden = [
+    { k:'debnr', l:'Debiteurnummer', verplicht:true, match:['debiteurnummer','debiteur','klantnummer','relatienummer','debnr'] },
+    { k:'type',  l:'Type',           verplicht:true, match:['type','model','pomp','installatie','omschrijving'] },
+    { k:'besturing', l:'Besturing',  match:['besturing','regeling'] }
+  ];
+  rv.forEach(function(v){
+    if(v.bron === 'type') return;
+    velden.push({ k:'rv_'+v.key, l:v.label, match:[String(v.label||'').toLowerCase(), String(v.bron||v.key||'').toLowerCase()], veld:v });
+  });
+  var serieVeld = rv.find(function(v){ return v.bron === 'serienummer'; });
+  _excelImport({
+    titel: 'Installaties importeren',
+    uitleg: 'Importeer installaties uit een Excel- of csv-bestand. Elke rij is één installatie; het debiteurnummer koppelt hem aan de klant. Staat het serienummer al in het register, dan wordt die installatie bijgewerkt.',
+    velden: velden,
+    analyseer: function(rijen){
+      var a = { nieuw:[], bij:[], over:[] }, gezien = {};
+      rijen.forEach(function(w, i){
+        var nr = String(w('debnr')), type = String(w('type'));
+        if(!nr && !type) return;   // lege regel
+        var deb = _impDebOpNr(nr);
+        if(!deb){ a.over.push({ tekst:'Rij '+(i+2)+': debiteurnummer '+(nr||'(leeg)')+' niet gevonden'+(type?' · '+type:'') }); return; }
+        if(!type){ a.over.push({ tekst:'Rij '+(i+2)+': geen type · '+nr }); return; }
+        var waarden = {};
+        velden.forEach(function(vd){
+          if(!vd.veld) return;
+          var ruw = w(vd.k); if(ruw === '') return;
+          var t = vd.veld.type, val = t === 'getal' ? _impGetal(ruw) : t === 'janee' ? _impJaNee(ruw) : t === 'datum' ? _impDatum(ruw) : String(ruw).trim();
+          if(val === '') return;
+          waarden[vd.veld.key] = { bron: vd.veld.bron || null, val: val };
+        });
+        var serie = serieVeld && waarden[serieVeld.key] ? String(waarden[serieVeld.key].val).trim() : '';
+        if(serie){
+          var sl = serie.toLowerCase();
+          if(gezien[sl]){ a.over.push({ tekst:'Rij '+(i+2)+': serienummer '+serie+' staat dubbel in het bestand' }); return; }
+          gezien[sl] = true;
+        }
+        var item = { deb:deb, type:type, besturing:String(w('besturing')), waarden:waarden, serie:serie };
+        var bestaand = serie ? (APP.wp_pompen||[]).find(function(p){ return String(p.serienummer||'').trim().toLowerCase() === serie.toLowerCase(); }) : null;
+        if(bestaand){ item.pomp = bestaand; a.bij.push(item); } else a.nieuw.push(item);
+      });
+      return a;
+    },
+    regel: function(x){ return debNaam(x.deb)+' · '+x.type+(x.serie?' · '+x.serie:''); },
+    uitvoeren: function(a){
+      if(!APP.wp_pompen) APP.wp_pompen = [];
+      var zet = function(p, x){
+        p.type = x.type;
+        if(x.besturing) p.besturing = x.besturing;
+        p.debId = x.deb.id; p.debNr = x.deb.nr || x.deb.debNr || ''; p.klantnaam = debNaam(x.deb);
+        Object.keys(x.waarden).forEach(function(key){
+          var wv = x.waarden[key];
+          if(wv.bron) p[wv.bron] = wv.val;
+          else { if(!p.extra) p.extra = {}; p.extra[key] = wv.val; }
+        });
+      };
+      a.nieuw.forEach(function(x, i){
+        var p = { id:'pomp_'+Date.now()+'_'+i, type:'', besturing:'', toonOpWerkbon:false, locatieId:null, artikelId:'', artikelCode:'',
+                  debId:'', debNr:'', klantnaam:'', aangemaaktOp:vandaagISO(), aangemaaktDoor:(APP.profiel && APP.profiel.naam) || 'import' };
+        zet(p, x);
+        APP.wp_pompen.push(p);
+        dbSaveItem('wp_pompen', p.id, p);
+      });
+      a.bij.forEach(function(x){ zet(x.pomp, x); dbSaveItem('wp_pompen', x.pomp.id, x.pomp); });
+      return { nieuw:a.nieuw.length, bij:a.bij.length };
+    },
+    naAfloop: function(){ if(typeof renderPompregister === 'function' && document.getElementById('pr-add-btn')) renderPompregister(); }
+  });
+}
+
+// ── Medewerkers importeren ──────────────────────────────────────
+// Alleen het medewerkersrecord, geen inlog. Bestaande medewerkers (zelfde e-mail, of zelfde
+// voor- en achternaam) worden bijgewerkt. Het verlofsaldo wordt alleen bij nieuwe medewerkers
+// gezet: bij bestaande loopt het via mutaties, en die historie mag een import niet overschrijven.
+function _openMedewerkerImport(){
+  var velden = [
+    { k:'voornaam',   l:'Voornaam',        match:['voornaam','roepnaam'] },
+    { k:'achternaam', l:'Achternaam',      match:['achternaam','familienaam'] },
+    { k:'naam',       l:'Volledige naam',  match:['volledige naam','naam medewerker','medewerker','naam'] },
+    { k:'email',      l:'E-mailadres',     match:['e-mail','email','mail'] },
+    { k:'telefoon',   l:'Telefoon',        match:['telefoon','mobiel','tel'] },
+    { k:'functie',    l:'Functie',         match:['functie'] },
+    { k:'rol',        l:'Rol',             match:['rol'] },
+    { k:'contract',   l:'Contracttype',    match:['contracttype','dienstverband','contract'] },
+    { k:'uren',       l:'Contracturen per week', match:['contracturen','uren per week','uren'] },
+    { k:'saldo',      l:'Verlofsaldo (uren, alleen nieuwe)', match:['verlofsaldo','verlof'] },
+    { k:'indienst',   l:'Datum in dienst', match:['in dienst','indienst','startdatum','datum in dienst'] },
+    { k:'straat',     l:'Straat en huisnummer', match:['straat','adres'] },
+    { k:'postcode',   l:'Postcode',        match:['postcode'] },
+    { k:'plaats',     l:'Plaats',          match:['plaats','woonplaats'] }
+  ];
+  var rolVan = function(t){
+    var s = String(t||'').trim().toLowerCase(), keys = Object.keys(APP.rollen||{});
+    var k = keys.find(function(x){ return x.toLowerCase() === s || String((APP.rollen[x]||{}).naam||'').toLowerCase() === s; });
+    return k || (APP.rollen && APP.rollen.monteur ? 'monteur' : (keys[0] || 'monteur'));
+  };
+  var contractVan = function(t){ var s = String(t||'').toLowerCase(); return /zzp|extern|freelance/.test(s) ? 'zzp' : /tijdelijk|bepaalde/.test(s) ? 'tijdelijk' : 'vast'; };
+  _excelImport({
+    titel: 'Medewerkers importeren',
+    uitleg: 'Importeer medewerkers uit een Excel- of csv-bestand. Er wordt alleen een medewerkersrecord gemaakt, geen inlog. Bestaande medewerkers (zelfde e-mailadres, of zelfde voor- en achternaam) worden bijgewerkt. Zonder kolom verlofsaldo begint een nieuwe medewerker op 0 uur.',
+    velden: velden,
+    analyseer: function(rijen, map){
+      if(!(map.voornaam && map.achternaam) && !map.naam) return { fout:'Koppel voornaam en achternaam, of de volledige naam.' };
+      var a = { nieuw:[], bij:[], over:[] }, gezien = {};
+      rijen.forEach(function(w, i){
+        var vn = String(w('voornaam')), an = String(w('achternaam'));
+        if((!vn || !an) && w('naam')){ var delen = String(w('naam')).split(/\s+/); vn = vn || delen[0] || ''; an = an || delen.slice(1).join(' '); }
+        var em = String(w('email')).toLowerCase();
+        if(!vn && !an && !em) return;   // lege regel
+        if(!vn || !an){ a.over.push({ tekst:'Rij '+(i+2)+': voor- of achternaam ontbreekt'+(em?' · '+em:'') }); return; }
+        var sleutel = em || (vn+' '+an).toLowerCase();
+        if(gezien[sleutel]){ a.over.push({ tekst:'Rij '+(i+2)+': '+vn+' '+an+' staat dubbel in het bestand' }); return; }
+        gezien[sleutel] = true;
+        var x = { vn:vn, an:an, em:em, w:w, map:map };
+        var bestaand = (APP.medewerkers||[]).find(function(m){
+          if(em && m.email && m.email.toLowerCase() === em) return true;
+          return String(m.voornaam||'').trim().toLowerCase() === vn.toLowerCase() && String(m.achternaam||'').trim().toLowerCase() === an.toLowerCase();
+        });
+        if(bestaand){ x.med = bestaand; a.bij.push(x); } else a.nieuw.push(x);
+      });
+      return a;
+    },
+    regel: function(x){ return x.vn+' '+x.an+(x.em?' · '+x.em:'')+(x.med?' (bestaat al)':''); },
+    uitvoeren: function(a){
+      var basis0 = (APP.teamInstellingen && APP.teamInstellingen.verlofBasis != null) ? APP.teamInstellingen.verlofBasis : 25;
+      var tekst = function(x, k){ return x.map[k] ? String(x.w(k)) : ''; };
+      var zet = function(m, x){
+        var t;
+        if((t = tekst(x,'email')))    m.email = t;
+        if((t = tekst(x,'telefoon'))) m.telefoon = t;
+        if((t = tekst(x,'functie')))  m.functie = t;
+        if((t = tekst(x,'rol')))      m.rol = rolVan(t);
+        if((t = tekst(x,'contract'))) m.contractType = contractVan(t);
+        if((t = tekst(x,'straat')))   m.straat = t;
+        if((t = tekst(x,'postcode'))) m.postcode = t;
+        if((t = tekst(x,'plaats')))   m.plaats = t;
+        var d = x.map.indienst ? _impDatum(x.w('indienst')) : ''; if(d) m.datumInDienst = d;
+        var u = x.map.uren ? _impGetal(x.w('uren')) : ''; if(u !== '') m.contractUren = Math.round(u);
+        if(m.contractType === 'zzp'){ m.contractUren = 0; m.verlofBasis = 0; }
+        m.verlofTegoed = Math.round(((m.verlofBasis||0) * (m.contractUren||0) / 40) * 10) / 10;
+      };
+      a.nieuw.forEach(function(x){
+        var m = { id:uid(), voornaam:x.vn, achternaam:x.an, functie:'', rol:rolVan(''), email:'', telefoon:'', emailPrive:'', telefoonPrive:'',
+                  geboortedatum:'', geslacht:'', datumInDienst:'', contractType:'vast', contractUren:40, verlofBasis:basis0, verlofTegoed:0,
+                  straat:'', postcode:'', plaats:'', status:'actief' };
+        zet(m, x);
+        var dagUren = Math.round(((m.contractUren||0) / 5) * 10) / 10;
+        m.werkrooster = { patroon:'week', week1:{ ma:dagUren, di:dagUren, wo:dagUren, do:dagUren, vr:dagUren, za:0, zo:0 } };
+        var s = x.map.saldo ? _impGetal(x.w('saldo')) : '';
+        m.verlofSaldoUren = m.contractType === 'zzp' ? 0 : (s === '' ? 0 : s);
+        m.verlofSaldo = verlofUrenNaarDagen(m.verlofSaldoUren, m);   // legacy, afgeleid uit de uren
+        m.kleur = rolKleur(m.rol);
+        APP.medewerkers.push(m);
+        dbSaveItem('medewerkers', m.id, m);
+      });
+      a.bij.forEach(function(x){ zet(x.med, x); dbSaveItem('medewerkers', x.med.id, x.med); });
+      _invalideerMedMap();
+      return { nieuw:a.nieuw.length, bij:a.bij.length };
+    },
+    naAfloop: function(){ if(APP.activePage === 'medewerkers') renderMedewerkers(); }
   });
 }
 
@@ -26000,6 +26302,7 @@ function renderPompLijst() {
   h += '<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
   h += '<button class="btn btn-ghost btn-sm" id="pr-objecten-btn" style="display:inline-flex;align-items:center;gap:4px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Objecten</button>';
   h += '<button class="btn btn-ghost btn-sm hide-mobile" id="pr-kolom-btn">'+ICO.settings+' Kolommen</button>';
+  if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm hide-mobile" id="pr-import-btn">'+ICO.upload+' Importeren</button>';
   h += '<button class="btn btn-ghost btn-sm hide-mobile" id="pr-export-btn">'+ICO.download+' Export</button>';
   if(kanSchrijven) h += '<button class="btn btn-primary btn-sm" id="pr-add-btn">+ Pomp</button>';
   h += '</div></div>';
@@ -26104,6 +26407,7 @@ function renderPompLijst() {
   if(objectenBtn) objectenBtn.addEventListener('click', function(){ _prTab='objecten'; renderPompObjecten(); });
 
   var addBtn = el.querySelector('#pr-add-btn'); if(addBtn) addBtn.addEventListener('click', function(){openPompModal(null);});
+  var impBtnPr = el.querySelector('#pr-import-btn'); if(impBtnPr) impBtnPr.addEventListener('click', _openInstallatieImport);
   var addEmpty = el.querySelector('#pr-add-empty'); if(addEmpty) addEmpty.addEventListener('click', function(){openPompModal(null);});
 
   // Kolomkiezer
