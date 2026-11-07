@@ -243,6 +243,9 @@ body.light .lf{color-scheme:light}
 .lf .lf-veld.lf-kort{width:76px!important}
 .lf .lf-stap input{width:52px!important}
 .lf .lf-bedrag input{width:170px!important}
+@media (max-width:768px){
+  .modal.modal-lf{height:calc(100vh - 12px - env(safe-area-inset-top))!important;height:calc(100dvh - 12px - env(safe-area-inset-top))!important;max-height:none!important;min-height:0!important}
+}
 /* Toast */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 22px;border-radius:var(--radius-pill);font-size:13.5px;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;box-shadow:0 16px 40px rgba(0,0,0,.4)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -6887,10 +6890,10 @@ function _bouwLogin3D(THREE){
       }` }));
   nevel.renderOrder = -2; nevel.position.set(0, 0, -24); camera.add(nevel);
   // lichtval op het inlogblok (schermruimte): bundel, uitwaaiering, randlicht en stromende pixelwolken
-  const lichtU = { tijd: tijdU, res: { value: new THREE.Vector2(1, 1) }, css: { value: new THREE.Vector2(1, 1) }, kaart: { value: new THREE.Vector4(0, 0, 1, 1) }, sterkte: sterkteU, snel: { value: 0 } };
+  const lichtU = { tijd: tijdU, res: { value: new THREE.Vector2(1, 1) }, css: { value: new THREE.Vector2(1, 1) }, kaart: { value: new THREE.Vector4(0, 0, 1, 1) }, sterkte: sterkteU, snel: { value: 0 }, faseA: { value: 0 }, faseB: { value: 0 } };
   const lichtMat = new THREE.ShaderMaterial({ uniforms: lichtU, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
     vertexShader: 'void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }',
-    fragmentShader: `uniform float tijd; uniform vec2 res; uniform vec2 css; uniform vec4 kaart; uniform float sterkte; uniform float snel;
+    fragmentShader: `uniform float tijd; uniform float faseA; uniform float faseB; uniform vec2 res; uniform vec2 css; uniform vec4 kaart; uniform float sterkte; uniform float snel;
       float h21(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float ruis(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h21(i), h21(i + vec2(1.0, 0.0)), f.x), mix(h21(i + vec2(0.0, 1.0)), h21(i + vec2(1.0, 1.0)), f.x), f.y); }
       float fbm(vec2 p){ float s = 0.0, a = 0.5; for (int i = 0; i < OCT; i++) { s += a * ruis(p); p *= 2.03; a *= 0.5; } return s; }
@@ -6920,8 +6923,8 @@ function _bouwLogin3D(THREE){
         // het licht vloeit ver over de randen van het blok uit
         float rand = exp(-max(dSm, 0.0) / 30.0) * step(0.0, dSm) * (0.45 + 0.55 * exp(-sPad / (L * 1.1))) * stroom;
         float randBreed = exp(-max(dSm, 0.0) / 110.0) * step(0.0, dSm) * (0.3 + 0.7 * exp(-sPad / (L * 0.9)));
-        float puls = pow(0.5 + 0.5 * cos(6.2832 * (sPad / 560.0 - tijd * (0.08 + snel * 0.6))), 7.0) * exp(-max(dSm, 0.0) / 16.0) * step(0.0, dSm);
-        float pulsB = pow(0.5 + 0.5 * cos(6.2832 * (-dyS / 700.0 - tijd * (0.12 + snel * 0.9))), 12.0) * exp(-dxS * dxS / 6.0) * boven;
+        float puls = pow(0.5 + 0.5 * cos(6.2832 * (sPad / 560.0 - faseA)), 7.0) * exp(-max(dSm, 0.0) / 16.0) * step(0.0, dSm);
+        float pulsB = pow(0.5 + 0.5 * cos(6.2832 * (-dyS / 700.0 - faseB)), 12.0) * exp(-dxS * dxS / 6.0) * boven;
         // waas rond de bundel (wijder bij het raakpunt) en rond het blok, met stromende wolken
         float bw = 18.0 + 240.0 * exp(-max(dyS, 0.0) / 130.0);
         float waasB = exp(-dxS * dxS / (bw * bw)) * smoothstep(-6.0, 4.0, dyS) * (0.14 + 0.86 * exp(-max(dyS, 0.0) / 280.0));
@@ -6963,7 +6966,10 @@ function _bouwLogin3D(THREE){
   function zetKaart(){ const r = kaartEl.getBoundingClientRect(); lichtU.kaart.value.set(r.left, r.top, r.width, r.height); }
   function maat(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); lichtU.res.value.set(w * PR, h * PR); lichtU.css.value.set(w, h); zetKaart(); }
   addEventListener('resize', maat); maat();
-  // bij focus in het formulier wordt het licht iets helderder, bij inloggen lopen de pulsen sneller
+  // bij focus in het formulier wordt het licht iets helderder; tijdens het inloggen ademt het rustig op en neer.
+  // De pulsfase wordt per beeld opgeteld: tijd x snelheid sprong bij een snelheidswissel honderden
+  // periodes vooruit (tijd loopt in seconden sinds het laden), en dat gaf een stroboscoop.
+  const inlogKnop = document.getElementById('login-btn');
   let doelSterkte = 0.8, getypt = 0, snelTot = 0, laatst = performance.now(), loopt = false;
   document.addEventListener('focusin', function(e){ if(e.target.matches('#login-screen input')) doelSterkte = 1.0; });
   document.addEventListener('focusout', function(e){ if(e.target.matches('#login-screen input')) doelSterkte = 0.8; });
@@ -6974,9 +6980,10 @@ function _bouwLogin3D(THREE){
     requestAnimationFrame(teken);
     if(SMAL && nu - getypt < 900) return;                            // op een telefoon pauzeren tijdens het typen
     const dt = Math.min(0.05, (nu - laatst) / 1000); laatst = nu; tijdU.value = nu / 1000;
-    const snel = nu < snelTot;
-    zetKaart(); lichtU.snel.value += ((snel ? 1 : 0) - lichtU.snel.value) * 0.1;
-    sterkteU.value += ((snel ? 1.0 : doelSterkte) - sterkteU.value) * (1 - Math.exp(-dt * 3));
+    const bezig = nu < snelTot || (inlogKnop && inlogKnop.classList.contains('loading'));
+    zetKaart(); lichtU.faseA.value += dt * 0.08; lichtU.faseB.value += dt * 0.12;
+    const doel = bezig ? 0.9 + 0.2 * Math.sin(nu / 1000 * Math.PI) : doelSterkte;   // één keer op en neer per 2 seconden
+    sterkteU.value += (doel - sterkteU.value) * (1 - Math.exp(-dt * 3));
     renderer.render(scene, camera);
   }
   return { start: function(){
