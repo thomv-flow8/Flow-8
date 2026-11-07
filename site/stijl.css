@@ -1317,19 +1317,28 @@ p,li,summary{text-wrap:pretty}
 .v-rij svg{flex-shrink:0;color:var(--acc-t)}
 .rekenvoorbeeld .bedrag,.rekenvoorbeeld .som{grid-column:1/-1}
 /* ── Rook op de contactpagina: een wolkentextuur (eenmalig getekend, geen shader) die traag drijft ── */
-.sectie .rook{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-.sectie .rook i{position:absolute;width:120vmax;height:120vmax;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='r' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0045' numOctaves='5' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.34  0 0 0 0 0.4  0 0 0 0 0.92  0 0 0 2.2 -1.05'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23r)'/%3E%3C/svg%3E") center/cover no-repeat;opacity:.38;-webkit-mask-image:radial-gradient(closest-side,#000 35%,transparent);mask-image:radial-gradient(closest-side,#000 35%,transparent)}
-.sectie .rook i:first-child{left:-40vmax;top:-45vmax;animation:rookDrijf1 70s ease-in-out infinite alternate}
-.sectie .rook i:last-child{right:-55vmax;bottom:-70vmax;opacity:.26;transform:rotate(140deg);animation:rookDrijf2 90s ease-in-out infinite alternate}
-.sectie .rook ~ .wrap{position:relative;z-index:1}
+:is(.sectie,.pagina-kop) .rook{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+:is(.sectie,.pagina-kop) .rook i{position:absolute;width:120vmax;height:120vmax;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='r' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0045' numOctaves='5' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.34  0 0 0 0 0.4  0 0 0 0 0.92  0 0 0 2.2 -1.05'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23r)'/%3E%3C/svg%3E") center/cover no-repeat;opacity:.38;-webkit-mask-image:radial-gradient(closest-side,#000 35%,transparent);mask-image:radial-gradient(closest-side,#000 35%,transparent)}
+:is(.sectie,.pagina-kop) .rook i:first-child{left:-40vmax;top:-45vmax;animation:rookDrijf1 70s ease-in-out infinite alternate}
+:is(.sectie,.pagina-kop) .rook i:last-child{right:-55vmax;bottom:-70vmax;opacity:.26;transform:rotate(140deg);animation:rookDrijf2 90s ease-in-out infinite alternate}
+:is(.sectie,.pagina-kop) .rook ~ .wrap{position:relative;z-index:1}
 @keyframes rookDrijf1{to{transform:translate(9vmax,5vmax) scale(1.08)}}
 @keyframes rookDrijf2{to{transform:rotate(150deg) translate(-7vmax,4vmax) scale(1.1)}}
-@media (prefers-reduced-motion:reduce){.sectie .rook i:first-child,.sectie .rook i:last-child{animation:none}}
+@media (prefers-reduced-motion:reduce){:is(.sectie,.pagina-kop) .rook i:first-child,:is(.sectie,.pagina-kop) .rook i:last-child{animation:none}}
 /* telefoons: één kleinere, stilstaande wolk (elke grote laag kost op een iPhone tientallen MB geheugen) */
-@media (max-width:820px){.sectie .rook i:last-child{display:none}.sectie .rook i:first-child{width:150vw;height:150vw;left:-55vw;top:-40vw;opacity:.28;animation:none}}
+@media (max-width:820px){:is(.sectie,.pagina-kop) .rook i:last-child{display:none}:is(.sectie,.pagina-kop) .rook i:first-child{width:150vw;height:150vw;left:-55vw;top:-40vw;opacity:.28;animation:none}}
 /* Donkere paginakop met rook (vragen, overstappen); de inhoud volgt op een licht vlak */
 .kop-donker{padding:150px 0 64px}
 .kop-donker .sectie-kop{margin-bottom:0}
 .kop-donker .onderwerpen{margin:28px 0 0}
 .kop-donker + .band-licht{padding-top:72px;border-top:0}
 @media (max-width:820px){.kop-donker{padding:118px 0 44px}}
+/* paginakop van product: de rook vloeit onderaan uit, want de sectie eronder is ook donker */
+.pagina-kop .rook{-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+.pagina-kop .rook ~ .wrap{position:relative;z-index:1}
+/* homepage: van de module-tegels door naar de productpagina */
+.naar-product{margin-top:40px;display:flex;justify-content:center}
+.naar-product .knop{display:inline-flex;align-items:center;gap:10px}
+/* na de reis: door naar alle functies */
+.landing-knop{margin-top:28px;display:inline-flex;align-items:center;gap:10px;position:relative;z-index:2}
+.landing-tekst .pijl-neer{display:block;margin:22px auto 0;width:fit-content}
