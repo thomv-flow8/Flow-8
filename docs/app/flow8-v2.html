@@ -553,7 +553,7 @@ label.lf-rij{cursor:pointer}
 .wo-foto-plus{width:76px;height:76px;border-radius:var(--radius);border:1px dashed var(--border);display:grid;place-items:center;color:var(--accent-t);background:rgba(79,110,245,.06);cursor:pointer}
 .wo-uur{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;margin-bottom:8px}
 .wo-uur-kop{display:flex;align-items:center;gap:10px}
-.wo-uur .wbx-who{width:32px;height:32px;border-radius:50%;background:var(--accent-knop);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+.wo-uur-rij{cursor:pointer}
 .lf .lf-veld.wo-uur-med{flex:1;min-width:0;width:auto!important;text-align:left}
 .wo-uur-tijd{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
 .wo-uur-van-tot{display:inline-flex;align-items:center;gap:4px;color:var(--muted)}
@@ -37860,8 +37860,7 @@ function _woRenderDetail(){
       + '<div class="wbx-field-lbl">Details</div><textarea class="wbx-field area wox-details" placeholder="Omschrijving van de werkzaamheden"'+dis+'>'+esc(wo.details||'')+'</textarea>';
     if(kanBeheren){
       var _isHoog = wo.prioriteit==='hoog';
-      _beheerHtml = '<div class="wo-beheer"><button type="button" class="wbx-chip-add wox-prio'+(_isHoog?' hoog':'')+'">'+ICO.flag+(_isHoog?'Hoge prioriteit uitzetten':'Markeren als hoge prioriteit')+'</button>'
-        + '<button type="button" class="lf-verwijder wox-verwijder">'+ICO.trash+' Werkorder verwijderen</button></div>';
+      _beheerHtml = '<div class="wo-beheer"><button type="button" class="wbx-chip-add wox-prio'+(_isHoog?' hoog':'')+'">'+ICO.flag+(_isHoog?'Hoge prioriteit uitzetten':'Markeren als hoge prioriteit')+'</button>'+'</div>';
     }
     _ovzInfo = info;
   }
@@ -38237,40 +38236,95 @@ function _woFotoSectieHtml(scope, data){
 }
 
 // UREN — met medewerker-keuze, uren en omschrijving (zoals werkbon)
-function _woUrenSectieHtml(scope, data){
-  data = data || {};
-  var uren = Array.isArray(data._uren) ? data._uren : [];
-  var totaal = uren.reduce(function(s,u){ return s + (parseFloat(u.uren)||0); }, 0);
-  var bew = _woDetailState.bewerkbaar;
-  var dis = bew ? '' : ' disabled';
+// Medewerkers die uren mogen schrijven op een werkorder (instelbaar per bedrijf).
+function _woUrenMedewerkers(){
   var _urenRollen = (APP.werkordersInst && APP.werkordersInst.urenRollen) || ['monteur','magazijn'];
-  var meds = (APP.medewerkers||[]).filter(function(m){
+  return (APP.medewerkers||[]).filter(function(m){
     if(m.status==='inactief') return false;
     // Filter op ingestelde rollen (rol kan string of array zijn); leeg = iedereen
     if(!_urenRollen.length) return true;
     var mr = Array.isArray(m.rollen) ? m.rollen : (m.rol ? [m.rol] : []);
     return mr.some(function(r){ return _urenRollen.indexOf(r)>=0; });
   });
-  var a = function(cls, ui){ return 'class="'+cls+'" data-scope="'+esc(scope)+'" data-ui="'+ui+'"'; };
+}
+
+function _woUrenSectieHtml(scope, data){
+  data = data || {};
+  var uren = Array.isArray(data._uren) ? data._uren : [];
+  var totaal = uren.reduce(function(s,u){ return s + (parseFloat(u.uren)||0); }, 0);
+  var bew = _woDetailState.bewerkbaar;
   // Het eerste div is de kop: de koppelcode werkt de urenteller daarin bij.
   var h = '<div class="wox-sectie wo-sectie lf"><div class="wo-sub">Uren'+(totaal?(' ('+String(Math.round(totaal*100)/100).replace('.',',')+' u)'):'')+'</div>';
+  // Zelfde regels als op de werkbon; tik op een regel om hem te wijzigen.
   uren.forEach(function(u, ui){
     var m = u.medewerkerId ? getMed(u.medewerkerId) : null;
-    h += '<div class="wo-uur">';
-    h += '<div class="wo-uur-kop"><span class="wbx-who">'+(m ? esc(initials(m)) : '?')+'</span>'
-      + '<select '+a('lf-veld wo-uur-med wox-uur-med', ui)+dis+' aria-label="Medewerker"><option value="">Medewerker kiezen</option>'
-      + meds.map(function(x){ var naam = ((x.voornaam||'')+' '+(x.achternaam||'')).trim()||x.email||'?'; return '<option value="'+esc(x.id)+'"'+(String(u.medewerkerId||'')===String(x.id)?' selected':'')+'>'+esc(naam)+'</option>'; }).join('')
-      + '</select>'
-      + (bew ? '<button type="button" '+a('vt-wis wox-uur-del', ui)+' aria-label="Uurregel verwijderen" title="Verwijderen">'+ICO.trash+'</button>' : '')+'</div>';
-    h += '<div class="wo-uur-tijd"><input type="date" '+a('lf-veld wox-uur-datum', ui)+' value="'+esc(u.datum||'')+'"'+dis+' aria-label="Datum">'
-      + '<span class="wo-uur-van-tot"><input type="time" '+a('lf-veld wox-uur-van', ui)+' value="'+esc(u.van||'')+'"'+dis+' aria-label="Van"><span>\u2013</span><input type="time" '+a('lf-veld wox-uur-tot', ui)+' value="'+esc(u.tot||'')+'"'+dis+' aria-label="Tot"></span>'
-      + '<span class="wo-uur-aantal"><input type="number" step="0.25" inputmode="decimal" '+a('lf-veld lf-kort wox-uur-aantal', ui)+' value="'+esc(u.uren!=null?u.uren:'')+'" placeholder="0"'+dis+' aria-label="Aantal uren">u</span></div>';
-    h += '<input type="text" '+a('lf-notitie wox-uur-oms', ui)+' value="'+esc(u.omschrijving||'')+'" placeholder="Omschrijving werkzaamheden"'+dis+'>';
-    h += '</div>';
+    var naam = m ? ((m.voornaam||'')+' '+(m.achternaam||'')).trim() : 'Onbekend';
+    var regel = [u.datum ? _lfDatum(u.datum) : '', (u.van && u.tot) ? u.van+'\u2013'+u.tot : '', u.omschrijving||''].filter(Boolean).join(' \u00b7 ') || '\u2014';
+    h += '<div class="wbx-uur-regel'+(bew?' wo-uur-rij':'')+'" data-scope="'+esc(scope)+'" data-ui="'+ui+'"'+(bew?' role="button" tabindex="0"':'')+'>'
+      + '<span class="wbx-who">'+(m ? esc(initials(m)) : '?')+'</span>'
+      + '<span class="wbx-det"><span class="wbx-n">'+esc(naam)+'</span><br><span class="wbx-t">'+esc(regel)+'</span></span>'
+      + '<span class="wbx-amt">'+esc(String(u.uren||0).replace('.',','))+' u</span>'
+      + (bew ? '<button type="button" class="wbx-del wox-uur-del btn btn-ghost btn-wis" data-scope="'+esc(scope)+'" data-ui="'+ui+'" title="Verwijderen" aria-label="Uurregel verwijderen">'+ICO.trash+'</button>' : '')
+      + '</div>';
   });
+  if(!uren.length) h += '<p class="lf-leeg">Nog geen uren toegevoegd.</p>';
   if(bew) h += '<button type="button" class="wbx-chip-add wox-uur-add" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' Uren toevoegen</button>';
-  else if(!uren.length) h += '<p class="lf-leeg">Geen uren.</p>';
   return h + '</div>';
+}
+
+// Uren toevoegen of wijzigen in een klein venster, net als op de werkbon. Met een datum,
+// want een werkorder loopt vaak over meerdere dagen. ui = index van de regel (null = nieuw).
+function _woUurDialoog(scope, ui){
+  var st = _woDetailState; if(!st) return;
+  var data = _woScopeData(st.antwoorden, scope);
+  data._uren = Array.isArray(data._uren) ? data._uren : [];
+  var bestaand = (ui!==null && ui!==undefined) ? data._uren[ui] : null;
+  var u = bestaand || {};
+  var mij = (typeof getMijnMedId==='function') ? getMijnMedId() : null;
+  var gekozen = String(u.medewerkerId || mij || '');
+  var meds = _woUrenMedewerkers().sort(function(a,b){ return ((a.voornaam||'')+' '+(a.achternaam||'')).localeCompare((b.voornaam||'')+' '+(b.achternaam||'')); });
+  var medOpts = '<option value="">Medewerker kiezen</option>' + meds.map(function(m){
+    var naam = ((m.voornaam||'')+' '+(m.achternaam||'')).trim() || m.email || m.id;
+    return '<option value="'+esc(m.id)+'"'+(String(m.id)===gekozen?' selected':'')+'>'+esc(naam)+'</option>';
+  }).join('');
+  var b = lfPersoon('<select class="input" id="wo-uur-med">'+medOpts+'</select>', esc(_woKlantKort(st.wo)||''));
+  b += lfRij(ICO.kalender, 'Datum', '<input class="lf-veld" type="date" id="wo-uur-datum" value="'+esc(u.datum||vandaagISO())+'" required>', {verplicht:true, voor:'wo-uur-datum'});
+  b += lfRij(ICO.clock, 'Van', '<input class="lf-veld" type="time" id="wo-uur-van" value="'+esc(u.van||'')+'">', {voor:'wo-uur-van'});
+  b += lfRij(ICO.clock, 'Tot', '<input class="lf-veld" type="time" id="wo-uur-tot" value="'+esc(u.tot||'')+'">', {voor:'wo-uur-tot'});
+  b += lfRij('', 'Uren', '<span class="lf-stap"><button type="button" data-lf-stap="-0.25" aria-label="Kwartier minder">'+_LF_MIN+'</button><input type="number" inputmode="decimal" id="wo-uur-aantal" value="'+esc(u.uren!=null&&u.uren!==''?String(u.uren):'')+'" min="0" step="0.25" placeholder="0"><button type="button" data-lf-stap="0.25" aria-label="Kwartier meer">'+_LF_PLUS+'</button></span>', {voor:'wo-uur-aantal', sub:'Rekent mee met van en tot'});
+  b += lfRij(ICO.edit, 'Omschrijving', '<input class="lf-tekst" type="text" id="wo-uur-oms" value="'+esc(u.omschrijving||'')+'" placeholder="Bijv. diagnose, demontage">', {voor:'wo-uur-oms'});
+  if(bestaand) b += '<button type="button" class="lf-verwijder" id="wo-uur-del">'+ICO.trash+' Uurregel verwijderen</button>';
+  lfOpen(bestaand ? 'Uren wijzigen' : 'Uren toevoegen', b, bestaand ? 'Opslaan' : 'Toevoegen', 'wo-uur-ok');
+
+  var vanEl = document.getElementById('wo-uur-van'), totEl = document.getElementById('wo-uur-tot'), aantalEl = document.getElementById('wo-uur-aantal');
+  var reken = function(){ var x = _wbUurVanTot(vanEl.value, totEl.value); if(x > 0) aantalEl.value = x; };
+  vanEl.addEventListener('input', reken);
+  totEl.addEventListener('input', reken);
+
+  document.getElementById('wo-uur-ok').addEventListener('click', function(){
+    var van = vanEl.value, tot = totEl.value;
+    if(van && tot && _wbUurVanTot(van, tot) <= 0){ toast('Tot-tijd moet na van-tijd liggen','error'); return; }
+    var aantal = parseFloat(String(aantalEl.value).replace(',','.')) || _wbUurVanTot(van, tot);
+    if(!(aantal > 0)){ toast('Vul van en tot in, of het aantal uren','error'); return; }
+    var regel = {
+      medewerkerId: document.getElementById('wo-uur-med').value || '',
+      datum: document.getElementById('wo-uur-datum').value || vandaagISO(),
+      van: van, tot: tot, uren: Math.round(aantal*100)/100,
+      omschrijving: document.getElementById('wo-uur-oms').value.trim()
+    };
+    if(bestaand) data._uren[ui] = Object.assign({}, bestaand, regel); else data._uren.push(regel);
+    closeModal();
+    _woBewaarAntwoorden(); _woRenderDetail();
+    toast(bestaand ? 'Uren bijgewerkt' : 'Uren toegevoegd','success');
+  });
+  var del = document.getElementById('wo-uur-del');
+  if(del) del.addEventListener('click', function(){
+    closeModal();
+    bevestigActie('Uurregel verwijderen','Deze uurregel verwijderen?', function(){
+      data._uren.splice(ui, 1);
+      _woBewaarAntwoorden(); _woRenderDetail();
+    });
+  });
 }
 
 // MATERIALEN — kiezen uit de artikelcatalogus (zoals werkbon)
@@ -38680,13 +38734,14 @@ function _woBindDetail(fullscreen){
   // ── Secties: uren ──
   root.querySelectorAll('.wox-uur-add').forEach(function(bt){
     bt.addEventListener('click', function(){
-      var data = _woScopeData(st.antwoorden, bt.dataset.scope);
-      data._uren = Array.isArray(data._uren)?data._uren:[];
-      var mij = (typeof getMijnMedId==='function') ? getMijnMedId() : null;
-      var vandaag = new Date().toISOString().slice(0,10);
-      data._uren.push({ medewerkerId: mij||'', datum:vandaag, van:'', tot:'', omschrijving:'', uren:'' });
-      _woBewaarAntwoorden(); _woRenderDetail();
+      _woUurDialoog(bt.dataset.scope, null);
     });
+  });
+  // Tik op een uurregel: wijzigen in hetzelfde venster
+  root.querySelectorAll('.wo-uur-rij').forEach(function(rij){
+    var open = function(e){ if(e && e.target.closest('.wox-uur-del')) return; _woUurDialoog(rij.dataset.scope, +rij.dataset.ui); };
+    rij.addEventListener('click', open);
+    rij.addEventListener('keydown', function(e){ if(e.target===rij && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); open(); } });
   });
   root.querySelectorAll('.wox-uur-oms').forEach(function(inp){
     inp.addEventListener('input', function(){ var d=_woScopeData(st.antwoorden,inp.dataset.scope); if(d._uren&&d._uren[+inp.dataset.ui]){ d._uren[+inp.dataset.ui].omschrijving=inp.value; _woBewaarAntwoorden(); } });
@@ -38722,7 +38777,8 @@ function _woBindDetail(fullscreen){
     inp.addEventListener('input', function(){ var d=_woScopeData(st.antwoorden,inp.dataset.scope); if(d._uren&&d._uren[+inp.dataset.ui]){ d._uren[+inp.dataset.ui].uren=inp.value; _woBewaarAntwoorden(); } });
   });
   root.querySelectorAll('.wox-uur-del').forEach(function(bt){
-    bt.addEventListener('click', function(){ var d=_woScopeData(st.antwoorden,bt.dataset.scope); if(d._uren){ d._uren.splice(+bt.dataset.ui,1); _woBewaarAntwoorden(); _woRenderDetail(); } });
+    // Bevestigen, net als op de werkbon: met handschoenen is een misser snel gemaakt.
+    bt.addEventListener('click', function(e){ e.stopPropagation(); bevestigActie('Uurregel verwijderen','Deze uurregel verwijderen?', function(){ var d=_woScopeData(st.antwoorden,bt.dataset.scope); if(d._uren){ d._uren.splice(+bt.dataset.ui,1); _woBewaarAntwoorden(); _woRenderDetail(); } }); });
   });
 
   // ── Secties: materialen ──
