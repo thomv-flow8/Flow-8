@@ -37897,6 +37897,12 @@ function _woRenderDetail(){
   h += '<div class="wbx-secties">';
   // Werkdocumenten: centrale documentenmap, bovenaan om te raadplegen. Inhoud wordt pas geladen bij het openen (scheelt reads).
   h += _sec('werkdocumenten', I_MAP, 'Werkdocumenten', '', '<div id="wox-wd-body"></div>');
+  // Interne memo: zelfde veld (interneMemo) en gedrag als op de werkbon; alleen voor het team.
+  h += _sec('memo', '<path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.8 21.8 0 015.06-6.06"/><path d="M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.8 21.8 0 01-2.16 3.19"/><path d="M14.12 14.12a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/>',
+    'Interne memo', wo.interneMemo ? '<span class="wbx-cnt-badge">1</span>' : '',
+    '<p class="lf-uitleg" style="padding-top:0">Alleen zichtbaar voor het team \u2014 komt niet op de PDF of in de mail naar de klant.</p>'
+    + '<textarea class="wbx-field area wox-memo" placeholder="Notitie voor jezelf of collega\u2019s\u2026"'+dis+'>'+esc(wo.interneMemo||'')+'</textarea>'
+    + '<div class="wbx-save-status wox-memo-status"></div>');
 
   if(heeftBlokken){
     // Gefaseerd: elke fase een eigen onderdeel
@@ -38728,6 +38734,21 @@ function _woBindDetail(fullscreen){
   if(wdKop) wdKop.addEventListener('click', _wdVul);
   var _wdSec = root.querySelector('.wbx-sec[data-sec="werkdocumenten"]');
   if(!fullscreen && _wdSec && _wdSec.classList.contains('open')) _wdVul();
+  // Interne memo: automatisch opslaan (eigen vertraging), zoals op de werkbon
+  var memoEl = root.querySelector('.wox-memo');
+  if(memoEl && st.bewerkbaar){
+    var _memoTimer = null;
+    memoEl.addEventListener('input', function(){
+      st.wo.interneMemo = memoEl.value;
+      var ms = root.querySelector('.wox-memo-status'); if(ms) ms.textContent = 'Opslaan\u2026';
+      if(_memoTimer) clearTimeout(_memoTimer);
+      _memoTimer = setTimeout(function(){
+        fsWerkorderBijwerken(st.id, { interneMemo: memoEl.value })
+          .then(function(){ var m2 = root.querySelector('.wox-memo-status'); if(m2){ m2.textContent = 'Opgeslagen'; setTimeout(function(){ m2.textContent = ''; }, 1500); } })
+          .catch(function(e){ var m3 = root.querySelector('.wox-memo-status'); if(m3) m3.textContent = 'Opslaan mislukt'; console.error('Interne memo opslaan:', e); });
+      }, 800);
+    });
+  }
   // Open en dicht onthouden, zodat het hertekenen na een wijziging je plek niet kwijtraakt
   root.querySelectorAll('.wbx-sec[data-sec] > .wbx-hdr').forEach(function(hd){
     hd.addEventListener('click', function(){ st.openSec[hd.parentNode.getAttribute('data-sec')] = hd.parentNode.classList.contains('open'); });
