@@ -264,6 +264,19 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
 .lf-art-plus{width:34px;height:34px;border-radius:50%;background:rgba(79,110,245,.14);color:var(--accent-t);display:grid;place-items:center}
 .lf-leeg,.lf-uitleg{font-size:13px;color:var(--muted);padding:14px 2px;line-height:1.45}
 .lf-fout{color:var(--red-t)}
+.lf-klap{margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.lf-klap-kop{display:flex;align-items:center;gap:12px;min-height:60px;padding:10px 14px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.lf-klap-kop:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.lf-klap-t{flex:1;font-size:15px;font-weight:600;min-width:0}
+.lf-klap-t small{display:block;font-size:12.5px;font-weight:400;color:var(--muted);margin-top:2px}
+.lf-klap-b{padding:0 14px 12px}
+.lf-klap-b > .lf-rij:first-child,.lf-klap-b > .lf-twee:first-child > *{border-top:0}
+.lf-klap-b .lf-rij{border-bottom:0;border-top:1px solid var(--border)}
+.lf .wr-uren{border-radius:10px;font-family:'Space Mono',monospace;font-weight:700}
+.lf .wr-tijd-toggle{font-family:inherit;color:var(--accent-t)}
+.lf #wr-week1-label,.lf #wr-week2-label{font-family:'Space Mono',monospace;font-weight:400;letter-spacing:.08em}
+.lf #wr-totaal1,.lf #wr-totaal2{font-size:12px}
+.lf .kleur-swatch{width:32px!important;height:32px!important}
 /* ── Grote formulieren (lijststijl met groepen): kaarten met kopjes, op desktop twee kolommen ── */
 .modal.modal-lf-groot .modal-body{background:var(--bg)}
 .lf-blok-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:0 14px}
@@ -291,12 +304,28 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
 .lf-sectie-kaart .lf-rij:first-child{border-top:0}
 .lf-mini{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .lf-mini .btn{min-height:36px}
+/* Tekstvelden vullen de ruimte naast het label (lange klant- en plaatsnamen passen) */
+.lf .lf-tekst{max-width:none!important}
+.lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px auto minmax(0,1fr)}
+.lf-rij:has(> .lf-w > .lf-tekst) > .lf-w{justify-self:stretch}
+.lf-rij:has(> .lf-w > .lf-tekst) > .lf-w > .lf-tekst{width:100%}
+@media(min-width:769px){
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px 132px minmax(0,1fr)}
+}
+/* Grote formulieren op de telefoon: label klein boven het vak, zodat lange namen passen */
+@media(max-width:768px){
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px minmax(0,1fr);row-gap:1px}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) > .lf-ic{grid-row:1/3;align-self:center}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) > .lf-l{font-size:12.5px;color:var(--muted)}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) > .lf-w{grid-column:2}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) .lf-tekst{text-align:left;padding:2px 0}
+}
 @media(max-width:768px){
   .lf .lf-nr + .lf-hint{display:none}
   .lf .lf-veld.lf-pc{width:108px!important}
 }
 @media(min-width:769px){
-  .modal.modal-lf-groot{width:min(900px,95vw)}
+  .modal.modal-lf-groot{width:min(1040px,95vw)}
   .modal-lf-groot .lf-twee{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
   .modal-lf-groot .lf-drie{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:16px}
   .modal-lf-groot .lf-sub-kaart .lf-drie > *{border-top:0}
@@ -11313,28 +11342,28 @@ function openMedModal(id) {
   kleurPickerHtml += '<input type="hidden" id="mf-kleur" value="'+_huidigKleurHex+'">';
   kleurPickerHtml += '</div></div>';
 
-  var b='<div class="form-grid">';
-  b+=fg('Voornaam *',finp('mf-vn','text',m.voornaam,'Jan'));
-  b+=fg('Achternaam *',finp('mf-an','text',m.achternaam,'de Vries'));
+  var _mfT = function(id2, waarde, ph, type, extra){ return '<input class="lf-tekst" type="'+(type||'text')+'" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
   // Functietitel is beschrijvend: er draait geen logica op. Vrije invoer dus, maar met
   // suggesties uit wat al bij andere medewerkers staat — dat voorkomt dat dezelfde
   // functie in drie schrijfwijzen in de lijst belandt, zonder dat er iets te beheren valt.
   var _functies = Array.from(new Set((APP.medewerkers||[])
     .map(function(x){ return (x.functie||'').trim(); })
     .filter(Boolean))).sort();
-  b+=fg('Functietitel',
-    '<input class="input" id="mf-fn" type="text" list="mf-fn-list" value="'+esc(m.functie||'')+'" placeholder="Servicemonteur">'
-    + '<datalist id="mf-fn-list">'+_functies.map(function(f){ return '<option value="'+esc(f)+'">'; }).join('')+'</datalist>');
+  var b = '';
+  if(!isNew) b += '<div class="lf-persoon" style="border:0;padding-bottom:2px"><span class="lf-av" id="mf-kop-av" style="background:'+_huidigKleurHex+';width:52px;height:52px;font-size:17px" aria-hidden="true">'+esc(_lfInit((m.voornaam||'')+' '+(m.achternaam||'')))+'</span><span class="lf-pt"><b>'+esc(((m.voornaam||'')+' '+(m.achternaam||'')).trim())+'</b>'+(m.functie?'<small>'+esc(m.functie)+'</small>':'')+'</span></div>';
+  b += '<div class="lf-groep">Persoon</div><div class="lf-blok-kaart">';
+  b += '<div class="lf-twee">'+lfRij(ICO.user, 'Voornaam', _mfT('mf-vn', m.voornaam, 'Jan', 'text', ' required'), {verplicht:true, voor:'mf-vn'})+lfRij('', 'Achternaam', _mfT('mf-an', m.achternaam, 'de Vries', 'text', ' required'), {verplicht:true, voor:'mf-an'})+'</div>';
   // Deze rol bepaalt géén rechten, maar of iemand planbaar is en beschikbaarheid krijgt.
   // De rechten in de app komen uit het gebruikersprofiel (Instellingen → Gebruikers).
-  b+=fg('Rol (planning en beschikbaarheid)',fsel('mf-rol',rolOpts,m.rol));
-  b+=fg('E-mail zakelijk',finp('mf-em','email',m.email,'jan@bedrijf.nl'));
-  b+=fg('Telefoon zakelijk',finp('mf-tel','text',m.telefoon,'06-12345678'));
-  b+=fg('E-mail privé',finp('mf-emp','email',m.emailPrive,''));
-  b+=fg('Telefoon privé',finp('mf-telp','text',m.telefoonPrive,''));
-  b+=fg('Geboortedatum',finp('mf-geb','date',m.geboortedatum,''));
-  b+=fg('Geslacht',fsel('mf-gel',gelOpts,m.geslacht));
-  b+='</div>';
+  b += '<div class="lf-twee">'+lfRij(ICO.koffer, 'Functie', _mfT('mf-fn', m.functie, 'Servicemonteur', 'text', ' list="mf-fn-list"')+'<datalist id="mf-fn-list">'+_functies.map(function(f){ return '<option value="'+esc(f)+'">'; }).join('')+'</datalist>', {voor:'mf-fn'})
+    + lfKies(ICO.users, 'Rol', fsel('mf-rol',rolOpts,m.rol), {sub:'Planning en beschikbaarheid', titel:'Rol'})+'</div>';
+  b += '<div class="lf-twee">'+lfRij(ICO.kalender, 'Geboortedatum', '<input class="lf-veld" type="date" id="mf-geb" value="'+esc(m.geboortedatum||'')+'">', {voor:'mf-geb'})+lfKies('', 'Geslacht', fsel('mf-gel',gelOpts,m.geslacht))+'</div>';
+  b += '</div>';
+  b += '<div class="lf-groep">Contact</div><div class="lf-blok-kaart">';
+  b += '<div class="lf-twee">'+lfRij(_LF_MAIL, 'E-mail zakelijk', _mfT('mf-em', m.email, 'jan@bedrijf.nl', 'email', ' inputmode="email" autocapitalize="off"'), {voor:'mf-em'})+lfRij(_LF_TEL, 'Telefoon zakelijk', _mfT('mf-tel', m.telefoon, '06-12345678', 'tel', ' inputmode="tel"'), {voor:'mf-tel'})+'</div>';
+  b += '<div class="lf-twee">'+lfRij('', 'E-mail privé', _mfT('mf-emp', m.emailPrive, 'Optioneel', 'email', ' inputmode="email" autocapitalize="off"'), {voor:'mf-emp'})+lfRij('', 'Telefoon privé', _mfT('mf-telp', m.telefoonPrive, 'Optioneel', 'tel', ' inputmode="tel"'), {voor:'mf-telp'})+'</div>';
+  b += '</div>';
+  b += '<div class="lf-groep">Aanvullend</div>';
 
   // Contract & Verlof accordion
   var _stdVerlofBasis = (APP.teamInstellingen && APP.teamInstellingen.verlofBasis != null) ? APP.teamInstellingen.verlofBasis : 25;
@@ -11347,15 +11376,17 @@ function openMedModal(id) {
   var _ctLabel = m.contractType ? (m.contractType==='zzp'?'ZZP/Extern':m.contractType==='tijdelijk'?'Tijdelijk':'Vast') : '';
   var _accContractSub = [_ctLabel, (!_isZzp&&m.contractUren)?m.contractUren+'u/week':''].filter(Boolean).join(' · ');
 
-  var contractHtml = '<div class="form-grid">';
-  contractHtml += fg('Datum in dienst',finp('mf-did','date',m.datumInDienst,''));
-  contractHtml += fg('Contracttype',fsel('mf-con',conOpts,m.contractType));
+  var _mfStap = function(id2, waarde, stap, min, max, eenheid){ return '<span class="lf-stap"><button type="button" data-lf-stap="-'+stap+'" aria-label="Minder">'+_LF_MIN+'</button><input type="number" inputmode="decimal" id="'+id2+'" value="'+waarde+'" min="'+min+'" max="'+max+'" step="'+stap+'"><button type="button" data-lf-stap="'+stap+'" aria-label="Meer">'+_LF_PLUS+'</button></span>'+(eenheid?'<span class="lf-hint">'+eenheid+'</span>':''); };
+  var contractHtml = '<div class="lf-twee">';
+  contractHtml += lfRij(ICO.kalender, 'In dienst', '<input class="lf-veld" type="date" id="mf-did" value="'+esc(m.datumInDienst||'')+'">', {voor:'mf-did'});
+  contractHtml += lfKies('', 'Contracttype', fsel('mf-con',conOpts,m.contractType));
   contractHtml += '</div>';
-  contractHtml += '<div id="mf-uren-verlof-wrap" style="display:contents"><div class="form-grid" style="margin-top:10px">';
-  contractHtml += fg('Uren/week',finp('mf-uur','number', _isZzp ? 0 : (m.contractUren != null ? m.contractUren : 40), '40'));
-  contractHtml += fg('Verloftegoed per jaar (basis bij 40u/week)',finp('mf-vb','number',_isZzp ? 0 : _defaultBasis,''+_stdVerlofBasis));
-  contractHtml += fg('Huidig saldo (uren)','<div style="display:flex;align-items:center;gap:8px"><input class="input" type="number" id="mf-saldo" value="'+(_isZzp ? 0 : _defaultSaldo)+'" step="0.1" style="flex:1"><div id="mf-saldo-uren" style="font-size:12px;color:var(--muted);white-space:nowrap;min-width:80px">≈ 0 dg</div></div>');
-  contractHtml += fg('Berekend tegoed','<div id="mf-verlof-calc" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--accent)">Vul uren/week en basis in</div>');
+  contractHtml += '<div id="mf-uren-verlof-wrap" style="display:contents"><div class="lf-twee">';
+  contractHtml += lfRij(ICO.clock, 'Uren per week', _mfStap('mf-uur', _isZzp ? 0 : (m.contractUren != null ? m.contractUren : 40), 1, 0, 60), {voor:'mf-uur'});
+  contractHtml += lfRij('', 'Verlof per jaar', _mfStap('mf-vb', _isZzp ? 0 : _defaultBasis, 0.5, 0, 60, 'dagen'), {voor:'mf-vb', sub:'Basis bij 40 uur per week'});
+  contractHtml += '</div><div class="lf-twee">';
+  contractHtml += lfRij('', 'Huidig saldo', '<input class="lf-veld lf-nr2" type="number" inputmode="decimal" id="mf-saldo" value="'+(_isZzp ? 0 : _defaultSaldo)+'" step="0.1"><span class="lf-hint">uur</span><span class="lf-hint" id="mf-saldo-uren"></span>', {voor:'mf-saldo'});
+  contractHtml += '<div class="lf-samen" id="mf-verlof-calc" style="align-self:center">Vul uren per week en verlof per jaar in</div>';
   contractHtml += '</div></div>';
 
   // Werkrooster variabelen (nodig voor accordion)
@@ -11389,31 +11420,28 @@ function openMedModal(id) {
     rij += '</div>';
     return rij;
   }
-  function accordion(id, titel, icoon, inhoud, defaultOpen) {
+  function accordion(id, titel, icoon, inhoud, defaultOpen, sub) {
     var open = defaultOpen ? true : false;
-    return '<div class="mf-accordion" id="acc-'+id+'" style="margin-top:10px;border:1px solid var(--border);border-radius:10px;overflow:hidden">'
-      + '<div class="mf-acc-header" data-acc="'+id+'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--surface2);user-select:none">'
-      + '<div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600">'+icoon+'<span>'+titel+'</span></div>'
-      + '<svg class="mf-acc-pijl" style="transition:transform .2s;transform:rotate('+(open?'90':'0')+'deg)" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>'
+    return '<div class="mf-accordion lf-klap'+(open?' open':'')+'" id="acc-'+id+'">'
+      + '<div class="mf-acc-header lf-klap-kop" data-acc="'+id+'" role="button" tabindex="0" aria-expanded="'+open+'">'
+      + _lfIco(icoon)+'<span class="lf-klap-t">'+titel+(sub?'<small>'+esc(sub)+'</small>':'')+'</span>'
+      + '<svg class="mf-acc-pijl lf-chev" style="transition:transform .2s;transform:rotate('+(open?'90':'0')+'deg)" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>'
       + '</div>'
-      + '<div class="mf-acc-body" id="accb-'+id+'" style="'+(open?'':'display:none')+';padding:14px 16px;border-top:1px solid var(--border)">'
+      + '<div class="mf-acc-body lf-klap-b" id="accb-'+id+'" style="'+(open?'':'display:none')+'">'
       + inhoud
       + '</div></div>';
   }
 
   // Adres sectie
-  var adresHtml = '<div class="form-grid">'
-    + fgf('Straat + huisnummer', finp('mf-str','text',m.straat,'Voorbeeldstraat 1'))
-    + fg('Postcode', finp('mf-pc','text',m.postcode,'1234 AB'))
-    + fg('Plaats', finp('mf-pl','text',m.plaats,'Amsterdam'))
-    + '</div>';
+  var adresHtml = lfRij(ICO.huis, 'Straat en nummer', _mfT('mf-str', m.straat, 'Voorbeeldstraat 1'), {voor:'mf-str'})
+    + '<div class="lf-twee">'+lfRij('', 'Postcode', _mfT('mf-pc', m.postcode, '1234 AB', 'text', ' autocapitalize="characters"'), {voor:'mf-pc'})+lfRij('', 'Plaats', _mfT('mf-pl', m.plaats, ''), {voor:'mf-pl'})+'</div>';
 
   // Werkrooster HTML opbouw
   var roosterHtml = '';
-  roosterHtml += '<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">';
-  roosterHtml += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px"><input type="radio" name="wr-patroon" id="wr-wekelijks" value="week"'+(wrPatroon==='week'?' checked':'')+' style="accent-color:var(--accent)"> Wekelijks</label>';
-  roosterHtml += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px"><input type="radio" name="wr-patroon" id="wr-tweeweken" value="tweeweken"'+(wrPatroon==='tweeweken'?' checked':'')+' style="accent-color:var(--accent)"> Om de 2 weken (ADV)</label>';
-  roosterHtml += '</div>';
+  roosterHtml += lfRij(ICO.refresh, 'Patroon', '<span class="lf-seg lf-seg-radio" role="radiogroup" aria-label="Patroon">'
+    + '<label><input type="radio" name="wr-patroon" id="wr-wekelijks" value="week"'+(wrPatroon==='week'?' checked':'')+'><span>Wekelijks</span></label>'
+    + '<label><input type="radio" name="wr-patroon" id="wr-tweeweken" value="tweeweken"'+(wrPatroon==='tweeweken'?' checked':'')+'><span>Om de 2 weken</span></label></span>', {sub:'Om de 2 weken: bijvoorbeeld met een ADV-dag'});
+  roosterHtml += '<div style="height:10px"></div>';
   roosterHtml += '<div id="wr-week1-wrap">';
   roosterHtml += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
   roosterHtml += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px" id="wr-week1-label">'+(wrPatroon==='tweeweken'?'Week 1':'Uren per werkdag')+'</div>';
@@ -11431,27 +11459,23 @@ function openMedModal(id) {
   roosterHtml += roosterRij(2, week2, week2Tijden);
   roosterHtml += '<div id="wr-totaal2" style="font-size:11px;color:var(--muted);margin-top:6px;text-align:right"></div>';
   roosterHtml += '</div>';
-  roosterHtml += '<div id="wr-gemiddeld" style="margin-top:10px;padding:8px 10px;background:var(--surface);border-radius:8px;font-size:12px;color:var(--accent)"></div>';
+  roosterHtml += '<div id="wr-gemiddeld" class="lf-samen"></div>';
 
   // Accordions toevoegen — allemaal altijd ingeklapt
   b += accordion('contract', 'Contract & Verlof',
     '<svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
-    contractHtml, false);
+    contractHtml, false, _accContractSub || 'Nog niet ingevuld');
   b += accordion('adres', 'Adresgegevens',
     '<svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
-    adresHtml, false);
+    adresHtml, false, [m.straat, m.plaats].filter(Boolean).join(', ') || 'Privé · niet ingevuld');
   b += accordion('rooster', 'Werkrooster',
     '<svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
-    roosterHtml, false);
+    roosterHtml, false, (wrPatroon==='tweeweken' ? 'Om de 2 weken' : 'Wekelijks')+' \u00b7 '+(parseInt(m.contractUren)||40)+' uur per week');
   b += accordion('kleur', 'Kleur (avatar & kaart)',
     '<svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>',
-    kleurPickerHtml, false);
+    kleurPickerHtml, false, 'Avatar en kaart');
 
-  var f='<button class="btn btn-ghost" id="mmod-cancel">Annuleren</button>';
-  f+='<button class="btn btn-primary" id="mmod-save">Opslaan</button>';
-  openModal(isNew?'Medewerker toevoegen':'Medewerker bewerken', b, f);
-
-  document.getElementById('mmod-cancel').addEventListener('click', closeModal);
+  lfOpen(isNew?'Medewerker toevoegen':'Medewerker bewerken', b, 'Opslaan', 'mmod-save', {groot:true});
 
   // Accordion toggle events
   document.querySelectorAll('.mf-acc-header').forEach(function(header) {
@@ -11463,7 +11487,9 @@ function openMedModal(id) {
       var isOpen = body.style.display !== 'none';
       body.style.display = isOpen ? 'none' : '';
       if (pijl) pijl.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+      header.setAttribute('aria-expanded', !isOpen);
     });
+    header.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); header.click(); } });
   });
 
   // Kleurpicker events
@@ -11472,6 +11498,7 @@ function openMedModal(id) {
     document.getElementById('mf-kleur-custom').value = kl;
     document.getElementById('mf-kleur-preview').style.background = kl;
     document.getElementById('mf-kleur-preview').style.boxShadow = '0 0 0 2px '+kl;
+    var _kopAv = document.getElementById('mf-kop-av'); if(_kopAv) _kopAv.style.background = kl;
     document.querySelectorAll('.kleur-swatch').forEach(function(s){
       var isActief = s.dataset.kleur === kl;
       s.style.border = isActief ? '3px solid white' : '3px solid transparent';
@@ -11514,7 +11541,7 @@ function openMedModal(id) {
     ['mf-uur','mf-vb','mf-saldo','mf-verlof-calc'].forEach(function(elId){
       var el = document.getElementById(elId);
       if(!el) return;
-      var fg = el.closest('.form-group') || el.parentElement && el.parentElement.closest('.form-group');
+      var fg = el.closest('.lf-rij, .lf-samen, .form-group');
       if(fg) fg.style.display = isZzp ? 'none' : '';
     });
     if(isZzp) {
