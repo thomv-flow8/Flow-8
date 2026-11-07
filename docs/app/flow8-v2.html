@@ -21903,8 +21903,9 @@ function saveOnkosten(id){
   var prevEl = document.getElementById('ok-bon-preview');
   // _bonnen is een closured variabele in de modal - haal via imgs op
   if(prevEl) {
+    // Ook nul bonnen overnemen: wie ze allemaal verwijdert, wil ze echt kwijt.
     var imgs = prevEl.querySelectorAll('img');
-    if(imgs.length > 0) bonnen = Array.from(imgs).map(function(img){return img.src;});
+    bonnen = Array.from(imgs).map(function(img){return img.src;});
   }
   var data=Object.assign({},bestaand,{
     id:id||uid(), medId:medId, datum:datum, bedrag:bedrag, categorie:cat,
