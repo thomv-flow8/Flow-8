@@ -243,6 +243,25 @@ body.light .lf{color-scheme:light}
 .lf .lf-veld.lf-kort{width:76px!important}
 .lf .lf-stap input{width:52px!important}
 .lf .lf-bedrag input{width:170px!important}
+.modal-lf .modal-footer:empty{display:none!important}
+.lf-held{display:grid;justify-items:center;gap:2px;padding:18px 0 16px;border-bottom:1px solid var(--border)}
+.lf-held b{font:700 44px 'Space Mono',monospace;letter-spacing:-.02em;color:var(--text)}
+.lf-held small{font-size:12.5px;color:var(--muted)}
+.lf-held-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--radius-pill);background:rgba(16,185,129,.14);color:var(--green-t);font-size:12px;font-weight:600;margin-bottom:6px}
+.lf-held-tag.reis{background:rgba(245,158,11,.14);color:var(--orange-t)}
+.lf-held-tag svg{width:14px;height:14px}
+.lf-zoek{display:flex;align-items:center;gap:10px;margin:6px 0 4px;padding:0 14px;height:46px;border-radius:var(--radius-pill);background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.lf-zoek:focus-within{border-color:var(--accent)}
+.lf .lf-zoek input{flex:1;min-width:0;width:auto;border:0;background:none;outline:none;font:15px 'Instrument Sans',sans-serif;color:var(--text);padding:0}
+.lf .lf-zoek input::placeholder{color:var(--muted2)}
+.lf-art{width:100%;display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;column-gap:12px;min-height:62px;padding:9px 0;border:0;border-bottom:1px solid var(--border);background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer;transition:background .15s}
+.lf-art:active{background:var(--surface2)}
+.lf-art:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--radius)}
+.lf-ic-foto{overflow:hidden}
+.lf-ic-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.lf-art-plus{width:34px;height:34px;border-radius:50%;background:rgba(79,110,245,.14);color:var(--accent-t);display:grid;place-items:center}
+.lf-leeg,.lf-uitleg{font-size:13px;color:var(--muted);padding:14px 2px;line-height:1.45}
+.lf-fout{color:var(--red-t)}
 @media (max-width:768px){
   .modal.modal-lf{height:calc(100vh - 12px - env(safe-area-inset-top))!important;height:calc(100dvh - 12px - env(safe-area-inset-top))!important;max-height:none!important;min-height:0!important}
 }
@@ -4013,27 +4032,23 @@ function _wbTimerStopDialoog(state, medId, actief){
   var nu = new Date();
   var stopTijd = String(nu.getHours()).padStart(2,'0')+':'+String(nu.getMinutes()).padStart(2,'0');
   var mi = _wbMedInfo(medId);
-  var h = '';
-  h += '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Medewerker</label>';
-  h += '<div style="font-size:14px;font-weight:600">'+esc(mi.naam||'\u2014')+'</div></div>';
-  h += '<div style="display:flex;gap:10px;margin-bottom:12px">';
-  h += '<div style="flex:1"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Van</label>';
-  h += '<input id="wb-timer-van" class="input" type="time" value="'+esc(actief.startTijd||'')+'"></div>';
-  h += '<div style="flex:1"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Tot</label>';
-  h += '<input id="wb-timer-tot" class="input" type="time" value="'+esc(stopTijd)+'"></div>';
-  h += '</div>';
-  h += '<div style="font-size:12px;color:var(--muted);margin:3px 0 12px 2px" id="wb-timer-berekend">&nbsp;</div>';
-  h += '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Omschrijving werk</label>';
-  h += '<input id="wb-timer-oms" class="input" type="text" placeholder="bijv. arbeid + materiaal ophalen"></div>';
-  h += '<button class="btn btn-primary" id="wb-timer-opslaan" style="width:100%;justify-content:center">Werktijd opslaan</button>';
-  openModal('Werktijd stoppen', h);
+  var _uTypeNu = (actief && actief.type) || 'werk';
+  var b = lfPersoonVast(mi.naam||'\u2014', _lfWbSub(state.wb));
+  b += '<div class="lf-held">'+(reistijdAan() ? '<span class="lf-held-tag'+(_uTypeNu==='reis'?' reis':'')+'">'+ICO.clock+(_uTypeNu==='reis'?'Reistijd':'Werk')+'</span>' : '')
+     + '<b id="wb-timer-berekend">0:00</b><small id="wb-timer-sub">uur gewerkt</small></div>';
+  b += lfRij(ICO.clock, 'Van', '<input class="lf-veld" type="time" id="wb-timer-van" value="'+esc(actief.startTijd||'')+'" required>', {verplicht:true, voor:'wb-timer-van'});
+  b += lfRij(ICO.clock, 'Tot', '<input class="lf-veld" type="time" id="wb-timer-tot" value="'+esc(stopTijd)+'" required>', {verplicht:true, voor:'wb-timer-tot'});
+  b += lfRij(ICO.edit, 'Omschrijving', '<input class="lf-tekst" type="text" id="wb-timer-oms" placeholder="Bijv. arbeid + materiaal ophalen">', {voor:'wb-timer-oms'});
+  lfOpen('Werktijd stoppen', b, 'Werktijd opslaan', 'wb-timer-opslaan');
 
   var vanEl = document.getElementById('wb-timer-van');
   var totEl = document.getElementById('wb-timer-tot');
   var berekendEl = document.getElementById('wb-timer-berekend');
   function _tonen(){
-    var u = _wbUurVanTot(vanEl.value, totEl.value);
-    berekendEl.textContent = u>0 ? (String(u).replace('.',',')+' uur') : '\u00a0';
+    var toMin = function(t){ var p=String(t||'').split(':'); return (+p[0])*60+(+p[1]||0); };
+    var d = (vanEl.value && totEl.value) ? toMin(totEl.value) - toMin(vanEl.value) : 0;
+    berekendEl.textContent = d>0 ? (Math.floor(d/60)+':'+String(d%60).padStart(2,'0')) : '0:00';
+    document.getElementById('wb-timer-sub').textContent = (d<=0 && vanEl.value && totEl.value) ? 'Tot moet na Van liggen' : 'uur gewerkt';
   }
   _tonen();
   vanEl.addEventListener('input', _tonen);
@@ -4234,32 +4249,24 @@ function _wbUurDialoog(state){
   var eigenMed = bonMonteur || getMijnMedId();
   // Dezelfde uitvoerende rollen als bij het aanmaken van een werkbon.
   var meds = werkbonMedewerkers(eigenMed).sort(function(a,b){ return ((a.voornaam||'')+' '+(a.achternaam||'')).localeCompare((b.voornaam||'')+' '+(b.achternaam||'')); });
-  var h = '';
-  h += '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Medewerker</label>';
-  h += '<select id="wb-uur-med" class="input">';
+  var medOpts = '';
   meds.forEach(function(m){
     var naam = ((m.voornaam||'')+' '+(m.achternaam||'')).trim() || m.email || m.id;
     var sel = (String(m.id)===String(eigenMed)) ? ' selected' : '';
-    h += '<option value="'+esc(m.id)+'"'+sel+'>'+esc(naam)+'</option>';
+    medOpts += '<option value="'+esc(m.id)+'"'+sel+'>'+esc(naam)+'</option>';
   });
-  h += '</select></div>';
-  h += '<div style="display:flex;gap:10px;margin-bottom:12px">';
-  h += '<div style="flex:1"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Van</label>';
-  h += '<input id="wb-uur-van" class="input" type="time"></div>';
-  h += '<div style="flex:1"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Tot</label>';
-  h += '<input id="wb-uur-tot" class="input" type="time"></div>';
-  h += '</div>';
-  h += '<div style="font-size:12px;color:var(--muted);margin:3px 0 12px 2px" id="wb-uur-berekend">&nbsp;</div>';
-  h += '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Omschrijving werk</label>';
-  h += '<input id="wb-uur-oms" class="input" type="text" placeholder="bijv. voorrijden + arbeid"></div>';
-  h += '<button class="btn btn-primary" id="wb-uur-opslaan" style="width:100%;justify-content:center">Toevoegen</button>';
-  openModal('Uren toevoegen', h);
+  var b = lfPersoon('<select class="input" id="wb-uur-med">'+medOpts+'</select>', esc(_lfWbSub(state.wb)));
+  b += lfRij(ICO.clock, 'Van', '<input class="lf-veld" type="time" id="wb-uur-van" required>', {verplicht:true, voor:'wb-uur-van'});
+  b += lfRij(ICO.clock, 'Tot', '<input class="lf-veld" type="time" id="wb-uur-tot" required>', {verplicht:true, voor:'wb-uur-tot'});
+  b += '<div class="lf-samen" id="wb-uur-berekend"></div>';
+  b += lfRij(ICO.edit, 'Omschrijving', '<input class="lf-tekst" type="text" id="wb-uur-oms" placeholder="Bijv. voorrijden + arbeid">', {voor:'wb-uur-oms'});
+  lfOpen('Uren toevoegen', b, 'Toevoegen', 'wb-uur-opslaan');
   var vanEl = document.getElementById('wb-uur-van');
   var totEl = document.getElementById('wb-uur-tot');
   var berekendEl = document.getElementById('wb-uur-berekend');
   function _wbUurTonen(){
     var u = _wbUurVanTot(vanEl.value, totEl.value);
-    berekendEl.textContent = u>0 ? (String(u).replace('.',',')+' uur') : '\u00a0';
+    berekendEl.textContent = u>0 ? (String(u).replace('.',',')+' uur') : ((vanEl.value && totEl.value) ? 'Tot moet na Van liggen' : '');
   }
   vanEl.addEventListener('input', _wbUurTonen);
   totEl.addEventListener('input', _wbUurTonen);
@@ -4601,18 +4608,16 @@ function _wbBindMateriaalRijen(state){
 
 // Catalogus-kiezer: zoek een artikel en voeg 'm als regel toe (snapshot).
 function _wbMateriaalKiezer(state){
-  openModal('Materiaal toevoegen', '<div style="font-size:12px;color:var(--muted)">Catalogus laden\u2026</div>');
+  lfOpen('Materiaal toevoegen', '<p class="lf-leeg">Catalogus laden\u2026</p>');
+  var vak = function(){ return document.querySelector('#modal-body .lf'); };
   laadArtikelenCache().then(function(artikelen){
+    var v = vak(); if(!v) return;
     var beschikbaar = artikelen.filter(function(a){ return a.zichtbaarWerkbon!==false; });
-    var body = '';
     if(!beschikbaar.length){
-      body = '<div style="font-size:13px;color:var(--muted)">Geen artikelen in de catalogus. Voeg eerst artikelen toe via de Materialen-module.</div>';
-      document.getElementById('modal-body').innerHTML = body;
+      v.innerHTML = '<p class="lf-leeg">Geen artikelen in de catalogus. Voeg eerst artikelen toe via de Materialen-module.</p>';
       return;
     }
-    body += '<input type="text" class="input" id="wbmat-zoek" placeholder="Zoek op code, omschrijving of EAN\u2026" style="margin-bottom:10px">';
-    body += '<div id="wbmat-lijst" style="max-height:340px;overflow-y:auto"></div>';
-    document.getElementById('modal-body').innerHTML = body;
+    v.innerHTML = _lfZoek('wbmat-zoek', 'Zoek op code, omschrijving of EAN') + '<div id="wbmat-lijst"></div>';
 
     function _lijst(q){
       q = (q||'').trim().toLowerCase();
@@ -4620,14 +4625,9 @@ function _wbMateriaalKiezer(state){
         return (a.code||'').toLowerCase().indexOf(q)>=0 || (a.omschrijving||'').toLowerCase().indexOf(q)>=0 || (a.ean||'').toLowerCase().indexOf(q)>=0;
       });
       var h = '';
-      if(!res.length){ h = '<div style="font-size:12px;color:var(--muted);padding:8px">Geen artikelen gevonden.</div>'; }
+      if(!res.length){ h = '<p class="lf-leeg">Geen artikelen gevonden.</p>'; }
       res.slice(0,60).forEach(function(a){
-        h += '<div class="wbmat-item" data-id="'+esc(a.id)+'" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer">';
-        h += a.foto ? '<img src="'+esc(a.foto)+'" style="width:36px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0">'
-                    : '<div style="width:36px;height:36px;border-radius:6px;background:var(--surface2);flex-shrink:0"></div>';
-        h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(a.omschrijving||'')+'</div>';
-        h += '<div style="font-size:11px;color:var(--muted)">'+esc(a.code||'')+(_wbToonPrijzen(state.wb)?(' \u00b7 '+_matEuro(a.stuksprijs)):'')+'</div></div>';
-        h += '</div>';
+        h += _lfArtikelRij('wbmat-item', a, _wbToonPrijzen(state.wb) ? _matEuro(a.stuksprijs) : '');
       });
       document.getElementById('wbmat-lijst').innerHTML = h;
       document.querySelectorAll('.wbmat-item').forEach(function(it){
@@ -4651,7 +4651,8 @@ function _wbMateriaalKiezer(state){
     var zoek = document.getElementById('wbmat-zoek');
     if(zoek) zoek.addEventListener('input', function(){ _lijst(zoek.value); });
   }).catch(function(e){
-    document.getElementById('modal-body').innerHTML = '<div style="font-size:12px;color:var(--red)">Catalogus laden mislukt: '+esc(e.message||e)+'</div>';
+    var v = document.querySelector('#modal-body .lf');
+    if(v) v.innerHTML = '<p class="lf-leeg lf-fout">Catalogus laden mislukt: '+esc(e.message||e)+'</p>';
   });
 }
 
@@ -9726,15 +9727,35 @@ function lfPersoon(selectHtml, sub){
   var subHtml = sub != null ? '<small id="lf-sub">'+sub+'</small>' : '';
   if(!selectHtml){
     var m = getMed(getMijnMedId());
-    var naam = m ? (m.voornaam+' '+m.achternaam) : ((APP.profiel && APP.profiel.naam) || '');
-    return '<div class="lf-persoon"><span class="lf-av" aria-hidden="true">'+esc(_lfInit(naam))+'</span><span class="lf-pt"><b>'+esc(naam)+'</b>'+subHtml+'</span></div>';
+    return lfPersoonVast(m ? (m.voornaam+' '+m.achternaam) : ((APP.profiel && APP.profiel.naam) || ''), sub);
   }
   return '<div class="lf-persoon lf-kies" role="button" tabindex="0" data-lf-titel="Medewerker" data-lf-persoon><span class="lf-av" aria-hidden="true"></span>'
     +'<span class="lf-pt"><b class="lf-kw"></b>'+subHtml+'</span>'+_LF_CHEV+_lfSel(selectHtml)+'</div>';
 }
+var _LF_PAKKET = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>';
+var _LF_ZOEK   = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+// Persoon zonder keuze: naam en eventueel een regel eronder.
+function lfPersoonVast(naam, sub){
+  return '<div class="lf-persoon"><span class="lf-av" aria-hidden="true">'+esc(_lfInit(naam))+'</span><span class="lf-pt"><b>'+esc(naam)+'</b>'+(sub != null ? '<small id="lf-sub">'+esc(sub)+'</small>' : '')+'</span></div>';
+}
+// Werkbonnummer en klant, voor onder de naam in de werkbon-vensters.
+function _lfWbSub(wb){
+  if(!wb) return '';
+  var nr = wb.bonnummer || wb.nummer || '';
+  return (nr ? nr+' · ' : '')+(wb.klantNaam||'');
+}
+function _lfZoek(id, ph){
+  return '<label class="lf-zoek">'+_LF_ZOEK+'<input type="search" id="'+id+'" placeholder="'+esc(ph)+'" aria-label="'+esc(ph)+'" autocomplete="off"></label>';
+}
+function _lfArtikelRij(cls, a, prijsTekst){
+  return '<button type="button" class="lf-art '+cls+'" data-id="'+esc(a.id)+'">'
+    +(a.foto ? '<span class="lf-ic lf-ic-foto" aria-hidden="true"><img src="'+esc(a.foto)+'" alt=""></span>' : _lfIco(_LF_PAKKET))
+    +'<span class="lf-l">'+esc(a.omschrijving||'Artikel')+'<small>'+esc(a.code||'')+(prijsTekst ? ' · '+esc(prijsTekst) : '')+'</small></span>'
+    +'<span class="lf-art-plus" aria-hidden="true">'+_LF_PLUS+'</span></button>';
+}
 function lfSchakel(id, aan){ return '<label class="lf-sw"><input type="checkbox" role="switch" id="'+id+'"'+(aan ? ' checked' : '')+'><i></i></label>'; }
 function lfOpen(titel, body, knopTekst, knopId){
-  openModal(titel, '<div class="lf">'+body+'</div>', '<button type="button" class="btn btn-primary lf-knop" id="'+knopId+'">'+knopTekst+'</button>');
+  openModal(titel, '<div class="lf">'+body+'</div>', knopTekst ? '<button type="button" class="btn btn-primary lf-knop" id="'+knopId+'">'+knopTekst+'</button>' : '');
   var md = document.getElementById('modal');
   if(md) md.classList.add('modal-lf');
   lfBind(document.getElementById('modal-body'));
@@ -22413,14 +22434,17 @@ function saveVerzuim(id){
 function herstelVerzuim(id){
   var v=APP.verzuim.find(function(x){return String(x.id)===String(id);}); if(!v) return;
   var vandaag=vandaagISO();
-  var b='<div class="form-group">'+
-    '<label style="font-size:13px;color:var(--muted);margin-bottom:8px;display:block">Hersteldatum</label>'+
-    '<input class="input" type="date" id="vz-hersteld-datum" value="'+vandaag+'">'+
-    '</div>';
-  var f='<button class="btn btn-ghost" id="vz-hersteld-ann">Annuleren</button>'+
-       '<button class="btn btn-primary" id="vz-hersteld-bev">✓ Hersteld melden</button>';
-  openModal('Hersteld melden', b, f);
-  document.getElementById('vz-hersteld-ann').addEventListener('click', closeModal);
+  var _hMed = getMed(v.medId);
+  var _hNaam = _hMed ? (_hMed.voornaam+' '+_hMed.achternaam) : 'Medewerker';
+  var _hType = {ziek:'Ziek', gedeeltelijk:'Gedeeltelijk ziek', geoorloofd:'Geoorloofd afwezig', ongeoorloofd:'Ongeoorloofd afwezig'}[v.type] || 'Ziek';
+  var b = lfPersoonVast(_hNaam, _hType);
+  if(v.van){
+    var _hN = Math.floor((new Date(vandaag+'T00:00:00') - new Date(v.van+'T00:00:00'))/864e5)+1;
+    b += '<div class="lf-samen">'+(_hN>=1 ? 'Afwezig sinds '+_lfDatum(v.van)+' · '+_hN+(_hN===1?' dag':' dagen') : 'Afwezig vanaf '+_lfDatum(v.van))+'</div>';
+  }
+  b += lfRij(ICO.kalender, 'Hersteldatum', '<input class="lf-veld" type="date" id="vz-hersteld-datum" value="'+vandaag+'" required>', {verplicht:true, voor:'vz-hersteld-datum'});
+  if(typeof stuurNotificatie==='function' && magNotificatie('verzuim','hersteld')) b += '<p class="lf-uitleg">'+esc(_hMed ? _hMed.voornaam : 'De medewerker')+' krijgt een melding dat de ziekmelding is afgemeld.</p>';
+  lfOpen('Hersteld melden', b, 'Hersteld melden', 'vz-hersteld-bev');
   document.getElementById('vz-hersteld-bev').addEventListener('click', function(){
     var datum=document.getElementById('vz-hersteld-datum').value;
     if(!datum){ toast('Vul een hersteldatum in','error'); return; }
@@ -38210,11 +38234,10 @@ function _woMatSectieHtml(scope, data){
 
 // Catalogus-picker voor werkorder-materialen
 function _woOpenMatKiezer(scope){
-  openModal('Materiaal toevoegen', '<div style="font-size:12px;color:var(--muted)">Catalogus laden\u2026</div>');
+  lfOpen('Materiaal toevoegen', '<p class="lf-leeg">Catalogus laden\u2026</p>');
   laadArtikelenCache(false).then(function(artikelen){
-    var b = '<input type="text" id="wox-mat-zoek" class="input" placeholder="Zoek op code of omschrijving..." style="margin-bottom:12px;width:100%;box-sizing:border-box">';
-    b += '<div id="wox-mat-resultaten" style="max-height:50vh;overflow-y:auto"></div>';
-    openModal('Materiaal toevoegen', b, '<button class="btn btn-ghost" onclick="closeModal()">Sluiten</button>');
+    var v = document.querySelector('#modal-body .lf'); if(!v) return;
+    v.innerHTML = _lfZoek('wox-mat-zoek', 'Zoek op code of omschrijving') + '<div id="wox-mat-resultaten"></div>';
     var zoek = document.getElementById('wox-mat-zoek');
     var res = document.getElementById('wox-mat-resultaten');
     function teken(filter){
@@ -38223,13 +38246,10 @@ function _woOpenMatKiezer(scope){
         if(!filter) return true;
         return ((a.code||'').toLowerCase().indexOf(filter)>=0) || ((a.omschrijving||'').toLowerCase().indexOf(filter)>=0);
       }).slice(0, 60);
-      if(!lijst.length){ res.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:16px;text-align:center">Geen artikelen gevonden.</div>'; return; }
+      if(!lijst.length){ res.innerHTML = '<p class="lf-leeg">Geen artikelen gevonden.</p>'; return; }
       var hh = '';
       lijst.forEach(function(a){
-        hh += '<div class="wox-mat-optie" data-id="'+esc(a.id)+'" style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border);cursor:pointer">';
-        hh += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(a.omschrijving||'Artikel')+'</div><div style="font-size:11px;color:var(--muted)">'+esc(a.code||'')+(a.stuksprijs!=null?(' · \u20ac '+String(a.stuksprijs).replace('.',',')):'')+'</div></div>';
-        hh += '<svg width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-        hh += '</div>';
+        hh += _lfArtikelRij('wox-mat-optie', a, a.stuksprijs!=null ? _matEuro(a.stuksprijs) : '');
       });
       res.innerHTML = hh;
       res.querySelectorAll('.wox-mat-optie').forEach(function(row){
