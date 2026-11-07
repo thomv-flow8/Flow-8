@@ -262,6 +262,8 @@ body.light .lf{color-scheme:light}
 .lf-art-plus{width:34px;height:34px;border-radius:50%;background:rgba(79,110,245,.14);color:var(--accent-t);display:grid;place-items:center}
 .lf-leeg,.lf-uitleg{font-size:13px;color:var(--muted);padding:14px 2px;line-height:1.45}
 .lf-fout{color:var(--red-t)}
+.lf-alleen-lezen{cursor:default}
+.lf-alleen-lezen .lf-chev{display:none}
 @media (max-width:768px){
   .modal.modal-lf{height:calc(100vh - 12px - env(safe-area-inset-top))!important;height:calc(100dvh - 12px - env(safe-area-inset-top))!important;max-height:none!important;min-height:0!important}
 }
@@ -1865,6 +1867,109 @@ button.sd-m-dag{cursor:pointer}
 .wbx-foto-item .wbx-fcap::placeholder{color:var(--muted)}
 .wbx-foto-item .wbx-fdelbtn{flex-shrink:0;color:var(--red);cursor:pointer;font-size:20px;line-height:1;padding:2px 8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none}
 .wbx-foto-item .wbx-ftekenbtn{flex-shrink:0;color:var(--accent-t);cursor:pointer;padding:4px 6px;min-width:44px;min-height:44px;background:none;border:none;display:flex;align-items:center;justify-content:center}
+/* ── Werkbon in lijststijl: zelfde rijen, icoontegels en knoppen als de invulformulieren ── */
+.wbx-sec{border-radius:var(--radius-lg)}
+.wbx-hdr{gap:12px;padding:10px 14px;min-height:60px}
+.wbx-hdr .wbx-ico{width:36px;height:36px;border-radius:10px;background:var(--surface2);color:var(--muted);align-items:center;justify-content:center;transition:background .2s,color .2s}
+.wbx-hdr .wbx-ico svg{width:18px;height:18px}
+.wbx-sec.open .wbx-hdr .wbx-ico{background:rgba(79,110,245,.14);color:var(--accent-t)}
+.wbx-hdr .wbx-naam{font-size:15px}
+.wbx-hdr .wbx-chev{color:var(--muted2)}
+.wbx-hdr .wbx-cnt-badge{min-width:24px;height:24px;padding:0 7px;background:var(--surface2);color:var(--muted);font-family:'Space Mono',monospace;font-size:12px}
+.wbx-svc-badge{font-size:11px;font-weight:600;letter-spacing:0;padding:3px 8px}
+.wbx-body{border-top:0;padding:0 14px 14px}
+.wbx-body.pt{padding-top:0}
+.wbx-row{padding:11px 0;border-bottom:0;border-top:1px solid var(--border);font-size:14px;gap:16px}
+.wbx-row .wbx-v{font-weight:500}
+.wbx-field-lbl{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;margin:16px 0 8px}
+.wbx-field{border-radius:var(--radius);font-size:15px;line-height:1.45}
+.wbx-field.area{font-size:15px;line-height:1.45}
+.wbx-field:focus{border-color:var(--accent);outline:none}
+.wbx-chip-add{display:flex;width:100%;gap:12px;background:none;border:0;border-top:1px solid var(--border);border-radius:0;padding:8px 0;min-height:54px;font-size:15px;font-weight:600;color:var(--accent-t);box-sizing:border-box}
+.wbx-chip-add svg{width:36px;height:36px;padding:10px;border-radius:10px;background:rgba(79,110,245,.14);box-sizing:border-box;flex-shrink:0}
+.wbx-body label:has(> .wbx-chip-add){display:block!important}
+.wbx-snel{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;padding-top:12px;border-top:1px solid var(--border)}
+.wbx-snel a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;text-decoration:none}
+.wbx-snel a:active{background:var(--border)}
+.wbx-uur-regel{background:none;border:0;border-top:1px solid var(--border);border-radius:0;padding:10px 0;margin:0;gap:12px}
+.wbx-uur-regel .wbx-who{width:36px;height:36px;font-size:12px}
+.wbx-uur-regel .wbx-det{font-size:15px;line-height:1.3}
+.wbx-uur-regel .wbx-det .wbx-n{font-weight:500}
+.wbx-uur-regel .wbx-det .wbx-t{font-size:12.5px}
+.wbx-uur-regel .wbx-amt{font-family:'Space Mono',monospace;font-size:14px}
+.wbx-uur-regel .wbx-del{color:var(--muted2)}
+.wbx-foto-item{background:none;border:0;border-top:1px solid var(--border);border-radius:0;padding:10px 0;margin:0}
+.wbx-foto-item .wbx-fthumb{width:64px;height:64px;border-radius:10px}
+.wbx-foto-item .wbx-fnum{font-size:14px;font-weight:600;color:var(--text)}
+.wbx-foto-item .wbx-fcap{border-radius:var(--radius);font-size:15px}
+.wbx-foto-item .wbx-fdelbtn{color:var(--muted2)}
+.wbx-form-opts{gap:8px}
+.wbx-form-opt{border-radius:var(--radius-pill);padding:10px 14px;font-size:14px;font-weight:600;background:var(--surface)}
+.wbx-form-opt.sel{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}
+.wbx-actiebar{gap:8px}
+.wbx-actiebar .btn{min-height:52px;padding:0 18px;font-size:15.5px;font-weight:600}
+.wbx-actiebar .btn-ghost{background:var(--surface2);border-color:var(--border)}
+.wbx-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2px 14px;margin-bottom:6px}
+.wbx-kaart > .wbx-row:first-child{border-top:0}
+.wbx-kaart > :first-child:not(.wbx-row){margin-top:10px}
+.wbx-kaart > :last-child:not(.wbx-row){margin-bottom:10px}
+.wbx-terug{width:40px;height:40px;border-radius:50%;border:0;background:var(--surface2);color:var(--text);display:grid;place-items:center;cursor:pointer;flex-shrink:0}
+/* timer (telefoon) */
+.wbt{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 12px;padding:12px 14px;border-radius:var(--radius-lg);background:var(--surface);border:1px solid var(--border)}
+.wbt.loopt{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.35)}
+.wbt.loopt.reis{background:rgba(79,110,245,.08);border-color:rgba(79,110,245,.35)}
+.wbt-lbl{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--muted)}
+.wbt.loopt .wbt-lbl{color:var(--green-t)}
+.wbt.loopt.reis .wbt-lbl{color:var(--accent-t)}
+.wbt-lbl i{width:8px;height:8px;border-radius:50%;background:var(--muted2)}
+.wbt.loopt .wbt-lbl i{background:var(--green);animation:wbtAdem 2s ease-in-out infinite}
+.wbt.loopt.reis .wbt-lbl i{background:var(--accent)}
+.wbt .wb-timer-elapsed{display:block;font:700 24px 'Space Mono',monospace;margin-top:2px;color:var(--text)}
+.wbt-knop{display:flex;align-items:center;gap:7px;height:44px;padding:0 18px;border:0;border-radius:var(--radius-pill);background:var(--green-knop);color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.wbt.reis .wbt-knop{background:var(--accent-knop)}
+.wbt.loopt .wbt-knop{background:var(--red)}
+.wbt-seg{grid-column:1/-1}
+@keyframes wbtAdem{50%{opacity:.35}}
+/* materialen */
+.wbm{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;column-gap:12px;padding:10px 0;border-top:1px solid var(--border)}
+.wbm-foto{width:36px;height:36px;border-radius:10px;object-fit:cover;cursor:pointer;display:block}
+.wbm-ic{width:36px;height:36px;border-radius:10px;background:var(--surface2);color:var(--muted);display:grid;place-items:center}
+.wbm-n{font-size:15px;line-height:1.3;min-width:0}
+.wbm-n small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.wbm-o{grid-column:2/-1;display:flex;align-items:center;gap:8px;margin-top:8px}
+.wbm-o .wbm-bedrag{margin-left:auto;white-space:nowrap;font-family:'Space Mono',monospace;font-weight:700;font-size:14px}
+.wbm-stap{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px}
+.wbm-stap button{width:36px;height:36px;border-radius:50%;border:0;background:var(--surface);color:var(--text);font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer}
+.wbm-stap input{width:48px;text-align:center;border:0;background:none;color:var(--text);font:700 14px 'Space Mono',monospace;padding:0;-moz-appearance:textfield}
+.wbm-stap input::-webkit-inner-spin-button,.wbm-stap input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.wbm-eenh{font-size:12.5px;color:var(--muted)}
+.wbm-tot{border-top:1px solid var(--border);margin-top:2px}
+.wbm-tot .wbx-row:first-child{border-top:0}
+.wbm-tot .wbm-eind{font-weight:700}
+.wbm-tot .wbm-eind .wbx-k{color:var(--text)}
+.wbm-tot .wbm-eind .wbx-v{font-family:'Space Mono',monospace;font-weight:700}
+@media (max-width:768px){.wbm-stap input{width:48px!important;min-width:0!important;font-size:14px!important}}
+/* checklistvelden */
+.wbx-cl-veld{border-top:1px solid var(--border);padding:10px 0;margin:0}
+.wbx-cl-rij{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 0;position:relative}
+.wbx-cl-lbl{display:block;font-size:15px;line-height:1.3;min-width:0}
+.wbx-cl-rij .wbx-cl-lbl{flex:1}
+.wbx-cl-blok .wbx-cl-lbl{margin-bottom:10px}
+.wbx-cl-lbl .lf-req{margin-left:3px}
+.wbx-cl-w{display:flex;align-items:center;gap:6px;flex-shrink:0;color:var(--muted);font-size:14px}
+.wbx-cl-opt{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:50px;border-top:1px solid var(--border);font-size:15px;cursor:pointer}
+.wbx-cl-opt:first-of-type{border-top:0}
+.wbx-cl-opt input[type=radio]{width:22px;height:22px;accent-color:var(--accent-knop);flex-shrink:0;margin:0}
+.wbx-cl-kop{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:16px 0 6px}
+.wbx-cl-veld textarea.lf-notitie{overflow:auto}
+/* desktop: lijst links */
+#wb-fullscreen .wbx-md-navitem{gap:12px;padding:8px 10px;min-height:52px;border-radius:var(--radius);font-size:15px}
+#wb-fullscreen .wbx-md-navico{width:36px;height:36px;border-radius:10px;background:var(--surface2);color:var(--muted);align-items:center;justify-content:center}
+#wb-fullscreen .wbx-md-navico svg{width:18px;height:18px}
+#wb-fullscreen .wbx-md-navitem.actief .wbx-md-navico{background:var(--accent-knop);color:#fff}
+#wb-fullscreen .wbx-md-navitem .wbx-svc-badge{display:none}
+#wb-fullscreen .wbx-md-navbadge{min-width:24px;height:24px;padding:0 7px;background:var(--surface2);color:var(--muted);font-family:'Space Mono',monospace;font-size:12px}
+@media (prefers-reduced-motion:reduce){.wbt.loopt .wbt-lbl i{animation:none}.wbx-hdr .wbx-ico{transition:none}}
 </style>
 </head>
 
@@ -3323,7 +3428,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   var _tijden = (wb.tijdVan||wb.tijdTot) ? ((wb.tijdVan||'')+(wb.tijdTot?('\u2013'+wb.tijdTot):'')) : '';
   var bonNr = wb.bonnummer || wb.nummer || (wb.planningId ? ('#'+String(wb.planningId).slice(-6)) : '');
   h += '<div id="wb-kop" style="display:flex;align-items:center;gap:12px;margin:-8px -4px 16px">';
-  h += '<button id="wb-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:10px;margin:-10px 0 -10px -10px;display:flex;align-items:center" title="Terug" aria-label="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  h += '<button id="wb-terug" class="wbx-terug" title="Terug" aria-label="Terug"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
   h += '<div style="flex:1;min-width:0"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px">Werkbon <span style="font-size:13px;font-weight:600;color:var(--muted)">'+esc(bonNr)+'</span></div></div>';
   h += '<span style="flex-shrink:0;font-size:12px;font-weight:600;color:'+_klTekst(kl)+';background:'+_kleurTint(kl,'26')+';padding:4px 10px;border-radius:var(--radius-pill)">'+(_statusLbl[wb.status]||wb.status)+'</span>';
   h += '</div>';
@@ -3366,7 +3471,9 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
     }
   }
   if(_contract) klBody += '<div class="wbx-row"><span class="wbx-k">Contract</span><span class="wbx-v">'+esc(_contract)+'</span></div>';
-  klBody += '<a class="wbx-mini-link" href="https://www.google.com/maps/dir/?api=1&destination='+navQ+'" target="_blank"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z"/><circle cx="12" cy="10" r="3"/></svg> Navigeer naar werkadres <span style="margin-left:auto">\u203a</span></a>';
+  klBody += '<div class="wbx-snel"><a href="https://www.google.com/maps/dir/?api=1&destination='+navQ+'" target="_blank" rel="noopener"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>Route</a>'
+    + (_cTel ? '<a href="tel:'+esc(String(_cTel).replace(/[^\d+]/g,''))+'"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>Bellen</a>' : '')
+    + '</div>';
   var svcBadge = wb.isServiceklant ? '<span class="wbx-svc-badge">Serviceklant</span>' : '';
   h += '<div class="wbx-secties">';
   h += _sec('klant', ICO_KLANT, 'Klantgegevens', svcBadge, klBody, true);
@@ -3399,7 +3506,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
 
   // ── Sectie: Checklists (gekoppelde formulieren, dynamisch per sjabloon) ──
   var clBadge = (wb.checklists&&wb.checklists.length) ? '<span class="wbx-cnt-badge">'+wb.checklists.length+'</span>' : '';
-  var clBody = '<div id="wb-checklists-body"></div>';
+  var clBody = '<div id="wb-checklists-body" class="lf"></div>';
   if(bewerkbaar) clBody += '<button type="button" class="wbx-chip-add" id="wb-checklist-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Checklist toevoegen</button>';
   h += _sec('checklists', ICO_CHECKLIST, 'Checklists', clBadge, clBody, false);
 
@@ -3937,12 +4044,11 @@ function _wbTimerCard(wb, medId){
 
   // ── Compacte balk: op een telefoon telt elke pixel, en de lijst eronder is
   //    belangrijker dan een grote klok. ──
-  h += '<div class="wb-timer-compact" style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid '+(actief?kleur:'var(--border)')+';border-radius:var(--radius-pill);padding:7px 12px 7px 7px">';
-  h += '<button type="button" class="wb-timer-btn" aria-label="'+(actief?'Timer stoppen':'Timer starten')+'" style="width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:'+(actief?'var(--red)':(isReis?'var(--accent-knop)':'var(--green-knop)'))+'">'+(actief?icoStop:icoPlay)+'</button>';
-  h += '<div style="min-width:0"><div class="wb-timer-elapsed" style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1">'+tijd+'</div>';
-  h += '<div style="font-size:12px;color:'+(actief?(isReis?'var(--accent-t)':'var(--green-t)'):'var(--muted)')+';white-space:nowrap">'+label.toLowerCase()+(actief?' \u00b7 loopt':' \u00b7 niet gestart')+'</div></div>';
+  h += '<div class="wb-timer-compact wbt'+(actief?' loopt':'')+(isReis?' reis':'')+'">';
+  h += '<div><span class="wbt-lbl"><i></i>'+(isReis?'Reistijd':'Werktijd')+(actief?' loopt':' · niet gestart')+'</span><b class="wb-timer-elapsed">'+tijd+'</b></div>';
+  h += '<button type="button" class="wb-timer-btn wbt-knop" aria-label="'+(actief?'Timer stoppen':'Timer starten')+'">'+(actief?icoStop+'Stoppen':icoPlay+'Starten')+'</button>';
   var segC = segment(true);
-  if(segC) h += '<div style="margin-left:auto">'+segC+'</div>';
+  if(segC) h += '<div class="wbt-seg">'+segC+'</div>';
   h += '</div>';
 
   // ── Ring: op een tablet is er ruimte, en de vullende ring laat in één oogopslag
@@ -4507,55 +4613,45 @@ function _wbRenderMaterialen(state){
 
   var top = '';
   if(state.bewerkbaar){
-    top += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;margin-bottom:8px;cursor:pointer">';
-    top += '<input type="checkbox" id="wb-mat-prijstoggle"'+(toonPrijs?' checked':'')+' style="width:20px;height:20px;accent-color:var(--accent-knop)">';
-    top += '<span style="font-size:13px;color:var(--muted)">Prijzen tonen op werkbon</span></label>';
+    top += '<label class="wbx-cl-opt"><span>Prijzen tonen op werkbon</span><span class="lf-sw"><input type="checkbox" role="switch" id="wb-mat-prijstoggle"'+(toonPrijs?' checked':'')+'><i></i></span></label>';
   }
 
   if(!lijst.length){
-    wrap.innerHTML = top + '<div style="font-size:12px;color:var(--muted);padding:4px 0 10px">Nog geen materialen toegevoegd.</div>';
+    wrap.innerHTML = top + '<div style="font-size:13px;color:var(--muted);padding:10px 0;border-top:1px solid var(--border)">Nog geen materialen toegevoegd.</div>';
     _wbBindPrijsToggle(state);
     return;
   }
 
-  var h = top + '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">';
+  var h = top;
   lijst.forEach(function(m, mi){
     var regel = (Number(m.aantal)||0) * (Number(m.stuksprijs)||0);
-    h += '<div style="padding:10px 12px;background:var(--surface2);border-radius:8px">';
-    // Bovenste regel: foto + omschrijving/code
-    h += '<div style="display:flex;align-items:center;gap:10px">';
-    h += m.foto ? '<img src="'+esc(m.foto)+'" class="wb-mat-foto" data-url="'+esc(m.foto)+'" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;cursor:pointer">'
-                : '<div style="width:40px;height:40px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>';
-    h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;line-height:1.3">'+esc(m.omschrijving||'')+'</div>';
-    h += '<div style="font-size:12px;color:var(--muted);margin-top:1px">'+esc(m.code||'')+(toonPrijs?(' \u00b7 '+_matEuro(m.stuksprijs)+' /'+esc(m.eenheid||'stuk')):'')+'</div></div>';
-    if(state.bewerkbaar) h += '<button class="wb-mat-verwijder btn btn-ghost btn-wis" data-mi="'+mi+'" aria-label="Materiaal verwijderen" style="flex-shrink:0;align-self:flex-start" title="Verwijderen">'+ICO.trash+'</button>';
-    h += '</div>';
-    // Onderste regel: stepper links, regelbedrag rechts
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
+    h += '<div class="wbm">';
+    h += m.foto ? '<img src="'+esc(m.foto)+'" class="wb-mat-foto wbm-foto" data-url="'+esc(m.foto)+'" alt="">'
+                : '<span class="wbm-ic" aria-hidden="true">'+_LF_PAKKET+'</span>';
+    h += '<span class="wbm-n">'+esc(m.omschrijving||'')+'<small>'+esc(m.code||'')+(toonPrijs?(' · '+_matEuro(m.stuksprijs)+' /'+esc(m.eenheid||'stuk')):'')+'</small></span>';
+    if(state.bewerkbaar) h += '<button class="wb-mat-verwijder btn btn-ghost btn-wis" data-mi="'+mi+'" aria-label="Materiaal verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
+    else h += '<span></span>';
+    h += '<div class="wbm-o">';
     if(state.bewerkbaar){
-      h += '<div style="display:flex;align-items:center;gap:6px">';
-      h += '<button class="wb-mat-min" data-mi="'+mi+'" aria-label="Eén minder" style="width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer;font-size:17px;line-height:1">\u2212</button>';
-      h += '<input class="wb-mat-aantal" data-mi="'+mi+'" type="number" step="0.01" value="'+esc(m.aantal!=null?m.aantal:1)+'" style="width:56px;text-align:center;border:1px solid var(--border);border-radius:6px;padding:5px;background:var(--surface)">';
-      h += '<button class="wb-mat-plus" data-mi="'+mi+'" aria-label="Eén meer" style="width:44px;height:44px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;cursor:pointer;font-size:17px;line-height:1">+</button>';
-      h += '<span style="font-size:12px;color:var(--muted);margin-left:2px">'+esc(m.eenheid||'stuk')+'</span>';
-      h += '</div>';
+      h += '<span class="wbm-stap"><button class="wb-mat-min" data-mi="'+mi+'" aria-label="Eén minder">−</button>';
+      h += '<input class="wb-mat-aantal" data-mi="'+mi+'" type="number" step="0.01" inputmode="decimal" value="'+esc(m.aantal!=null?m.aantal:1)+'" aria-label="Aantal">';
+      h += '<button class="wb-mat-plus" data-mi="'+mi+'" aria-label="Eén meer">+</button></span>';
+      h += '<span class="wbm-eenh">'+esc(m.eenheid||'stuk')+'</span>';
     } else {
-      h += '<div style="font-size:13px;color:var(--muted)">'+esc(m.aantal!=null?m.aantal:1)+'\u00d7 '+esc(m.eenheid||'stuk')+'</div>';
+      h += '<span class="wbm-eenh">'+esc(m.aantal!=null?m.aantal:1)+'× '+esc(m.eenheid||'stuk')+'</span>';
     }
-    if(toonPrijs) h += '<div style="font-size:14px;font-weight:700">'+_matEuro(regel)+'</div>';
-    h += '</div>';
-    h += '</div>';
+    if(toonPrijs) h += '<span class="wbm-bedrag">'+_matEuro(regel)+'</span>';
+    h += '</div></div>';
   });
-  h += '</div>';
 
   if(toonPrijs){
     var t = _wbMateriaalTotalen(lijst);
-    h += '<div style="border-top:1px solid var(--border);padding-top:10px;font-size:13px">';
-    h += '<div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Subtotaal (excl. btw)</span><span>'+_matEuro(t.subtotaal)+'</span></div>';
+    h += '<div class="wbm-tot">';
+    h += '<div class="wbx-row"><span class="wbx-k">Subtotaal (excl. btw)</span><span class="wbx-v">'+_matEuro(t.subtotaal)+'</span></div>';
     Object.keys(t.btwPerTarief).sort().forEach(function(tar){
-      h += '<div style="display:flex;justify-content:space-between;color:var(--muted)"><span>Btw '+esc(tar)+'%</span><span>'+_matEuro(t.btwPerTarief[tar])+'</span></div>';
+      h += '<div class="wbx-row"><span class="wbx-k">Btw '+esc(tar)+'%</span><span class="wbx-v">'+_matEuro(t.btwPerTarief[tar])+'</span></div>';
     });
-    h += '<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:4px"><span>Totaal (incl. btw)</span><span>'+_matEuro(t.totaal)+'</span></div>';
+    h += '<div class="wbx-row wbm-eind"><span class="wbx-k">Totaal (incl. btw)</span><span class="wbx-v">'+_matEuro(t.totaal)+'</span></div>';
     h += '</div>';
   }
   wrap.innerHTML = h;
@@ -4684,10 +4780,9 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
   // Optionele object-koppeling (als de klant objecten heeft)
   var _objecten = _wbChecklistObjecten();
   if(_objecten.length){
-    h += '<div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">';
-    h += '<div style="font-size:12px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px"><svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>Koppel aan object</div>';
-    h += '<select class="input cl-object" data-ci="'+ci+'"'+(bewerkbaar?'':' disabled')+' style="max-width:320px">';
-    h += '<option value="">— Geen object —</option>';
+    h += '<div class="wbx-cl-veld wbx-cl-rij lf-kies" role="button" tabindex="0" data-lf-titel="Object" style="border-top:0">'+_lfIco('<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>')+'<span class="wbx-cl-lbl">Object</span><span class="lf-w"><span class="lf-kw"></span>'+_LF_CHEV+'</span>';
+    h += '<select class="lf-sel cl-object" tabindex="-1" aria-hidden="true" data-ci="'+ci+'"'+(bewerkbaar?'':' disabled')+'>';
+    h += '<option value="">Geen object</option>';
     _objecten.forEach(function(o){
       h += '<option value="'+esc(o.id)+'"'+(String(cl.objectId||'')===String(o.id)?' selected':'')+'>'+esc(o.naam||o.omschrijving||'Object')+'</option>';
     });
@@ -4698,36 +4793,41 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
     var dis = bewerkbaar ? '' : ' disabled';
     var attrs = 'data-ci="'+ci+'" data-vi="'+vi+'"';
 
-    if(v.type==='header'){ h += '<div style="font-weight:700;font-size:13px;margin:'+(vi===0?'0':'14px')+' 0 8px">'+esc(v.label||'')+'</div>'; return; }
-    if(v.type==='paragraaf'){ h += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;white-space:pre-wrap">'+esc(v.label||'')+'</div>'; return; }
+    if(v.type==='header'){ h += '<div class="wbx-cl-kop">'+esc(v.label||'')+'</div>'; return; }
+    if(v.type==='paragraaf'){ h += '<div style="font-size:13px;color:var(--muted);margin:4px 0 12px;white-space:pre-wrap;line-height:1.45">'+esc(v.label||'')+'</div>'; return; }
     if(v.type==='paginaeinde'){ h += '<div style="border-top:1px dashed var(--border);margin:14px 0;font-size:10px;color:var(--muted);text-align:center">pagina-einde</div>'; return; }
 
-    h += '<div class="wbx-cl-veld" style="margin-bottom:14px">';
-    h += '<div style="font-size:12px;font-weight:600;margin-bottom:6px">'+esc(v.label||'')+(v.verplicht?' <span style="color:var(--red-t)">*</span>':'')+'</div>';
-
-    if(v.type==='tekst_kort'){
-      h += '<input type="text" class="input cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+'>';
-    } else if(v.type==='tekst_lang'){
-      h += '<textarea class="input cl-ant" '+attrs+' rows="3"'+dis+'>'+esc(waarde||'')+'</textarea>';
-    } else if(v.type==='numeriek'){
-      h += '<div style="display:flex;align-items:center;gap:8px"><input type="number" class="input cl-ant" '+attrs+' value="'+esc(waarde!=null?waarde:'')+'"'+dis+' style="max-width:160px">'+(v.eenheid?('<span style="font-size:12px;color:var(--muted)">'+esc(v.eenheid)+'</span>'):'')+'</div>';
-    } else if(v.type==='dropdown'){
-      h += '<select class="input cl-ant" '+attrs+dis+'><option value="">\u2014 kies \u2014</option>';
+    // Lijststijl: korte antwoorden (getal, keuze, datum, tijd) naast het label, de rest eronder.
+    var _clRij = ['numeriek','dropdown','datum','tijd'].indexOf(v.type) >= 0;
+    var _clLbl = '<span class="wbx-cl-lbl">'+esc(v.label||'')+(v.verplicht?'<span class="lf-req" aria-hidden="true">*</span>':'')+'</span>';
+    if(v.type==='dropdown'){
+      h += '<div class="wbx-cl-veld wbx-cl-rij lf-kies" role="button" tabindex="0" data-lf-titel="'+esc(v.label||'Kies')+'">'+_clLbl+'<span class="lf-w"><span class="lf-kw"></span>'+_LF_CHEV+'</span>';
+      h += '<select class="lf-sel cl-ant" tabindex="-1" aria-hidden="true" '+attrs+dis+'><option value="">Kies</option>';
       (v.opties||[]).forEach(function(o){ h += '<option value="'+esc(o)+'"'+(waarde===o?' selected':'')+'>'+esc(o)+'</option>'; });
       h += '</select>';
+    } else {
+      h += '<div class="wbx-cl-veld '+(_clRij?'wbx-cl-rij':'wbx-cl-blok')+'">'+_clLbl;
+    }
+
+    if(v.type==='tekst_kort'){
+      h += '<input type="text" class="lf-notitie cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+'>';
+    } else if(v.type==='tekst_lang'){
+      h += '<textarea class="lf-notitie cl-ant" '+attrs+' rows="3"'+dis+'>'+esc(waarde||'')+'</textarea>';
+    } else if(v.type==='numeriek'){
+      h += '<span class="wbx-cl-w"><input type="number" inputmode="decimal" class="lf-veld lf-kort cl-ant" '+attrs+' value="'+esc(waarde!=null?waarde:'')+'"'+dis+'>'+(v.eenheid?esc(v.eenheid):'')+'</span>';
     } else if(v.type==='radio'){
       (v.opties||[]).forEach(function(o){
-        h += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer"><input type="radio" name="cl-radio-'+ci+'-'+vi+'" class="cl-ant-radio" '+attrs+' value="'+esc(o)+'"'+(waarde===o?' checked':'')+dis+' style="width:20px;height:20px;flex-shrink:0"><span style="font-size:13px">'+esc(o)+'</span></label>';
+        h += '<label class="wbx-cl-opt"><span>'+esc(o)+'</span><input type="radio" name="cl-radio-'+ci+'-'+vi+'" class="cl-ant-radio" '+attrs+' value="'+esc(o)+'"'+(waarde===o?' checked':'')+dis+'></label>';
       });
     } else if(v.type==='checkbox'){
       var geselecteerd = Array.isArray(waarde) ? waarde : [];
       (v.opties||[]).forEach(function(o){
-        h += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer"><input type="checkbox" class="cl-ant-checkbox" '+attrs+' value="'+esc(o)+'"'+(geselecteerd.indexOf(o)>=0?' checked':'')+dis+' style="width:20px;height:20px;flex-shrink:0"><span style="font-size:13px">'+esc(o)+'</span></label>';
+        h += '<label class="wbx-cl-opt"><span>'+esc(o)+'</span><span class="lf-sw"><input type="checkbox" class="cl-ant-checkbox" '+attrs+' value="'+esc(o)+'"'+(geselecteerd.indexOf(o)>=0?' checked':'')+dis+'><i></i></span></label>';
       });
     } else if(v.type==='datum'){
-      h += '<input type="date" class="input cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+' style="max-width:200px">';
+      h += '<span class="wbx-cl-w"><input type="date" class="lf-veld cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+'></span>';
     } else if(v.type==='tijd'){
-      h += '<input type="time" class="input cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+' style="max-width:160px">';
+      h += '<span class="wbx-cl-w"><input type="time" class="lf-veld cl-ant" '+attrs+' value="'+esc(waarde||'')+'"'+dis+'></span>';
     } else if(v.type==='foto'){
       var fotos = Array.isArray(waarde) ? waarde : [];
       h += '<div class="cl-foto-grid" style="margin-bottom:8px">';
@@ -4755,7 +4855,7 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
         h += '</div>';
       });
       h += '</div>';
-      if(bewerkbaar) h += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">'+ICO.foto+' Foto toevoegen<input type="file" accept="image/*" multiple class="cl-foto-input" data-ci="'+ci+'" data-vi="'+vi+'" style="display:none"></label>';
+      if(bewerkbaar) h += '<label style="display:block"><span class="wbx-chip-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Foto toevoegen</span><input type="file" accept="image/*" multiple class="cl-foto-input" data-ci="'+ci+'" data-vi="'+vi+'" style="display:none"></label>';
     } else if(v.type==='tabel'){
       var rijen = Array.isArray(waarde) ? waarde : [];
       h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
@@ -4854,6 +4954,7 @@ function _wbRenderChecklists(state){
       });
     });
   });
+  _lfBindKies(wrap);
   _wbBindChecklistVelden(state);
 }
 
@@ -5329,13 +5430,13 @@ function _wbAfrondDialoog(state){
   var h = '';
   // Kop met terug-pijl
   h += '<div style="display:flex;align-items:center;gap:12px;margin:-8px -4px 16px">';
-  h += '<button id="wb-af-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:10px;margin:-10px 0 -10px -10px;display:flex;align-items:center" title="Terug" aria-label="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  h += '<button id="wb-af-terug" class="wbx-terug" title="Terug" aria-label="Terug"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
   h += '<div style="flex:1;font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:800">Ondertekenen &amp; versturen</div>';
   h += '</div>';
 
   // Klantinformatie
   h += '<div class="wbx-field-lbl">Klant informatie</div>';
-  h += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px">';
+  h += '<div class="wbx-kaart">';
   h += '<div style="font-weight:700;font-size:14px">'+esc(wb.klantNaam||'\u2014')+'</div>';
   h += '<div style="font-size:12px;color:var(--muted);margin-top:3px">'+esc([(wa.adres||''),(wa.plaats||'')].filter(Boolean).join(', '))+'</div>';
   h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
@@ -5345,14 +5446,14 @@ function _wbAfrondDialoog(state){
 
   // Werk-samenvatting
   h += '<div class="wbx-field-lbl">Werk</div>';
-  h += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px">';
+  h += '<div class="wbx-kaart">';
   h += '<div class="wbx-row"><span class="wbx-k">Omschrijving</span><span class="wbx-v" style="max-width:60%">'+esc(wb.omschrijving||'\u2014')+'</span></div>';
   h += '<div class="wbx-row"><span class="wbx-k">Bevindingen</span><span class="wbx-v" style="max-width:60%">'+esc(wb.bevindingen||'\u2014')+'</span></div>';
   h += '</div>';
 
   // Totaal (uren-regels met monteur; artikelen volgen bij materialen-module)
   h += '<div class="wbx-field-lbl">Totaal</div>';
-  h += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px">';
+  h += '<div class="wbx-kaart">';
   if(uren.length){
     uren.forEach(function(u){
       var mi = _wbMedInfo(u.medewerkerId);
@@ -5370,7 +5471,7 @@ function _wbAfrondDialoog(state){
   if(mats.length){
     var toonPrijs = _wbToonPrijzen(wb);
     h += '<div class="wbx-field-lbl">Materialen</div>';
-    h += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:14px">';
+    h += '<div class="wbx-kaart">';
     mats.forEach(function(m){
       var regel = (Number(m.aantal)||0)*(Number(m.stuksprijs)||0);
       h += '<div class="wbx-row"><span class="wbx-k">'+esc(String(m.aantal!=null?m.aantal:1).replace('.',','))+'\u00d7 '+esc(m.omschrijving||m.code||'')+'</span><span class="wbx-v">'+(toonPrijs?_matEuro(regel):'')+'</span></div>';
@@ -9762,19 +9863,7 @@ function lfOpen(titel, body, knopTekst, knopId){
 }
 function lfBind(root){
   if(!root) return;
-  root.querySelectorAll('.lf-kies').forEach(function(rij){
-    var sel = rij.querySelector('select'); if(!sel) return;
-    var toon = function(){
-      var opt = sel.options[sel.selectedIndex], t = opt ? opt.textContent : '';
-      var kw = rij.querySelector('.lf-kw'); kw.textContent = t; kw.classList.toggle('leeg', !sel.value);
-      if(rij.hasAttribute('data-lf-persoon')) rij.querySelector('.lf-av').textContent = _lfInit(t);
-    };
-    toon();
-    sel.addEventListener('change', toon);
-    var open = function(){ lfKeuzelijst(rij.getAttribute('data-lf-titel'), sel); };
-    rij.addEventListener('click', open);
-    rij.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } });
-  });
+  _lfBindKies(root);
   root.querySelectorAll('[data-lf-stap]').forEach(function(b){
     b.addEventListener('click', function(){
       var inp = b.parentNode.querySelector('input');
@@ -9805,6 +9894,27 @@ function lfBind(root){
   root.addEventListener('input', check);
   root.addEventListener('change', check);
   check();
+}
+// Keuzerijen (.lf-kies met een verborgen <select>) koppelen aan de keuzelijst. Ook voor delen
+// die opnieuw getekend worden (checklists op de werkbon): een rij wordt maar één keer gekoppeld.
+function _lfBindKies(root){
+  if(!root) return;
+  root.querySelectorAll('.lf-kies').forEach(function(rij){
+    if(rij.getAttribute('data-lf-gebonden')) return;
+    var sel = rij.querySelector('select'); if(!sel) return;
+    rij.setAttribute('data-lf-gebonden', '1');
+    var toon = function(){
+      var opt = sel.options[sel.selectedIndex], t = opt ? opt.textContent : '';
+      var kw = rij.querySelector('.lf-kw'); if(kw){ kw.textContent = t; kw.classList.toggle('leeg', !sel.value); }
+      if(rij.hasAttribute('data-lf-persoon')) rij.querySelector('.lf-av').textContent = _lfInit(t);
+    };
+    toon();
+    sel.addEventListener('change', toon);
+    if(sel.disabled){ rij.removeAttribute('role'); rij.removeAttribute('tabindex'); rij.classList.add('lf-alleen-lezen'); return; }
+    var open = function(){ lfKeuzelijst(rij.getAttribute('data-lf-titel'), sel); };
+    rij.addEventListener('click', open);
+    rij.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } });
+  });
 }
 function lfKeuzelijst(titel, sel){
   var oud = document.getElementById('lf-pk'); if(oud) oud.remove();
