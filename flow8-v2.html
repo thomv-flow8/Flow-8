@@ -24209,6 +24209,8 @@ function openMailVerzendModal(opts) {
   } else {
     b += lfRij(ICO.clipboard, 'Bericht', '<textarea class="lf-notitie" id="mv-body" rows="5">'+esc(opts.body||'')+'</textarea>', {blok:true, voor:'mv-body'});
   }
+  // Extra velden van de aanroeper (bijv. de status bij het versturen van een werkorderblok).
+  if(opts.extraHtml) b += opts.extraHtml;
   var heeftPreview = (typeof opts.previewBron==='function');
   if(heeftPreview) b += _lfNavRij('mv-preview', ICO.pdf, 'Bijlage bekijken', 'De PDF die met deze mail meegaat', '');
 
@@ -24258,11 +24260,15 @@ function openMailVerzendModal(opts) {
     if(!aanAdressen.length){ toast('Vul minimaal \u00e9\u00e9n e-mailadres in','error'); return null; }
     var fout = aanAdressen.concat(ccAdressen).filter(function(a){ return !geldigEmail(a); });
     if(fout.length){ toast('Ongeldig e-mailadres: '+fout[0],'error'); return null; }
+    // Verplichte extra velden (data-mv-extra + required) moeten ingevuld zijn.
+    var _leeg = Array.prototype.find.call(document.querySelectorAll('#modal-body [data-mv-extra][required]'), function(el){ return !el.value; });
+    if(_leeg){ toast('Vul eerst de verplichte velden in','error'); return null; }
     return {
       aan: aanAdressen.slice(),
       cc: ccAdressen.slice(),
       onderwerp: document.getElementById('mv-ond').value,
-      body: document.getElementById('mv-body').value
+      body: document.getElementById('mv-body').value,
+      extra: (function(){ var x = {}; document.querySelectorAll('#modal-body [data-mv-extra]').forEach(function(el){ x[el.getAttribute('data-mv-extra')] = el.value; }); return x; })()
     };
   }
 
@@ -39013,47 +39019,88 @@ function _woBlokAfronden(bi, zonderMail){
 
   var mailNaar = bl.afronding && bl.afronding.mailNaar || 'kantoor';
   var wilMail = bl.afronding && bl.afronding.mail && zonderMail !== true;
-  var mailLabel = mailNaar==='klant' ? 'de klant' : (mailNaar==='beide' ? 'klant én kantoor' : 'kantoor');
-  var vraag = 'Weet je zeker dat je het blok "'+esc(bl.naam||'')+'" wilt afronden?';
-  if(wilMail) vraag += ' Daarna kun je een mail versturen naar '+mailLabel+'.';
-  if(bl.zetStatus){
-    var stObj = st.type && st.type.statussen ? st.type.statussen.find(function(s){return s.key===bl.zetStatus;}) : null;
-    if(stObj) vraag += ' De status wordt "'+esc(stObj.naam)+'".';
+
+  // Welke status daarna? Beheerders kiezen zelf (vooraf ingevuld met de instelling van het blok);
+  // voor anderen staat hij vast, zoals voorheen. Terugzetten kan altijd met de statuskaart bovenaan.
+  var kanKiezen = isAdmin() || magBeheren('werkorders');
+  var statussen = (st.type && Array.isArray(st.type.statussen)) ? st.type.statussen : [];
+  var huidig = statussen.find(function(x){ return x.key===st.wo.status; });
+  var opties = [];
+  if(kanKiezen && statussen.length){
+    if(huidig && Array.isArray(huidig.naar) && huidig.naar.length){
+      huidig.naar.forEach(function(k){ var x = statussen.find(function(z){ return z.key===k; }); if(x) opties.push(x); });
+    } else {
+      opties = statussen.filter(function(x){ return x.key!==st.wo.status; });
+    }
+    if(bl.zetStatus && bl.zetStatus!==st.wo.status && !opties.some(function(x){ return x.key===bl.zetStatus; })){
+      var _zs = statussen.find(function(x){ return x.key===bl.zetStatus; }); if(_zs) opties.unshift(_zs);
+    }
+  }
+  // verplicht: in het mailvenster kies je bewust een status (ook "blijft" mag); anders is
+  // "niet wijzigen" de standaard.
+  function statusVeld(verplicht){
+    if(opties.length){
+      var keuzes = opties.slice();
+      if(verplicht && huidig) keuzes.push(huidig);
+      return lfKies(ICO.refresh, 'Status daarna', '<select class="input" id="wob-af-status" data-mv-extra="status"'+(verplicht?' required':'')+'>'
+        + (verplicht ? '<option value="">Kies een status</option>' : '<option value="">Niet wijzigen'+(huidig ? ' ('+esc(huidig.naam)+')' : '')+'</option>')
+        + keuzes.map(function(x){ return '<option value="'+esc(x.key)+'"'+(x.key===bl.zetStatus?' selected':'')+'>'+esc(x.naam)+((huidig && x.key===huidig.key) ? ' (blijft)' : '')+'</option>'; }).join('')+'</select>',
+        {titel:'Status na afronden', verplicht:verplicht, sub:'Terugzetten kan later bovenaan'});
+    }
+    if(bl.zetStatus && bl.zetStatus!==st.wo.status){
+      var _vast = statussen.find(function(x){ return x.key===bl.zetStatus; });
+      if(_vast) return lfRij(ICO.refresh, 'Status daarna', '<span class="lf-kw">'+esc(_vast.naam)+'</span>');
+    }
+    return '';
   }
 
-  bevestigActie('Blok afronden', vraag, function(){
+  // Het eigenlijke afronden: markeren, de status zetten (indien gekozen) en opslaan.
+  function doeAfronden(nieuweStatus, naMail){
     antw._afgerond = true;
     antw._afgerondOp = Date.now();
     var mijnMed = (typeof getMijnMedId==='function') ? getMijnMedId() : null;
     antw._afgerondDoor = mijnMed || null;
-
-    var updates = { velden: null }; // velden vullen we hieronder in na _fsSchoon
-    // Status wijzigen indien ingesteld
     var statusUpdate = {};
-    if(bl.zetStatus && bl.zetStatus!==st.wo.status){
+    if(nieuweStatus && nieuweStatus!==st.wo.status){
       var med = mijnMed ? (APP.medewerkers||[]).find(function(m){ return String(m.id)===String(mijnMed); }) : null;
       var doorNaam = med ? ((med.voornaam||'')+' '+(med.achternaam||'')).trim() : '';
       var hist = Array.isArray(st.wo.statusHistorie) ? st.wo.statusHistorie.slice() : [];
-      hist.push({ status:bl.zetStatus, tijd:Date.now(), doorMedId:mijnMed||null, doorNaam:doorNaam });
-      st.wo.status = bl.zetStatus;
+      hist.push({ status:nieuweStatus, tijd:Date.now(), doorMedId:mijnMed||null, doorNaam:doorNaam });
+      st.wo.status = nieuweStatus;
       st.wo.statusHistorie = hist;
-      statusUpdate = { status: bl.zetStatus, statusHistorie: _fsSchoon(hist) };
+      statusUpdate = { status: nieuweStatus, statusHistorie: _fsSchoon(hist) };
     }
-
     var payload = Object.assign({ velden: _fsSchoon(st.antwoorden) }, statusUpdate);
     fsWerkorderBijwerken(st.id, payload).then(function(){
-      if(wilMail){
-        _woBlokMailVersturen(bl, mailNaar);
-      } else {
-        toast('Blok afgerond','success');
-      }
+      toast(naMail ? 'Blok afgerond en verstuurd' : 'Blok afgerond','success');
       _woRenderDetail();
     }).catch(function(e){ toast('Afronden mislukt: '+(e.message||e),'error'); });
+  }
+
+  if(wilMail){
+    // Versturen: de statuskeuze zit verplicht in het mailvenster. Afronden gebeurt pas bij
+    // verzenden; wie het venster sluit, laat het blok zoals het was.
+    _woBlokMailVersturen(bl, mailNaar, statusVeld(true), function(g){
+      var gekozen = opties.length ? ((g.extra && g.extra.status) || '') : (bl.zetStatus || '');
+      doeAfronden(gekozen, true);
+    });
+    return;
+  }
+
+  var b = '<p class="lf-uitleg" style="padding-top:0">Je rondt \u201c'+esc(bl.naam||'dit blok')+'\u201d af.</p>' + statusVeld(false);
+  lfOpen('Blok afronden', b, 'Blok afronden', 'wob-af-ok');
+  document.getElementById('wob-af-ok').addEventListener('click', function(){
+    var _sel = document.getElementById('wob-af-status');
+    var nieuweStatus = _sel ? _sel.value : (bl.zetStatus || '');
+    closeModal();
+    doeAfronden(nieuweStatus, false);
   });
 }
 
 // Mail versturen bij blok-afronding — preview-modal met de werkorder-PDF (alle ingevulde blokken).
-function _woBlokMailVersturen(bl, mailNaar){
+// extraHtml / naVerzendenExtra (optioneel): extra velden in het mailvenster en wat er na verzenden
+// met die invoer moet gebeuren (bij blok-afronding: afronden en de gekozen status zetten).
+function _woBlokMailVersturen(bl, mailNaar, extraHtml, naVerzendenExtra){
   var st = _woDetailState; if(!st) return;
   var wo = st.wo, type = st.type;
   var bg = APP.bedrijfGegevens || {};
@@ -39112,7 +39159,11 @@ function _woBlokMailVersturen(bl, mailNaar){
       // Zelfde popup als bij de werkbonnen: PDF.js-renderer, alle pagina's scrollbaar.
       genereerWerkorderPDF({ uitvoer:'popup' });
     },
-    naVerzenden: function(methode){ toast('Werkorder verstuurd','success'); }
+    extraHtml: extraHtml || '',
+    naVerzenden: function(methode, g){
+      if(typeof naVerzendenExtra === 'function') naVerzendenExtra(g || {});
+      else toast('Werkorder verstuurd','success');
+    }
   });
 }
 
