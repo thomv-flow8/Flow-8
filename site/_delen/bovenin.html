@@ -12,6 +12,9 @@
   <symbol id="ic-storing" viewBox="0 0 32 32"><circle cx="18" cy="17" r="12" fill="url(#ig-b)" opacity=".75"/><path d="M17.5 2 6 18h8l-2 12L24 13h-8z" fill="url(#ig-a)"/><path d="M17.5 2 13 13h3z" fill="url(#ig-c)" opacity=".5"/></symbol>
   <symbol id="ic-register" viewBox="0 0 32 32"><path d="M16 17 30 23 16 29 2 23z" fill="url(#ig-b)" opacity=".7"/><path d="M16 11 30 17 16 23 2 17z" fill="url(#ig-b)"/><path d="M16 4 30 10 16 16 2 10z" fill="url(#ig-a)"/><path d="M16 6.5 24 10 16 13.5 8 10z" fill="url(#ig-c)" opacity=".4"/></symbol>
   <symbol id="ic-rapport" viewBox="0 0 32 32"><rect x="3" y="17" width="7" height="12" rx="2" fill="url(#ig-b)"/><rect x="12.5" y="10" width="7" height="19" rx="2" fill="url(#ig-a)"/><rect x="22" y="3" width="7" height="26" rx="2" fill="url(#ig-c)"/></symbol>
+<symbol id="ic-dashboard" viewBox="0 0 32 32"><rect x="2" y="2" width="12" height="16" rx="2.5" fill="url(#ig-a)"/><rect x="18" y="2" width="12" height="9" rx="2.5" fill="url(#ig-b)"/><rect x="18" y="14" width="12" height="16" rx="2.5" fill="url(#ig-a)"/><rect x="2" y="21" width="12" height="9" rx="2.5" fill="url(#ig-b)"/></symbol>
+  <symbol id="ic-klanten" viewBox="0 0 32 32"><circle cx="12" cy="10" r="5.5" fill="url(#ig-a)"/><path d="M2 28c0-5.5 4.5-9 10-9s10 3.5 10 9z" fill="url(#ig-a)"/><circle cx="23" cy="11" r="4" fill="url(#ig-b)"/><path d="M20 19.5c5.5-.5 10 2.5 10 8.5h-6c0-3.5-1.4-6.4-4-8.5z" fill="url(#ig-b)"/></symbol>
+  <symbol id="ic-team" viewBox="0 0 32 32"><circle cx="11" cy="9" r="5.5" fill="url(#ig-a)"/><path d="M1 27c0-5.5 4.5-9 10-9s10 3.5 10 9z" fill="url(#ig-a)"/><circle cx="24" cy="22" r="7" fill="url(#ig-b)"/><path d="m20.8 22 2.2 2.2 4.2-4.4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 <nav class="nav" aria-label="Hoofdmenu">
   <a href="{{w}}" aria-label="Flow 8">
@@ -26,14 +29,17 @@
   <div class="links">
     <div class="menu-sub"><button type="button" class="sub-knop" aria-expanded="false" aria-controls="sub-product">Product <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button>
       <div class="sub" id="sub-product">
-        <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-planning"/></svg><span><b>Planning en route</b><small>Lijst, week of dag per monteur, met route-optimalisatie.</small></span></a>
-        <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-werkbon"/></svg><span><b>Werkbonnen</b><small>Op de telefoon, met checklist, foto’s en handtekening.</small></span></a>
-        <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-werkorder"/></svg><span><b>Werkorders</b><small>Reparaties in de werkplaats, met eigen stappen per soort.</small></span></a>
-        <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-mail"/></svg><span><b>Klantmails</b><small>Afspraken bevestigen met eigen sjablonen, alles in het maillog.</small></span></a>
+        <a href="{{w}}product/#dashboard"><svg class="ic" aria-hidden="true"><use href="#ic-dashboard"/></svg><span><b>Dashboard</b><small>Opdrachten, afwezigen en storingsdienst in één oogopslag.</small></span></a>
+        <a href="{{w}}product/#planning"><svg class="ic" aria-hidden="true"><use href="#ic-planning"/></svg><span><b>Planning en route</b><small>Lijst, week of dag per monteur, met route-optimalisatie.</small></span></a>
+        <a href="{{w}}product/#werkbonnen"><svg class="ic" aria-hidden="true"><use href="#ic-werkbon"/></svg><span><b>Werkbonnen</b><small>Op de telefoon, met checklist, foto’s en handtekening.</small></span></a>
+        <a href="{{w}}product/#werkorders"><svg class="ic" aria-hidden="true"><use href="#ic-werkorder"/></svg><span><b>Werkorders</b><small>Reparaties in de werkplaats, met eigen stappen per soort.</small></span></a>
+        <a href="{{w}}product/#klanten"><svg class="ic" aria-hidden="true"><use href="#ic-klanten"/></svg><span><b>Klanten en contracten</b><small>Debiteuren, serviceklanten en terugkerend onderhoud.</small></span></a>
+        <a href="{{w}}product/#klantmails"><svg class="ic" aria-hidden="true"><use href="#ic-mail"/></svg><span><b>Klantmails</b><small>Afspraken bevestigen met eigen sjablonen, alles in het maillog.</small></span></a>
         <a href="{{w}}product/#kaart"><svg class="ic" aria-hidden="true"><use href="#ic-kaart"/></svg><span><b>Kaartoverzicht</b><small>Alle klanten en opdrachten op de kaart, gekleurd naar status.</small></span></a>
-        <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-storing"/></svg><span><b>Storingsdienst</b><small>Zie wie er dienst heeft, deze week en de volgende.</small></span></a>
+        <a href="{{w}}product/#storingsdienst"><svg class="ic" aria-hidden="true"><use href="#ic-storing"/></svg><span><b>Storingsdienst</b><small>Zie wie er dienst heeft, deze week en de volgende.</small></span></a>
         <a href="{{w}}product/#register"><svg class="ic" aria-hidden="true"><use href="#ic-register"/></svg><span><b>Register en materialen</b><small>Machines, installaties en artikelen, gekoppeld aan de klant.</small></span></a>
-        <a href="{{w}}product/#klanten"><svg class="ic" aria-hidden="true"><use href="#ic-rapport"/></svg><span><b>Rapportage</b><small>Opdrachten per monteur, per soort en per maand.</small></span></a>
+        <a href="{{w}}product/#rapportage"><svg class="ic" aria-hidden="true"><use href="#ic-rapport"/></svg><span><b>Rapportage</b><small>Opdrachten per monteur, per soort en per maand.</small></span></a>
+        <a href="{{w}}product/#team"><svg class="ic" aria-hidden="true"><use href="#ic-team"/></svg><span><b>Team en uren</b><small>Medewerkers, verlof, overuren, onkosten en verzuim.</small></span></a>
         <a class="alles" href="{{w}}product/">Alle functies bekijken <span aria-hidden="true">→</span></a>
       </div>
     </div>
@@ -45,14 +51,17 @@
   <nav class="mm-lijst" aria-label="Menu">
     <button type="button" class="mm-sub-knop" aria-expanded="false" aria-controls="mm-product">Product <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 5.5 3.5 3.5 3.5-3.5"/></svg></button>
     <div class="mm-sub" id="mm-product" hidden>
-      <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-planning"/></svg>Planning en route</a>
-      <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-werkbon"/></svg>Werkbonnen</a>
-      <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-werkorder"/></svg>Werkorders</a>
-      <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-mail"/></svg>Klantmails</a>
+      <a href="{{w}}product/#dashboard"><svg class="ic" aria-hidden="true"><use href="#ic-dashboard"/></svg>Dashboard</a>
+      <a href="{{w}}product/#planning"><svg class="ic" aria-hidden="true"><use href="#ic-planning"/></svg>Planning en route</a>
+      <a href="{{w}}product/#werkbonnen"><svg class="ic" aria-hidden="true"><use href="#ic-werkbon"/></svg>Werkbonnen</a>
+      <a href="{{w}}product/#werkorders"><svg class="ic" aria-hidden="true"><use href="#ic-werkorder"/></svg>Werkorders</a>
+      <a href="{{w}}product/#klanten"><svg class="ic" aria-hidden="true"><use href="#ic-klanten"/></svg>Klanten en contracten</a>
+      <a href="{{w}}product/#klantmails"><svg class="ic" aria-hidden="true"><use href="#ic-mail"/></svg>Klantmails</a>
       <a href="{{w}}product/#kaart"><svg class="ic" aria-hidden="true"><use href="#ic-kaart"/></svg>Kaartoverzicht</a>
-      <a href="{{w}}#modules"><svg class="ic" aria-hidden="true"><use href="#ic-storing"/></svg>Storingsdienst</a>
+      <a href="{{w}}product/#storingsdienst"><svg class="ic" aria-hidden="true"><use href="#ic-storing"/></svg>Storingsdienst</a>
       <a href="{{w}}product/#register"><svg class="ic" aria-hidden="true"><use href="#ic-register"/></svg>Register en materialen</a>
-      <a href="{{w}}product/#klanten"><svg class="ic" aria-hidden="true"><use href="#ic-rapport"/></svg>Rapportage</a>
+      <a href="{{w}}product/#rapportage"><svg class="ic" aria-hidden="true"><use href="#ic-rapport"/></svg>Rapportage</a>
+      <a href="{{w}}product/#team"><svg class="ic" aria-hidden="true"><use href="#ic-team"/></svg>Team en uren</a>
     </div>
     <a href="{{w}}prijzen/" data-pagina="prijzen">Prijzen</a><a href="{{w}}overstappen/" data-pagina="overstappen">Overstappen</a><a href="{{w}}vragen/" data-pagina="vragen">Veelgestelde vragen</a><a href="{{w}}contact/" data-pagina="contact">Contact</a>
   </nav>
