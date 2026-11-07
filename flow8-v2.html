@@ -263,6 +263,16 @@ body.light .lf{color-scheme:light}
 .lf-art-plus{width:34px;height:34px;border-radius:50%;background:rgba(79,110,245,.14);color:var(--accent-t);display:grid;place-items:center}
 .lf-leeg,.lf-uitleg{font-size:13px;color:var(--muted);padding:14px 2px;line-height:1.45}
 .lf-fout{color:var(--red-t)}
+.lf-groep-knop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.lf-groep-knop b{font-weight:700;color:var(--text)}
+.lf-link{border:0;background:none;color:var(--accent-t);font-family:'Instrument Sans',sans-serif;font-size:13.5px;font-weight:600;text-transform:none;letter-spacing:0;cursor:pointer;padding:6px 0}
+label.lf-rij{cursor:pointer}
+.lf-ic.groot{width:42px;height:42px;border-radius:12px}
+.lf .lf-veld.lf-pc{min-width:0;width:96px!important;text-align:center}
+.lf .lf-veld.lf-nr{min-width:0;width:64px!important;text-align:center}
+.lf-gevonden{display:flex;align-items:center;gap:6px;margin:8px 0 2px;font-size:12.5px;font-weight:600;color:var(--green-t)}
+.lf-verwijder{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:18px;min-height:48px;border-radius:var(--radius-pill);border:1px solid rgba(239,68,68,.35);background:none;color:var(--red-t);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.lf-verwijder svg{width:18px;height:18px}
 .lf-av.klein{width:36px;height:36px;font-size:12px}
 .lf-w-kol{flex-direction:column;align-items:flex-end;gap:3px}
 .lf-omg{font-size:11.5px;color:var(--muted)}
@@ -9955,6 +9965,13 @@ function _lfOpdrachtNaam(opId){
   var op = (APP.opdrachten||[]).find(function(x){ return String(x.id)===String(opId); });
   return op ? (op.klantNaam||'Opdracht') : '';
 }
+var _LF_TEL  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>';
+var _LF_MAIL = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>';
+var _LF_STER = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
+// Kop met de klant (debiteur) bovenaan een klantvenster.
+function _lfKlantKop(d){
+  return '<div class="lf-persoon"><span class="lf-ic groot" aria-hidden="true">'+String(ICO.gebouw).replace(/width="\d+" height="\d+"/, 'width="20" height="20"')+'</span><span class="lf-pt"><b>'+esc((d&&d.naam)||'Klant')+'</b>'+(d&&d.nummer ? '<small>Debiteur '+esc(d.nummer)+'</small>' : '')+'</span></div>';
+}
 function lfKeuzelijst(titel, sel){
   var oud = document.getElementById('lf-pk'); if(oud) oud.remove();
   var w = document.createElement('div');
@@ -12683,21 +12700,13 @@ function openContactModal(debId, ci){
   var isNew = (ci == null || ci < 0);
   var c = isNew ? { naam:'', functie:'', telefoon:'', email:'', standaard:!lijst.length } : (lijst[ci]||{});
 
-  var b = '<div class="form-grid">';
-  b += fgf('Naam *', finp('ct-naam','text', c.naam||'', 'Voor- en achternaam'));
-  b += fg('Functie', finp('ct-functie','text', c.functie||'', 'Bijv. Technische dienst, Inkoop'));
-  b += fg('Telefoon', finp('ct-tel','text', c.telefoon||'', ''));
-  b += fgf('E-mail', finp('ct-mail','email', c.email||'', ''));
-  b += '</div>';
-  b += '<label style="display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-  b += '<input type="checkbox" id="ct-std" '+(c.standaard?'checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)">';
-  b += '<div><div style="font-size:13px;font-weight:600">Standaard contactpersoon</div>';
-  b += '<div style="font-size:11px;color:var(--muted)">Wordt gebruikt op de werkbon, in mails en op PDF\u2019s wanneer er niets anders is gekozen.</div></div>';
-  b += '</label>';
-
-  var f = '<button class="btn btn-ghost" id="ct-cancel">Annuleren</button><button class="btn btn-primary" id="ct-save">Opslaan</button>';
-  openModal(isNew?'Contactpersoon toevoegen':'Contactpersoon bewerken', b, f);
-  document.getElementById('ct-cancel').addEventListener('click', closeModal);
+  var b = _lfKlantKop(d);
+  b += lfRij(ICO.user, 'Naam', '<input class="lf-tekst" type="text" id="ct-naam" value="'+esc(c.naam||'')+'" placeholder="Voor- en achternaam" required>', {verplicht:true, voor:'ct-naam'});
+  b += lfRij(ICO.koffer, 'Functie', '<input class="lf-tekst" type="text" id="ct-functie" value="'+esc(c.functie||'')+'" placeholder="Bijv. inkoop">', {voor:'ct-functie'});
+  b += lfRij(_LF_TEL, 'Telefoon', '<input class="lf-tekst" type="tel" inputmode="tel" id="ct-tel" value="'+esc(c.telefoon||'')+'" placeholder="06 …">', {voor:'ct-tel'});
+  b += lfRij(_LF_MAIL, 'E-mail', '<input class="lf-tekst" type="email" inputmode="email" autocapitalize="off" id="ct-mail" value="'+esc(c.email||'')+'" placeholder="naam@bedrijf.nl">', {voor:'ct-mail'});
+  b += lfRij(_LF_STER, 'Standaard contactpersoon', lfSchakel('ct-std', !!c.standaard), {voor:'ct-std', sub:'Op de werkbon, in mails en op pdf’s als er niets anders is gekozen'});
+  lfOpen(isNew?'Contactpersoon toevoegen':'Contactpersoon bewerken', b, 'Opslaan', 'ct-save');
   document.getElementById('ct-save').addEventListener('click', function(){
     var naam = document.getElementById('ct-naam').value.trim();
     if(!naam){ toast('Naam is verplicht','error'); return; }
@@ -13079,22 +13088,16 @@ function openLocatieModal(debId, locId) {
   var d=APP.debiteuren.find(function(x){return String(x.id)===String(debId);})||{};
   var loc = locId && d.locaties ? (d.locaties[locId]||{}) : {};
   var isNew = !locId;
-  var b='<div class="form-grid">';
-  b+=fgf('Naam locatie *',finp('lf-naam','text',loc.naam||'','Bijv. Vestiging Utrecht, Depot Noord'));
-  b+=fgf('Postcode &amp; huisnummer','<div style="display:flex;gap:6px"><input class="input" id="lf-pc" value="'+esc(loc.postcode||'')+'" placeholder="1234 AB" style="flex:2;min-width:0"><input class="input" id="lf-huisnr" placeholder="Huisnr" style="flex:1;min-width:0" title="Huisnummer voor adres-aanvulling"></div>');
-  b+=fgf('Adres',finp('lf-adr','text',loc.adres||'','Wordt automatisch ingevuld'));
-  b+=fg('Plaats',finp('lf-pl','text',loc.plaats||'',''));
-  b+=fg('Contactpersoon',finp('lf-ct','text',loc.contactpersoon||'',''));
-  b+=fg('Telefoon',finp('lf-tel','text',loc.telefoon||'',''));
-  b+='</div>';
-  b+='<label style="display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-  b+='<input type="checkbox" id="lf-standaard" '+(loc.isStandaard?'checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)">';
-  b+='<div><div style="font-size:13px;font-weight:600">Als standaard instellen</div>';
-  b+='<div style="font-size:11px;color:var(--muted)">Dit adres wordt automatisch ingevuld bij nieuwe opdrachten voor deze klant</div></div>';
-  b+='</label>';
-  var f='<button class="btn btn-ghost" id="lmod-cancel">Annuleren</button><button class="btn btn-primary" id="lmod-save">Opslaan</button>';
-  openModal(isNew?'Locatie toevoegen':'Locatie bewerken',b,f);
-  document.getElementById('lmod-cancel').addEventListener('click',closeModal);
+  var b = _lfKlantKop(d);
+  b += lfRij(ICO.gebouw, 'Naam', '<input class="lf-tekst" type="text" id="lf-naam" value="'+esc(loc.naam||'')+'" placeholder="Bijv. vestiging Utrecht" required>', {verplicht:true, voor:'lf-naam'});
+  b += lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="lf-pc" value="'+esc(loc.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="lf-huisnr" placeholder="Nr." aria-label="Huisnummer" inputmode="text">');
+  b += '<div class="lf-gevonden" id="lf-gevonden" hidden><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Adres gevonden via postcode</div>';
+  b += lfRij('', 'Straat', '<input class="lf-tekst" type="text" id="lf-adr" value="'+esc(loc.adres||'')+'" placeholder="Wordt automatisch ingevuld">', {voor:'lf-adr'});
+  b += lfRij('', 'Plaats', '<input class="lf-tekst" type="text" id="lf-pl" value="'+esc(loc.plaats||'')+'">', {voor:'lf-pl'});
+  b += lfRij(ICO.user, 'Contactpersoon', '<input class="lf-tekst" type="text" id="lf-ct" value="'+esc(loc.contactpersoon||'')+'" placeholder="Optioneel">', {voor:'lf-ct'});
+  b += lfRij(_LF_TEL, 'Telefoon', '<input class="lf-tekst" type="tel" inputmode="tel" id="lf-tel" value="'+esc(loc.telefoon||'')+'" placeholder="Optioneel">', {voor:'lf-tel'});
+  b += lfRij(_LF_STER, 'Standaardlocatie', lfSchakel('lf-standaard', !!loc.isStandaard), {voor:'lf-standaard', sub:'Werkadres bij nieuwe opdrachten voor deze klant'});
+  lfOpen(isNew?'Locatie toevoegen':'Locatie bewerken', b, 'Opslaan', 'lmod-save');
   // Postcode + huisnummer → adres auto-aanvullen
   function _lfZoekAdres(){
     var pcEl=document.getElementById('lf-pc');
@@ -13104,7 +13107,7 @@ function openLocatieModal(debId, locId) {
     if(!pcEl||!adrEl) return;
     var huisnr=huisnrEl?huisnrEl.value.trim():'';
     zoekAdresViaPostcode(pcEl.value, huisnr,
-      function(adres){ adrEl.value=adres; },
+      function(adres){ adrEl.value=adres; var g=document.getElementById('lf-gevonden'); if(g) g.hidden=false; },
       function(plaats){ if(plEl) plEl.value=plaats; }
     );
   }
@@ -23623,7 +23626,7 @@ function openAgendaModal(id, prefillDatum, prefillTijd) {
   var medOpts = '';
   APP.medewerkers.filter(function(m){return m.status!=='inactief';}).forEach(function(m){
     var aan = (a.deelnemerIds||[]).indexOf(String(m.id))>=0 ? ' checked' : '';
-    medOpts += '<label><input type="checkbox" value="'+m.id+'"'+aan+'> '+esc(m.voornaam+' '+m.achternaam)+'</label>';
+    medOpts += '<label class="lf-rij"><span class="lf-av klein" style="background:'+medKleur(m)+'" aria-hidden="true">'+esc(initials(m))+'</span><span class="lf-l">'+esc(m.voornaam+' '+m.achternaam)+'</span><span class="lf-w"><span class="lf-sw"><input type="checkbox" value="'+m.id+'"'+aan+'><i></i></span></span></label>';
   });
 
   var typeOpts = Object.keys(AG_TYPES).map(function(k){
@@ -23633,44 +23636,44 @@ function openAgendaModal(id, prefillDatum, prefillTijd) {
   var startDatum = prefillDatum || a.van || vandaagISO();
   var isVrijeDag = a.type === 'vrije_dag';
 
-  var b = '<div class="form-grid">';
-  b += fg('Type', '<select class="input" id="ag-type">'+typeOpts+'</select>');
-  b += fg('Titel', finp('ag-titel','text',a.titel||'','Bijv. Maandelijks werkoverleg'));
-  b += fg('Van (datum)', finp('ag-van','date',startDatum,''));
-  b += fg('Tot (datum, leeg = zelfde dag)', finp('ag-tot','date',a.tot&&a.tot!==a.van?a.tot:'',''));
-  b += fg('Hele dag', '<label class="ag-vink"><input type="checkbox" id="ag-heeldag"'+(a.heelDag||isVrijeDag?' checked':'')+'> Hele dag</label>');
-  b += '<div id="ag-tijd-wrap" style="'+(a.heelDag||isVrijeDag?'display:none':'')+'grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px">';
-  b += fg('Begintijd', finp('ag-tijdvan','time',a.tijdVan||prefillTijd||'09:00',''));
-  b += fg('Eindtijd',  finp('ag-tijdtot','time',a.tijdTot||'10:00',''));
+  var _agTypeIco = function(k){ var t = agTypeInfo(k); return '<span style="color:'+t.kleur+';display:flex"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">'+t.svg+'</svg></span>'; };
+  var _agType0 = a.type || Object.keys(AG_TYPES)[0];
+  var b = lfKies(_agTypeIco(_agType0), 'Type', '<select class="input" id="ag-type">'+typeOpts+'</select>', {titel:'Soort afspraak'});
+  b += lfRij(ICO.edit, 'Titel', '<input class="lf-tekst" type="text" id="ag-titel" value="'+esc(a.titel||'')+'" placeholder="Bijv. werkoverleg">', {voor:'ag-titel'});
+  b += lfRij(ICO.kalender, 'Datum', '<input class="lf-veld" type="date" id="ag-van" value="'+esc(startDatum)+'" required>', {verplicht:true, voor:'ag-van'});
+  b += lfRij(ICO.kalender, 'Tot en met', '<input class="lf-veld" type="date" id="ag-tot" value="'+esc(a.tot&&a.tot!==a.van?a.tot:'')+'">', {voor:'ag-tot', sub:'Leeg = dezelfde dag'});
+  b += lfRij(ICO.clock, 'Hele dag', lfSchakel('ag-heeldag', !!(a.heelDag||isVrijeDag)), {voor:'ag-heeldag'});
+  b += '<div id="ag-tijd-wrap"'+(a.heelDag||isVrijeDag?' style="display:none"':'')+'>';
+  b += lfRij('', 'Van', '<input class="lf-veld" type="time" id="ag-tijdvan" value="'+esc(a.tijdVan||prefillTijd||'09:00')+'">', {voor:'ag-tijdvan'});
+  b += lfRij('', 'Tot', '<input class="lf-veld" type="time" id="ag-tijdtot" value="'+esc(a.tijdTot||'10:00')+'">', {voor:'ag-tijdtot'});
   b += '</div>';
-  b += fg('Locatie', finp('ag-locatie','text',a.locatie||'','Bijv. Vergaderzaal, Teams'));
-  b += fgf('Omschrijving', ftxtAuto('ag-omschr', a.omschrijving||''));
-  var _agAlleAan = APP.medewerkers.filter(function(m){return m.status!=='inactief';}).every(function(m){ return (a.deelnemerIds||[]).indexOf(String(m.id))>=0; });
-  b += fgf('Deelnemers', '<button type="button" class="btn btn-ghost btn-sm ag-deel-alle" id="ag-deel-alle" onclick="_agDeelAlle()">'+(_agAlleAan?'Niemand selecteren':'Iedereen selecteren')+'</button>'
-    + '<div class="ag-deel" id="ag-deelnemers" role="group" aria-label="Deelnemers" onchange="_agDeelKnop()">'+medOpts+'</div>');
-  b += '</div>';
+  b += lfRij(ICO.locatie, 'Locatie', '<input class="lf-tekst" type="text" id="ag-locatie" value="'+esc(a.locatie||'')+'" placeholder="Bijv. vergaderzaal, Teams">', {voor:'ag-locatie'});
+  b += lfRij(ICO.edit, 'Omschrijving', '<textarea class="lf-notitie" id="ag-omschr" rows="1" placeholder="Optioneel">'+esc(a.omschrijving||'')+'</textarea>', {blok:true, voor:'ag-omschr'});
+  b += '<div class="lf-groep lf-groep-knop"><span>Deelnemers · <b id="ag-deel-n">0</b></span><button type="button" class="lf-link" id="ag-deel-alle" onclick="_agDeelAlle()">Iedereen</button></div>';
+  b += '<div id="ag-deelnemers" role="group" aria-label="Deelnemers" onchange="_agDeelKnop()">'+medOpts+'</div>';
+  if(!isNew) b += '<button type="button" class="lf-verwijder" id="ag-modal-del">'+ICO.trash+' Afspraak verwijderen</button>';
 
-  var f = '<button class="btn btn-ghost" id="ag-modal-cancel">Annuleren</button>';
-  if(!isNew) f += '<button class="btn btn-ghost" id="ag-modal-del" style="color:var(--red-t)">'+ICO.trash+' Verwijderen</button>';
-  f += '<button class="btn btn-primary" id="ag-modal-save">Opslaan</button>';
-  openModal(isNew?'Afspraak toevoegen':'Afspraak bewerken', b, f);
+  lfOpen(isNew?'Afspraak toevoegen':'Afspraak bewerken', b, 'Opslaan', 'ag-modal-save');
   bindAutoGrow(document.getElementById('ag-omschr'));
+  _agDeelKnop();
 
   // Hele dag toggle
   var heeldagCb = document.getElementById('ag-heeldag');
   var tijdWrap  = document.getElementById('ag-tijd-wrap');
   heeldagCb.addEventListener('change', function(){
-    tijdWrap.style.display = heeldagCb.checked ? 'none' : 'grid';
+    tijdWrap.style.display = heeldagCb.checked ? 'none' : '';
   });
-  // Vrije dag = altijd hele dag
+  // Vrije dag = altijd hele dag; het icoon volgt het type
   document.getElementById('ag-type').addEventListener('change', function(){
-    if(document.getElementById('ag-type').value === 'vrije_dag') {
+    var k = document.getElementById('ag-type').value;
+    var ico = document.getElementById('ag-type').closest('.lf-kies').querySelector('.lf-ic');
+    if(ico) ico.innerHTML = _agTypeIco(k);
+    if(k === 'vrije_dag') {
       heeldagCb.checked = true;
       tijdWrap.style.display = 'none';
     }
   });
 
-  document.getElementById('ag-modal-cancel').addEventListener('click', closeModal);
   document.getElementById('ag-modal-save').addEventListener('click', function(){ saveAgenda(id); });
   if(!isNew) {
     document.getElementById('ag-modal-del').addEventListener('click', function(){
@@ -23692,7 +23695,9 @@ function _agDeelAlle(){
 function _agDeelKnop(){
   var vakjes = Array.prototype.slice.call(document.querySelectorAll('#ag-deelnemers input'));
   var k = document.getElementById('ag-deel-alle');
-  if(k) k.textContent = (vakjes.length && vakjes.every(function(v){ return v.checked; })) ? 'Niemand selecteren' : 'Iedereen selecteren';
+  if(k) k.textContent = (vakjes.length && vakjes.every(function(v){ return v.checked; })) ? 'Niemand' : 'Iedereen';
+  var n = document.getElementById('ag-deel-n');
+  if(n) n.textContent = vakjes.filter(function(v){ return v.checked; }).length;
 }
 function saveAgenda(id) {
   var isNew = !id;
