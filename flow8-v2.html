@@ -258,6 +258,9 @@ body .plan-tabel tbody tr:hover td{background:rgba(79,110,245,.09)}
 #login-kop h2{font:500 clamp(26px,2.4vw,38px)/1.05 'Inter Tight','Instrument Sans',sans-serif;letter-spacing:-.04em;color:#f4f6fb;text-wrap:balance}
 #login-kop p{margin-top:10px;color:#a8aec0;font-size:15px;max-width:34ch}
 @media (max-width:1100px),(max-height:720px){#login-kop{display:none}}
+/* Desktop: het blok iets onder het midden, zodat de lichtstraal er langer op valt (het versienummer eronder trok het omhoog) */
+@media (min-width:901px){#login-screen.login-3d-aan{padding-top:clamp(110px,18vh,220px)}}
+@media (min-width:901px) and (max-height:760px){#login-screen.login-3d-aan{padding-top:64px}}
 @media (max-width:900px){#login-screen.login-3d-aan{padding-top:76px}}
 @media (prefers-reduced-motion:reduce){#login-screen #login-form::before{animation:none}}
 @keyframes loginFlowArc{to{stroke-dashoffset:-100}}
