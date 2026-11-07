@@ -451,6 +451,93 @@ label.lf-rij{cursor:pointer}
 .lf-stappen span svg{width:14px;height:14px}
 .lf-stappen span.klaar{color:var(--green-t)}
 .lf-stappen span.aan{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.vt-kop{display:flex;align-items:center;gap:14px;margin:0 0 6px}
+.vt-kop .modal-close{width:36px;height:36px;border:0;border-radius:50%;background:var(--surface2);flex:none}
+.vt-titel{font-size:18px;font-weight:700}
+.vt-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.vt-meta{margin-top:12px}
+.vt-kolommen{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:start}
+.vt-toe{padding:0 14px}
+.vt-toe .lf-art{min-height:52px}
+.vt-toe .lf-art.uit{opacity:.5;cursor:default}
+.vt-links-kop{display:none}
+.vt-achter{display:none}
+.vt-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:8px;padding:0 14px}
+.vt-kaart.open{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,110,245,.12)}
+.vt-rij,.vt-sectie{display:grid;grid-template-columns:auto 36px minmax(0,1fr) auto;align-items:center;column-gap:10px;min-height:60px;padding:8px 0}
+.vt-rij{cursor:pointer}
+.vt-rij .lf-w,.vt-sectie .lf-w{display:flex;align-items:center;gap:4px}
+.vt-titel-v.leeg{color:var(--muted);font-style:italic}
+.vt-chev{display:inline-flex;color:var(--muted);transition:transform .2s}
+.vt-kaart.open .vt-chev{transform:rotate(90deg)}
+.vt-bewerk{display:none;border-top:1px solid var(--border);padding:2px 0 14px}
+.vt-kaart.open .vt-bewerk{display:block}
+.vt-bewerk .lf-rij{border-bottom:0;border-top:1px solid var(--border)}
+.vt-bewerk .lf-rij:first-child{border-top:0}
+.vt-bewerk .lf-rij:has(> .lf-w > .lf-tekst) .lf-tekst{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:8px 13px;text-align:left}
+.lf .lf-veld.vt-sel{width:auto!important;max-width:230px;padding-right:28px}
+.vt-sectie{background:rgba(79,110,245,.07);border:1px solid rgba(79,110,245,.22);border-radius:var(--radius-lg);margin-bottom:8px;padding:8px 14px}
+.vt-sectie .lf-ic{background:rgba(79,110,245,.14);color:var(--accent-t)}
+.vt-wis{width:30px;height:30px;border-radius:50%;border:0;background:none;color:var(--red-t);display:grid;place-items:center;cursor:pointer;padding:0}
+.vt-wis svg{width:16px;height:16px}
+.vt .sleep-greep{color:var(--muted2)}
+.vt-voet{position:sticky;bottom:0;display:flex;justify-content:flex-end;margin-top:18px;padding:14px 0 4px;background:var(--surface);border-top:1px solid var(--border)}
+.vt-voet .lf-knop{flex:0 0 auto;min-width:220px}
+@media(min-width:769px){
+  .vt-kolommen{grid-template-columns:300px minmax(0,1fr)}
+  .vt-links{position:sticky;top:0}
+  .vt-toevoeg-knop{display:none!important}
+}
+@media(max-width:768px){
+  .vt-alleen-breed{display:none}
+  .vt-voet .lf-knop{flex:1}
+  /* Het paneel heeft onderin 80px ruimte; een plakkende balk bleef daardoor zweven. Vast onderaan dus. */
+  .vt-voet{position:fixed;left:0;right:0;bottom:0;z-index:30;margin:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  /* Verplaatsen gaat op de telefoon met het greepje; de pijltjes nemen hier te veel ruimte in. */
+  .vt .lf-volgorde{display:none}
+  .vt-bewerk .lf-rij > .lf-l{white-space:nowrap}
+  .vt-bewerk .lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px minmax(0,1fr);row-gap:4px}
+  .vt-bewerk .lf-rij:has(> .lf-w > .lf-tekst) > .lf-ic{grid-row:1/3;align-self:center}
+  .vt-bewerk .lf-rij:has(> .lf-w > .lf-tekst) > .lf-l{font-size:12.5px;color:var(--muted);white-space:normal}
+  .vt-bewerk .lf-rij:has(> .lf-w > .lf-tekst) > .lf-w{grid-column:2}
+  .lf .lf-veld.vt-sel{max-width:58vw}
+  .vt-links{display:none;position:fixed;left:0;right:0;bottom:0;z-index:720;max-height:78vh;overflow-y:auto;background:var(--surface);border-radius:18px 18px 0 0;padding:8px 16px calc(20px + env(safe-area-inset-bottom))}
+  .vt-achter{position:fixed;inset:0;z-index:719;background:rgba(0,0,0,.45)}
+  .vt-toevoegen-open .vt-links,.vt-toevoegen-open .vt-achter{display:block}
+  .vt-links-kop{display:flex;align-items:center;justify-content:space-between;font-size:16px;font-weight:600;padding:6px 0 2px}
+  .vt-links-dicht{width:32px;height:32px;border-radius:50%;border:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
+  .vt-rij,.vt-sectie{grid-template-columns:auto 32px minmax(0,1fr) auto;column-gap:8px}
+}
+.wox-pagina .wo-kop{display:flex;align-items:center;gap:12px;margin:-8px -4px 4px}
+.wo-titel{flex:1;min-width:0;font-size:18px;font-weight:600}
+.wo-titel span{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.wo-subkop{font-size:14px;font-weight:600;margin:0 0 12px}
+.wo-subkop.voorraad{font-style:italic;color:var(--muted);font-weight:500}
+.wo-nav-klant{display:none;font-size:15px;font-weight:600;margin:2px 0 10px}
+.wbx-md .wo-nav-klant{display:block}
+.wo-status{position:relative;display:flex;align-items:center;gap:10px;padding:12px 14px;margin:0 0 14px;border-radius:var(--radius-lg);background:var(--surface2);border:1px solid var(--border)}
+.wo-status > div{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.wo-status-lbl{font:700 10.5px 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wo-tag{align-self:flex-start;font-size:13px;font-weight:600;padding:4px 11px;border-radius:var(--radius-pill);color:var(--k);background:color-mix(in srgb,var(--k) 16%,transparent)}
+.wo-opgeslagen{font-size:12px;color:var(--green-t)}
+.wo-opgeslagen:empty{display:none}
+.wo-status-knop{flex:none;display:inline-flex;align-items:center;gap:4px;height:36px;padding:0 12px 0 14px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);color:var(--text);font:600 13px 'Instrument Sans',sans-serif;cursor:pointer}
+.wo-status-knop svg{width:14px;height:14px}
+.wo-beheer{margin-top:14px;padding-top:6px;border-top:1px solid var(--border)}
+.wo-beheer .wox-prio{border-top:0}
+.wo-beheer .wox-prio.hoog{color:var(--red-t)}
+.wo-beheer .wox-prio svg{background:rgba(79,110,245,.14)}
+.wo-beheer .wox-prio.hoog svg{background:rgba(239,68,68,.14)}
+.wo-link{color:var(--accent-t);text-decoration:none;word-break:break-all}
+.wo-klaar{background:rgba(16,185,129,.16)!important;color:var(--green-t)!important}
+.wo-alinea{font-size:13px;color:var(--muted);margin:4px 0 12px;white-space:pre-wrap;line-height:1.45}
+.wo-velden + .wo-velden > .wbx-cl-veld:first-child{border-top:1px solid var(--border)}
+.wo-sub{font:700 10.5px 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)}
+.wo-afronding{margin-top:6px}
+.wo-afgerond{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--green-t);font-weight:600}
+.wo-kaal{background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;padding:12px 14px;min-height:44px}
+/* Secties (foto's, uren, materialen, ...) krijgen dezelfde kopjes als de rest van de pagina */
+.wox-pagina .wox-sectie > div:first-child{font:700 10.5px 'Space Mono',monospace!important;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
 .lf-wis:hover{background:var(--red);color:#fff}
@@ -3422,7 +3509,10 @@ function _magWerkbonBewerken(wb) {
 // Activeert de master-detail layout van de werkbon op brede schermen.
 // De accordion-secties blijven intact (met hun bind-handlers); we bouwen er een
 // navigatiekolom omheen en tonen telkens één sectie rechts.
-function _wbActiveerMasterDetail(rootEl){
+// opts (optioneel): { label (titel bovenin, standaard 'Werkbon'), start (index van het eerste
+// onderdeel), opWissel(idx, sectie) } — gebruikt door de werkorderpagina.
+function _wbActiveerMasterDetail(rootEl, opts){
+  opts = opts || {};
   var fullscreen = !!rootEl;
   var panel = rootEl || document.getElementById('panel');
   if(!panel) return;
@@ -3471,7 +3561,7 @@ function _wbActiveerMasterDetail(rootEl){
     if(kopEl){ var _bn = kopEl.querySelector('span'); if(_bn) bonNr = _bn.textContent||''; }
     var terugRij = document.createElement('div');
     terugRij.className = 'wbx-md-terug';
-    terugRij.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Werkbon <span class="wbx-md-bonnr">'+esc(bonNr)+'</span>';
+    terugRij.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> '+esc(opts.label||'Werkbon')+' <span class="wbx-md-bonnr">'+esc(bonNr)+'</span>';
     terugRij.addEventListener('click', function(){ if(terugBtn) terugBtn.click(); });
     navTop.appendChild(terugRij);
     // Timer in de nav-top
@@ -3536,11 +3626,12 @@ function _wbActiveerMasterDetail(rootEl){
     }
     var db = detailWrap ? detailWrap.querySelector('.wbx-md-detailbody') : null;
     if(db) db.scrollTop = 0;
+    if(opts.opWissel) opts.opWissel(idx, secties[idx]);
   }
 
   function pasToe(){
     if(isBreed()){
-      var actIdx = 0;
+      var actIdx = navList ? 0 : Math.max(0, Math.min(opts.start||0, secties.length-1));
       if(navList){ Array.prototype.forEach.call(navList.children, function(it,i){ if(it.classList.contains('actief')) actIdx=i; }); }
       panel.classList.add('wbx-md');
       if(kopEl) kopEl.style.display = 'none'; // eigen kop verbergen; nav-top vervangt 'm
@@ -37661,137 +37752,181 @@ function _woRenderDetail(){
   var heeftBlokken = st.blokken && st.blokken.length;
 
   // Scrollpositie bewaren zodat de weergave niet naar boven springt bij her-render
-  var _oudeScroll = 0;
-  var _oudeBody = document.querySelector('.wox-body');
-  if(_oudeBody) _oudeScroll = _oudeBody.scrollTop;
+  var _scrollVlak = function(){ return document.querySelector('#wb-fullscreen.open .wbx-md-detailbody') || (document.querySelector('#panel .wox-pagina') ? document.getElementById('panel') : null); };
+  var _oudVlak = document.querySelector('.wox-pagina') ? _scrollVlak() : null;
+  var _oudeScroll = _oudVlak ? _oudVlak.scrollTop : 0;
 
   // Status-naam + kleur
   var statusObj = type && Array.isArray(type.statussen) ? type.statussen.find(function(s){ return s.key===wo.status; }) : null;
-  var statusNaam = statusObj ? statusObj.naam : (wo.status||'—');
+  var statusNaam = statusObj ? statusObj.naam : (wo.status||'\u2014');
   var statusKl = statusObj ? statusObj.kleur : 'muted';
 
   var fs = document.getElementById('wb-fullscreen');
   var gebruikFs = fs && window.innerWidth >= 900;
-
-  var h = '';
-  // Kop
-  h += '<div class="wox-kop" style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border)">';
-  h += '<button id="wox-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:10px;margin:-10px 0 -10px -10px;display:flex" title="Terug" aria-label="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
-  // Zelfde opzet als de werkbon-kop: typenaam groot, nummer klein en gedempt ernaast.
-  // Geen ellipsis op de titel — een lange typenaam mag afbreken, niet wegvallen.
+  var kanBeheren = isAdmin() || magBeheren('werkorders');
+  var dis = st.bewerkbaar ? '' : ' disabled';
+  var secties = (wo.secties || (type&&type.secties) || {});
   var _kopKlant = (typeof _woKlantKort==='function') ? _woKlantKort(wo) : '';
-  h += '<div style="flex:1;min-width:0">';
-  h += '<div style="font-size:18px;font-weight:800;font-family:\'Instrument Sans\',sans-serif;line-height:1.15">'
-     + esc(wo.typeNaam||'Werkorder')
-     + ' <span style="display:inline-block;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap">'+esc(_woNummerLabel(wo))+'</span></div>';
-  if(_kopKlant) h += '<div style="font-size:12.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'+((wo&&wo.tbvVoorraad)?';font-style:italic':'')+'">'+esc(_kopKlant)+'</div>';
-  h += '</div>';
-  // Status met de opslagmelding eronder: geen vaste ruimte meer die de titel verdringt.
-  h += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">';
-  h += '<span class="tag tag-'+esc(statusKl)+'" style="font-size:12px">'+esc(statusNaam)+'</span>';
-  h += '<span id="wox-save-status" style="font-size:12px;color:var(--green-t);text-align:right;transition:opacity .2s"></span>';
-  h += '</div>';
-  h += '</div>';
+  var _blokKlaar = function(bl){ var a = st.antwoorden['blok_'+bl.key]; return !!(a && a._afgerond); };
 
-  // Body
-  // Op mobiel scrollt het paneel zelf; een tweede scrollend vlak eronder geeft een
-  // dubbele scrollbalk en een klemmend gevoel. Alleen fullscreen scrollt de body.
-  h += '<div class="wox-body" style="'+(gebruikFs?'flex:1;overflow-y:auto;padding:18px 20px;':'padding:14px 16px 24px;')+'max-width:820px;margin:0 auto;width:100%">';
+  // Welke onderdelen op een telefoon open staan; de eerste nog niet afgeronde fase begint open.
+  if(!st.openSec){
+    st.openSec = { info: !heeftBlokken, velden: true };
+    if(heeftBlokken){ var _eerste = st.blokken.find(function(bl){ return !_blokKlaar(bl); }); if(_eerste) st.openSec['blok_'+_eerste.key] = true; }
+  }
+  var _secKeys = [];
+  var _sec = function(key, ico, naam, badge, body){
+    _secKeys.push(key);
+    var open = !!st.openSec[key];
+    return '<div class="wbx-sec'+(open?' open':'')+'" data-sec="'+esc(key)+'">'
+      + '<div class="wbx-hdr" role="button" tabindex="0" aria-expanded="'+open+'" onclick="_wbSecToggle(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();_wbSecToggle(this)}">'
+      + '<span class="wbx-ico"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">'+ico+'</svg></span>'
+      + '<span class="wbx-naam">'+naam+'</span>'+(badge||'')
+      + '<span class="wbx-chev"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></div>'
+      + '<div class="wbx-body pt">'+body+'</div></div>';
+  };
+  var _rij = function(k, v){ return '<div class="wbx-row"><span class="wbx-k">'+k+'</span><span class="wbx-v">'+v+'</span></div>'; };
+  var I_INFO = '<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>';
+  var I_KLANT = '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>';
+  var I_MAP = '<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>';
+  var I_VELDEN = '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>';
+  var I_NR = function(n){ return '<text x="12" y="18.5" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor" stroke="none" font-family="Space Mono, monospace">'+n+'</text>'; };
+  var I_KLAAR = '<path d="M20 6 9 17l-5-5"/>';
 
-  // Infoblok
-  h += _woInfoblokHtml(wo, type);
+  var h = '<div class="wox-pagina">';
+  // Kop (op brede schermen vervangen door de navigatiekolom)
+  h += '<div id="wb-kop" class="wo-kop"><button type="button" id="wb-terug" class="wbx-terug" title="Terug" aria-label="Terug"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>'
+     + '<div class="wo-titel">'+esc(wo.typeNaam||'Werkorder')+' <span>'+esc(_woNummerLabel(wo))+'</span></div></div>';
+  h += '<div class="wo-subkop'+((wo&&wo.tbvVoorraad)?' voorraad':'')+'">'+esc(_kopKlant||'')+'</div>';
 
-  // Werkdocumenten: centrale documentenmap, raadpleegbaar zonder de werkorder te verlaten.
-  // Inhoud wordt pas geladen bij het openen van de accordion (scheelt reads).
-  h += '<div class="wox-sectie" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px">';
-  h += '<div id="wox-wd-kop" role="button" tabindex="0" aria-expanded="false" style="display:flex;align-items:center;gap:10px;padding:13px 15px;min-height:48px;cursor:pointer;user-select:none">';
-  h += '<span style="color:var(--accent);display:flex"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span>';
-  h += '<div style="font-size:14px;font-weight:700;flex:1">Werkdocumenten</div>';
-  h += '<svg id="wox-wd-pijl" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color:var(--muted);transition:transform .2s"><path d="M6 9l6 6 6-6"/></svg>';
-  h += '</div>';
-  h += '<div id="wox-wd-body" style="display:none;border-top:1px solid var(--border);padding:10px 12px"></div>';
-  h += '</div>';
+  // Status (staat op brede schermen bovenin de navigatiekolom)
+  var _opties = [];
+  if(kanBeheren && st.bewerkbaar && type && Array.isArray(type.statussen) && type.statussen.length){
+    if(statusObj && Array.isArray(statusObj.naar) && statusObj.naar.length){
+      statusObj.naar.forEach(function(k){ var x = type.statussen.find(function(z){ return z.key===k; }); if(x) _opties.push(x); });
+    } else {
+      _opties = type.statussen.filter(function(x){ return x.key!==wo.status; });
+    }
+  }
+  h += '<div id="wb-timer-slot"><div class="wo-nav-klant">'+esc(_kopKlant||'')+'</div>';
+  h += '<div class="wo-status"><div><span class="wo-status-lbl">Status</span><span class="wo-tag" style="--k:'+_woStatusKleurC(statusKl)+'">'+esc(statusNaam)+'</span></div>'
+     + '<span id="wox-save-status" class="wo-opgeslagen"></span>'
+     + (_opties.length ? '<button type="button" class="wo-status-knop wox-status-wissel">Wijzigen '+_LF_CHEV+'</button><select class="lf-sel wox-status-sel" tabindex="-1" aria-hidden="true">'
+       + _opties.map(function(x){ return '<option value="'+esc(x.key)+'">'+esc(x.naam)+'</option>'; }).join('')+'</select>' : '')
+     + '</div></div>';
 
-  // Status wijzigen (volgens workflow-regels)
-  h += _woStatusWisselHtml(wo, type, statusObj);
+  h += '<div class="wbx-secties">';
+  // Informatie
+  if(secties.infoblok !== false){
+    var _datum = '';
+    if(wo.aangemaaktOp && wo.aangemaaktOp.toDate){ try { _datum = fmtD(wo.aangemaaktOp.toDate().toISOString().slice(0,10)); } catch(e){} }
+    var info = _rij('Nummer', esc(_woNummerLabel(wo)))
+      + _rij('Aangemaakt', esc([_datum, wo.aangemaaktDoor && wo.aangemaaktDoor.naam].filter(Boolean).join(' \u00b7 ') || '\u2014'))
+      + '<div class="wbx-row"><span class="wbx-k">Deadline</span><span class="wbx-v"><input type="date" class="lf-veld wox-deadline" value="'+esc(wo.deadline||'')+'"'+dis+'></span></div>'
+      + '<div class="wbx-field-lbl">Details</div><textarea class="wbx-field area wox-details" placeholder="Omschrijving van de werkzaamheden"'+dis+'>'+esc(wo.details||'')+'</textarea>';
+    if(kanBeheren){
+      var _isHoog = wo.prioriteit==='hoog';
+      info += '<div class="wo-beheer"><button type="button" class="wbx-chip-add wox-prio'+(_isHoog?' hoog':'')+'">'+ICO.flag+(_isHoog?'Hoge prioriteit uitzetten':'Markeren als hoge prioriteit')+'</button>'
+        + '<button type="button" class="lf-verwijder wox-verwijder">'+ICO.trash+' Werkorder verwijderen</button></div>';
+    }
+    h += _sec('info', I_INFO, 'Informatie', '', info);
+  }
+  // Klant
+  if(wo.tbvVoorraad){
+    h += _sec('klant', I_KLANT, 'Klant', '', _rij('Klant', '<i>T.b.v. voorraad</i>'));
+  } else if(wo.debId || wo.klantnaam){
+    var deb = wo.debId ? (APP.debiteuren||[]).find(function(d){ return String(d.id)===String(wo.debId); }) : null;
+    var kn = wo.klantnaam || (deb&&deb.naam) || (typeof debNaam==='function' ? debNaam(wo.debId) : '') || '';
+    var kl = _rij('Naam', esc(kn||'\u2014'));
+    if(deb){
+      if(deb.contactpersoon) kl += _rij('Contact', esc(deb.contactpersoon));
+      var _adres = [deb.adres, [deb.postcode, deb.plaats].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+      if(_adres) kl += _rij('Adres', esc(_adres));
+      if(deb.email) kl += _rij('E-mail', '<a href="mailto:'+esc(deb.email)+'" class="wo-link">'+esc(deb.email)+'</a>');
+      var _snel = '';
+      var _navQ = encodeURIComponent([deb.adres, deb.postcode, deb.plaats].filter(Boolean).join(' '));
+      if(_navQ) _snel += '<a href="https://www.google.com/maps/dir/?api=1&destination='+_navQ+'" target="_blank" rel="noopener"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>Route</a>';
+      if(deb.telefoon) _snel += '<a href="tel:'+esc(String(deb.telefoon).replace(/\s/g,''))+'">'+_LF_TEL+'Bellen</a>';
+      if(_snel) kl += '<div class="wbx-snel">'+_snel+'</div>';
+    }
+    h += _sec('klant', I_KLANT, 'Klant', '', kl);
+  }
+  // Werkdocumenten: centrale documentenmap. Inhoud wordt pas geladen bij het openen (scheelt reads).
+  h += _sec('werkdocumenten', I_MAP, 'Werkdocumenten', '', '<div id="wox-wd-body"></div>');
 
   if(heeftBlokken){
-    // Gefaseerd: blokken als accordions
+    // Gefaseerd: elke fase een eigen onderdeel
     st.blokken.forEach(function(bl, bi){
-      h += _woBlokAccordionHtml(bl, bi);
+      var klaar = _blokKlaar(bl);
+      h += _sec('blok_'+bl.key, klaar ? I_KLAAR : I_NR(bi+1), esc(bl.naam||'Blok'), klaar ? '<span class="wbx-cnt-badge wo-klaar">Klaar</span>' : '', _woBlokInhoudHtml(bl, bi));
     });
   } else {
     // Simpel: één set velden
-    h += '<div style="margin-top:16px">';
-    h += _woOpbouwInvulHtml(st.velden, (wo.secties || (type&&type.secties) || {}), 'v', st.antwoorden);
-    h += '</div>';
-
+    var vb = _woOpbouwInvulHtml(st.velden, (wo.secties || (type&&type.secties) || {}), 'v', st.antwoorden);
     // Afronding op werkorder-niveau (handtekening + mail), gestuurd door Weergave-opties
     var _tSec = (type && type.secties) || {};
     if(_tSec.handtekening || _tSec.mail){
       var sAntw = st.antwoorden;
       var sAfgerond = sAntw._afgerond;
       var sHtk = sAntw._handtekening;
-      h += '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">';
-      h += '<div style="font-size:13px;font-weight:700;margin-bottom:10px">Afronding</div>';
-      // ── Werkbon-stijl: signstatus-vlak, 'afronden zonder versturen', [Handtekening][Versturen] ──
+      vb += '<div class="wo-afronding"><div class="wo-sub">Afronding</div>';
       if(_tSec.handtekening){
-        h += '<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Handtekening klant</div>';
-        h += '<div style="margin-bottom:14px">'+_wbSignStatusHtml(!!sHtk, sHtk)+'</div>';
+        vb += '<div style="margin-bottom:14px">'+_wbSignStatusHtml(!!sHtk, sHtk)+'</div>';
       }
       if(sAfgerond){
         var sAfrTijd = sAntw._afgerondOp ? fmtD(new Date(sAntw._afgerondOp).toISOString().slice(0,10)) : '';
-        h += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--green-t);font-weight:600"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Afgerond'+(sAfrTijd?(' op '+esc(sAfrTijd)):'')+'</div>';
-        if(isAdmin() || magBeheren('werkorders')) h += '<button type="button" class="btn btn-ghost btn-sm wox-simpel-heropen" style="margin-top:6px;font-size:11px">Heropenen</button>';
-      } else if(_woDetailState.bewerkbaar){
+        vb += '<div class="wo-afgerond"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Afgerond'+(sAfrTijd?(' op '+esc(sAfrTijd)):'')+'</div>';
+        if(kanBeheren) vb += '<button type="button" class="btn btn-ghost btn-sm wox-simpel-heropen" style="margin-top:6px">Heropenen</button>';
+      } else if(st.bewerkbaar){
         if(_tSec.mail){
-          h += '<div style="text-align:center;margin:2px 0"><button type="button" class="wox-simpel-afrondkaal" style="background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;padding:12px 14px;min-height:44px">Afronden zonder versturen</button></div>';
+          vb += '<div style="text-align:center;margin:2px 0"><button type="button" class="wox-simpel-afrondkaal wo-kaal">Afronden zonder versturen</button></div>';
         }
-        h += '<div style="display:flex;gap:10px;margin-top:8px">';
-        if(_tSec.handtekening){
-          h += '<button type="button" class="btn btn-ghost wox-afrond-btn wox-simpel-htk" style="flex:1">Handtekening</button>';
-        }
-        h += '<button type="button" class="btn btn-primary wox-afrond-btn wox-simpel-afrond" style="flex:1">'+(_tSec.mail?'Versturen':'Afronden')+'</button>';
-        h += '</div>';
+        vb += '<div style="display:flex;gap:10px;margin-top:8px">';
+        if(_tSec.handtekening) vb += '<button type="button" class="btn btn-ghost wox-afrond-btn wox-simpel-htk" style="flex:1">Handtekening</button>';
+        vb += '<button type="button" class="btn btn-primary wox-afrond-btn wox-simpel-afrond" style="flex:1">'+(_tSec.mail?'Versturen':'Afronden')+'</button>';
+        vb += '</div>';
       }
-      h += '</div>';
+      vb += '</div>';
     }
+    h += _sec('velden', I_VELDEN, 'Invullen', '', vb);
   }
+  h += '</div>';   // wbx-secties
 
-  // Volledige PDF-knop + verwijderen
-  h += '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:center;gap:10px;flex-wrap:wrap">';
-  h += '<button type="button" class="btn btn-ghost wox-pdf-volledig"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg><span style="vertical-align:middle">Volledige PDF</span></button>';
-  var _kanBeheren = isAdmin() || magBeheren('werkorders');
-  if(_kanBeheren){
-    var _isHoog = wo.prioriteit==='hoog';
-    h += '<button type="button" class="btn btn-ghost wox-prio" style="'+(_isHoog?'color:var(--red);border-color:rgba(239,68,68,.4)':'')+'">'+ICO.flag+'<span style="vertical-align:middle;margin-left:5px">'+(_isHoog?'Hoge prioriteit':'Prioriteit')+'</span></button>';
+  // Onderaan (op brede schermen onderin de navigatiekolom): de volledige PDF
+  h += '<div class="wbx-actiebar"><button type="button" class="btn btn-ghost wox-pdf-volledig"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg> PDF van de werkorder</button></div>';
+  h += '</div>';   // wox-pagina
+
+  // Op een breed scherm begint de pagina bij de eerste fase die nog open staat.
+  if(st.mdIdx === undefined){
+    var _start = 0;
+    if(heeftBlokken){ var _open = st.blokken.find(function(bl){ return !_blokKlaar(bl); }); if(_open) _start = Math.max(0, _secKeys.indexOf('blok_'+_open.key)); }
+    st.mdIdx = _start;
   }
-  if(_kanBeheren) h += '<button type="button" class="btn btn-ghost wox-verwijder" style="color:var(--red)">'+ICO.trash+'<span style="vertical-align:middle;margin-left:5px">Verwijderen</span></button>';
-  h += '</div>';
-
-  h += '</div>';
 
   if(gebruikFs){
     fs.innerHTML = '<div class="wbx-fs-inner">'+h+'</div>';
     fs.classList.add('open');
     document.body.style.overflow = 'hidden';
     _woBindDetail(true);
+    _wbActiveerMasterDetail(fs, { label: wo.typeNaam||'Werkorder', start: st.mdIdx, opWissel: function(i, sec){
+      st.mdIdx = i;
+      if(sec && sec.getAttribute('data-sec')==='werkdocumenten' && st._wdVul) st._wdVul();
+    }});
   } else {
     // Eigen kop met terugknop staat al in h; de paneelkop erboven zou een tweede
     // titelbalk met sluitknop opleveren. Zelfde aanpak als de werkbon.
-    openPanel('Werkorder \u2014 '+((typeof _woKlantKort==='function' ? _woKlantKort(wo) : '')||''), h);
+    openPanel('Werkorder \u2014 '+(_kopKlant||''), h);
     var _wph = document.querySelector('#panel .panel-header');
     if(_wph) _wph.style.display = 'none';
     _woBindDetail(false);
   }
+  _lfBindKies(gebruikFs ? fs : document.getElementById('panel'));
   // Scrollpositie herstellen
-  if(_oudeScroll){
-    var _nieuweBody = document.querySelector('.wox-body');
-    if(_nieuweBody) _nieuweBody.scrollTop = _oudeScroll;
-  }
+  if(_oudeScroll){ var _nwVlak = _scrollVlak(); if(_nwVlak) _nwVlak.scrollTop = _oudeScroll; }
 }
 
 // Infoblok: nummer, aangemaakt door/op, deadline, toegewezen
+// Niet meer gebruikt door de pagina zelf (zie _woRenderDetail); blijft staan voor eventuele andere aanroepen.
 function _woInfoblokHtml(wo, type){
   var secties = (wo.secties || (type&&type.secties) || {});
   // Infoblok alleen tonen als 'infoblok' aan staat (default aan)
@@ -37878,41 +38013,22 @@ function _woKlantKort(wo){
   return wo.klantnaam || (deb&&deb.naam) || (typeof debNaam==='function' ? debNaam(wo.debId) : '') || '';
 }
 
-function _woBlokAccordionHtml(bl, bi){
+function _woBlokInhoudHtml(bl, bi){
   var st = _woDetailState;
-  var open = st.openBlok===bi;
   // Echte referentie naar het blok-antwoord-object (aangemaakt indien nodig),
   // zodat toevoegingen (foto's/uren/materialen) en render dezelfde data delen.
   var skey = 'blok_'+bl.key;
   st.antwoorden[skey] = st.antwoorden[skey] || {};
   var antw = st.antwoorden[skey];
-  var aantalVeld = Array.isArray(bl.velden)?bl.velden.length:0;
-  var h = '<div class="wox-blok card" style="padding:0;margin-bottom:10px;overflow:hidden">';
-  h += '<div class="wox-blok-hdr" data-bi="'+bi+'" role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'" style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none">';
-  h += '<span style="width:26px;height:26px;border-radius:8px;background:var(--accent-knop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">'+(bi+1)+'</span>';
-  h += '<span style="flex:1;font-weight:700;font-size:14px">'+esc(bl.naam||'Blok')+'</span>';
-  h += '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="transform:rotate('+(open?'180':'0')+'deg);transition:transform .15s;flex-shrink:0"><path d="M6 9l6 6 6-6"/></svg>';
-  h += '</div>';
-  h += '<div class="wox-blok-body" data-bi="'+bi+'" style="padding:'+(open?'4px 16px 16px':'0 16px')+';border-top:'+(open?'1px solid var(--border)':'none')+';max-height:'+(open?'none':'0')+';overflow:hidden;display:'+(open?'block':'none')+'">';
-  if(open){
-    // Klant bovenaan het blok: bij een lange werkorder scrollt de infokaart uit beeld,
-    // en dan moet nog steeds duidelijk zijn voor wie dit werk is.
-    var _kk = _woKlantKort(st.wo);
-    if(_kk){
-      var _vrd = !!(st.wo && st.wo.tbvVoorraad);
-      h += '<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;margin:6px 0 12px;'
-        + 'background:var(--surface2);border-radius:7px;font-size:12.5px;'
-        + (_vrd ? 'color:var(--muted);font-style:italic">' : 'font-weight:600">')
-        + '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0;opacity:.6"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5"/></svg>'
-        + esc(_kk) + '</div>';
-    }
+  var h = '';
+  {
     // Velden + secties van dit blok in de opbouw-volgorde
     h += _woOpbouwInvulHtml(bl.velden||[], bl.secties||{}, 'blok_'+bl.key, antw);
     // Afronding (handtekening + mail per blok)
     if(bl.afronding && (bl.afronding.handtekening || bl.afronding.mail)){
       var afgerond = antw._afgerond;
       var htkData = antw._handtekening;
-      h += '<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">';
+      h += '<div class="wo-afronding"><div class="wo-sub">Afronding</div>';
       // Handtekening
       if(bl.afronding.handtekening){
         h += '<div style="margin-bottom:10px">';
@@ -37939,49 +38055,49 @@ function _woBlokAccordionHtml(bl, bi){
       h += '</div>';
     }
   }
-  h += '</div></div>';
   return h;
 }
 
 // Dynamische veld-invulling (eigen renderer, los van checklist-code)
 function _woVeldenInvulHtml(velden, antwoorden, scope){
-  if(!velden || !velden.length) return '<div style="font-size:12px;color:var(--muted);padding:6px 0">Geen velden.</div>';
+  if(!velden || !velden.length) return '<p class="lf-leeg">Geen velden.</p>';
   var dis = _woDetailState.bewerkbaar ? '' : ' disabled';
-  var h = '';
-  velden.forEach(function(v, vi){
+  // Zelfde rijen als de checklists op de werkbon: kort antwoord rechts, lang antwoord eronder.
+  var h = '<div class="lf wo-velden">';
+  velden.forEach(function(v){
     var waarde = antwoorden[v.id];
-    // Zelfde uitstraling als de sectiekoppen op de PDF: accentkleur, groter, met lijn.
-    if(v.type==='header'){ h += '<div style="font-weight:700;font-size:15px;color:var(--accent-t);margin:'+(vi===0?'2px':'20px')+' 0 10px;padding-bottom:5px;border-bottom:1px solid var(--border)">'+esc(v.label||'')+'</div>'; return; }
-    if(v.type==='paragraaf'){ h += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;white-space:pre-wrap">'+esc(v.label||'')+'</div>'; return; }
+    if(v.type==='header'){ h += '<div class="wbx-cl-kop">'+esc(v.label||'')+'</div>'; return; }
+    if(v.type==='paragraaf'){ h += '<div class="wo-alinea">'+esc(v.label||'')+'</div>'; return; }
     if(v.type==='paginaeinde'){ return; }
-    h += '<div style="margin-bottom:14px">';
-    h += '<div style="font-size:12px;font-weight:600;margin-bottom:6px">'+esc(v.label||'')+(v.verplicht?' <span style="color:var(--red-t)">*</span>':'')+'</div>';
-    var a = 'class="wox-veld" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'"';
+    var lbl = '<span class="wbx-cl-lbl">'+esc(v.label||'')+(v.verplicht?'<span class="lf-req" aria-hidden="true">*</span>':'')+'</span>';
+    var at = function(cls){ return 'class="'+cls+' wox-veld" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'"'; };
+    var naamRadio = 'wox-'+esc(scope)+'-'+esc(v.id);
     if(v.type==='tekst_kort'){
-      h += '<input type="text" '+a+' value="'+esc(waarde||'')+'"'+dis+' style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text)">';
+      h += '<div class="wbx-cl-veld wbx-cl-blok">'+lbl+'<input type="text" '+at('lf-notitie')+' value="'+esc(waarde||'')+'"'+dis+'></div>';
     } else if(v.type==='tekst_lang'){
-      h += '<textarea '+a+' rows="3"'+dis+' style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical">'+esc(waarde||'')+'</textarea>';
+      h += '<div class="wbx-cl-veld wbx-cl-blok">'+lbl+'<textarea '+at('lf-notitie')+' rows="3"'+dis+'>'+esc(waarde||'')+'</textarea></div>';
     } else if(v.type==='numeriek'){
-      h += '<div style="display:flex;align-items:center;gap:8px"><input type="number" '+a+' value="'+esc(waarde!=null?waarde:'')+'"'+dis+' style="max-width:160px;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text)">'+(v.eenheid?('<span style="font-size:12px;color:var(--muted)">'+esc(v.eenheid)+'</span>'):'')+'</div>';
+      h += '<div class="wbx-cl-veld wbx-cl-rij">'+lbl+'<span class="wbx-cl-w"><input type="number" inputmode="decimal" '+at('lf-veld lf-kort')+' value="'+esc(waarde!=null?waarde:'')+'"'+dis+'>'+(v.eenheid?esc(v.eenheid):'')+'</span></div>';
     } else if(v.type==='dropdown'){
-      h += '<select '+a+dis+' style="width:100%;max-width:320px;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text)"><option value="">\u2014 kies \u2014</option>';
-      (v.opties||[]).forEach(function(o){ h += '<option value="'+esc(o)+'"'+(waarde===o?' selected':'')+'>'+esc(o)+'</option>'; });
-      h += '</select>';
+      h += '<div class="wbx-cl-veld wbx-cl-rij lf-kies" role="button" tabindex="0" data-lf-titel="'+esc(v.label||'Kies')+'">'+lbl+'<span class="lf-w"><span class="lf-kw"></span>'+_LF_CHEV+'</span>'
+        + '<select '+at('lf-sel')+' tabindex="-1" aria-hidden="true"'+dis+'><option value="">Kies</option>'
+        + (v.opties||[]).map(function(o){ return '<option value="'+esc(o)+'"'+(waarde===o?' selected':'')+'>'+esc(o)+'</option>'; }).join('')+'</select></div>';
     } else if(v.type==='radio'){
-      (v.opties||[]).forEach(function(o){ h += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer"><input type="radio" name="wox-'+esc(scope)+'-'+esc(v.id)+'" class="wox-veld-radio" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'" value="'+esc(o)+'"'+(waarde===o?' checked':'')+dis+'><span style="font-size:13px">'+esc(o)+'</span></label>'; });
+      h += '<div class="wbx-cl-veld wbx-cl-blok">'+lbl+(v.opties||[]).map(function(o){
+        return '<label class="wbx-cl-opt"><span>'+esc(o)+'</span><input type="radio" name="'+naamRadio+'" class="wox-veld-radio" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'" value="'+esc(o)+'"'+(waarde===o?' checked':'')+dis+'></label>';
+      }).join('')+'</div>';
     } else if(v.type==='checkbox'){
       var sel = Array.isArray(waarde)?waarde:[];
-      (v.opties||[]).forEach(function(o){ h += '<label style="display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer"><input type="checkbox" class="wox-veld-check" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'" value="'+esc(o)+'"'+(sel.indexOf(o)>=0?' checked':'')+dis+'><span style="font-size:13px">'+esc(o)+'</span></label>'; });
-    } else if(v.type==='datum'){
-      h += '<input type="date" '+a+' value="'+esc(waarde||'')+'"'+dis+' style="max-width:200px;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text)">';
-    } else if(v.type==='tijd'){
-      h += '<input type="time" '+a+' value="'+esc(waarde||'')+'"'+dis+' style="max-width:160px;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;color:var(--text)">';
+      h += '<div class="wbx-cl-veld wbx-cl-blok">'+lbl+(v.opties||[]).map(function(o){
+        return '<label class="wbx-cl-opt"><span>'+esc(o)+'</span><span class="lf-sw"><input type="checkbox" class="wox-veld-check" data-scope="'+esc(scope)+'" data-id="'+esc(v.id)+'" value="'+esc(o)+'"'+(sel.indexOf(o)>=0?' checked':'')+dis+'><i></i></span></label>';
+      }).join('')+'</div>';
+    } else if(v.type==='datum' || v.type==='tijd'){
+      h += '<div class="wbx-cl-veld wbx-cl-rij">'+lbl+'<span class="wbx-cl-w"><input type="'+(v.type==='datum'?'date':'time')+'" '+at('lf-veld')+' value="'+esc(waarde||'')+'"'+dis+'></span></div>';
     } else if(v.type==='foto' || v.type==='tabel'){
-      h += '<div style="font-size:11px;color:var(--muted);font-style:italic">'+(v.type==='foto'?'Foto\'s':'Tabel')+' — wordt in de volgende stap toegevoegd</div>';
+      h += '<div class="wbx-cl-veld wbx-cl-blok">'+lbl+'<span class="lf-hint">'+(v.type==='foto'?'Foto\'s':'Tabel')+' \u2014 wordt in de volgende stap toegevoegd</span></div>';
     }
-    h += '</div>';
   });
-  return h;
+  return h + '</div>';
 }
 
 // ── Secties in een blok (of simpel type): foto's, uren, materialen ──
@@ -38472,32 +38588,19 @@ function _woBindDetail(fullscreen){
   if(!root) return;
 
   // Terug
-  var terug = root.querySelector('#wox-terug');
+  var terug = root.querySelector('#wox-terug, #wb-terug');
   if(terug) terug.addEventListener('click', function(){ _woSluitDetail(); });
 
-  // Werkdocumenten-accordion: openen/sluiten, inhoud lazy laden bij eerste opening
-  var wdKop = root.querySelector('#wox-wd-kop');
-  if(wdKop) wdKop.addEventListener('click', function(){
-    var body = root.querySelector('#wox-wd-body');
-    var pijl = root.querySelector('#wox-wd-pijl');
-    if(!body) return;
-    var open = body.style.display !== 'none';
-    body.style.display = open ? 'none' : 'block';
-    wdKop.setAttribute('aria-expanded', open ? 'false' : 'true');
-    if(pijl) pijl.style.transform = open ? '' : 'rotate(180deg)';
-    if(!open && !body._gevuld){ body._gevuld = true; _woWdAccordionVul(body); }
-  });
-
-  // Blok accordion toggle
-  root.querySelectorAll('.wox-blok-hdr').forEach(function(hdr){
-    hdr.addEventListener('click', function(){
-      var bi = +hdr.dataset.bi;
-      var hadFocus = document.activeElement === hdr;
-      st.openBlok = (st.openBlok===bi) ? -1 : bi;
-      _woRenderDetail();
-      // Na het herbouwen de focus terug op dezelfde kop, anders ben je met het toetsenbord je plek kwijt.
-      if(hadFocus){ var nw = document.querySelector('.wox-blok-hdr[data-bi="'+bi+'"]'); if(nw) nw.focus(); }
-    });
+  // Werkdocumenten: inhoud pas laden bij de eerste keer openen (scheelt reads)
+  var _wdVul = function(){ var body = root.querySelector('#wox-wd-body'); if(body && !body._gevuld){ body._gevuld = true; _woWdAccordionVul(body); } };
+  st._wdVul = _wdVul;
+  var wdKop = root.querySelector('.wbx-sec[data-sec="werkdocumenten"] > .wbx-hdr');
+  if(wdKop) wdKop.addEventListener('click', _wdVul);
+  var _wdSec = root.querySelector('.wbx-sec[data-sec="werkdocumenten"]');
+  if(!fullscreen && _wdSec && _wdSec.classList.contains('open')) _wdVul();
+  // Open en dicht onthouden, zodat het hertekenen na een wijziging je plek niet kwijtraakt
+  root.querySelectorAll('.wbx-sec[data-sec] > .wbx-hdr').forEach(function(hd){
+    hd.addEventListener('click', function(){ st.openSec[hd.parentNode.getAttribute('data-sec')] = hd.parentNode.classList.contains('open'); });
   });
 
   // Veld-invoer opslaan (debounced auto-save)
@@ -38536,6 +38639,12 @@ function _woBindDetail(fullscreen){
   // Status wijzigen
   root.querySelectorAll('.wox-status-btn').forEach(function(bt){
     bt.addEventListener('click', function(){ _woWijzigStatus(bt.dataset.key); });
+  });
+  // Status wijzigen: keuzelijst met alleen de statussen die volgens de statusflow mogen
+  root.querySelectorAll('.wox-status-wissel').forEach(function(bt){
+    var sel = bt.parentNode.querySelector('.wox-status-sel'); if(!sel) return;
+    bt.addEventListener('click', function(){ sel.selectedIndex = -1; lfKeuzelijst('Status wijzigen', sel); });
+    sel.addEventListener('change', function(){ if(sel.value) _woWijzigStatus(sel.value); });
   });
 
   // ── Secties: foto's ──
@@ -39690,67 +39799,27 @@ function _openWerkorderVeldEditor(type){
 
 // Weergave van een sectie-item in de opbouw-lijst (herkenbaar anders dan een veld).
 function _woSectieRow(v, i, totaal){
-  var h = '<div class="cl-veld-row wov-sectie-row" data-i="'+i+'" style="background:rgba(74,108,247,.06);border:1px solid rgba(74,108,247,.25);border-radius:10px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:10px">';
-  h += '<span style="color:var(--accent);flex-shrink:0">'+_woSectieIco(v.sectie)+'</span>';
-  h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+esc(_woSectieLabel(v.sectie))+'</div><div style="font-size:11px;color:var(--muted)">Sectie</div></div>';
-  // Omhoog / omlaag / verwijder
-  h += '<div style="display:flex;gap:2px;flex-shrink:0">';
-h += '<span class="sleep-greep" title="Sleep om te verplaatsen"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>';
-    h += '<button type="button" class="cl-veld-omhoog" data-i="'+i+'"'+(i===0?' disabled':'')+' style="background:none;border:none;cursor:pointer;padding:4px;color:var(--muted)'+(i===0?';opacity:.3':'')+'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg></button>';
-  h += '<button type="button" class="cl-veld-omlaag" data-i="'+i+'"'+(i>=totaal-1?' disabled':'')+' style="background:none;border:none;cursor:pointer;padding:4px;color:var(--muted)'+(i>=totaal-1?';opacity:.3':'')+'"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>';
-  h += '<button type="button" class="cl-veld-verwijder" data-i="'+i+'" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--red)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></button>';
-  h += '</div>';
-  h += '</div>';
-  return h;
+  return '<div class="cl-veld-row vt-sectie" data-i="'+i+'">'+_VT_GREEP
+    + '<span class="lf-ic" aria-hidden="true">'+_woSectieIco(v.sectie)+'</span>'
+    + '<span class="lf-l">'+esc(_woSectieLabel(v.sectie))+'<small>Sectie</small></span>'
+    + '<span class="lf-w">'+_vtVolgorde(i, totaal)+'<button type="button" class="vt-wis cl-veld-verwijder" data-i="'+i+'" aria-label="Sectie verwijderen" title="Verwijderen">'+ICO.trash+'</button></span></div>';
 }
 
 function _woRenderVeldEditor(){
   var st = _woVeldState; var type = st.type;
-  var h = '';
-  h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">';
-  h += '<button id="wov-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:4px;display:flex;align-items:center" title="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
-  h += '<div style="font-size:18px;font-weight:800;font-family:\'Instrument Sans\',sans-serif">Velden — '+esc(type.naam||'')+'</div>';
-  h += '</div>';
-
-  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:16px;max-width:620px">De velden die ingevuld worden op een '+esc(type.labelEnkelvoud||'werkorder')+' van dit type. Kies links een veldtype om toe te voegen.</div>';
-
-  h += '<div class="cl-veld-kolommen-grid" style="display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start">';
-  // Linkerkolom: veldtypes + secties
-  h += '<div style="position:sticky;top:0">';
-  h += '<div style="font-weight:700;font-size:13px;margin-bottom:10px">Veld toevoegen</div>';
-  h += '<div style="display:flex;flex-direction:column;gap:6px">';
+  var _reedsSec = {}; st.velden.forEach(function(v){ if(v.type==='sectie'&&v.sectie) _reedsSec[v.sectie]=true; });
+  var toe = '<div class="lf-groep">Veld toevoegen</div><div class="lf-blok-kaart vt-toe">';
   CHECKLIST_VELDTYPES.forEach(function(vt){
     if(vt.t==='foto') return; // foto's zitten al als sectie — geen los veldtype in werkorders
-    h += '<button type="button" class="btn btn-ghost btn-sm wov-veld-add" data-type="'+vt.t+'" style="justify-content:flex-start;width:100%">+ '+vt.l+'</button>';
+    toe += _vtToevoeg('wov-veld-add', 'data-type="'+vt.t+'"', _vtIco(vt.t), vt.l);
   });
-  h += '</div>';
-  // Secties toevoegen
-  h += '<div style="font-weight:700;font-size:13px;margin:16px 0 10px">Sectie toevoegen</div>';
-  h += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Sleep tussen de velden om de plek te bepalen.</div>';
-  h += '<div style="display:flex;flex-direction:column;gap:6px">';
-  var _reedsSec = {}; st.velden.forEach(function(v){ if(v.type==='sectie'&&v.sectie) _reedsSec[v.sectie]=true; });
-  WO_INHOUD_SECTIES.forEach(function(s){
-    var alGebruikt = _reedsSec[s.k];
-    h += '<button type="button" class="btn btn-ghost btn-sm wov-sectie-add" data-sectie="'+s.k+'"'+(alGebruikt?' disabled':'')+' style="justify-content:flex-start;width:100%;gap:7px'+(alGebruikt?';opacity:.4':'')+'">'+_woSectieIco(s.k)+'<span>'+s.l+'</span></button>';
-  });
-  h += '</div></div>';
-  // Rechterkolom: opgebouwde velden + secties (in volgorde)
-  h += '<div>';
-  h += '<div style="font-weight:700;font-size:13px;margin-bottom:10px">Opbouw ('+st.velden.length+')</div>';
-  h += '<div id="wov-velden-lijst">';
-  st.velden.forEach(function(v,i){
-    if(v.type==='sectie') h += _woSectieRow(v, i, st.velden.length);
-    else h += _clVeldRow(v, i, st.velden.length);
-  });
-  if(!st.velden.length) h += '<div style="font-size:12px;color:var(--muted);padding:8px 0">Nog geen velden of secties \u2014 kies links om te beginnen.</div>';
-  h += '</div></div>';
-  h += '</div>';
-
-  h += '<div style="display:flex;gap:10px;padding:24px 0">';
-  h += '<button class="btn btn-ghost" id="wov-annuleer" style="flex:1;justify-content:center">Annuleren</button>';
-  h += '<button class="btn btn-primary" id="wov-opslaan" style="flex:1.4;justify-content:center">Velden opslaan</button>';
-  h += '</div>';
-
+  toe += '</div><div class="lf-groep">Sectie toevoegen</div><div class="lf-blok-kaart vt-toe">';
+  WO_INHOUD_SECTIES.forEach(function(x){ var al = _reedsSec[x.k]; toe += _vtToevoeg('wov-sectie-add', 'data-sectie="'+x.k+'"', _woSectieIco(x.k), x.l, al ? 'Al in de opbouw' : 'Blok met eigen invoer', al); });
+  toe += '</div>';
+  var lijst = st.velden.map(function(v,i){ return v.type==='sectie' ? _woSectieRow(v, i, st.velden.length) : _clVeldRow(v, i, st.velden.length); }).join('')
+    || '<p class="lf-leeg">Nog geen velden of secties. Voeg het eerste toe.</p>';
+  var h = _vtShell({ terugId:'wov-terug', titel:'Velden \u00b7 '+esc(type.naam||''), sub:'Wat er op een '+esc(type.labelEnkelvoud||'werkorder')+' wordt ingevuld, in deze volgorde',
+    toevoegen:toe, lijstId:'wov-velden-lijst', lijst:lijst, aantal:st.velden.length, knopId:'wov-opslaan', knopTekst:'Velden opslaan' });
   openPanel('Velden', h);
   document.getElementById('panel').classList.add('panel-breed');
   var _phdr = document.querySelector('#panel .panel-header'); if(_phdr) _phdr.style.display='none';
@@ -39970,26 +40039,16 @@ function _woBlokDialoog(idx){
 function _woBlokVeldEditor(bl, blokIdx){
   var werkVelden = _woMigreerSecties((bl.velden||[]).map(function(v){ return Object.assign({}, v); }), bl.secties);
   function teken(){
-    var h = '';
-    h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">';
-    h += '<button id="wbv-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:4px;display:flex;align-items:center"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
-    h += '<div style="font-size:18px;font-weight:800;font-family:\'Instrument Sans\',sans-serif">Velden — '+esc(bl.naam||'blok')+'</div>';
-    h += '</div>';
-    h += '<div style="display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start">';
-    h += '<div style="position:sticky;top:0"><div style="font-weight:700;font-size:13px;margin-bottom:10px">Veld toevoegen</div><div style="display:flex;flex-direction:column;gap:6px">';
-    CHECKLIST_VELDTYPES.forEach(function(vt){ if(vt.t==='foto') return; h += '<button type="button" class="btn btn-ghost btn-sm wbv-add" data-type="'+vt.t+'" style="justify-content:flex-start;width:100%">+ '+vt.l+'</button>'; });
-    h += '</div>';
-    h += '<div style="font-weight:700;font-size:13px;margin:16px 0 10px">Sectie toevoegen</div>';
-    h += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Sleep tussen de velden om de plek te bepalen.</div>';
-    h += '<div style="display:flex;flex-direction:column;gap:6px">';
     var _reedsSec = {}; werkVelden.forEach(function(v){ if(v.type==='sectie'&&v.sectie) _reedsSec[v.sectie]=true; });
-    WO_INHOUD_SECTIES.forEach(function(s){ var al=_reedsSec[s.k]; h += '<button type="button" class="btn btn-ghost btn-sm wbv-sectie-add" data-sectie="'+s.k+'"'+(al?' disabled':'')+' style="justify-content:flex-start;width:100%;gap:7px'+(al?';opacity:.4':'')+'">'+_woSectieIco(s.k)+'<span>'+s.l+'</span></button>'; });
-    h += '</div></div>';
-    h += '<div><div style="font-weight:700;font-size:13px;margin-bottom:10px">Opbouw ('+werkVelden.length+')</div><div id="wbv-lijst">';
-    werkVelden.forEach(function(v,i){ if(v.type==='sectie') h += _woSectieRow(v, i, werkVelden.length); else h += _clVeldRow(v, i, werkVelden.length); });
-    if(!werkVelden.length) h += '<div style="font-size:12px;color:var(--muted);padding:8px 0">Nog geen velden of secties.</div>';
-    h += '</div></div></div>';
-    h += '<div style="display:flex;gap:10px;padding:24px 0"><button class="btn btn-ghost" id="wbv-annuleer" style="flex:1;justify-content:center">Annuleren</button><button class="btn btn-primary" id="wbv-opslaan" style="flex:1.4;justify-content:center">Velden opslaan</button></div>';
+    var toe = '<div class="lf-groep">Veld toevoegen</div><div class="lf-blok-kaart vt-toe">';
+    CHECKLIST_VELDTYPES.forEach(function(vt){ if(vt.t==='foto') return; toe += _vtToevoeg('wbv-add', 'data-type="'+vt.t+'"', _vtIco(vt.t), vt.l); });
+    toe += '</div><div class="lf-groep">Sectie toevoegen</div><div class="lf-blok-kaart vt-toe">';
+    WO_INHOUD_SECTIES.forEach(function(x){ var al = _reedsSec[x.k]; toe += _vtToevoeg('wbv-sectie-add', 'data-sectie="'+x.k+'"', _woSectieIco(x.k), x.l, al ? 'Al in de opbouw' : 'Blok met eigen invoer', al); });
+    toe += '</div>';
+    var lijst = werkVelden.map(function(v,i){ return v.type==='sectie' ? _woSectieRow(v, i, werkVelden.length) : _clVeldRow(v, i, werkVelden.length); }).join('')
+      || '<p class="lf-leeg">Nog geen velden of secties. Voeg het eerste toe.</p>';
+    var h = _vtShell({ terugId:'wbv-terug', titel:'Velden \u00b7 '+esc(bl.naam||'blok'), sub:'Wat er in dit blok wordt ingevuld, in deze volgorde',
+      toevoegen:toe, lijstId:'wbv-lijst', lijst:lijst, aantal:werkVelden.length, knopId:'wbv-opslaan', knopTekst:'Velden opslaan' });
     openPanel('Velden', h);
     document.getElementById('panel').classList.add('panel-breed');
     var _ph=document.querySelector('#panel .panel-header'); if(_ph) _ph.style.display='none';
@@ -39998,7 +40057,6 @@ function _woBlokVeldEditor(bl, blokIdx){
   function bind(){
     function sluit(){ var _ph=document.querySelector('#panel .panel-header'); if(_ph) _ph.style.display=''; document.getElementById('panel').classList.remove('panel-breed'); closePanel(); setTimeout(function(){ _woBlokDialoog(blokIdx); }, 60); }
     document.getElementById('wbv-terug').addEventListener('click', sluit);
-    document.getElementById('wbv-annuleer').addEventListener('click', sluit);
     _bindVeldTypeKeuze(werkVelden, teken);
     document.querySelectorAll('#panel .cl-veld-label').forEach(function(inp){ inp.addEventListener('input', function(){ werkVelden[+inp.dataset.i].label=inp.value; }); });
     document.querySelectorAll('#panel .cl-veld-opties').forEach(function(inp){ inp.addEventListener('input', function(){ werkVelden[+inp.dataset.i].opties=inp.value.split(',').map(function(s){return s.trim();}).filter(Boolean); }); });
@@ -40119,6 +40177,72 @@ function _bindVeldTypeKeuze(velden, herteken){
   });
 }
 
+// ── Opbouw-editor (velden van een werkorder-type, een blok of een checklist-sjabloon) ──
+// Links wat je kunt toevoegen, rechts de opbouw als compacte rijen die je openklapt om te
+// bewerken. Op een telefoon komt "toevoegen" als lijst onderaan het scherm.
+var _clVeldOpen = {};   // welke velden opengeklapt zijn (op id), blijft staan bij hertekenen
+var _VT_ICO = {
+  header:'<path d="M6 4v16M18 4v16M6 12h12"/>',
+  paragraaf:'<path d="M4 6h16M4 12h16M4 18h10"/>',
+  tekst_kort:'<path d="M4 7h16v10H4z"/><path d="M8 12h5"/>',
+  tekst_lang:'<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 17h4"/>',
+  numeriek:'<path d="M9 4 7 20M17 4l-2 16M4 9h16M3 15h16"/>',
+  dropdown:'<path d="M4 6h16v12H4z"/><path d="m10 11 2 2 2-2"/>',
+  radio:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  checkbox:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8 12 3 3 5-6"/>',
+  datum:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+  tijd:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  foto:'<path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/>',
+  tabel:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M10 4v16"/>',
+  paginaeinde:'<path d="M4 12h3M10 12h4M17 12h3"/><path d="M7 4h10v5H7zM7 15h10v5H7z"/>'
+};
+function _vtIco(type){ return '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">'+(_VT_ICO[type]||_VT_ICO.tekst_kort)+'</svg>'; }
+var _VT_GREEP = '<span class="sleep-greep" title="Sleep om te verplaatsen" aria-hidden="true"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span>';
+function _vtVolgorde(i, n){
+  var pijl = function(d){ return '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="'+d+'"/></svg>'; };
+  return '<span class="lf-volgorde"><button type="button" class="cl-veld-omhoog" data-i="'+i+'" aria-label="Omhoog"'+(i===0?' disabled':'')+'>'+pijl('m18 15-6-6-6 6')+'</button>'
+    + '<button type="button" class="cl-veld-omlaag" data-i="'+i+'" aria-label="Omlaag"'+(i>=n-1?' disabled':'')+'>'+pijl('m6 9 6 6 6-6')+'</button></span>';
+}
+// Eén regel in de toevoeglijst. 'uit' = al gebruikt (een sectie mag maar één keer).
+function _vtToevoeg(cls, data, ico, label, sub, uit){
+  return '<button type="button" class="lf-art '+cls+(uit?' uit':'')+'" '+data+(uit?' disabled':'')+'>'+_lfIco(ico)
+    + '<span class="lf-l">'+esc(label)+(sub ? '<small>'+esc(sub)+'</small>' : '')+'</span>'
+    + '<span class="lf-art-plus" aria-hidden="true">'+(uit ? ICO.check.replace(/width="\d+" height="\d+"/, 'width="16" height="16"') : _LF_PLUS)+'</span></button>';
+}
+// o: { terugId, titel, sub, kop (html boven de opbouw), toevoegen (html), lijstId, lijst (html), aantal, knopId, knopTekst }
+function _vtShell(o){
+  var h = '<div class="lf vt">';
+  h += '<div class="vt-kop"><button type="button" class="modal-close" id="'+o.terugId+'" aria-label="Terug" title="Terug"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>'
+    + '<div><div class="vt-titel">'+o.titel+'</div>'+(o.sub ? '<div class="vt-sub">'+o.sub+'</div>' : '')+'</div></div>';
+  h += (o.kop||'');
+  h += '<div class="vt-kolommen"><div class="vt-achter"></div><div class="vt-links"><div class="vt-links-kop"><span>Toevoegen</span><button type="button" class="vt-links-dicht" aria-label="Sluiten">'+_LF_X+'</button></div>'+o.toevoegen+'</div>';
+  h += '<div><div class="lf-groep lf-groep-knop"><span>Opbouw \u00b7 '+o.aantal+'</span><span class="lf-hint vt-alleen-breed">Tik op een veld om het te bewerken</span></div>';
+  h += '<div id="'+o.lijstId+'">'+o.lijst+'</div>';
+  h += '<button type="button" class="wbx-chip-add vt-toevoeg-knop">'+_LF_PLUS+'Veld of sectie toevoegen</button></div></div>';
+  h += '<div class="vt-voet"><button type="button" class="btn btn-primary lf-knop" id="'+o.knopId+'">'+o.knopTekst+'</button></div>';
+  return h + '</div>';
+}
+// Eén keer koppelen: openklappen, de toevoeglijst op mobiel, en de titel live bijwerken.
+document.addEventListener('click', function(e){
+  var t = e.target; if(!t || !t.closest) return;
+  if(t.closest('.vt-toevoeg-knop')){ var vt = t.closest('.vt'); if(vt) vt.classList.add('vt-toevoegen-open'); return; }
+  if(t.closest('.vt-achter') || t.closest('.vt-links-dicht')){ var vt2 = t.closest('.vt'); if(vt2) vt2.classList.remove('vt-toevoegen-open'); return; }
+  var kop = t.closest('.vt-rij[data-vt]');
+  if(kop && !t.closest('button,select,input,label,.sleep-greep')){
+    var kaart = kop.closest('.vt-kaart'); if(!kaart) return;
+    var open = !kaart.classList.contains('open');
+    kaart.classList.toggle('open', open);
+    _clVeldOpen[kop.getAttribute('data-vt')] = open;
+  }
+});
+document.addEventListener('input', function(e){
+  var t = e.target;
+  if(t && t.classList && t.classList.contains('cl-veld-label')){
+    var tt = t.closest('.vt-kaart'); tt = tt && tt.querySelector('.vt-titel-v');
+    if(tt){ tt.textContent = t.value || 'Zonder titel'; tt.classList.toggle('leeg', !t.value); }
+  }
+});
+
 function _clVeldTypeInfo(type){
   return CHECKLIST_VELDTYPES.find(function(x){ return x.t===type; }) || CHECKLIST_VELDTYPES[2];
 }
@@ -40212,87 +40336,52 @@ function _arrayVerplaats(arr, van, naar) {
 
 function _clVeldRow(v, i, totaal){
   var info = _clVeldTypeInfo(v.type);
-  var h = '<div class="cl-veld-row" data-i="'+i+'" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px">';
-  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">';
-  // Type is wijzigbaar: kies een andere soort en het veld verandert mee. Het label
-  // blijft behouden; eigenschappen die niet bij het nieuwe type horen worden opgeruimd.
-  h += '<select class="input cl-veld-type" data-i="'+i+'" style="flex:0 0 auto;width:auto;max-width:190px;font-size:12px;padding:4px 26px 4px 9px;font-weight:600;color:var(--accent);background-color:rgba(74,108,247,.10);border-color:rgba(74,108,247,.28);border-radius:20px">';
-  CHECKLIST_VELDTYPES.forEach(function(t){
-    h += '<option value="'+t.t+'"'+(t.t===v.type?' selected':'')+'>'+esc(t.l)+'</option>';
-  });
-  h += '</select>';
-  h += '<span style="flex:1"></span>';
-h += '<span class="sleep-greep" title="Sleep om te verplaatsen"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>';
-    h += '<button type="button" class="btn btn-ghost btn-sm cl-veld-omhoog" data-i="'+i+'"'+(i===0?' disabled':'')+' title="Omhoog">\u2191</button>';
-  h += '<button type="button" class="btn btn-ghost btn-sm cl-veld-omlaag" data-i="'+i+'"'+(i===totaal-1?' disabled':'')+' title="Omlaag">\u2193</button>';
-  h += '<button type="button" class="btn btn-ghost btn-sm cl-veld-verwijder btn-wis" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-  h += '</div>';
-
-  if(v.type==='paginaeinde'){
-    h += '<div style="font-size:12px;color:var(--muted);text-align:center;padding:4px 0">\u2014 pagina-einde in de PDF \u2014</div>';
-  } else {
-    var _ph = v.type==='header' ? 'Titel van de sectie' : (v.type==='paragraaf' ? 'Toelichtende tekst' : 'Vraag / label');
-    h += '<input type="text" class="input cl-veld-label" data-i="'+i+'" value="'+esc(v.label||'')+'" placeholder="'+_ph+'" style="margin-bottom:8px">';
+  var sleutel = v.id || ('i'+i);
+  // Een nieuw veld (nog zonder titel) staat open; verder onthouden we wat je open- of dichtklapte.
+  var open = (_clVeldOpen[sleutel] !== undefined) ? _clVeldOpen[sleutel] : (!v.label && v.type !== 'paginaeinde');
+  var sub = [info.l, v.verplicht ? 'verplicht' : '',
+    (info.extra==='opties' && (v.opties||[]).length) ? v.opties.length+' opties' : '',
+    (info.extra==='eenheid' && v.eenheid) ? 'in '+v.eenheid : '',
+    (info.extra==='kolommen' && (v.kolommen||[]).length) ? v.kolommen.length+' kolommen' : ''].filter(Boolean).join(' \u00b7 ');
+  var titel = v.type==='paginaeinde' ? 'Pagina-einde in de PDF' : (v.label || 'Zonder titel');
+  var h = '<div class="cl-veld-row vt-kaart'+(open?' open':'')+'" data-i="'+i+'">';
+  h += '<div class="vt-rij" data-vt="'+esc(sleutel)+'">'+_VT_GREEP+_lfIco(_vtIco(v.type))
+    + '<span class="lf-l"><span class="vt-titel-v'+((v.label || v.type==='paginaeinde') ? '' : ' leeg')+'">'+esc(titel)+'</span><small>'+esc(sub)+'</small></span>'
+    + '<span class="lf-w">'+_vtVolgorde(i, totaal)
+    + (v.type==='paginaeinde' ? '<button type="button" class="vt-wis cl-veld-verwijder" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>' : '<span class="vt-chev">'+_LF_CHEV+'</span>')
+    + '</span></div>';
+  if(v.type !== 'paginaeinde'){
+    h += '<div class="vt-bewerk">';
+    // Type is wijzigbaar: kies een andere soort en het veld verandert mee. Het label
+    // blijft behouden; eigenschappen die niet bij het nieuwe type horen worden opgeruimd.
+    h += lfRij(_vtIco(v.type), 'Soort veld', '<select class="lf-veld vt-sel cl-veld-type" data-i="'+i+'" aria-label="Soort veld">'
+      + CHECKLIST_VELDTYPES.map(function(t){ return '<option value="'+t.t+'"'+(t.t===v.type?' selected':'')+'>'+esc(t.l)+'</option>'; }).join('')+'</select>');
+    var _ph = v.type==='header' ? 'Titel van de sectie' : (v.type==='paragraaf' ? 'Toelichtende tekst' : 'Vraag of label');
+    h += lfRij(ICO.edit, v.type==='header' ? 'Titel' : (v.type==='paragraaf' ? 'Tekst' : 'Vraag'), '<input type="text" class="lf-tekst cl-veld-label" data-i="'+i+'" value="'+esc(v.label||'')+'" placeholder="'+_ph+'">');
+    if(info.extra==='opties')   h += lfRij('', 'Opties', '<input type="text" class="lf-tekst cl-veld-opties" data-i="'+i+'" value="'+esc((v.opties||[]).join(', '))+'" placeholder="Bijv. Klep, Schuif, Overig">', {sub:'Komma tussen de opties'});
+    if(info.extra==='kolommen') h += lfRij('', 'Kolommen', '<input type="text" class="lf-tekst cl-veld-kolommen" data-i="'+i+'" value="'+esc((v.kolommen||[]).join(', '))+'" placeholder="Bijv. Tijdstip, Druk (bar)">', {sub:'Komma tussen de kolommen'});
+    if(info.extra==='eenheid')  h += lfRij('', 'Eenheid', '<input type="text" class="lf-tekst cl-veld-eenheid" data-i="'+i+'" value="'+esc(v.eenheid||'')+'" placeholder="Bijv. m\u00b3/h">', {sub:'Optioneel'});
+    if(info.input) h += lfRij(ICO.check, 'Verplicht', '<label class="lf-sw"><input type="checkbox" role="switch" class="cl-veld-verplicht" data-i="'+i+'"'+(v.verplicht?' checked':'')+' aria-label="Verplicht"><i></i></label>');
+    h += '<button type="button" class="lf-verwijder cl-veld-verwijder" data-i="'+i+'">'+ICO.trash+' Veld verwijderen</button>';
+    h += '</div>';
   }
-
-  if(info.extra==='opties'){
-    h += '<input type="text" class="input cl-veld-opties" data-i="'+i+'" value="'+esc((v.opties||[]).join(', '))+'" placeholder="Opties, komma-gescheiden (bijv. Klep, Schuif, Overig)">';
-  }
-  if(info.extra==='kolommen'){
-    h += '<input type="text" class="input cl-veld-kolommen" data-i="'+i+'" value="'+esc((v.kolommen||[]).join(', '))+'" placeholder="Kolomnamen, komma-gescheiden (bijv. Tijdstip, Druk (bar))">';
-  }
-  if(info.extra==='eenheid'){
-    h += '<input type="text" class="input cl-veld-eenheid" data-i="'+i+'" value="'+esc(v.eenheid||'')+'" placeholder="Eenheid (optioneel, bijv. m\u00b3/h)" style="max-width:200px">';
-  }
-
-  if(info.input){
-    h += '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer">';
-    h += '<input type="checkbox" class="cl-veld-verplicht" data-i="'+i+'"'+(v.verplicht?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent)">';
-    h += '<span style="font-size:12px;color:var(--muted)">Verplicht veld</span></label>';
-  }
-  h += '</div>';
-  return h;
+  return h + '</div>';
 }
 
 function _renderChecklistEditor(){
   var t = _clEditState;
-  var h = '';
-  h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">';
-  h += '<button id="cl-terug" style="background:none;border:none;color:var(--text);cursor:pointer;padding:4px;display:flex;align-items:center" title="Terug"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>';
-  h += '<div style="font-size:18px;font-weight:800;font-family:\'Instrument Sans\',sans-serif">'+(t.id?'Sjabloon bewerken':'Nieuw sjabloon')+'</div>';
-  h += '</div>';
-
-  h += '<div class="card" style="margin-bottom:16px"><div class="form-grid">';
-  h += fg('Naam', finp('cl-naam','text', t.naam||'', 'bijv. Onderhoud \u2014 1 pomp in put'));
-  h += fg('Omschrijving (optioneel)', finp('cl-omschrijving','text', t.omschrijving||'', ''));
-  h += '</div></div>';
-
-  h += '<div class="cl-veld-kolommen-grid" style="display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start">';
-
-  // Linkerkolom: veldtypes om toe te voegen
-  h += '<div style="position:sticky;top:0">';
-  h += '<div style="font-weight:700;font-size:13px;margin-bottom:10px">Veld toevoegen</div>';
-  h += '<div style="display:flex;flex-direction:column;gap:6px">';
-  CHECKLIST_VELDTYPES.forEach(function(vt){
-    h += '<button type="button" class="btn btn-ghost btn-sm cl-veld-add" data-type="'+vt.t+'" style="justify-content:flex-start;width:100%">+ '+vt.l+'</button>';
-  });
-  h += '</div></div>';
-
-  // Rechterkolom: de opgebouwde velden
-  h += '<div>';
-  h += '<div style="font-weight:700;font-size:13px;margin-bottom:10px">Velden ('+((t.velden||[]).length)+')</div>';
-  h += '<div id="cl-velden-lijst">';
-  (t.velden||[]).forEach(function(v,i){ h += _clVeldRow(v, i, t.velden.length); });
-  if(!t.velden || !t.velden.length) h += '<div style="font-size:12px;color:var(--muted);padding:8px 0">Nog geen velden \u2014 kies links een veldtype om te beginnen.</div>';
-  h += '</div></div>';
-
-  h += '</div>';
-
-  h += '<div style="display:flex;gap:10px;padding:24px 0">';
-  h += '<button class="btn btn-ghost" id="cl-annuleer" style="flex:1;justify-content:center">Annuleren</button>';
-  h += '<button class="btn btn-primary" id="cl-opslaan" style="flex:1.4;justify-content:center">Sjabloon opslaan</button>';
-  h += '</div>';
-
+  var kop = '<div class="lf-blok-kaart vt-meta">'
+    + lfRij(ICO.edit, 'Naam', '<input class="lf-tekst" type="text" id="cl-naam" value="'+esc(t.naam||'')+'" placeholder="Bijv. Onderhoud \u2014 1 pomp in put">', {voor:'cl-naam'})
+    + lfRij('', 'Omschrijving', '<input class="lf-tekst" type="text" id="cl-omschrijving" value="'+esc(t.omschrijving||'')+'" placeholder="Optioneel">', {voor:'cl-omschrijving'})
+    + '</div>';
+  var toe = '<div class="lf-groep">Veld toevoegen</div><div class="lf-blok-kaart vt-toe">';
+  CHECKLIST_VELDTYPES.forEach(function(vt){ toe += _vtToevoeg('cl-veld-add', 'data-type="'+vt.t+'"', _vtIco(vt.t), vt.l); });
+  toe += '</div>';
+  var velden = t.velden || [];
+  var lijst = velden.map(function(v,i){ return _clVeldRow(v, i, velden.length); }).join('')
+    || '<p class="lf-leeg">Nog geen velden. Voeg het eerste toe.</p>';
+  var h = _vtShell({ terugId:'cl-terug', titel:(t.id?'Sjabloon bewerken':'Nieuw sjabloon'), sub:'Een checklist die monteurs op de werkbon invullen',
+    kop:kop, toevoegen:toe, lijstId:'cl-velden-lijst', lijst:lijst, aantal:velden.length, knopId:'cl-opslaan', knopTekst:'Sjabloon opslaan' });
   openPanel(t.id?'Sjabloon bewerken':'Nieuw sjabloon', h);
   document.getElementById('panel').classList.add('panel-breed');
   var _phdr = document.querySelector('#panel .panel-header'); if(_phdr) _phdr.style.display='none';
