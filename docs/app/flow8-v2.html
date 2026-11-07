@@ -263,6 +263,30 @@ body.light .lf{color-scheme:light}
 .lf-art-plus{width:34px;height:34px;border-radius:50%;background:rgba(79,110,245,.14);color:var(--accent-t);display:grid;place-items:center}
 .lf-leeg,.lf-uitleg{font-size:13px;color:var(--muted);padding:14px 2px;line-height:1.45}
 .lf-fout{color:var(--red-t)}
+.lf-av.klein{width:36px;height:36px;font-size:12px}
+.lf-w-kol{flex-direction:column;align-items:flex-end;gap:3px}
+.lf-omg{font-size:11.5px;color:var(--muted)}
+.lf-totaal{display:flex;justify-content:space-between;align-items:center;padding:14px 0 4px;font-weight:600;font-size:15px}
+.lf-totaal b{font-family:'Space Mono',monospace;font-size:14px}
+.lf-kaart{margin-top:12px;background:var(--surface2);border-radius:var(--radius-lg);padding:0 12px}
+.lf-kaart .lf-rij:last-child{border-bottom:0}
+.lf-kaart .lf-ic{background:var(--surface)}
+.lf-kaart .lf-w{font-size:14px;max-width:180px;text-align:right}
+.lf-groep{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 2px 8px}
+.lf-chips{display:flex;flex-wrap:wrap;gap:8px}
+.lf-chips button{padding:9px 13px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;font-weight:600;cursor:pointer}
+.lf-chips button.aan{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.45);color:var(--red-t)}
+.lf .lf-reden{margin-top:10px}
+.lf-knop.lf-knop-rood{background:var(--red);border-color:var(--red)}
+.lf-som{display:flex;align-items:baseline;justify-content:center;gap:6px;flex-wrap:wrap;padding:16px 0 4px}
+.lf-som span{font:700 24px 'Space Mono',monospace;color:var(--muted)}
+.lf-som b{font:700 38px 'Space Mono',monospace;color:var(--text)}
+.lf-som small{flex-basis:100%;text-align:center;font-size:12.5px;color:var(--muted)}
+.lf-bon-klein{width:44px;height:54px;border-radius:8px;object-fit:cover;border:1px solid var(--border);display:block}
+.lf-afwijs{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px 12px;margin-bottom:12px}
+.lf-afwijs div:first-child{font-size:11px;color:var(--red-t);margin-bottom:4px;text-transform:uppercase;font-weight:600}
+.lf-afwijs div:last-child{font-size:13px}
+.lf .mono{font-family:'Space Mono',monospace;font-weight:700}
 .lf-alleen-lezen{cursor:default}
 .lf-alleen-lezen .lf-chev{display:none}
 @media (max-width:768px){
@@ -8328,30 +8352,36 @@ function openVerlofBijschrijfModal(jaar) {
     }
 
     var voorstellen = verzoek.voorstellen || {};
-    var b = '<div style="margin-bottom:16px;padding:12px;background:rgba(74,108,247,.08);border-radius:8px;font-size:13px;color:var(--muted)">'
-      + 'Controleer en pas het aantal vakantiedagen per medewerker aan. Klik op Goedkeuren om de dagen bij te schrijven.'
-      + '</div>';
-    b += '<div style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto">';
+    var b = '<div class="lf-samen" style="margin-top:4px">Controleer per medewerker het aantal vakantiedagen. Op 0 gezet wordt iemand overgeslagen.</div>';
     Object.values(voorstellen).forEach(function(v) {
       var med = getMed(v.medId);
       var kl  = med ? medKleur(med) : '#6b7694';
       var uren = med ? (parseInt(med.contractUren)||40) : 40;
-      b += '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface2);border-radius:8px">';
-      b += '<div class="avatar" style="width:28px;height:28px;font-size:10px;background:+kl+;color:#fff;flex-shrink:0">'+(med?initials(med):'?')+'</div>';
-      b += '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+esc(v.naam)+'</div>';
-      b += '<div style="font-size:11px;color:var(--muted)">'+uren+'u/week · huidig saldo: '+(med?String(getVerlofSaldoUren(med)).replace('.',',')+'u':'—')+'</div></div>';
-      b += '<div style="display:flex;align-items:center;gap:6px">';
-      b += '<input type="number" class="input vb-dagen" data-medid="'+v.medId+'" value="'+v.voorstel+'" min="0" max="50" step="0.5" style="width:70px;text-align:center;font-weight:700">';
-      b += '<span style="font-size:12px;color:var(--muted)">dagen</span>';
-      b += '</div></div>';
+      b += '<div class="lf-rij">';
+      b += '<span class="lf-av klein" style="background:'+kl+'" aria-hidden="true">'+(med?esc(initials(med)):'?')+'</span>';
+      b += '<span class="lf-l">'+esc(v.naam)+'<small>'+uren+' u/week · saldo '+(med?_hrGetal(getVerlofSaldoUren(med))+' u':'—')+'</small></span>';
+      b += '<span class="lf-w lf-w-kol"><span class="lf-stap"><button type="button" data-lf-stap="-0.5" aria-label="Halve dag minder">'+_LF_MIN+'</button>';
+      b += '<input type="number" inputmode="decimal" class="vb-dagen" data-medid="'+esc(v.medId)+'" value="'+v.voorstel+'" min="0" max="50" step="0.5" aria-label="Dagen voor '+esc(v.naam)+'">';
+      b += '<button type="button" data-lf-stap="0.5" aria-label="Halve dag meer">'+_LF_PLUS+'</button></span><small class="lf-omg" data-omg="'+esc(v.medId)+'"></small></span>';
+      b += '</div>';
     });
-    b += '</div>';
+    b += '<div class="lf-totaal"><span id="vb-aantal"></span><b id="vb-totaal"></b></div>';
 
-    var f = '<button class="btn btn-ghost" id="vb-cancel">Annuleren</button>';
-    f += '<button class="btn btn-primary" id="vb-goedkeuren">'+ICO.check+' Goedkeuren & bijschrijven</button>';
-    openModal('Verlof bijschrijven ' + jaar, b, f);
-
-    document.getElementById('vb-cancel').addEventListener('click', closeModal);
+    lfOpen('Verlof bijschrijven ' + jaar, b, 'Goedkeuren en bijschrijven', 'vb-goedkeuren');
+    // Uren per medewerker en het totaal live bijwerken
+    function vbTotaal(){
+      var tot = 0, n = 0;
+      document.querySelectorAll('.vb-dagen').forEach(function(inp){
+        var d = parseFloat(inp.value) || 0, m = getMed(inp.dataset.medid);
+        var omg = document.querySelector('.lf-omg[data-omg="'+inp.dataset.medid+'"]');
+        if(omg) omg.textContent = d > 0 ? '= '+_hrGetal(m ? verlofDagenNaarUren(d, m) : d*8)+' u' : 'overslaan';
+        if(d > 0){ tot += d; n++; }
+      });
+      document.getElementById('vb-aantal').textContent = n+(n===1?' medewerker':' medewerkers');
+      document.getElementById('vb-totaal').textContent = _hrGetal(tot)+(tot===1?' dag':' dagen');
+    }
+    document.querySelector('#modal-body > .lf').addEventListener('input', vbTotaal);
+    vbTotaal();
     document.getElementById('vb-goedkeuren').addEventListener('click', function(){
       var nu2  = new Date();
       var updated = 0;
@@ -9324,44 +9354,44 @@ function verlofSaldoHerstel(medId) {
 function openCorrectieModal(medId) {
   var m = getMed(medId);
   if (!m) return;
-  var urenPerDag = (APP.teamInstellingen && APP.teamInstellingen.werkUrenPerDag) || 8;
-  var b = '<div class="form-grid">';
-  b += fgf('Medewerker','<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;font-weight:600">'+esc(m.voornaam+' '+m.achternaam)+' · huidig saldo: <strong style="color:var(--green-t)">'+String(getVerlofSaldoUren(m)).replace('.',',')+' uur</strong> (\u2248 '+String(verlofUrenNaarDagen(getVerlofSaldoUren(m), m)).replace('.',',')+' dg)</div>');
-  b += fgf('Eenheid','<div style="display:flex;gap:10px"><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="cor-eenheid" value="dagen" checked> Dagen</label><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="radio" name="cor-eenheid" value="uren"> Uren</label></div>');
-  b += fg('Aantal (+ of -)', '<input class="input" type="number" id="cor-waarde" step="0.1" placeholder="Bijv. 2 of -1.5"><div id="cor-preview" style="font-size:11px;color:var(--muted);margin-top:4px"></div>');
-  b += fgf('Omschrijving *', finp('cor-omschr','text','','Bijv. correctie ziekteverlof 2024'));
-  b += '</div>';
-  var f = '<button class="btn btn-ghost" id="cor-cancel">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="cor-save">Opslaan</button>';
-  openModal('Verlof correctie — '+m.voornaam, b, f);
+  var seg = function(id, opts){ return '<input type="hidden" id="'+id+'" value="'+opts[0][0]+'"><span class="lf-seg" role="radiogroup" data-lf-seg="'+id+'">'
+    + opts.map(function(o,i){ return '<button type="button" role="radio" data-waarde="'+o[0]+'" aria-checked="'+(i===0)+'"'+(i===0?' class="aan"':'')+'>'+o[1]+'</button>'; }).join('')+'</span>'; };
+  var saldo = getVerlofSaldoUren(m);
+  var b = lfPersoonVast(m.voornaam+' '+m.achternaam, 'Verlofsaldo '+_hrGetal(saldo)+' uur · '+_hrGetal(verlofUrenNaarDagen(saldo, m))+' dag');
+  b += lfRij(ICO.refresh, 'Soort correctie', seg('cor-richting', [['erbij','Erbij'],['eraf','Eraf']]));
+  b += lfRij(ICO.clock, 'Eenheid', seg('cor-eenheid', [['dagen','Dagen'],['uren','Uren']]));
+  b += lfRij(ICO.kalender, 'Aantal', '<span class="lf-stap"><button type="button" data-lf-stap="-0.5" aria-label="Minder">'+_LF_MIN+'</button><input type="number" inputmode="decimal" id="cor-waarde" min="0" step="0.5" placeholder="0" required><button type="button" data-lf-stap="0.5" aria-label="Meer">'+_LF_PLUS+'</button></span>', {verplicht:true, voor:'cor-waarde'});
+  b += '<div class="lf-samen" id="cor-preview"></div>';
+  b += lfRij(ICO.edit, 'Omschrijving', '<textarea class="lf-notitie" id="cor-omschr" rows="1" placeholder="Bijv. correctie ziekteverlof 2026" required></textarea>', {blok:true, verplicht:true, voor:'cor-omschr', sub:'Komt in de verlofhistorie van de medewerker'});
+  lfOpen('Verlof corrigeren', b, 'Correctie opslaan', 'cor-save');
+  bindAutoGrow(document.getElementById('cor-omschr'));
 
-  document.getElementById('cor-cancel').addEventListener('click', closeModal);
-
-  // Preview berekening
-  function updatePreview() {
-    var waarde = parseFloat(document.getElementById('cor-waarde').value) || 0;
-    var eenheid = document.querySelector('input[name="cor-eenheid"]:checked').value;
-    var prev = document.getElementById('cor-preview');
-    if(!waarde){ prev.textContent=''; return; }
-    if(eenheid === 'uren') {
-      var dagen = Math.round(waarde / urenPerDag * 10) / 10;
-      prev.textContent = waarde+'u ÷ '+urenPerDag+'u/dag = '+dagen+' dag'+(Math.abs(dagen)!==1?'en':'');
-    } else {
-      var uren = Math.round(waarde * urenPerDag * 10) / 10;
-      prev.textContent = waarde+' dag'+(Math.abs(waarde)!==1?'en':'')+' × '+urenPerDag+'u/dag = '+uren+'u';
-    }
+  // Correctie in uren, met de eigen werkdag van de medewerker (net als bij het opslaan)
+  function correctieUren(){
+    var waarde = Math.abs(parseFloat(document.getElementById('cor-waarde').value) || 0);
+    var teken = document.getElementById('cor-richting').value === 'eraf' ? -1 : 1;
+    var eenheid = document.getElementById('cor-eenheid').value;
+    return { waarde: waarde*teken, eenheid: eenheid, uren: eenheid === 'uren' ? Math.round(waarde*teken*10)/10 : verlofDagenNaarUren(waarde*teken, m) };
   }
-  document.getElementById('cor-waarde').addEventListener('input', updatePreview);
-  document.querySelectorAll('input[name="cor-eenheid"]').forEach(function(r){ r.addEventListener('change', updatePreview); });
+  function updatePreview() {
+    var c = correctieUren(), prev = document.getElementById('cor-preview');
+    if(!c.waarde){ prev.textContent=''; return; }
+    var t = c.waarde > 0 ? '+' : '−', abs = Math.abs(c.waarde), dagen = Math.abs(verlofUrenNaarDagen(c.uren, m));
+    prev.textContent = t + _hrGetal(abs) + (c.eenheid === 'uren' ? ' uur = '+_hrGetal(dagen)+(dagen===1?' dag':' dagen') : (abs===1?' dag':' dagen')+' = '+_hrGetal(Math.abs(c.uren))+' uur')
+      + ' · nieuw saldo '+_hrGetal(Math.round((saldo + c.uren)*10)/10)+' uur';
+  }
+  var _corVak = document.querySelector('#modal-body > .lf');
+  _corVak.addEventListener('input', updatePreview);
+  _corVak.addEventListener('change', updatePreview);
 
   document.getElementById('cor-save').addEventListener('click', function() {
-    var waarde = parseFloat(document.getElementById('cor-waarde').value);
-    var eenheid = document.querySelector('input[name="cor-eenheid"]:checked').value;
+    var c = correctieUren();
+    var waarde = c.waarde, eenheid = c.eenheid;
     var omschr = document.getElementById('cor-omschr').value.trim();
     if (isNaN(waarde) || waarde === 0) { toast('Voer een geldig getal in', 'error'); return; }
     if (!omschr) { toast('Omschrijving is verplicht', 'error'); return; }
     // Uren zijn leidend: bepaal de correctie in uren (of via dagen → uren)
-    var corUren = eenheid === 'uren' ? Math.round(waarde * 10) / 10 : verlofDagenNaarUren(waarde, m);
+    var corUren = c.uren;
     var huidigUren = getVerlofSaldoUren(m);
     var nieuwUren = Math.round((huidigUren + corUren) * 10) / 10;
     var dagen = verlofUrenNaarDagen(corUren, m); // voor de mutatie-weergave
@@ -9832,7 +9862,9 @@ function lfOpen(titel, body, knopTekst, knopId){
   openModal(titel, '<div class="lf">'+body+'</div>', knopTekst ? '<button type="button" class="btn btn-primary lf-knop" id="'+knopId+'">'+knopTekst+'</button>' : '');
   var md = document.getElementById('modal');
   if(md) md.classList.add('modal-lf');
-  lfBind(document.getElementById('modal-body'));
+  // Aan de inhoud koppelen, niet aan #modal-body: die blijft bestaan en zou de
+  // luisteraars meenemen naar het volgende venster.
+  lfBind(document.querySelector('#modal-body > .lf'));
 }
 function lfBind(root){
   if(!root) return;
@@ -9852,7 +9884,7 @@ function lfBind(root){
     var doel = document.getElementById(seg.getAttribute('data-lf-seg'));
     seg.querySelectorAll('button').forEach(function(b){
       b.addEventListener('click', function(){
-        if(doel) doel.value = b.getAttribute('data-waarde');
+        if(doel){ doel.value = b.getAttribute('data-waarde'); doel.dispatchEvent(new Event('change', {bubbles:true})); }
         seg.querySelectorAll('button').forEach(function(x){ var aan = x===b; x.classList.toggle('aan', aan); x.setAttribute('aria-checked', aan); });
       });
     });
@@ -9888,6 +9920,37 @@ function _lfBindKies(root){
     rij.addEventListener('click', open);
     rij.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } });
   });
+}
+// Afwijzen (overuren, onkosten): samenvatting, snelle redenen en een eigen toelichting.
+// De reden komt in een apart veld; de notitie van de medewerker blijft staan.
+function lfAfwijzen(o){
+  var b = o.persoon + o.samenvatting;
+  b += '<div class="lf-groep">Reden</div><div class="lf-chips">';
+  o.redenen.forEach(function(r){ b += '<button type="button" aria-pressed="false">'+esc(r)+'</button>'; });
+  b += '</div><textarea class="lf-notitie lf-reden" id="lf-afwijs-reden" rows="2" placeholder="Of typ zelf een reden (optioneel)"></textarea>';
+  if(o.melding) b += '<p class="lf-uitleg">'+esc(o.naam)+' krijgt een melding met de reden. De eigen notitie blijft staan.</p>';
+  lfOpen(o.titel, b, 'Afwijzen', 'lf-afwijs-ok');
+  document.getElementById('lf-afwijs-ok').classList.add('lf-knop-rood');
+  var tekst = document.getElementById('lf-afwijs-reden');
+  bindAutoGrow(tekst);
+  document.querySelectorAll('#modal-body .lf-chips button').forEach(function(c){
+    c.addEventListener('click', function(){ var aan = !c.classList.contains('aan'); c.classList.toggle('aan', aan); c.setAttribute('aria-pressed', aan); });
+  });
+  document.getElementById('lf-afwijs-ok').addEventListener('click', function(){
+    var gekozen = [].map.call(document.querySelectorAll('#modal-body .lf-chips button.aan'), function(c){ return c.textContent; });
+    var reden = [gekozen.join(', '), tekst.value.trim()].filter(Boolean).join(' — ');
+    closeModal();
+    o.bij(reden);
+  });
+}
+function _lfAfwijsPersoon(rec){
+  var m = getMed(rec.medId);
+  return lfPersoonVast(m ? (m.voornaam+' '+m.achternaam) : 'Medewerker', rec.aangemaaktOp ? 'Ingediend op '+_lfDatum(rec.aangemaaktOp) : '');
+}
+function _lfOpdrachtNaam(opId){
+  if(!opId) return '';
+  var op = (APP.opdrachten||[]).find(function(x){ return String(x.id)===String(opId); });
+  return op ? (op.klantNaam||'Opdracht') : '';
 }
 function lfKeuzelijst(titel, sel){
   var oud = document.getElementById('lf-pk'); if(oud) oud.remove();
@@ -21528,21 +21591,15 @@ function keurOveruren(id, status) {
     return;
   }
 
-  // Afwijzing via custom modal
+  // Afwijzing via het afwijs-venster
   if (status === 'afgewezen') {
-    var b='<div class="form-group">'+
-      '<label style="font-size:13px;color:var(--muted);margin-bottom:8px;display:block">Geef een reden voor de afwijzing (optioneel):</label>'+
-      '<textarea class="input" id="ou-afwijs-reden" rows="3" placeholder="Bijv. Niet van toepassing, al gecompenseerd..." style="resize:vertical"></textarea>'+
-      '</div>';
-    var f='<button class="btn btn-ghost" id="ou-afwijs-ann">Annuleren</button>'+
-         '<button class="btn btn-primary" id="ou-afwijs-bev" style="background:var(--red)">✗ Afwijzen</button>';
-    openModal('Overuren afwijzen', b, f);
-    document.getElementById('ou-afwijs-ann').addEventListener('click', closeModal);
-    document.getElementById('ou-afwijs-bev').addEventListener('click', function(){
-      var reden = document.getElementById('ou-afwijs-reden').value.trim();
-      closeModal();
-      _voerKeuringOveruren(id, 'afgewezen', reden);
-    });
+    var _m = getMed(o.medId), _op = _lfOpdrachtNaam(o.opdrachtId);
+    var sam = '<div class="lf-kaart">'+lfRij(ICO.kalender, 'Datum', esc(_lfDatum(o.datum)))+lfRij(ICO.clock, 'Aantal uren', '<b class="mono">'+_hrGetal(o.uren)+' u</b>')
+      +(_op ? lfRij(ICO.clipboard, 'Opdracht', esc(_op)) : '')+(o.omschrijving ? lfRij(ICO.edit, 'Omschrijving', esc(o.omschrijving)) : '')+'</div>';
+    lfAfwijzen({ titel:'Overuren afwijzen', persoon:_lfAfwijsPersoon(o), samenvatting:sam, naam:_m ? _m.voornaam : 'De medewerker',
+      melding: typeof stuurNotificatie==='function' && magNotificatie('overuren','afgewezen'),
+      redenen:['Niet afgesproken','Al gecompenseerd','Aantal uren klopt niet','Valt binnen werktijd'],
+      bij:function(reden){ _voerKeuringOveruren(id, 'afgewezen', reden); } });
     return;
   }
 
@@ -21555,7 +21612,8 @@ function keurOveruren(id, status) {
 function _voerKeuringOveruren(id, status, reden) {
   var o = APP.overuren.find(function(x){return String(x.id)===String(id);}); if(!o) return;
 
-  if (reden) o.notitie = reden;
+  // De reden in een eigen veld: de notitie van de medewerker blijft staan.
+  if (status === 'afgewezen') o.afwijsReden = reden || null;
 
   // Compensatie → voeg uren toe aan verlofsaldo
   if (status === 'gecompenseerd' && o.status !== 'gecompenseerd') {
@@ -21629,6 +21687,7 @@ function openOverurenPanel(id) {
 
   if(o.omschrijving) { h += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;font-weight:600">Omschrijving</div><div style="font-size:13px">'+esc(o.omschrijving)+'</div></div>'; }
   if(o.notitie)      { h += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;font-weight:600">Notitie</div><div style="font-size:13px">'+esc(o.notitie)+'</div></div>'; }
+  if(o.afwijsReden)  { h += '<div class="lf-afwijs"><div>Reden afwijzing</div><div>'+esc(o.afwijsReden)+'</div></div>'; }
 
   // Acties
   h += '<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px;margin-top:4px">';
@@ -22046,19 +22105,14 @@ function keurOnkosten(id,status){
     return;
   }
   if(status==='afgewezen'){
-    var b='<div class="form-group">'+
-      '<label style="font-size:13px;color:var(--muted);margin-bottom:8px;display:block">Geef een reden voor de afwijzing (optioneel):</label>'+
-      '<textarea class="input" id="ok-afwijs-reden" rows="3" placeholder="Bijv. Bon ontbreekt, bedrag klopt niet..." style="resize:vertical"></textarea>'+
-      '</div>';
-    var f='<button class="btn btn-ghost" id="ok-afwijs-ann">Annuleren</button>'+
-         '<button class="btn btn-primary" id="ok-afwijs-bev" style="background:var(--red)">✗ Afwijzen</button>';
-    openModal('Onkosten afwijzen', b, f);
-    document.getElementById('ok-afwijs-ann').addEventListener('click', closeModal);
-    document.getElementById('ok-afwijs-bev').addEventListener('click', function(){
-      var reden = document.getElementById('ok-afwijs-reden').value.trim();
-      closeModal();
-      _voerKeuringOnkosten(id, 'afgewezen', reden);
-    });
+    var _m = getMed(o.medId), _op = _lfOpdrachtNaam(o.opdrachtId);
+    var _bon = (o.bonnen && o.bonnen.length && String(o.bonnen[0]).indexOf('data:application/pdf')!==0) ? '<img class="lf-bon-klein" src="'+esc(o.bonnen[0])+'" alt="Bon">' : (o.bonnen && o.bonnen.length ? o.bonnen.length+(o.bonnen.length===1?' bon':' bonnen') : 'Geen');
+    var sam = '<div class="lf-som"><span aria-hidden="true">€</span><b>'+esc((Number(o.bedrag)||0).toLocaleString('nl-NL',{minimumFractionDigits:2,maximumFractionDigits:2}))+'</b><small>'+esc([o.categorie, _lfDatum(o.datum)].filter(Boolean).join(' · '))+'</small></div>'
+      + '<div class="lf-kaart">'+(_op ? lfRij(ICO.clipboard, 'Opdracht', esc(_op)) : '')+(o.omschrijving ? lfRij(ICO.edit, 'Omschrijving', esc(o.omschrijving)) : '')+lfRij(ICO.foto, 'Bonnen', _bon)+'</div>';
+    lfAfwijzen({ titel:'Onkosten afwijzen', persoon:_lfAfwijsPersoon(o), samenvatting:sam, naam:_m ? _m.voornaam : 'De medewerker',
+      melding: typeof stuurNotificatie==='function' && magNotificatie('onkosten','afgewezen'),
+      redenen:['Bon ontbreekt','Bedrag klopt niet','Geen zakelijke kosten','Dubbel ingediend'],
+      bij:function(reden){ _voerKeuringOnkosten(id, 'afgewezen', reden); } });
     return;
   }
   _voerKeuringOnkosten(id, status, null);
@@ -22066,7 +22120,8 @@ function keurOnkosten(id,status){
 
 function _voerKeuringOnkosten(id, status, reden){
   var o=APP.onkosten.find(function(x){return String(x.id)===String(id);}); if(!o) return;
-  if(reden) o.notitie=reden;
+  // De reden in een eigen veld: de notitie van de medewerker blijft staan.
+  if(status==='afgewezen') o.afwijsReden=reden||null;
   o.status=status; o.beoordeeldOp=vandaagISO(); o.beoordeeldDoor=APP.profiel?APP.profiel.naam:'';
   dbSaveItem('onkosten',o.id,o); renderOnkosten();
   toast({goedgekeurd:'Goedgekeurd',afgewezen:'Afgewezen',uitbetaald:'Uitbetaald'}[status]||status,'success');
@@ -22100,6 +22155,7 @@ function openOnkostenPanel(id){
   if(ops){h+='<div style="background:rgba(74,108,247,.08);border:1px solid rgba(74,108,247,.2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px">GEKOPPELDE OPDRACHT</div><div style="font-size:13px;font-weight:600">'+esc(ops.klantNaam||'—')+'</div><div style="font-size:12px;color:var(--muted)">'+fmtD(ops.datum)+'</div></div>';}
   if(o.omschrijving)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Omschrijving</div><div style="font-size:13px">'+esc(o.omschrijving)+'</div></div>';
   if(o.notitie)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Notitie</div><div style="font-size:13px">'+esc(o.notitie)+'</div></div>';
+  if(o.afwijsReden)h+='<div class="lf-afwijs"><div>Reden afwijzing</div><div>'+esc(o.afwijsReden)+'</div></div>';
   // Bonnen/foto's
   if(o.bonnen&&o.bonnen.length){
     h+='<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:8px">Bonnen ('+o.bonnen.length+')</div>';
