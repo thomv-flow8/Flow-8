@@ -11511,20 +11511,30 @@ function openMedModal(id) {
   var customPicker = document.getElementById('mf-kleur-custom');
   if(customPicker) customPicker.addEventListener('input', function(){ _setKleur(customPicker.value); });
 
+  // De medewerker zoals hij nu in het formulier staat (uren per week en rooster), zodat de
+  // verlofregel met zijn eigen werkdag rekent in plaats van met een vaste 8 uur.
+  function _mfMedNu() {
+    var w1 = {}, w2 = {};
+    document.querySelectorAll('.wr-uren[data-week="1"]').forEach(function(inp){ w1[inp.dataset.dag] = parseFloat(inp.value)||0; });
+    document.querySelectorAll('.wr-uren[data-week="2"]').forEach(function(inp){ w2[inp.dataset.dag] = parseFloat(inp.value)||0; });
+    var pat = document.querySelector('input[name="wr-patroon"]:checked');
+    var uurEl = document.getElementById('mf-uur');
+    return { contractUren: (uurEl && parseInt(uurEl.value)) || 40, werkrooster: { patroon: pat ? pat.value : 'week', week1: w1, week2: w2 } };
+  }
   // Live verlof berekening
   function updateVerlofCalc() {
     var basis = parseFloat(document.getElementById('mf-vb').value); if(isNaN(basis)) basis=(APP.teamInstellingen&&APP.teamInstellingen.verlofBasis!=null?APP.teamInstellingen.verlofBasis:25);
     var uren  = parseInt(document.getElementById('mf-uur').value) || 40;
     var dagen = Math.round((basis * uren / 40) * 10) / 10;
-    var totalUren = Math.round(dagen * 8 * 10) / 10;
+    var totalUren = verlofDagenNaarUren(dagen, _mfMedNu());
     var el = document.getElementById('mf-verlof-calc');
-    if (el) el.innerHTML = '<strong>' + dagen + ' dagen</strong> bij ' + uren + 'u/week &nbsp;·&nbsp; <strong>' + totalUren + ' uur</strong> totaal';
+    if (el) el.innerHTML = '<strong>' + _hrGetal(dagen) + ' dagen</strong> bij ' + uren + 'u/week &nbsp;·&nbsp; <strong>' + _hrGetal(totalUren) + ' uur</strong> totaal';
   }
   function updateSaldoUren() {
     // Het veld staat in uren; hiernaast tonen we de dagen-indicatie.
     var saldoUren = parseFloat(document.getElementById('mf-saldo').value) || 0;
     var el = document.getElementById('mf-saldo-uren');
-    if (el) el.textContent = '≈ ' + String(verlofUrenNaarDagen(saldoUren, m)).replace('.',',') + ' dg';
+    if (el) el.textContent = '≈ ' + _hrGetal(verlofUrenNaarDagen(saldoUren, _mfMedNu())) + ' dg';
   }
   var mfVb    = document.getElementById('mf-vb');
   var mfUur   = document.getElementById('mf-uur');
@@ -11584,6 +11594,8 @@ function openMedModal(id) {
     }
     var elG = document.getElementById('wr-gemiddeld');
     if(elG) elG.innerHTML = 'Gemiddeld <strong>'+gem+'u/week</strong> · <strong>'+Math.round(gem/5*10)/10+'u per dag</strong>';
+    // Ander rooster = andere werkdag: de verlofregel rekent mee
+    updateVerlofCalc(); updateSaldoUren();
   }
   document.querySelectorAll('.wr-uren').forEach(function(inp){
     inp.addEventListener('input', _updateWrTotalen);
