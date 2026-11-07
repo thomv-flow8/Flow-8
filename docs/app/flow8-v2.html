@@ -381,6 +381,7 @@ label.lf-rij{cursor:pointer}
 .lf-tel:empty{display:none!important}
 .lf-stip{width:10px;height:10px;border-radius:50%}
 .lf-klap-b > .lf-zoek-res + .lf-rij,.lf-klap-b > #art-doc-lijst + .lf-rij{border-top:1px solid var(--border)}
+.lf-doc-rij > .lf-l .lf-tekst{text-align:left!important;width:100%;padding:4px 0}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
 .lf-wis:hover{background:var(--red);color:#fff}
@@ -9926,7 +9927,16 @@ function lfOpen(titel, body, knopTekst, knopId, opts){
   // luisteraars meenemen naar het volgende venster.
   lfBind(document.querySelector('#modal-body > .lf'));
 }
-function lfBind(root){
+// Lijststijl-venster bóven een open modal (zie openBovenModal): het formulier eronder blijft
+// staan. Geeft { el, sluit } terug, net als openBovenModal.
+function lfBovenOpen(titel, body, knopTekst, knopId){
+  var v = openBovenModal(titel, '<div class="lf">'+body+'</div>', knopTekst ? '<button type="button" class="btn btn-primary lf-knop" id="'+knopId+'">'+knopTekst+'</button>' : '');
+  var md = (v.el && v.el.id !== 'modal-overlay') ? v.el.querySelector('.modal') : document.getElementById('modal');
+  if(md) md.classList.add('modal-lf');
+  lfBind(md ? md.querySelector('.modal-body > .lf') : null, md ? md.querySelector('.lf-knop') : null);
+  return v;
+}
+function lfBind(root, knopEl){
   if(!root) return;
   _lfBindKies(root);
   root.querySelectorAll('[data-lf-stap]').forEach(function(b){
@@ -9951,7 +9961,7 @@ function lfBind(root){
   });
   // De knop wordt pas actief als de verplichte velden een waarde hebben; het opslaan
   // controleert daarnaast zelf nog, met een melding.
-  var knop = document.querySelector('#modal-footer .lf-knop');
+  var knop = knopEl || document.querySelector('#modal-footer .lf-knop');
   var check = function(){
     if(!knop) return;
     knop.disabled = [].some.call(root.querySelectorAll('[required]'), function(el){ return !String(el.value||'').trim(); });
@@ -12142,56 +12152,51 @@ function openSkModal(id) {
   var conOpts = getBasisContracten().map(function(c){ return [c.code, c.code + ' — ' + c.naam.replace('Contract '+c.code+' - ','').replace('Contract '+c.code+' — ','')] });
   var _kCt = getContract(k.contractType || k.contractId);
 
-  var b='<div class="form-grid">';
-  // Readonly: naam + adres (van debiteur)
-  b+='<div style="grid-column:1/-1;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-bottom:4px">';
-  b+='<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600">DEBITEUR (alleen-lezen)</div>';
-  b+='<div style="font-weight:700;font-size:14px">'+esc(k.naam)+'</div>';
-  if(k.adres||k.plaats) b+='<div style="font-size:12px;color:var(--muted);margin-top:2px">'+esc((k.adres||'')+' · '+(k.postcode||'')+' '+(k.plaats||''))+'</div>';
-  if(deb) b+='<div style="font-size:11px;color:var(--accent);margin-top:4px;cursor:pointer" onclick="closeModal();openDebPanel(\''+deb.id+'\')">→ Open debiteur</div>';
-  b+='</div>';
-  // Bewerkbaar: service-specifieke velden
-  b+=fg('Contracttype',fsel('sk-con',conOpts,_kCt?_kCt.code:k.contractType));
-  b+=fg('Uitvoerder','<select class="input" id="sk-uitvoerder"><option value="intern"'+(k.uitvoerder!=='extern'?' selected':'')+'>Homa intern</option><option value="extern"'+(k.uitvoerder==='extern'?' selected':'')+'>Extern / ZZP</option></select>');
-  b+=aanvullingKeuzeHtml('sk-aanvulling', klantAanvulling(k));
-  var _rgS = getRegisterInst();
-  b+=fg(esc(_rgS.veld1Label),finp('sk-pt','text',k.pomptype,''));
-  b+=fg(esc(_rgS.veld2Label),finp('sk-bs','text',k.besturing,''));
-  b+=fg('Laatste uitvoeringsdatum',finp('sk-ld','date',k.laatsteDatum,''));
-  b+=fg('Tijdsduur servicebeurt (uren)', '<div style="display:flex;align-items:center;gap:8px">'
-    + '<input class="input" type="number" id="sk-duur" value="'+(k.duurUren||'')+'" min="0.5" max="24" step="0.5" placeholder="Bijv. 4" style="width:100px">'
-    + '<span style="font-size:13px;color:var(--muted)">uur — specifiek voor deze installatie</span>'
-    + '</div>');
-  b+=fgf('Werkomschrijving',ftxtAuto('sk-wo',k.werkomschrijving));
-  b+=fgf('Notitie',ftxtAuto('sk-nt',k.notitie));
-  b+='</div>';
+  // Bovenaan de klant zelf (alleen-lezen: naam en adres komen van de debiteur).
+  var b = _lfKlantKop({naam:k.naam, nummer:deb ? (deb.nr||'') : (k.debNr||'')});
+  var _skAdres = [k.adres, [k.postcode, k.plaats].filter(Boolean).join(' ')].filter(Boolean).join(' \u00b7 ');
+  if(_skAdres || deb) b += '<p class="lf-uitleg" style="padding:8px 2px 0">'+esc(_skAdres)+(deb ? (_skAdres?' \u00b7 ':'')+'<button type="button" class="lf-link" onclick="closeModal();openDebPanel(\''+deb.id+'\')">Open debiteur</button>' : '')+'</p>';
 
-  // Planningvoorkeur sectie
-  b+='<div style="margin-top:14px;padding:12px 14px;background:rgba(74,108,247,.06);border:1px solid rgba(74,108,247,.2);border-radius:8px">';
-  b+='<div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--accent)">'+ICO.kalender+' Planningvoorkeur</div>';
-  b+='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Ankerdatum voorkomt drift bij uitstel. De volgende beurt wordt altijd berekend als een veelvoud van het interval vanaf de ankerdatum.</div>';
-  b+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
-  b+=fg('Ankerdatum',finp('sk-anker','date',k.planningAnker||'',''));
-  b+=fg('Voorkeurweek (1-52)','<input class="input" type="number" id="sk-week" min="1" max="52" value="'+esc(String(k.voorkeurWeek||''))+'" placeholder="Bijv. 28">');
-  b+=fg('Voorkeurdag','<select class="input" id="sk-dag"><option value="">— Geen voorkeur —</option>'
-    +'<option value="ma"'+(k.voorkeurDag==='ma'?' selected':'')+'>Maandag</option>'
-    +'<option value="di"'+(k.voorkeurDag==='di'?' selected':'')+'>Dinsdag</option>'
-    +'<option value="wo"'+(k.voorkeurDag==='wo'?' selected':'')+'>Woensdag</option>'
-    +'<option value="do"'+(k.voorkeurDag==='do'?' selected':'')+'>Donderdag</option>'
-    +'<option value="vr"'+(k.voorkeurDag==='vr'?' selected':'')+'>Vrijdag</option>'
-    +'</select>');
-  b+='</div>';
-  b+='<label style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:9px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);cursor:pointer">'
-    +'<input type="checkbox" id="sk-planvast"'+(k.planVast?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0">'
-    +'<div><div style="font-size:13px;font-weight:600">Vaste afspraak</div>'
-    +'<div style="font-size:11px;color:var(--muted)">De jaarplanner verschuift deze klant nooit naar een andere maand.</div></div>'
-    +'</label>';
-  b+='</div>';
-  var f='<button class="btn btn-ghost" id="skmod-cancel">Annuleren</button><button class="btn btn-primary" id="skmod-save">Opslaan</button>';
-  openModal('Serviceklant bewerken',b,f);
+  b += '<div class="lf-groep">Contract</div><div class="lf-blok-kaart"><div class="lf-twee">';
+  b += lfKies(ICO.clipboard, 'Contracttype', fsel('sk-con',conOpts,_kCt?_kCt.code:k.contractType));
+  b += lfKies(ICO.user, 'Uitvoerder', '<select class="input" id="sk-uitvoerder"><option value="intern"'+(k.uitvoerder!=='extern'?' selected':'')+'>Intern</option><option value="extern"'+(k.uitvoerder==='extern'?' selected':'')+'>Extern</option></select>');
+  b += '</div>';
+  var _skAanv = getAanvullingen();
+  if(_skAanv.length){
+    var _skAanvHuidig = klantAanvulling(k);
+    b += lfKies(ICO.flag, 'Aanvulling', '<select class="input" id="sk-aanvulling"><option value="">Geen</option>'
+      + _skAanv.map(function(c){ return '<option value="'+esc(c.code)+'"'+(String(_skAanvHuidig||'')===String(c.code)?' selected':'')+'>'+esc(aanvullingLabel(c.code))+'</option>'; }).join('')+'</select>', {sub:'Geldt bovenop het basiscontract'});
+  }
+  b += '<div class="lf-twee">';
+  b += lfRij(ICO.kalender, 'Laatste uitvoering', '<input class="lf-veld" type="date" id="sk-ld" value="'+esc(k.laatsteDatum||'')+'">', {voor:'sk-ld'});
+  b += lfRij(ICO.clock, 'Serviceduur', '<span class="lf-stap"><button type="button" data-lf-stap="-0.5" aria-label="Halfuur minder">'+_LF_MIN+'</button><input type="number" inputmode="decimal" id="sk-duur" value="'+(k.duurUren||'')+'" min="0.5" max="24" step="0.5" placeholder="0"><button type="button" data-lf-stap="0.5" aria-label="Halfuur meer">'+_LF_PLUS+'</button></span><span class="lf-hint">uur</span>', {voor:'sk-duur'});
+  b += '</div></div>';
+
+  var _rgS = getRegisterInst();
+  var _skT = function(id2, waarde, ph){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'">'; };
+  b += '<div class="lf-groep">Installatie en werk</div><div class="lf-blok-kaart"><div class="lf-twee">';
+  b += lfRij(_LF_PAKKET, esc(_rgS.veld1Label), _skT('sk-pt', k.pomptype, ''), {voor:'sk-pt'});
+  b += lfRij(ICO.settings, esc(_rgS.veld2Label), _skT('sk-bs', k.besturing, ''), {voor:'sk-bs'});
+  b += '</div>';
+  b += lfRij(ICO.edit, 'Werkomschrijving', '<textarea class="lf-notitie" id="sk-wo" rows="2" placeholder="Wat er bij een beurt gebeurt">'+esc(k.werkomschrijving||'')+'</textarea>', {blok:true, voor:'sk-wo'});
+  b += lfRij(ICO.info, 'Notitie', '<textarea class="lf-notitie" id="sk-nt" rows="2" placeholder="Optioneel">'+esc(k.notitie||'')+'</textarea>', {blok:true, voor:'sk-nt'});
+  b += '</div>';
+
+  b += '<div class="lf-sub-kaart">';
+  b += '<div class="lf-sub-kt">'+ICO.kalender+' Planningvoorkeur</div>';
+  b += '<p>Met een ankerdatum schuift de volgende beurt niet op bij uitstel: de planning rekent altijd een veelvoud van het interval vanaf deze datum.</p>';
+  b += '<div class="lf-drie">';
+  b += lfRij('', 'Ankerdatum', '<input class="lf-veld" type="date" id="sk-anker" value="'+esc(k.planningAnker||'')+'">', {voor:'sk-anker'});
+  b += lfRij('', 'Voorkeurweek', '<input class="lf-veld lf-nr2" type="number" inputmode="numeric" id="sk-week" min="1" max="52" value="'+esc(String(k.voorkeurWeek||''))+'" placeholder="1-52">', {voor:'sk-week'});
+  b += lfKies('', 'Voorkeurdag', '<select class="input" id="sk-dag"><option value="">Geen voorkeur</option>'
+    + [['ma','Maandag'],['di','Dinsdag'],['wo','Woensdag'],['do','Donderdag'],['vr','Vrijdag']].map(function(o){ return '<option value="'+o[0]+'"'+(k.voorkeurDag===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>');
+  b += '</div>';
+  b += lfRij('', 'Vaste afspraak', lfSchakel('sk-planvast', !!k.planVast), {voor:'sk-planvast', sub:'De jaarplanner verschuift deze klant nooit naar een andere maand'});
+  b += '</div>';
+
+  lfOpen('Serviceklant bewerken', b, 'Opslaan', 'skmod-save', {groot:true});
   bindAutoGrow(document.getElementById('sk-wo'));
   bindAutoGrow(document.getElementById('sk-nt'));
-  document.getElementById('skmod-cancel').addEventListener('click',closeModal);
   document.getElementById('skmod-save').addEventListener('click',function(){saveSk(id);});
 }
 
@@ -12585,13 +12590,11 @@ function bindMemoEvents(debId) {
   });
 }
 function openMemoModal(debId) {
-  var b = '<div class="form-grid">';
-  b += fg('Type', '<select class="input" id="memo-type"><option value="waarschuwing">Waarschuwing</option><option value="info">Info</option></select>');
-  b += '<div style="grid-column:1/-1">'+fg('Aantekening *', '<textarea id="memo-tekst" class="input" rows="4" placeholder="Bijv. Heeft nog een openstaande rekening — niet langsgaan voor betaling." style="resize:vertical"></textarea>')+'</div>';
-  b += '</div>';
-  var f = '<button class="btn btn-ghost" id="memo-cancel">Annuleren</button><button class="btn btn-primary" id="memo-save">Opslaan</button>';
-  openModal('Aantekening toevoegen', b, f);
-  document.getElementById('memo-cancel').addEventListener('click', closeModal);
+  var b = lfRij(ICO.warn, 'Soort', '<input type="hidden" id="memo-type" value="waarschuwing"><span class="lf-seg" role="radiogroup" aria-label="Soort aantekening" data-lf-seg="memo-type">'
+    + '<button type="button" role="radio" data-waarde="waarschuwing" aria-checked="true" class="aan">Waarschuwing</button>'
+    + '<button type="button" role="radio" data-waarde="info" aria-checked="false">Info</button></span>');
+  b += lfRij(ICO.edit, 'Aantekening', '<textarea class="lf-notitie" id="memo-tekst" rows="4" placeholder="Bijv. Heeft nog een openstaande rekening; niet langsgaan voor betaling." required></textarea>', {blok:true, verplicht:true, voor:'memo-tekst'});
+  lfOpen('Aantekening toevoegen', b, 'Opslaan', 'memo-save');
   document.getElementById('memo-save').addEventListener('click', function(){
     var tekst = document.getElementById('memo-tekst').value.trim();
     if(!tekst){toast('Vul een aantekening in','error');return;}
@@ -13583,26 +13586,20 @@ function openSnelDebiteurModal(naam, onKlaar) {
   var vAdr = opAdr ? opAdr.value.trim() : '';
   var vPl = opPl ? opPl.value.trim() : '';
 
-  var b = '<div class="form-grid">';
-  b += fgf('Naam *', finp('sd-nm','text', naam||'', 'Bedrijfsnaam'));
-  b += fgf('Debiteurnummer *', finp('sd-nr','text','', 'Bijv. 111500'));
-  b += fgf('Postcode &amp; huisnummer', '<div style="display:flex;gap:6px"><input class="input" id="sd-pc" value="'+esc(vPc)+'" placeholder="1234 AB" style="flex:3;min-width:0"><input class="input" id="sd-hnr" value="'+esc(vHnr)+'" placeholder="Nr" style="flex:1;min-width:0"></div>');
-  b += fgf('Adres', finp('sd-adr','text', vAdr, 'Wordt automatisch ingevuld'));
-  b += '<div style="display:flex;gap:10px">';
-  b += '<div style="flex:1">'+fgf('Plaats', finp('sd-pl','text', vPl, ''))+'</div>';
-  b += '<div style="flex:1">'+fgf('Contactpersoon', finp('sd-ct','text','', ''))+'</div>';
-  b += '</div>';
-  b += '<div style="display:flex;gap:10px">';
-  b += '<div style="flex:1">'+fgf('E-mail', finp('sd-em','email','', ''))+'</div>';
-  b += '<div style="flex:1">'+fgf('Telefoon', finp('sd-tel','text','', ''))+'</div>';
-  b += '</div>';
-  b += '</div>';
-
-  var f = '<button class="btn btn-ghost" id="sd-cancel">Annuleren</button>'
-        + '<button class="btn btn-primary" id="sd-save">Aanmaken &amp; koppelen</button>';
+  var _sdT = function(id2, waarde, ph, type, extra){ return '<input class="lf-tekst" type="'+(type||'text')+'" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var b = '<p class="lf-uitleg" style="padding-top:0">Alleen de basis; aanvullen kan later in Debiteuren.</p>';
+  b += lfRij(ICO.gebouw, 'Naam', _sdT('sd-nm', naam||'', 'Bedrijfsnaam', 'text', ' required'), {verplicht:true, voor:'sd-nm'});
+  b += lfRij(ICO.flag, 'Debiteurnummer', _sdT('sd-nr', '', 'Bijv. 111500', 'text', ' required'), {verplicht:true, voor:'sd-nr'});
+  b += lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="sd-pc" value="'+esc(vPc)+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="sd-hnr" value="'+esc(vHnr)+'" placeholder="Nr." aria-label="Huisnummer" inputmode="text">');
+  b += lfRij('', 'Adres', _sdT('sd-adr', vAdr, 'Wordt automatisch ingevuld'), {voor:'sd-adr'});
+  b += lfRij('', 'Plaats', _sdT('sd-pl', vPl, ''), {voor:'sd-pl'});
+  b += '<div class="lf-groep">Contact</div>';
+  b += lfRij(ICO.user, 'Contactpersoon', _sdT('sd-ct', '', 'Optioneel'), {voor:'sd-ct'});
+  b += lfRij(_LF_TEL, 'Telefoon', _sdT('sd-tel', '', 'Optioneel', 'tel', ' inputmode="tel"'), {voor:'sd-tel'});
+  b += lfRij(_LF_MAIL, 'E-mail', _sdT('sd-em', '', 'Optioneel', 'email', ' inputmode="email" autocapitalize="off"'), {voor:'sd-em'});
 
   // Boven het opdrachtformulier openen: openModal zou het formulier vervangen
-  var _sdVenster = openBovenModal('Nieuwe debiteur', '<div style="font-size:12px;color:var(--muted);margin-bottom:16px">Alleen de basis — later aanvullen kan in Debiteuren</div>'+b, f);
+  var _sdVenster = lfBovenOpen('Nieuwe debiteur', b, 'Aanmaken en koppelen', 'sd-save');
 
   // PDOK adres-aanvulling bij postcode/huisnummer
   function _sdLookup(){
@@ -13616,7 +13613,6 @@ function openSnelDebiteurModal(naam, onKlaar) {
   var sdPc = document.getElementById('sd-pc'); if(sdPc) sdPc.addEventListener('blur', _sdLookup);
   var sdHnr = document.getElementById('sd-hnr'); if(sdHnr) sdHnr.addEventListener('blur', _sdLookup);
 
-  document.getElementById('sd-cancel').addEventListener('click', _sdVenster.sluit);
   document.getElementById('sd-save').addEventListener('click', function(){
     wisValidatieStijlen();
     var nm = document.getElementById('sd-nm').value.trim();
@@ -20464,23 +20460,16 @@ function openOpdrachtModal(id, prefill) {
   var addLocBtn = document.getElementById('op-add-locatie');
   if(addLocBtn) addLocBtn.addEventListener('click', function(){
     var debId = (document.getElementById('op-klant')||{}).value;
-    var b2 = '<div class="form-grid">';
-    b2 += fgf('Naam locatie *', finp('nloc-naam','text','','Bijv. Hoofdkantoor, Locatie Noord'));
-    b2 += fgf('Postcode &amp; huisnummer', '<div style="display:flex;gap:6px"><input class="input" id="nloc-pc" placeholder="1234 AB" style="flex:2;min-width:0"><input class="input" id="nloc-huisnr" placeholder="Huisnr" style="flex:1;min-width:0" title="Huisnummer voor adres-aanvulling"></div>');
-    b2 += fgf('Adres', finp('nloc-adres','text','','Wordt automatisch ingevuld'));
-    b2 += fg('Plaats', finp('nloc-pl','text','','bijv. Rotterdam'));
-    b2 += fg('Contactpersoon', finp('nloc-ct','text','',''));
-    b2 += fg('Telefoon', finp('nloc-tel','text','',''));
-    b2 += '</div>';
-    b2 += '<label style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-    b2 += '<input type="checkbox" id="nloc-standaard" style="width:15px;height:15px;accent-color:var(--accent)">';
-    b2 += '<div><div style="font-size:13px;font-weight:600">Als standaard instellen</div>';
-    b2 += '<div style="font-size:11px;color:var(--muted)">Dit adres wordt automatisch ingevuld bij nieuwe opdrachten</div></div>';
-    b2 += '</label>';
-    var f2 = '<button class="btn btn-ghost" id="nloc-cancel">Annuleren</button><button class="btn btn-primary" id="nloc-save">Toevoegen</button>';
+    var _nlT = function(id2, ph, type, extra){ return '<input class="lf-tekst" type="'+(type||'text')+'" id="'+id2+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+    var b2 = lfRij(ICO.gebouw, 'Naam', _nlT('nloc-naam', 'Bijv. Hoofdkantoor, Locatie Noord'), {voor:'nloc-naam'});
+    b2 += lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="nloc-pc" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="nloc-huisnr" placeholder="Nr." aria-label="Huisnummer" inputmode="text">');
+    b2 += lfRij('', 'Adres', _nlT('nloc-adres', 'Wordt automatisch ingevuld', 'text', ' required'), {verplicht:true, voor:'nloc-adres'});
+    b2 += lfRij('', 'Plaats', _nlT('nloc-pl', 'Bijv. Rotterdam'), {voor:'nloc-pl'});
+    b2 += lfRij(ICO.user, 'Contactpersoon', _nlT('nloc-ct', 'Optioneel'), {voor:'nloc-ct'});
+    b2 += lfRij(_LF_TEL, 'Telefoon', _nlT('nloc-tel', 'Optioneel', 'tel', ' inputmode="tel"'), {voor:'nloc-tel'});
+    b2 += lfRij(_LF_STER, 'Standaardlocatie', lfSchakel('nloc-standaard', false), {voor:'nloc-standaard', sub:'Werkadres bij nieuwe opdrachten voor deze klant'});
     // Boven het opdrachtformulier openen: openModal zou het formulier vervangen
-    var _nlocVenster = openBovenModal('Nieuwe locatie toevoegen', b2, f2);
-    document.getElementById('nloc-cancel').addEventListener('click', _nlocVenster.sluit);
+    var _nlocVenster = lfBovenOpen('Nieuwe locatie', b2, 'Toevoegen', 'nloc-save');
     // Postcode + huisnummer → adres auto-aanvullen
     function _nlocZoekAdres(){
       var pcEl=document.getElementById('nloc-pc');
@@ -28071,24 +28060,15 @@ function openOnderdeelModal(pompId, ondId) {
   if(!pomp) return;
   var ond = ondId && pomp.onderdelen ? pomp.onderdelen[ondId] : null;
 
-  var b = '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px">';
-  b += fg('Positie', finp('pr-ond-pos','text', ond?ond.positie:'', 'Bijv. 23 of 412.01'));
-  b += fg('Art.-Nr.', finp('pr-ond-art','text', ond?ond.artikelnr:'', 'Bijv. 7340905'));
-  b += '</div>';
-  b += '<div class="form-grid" style="gap:12px;margin-top:12px">';
-  b += fgf('Omschrijving *', finp('pr-ond-omschr','text', ond?ond.omschrijving:'', 'Bijv. SCHNEIDKOPF'));
-  b += fgf('Specificatie', finp('pr-ond-spec','text', ond?ond.specificatie:'', 'Bijv. M1024 A4 GRP (F. BALKEN)'));
-  b += '</div>';
-  b += '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">';
-  b += fg('Aantal', finp('pr-ond-aantal','number', ond?ond.standaardAantal:'1', '1'));
-  b += fg('Eenheid', fsel('pr-ond-eenheid',[{v:'ST',l:'ST (stuks)'},{v:'SET',l:'SET'},{v:'m',l:'m (meter)'},{v:'l',l:'l (liter)'},{v:'kg',l:'kg'},{v:'set',l:'set'}], ond?ond.eenheid:'ST'));
-  b += '</div>';
+  var _odT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var b = lfRij(ICO.edit, 'Omschrijving', _odT('pr-ond-omschr', ond?ond.omschrijving:'', 'Bijv. SCHNEIDKOPF', ' required'), {verplicht:true, voor:'pr-ond-omschr'});
+  b += lfRij('', 'Specificatie', _odT('pr-ond-spec', ond?ond.specificatie:'', 'Bijv. M1024 A4 GRP'), {voor:'pr-ond-spec'});
+  b += lfRij(ICO.pin, 'Positie', _odT('pr-ond-pos', ond?ond.positie:'', 'Bijv. 23 of 412.01'), {voor:'pr-ond-pos'});
+  b += lfRij(_LF_PAKKET, 'Art.-nr.', _odT('pr-ond-art', ond?ond.artikelnr:'', 'Bijv. 7340905'), {voor:'pr-ond-art'});
+  b += lfRij('', 'Aantal', '<span class="lf-stap"><button type="button" data-lf-stap="-1" aria-label="Minder">'+_LF_MIN+'</button><input type="number" inputmode="decimal" id="pr-ond-aantal" value="'+esc(String(ond&&ond.standaardAantal!=null?ond.standaardAantal:1))+'" min="0" step="any"><button type="button" data-lf-stap="1" aria-label="Meer">'+_LF_PLUS+'</button></span>', {voor:'pr-ond-aantal'});
+  b += lfKies('', 'Eenheid', fsel('pr-ond-eenheid',[{v:'ST',l:'ST (stuks)'},{v:'SET',l:'SET'},{v:'m',l:'m (meter)'},{v:'l',l:'l (liter)'},{v:'kg',l:'kg'},{v:'set',l:'set'}], ond?ond.eenheid:'ST'));
 
-  var f = '<button class="btn btn-ghost" id="pr-ond-cancel">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="pr-ond-save">Opslaan</button>';
-  openModal('Onderdeel toevoegen', b, f);
-
-  document.getElementById('pr-ond-cancel').addEventListener('click', closeModal);
+  lfOpen(ond ? 'Onderdeel bewerken' : 'Onderdeel toevoegen', b, 'Opslaan', 'pr-ond-save');
   document.getElementById('pr-ond-save').addEventListener('click', async function(){
     var omschr = document.getElementById('pr-ond-omschr').value.trim();
     if(!omschr) { toast('Omschrijving is verplicht','error'); return; }
@@ -36999,45 +36979,25 @@ function _woToonAanmaakForm(){
   var klantInst = type.klant || {};
   var b = '';
   if(klantInst.aan){
-    b += '<div style="margin-bottom:16px">';
-    b += '<label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Klant</label>';
-    if(s.debId || s.tbvVoorraad){
-      var lbl = s.tbvVoorraad ? 'T.b.v. voorraad (geen klant)' : (s.klantnaam||'Gekozen klant');
-      b += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:8px">';
-      b += '<span style="font-size:13px;font-weight:600'+(s.tbvVoorraad?';font-style:italic;color:var(--muted)':'')+'">'+esc(lbl)+'</span>';
-      b += '<button type="button" class="btn btn-ghost btn-sm" id="wo-klant-wijzig" style="font-size:11px">Wijzigen</button>';
-      b += '</div>';
-    } else {
-      b += '<button type="button" class="btn btn-ghost" id="wo-klant-kies" style="width:100%;justify-content:center"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span style="vertical-align:middle">Klant kiezen</span></button>';
-    }
-    b += '</div>';
+    var _kLbl = s.tbvVoorraad ? 'T.b.v. voorraad (geen klant)' : (s.debId ? (s.klantnaam||'Gekozen klant') : '');
+    b += '<button type="button" class="lf-rij lf-kies" id="'+((s.debId||s.tbvVoorraad)?'wo-klant-wijzig':'wo-klant-kies')+'">'+_lfIco(ICO.gebouw)
+      + '<span class="lf-l">Klant<span class="lf-req" aria-hidden="true">*</span></span><span class="lf-w"><span class="lf-kw'+(_kLbl?'':' leeg')+'">'+esc(_kLbl||'Kies klant')+'</span>'+_LF_CHEV+'</span></button>';
   }
-  b += '<div style="margin-bottom:16px">';
-  b += '<label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Deadline</label>';
-  b += '<input type="date" class="input" id="wo-nieuw-deadline" value="'+esc(s.deadline||'')+'" style="max-width:200px">';
-  b += '</div>';
-  b += '<div style="margin-bottom:16px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="wo-nieuw-prio"'+(s.prioriteit==='hoog'?' checked':'')+' style="width:15px;height:15px;accent-color:var(--red)"><span style="font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:5px"><span style="color:var(--red)">'+ICO.flag+'</span>Hoge prioriteit</span></label></div>';
-  b += '<div style="margin-bottom:16px">';
-  b += '<label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Details (omschrijving werkzaamheden)</label>';
-  b += '<textarea class="input" id="wo-nieuw-details" rows="3" placeholder="Wat moet er gebeuren?" style="width:100%;box-sizing:border-box;resize:vertical">'+esc(s.details||'')+'</textarea>';
-  b += '</div>';
-  b += '<div style="margin-bottom:8px">';
-  b += '<label style="font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px">Documenten</label>';
-  if(s.docs.length){
-    s.docs.forEach(function(d, di){
-      // Naam direct bewerkbaar in de rij (Outsmart-stijl); de aangepaste naam wordt
-      // bij het aanmaken als documentnaam op de werkorder gebruikt.
-      b += '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--surface2);border-radius:8px;margin-bottom:5px">';
-      b += '<input type="text" class="input wo-nieuw-doc-naam" data-di="'+di+'" value="'+esc(d.naam)+'" style="flex:1;min-width:0;font-size:12px;padding:6px 9px">';
-      if(d.file && d.file.size) b += '<span style="font-size:11px;color:var(--muted);white-space:nowrap">'+(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.file.size):(Math.round(d.file.size/1024)+' KB'))+'</span>';
-      b += '<button type="button" class="wo-nieuw-doc-del btn btn-ghost btn-wis" data-di="'+di+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-      b += '</div>';
-    });
-  }
-  b += '<label id="wo-nieuw-doc-drop" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px;border:1.5px dashed var(--border);border-radius:10px;cursor:pointer;text-align:center;transition:all .15s"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="color:var(--muted)"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg><span style="font-size:13px;font-weight:600">Bestand toevoegen</span><span style="font-size:11px;color:var(--muted)">Klik of sleep bestanden hierheen</span><input type="file" id="wo-nieuw-doc-input" multiple style="display:none"></label>';
-  b += '</div>';
-  var f = '<button class="btn btn-ghost" onclick="closeModal()">Annuleren</button><button class="btn btn-primary" id="wo-nieuw-aanmaak">Aanmaken</button>';
-  openModal('Nieuwe '+esc(type.labelEnkelvoud||type.naam||'werkorder'), b, f);
+  b += lfRij(ICO.kalender, 'Deadline', '<input class="lf-veld" type="date" id="wo-nieuw-deadline" value="'+esc(s.deadline||'')+'">', {voor:'wo-nieuw-deadline'});
+  b += lfRij(ICO.flag, 'Hoge prioriteit', lfSchakel('wo-nieuw-prio', s.prioriteit==='hoog'), {voor:'wo-nieuw-prio', sub:'Krijgt een rode vlag in de lijst'});
+  b += lfRij(ICO.edit, 'Details', '<textarea class="lf-notitie" id="wo-nieuw-details" rows="3" placeholder="Wat moet er gebeuren?">'+esc(s.details||'')+'</textarea>', {blok:true, voor:'wo-nieuw-details', sub:'Omschrijving van de werkzaamheden'});
+  b += '<div class="lf-groep">Documenten'+(s.docs.length ? ' \u00b7 '+s.docs.length : '')+'</div>';
+  s.docs.forEach(function(d, di){
+    // Naam direct bewerkbaar in de rij (Outsmart-stijl); de aangepaste naam wordt
+    // bij het aanmaken als documentnaam op de werkorder gebruikt.
+    var grootte = (d.file && d.file.size) ? (typeof _wbFormatBytes==='function' ? _wbFormatBytes(d.file.size) : (Math.round(d.file.size/1024)+' KB')) : '';
+    b += '<div class="lf-rij lf-doc-rij">'+_lfIco(ICO.pdf)
+      + '<span class="lf-l"><input type="text" class="lf-tekst wo-nieuw-doc-naam" data-di="'+di+'" value="'+esc(d.naam)+'" aria-label="Naam document">'+(grootte ? '<small>'+grootte+'</small>' : '')+'</span>'
+      + '<span class="lf-w"><button type="button" class="wo-nieuw-doc-del btn btn-ghost btn-wis" data-di="'+di+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></span></div>';
+  });
+  b += '<label id="wo-nieuw-doc-drop" class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Bestand toevoegen<small class="lf-hint" style="display:block;font-weight:400">Kies of sleep bestanden hierheen</small></span><input type="file" id="wo-nieuw-doc-input" multiple hidden></label>';
+  lfOpen('Nieuwe '+esc(type.labelEnkelvoud||type.naam||'werkorder'), b, 'Aanmaken', 'wo-nieuw-aanmaak');
+  bindAutoGrow(document.getElementById('wo-nieuw-details'));
   var kk = document.getElementById('wo-klant-kies');
   if(kk) kk.addEventListener('click', function(){ _woBewaarFormVeldenTijdelijk(); _woKiesDebiteur(); });
   var kw = document.getElementById('wo-klant-wijzig');
@@ -37085,12 +37045,13 @@ function _woKiesDebiteur(){
   var s = _woNieuwState; if(!s) return;
   var type = s.type, klantInst = type.klant || {};
   var debiteuren = (APP.debiteuren||[]).slice().sort(function(a,b){ return (a.naam||'').localeCompare(b.naam||''); });
-  var b = '<input type="text" id="wo-deb-zoek" class="input" placeholder="Zoek debiteur..." style="margin-bottom:10px;width:100%;box-sizing:border-box" autofocus>';
+  var b = _lfZoek('wo-deb-zoek', 'Zoek op naam of plaats');
   if(klantInst.voorraad){
-    b += '<button type="button" class="btn btn-ghost btn-sm" id="wo-deb-voorraad" style="width:100%;justify-content:center;margin-bottom:10px">T.b.v. voorraad (geen klant)</button>';
+    b += '<button type="button" class="wbx-chip-add" id="wo-deb-voorraad"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/></svg> T.b.v. voorraad (geen klant)</button>';
   }
-  b += '<div id="wo-deb-resultaten" style="max-height:44vh;overflow-y:auto"></div>';
-  openModal('Klant kiezen', b, '<button class="btn btn-ghost" id="wo-deb-terug">Terug</button>');
+  b += '<div id="wo-deb-resultaten"></div>';
+  lfOpen('Klant kiezen', b);
+  document.getElementById('modal-footer').innerHTML = '<button type="button" class="btn btn-ghost lf-knop" id="wo-deb-terug">Terug</button>';
   document.getElementById('wo-deb-terug').addEventListener('click', _woToonAanmaakForm);
   var zoek = document.getElementById('wo-deb-zoek');
   var res = document.getElementById('wo-deb-resultaten');
@@ -37100,15 +37061,11 @@ function _woKiesDebiteur(){
       if(!filter) return true;
       return ((d.naam||'').toLowerCase().indexOf(filter)>=0) || ((d.plaats||'').toLowerCase().indexOf(filter)>=0);
     }).slice(0, 50);
-    if(!lijst.length){ res.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:16px;text-align:center">Geen debiteuren gevonden.</div>'; return; }
-    var hh = '';
-    lijst.forEach(function(d){
-      hh += '<div class="wo-deb-optie" data-id="'+esc(d.id)+'" style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border);cursor:pointer">';
-      hh += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(d.naam||'—')+'</div><div style="font-size:11px;color:var(--muted)">'+esc([d.adres,d.plaats].filter(Boolean).join(', '))+(d.email?(' · '+esc(d.email)):'')+'</div></div>';
-      hh += '<svg width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
-      hh += '</div>';
-    });
-    res.innerHTML = hh;
+    if(!lijst.length){ res.innerHTML = '<p class="lf-leeg">Geen debiteuren gevonden.</p>'; return; }
+    res.innerHTML = lijst.map(function(d){
+      return '<button type="button" class="lf-art wo-deb-optie" data-id="'+esc(d.id)+'">'+_lfIco(ICO.gebouw)
+        + '<span class="lf-l">'+esc(d.naam||'\u2014')+'<small>'+esc([d.adres,d.plaats].filter(Boolean).join(', '))+(d.email?(' \u00b7 '+esc(d.email)):'')+'</small></span>'+_LF_CHEV+'</button>';
+    }).join('');
     res.querySelectorAll('.wo-deb-optie').forEach(function(row){
       row.addEventListener('click', function(){
         var d = debiteuren.find(function(x){ return String(x.id)===String(row.dataset.id); });
