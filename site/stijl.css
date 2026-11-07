@@ -1327,7 +1327,9 @@ p,li,summary{text-wrap:pretty}
 @media (prefers-reduced-motion:reduce){.sectie .rook i:first-child,.sectie .rook i:last-child{animation:none}}
 /* telefoons: één kleinere, stilstaande wolk (elke grote laag kost op een iPhone tientallen MB geheugen) */
 @media (max-width:820px){.sectie .rook i:last-child{display:none}.sectie .rook i:first-child{width:150vw;height:150vw;left:-55vw;top:-40vw;opacity:.28;animation:none}}
-/* op een licht vlak: dezelfde wolken als een zachte blauwige waas */
-.band-licht .rook i{opacity:.32;mix-blend-mode:multiply}
-.band-licht .rook i:last-child{opacity:.24}
-@media (max-width:820px){.band-licht .rook i:first-child{opacity:.24}}
+/* Donkere paginakop met rook (vragen, overstappen); de inhoud volgt op een licht vlak */
+.kop-donker{padding:150px 0 64px}
+.kop-donker .sectie-kop{margin-bottom:0}
+.kop-donker .onderwerpen{margin:28px 0 0}
+.kop-donker + .band-licht{padding-top:72px;border-top:0}
+@media (max-width:820px){.kop-donker{padding:118px 0 44px}}
