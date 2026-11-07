@@ -352,6 +352,8 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-art-oms > .lf-rij:last-child:has(> .lf-w > .lf-tekst){grid-template-columns:auto minmax(0,1fr)}
   .modal-lf-groot .lf-art-oms > .lf-rij:last-child > .lf-ic:empty{display:none}
   .modal-lf-groot .lf-kolommen{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* Debiteur: het nummer is kort, de naam vaak lang. */
+  .modal-lf-groot .lf-twee.lf-twee-nr{grid-template-columns:330px minmax(0,1fr)}
   .modal-lf-groot .lf-kolommen.tpl{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
   .modal-lf-groot .lf-kolommen .tpl-preview-kol{position:sticky;top:0}
   /* Waarde direct na de labelkolom in plaats van tegen de rechterrand (prijs + btw). */
@@ -5767,6 +5769,8 @@ function _wbAfrondDialoog(state){
   } else {
     openPanel('Ondertekenen & versturen', h);
     var _ph = document.querySelector('#panel .panel-header'); if(_ph) _ph.style.display='none';
+    // Het paneel behoudt anders de scrollpositie van de werkbon; dit scherm begint bovenaan.
+    document.getElementById('panel').scrollTop = 0;
     // Op brede schermen (tablet/desktop) het afrond-scherm breder tonen — niet die smalle kolom.
     if(window.innerWidth >= 900){ document.getElementById('panel').classList.add('wbx-af-breed'); }
   }
@@ -13565,7 +13569,7 @@ function openDebModal(id){
   });
 
   var _dfT = function(id2, waarde, ph, type, extra){ return '<input class="lf-tekst" type="'+(type||'text')+'" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
-  var b = '<div class="lf-groep">Debiteur</div><div class="lf-blok-kaart"><div class="lf-twee">';
+  var b = '<div class="lf-groep">Debiteur</div><div class="lf-blok-kaart"><div class="lf-twee lf-twee-nr">';
   b += lfRij(ICO.flag, 'Debiteurnummer', _dfT('df-nr', d.nr, 'D-00001', 'text', ' required'), {verplicht:true, voor:'df-nr'});
   b += lfRij(ICO.gebouw, 'Naam', _dfT('df-nm', d.naam, '', 'text', ' required'), {verplicht:true, voor:'df-nm'});
   b += '</div></div>';
