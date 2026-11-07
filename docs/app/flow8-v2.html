@@ -208,7 +208,7 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
 .lf-stap button{width:32px;height:32px;border-radius:50%;border:0;background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer}
 .lf .lf-stap input{width:52px;text-align:center;background:none;border:0;font:700 15px 'Space Mono',monospace;color:var(--text);outline:none;-moz-appearance:textfield;padding:0}
 .lf :is(.lf-stap,.lf-bedrag) input::-webkit-inner-spin-button,.lf :is(.lf-stap,.lf-bedrag) input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.lf-seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px}
+.lf-seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px}
 .lf-seg button{border:0;background:none;color:var(--muted);font:600 14px 'Instrument Sans',sans-serif;padding:9px;border-radius:var(--radius-pill);cursor:pointer}
 .lf-seg button.aan{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.18)}
 .lf-bedrag{display:flex;align-items:baseline;justify-content:center;gap:6px;flex-wrap:wrap;padding:16px 0 14px;border-bottom:1px solid var(--border)}
@@ -373,6 +373,11 @@ label.lf-rij{cursor:pointer}
 .lf-ic.groot{width:42px;height:42px;border-radius:12px}
 .lf .lf-veld.lf-pc{min-width:0;width:96px!important;text-align:center}
 .lf .lf-veld.lf-nr{min-width:0;width:64px!important;text-align:center}
+.lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.lf-wis[hidden]{display:none}
+.lf-wis:hover{background:var(--red);color:#fff}
+.lf-zoek-res{max-height:260px;overflow:auto;border-bottom:1px solid var(--border)}
+.lf-zoek-res .lf-art:last-child{border-bottom:0}
 .lf-gevonden{display:flex;align-items:center;gap:6px;margin:8px 0 2px;font-size:12.5px;font-weight:600;color:var(--green-t)}
 .lf-verwijder{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:18px;min-height:48px;border-radius:var(--radius-pill);border:1px solid rgba(239,68,68,.35);background:none;color:var(--red-t);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer}
 .lf-verwijder svg{width:18px;height:18px}
@@ -1024,46 +1029,6 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 /* Sleepgreep bij herordenbare velden. touch-action:none is nodig, anders scrollt de
    pagina mee zodra je op een telefoon begint te slepen. */
 
-/* Aanmaakvenster werkbon: rijen met het label links en de waarde rechts. Compacter dan
-   labels boven de velden, en de waarden staan onder elkaar uitgelijnd. */
-.wbn-form .wbn-rij{display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--border)}
-.wbn-form .wbn-k{font-size:13.5px;font-weight:600;flex-shrink:0;min-width:84px}
-/* Alles wat je kunt invullen of kiezen krijgt dezelfde omlijsting; wat vaststaat niet.
-   Zo zie je zonder te tikken waar je iets kunt wijzigen. */
-.wbn-form .wbn-veld{
-  flex:1;min-width:0;display:flex;align-items:center;gap:7px;
-  background:var(--surface2);border:1px solid var(--border);border-radius:9px;
-  padding:7px 11px;transition:border-color .13s}
-.wbn-form .wbn-veld:focus-within{border-color:var(--accent)}
-/* Gecentreerd: bij rechts uitlijnen schuift een lange klantnaam zo ver op dat het begin
-   uit beeld valt, en dat maakt corrigeren lastig. */
-.wbn-form .wbn-inp,.wbn-form .wbn-sel{
-  flex:1;min-width:0;border:none;background:none;font-family:inherit;font-size:13.5px;
-  color:var(--text);text-align:center;padding:0;outline:none}
-.wbn-form .wbn-inp::placeholder{color:var(--muted)}
-/* Safari negeert text-align op de gekozen optie van een select; text-align-last wel. */
-.wbn-form .wbn-sel{cursor:pointer;-webkit-appearance:none;appearance:none;
-  text-align:center;text-align-last:center}
-.wbn-form input[type="date"].wbn-inp{text-align:center}
-/* Wisknop bij de klant */
-.wbn-form .wbn-wis{
-  width:20px;height:20px;border-radius:50%;border:none;flex-shrink:0;cursor:pointer;
-  background:var(--border);color:var(--text);font-size:14px;line-height:1;
-  display:flex;align-items:center;justify-content:center;padding:0;font-family:inherit}
-.wbn-form .wbn-wis:hover{background:var(--red);color:#fff}
-.wbn-form .wbn-chev,.wbn-form .wbn-zoek-ico{color:var(--muted);flex-shrink:0}
-.wbn-form .wbn-zoek-ico{order:-1}
-/* Vaste waarde: geen kader, want er valt niets te kiezen. */
-.wbn-form .wbn-vast{flex:1;text-align:right;font-size:13.5px;font-weight:600;justify-content:flex-end}
-.wbn-form .wbn-avatar{
-  width:24px;height:24px;border-radius:50%;background:var(--accent-knop);color:#fff;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700}
-.wbn-form .wbn-pil{
-  border:1px solid var(--border);background:var(--surface2);border-radius:9px;padding:7px 11px;
-  font-family:inherit;font-size:13px;font-weight:600;color:var(--text);outline:none}
-.wbn-form .wbn-pil:focus{border-color:var(--accent)}
-.wbn-klant-item:last-child{border-bottom:none!important}
-.wbn-klant-item:hover{background:var(--surface2)}
 
 .sleep-greep{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:26px;height:26px;
   border-radius:7px;color:var(--muted);cursor:grab;flex-shrink:0;touch-action:none;
@@ -1835,6 +1800,7 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
   .werkbalk select.input{height:38px;padding-top:0;padding-bottom:0}
   .werkbalk .btn{min-height:38px;padding:0 14px;font-size:13.5px}
   .werkbalk .meer-knop{width:38px;padding:0}
+  .werkbalk #loc-klant-zoek{height:38px;padding-top:0;padding-bottom:0}
   .werkbalk .plan-view-btn{min-height:30px}
 }
 /* Zoeken (bovenin) */
@@ -3932,97 +3898,67 @@ function _wbNieuweBonDialoog(){
   var typen = (APP.opdrachttypes||[]).filter(function(t){ return !t.verborgen; });
   if(!typen.length) typen = [{id:'storing', label:'Storing'}];
 
-  var b = '<div class="wbn-form">';
-
-  b += '<div class="wbn-rij"><span class="wbn-k">Type werk</span>'
-     + '<span class="wbn-veld"><select class="wbn-sel" id="wbn-type">'
-     + typen.map(function(t){ return '<option value="'+esc(t.id)+'">'+esc(t.label||t.naam||t.id)+'</option>'; }).join('')
-     + '</select><svg class="wbn-chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></div>';
-
-  b += '<div class="wbn-rij"><span class="wbn-k">'+esc(externNrLabel())+'</span>'
-     + '<span class="wbn-veld"><input class="wbn-inp" id="wbn-externnr" placeholder="Optioneel"></span></div>';
-
-  b += '<div class="wbn-rij"><span class="wbn-k">Klant</span>'
-     + '<span class="wbn-veld"><svg class="wbn-zoek-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
-     + '<input class="wbn-inp" id="wbn-klant-zoek" placeholder="Zoek klant" autocomplete="off">'
-     + '<button type="button" class="wbn-wis" id="wbn-klant-wis" title="Wissen" style="display:none">&times;</button></span>'
-     + '<input type="hidden" id="wbn-klant-val"></div>';
-  b += '<div id="wbn-klant-lijst" style="display:none;max-height:210px;overflow:auto;border-bottom:1px solid var(--border)"></div>';
-
-  // Locatiekeuze verschijnt alleen als de gekozen debiteur er meer dan één heeft.
-  b += '<div class="wbn-rij" id="wbn-loc-rij" style="display:none"><span class="wbn-k">Locatie</span>'
-     + '<span class="wbn-veld"><select class="wbn-sel" id="wbn-loc"></select>'
-     + '<svg class="wbn-chev" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></div>';
-
-  b += '<div class="wbn-rij"><span class="wbn-k">Adres</span>'
-     + '<span class="wbn-veld"><input class="wbn-inp" id="wbn-adres" placeholder="Volgt uit klant"></span></div>';
-
-  b += '<div class="wbn-rij"><span class="wbn-k">Postcode</span>'
-     + '<span class="wbn-veld" style="max-width:150px;margin-left:auto;flex:0 0 150px"><input class="wbn-inp" id="wbn-pc" placeholder="Postcode"></span></div>';
-
-  b += '<div class="wbn-rij"><span class="wbn-k">Plaats</span>'
-     + '<span class="wbn-veld"><input class="wbn-inp" id="wbn-pl" placeholder="Plaats"></span></div>';
-
-  b += '<div class="wbn-rij"><span class="wbn-k">Monteur</span>';
+  // Bovenaan voor wie de bon is; een planner kan erop tikken om een andere monteur te kiezen.
+  var b;
   if(magKiezen){
     // Alleen wie werkbonnen uitvoert; kantoorrollen horen hier niet in.
     var meds = werkbonMedewerkers(mijnMed).sort(function(a,b){
       return ((a.voornaam||'')+' '+(a.achternaam||'')).localeCompare((b.voornaam||'')+' '+(b.achternaam||''));
     });
-    var _ikSel = mijnMed ? getMed(mijnMed) : null;
-    b += '<span class="wbn-veld" style="display:flex;align-items:center;gap:8px">'
-       + '<span class="wbn-avatar" id="wbn-mont-avatar" style="'+(_ikSel?'background:'+medKleur(_ikSel):'display:none')+'">'+(_ikSel?initials(_ikSel):'')+'</span>'
-       + '<select class="wbn-sel" id="wbn-monteur">'
-       + meds.map(function(m){
-           var sel = String(m.id)===String(mijnMed) ? ' selected' : '';
-           return '<option value="'+esc(String(m.id))+'"'+sel+'>'+esc((m.voornaam||'')+' '+(m.achternaam||''))+'</option>';
-         }).join('')
-       + '</select></span>';
+    b = lfPersoon('<select class="input" id="wbn-monteur">'
+      + meds.map(function(m){
+          var sel = String(m.id)===String(mijnMed) ? ' selected' : '';
+          return '<option value="'+esc(String(m.id))+'"'+sel+'>'+esc((m.voornaam||'')+' '+(m.achternaam||''))+'</option>';
+        }).join('')
+      + '</select>', 'Monteur');
   } else {
-    var ik = mijnMed ? getMed(mijnMed) : null;
-    b += '<span class="wbn-vast" style="display:flex;align-items:center;gap:8px">'
-       + (ik ? '<span class="wbn-avatar" style="background:'+medKleur(ik)+'">'+initials(ik)+'</span>' : '')
-       + esc(ik ? (ik.voornaam+' '+ik.achternaam) : 'Jij')+'</span>'
-       + '<input type="hidden" id="wbn-monteur" value="'+esc(String(mijnMed||''))+'">';
+    b = lfPersoon('', 'Monteur') + '<input type="hidden" id="wbn-monteur" value="'+esc(String(mijnMed||''))+'">';
   }
-  b += '</div>';
 
-  b += '<div class="wbn-rij"><span class="wbn-k">Datum</span>'
-     + '<span class="wbn-veld"><input class="wbn-inp" type="date" id="wbn-datum" value="'+vandaagISO()+'"></span></div>';
+  b += lfKies(ICO.wrench, 'Type werk', '<select class="input" id="wbn-type">'
+     + typen.map(function(t){ return '<option value="'+esc(t.id)+'">'+esc(t.label||t.naam||t.id)+'</option>'; }).join('')
+     + '</select>');
+  b += lfRij(ICO.kalender, 'Datum', '<input class="lf-veld" type="date" id="wbn-datum" value="'+vandaagISO()+'" required>', {verplicht:true, voor:'wbn-datum'});
+  b += lfRij(ICO.clipboard, esc(externNrLabel()), '<input class="lf-tekst" type="text" id="wbn-externnr" placeholder="Optioneel">', {voor:'wbn-externnr'});
 
-  b += '<div style="padding:14px 0 2px">'
-     + '<label for="wbn-oms" style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:7px">Omschrijving werk</label>'
-     + '<textarea class="input" id="wbn-oms" rows="3" placeholder="Wat er gedaan moet worden\u2026" style="resize:vertical"></textarea></div>';
-  b += '</div>';
+  b += '<div class="lf-groep">Klant en adres</div>';
+  b += lfRij(ICO.gebouw, 'Klant', '<input class="lf-tekst" type="text" id="wbn-klant-zoek" placeholder="Zoek op naam of nummer" autocomplete="off" required>'
+     + '<button type="button" class="lf-wis" id="wbn-klant-wis" aria-label="Klant wissen" hidden>'+_LF_X+'</button>', {verplicht:true, voor:'wbn-klant-zoek'})
+     + '<input type="hidden" id="wbn-klant-val">';
+  b += '<div id="wbn-klant-lijst" class="lf-zoek-res" hidden></div>';
+  // Locatiekeuze verschijnt alleen als de gekozen debiteur er meer dan één heeft.
+  b += lfKies(ICO.huis, 'Locatie', '<select class="input" id="wbn-loc"></select>').replace('<div class="lf-rij lf-kies"', '<div id="wbn-loc-rij" hidden class="lf-rij lf-kies"');
+  b += lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="wbn-pc" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="wbn-huisnr" placeholder="Nr." aria-label="Huisnummer" inputmode="text">');
+  b += lfRij('', 'Adres', '<input class="lf-tekst" type="text" id="wbn-adres" placeholder="Volgt uit klant of postcode">', {voor:'wbn-adres'});
+  b += lfRij('', 'Plaats', '<input class="lf-tekst" type="text" id="wbn-pl">', {voor:'wbn-pl'});
 
-  openModal('Nieuwe werkbon', b,
-    '<button class="btn btn-ghost" id="wbn-annuleer" style="flex:1">Annuleren</button>'
-    + '<button class="btn btn-primary" id="wbn-maak" style="flex:1.4">Werkbon aanmaken</button>');
+  b += lfRij(ICO.edit, 'Omschrijving werk', '<textarea class="lf-notitie" id="wbn-oms" rows="3" placeholder="Wat er gedaan moet worden\u2026"></textarea>', {blok:true, voor:'wbn-oms'});
+
+  lfOpen('Nieuwe werkbon', b, 'Werkbon aanmaken', 'wbn-maak');
 
   // ── Klant zoeken; adres volgt maar blijft aanpasbaar ──
   var zoekEl = document.getElementById('wbn-klant-zoek');
   var lijstEl = document.getElementById('wbn-klant-lijst');
   function toonKlanten(q){
     q = (q||'').toLowerCase().trim();
-    if(q.length < 2){ lijstEl.style.display='none'; return; }
+    if(q.length < 2){ lijstEl.hidden = true; return; }
     var res = (APP.debiteuren||[]).filter(function(d){
       return (d.naam||'').toLowerCase().indexOf(q) >= 0 || String(d.nr||'').toLowerCase().indexOf(q) >= 0;
     }).slice(0, 25);
-    if(!res.length){ lijstEl.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:var(--muted)">Niets gevonden</div>'; lijstEl.style.display='block'; return; }
-    lijstEl.innerHTML = res.map(function(d){
-      return '<div class="wbn-klant-item" data-id="'+esc(String(d.id))+'" style="padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)">'
-        + '<div style="font-weight:600">'+esc(d.naam||'')+'</div>'
-        + '<div style="font-size:11.5px;color:var(--muted)">'+esc([d.nr, d.adres, d.plaats].filter(Boolean).join(' \u00b7 '))+'</div></div>';
-    }).join('');
-    lijstEl.style.display='block';
+    lijstEl.innerHTML = res.length ? res.map(function(d){
+      return '<button type="button" class="lf-art wbn-klant-item" data-id="'+esc(String(d.id))+'">'+_lfIco(ICO.gebouw)
+        + '<span class="lf-l">'+esc(d.naam||'\u2014')+'<small>'+esc([d.nr, d.adres, d.plaats].filter(Boolean).join(' \u00b7 '))+'</small></span>'+_LF_CHEV+'</button>';
+    }).join('') : '<p class="lf-leeg">Geen klant gevonden. De naam die je typt komt op de bon.</p>';
+    lijstEl.hidden = false;
     lijstEl.querySelectorAll('.wbn-klant-item').forEach(function(it){
       it.addEventListener('click', function(){
         var d = (APP.debiteuren||[]).find(function(x){ return String(x.id)===it.dataset.id; });
         if(!d) return;
         document.getElementById('wbn-klant-val').value = d.id;
         zoekEl.value = d.naam || '';
-        wisKnop.style.display = 'flex';
-        lijstEl.style.display='none';
+        zoekEl.dispatchEvent(new Event('change', {bubbles:true}));
+        wisKnop.hidden = false;
+        lijstEl.hidden = true;
         vulLocaties(d);
       });
     });
@@ -4050,10 +3986,11 @@ function _wbNieuweBonDialoog(){
         var lbl = (l.naam ? l.naam+' \u2014 ' : '') + l.adres + (l.plaats ? ', '+l.plaats : '');
         return '<option value="'+i+'">'+esc(lbl)+'</option>';
       }).join('');
-      locRij.style.display = 'flex';
+      locRij.hidden = false;
       locSel._locs = locs;
+      lfKiesTekst(locSel);
     } else {
-      locRij.style.display = 'none';
+      locRij.hidden = true;
       locSel._locs = null;
     }
     zetAdres(locs[0] || {});
@@ -4063,6 +4000,7 @@ function _wbNieuweBonDialoog(){
     document.getElementById('wbn-adres').value = l.adres || '';
     document.getElementById('wbn-pc').value    = l.postcode || '';
     document.getElementById('wbn-pl').value    = l.plaats || '';
+    document.getElementById('wbn-huisnr').value = '';
   }
 
   if(locSel) locSel.addEventListener('change', function(){
@@ -4070,36 +4008,32 @@ function _wbNieuweBonDialoog(){
     zetAdres(lijst[+locSel.value] || {});
   });
 
+  // Postcode + huisnummer vullen het adres aan, net als bij een opdracht of locatie.
+  function zoekAdres(){
+    zoekAdresViaPostcode(document.getElementById('wbn-pc').value, document.getElementById('wbn-huisnr').value,
+      function(adres){ document.getElementById('wbn-adres').value = adres; },
+      function(plaats){ document.getElementById('wbn-pl').value = plaats; });
+  }
+  document.getElementById('wbn-pc').addEventListener('blur', zoekAdres);
+  document.getElementById('wbn-huisnr').addEventListener('blur', zoekAdres);
+
   // Wissen: leegt de klant, het adres en de locatiekeuze in één keer.
   if(wisKnop) wisKnop.addEventListener('click', function(){
     zoekEl.value = '';
     document.getElementById('wbn-klant-val').value = '';
     zetAdres({});
-    locRij.style.display = 'none';
-    lijstEl.style.display = 'none';
-    wisKnop.style.display = 'none';
+    locRij.hidden = true;
+    lijstEl.hidden = true;
+    wisKnop.hidden = true;
+    zoekEl.dispatchEvent(new Event('change', {bubbles:true}));
     zoekEl.focus();
   });
 
   if(zoekEl) zoekEl.addEventListener('input', function(){
     document.getElementById('wbn-klant-val').value = '';
-    wisKnop.style.display = zoekEl.value ? 'flex' : 'none';
+    wisKnop.hidden = !zoekEl.value;
     toonKlanten(zoekEl.value);
   });
-
-  // Avatar meeveranderen zodra er een andere monteur wordt gekozen.
-  var montSel = document.getElementById('wbn-monteur');
-  var montAv  = document.getElementById('wbn-mont-avatar');
-  if(montSel && montAv && montSel.tagName === 'SELECT'){
-    montSel.addEventListener('change', function(){
-      var m = getMed(montSel.value);
-      if(m){ montAv.textContent = initials(m); montAv.style.display='flex'; montAv.style.background = medKleur(m); }
-      else { montAv.style.display='none'; }
-    });
-  }
-
-  var an = document.getElementById('wbn-annuleer');
-  if(an) an.addEventListener('click', closeModal);
 
   var maak = document.getElementById('wbn-maak');
   if(maak) maak.addEventListener('click', function(){
@@ -23002,7 +22936,7 @@ function renderAgenda() {
   }
 
   // ── Toolbar ──
-  var h = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+  var h = '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   // Medewerker filter
   h += '<select class="input" id="ag-med-filter" style="max-width:200px">';
   h += '<option value="alle">Alle medewerkers</option>';
@@ -30522,7 +30456,7 @@ function renderLocatie() {
   h+='</div>';
 
   // ── Zoekbalk: klant-zoeker + afstandszoeker (onder de filterbalk) ──
-  h+='<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+  h+='<div class="werkbalk" style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
   // Klant-zoeker (navigeren naar klant op kaart)
   h+='<div style="position:relative;flex:1;min-width:200px;max-width:340px">';
   h+='<input type="text" class="input" id="loc-klant-zoek" placeholder="Zoek serviceklant op de kaart..." autocomplete="off" style="width:100%">';
