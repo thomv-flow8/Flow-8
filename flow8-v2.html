@@ -344,6 +344,8 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst){grid-template-columns:36px 132px minmax(0,1fr)}
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-pc){grid-template-columns:36px 132px minmax(0,1fr)}
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-pc) > .lf-w{justify-self:start}
+  /* Rechterkolom: korte labels (naam, plaats, telefoon), dus een smallere labelkolom en meer ruimte voor het veld. */
+  .modal-lf-groot .lf-twee > .lf-rij:nth-child(2):has(> .lf-w > .lf-tekst){grid-template-columns:36px 112px minmax(0,1fr)}
 }
 /* Grote formulieren op de telefoon: label klein boven het vak, zodat lange namen passen */
 @media(max-width:768px){
@@ -358,7 +360,7 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .lf .lf-veld.lf-pc{width:108px!important}
 }
 @media(min-width:769px){
-  .modal.modal-lf-groot{width:min(1040px,95vw)}
+  .modal.modal-lf-groot{width:min(1200px,95vw)}
   .modal-lf-groot .lf-twee{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
   .modal-lf-groot .lf-drie{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:16px}
   .modal-lf-groot .lf-sub-kaart .lf-drie > *{border-top:0}
@@ -373,6 +375,12 @@ label.lf-rij{cursor:pointer}
 .lf-ic.groot{width:42px;height:42px;border-radius:12px}
 .lf .lf-veld.lf-pc{min-width:0;width:96px!important;text-align:center}
 .lf .lf-veld.lf-nr{min-width:0;width:64px!important;text-align:center}
+.lf-voor{color:var(--muted);font-weight:600;font-size:14px}
+.lf .lf-veld.lf-prijs{min-width:0;width:104px!important;text-align:right}
+.lf-tel{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;border-radius:var(--radius-pill);background:rgba(79,110,245,.14);color:var(--accent-t);font-size:12px;font-weight:700}
+.lf-tel:empty{display:none!important}
+.lf-stip{width:10px;height:10px;border-radius:50%}
+.lf-klap-b > .lf-zoek-res + .lf-rij,.lf-klap-b > #art-doc-lijst + .lf-rij{border-top:1px solid var(--border)}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
 .lf-wis:hover{background:var(--red);color:#fff}
@@ -10007,6 +10015,7 @@ function _lfOpdrachtNaam(opId){
 }
 var _LF_TEL  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>';
 var _LF_MAIL = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>';
+var _LF_EAN  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6v12M8 6v12M11 6v12M15 6v12M18 6v12M21 6v12"/></svg>';
 var _LF_STER = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>';
 // Kop met de klant (debiteur) bovenaan een klantvenster.
 function _lfKlantKop(d){
@@ -25595,59 +25604,48 @@ function _openArtikelEditor(artikel){
   var a = artikel || {};
   var isNew = !artikel;
   var _fotoData = a.foto || '';
-  var b = '<div class="form-grid">';
-  b += fg('Artikelcode *', finp('art-code','text', a.code||'', 'bijv. PMP-4823'));
-  b += fg('Omschrijving *', finp('art-oms','text', a.omschrijving||'', 'bijv. Dompelpomp TP48'));
-  b += fg('EAN-code', finp('art-ean','text', a.ean||'', ''));
-  b += fg('Stuksprijs (€)', finp('art-prijs','number', a.stuksprijs!=null?a.stuksprijs:'', '0,00'));
-  b += fg('BTW-percentage', finp('art-btw','number', a.btw!=null?a.btw:21, '21'));
-  b += fg('Eenheid', finp('art-eenheid','text', a.eenheid||'stuk', 'stuk'));
+  var _arT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var b = '<div class="lf-groep">Artikel</div><div class="lf-blok-kaart">';
+  b += '<div class="lf-twee">'+lfRij(_LF_PAKKET, 'Artikelcode', _arT('art-code', a.code, 'Bijv. PMP-4823', ' required autocapitalize="characters"'), {verplicht:true, voor:'art-code'})
+     + lfRij(ICO.edit, 'Omschrijving', _arT('art-oms', a.omschrijving, 'Bijv. Dompelpomp TP48', ' required'), {verplicht:true, voor:'art-oms'})+'</div>';
+  b += '<div class="lf-twee">'+lfRij(_LF_EAN, 'EAN-code', _arT('art-ean', a.ean, 'Optioneel', ' inputmode="numeric"'), {voor:'art-ean'})
+     + lfRij('', 'Eenheid', _arT('art-eenheid', a.eenheid||'stuk', 'stuk'), {voor:'art-eenheid'})+'</div>';
+  b += lfRij(ICO.info, 'Notitie', '<textarea class="lf-notitie" id="art-notitie" rows="2" placeholder="Optionele uitgebreide omschrijving\u2026">'+esc(a.notitie||'')+'</textarea>', {blok:true, voor:'art-notitie'});
   b += '</div>';
-  b += fgf('Notitie', '<textarea class="input" id="art-notitie" rows="2" placeholder="Optionele uitgebreide omschrijving…">'+esc(a.notitie||'')+'</textarea>');
-  b += '<div style="display:flex;align-items:center;gap:10px;margin:12px 0"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="art-zichtbaar"'+(a.zichtbaarWerkbon!==false?' checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)"><span style="font-size:13px">Zichtbaar op werkbon</span></label></div>';
-  // ── Foto (inklapbaar, standaard dicht) ──
+  b += '<div class="lf-groep">Prijs en werkbon</div><div class="lf-blok-kaart">';
+  b += '<div class="lf-twee">'+lfRij(ICO.euro, 'Stuksprijs', '<span class="lf-voor">\u20ac</span><input class="lf-veld lf-prijs" type="number" inputmode="decimal" step="0.01" min="0" id="art-prijs" value="'+(a.stuksprijs!=null?esc(String(a.stuksprijs)):'')+'" placeholder="0,00">', {voor:'art-prijs'})
+     + lfRij('', 'Btw', '<input class="lf-veld lf-nr2" type="number" inputmode="decimal" step="1" min="0" id="art-btw" value="'+(a.btw!=null?esc(String(a.btw)):'21')+'"><span class="lf-voor">%</span>', {voor:'art-btw'})+'</div>';
+  b += lfRij(ICO.check, 'Zichtbaar op werkbon', lfSchakel('art-zichtbaar', a.zichtbaarWerkbon!==false), {voor:'art-zichtbaar', sub:'Monteurs kunnen dit artikel als materiaal kiezen'});
+  b += '</div>';
+
+  // Foto en documenten: inklapbaar, standaard dicht.
+  var _artKlapKop = function(ico, titel, telHtml){ return '<div class="art-acc-hdr lf-klap-kop" role="button" tabindex="0">'+_lfIco(ico)+'<span class="lf-klap-t">'+titel+'</span>'+telHtml+'<svg class="art-acc-chev lf-chev" style="transition:transform .2s" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>'; };
   var _heeftFoto = !!_fotoData;
-  b += '<div class="art-acc" id="art-acc-foto" style="margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden">';
-  b += '<div class="art-acc-hdr" style="display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;user-select:none">';
-  b += '<svg width="16" height="16" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>';
-  b += '<span style="font-weight:600;font-size:13px;flex:1">Foto</span>';
-  b += '<span class="art-acc-tel" id="art-acc-foto-tel" style="font-size:11px;font-weight:700;color:var(--accent)">'+(_heeftFoto?'\u2713':'')+'</span>';
-  b += '<svg class="art-acc-chev" width="16" height="16" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
-  b += '</div>';
-  b += '<div class="art-acc-body" style="display:none;padding:0 14px 14px">';
+  b += '<div class="art-acc lf-klap" id="art-acc-foto">'+_artKlapKop(ICO.foto, 'Foto', '<span class="art-acc-tel lf-tel" id="art-acc-foto-tel">'+(_heeftFoto?'\u2713':'')+'</span>');
+  b += '<div class="art-acc-body lf-klap-b" style="display:none">';
   b += '<div id="art-foto-preview" style="margin-bottom:8px">'+(_fotoData?'<img src="'+esc(_fotoData)+'" class="art-editor-foto" data-url="'+esc(_fotoData)+'" style="max-width:120px;max-height:120px;border-radius:8px;object-fit:cover;cursor:pointer">':'<div style="font-size:12px;color:var(--muted)">Geen foto</div>')+'</div>';
-  b += '<label class="btn btn-ghost btn-sm" style="cursor:pointer">Foto kiezen<input type="file" id="art-foto-input" accept="image/*" style="display:none"></label>';
-  if(_fotoData) b += ' <button class="btn btn-ghost btn-sm" id="art-foto-wis" style="color:var(--red)">Verwijderen</button>';
+  b += '<label class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Foto kiezen<input type="file" id="art-foto-input" accept="image/*" hidden></label>';
+  if(_fotoData) b += '<button type="button" class="lf-verwijder" id="art-foto-wis">'+ICO.trash+' Foto verwijderen</button>';
   b += '</div></div>';
 
-  // ── Documenten (inklapbaar, standaard dicht) ──
   var _docAantalInit = Array.isArray(a.documenten) ? a.documenten.length : (a.documenten ? Object.keys(a.documenten).length : 0);
-  b += '<div class="art-acc" id="art-acc-doc" style="margin-top:10px;border:1px solid var(--border);border-radius:10px;overflow:hidden">';
-  b += '<div class="art-acc-hdr" style="display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;user-select:none">';
-  b += '<svg width="16" height="16" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>';
-  b += '<span style="font-weight:600;font-size:13px;flex:1">Documenten</span>';
-  b += '<span class="art-acc-tel" id="art-acc-doc-tel" style="font-size:11px;font-weight:700;min-width:18px;height:18px;padding:0 6px;border-radius:var(--radius-pill);background:rgba(74,108,247,.16);color:var(--accent);display:'+(_docAantalInit>0?'flex':'none')+';align-items:center;justify-content:center">'+_docAantalInit+'</span>';
-  b += '<svg class="art-acc-chev" width="16" height="16" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
-  b += '</div>';
-  b += '<div class="art-acc-body" style="display:none;padding:0 14px 14px">';
-  b += '<div style="font-size:11px;color:var(--muted);margin-bottom:10px">Standaarddocumenten voor dit artikel. Gekoppelde pompen tonen deze automatisch.</div>';
-  b += '<div id="art-doc-lijst" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px"></div>';
-  b += '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">';
-  b += fg('Naam', finp('art-doc-naam','text','','Bijv. Explosietekening TP48'));
-  b += fg('Type', fsel('art-doc-type',[
+  b += '<div class="art-acc lf-klap" id="art-acc-doc">'+_artKlapKop(ICO.pdf, 'Documenten', '<span class="art-acc-tel lf-tel" id="art-acc-doc-tel" style="display:'+(_docAantalInit>0?'inline-flex':'none')+'">'+_docAantalInit+'</span>');
+  b += '<div class="art-acc-body lf-klap-b" style="display:none">';
+  b += '<p class="lf-uitleg" style="padding:0 2px 8px">Standaarddocumenten voor dit artikel. Gekoppelde pompen tonen deze automatisch.</p>';
+  b += '<div id="art-doc-lijst"></div>';
+  b += lfRij(ICO.edit, 'Naam', _arT('art-doc-naam', '', 'Bijv. Explosietekening TP48'), {voor:'art-doc-naam'});
+  b += lfKies('', 'Type', fsel('art-doc-type',[
     {v:'handleiding',l:'Handleiding'},
     {v:'explosietekening',l:'Explosietekening'},
     {v:'onderdelenlijst',l:'Onderdelenlijst'},
     {v:'certificaat',l:'Certificaat'},
     {v:'overig',l:'Overig'},
-  ],'handleiding'));
-  b += '</div>';
-  b += '<label class="btn btn-ghost btn-sm" style="cursor:pointer">Bestand kiezen<input type="file" id="art-doc-file" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none"></label>';
-  b += '<span id="art-doc-status" style="font-size:12px;color:var(--muted);margin-left:8px"></span>';
+  ],'handleiding'), {titel:'Soort document'});
+  b += '<label class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Bestand kiezen<input type="file" id="art-doc-file" accept=".pdf,.jpg,.jpeg,.png,.webp" hidden></label>';
+  b += '<span id="art-doc-status" class="lf-hint"></span>';
   b += '</div></div>';
 
-  var f = '<button class="btn btn-ghost" id="art-cancel">Annuleren</button><button class="btn btn-primary" id="art-save">Opslaan</button>';
-  openModal(isNew?'Artikel toevoegen':'Artikel bewerken', b, f);
+  lfOpen(isNew?'Artikel toevoegen':'Artikel bewerken', b, 'Opslaan', 'art-save', {groot:true});
 
   // Accordion-toggles (Foto, Documenten) — standaard dicht
   document.querySelectorAll('#modal .art-acc .art-acc-hdr').forEach(function(hdr){
@@ -25686,14 +25684,12 @@ function _openArtikelEditor(artikel){
     // Teller op de accordion-kop bijwerken
     var tel = document.getElementById('art-acc-doc-tel');
     if(tel){ tel.textContent = _docs.length; tel.style.display = _docs.length>0 ? 'flex' : 'none'; }
-    if(!_docs.length){ wrap.innerHTML = '<div style="font-size:12px;color:var(--muted)">Nog geen documenten.</div>'; return; }
+    if(!_docs.length){ wrap.innerHTML = '<p class="lf-leeg" style="padding:4px 2px 10px">Nog geen documenten.</p>'; return; }
     wrap.innerHTML = _docs.map(function(d,i){
       var kl = _docTypeKleuren[d.type]||'#6b7694';
-      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:8px">'
-        + '<span style="width:8px;height:8px;border-radius:50%;background:'+kl+';flex-shrink:0"></span>'
-        + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(d.naam||'Document')+'</div>'
-        + '<div style="font-size:11px;color:var(--muted)">'+esc(_docTypeLabels[d.type]||'Overig')+'</div></div>'
-        + '<button type="button" class="art-doc-del btn btn-ghost btn-wis" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>'
+      return '<div class="lf-rij"><span class="lf-ic" aria-hidden="true"><span class="lf-stip" style="background:'+kl+'"></span></span>'
+        + '<span class="lf-l">'+esc(d.naam||'Document')+'<small>'+esc(_docTypeLabels[d.type]||'Overig')+'</small></span>'
+        + '<span class="lf-w"><button type="button" class="art-doc-del btn btn-ghost btn-wis" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></span>'
         + '</div>';
     }).join('');
     wrap.querySelectorAll('.art-doc-del').forEach(function(btn){
@@ -25724,7 +25720,6 @@ function _openArtikelEditor(artikel){
   });
   _renderArtDocs();
 
-  document.getElementById('art-cancel').addEventListener('click', closeModal);
   document.getElementById('art-save').addEventListener('click', function(){
     var code = document.getElementById('art-code').value.trim();
     var oms  = document.getElementById('art-oms').value.trim();
@@ -26360,41 +26355,27 @@ function openPompObjectModal(id) {
   var obj = id ? (APP.pr_objecten||[]).find(function(o){ return o.id===id; }) : null;
   obj = obj || {};
 
-  var b = '<div style="display:flex;flex-direction:column;gap:14px">';
-  b += fg('Naam object', finp('obj-naam','text',obj.naam||'','bijv. Pompput Noord'));
-  b += fg('Besturing', finp('obj-besturing','text',obj.besturing||'','bijv. Hcon 25D, Grundfos CU301'));
-  b += fg('Omschrijving', '<textarea class="input" id="obj-omschr" rows="2" placeholder="Optionele omschrijving">'+esc(obj.omschrijving||'')+'</textarea>');
+  var _obT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var b = lfRij(ICO.huis, 'Naam', _obT('obj-naam', obj.naam, 'Bijv. Pompput Noord', ' required'), {verplicht:true, voor:'obj-naam'});
+  b += lfRij(ICO.settings, 'Besturing', _obT('obj-besturing', obj.besturing, 'Bijv. Hcon 25D'), {voor:'obj-besturing'});
+  b += lfRij(ICO.edit, 'Omschrijving', '<textarea class="lf-notitie" id="obj-omschr" rows="2" placeholder="Optioneel">'+esc(obj.omschrijving||'')+'</textarea>', {blok:true, voor:'obj-omschr'});
 
-  // Klant zoekbalk
-  b += '<div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Klant</label>';
-  b += '<div style="position:relative">';
+  b += '<div class="lf-groep">Klant en locatie</div>';
   var debNaam = '';
   if(obj.debId) {
     var gedeb = (APP.debiteuren||[]).find(function(d){return String(d.id)===String(obj.debId);});
-    if(gedeb) debNaam = (gedeb.nr||gedeb.nummer||'')+' – '+(gedeb.naam||gedeb.bedrijfsnaam||'');
+    if(gedeb) debNaam = (gedeb.nr||gedeb.nummer||'')+' \u2013 '+(gedeb.naam||gedeb.bedrijfsnaam||'');
   }
-  b += '<input class="input" type="text" id="obj-deb-zoek" placeholder="Zoek op naam of nummer..." value="'+esc(debNaam)+'" autocomplete="off">';
+  b += lfRij(ICO.gebouw, 'Klant', _obT('obj-deb-zoek', debNaam, 'Zoek op naam of nummer', ' autocomplete="off"'), {voor:'obj-deb-zoek'});
   b += '<input type="hidden" id="obj-deb-id" value="'+esc(obj.debId||'')+'">';
-  b += '<div id="obj-deb-suggesties" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;max-height:200px;overflow-y:auto;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,.3)"></div>';
-  b += '</div></div>';
+  b += '<div id="obj-deb-suggesties" class="lf-zoek-res" style="display:none"></div>';
+  b += '<div id="obj-locatie-wrap">'+lfKies(ICO.pin, 'Locatie', '<select class="input" id="obj-locatie" disabled><option value="">Kies eerst een klant</option></select>')+'</div>';
 
-  // Locatie
-  b += '<div id="obj-locatie-wrap">';
-  b += fg('Locatie','<select class="input" id="obj-locatie"><option value="">— Selecteer klant eerst —</option></select>');
-  b += '</div>';
+  b += '<div class="lf-groep">'+esc(registerItemMeervoud(true))+' koppelen</div>';
+  b += '<div id="obj-pompen-lijst"><p class="lf-leeg">Kies eerst een klant.</p></div>';
+  if(id) b += '<button type="button" class="lf-verwijder" id="obj-del">'+ICO.trash+' Object verwijderen</button>';
 
-  // Pompen (gefilterd op klant)
-  b += '<div><label style="font-size:12px;color:var(--muted);margin-bottom:6px;display:block">Pompen koppelen <span style="font-weight:400">(alleen pompen van geselecteerde klant)</span></label>';
-  b += '<div id="obj-pompen-lijst" style="display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px">';
-  b += '<div style="font-size:12px;color:var(--muted)">Selecteer eerst een klant</div>';
-  b += '</div></div>';
-  b += '</div>';
-
-  var f = '';
-  if(id) f += '<button class="btn btn-ghost" id="obj-del" style="color:var(--red);margin-right:auto">Verwijderen</button>';
-  f += '<button class="btn btn-ghost" id="obj-cancel">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="obj-save">Opslaan</button>';
-  openModal(id ? 'Object bewerken' : 'Object aanmaken', b, f);
+  lfOpen(id ? 'Object bewerken' : 'Object aanmaken', b, 'Opslaan', 'obj-save');
 
   // Klant zoeken
   var zoekInp = document.getElementById('obj-deb-zoek');
@@ -26412,9 +26393,9 @@ function openPompObjectModal(id) {
     }).slice(0,8);
     if(!matches.length||!q) { zoekRes.style.display='none'; return; }
     zoekRes.innerHTML = matches.map(function(d){
-      return '<div class="obj-deb-opt" data-id="'+esc(d.id)+'" data-label="'+esc((d.nr||d.nummer||'')+' \u2013 '+(d.naam||d.bedrijfsnaam||''))+'" style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border)">'
-        +'<span style="font-weight:600">'+esc(d.naam||d.bedrijfsnaam||'')+'</span>'
-        +(d.nr||d.nummer?'<span style="color:var(--muted);margin-left:8px">'+esc(d.nr||d.nummer||'')+'</span>':'')
+      return '<div class="obj-deb-opt lf-art" data-id="'+esc(d.id)+'" data-label="'+esc((d.nr||d.nummer||'')+' \u2013 '+(d.naam||d.bedrijfsnaam||''))+'">'
+        +_lfIco(ICO.gebouw)
+        +'<span class="lf-l">'+esc(d.naam||d.bedrijfsnaam||'')+'<small>'+esc([d.nr||d.nummer, d.adres, d.plaats].filter(Boolean).join(' \u00b7 '))+'</small></span>'
         +'</div>';
     }).join('');
     zoekRes.style.display='block';
@@ -26441,13 +26422,14 @@ function openPompObjectModal(id) {
     // Locaties
     var locWrap = document.getElementById('obj-locatie-wrap');
     if(locWrap) {
-      var locSel = '<select class="input" id="obj-locatie"><option value="">— Geen locatie —</option>';
+      var locSel = '<select class="input" id="obj-locatie"><option value="">Geen locatie</option>';
       locs.forEach(function(l){
         var v=l.id||l.naam||'';
         locSel += '<option value="'+esc(v)+'"'+(String(gekozenLocId)===String(v)?' selected':'')+'>'+esc(l.naam||l.adres||'\u2014')+(l.adres?' \u2013 '+esc(l.adres):'')+'</option>';
       });
       locSel += '</select>';
-      locWrap.innerHTML = fg('Locatie', locSel);
+      locWrap.innerHTML = lfKies(ICO.pin, 'Locatie', locSel);
+      _lfBindKies(locWrap);
     }
 
     // Pompen
@@ -26455,23 +26437,21 @@ function openPompObjectModal(id) {
     if(!pompLijst) return;
     var pompFilter = deb ? (APP.wp_pompen||[]).filter(function(p){return String(p.debId)===String(debId);}) : [];
     if(!pompFilter.length) {
-      pompLijst.innerHTML = '<div style="font-size:12px;color:var(--muted)">'+(deb?'Geen '+registerItemMeervoud(false)+' gekoppeld aan deze klant':'Selecteer eerst een klant')+'</div>';
+      pompLijst.innerHTML = '<p class="lf-leeg">'+(deb?'Geen '+registerItemMeervoud(false)+' gekoppeld aan deze klant.':'Kies eerst een klant.')+'</p>';
       return;
     }
     pompLijst.innerHTML = pompFilter.map(function(p){
       var checked = gekozenPompIds.indexOf(p.id)>=0;
-      return '<label style="display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:12px">'
-        +'<input type="checkbox" class="obj-pomp-cb" data-pid="'+esc(p.id)+'"'+(checked?' checked':'')+' style="accent-color:var(--accent);width:14px;height:14px">'
-        +'<span style="font-weight:600">'+esc(p.type||'\u2014')+'</span>'
-        +'<span style="color:var(--muted)">SN: '+esc(p.serienummer||'\u2014')+'</span>'
-        +'</label>';
+      return '<div class="lf-rij">'+_lfIco(_LF_PAKKET)
+        +'<span class="lf-l">'+esc(p.type||'\u2014')+'<small>SN: '+esc(p.serienummer||'\u2014')+'</small></span>'
+        +'<span class="lf-w"><label class="lf-sw"><input type="checkbox" role="switch" class="obj-pomp-cb" data-pid="'+esc(p.id)+'"'+(checked?' checked':'')+' aria-label="'+esc(p.type||'Koppelen')+'"><i></i></label></span>'
+        +'</div>';
     }).join('');
   }
 
   // Init met huidige klant
   if(obj.debId) laadLocatiesEnPompen(obj.debId, obj.locatieId, obj.pompIds||[]);
 
-  document.getElementById('obj-cancel').addEventListener('click', closeModal);
 
   document.getElementById('obj-save').addEventListener('click', function(){
     var naam = document.getElementById('obj-naam').value.trim();
@@ -27760,10 +27740,11 @@ function openPompModal(id, opties) {
   // Register is ingesteld. In de data blijven het pomp.type en pomp.besturing, dezelfde
   // velden die het debiteurformulier bij "Ook serviceklant" invult.
   var _rgInst = getRegisterInst();
-  var b = '<div class="form-grid" style="gap:12px">';
-  b += fgf(esc(_rgInst.veld1Label)+' *', finp('pr-m-type','text', pomp?pomp.type:'', 'Bijv. BARRACUDA 50HZ GRP26 D'));
-  b += fgf(esc(_rgInst.veld2Label), finp('pr-m-besturing','text', pomp?pomp.besturing||'':'', 'Bijv. HCON 25D'));
-  b += '</div>';
+  var _prT = function(id2, waarde, ph, extra){ return '<input class="lf-tekst" type="text" id="'+id2+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'; };
+  var b = '<div class="lf-groep">'+esc(registerItemEnkel(true))+'</div><div class="lf-blok-kaart"><div class="lf-twee">';
+  b += lfRij(_LF_PAKKET, esc(_rgInst.veld1Label), _prT('pr-m-type', pomp?pomp.type:'', 'Bijv. BARRACUDA 50HZ GRP26 D', ' required'), {verplicht:true, voor:'pr-m-type'});
+  b += lfRij(ICO.settings, esc(_rgInst.veld2Label), _prT('pr-m-besturing', pomp?pomp.besturing||'':'', 'Bijv. HCON 25D'), {voor:'pr-m-besturing'});
+  b += '</div></div>';
 
   // ── Gekoppeld artikel (voor standaard documenten) ──
   var _prArtId = pomp ? (pomp.artikelId||'') : '';
@@ -27771,21 +27752,9 @@ function openPompModal(id, opties) {
   var _prArtNaam = '';
   if(_prArtId){
     var _aInit = (APP.artikelenCache||[]).find(function(x){return String(x.id)===String(_prArtId);});
-    if(_aInit) _prArtNaam = (_aInit.code||'')+' — '+(_aInit.omschrijving||'');
+    if(_aInit) _prArtNaam = (_aInit.code||'')+' \u2014 '+(_aInit.omschrijving||'');
     else if(_prArtCode) _prArtNaam = _prArtCode;
   }
-  b += '<div style="font-weight:700;font-size:13px;margin:14px 0 10px">Gekoppeld artikel (optioneel)</div>';
-  b += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Koppel een artikel om de standaard documenten (tekening, onderdelenlijst, handleiding) automatisch bij deze pomp te tonen.</div>';
-  b += fgf('Artikel',
-    '<div style="position:relative" id="pr-art-wrap">'
-    + '<input type="text" class="input" id="pr-m-art-zoek" placeholder="Zoek op artikelcode of omschrijving..." autocomplete="off" value="'+esc(_prArtNaam)+'" style="padding-right:32px">'
-    + '<span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none">'+ICO.search+'</span>'
-    + '<input type="hidden" id="pr-m-art-id" value="'+esc(_prArtId)+'">'
-    + '<input type="hidden" id="pr-m-art-code" value="'+esc(_prArtCode)+'">'
-    + '<div id="pr-art-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;max-height:220px;overflow-y:auto;z-index:998;box-shadow:0 8px 24px rgba(0,0,0,0.25)"></div>'
-    + '</div>'
-  );
-  b += '<div class="form-grid" style="gap:12px">';
 
   // Bepaal beginwaarde klantzoeker
   var _prKlantNaam = pomp ? (pomp.klantnaam||'') : '';
@@ -27800,82 +27769,69 @@ function openPompModal(id, opties) {
     if(_dInit) { _prKlantNaam = debNaam(_dInit); _prKlantVal = 'deb:'+_dInit.id; }
   }
 
-  b += fgf('Klant',
-    '<div style="position:relative" id="pr-klant-wrap">'
-    + '<input type="text" class="input" id="pr-m-klant-zoek" placeholder="Zoek op naam, debiteurnr. of typ vrije naam..." autocomplete="off" value="'+esc(_prKlantNaam)+'" style="padding-right:32px">'
-    + '<span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none">'+ICO.search+'</span>'
-    + '<input type="hidden" id="pr-m-klant-val" value="'+esc(_prKlantVal)+'">'
-    + '<div id="pr-klant-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;max-height:220px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.25)"></div>'
-    + '</div>'
-  );
+  // Locatie koppeling (alleen als er al een debiteur met locaties aan hangt)
+  var pompDebId = pomp && pomp.debId ? pomp.debId : null;
+  var pompDeb = pompDebId ? APP.debiteuren.find(function(d){return String(d.id)===String(pompDebId);}) : null;
+  var pompLocs = pompDeb && pompDeb.locaties ? Object.values(pompDeb.locaties) : [];
+
+  b += '<div class="lf-groep">Koppelingen</div><div class="lf-blok-kaart">';
+  b += lfRij(ICO.gebouw, 'Klant', _prT('pr-m-klant-zoek', _prKlantNaam, 'Zoek of typ een naam', ' autocomplete="off"'), {voor:'pr-m-klant-zoek'})
+     + '<input type="hidden" id="pr-m-klant-val" value="'+esc(_prKlantVal)+'">'
+     + '<div id="pr-klant-dropdown" class="lf-zoek-res" style="display:none"></div>';
+  if(pompLocs.length > 0) {
+    var locOptsPr = '<option value="">Geen specifieke locatie</option>';
+    pompLocs.forEach(function(l){ locOptsPr += '<option value="'+esc(l.id)+'"'+(pomp&&pomp.locatieId===l.id?' selected':'')+'>'+esc(l.naam+' \u2013 '+l.adres+', '+l.plaats)+'</option>'; });
+    b += lfKies(ICO.huis, 'Locatie', '<select class="input" id="pr-m-locatie">'+locOptsPr+'</select>', {titel:'Installatielocatie'});
+  } else {
+    b += '<input type="hidden" id="pr-m-locatie" value="'+(pomp&&pomp.locatieId||'')+'">';
+  }
+  b += lfRij(ICO.clipboard, 'Artikel', _prT('pr-m-art-zoek', _prArtNaam, 'Zoek op code of omschrijving', ' autocomplete="off"'), {voor:'pr-m-art-zoek', sub:'Voor de documenten'})
+     + '<input type="hidden" id="pr-m-art-id" value="'+esc(_prArtId)+'">'
+     + '<input type="hidden" id="pr-m-art-code" value="'+esc(_prArtCode)+'">'
+     + '<div id="pr-art-dropdown" class="lf-zoek-res" style="display:none"></div>';
   b += '</div>';
 
   // Extra velden komen uit Instellingen → Register. Alleen wat daar is aangemaakt
   // verschijnt hier; het blok verdwijnt als er niets is ingesteld.
   var _rgVelden = getRegisterVelden();
   if(_rgVelden.length) {
-    b += '<div style="font-weight:700;font-size:13px;margin:14px 0 10px">Gegevens</div>';
-    b += '<div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px">';
-    _rgVelden.forEach(function(v){
+    var _rgRijen = _rgVelden.map(function(v){
       var waarde = pomp ? registerVeldWaarde(pomp, v) : '';
       var id = 'rg-f-'+v.key;
-      if(v.type === 'janee') {
-        b += fg(registerVeldLabel(v),
-          '<label style="display:flex;align-items:center;gap:8px;padding:9px 0">'
-          + '<input type="checkbox" id="'+id+'" '+(waarde?'checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)">'
-          + '<span style="font-size:13px;color:var(--muted)">Ja</span></label>');
-      } else if(v.key === 'fabrikant') {
+      var lbl = esc(v.label + (v.eenheid ? ' ('+v.eenheid+')' : ''));
+      var o = {voor:id, verplicht:!!v.verplicht};
+      var req = v.verplicht ? ' required' : '';
+      if(v.type === 'janee') return lfRij('', lbl, lfSchakel(id, !!waarde), {voor:id, verplicht:!!v.verplicht});
+      if(v.key === 'fabrikant') {
         // Suggesties uit bestaande fabrikanten blijven behouden.
-        b += fg(registerVeldLabel(v),
-          '<input class="input" id="'+id+'" list="pr-fab-list" value="'+esc(waarde||(pomp?'':'Homa'))+'" placeholder="'+esc(v.label)+'">'
-          + '<datalist id="pr-fab-list">'+fabrikanten.map(function(f){return'<option value="'+esc(f)+'">';}).join('')+'</datalist>');
-      } else {
-        var invoerType = v.type==='getal' ? 'number' : (v.type==='datum' ? 'date' : 'text');
-        b += fg(registerVeldLabel(v), finp(id, invoerType, waarde, ''));
+        return lfRij('', lbl, '<input class="lf-tekst" type="text" id="'+id+'" list="pr-fab-list" value="'+esc(waarde||(pomp?'':'Homa'))+'"'+req+'>'
+          + '<datalist id="pr-fab-list">'+fabrikanten.map(function(f){return'<option value="'+esc(f)+'">';}).join('')+'</datalist>', o);
       }
+      if(v.type === 'datum') return lfRij('', lbl, '<input class="lf-veld" type="date" id="'+id+'" value="'+esc(waarde||'')+'"'+req+'>', o);
+      if(v.type === 'getal') return lfRij('', lbl, '<input class="lf-tekst" type="number" inputmode="decimal" step="any" id="'+id+'" value="'+esc(waarde===''||waarde==null?'':String(waarde))+'"'+req+'>', o);
+      return lfRij('', lbl, '<input class="lf-tekst" type="text" id="'+id+'" value="'+esc(waarde||'')+'"'+req+'>', o);
     });
+    b += '<div class="lf-groep">Gegevens</div><div class="lf-blok-kaart">';
+    for(var _ri = 0; _ri < _rgRijen.length; _ri += 2) b += '<div class="lf-twee">'+_rgRijen[_ri]+(_rgRijen[_ri+1]||'')+'</div>';
     b += '</div>';
   }
-  // Zichtbaarheid op werkbon/opdrachten (los van contract/object — extra control)
-  b += '<label style="display:flex;align-items:flex-start;gap:10px;margin:14px 0 4px;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;cursor:pointer">';
-  b += '<input type="checkbox" id="pr-m-toonwerkbon" '+((pomp&&pomp.toonOpWerkbon)?'checked':'')+' style="width:16px;height:16px;margin-top:1px;accent-color:var(--accent)">';
-  b += '<span style="font-size:13px"><b>Tonen op werkbon / opdrachten</b><br><span style="font-size:11px;color:var(--muted)">Zet aan om deze '+registerItemEnkel(false)+' altijd op de werkbon te tonen. '+registerItemMeervoud(true)+' die via een servicecontract of object gekoppeld zijn, verschijnen sowieso.</span></span>';
-  b += '</label>';
 
-  // Koppeling aan het servicecontract (alleen tonen als er een serviceklant met contract is
-  // voor de klant van deze pomp). Dit is iets ANDERS dan "tonen op werkbon": contract =
-  // hoort bij het onderhoudscontract; tonen op werkbon = alleen zichtbaar bij uitvoering.
+  // Tonen op werkbon en de koppeling aan het servicecontract zijn twee verschillende dingen:
+  // contract = hoort bij het onderhoudscontract; tonen op werkbon = alleen zichtbaar bij uitvoering.
   var _pmDebId = pomp && pomp.debId ? pomp.debId : null;
   var _pmSk = _pmDebId ? (APP.serviceklanten||[]).find(function(k){ return String(k.debId)===String(_pmDebId); }) : null;
   var _pmInContract = !!(pomp && _pmSk && Array.isArray(_pmSk.pompIds) && _pmSk.pompIds.map(String).indexOf(String(pomp.id))>=0);
+  b += '<div class="lf-groep">Werkbon en contract</div><div class="lf-blok-kaart">';
+  b += lfRij(ICO.clipboard, 'Tonen op werkbon', lfSchakel('pr-m-toonwerkbon', !!(pomp&&pomp.toonOpWerkbon)), {voor:'pr-m-toonwerkbon', sub:'Altijd op de werkbon. Via een contract of object gekoppelde '+registerItemMeervoud(false)+' verschijnen sowieso.'});
   if(_pmSk && _pmSk.contractType){
-    b += '<label style="display:flex;align-items:flex-start;gap:10px;margin:8px 0 4px;padding:11px 13px;background:'+(_pmInContract?'rgba(16,185,129,.08)':'var(--surface2)')+';border:1px solid '+(_pmInContract?'rgba(16,185,129,.35)':'var(--border)')+';border-radius:9px;cursor:pointer">';
-    b += '<input type="checkbox" id="pr-m-incontract" '+(_pmInContract?'checked':'')+' style="width:16px;height:16px;margin-top:1px;accent-color:var(--green)">';
-    b += '<span style="font-size:13px"><b>Gekoppeld aan servicecontract</b><br><span style="font-size:11px;color:var(--muted)">Hoort deze '+registerItemEnkel(false)+' bij het onderhoudscontract van '+esc(_pmSk.naam||'deze klant')+' ('+esc(_pmSk.contractType)+')? Dan wordt hij meegenomen bij geplande onderhoudsbeurten.</span></span>';
-    b += '</label>';
+    b += lfRij(ICO.check, 'In servicecontract', lfSchakel('pr-m-incontract', _pmInContract), {voor:'pr-m-incontract', sub:'Hoort bij het contract van '+esc(_pmSk.naam||'deze klant')+' ('+esc(_pmSk.contractType)+') en gaat mee bij geplande onderhoudsbeurten.'});
   } else if(_pmDebId && !_pmSk){
-    b += '<div style="font-size:11px;color:var(--muted);margin:8px 0 4px;padding:2px 2px">Deze klant heeft geen servicecontract; koppelen aan een contract is daarom niet mogelijk.</div>';
+    b += '<p class="lf-uitleg" style="border-top:1px solid var(--border)">Deze klant heeft geen servicecontract; koppelen aan een contract is daarom niet mogelijk.</p>';
   }
-  // Locatie koppeling (alleen als debiteur geselecteerd)
-  var pompDebId = pomp && pomp.debId ? pomp.debId : null;
-  var pompDeb = pompDebId ? APP.debiteuren.find(function(d){return String(d.id)===String(pompDebId);}) : null;
-  var pompLocs = pompDeb && pompDeb.locaties ? Object.values(pompDeb.locaties) : [];
-  if(pompLocs.length > 0) {
-    b += '<div style="font-weight:700;font-size:13px;margin:14px 0 10px">Installatie locatie</div>';
-    b += '<div class="form-grid" style="gap:12px">';
-    var locOptsPr = '<option value="">— Geen specifieke locatie —</option>';
-    pompLocs.forEach(function(l){ locOptsPr += '<option value="'+esc(l.id)+'"'+(pomp&&pomp.locatieId===l.id?' selected':'')+'>'+esc(l.naam+' – '+l.adres+', '+l.plaats)+'</option>'; });
-    b += fgf('Locatie', '<select class="input" id="pr-m-locatie">'+locOptsPr+'</select>');
-    b += '</div>';
-  } else {
-    b += '<input type="hidden" id="pr-m-locatie" value="'+(pomp&&pomp.locatieId||'')+'">';
-  }
+  b += '</div>';
+  if(!isNieuw) b += '<button type="button" class="lf-verwijder" id="pr-m-del">'+ICO.trash+' '+esc(registerItemEnkel(true))+' verwijderen</button>';
 
-  var f = '<button class="btn btn-ghost" id="pr-m-cancel">Annuleren</button>';
-  if(!isNieuw) f = '<button class="btn btn-ghost" id="pr-m-del" style="color:var(--red);margin-right:auto">'+ICO.trash+' Verwijderen</button>' + f;
-  f += '<button class="btn btn-primary" id="pr-m-save">'+(isNieuw?'Registreren':'Opslaan')+'</button>';
-
-  openModal((isNieuw?'Pomp registreren':'Pomp bewerken'), b, f);
+  lfOpen((isNieuw?'Pomp registreren':'Pomp bewerken'), b, isNieuw?'Registreren':'Opslaan', 'pr-m-save', {groot:true});
 
   // ── Klantzoeker (identiek aan planning modal) ──
   var _prKlantPool = [];
@@ -27903,24 +27859,21 @@ function openPompModal(id, opties) {
       : _prKlantPool.filter(function(k){ return k.label.toLowerCase().includes(query)||k.sub.toLowerCase().includes(query); }).slice(0,40);
     if(!res.length) {
       // Vrije naam invoer optie tonen
-      _prDrop.innerHTML = '<div style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted)" id="pr-vrije-opt">Gebruik "'+esc(query)+'" als vrije klantnaam</div>';
+      _prDrop.innerHTML = '<div class="lf-art" id="pr-vrije-opt">'+_lfIco(ICO.edit)+'<span class="lf-l">Gebruik \u201c'+esc(query)+'\u201d als klantnaam<small>Niet gekoppeld aan een debiteur</small></span></div>';
       var vrije = _prDrop.querySelector('#pr-vrije-opt');
       if(vrije) { vrije.addEventListener('mousedown',function(e){ e.preventDefault(); _prZoekInp.value=query; _prZoekHid.value='vrij:'+query; _prDrop.style.display='none'; }); }
     } else {
       _prDrop.innerHTML = res.map(function(k){
-        return '<div class="pr-klant-opt" data-val="'+esc(k.val)+'" data-label="'+esc(k.label)+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">'
-          +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(k.label)+'</div>'
-          +'<div style="font-size:11px;color:var(--muted);margin-top:1px">'+esc(k.sub)+'</div></div>'
-          +(k.type==='sk'?'<span style="font-size:10px;background:rgba(16,185,129,.15);color:var(--green-t);border-radius:4px;padding:2px 6px;flex-shrink:0">Contract</span>':'')
+        return '<div class="pr-klant-opt lf-art" data-val="'+esc(k.val)+'" data-label="'+esc(k.label)+'">'
+          +_lfIco(k.type==='sk' ? _LF_STER : ICO.gebouw)
+          +'<span class="lf-l">'+esc(k.label)+'<small>'+esc(k.sub)+'</small></span>'
           +'</div>';
       }).join('');
     }
     _prDrop.style.display='block';
     _prDrop.querySelectorAll('.pr-klant-opt').forEach(function(item){
       item.addEventListener('mousedown',function(e){ e.preventDefault(); e.stopPropagation(); _prZoekInp.value=item.dataset.label; _prZoekHid.value=item.dataset.val; _prDrop.style.display='none'; });
-      item.addEventListener('mouseover',function(){ item.style.background='var(--surface2)'; });
-      item.addEventListener('mouseout', function(){ item.style.background=''; });
-    });
+          });
   }
 
   if(_prZoekInp) {
@@ -27929,7 +27882,6 @@ function openPompModal(id, opties) {
     _prZoekInp.addEventListener('blur', function(){ setTimeout(function(){ _prDrop.style.display='none'; },300); });
   }
 
-  document.getElementById('pr-m-cancel').addEventListener('click', closeModal);
 
   // ── Artikel-zoeker binden ──
   var _prArtInp = document.getElementById('pr-m-art-zoek');
@@ -27944,13 +27896,13 @@ function openPompModal(id, opties) {
       return (a.code||'').toLowerCase().includes(query) || (a.omschrijving||'').toLowerCase().includes(query);
     }).slice(0,40));
     if(!res.length){
-      _prArtDrop.innerHTML = '<div style="padding:10px 14px;font-size:12px;color:var(--muted)">Geen artikelen gevonden.</div>';
+      _prArtDrop.innerHTML = '<p class="lf-leeg">Geen artikelen gevonden.</p>';
     } else {
       _prArtDrop.innerHTML = res.map(function(a){
         var aantalDoc = Array.isArray(a.documenten)?a.documenten.length:(a.documenten?Object.keys(a.documenten).length:0);
-        return '<div class="pr-art-opt" data-id="'+esc(a.id)+'" data-code="'+esc(a.code||'')+'" data-label="'+esc((a.code||'')+' — '+(a.omschrijving||''))+'" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border)">'
-          +'<div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.code||'')+' — '+esc(a.omschrijving||'')+'</div>'
-          +'<div style="font-size:11px;color:var(--muted);margin-top:1px">'+(aantalDoc?aantalDoc+' document'+(aantalDoc!==1?'en':''):'geen documenten')+'</div>'
+        return '<div class="pr-art-opt lf-art" data-id="'+esc(a.id)+'" data-code="'+esc(a.code||'')+'" data-label="'+esc((a.code||'')+' — '+(a.omschrijving||''))+'">'
+          +_lfIco(_LF_PAKKET)
+          +'<span class="lf-l">'+esc(a.code||'')+' — '+esc(a.omschrijving||'')+'<small>'+(aantalDoc?aantalDoc+' document'+(aantalDoc!==1?'en':''):'geen documenten')+'</small></span>'
           +'</div>';
       }).join('');
     }
@@ -27959,9 +27911,7 @@ function openPompModal(id, opties) {
       item.addEventListener('mousedown',function(e){ e.preventDefault(); e.stopPropagation();
         _prArtInp.value=item.dataset.label; _prArtIdH.value=item.dataset.id; _prArtCodeH.value=item.dataset.code; _prArtDrop.style.display='none';
       });
-      item.addEventListener('mouseover',function(){ item.style.background='var(--surface2)'; });
-      item.addEventListener('mouseout', function(){ item.style.background=''; });
-    });
+          });
   }
   if(_prArtInp){
     // Zorg dat de artikelen geladen zijn voor de zoeker
