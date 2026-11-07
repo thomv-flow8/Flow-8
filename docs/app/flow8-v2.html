@@ -846,9 +846,6 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 /* Timer compact + verticaal in de nav-top */
 #wb-fullscreen #wb-timer-slot{margin-top:14px}
 #wb-fullscreen #wb-timer-card{margin:0}
-/* In beeldvullende weergave is er ruimte zat: daar altijd de ring. */
-#wb-fullscreen .wb-timer-compact{display:none!important}
-#wb-fullscreen .wb-timer-ring{display:flex!important;background:none;border:none;padding:8px 0}
 /* Detail-kolom: titel + scrollbare body */
 #wb-fullscreen .wbx-md-detail{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;background:var(--bg);border-radius:0 16px 16px 0}
 #wb-fullscreen .wbx-md-titel{font-family:'Instrument Sans',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.02em;padding:22px 32px 0;margin:0;display:flex;align-items:center;gap:10px;flex-shrink:0}
@@ -888,13 +885,6 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 .wp-sc .stat-card,.wo-sc .stat-card{cursor:pointer}
 /* Sleepgreep bij herordenbare velden. touch-action:none is nodig, anders scrollt de
    pagina mee zodra je op een telefoon begint te slepen. */
-/* Timer: compacte balk op een telefoon, ring op tablet en desktop. Beide staan in de
-   DOM zodat draaien van het toestel meteen de juiste vorm toont. */
-.wb-timer-ring{display:none}
-@media(min-width:769px){
-  .wb-timer-compact{display:none!important}
-  .wb-timer-ring{display:flex!important}
-}
 
 /* Aanmaakvenster werkbon: rijen met het label links en de waarde rechts. Compacter dan
    labels boven de velden, en de waarden staan onder elkaar uitgelijnd. */
@@ -1930,6 +1920,18 @@ button.sd-m-dag{cursor:pointer}
 .wbt.loopt .wbt-knop{background:var(--red)}
 .wbt-seg{grid-column:1/-1}
 @keyframes wbtAdem{50%{opacity:.35}}
+.wbt-sub{display:none;font-size:12.5px;color:var(--muted);margin-top:2px}
+/* Tablet en desktop: dezelfde kaart, groter en onder elkaar */
+@media(min-width:769px){
+  .wbt{grid-template-columns:1fr;gap:12px;padding:16px}
+  .wbt .wb-timer-elapsed{font-size:34px;letter-spacing:-.02em}
+  .wbt-sub{display:block}
+  .wbt-knop{width:100%;justify-content:center;height:48px;font-size:15px}
+  .wbt-seg > div{display:flex!important;width:100%}
+  .wbt-seg button{flex:1;justify-content:center}
+  .wbt-seg{order:1}
+  .wbt-knop{order:2}
+}
 /* materialen */
 .wbm{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;column-gap:12px;padding:10px 0;border-top:1px solid var(--border)}
 .wbm-foto{width:36px;height:36px;border-radius:10px;object-fit:cover;cursor:pointer;display:block}
@@ -3460,7 +3462,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
     _cNaam = (_skC&&_skC.contactpersoon) || (_debC&&_debC.contactpersoon) || '';
     _cTel  = (_skC&&_skC.telefoon) || (_debC&&_debC.telefoon) || '';
   }
-  if(_cNaam || _cTel) klBody += '<div class="wbx-row"><span class="wbx-k">Contact</span><span class="wbx-v">'+esc(_cNaam)+(_cTel?(' \u00b7 '+esc(_cTel)):'')+'</span></div>';
+  if(_cNaam || _cTel) klBody += '<div class="wbx-row"><span class="wbx-k">Contact</span><span class="wbx-v">'+esc([_cNaam,_cTel].filter(Boolean).join(' \u00b7 '))+'</span></div>';
   // Contracttype (leesbaar label uit de gekoppelde serviceklant)
   var _contract = '';
   if(wb.skId){
@@ -4016,8 +4018,6 @@ function _wbTimerCard(wb, medId){
   // keuze (standaard werktijd).
   var type   = actief ? (actief.type || 'werk') : (window._wbTimerType || 'werk');
   var isReis = type === 'reis';
-  var kleur  = isReis ? 'var(--accent)' : 'var(--green)';
-  var label  = isReis ? 'REISTIJD' : 'WERKTIJD';
   var tijd   = _wbTimerElapsedStr(actief && actief.startOp);
 
   var icoWerk = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>';
@@ -4042,36 +4042,14 @@ function _wbTimerCard(wb, medId){
 
   var h = '<div id="wb-timer-card" style="margin-bottom:16px">';
 
-  // ── Compacte balk: op een telefoon telt elke pixel, en de lijst eronder is
-  //    belangrijker dan een grote klok. ──
+  // ── Kaart: op een telefoon compact naast elkaar, op tablet en desktop groter en onder elkaar (css). ──
   h += '<div class="wb-timer-compact wbt'+(actief?' loopt':'')+(isReis?' reis':'')+'">';
-  h += '<div><span class="wbt-lbl"><i></i>'+(isReis?'Reistijd':'Werktijd')+(actief?' loopt':' · niet gestart')+'</span><b class="wb-timer-elapsed">'+tijd+'</b></div>';
+  h += '<div><span class="wbt-lbl"><i></i>'+(isReis?'Reistijd':'Werktijd')+(actief?' loopt':' · niet gestart')+'</span><b class="wb-timer-elapsed">'+tijd+'</b>'+(actief && actief.startTijd ? '<small class="wbt-sub">gestart '+esc(actief.startTijd)+'</small>' : '')+'</div>';
   h += '<button type="button" class="wb-timer-btn wbt-knop" aria-label="'+(actief?'Timer stoppen':'Timer starten')+'">'+(actief?icoStop+'Stoppen':icoPlay+'Starten')+'</button>';
   var segC = segment(true);
   if(segC) h += '<div class="wbt-seg">'+segC+'</div>';
   h += '</div>';
 
-  // ── Ring: op een tablet is er ruimte, en de vullende ring laat in één oogopslag
-  //    zien hoe lang je bezig bent. ──
-  var pct = 0;
-  if(actief && actief.startOp){
-    var secs = Math.floor((Date.now() - new Date(actief.startOp).getTime())/1000);
-    pct = (secs % 60) / 60;
-  }
-  var omtrek = 364.4;
-  h += '<div class="wb-timer-ring" style="display:none;flex-direction:column;align-items:center;gap:12px;background:var(--surface);border:1px solid '+(actief?kleur:'var(--border)')+';border-radius:16px;padding:20px 16px">';
-  h += '<button type="button" class="wb-timer-btn" style="position:relative;width:132px;height:132px;border:none;background:none;padding:0;cursor:pointer">';
-  h += '<svg width="132" height="132" style="transform:rotate(-90deg);display:block"><circle cx="66" cy="66" r="58" fill="none" stroke="var(--surface2)" stroke-width="8"/>';
-  h += '<circle class="wb-timer-arc" cx="66" cy="66" r="58" fill="none" stroke="'+kleur+'" stroke-width="8" stroke-linecap="round" stroke-dasharray="'+omtrek+'" stroke-dashoffset="'+(omtrek-omtrek*pct)+'" style="transition:stroke-dashoffset .9s linear"/></svg>';
-  h += '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:'+_klTekst(kleur)+'">';
-  h += '<span>'+(isReis?icoReis:icoWerk).replace('width="13" height="13"','width="19" height="19"')+'</span>';
-  h += '<span style="font-size:12px;font-weight:700;letter-spacing:.3px">'+(actief?'Bezig':'Start')+'</span>';
-  h += '<span class="wb-timer-elapsed" style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--text)">'+tijd+'</span>';
-  h += '</div></button>';
-  var segR = segment(false);
-  if(segR) h += segR;
-  if(actief) h += '<div style="font-size:12px;color:var(--muted)">'+label.toLowerCase()+' \u00b7 gestart '+esc(actief.startTijd||'')+'</div>';
-  h += '</div>';
 
   h += '</div>';
   return h;
@@ -4102,12 +4080,6 @@ function _wbTimerBind(state){
       if(!els.length){ clearInterval(_wbTimerInterval); _wbTimerInterval = null; return; }
       var tekst = _wbTimerElapsedStr(actief.startOp);
       els.forEach(function(el){ el.textContent = tekst; });
-      // De ring vult zich per minuut, zodat je zonder lezen ziet hoe lang je bezig bent.
-      var secs = Math.floor((Date.now() - new Date(actief.startOp).getTime())/1000);
-      var omtrek = 364.4;
-      document.querySelectorAll('.wb-timer-arc').forEach(function(arc){
-        arc.style.strokeDashoffset = omtrek - omtrek * ((secs % 60) / 60);
-      });
     }, 1000);
   }
 }
