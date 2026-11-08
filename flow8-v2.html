@@ -15601,7 +15601,7 @@ function renderVerlof(){
           h2 += '<svg class="vl-chevron" style="width:16px;height:16px;flex-shrink:0;transition:transform .2s;transform:rotate('+(_open?'90':'0')+'deg);color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18l6-6-6-6"/></svg>';
           h2 += '<div class="avatar" style="width:32px;height:32px;font-size:11px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
           h2 += '<div style="font-weight:700">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
-          h2 += '<span style="font-size:12px;color:var(--muted);margin-left:4px">saldo: <strong>'+String(getVerlofSaldoUren(m)).replace('.',',')+'u</strong> ('+String(verlofUrenNaarDagen(getVerlofSaldoUren(m), m)).replace('.',',')+'d)</span>';
+          h2 += '<span style="font-size:12px;color:var(--muted);margin-left:4px">saldo: <strong>'+_hrGetal(getVerlofSaldoUren(m))+'u</strong> ('+_hrGetal(verlofUrenNaarDagen(getVerlofSaldoUren(m), m))+'d)</span>';
           h2 += '<span style="font-size:11px;color:var(--muted)">· '+_mutCount+' mutatie'+(_mutCount!==1?'s':'')+'</span>';
           if(isAdmin()) h2 += '<button class="btn btn-ghost btn-sm" data-correctie="'+m.id+'" style="margin-left:auto;font-size:11px">+ Correctie</button>';
           h2 += '</div>';
@@ -17476,7 +17476,7 @@ function openBeschikbaarheid(opdrachtId) {
     });
     sluitWeek();
   }
-  b += '<p class="lf-uitleg">Tik op een dag om de opdracht daar in te plannen. Noem de groene dagen aan de klant; werk in de buurt is handig om mee te nemen, de route volgt bij het inplannen.</p>';
+  b += '<p class="lf-uitleg">Kies een dag om de opdracht daar in te plannen. Noem de groene dagen aan de klant; werk in de buurt is handig om mee te nemen, de route volgt bij het inplannen.</p>';
 
   lfOpen('Eerstvolgende mogelijkheden', b);
   document.querySelectorAll('#modal-body .bh-dag').forEach(function(rij){
@@ -26579,7 +26579,7 @@ function renderPompObjectDetail(objId) {
   if(kanSchrijven){
     geo = _zpRij(_ZP_DOEL, 'Breedtegraad', '<input class="lf-veld obj-geo" type="number" id="obj-geo-lat" value="'+esc(geoLat)+'" step="0.000001" placeholder="bijv. 51.9" aria-label="Breedtegraad">')
       + _zpRij('', 'Lengtegraad', '<input class="lf-veld obj-geo" type="number" id="obj-geo-lng" value="'+esc(geoLng)+'" step="0.000001" placeholder="bijv. 4.3" aria-label="Lengtegraad">')
-      + '<p class="lf-uitleg obj-uitleg">Gaan voor op het adres. Tik op de kaart om een punt te prikken.</p>'
+      + '<p class="lf-uitleg obj-uitleg">Gaan voor op het adres. Klik of tik op de kaart om een punt te prikken.</p>'
       + '<div class="obj-knoppen"><button type="button" class="btn btn-primary btn-sm" id="pr-objdet-geo-save">Opslaan en kaart bijwerken</button>'
       + (geoLat&&geoLng ? '<button type="button" class="btn btn-ghost btn-sm" id="pr-objdet-geo-wis" style="color:var(--red-t)">Wissen</button>' : '')+'</div>';
   } else {
@@ -31673,7 +31673,7 @@ function _renderMailTemplatesTab() {
   }).join('');
   if(!tplArr.length) b = '<p class="lf-leeg">Nog geen templates.</p>';
   b += _zpToevoeg('tpl-add', 'Template toevoegen');
-  var h = '<div class="ist-wrap lf">'+_istKaart('Templates \u00b7 '+tplArr.length, 'Klantmails die je aan opdracht- en werkordertypes kunt koppelen. Tik op een template om hem te wijzigen.', b, null)+'</div>';
+  var h = '<div class="ist-wrap lf">'+_istKaart('Templates \u00b7 '+tplArr.length, 'Klantmails die je aan opdracht- en werkordertypes kunt koppelen. Kies een template om hem te wijzigen.', b, null)+'</div>';
   return h;
 }
 
@@ -32299,7 +32299,7 @@ function _rapSoortWerkPerMonteur(opJaar, monteurs){
       var van = String(o.monteurId)===String(m.id) ||
         (Array.isArray(o.monteurIds) && o.monteurIds.map(String).indexOf(String(m.id))>=0);
       if(!van) return;
-      var k = o.type || 'Onbekend';
+      var k = o.type || 'Zonder type';
       if(!typeInfo[k]){ var ot = getOpdrachttype(k); typeInfo[k] = { label: ot.label || k, kleur: ot.kleur || '#6b7694' }; typeVolg.push(k); }
       per[k] = (per[k]||0) + 1; tot++;
     });
@@ -32367,16 +32367,25 @@ function renderRapOpdrachten(el) {
   monteurs.forEach(function(m){
     var n = opJaar.filter(function(o){
       return String(o.monteurId)===String(m.id) ||
-        (Array.isArray(o.monteurIds) && o.monteurIds.indexOf(String(m.id))>=0);
+        (Array.isArray(o.monteurIds) && o.monteurIds.map(String).indexOf(String(m.id))>=0);
     }).length;
     if(n>0) segMonteurs.push({label: m.voornaam+' '+m.achternaam, waarde: n, kleur: medKleur(m)});
   });
   segMonteurs.sort(function(a,b){return b.waarde-a.waarde;});
+  // Opdrachten zonder monteur, of met iemand die niet (meer) in de lijst staat, tellen ook mee:
+  // anders verdeelt de donut alleen de toegewezen opdrachten en klopt hij niet met de percentages.
+  var _metMonteur = function(o){ return !!(o.monteurId || (Array.isArray(o.monteurIds) && o.monteurIds.length)); };
+  var _inLijst = function(o){ return monteurs.some(function(m){ return String(o.monteurId)===String(m.id) || (Array.isArray(o.monteurIds) && o.monteurIds.map(String).indexOf(String(m.id))>=0); }); };
+  var _overig = opJaar.filter(function(o){ return _metMonteur(o) && !_inLijst(o); }).length;
+  var _nietToegewezen = opJaar.filter(function(o){ return !_metMonteur(o); }).length;
+  if(_overig) segMonteurs.push({label:'Andere medewerkers', waarde:_overig, kleur:'#8a93a8'});
+  if(_nietToegewezen) segMonteurs.push({label:'Niet toegewezen', waarde:_nietToegewezen, kleur:'#c3c8d3'});
+  var _somMonteurs = segMonteurs.reduce(function(t,x){ return t+x.waarde; }, 0);
 
   // Type opdrachten data — gebruik labels en kleuren uit Instellingen
   var typeMap = {};
   opJaar.forEach(function(o){
-    var type = o.type || 'Onbekend';
+    var type = o.type || 'Zonder type';
     if(!typeMap[type]) typeMap[type] = 0;
     typeMap[type]++;
   });
@@ -32386,7 +32395,7 @@ function renderRapOpdrachten(el) {
   }).sort(function(a,b){return b.waarde-a.waarde;});
 
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
-  h += grafiekKaart('Opdrachten per monteur — '+_rapJaar, donutSVG(segMonteurs, totaal+'|totaal'), legendaHTML(segMonteurs, totaal));
+  h += grafiekKaart('Opdrachten per monteur — '+_rapJaar, donutSVG(segMonteurs, totaal+'|totaal'), legendaHTML(segMonteurs, totaal) + (_somMonteurs > totaal ? '<p style="font-size:11px;color:var(--muted);margin:8px 0 0">Een opdracht met meer monteurs telt bij elke monteur mee.</p>' : ''));
   h += grafiekKaart('Verdeling per opdrachttype — '+_rapJaar, donutSVG(segTypes, totaal+'|totaal'), legendaHTML(segTypes, totaal));
   h += '</div>';
   h += _rapSoortWerkPerMonteur(opJaar, monteurs);
@@ -32410,7 +32419,7 @@ function renderRapOpdrachten(el) {
     var mndStr = jaarStr+'-'+('0'+(idx+1)).slice(-2);
     var opMnd = opJaar.filter(function(o){ return (o.datum||'').startsWith(mndStr); });
     var perType = {};
-    opMnd.forEach(function(o){ var t=o.type||'Onbekend'; perType[t]=(perType[t]||0)+1; });
+    opMnd.forEach(function(o){ var t=o.type||'Zonder type'; perType[t]=(perType[t]||0)+1; });
     return { mn: mn, totaal: opMnd.length, perType: perType };
   });
 
@@ -34249,7 +34258,7 @@ function renderInstContracten(el) {
   }).join('');
   if(!contracten.length) b = '<p class="lf-leeg">Nog geen contracttypes.</p>';
   b += _zpToevoeg('ct-add', 'Contracttype toevoegen');
-  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Contracttypes · '+contracten.length, 'Tik op een contracttype om het te wijzigen. De code en kleur zie je terug bij serviceklanten en in de planning.', b, null)+'</div>';
+  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Contracttypes · '+contracten.length, 'Kies een contracttype om het te wijzigen. De code en kleur zie je terug bij serviceklanten en in de planning.', b, null)+'</div>';
   el.querySelectorAll('.ct-sort-th').forEach(function(th){
     th.addEventListener('click', function(){ if(_ctSortKey===th.dataset.sort)_ctSortDir*=-1;else{_ctSortKey=th.dataset.sort;_ctSortDir=1;} renderInstellingen(); });
   });
@@ -34366,7 +34375,7 @@ function renderInstOpdrachten(el) {
   }).join('');
   if(!types.length) b = '<p class="lf-leeg">Nog geen opdrachttypes.</p>';
   b += _zpToevoeg('ot-add', 'Opdrachttype toevoegen');
-  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Opdrachttypes · '+types.length, 'Tik op een type om naam, icoon, kleur of de mailtemplate voor klantmails te wijzigen.', b, null)+'</div>';
+  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Opdrachttypes · '+types.length, 'Kies een type om naam, icoon, kleur of de mailtemplate voor klantmails te wijzigen.', b, null)+'</div>';
   el.querySelectorAll('.ot-sort-th').forEach(function(th){
     th.addEventListener('click', function(){ if(_otSortKey===th.dataset.sort)_otSortDir*=-1;else{_otSortKey=th.dataset.sort;_otSortDir=1;} renderInstellingen(); });
   });
@@ -34497,7 +34506,7 @@ function renderInstRollen(el) {
       '<button type="button" class="btn btn-ghost btn-wis btn-icoon rol-verwijder" data-rol="'+esc(r)+'" aria-label="Rol '+esc(r)+' verwijderen" title="Verwijderen">'+ICO.trash+'</button>');
   });
   _rb += _zpToevoeg('rol-nieuw', 'Rol toevoegen');
-  h += _istKaart('Rollen · '+rolNamen.length, 'Tik op een rol om de naam of kleur te wijzigen. Welke rol iemand heeft, stel je in bij Gebruikers.', _rb, null);
+  h += _istKaart('Rollen · '+rolNamen.length, 'Kies een rol om de naam of kleur te wijzigen. Welke rol iemand heeft, stel je in bij Gebruikers.', _rb, null);
 
   // Rechten matrix
   var _rm = '<div class="table-wrap rol-tabel-wrap ist-rolmatrix" data-geen-kaarten><table><thead><tr>';
@@ -35408,7 +35417,7 @@ function renderInstGebruikers(el) {
   h += _istKaart('Gebruikers', 'Wie kan inloggen en met welke rechten. De rol hier bepaalt wat iemand in de app mag zien en wijzigen; de rol bij Medewerkers bepaalt alleen of iemand planbaar is en beschikbaarheid krijgt.',
     '<div id="gb-tabel-wrap"><p class="lf-leeg">Laden…</p></div>', null);
   // Medewerkers zonder login — het uitgangspunt: zien wie er nog geen account heeft.
-  h += _istKaart('Medewerkers zonder login', 'Tik op een naam om het formulier hieronder in te vullen.', '<div id="gb-zonder-wrap"><p class="lf-leeg">Laden…</p></div>', null);
+  h += _istKaart('Medewerkers zonder login', 'Kies een naam om het formulier hieronder in te vullen.', '<div id="gb-zonder-wrap"><p class="lf-leeg">Laden…</p></div>', null);
   // Nieuw account aanmaken
   h += _istKaart('Nieuw account', '',
     lfKies(_ZP_PERSOON, 'Medewerker', '<select class="input" id="gb-med"><option value="">Kies een medewerker</option>'
@@ -35727,7 +35736,7 @@ function renderInstGoedkeuring(el) {
   actieveMeds.forEach(function(m){
     mods.forEach(function(mod){ if(!heeftGoedkeurder(m.id, mod.k)) _leeg++; });
   });
-  if(_leeg > 0) b += _zpMelding('actie', _leeg+' vakje'+(_leeg===1?'':'s')+' nog leeg', 'Voor die combinaties kan alleen een beheerder goedkeuren; de aanvraag blijft anders liggen. Vul aan waar iemand anders moet tekenen.');
+  if(_leeg > 0) b += _zpMelding('info', _leeg+' vakje'+(_leeg===1?'':'s')+' op Beheerder', 'Daar wacht de aanvraag tot een beheerder hem goedkeurt. Kies een medewerker waar iemand anders moet tekenen.');
 
   b += '<div class="table-wrap ist-tabel ist-gk"><table><thead><tr>';
   var _gkAct = _gkSortKey==='achternaam'; var gkIco = sortArrow(_gkAct,_gkSortDir);
@@ -39962,7 +39971,7 @@ function _openWerkorderStatusEditor(type){
 
   // Het statussen-hoofdscherm (her)openen
   function _heropenStatusLijst(){
-    var b = '<p class="lf-uitleg" style="padding-top:0">De statussen van '+esc(type.naam||'dit type')+', in deze volgorde. Tik op een status om naam, kleur en de volgende statussen in te stellen.</p>';
+    var b = '<p class="lf-uitleg" style="padding-top:0">De statussen van '+esc(type.naam||'dit type')+', in deze volgorde. Kies een status om naam, kleur en de volgende statussen in te stellen.</p>';
     b += '<div id="wo-status-lijst"></div>';
     b += '<button type="button" class="wbx-chip-add" id="wo-status-nieuw">'+_LF_PLUS+'Status toevoegen</button>';
     lfOpen('Statusflow \u00b7 '+(type.naam||''), b, 'Opslaan', 'wo-status-opslaan');
@@ -40151,7 +40160,7 @@ function _openWerkorderBlokEditor(type){
 
 function _woHeropenBlokLijst(){
   var st = _woBlokState; var type = st.type;
-  var b = '<p class="lf-uitleg" style="padding-top:0">Elk blok is een fase van '+esc(type.naam||'dit type')+' met eigen velden en een eigen afronding (handtekening of mail). Tik op een blok om het te bewerken.</p>';
+  var b = '<p class="lf-uitleg" style="padding-top:0">Elk blok is een fase van '+esc(type.naam||'dit type')+' met eigen velden en een eigen afronding (handtekening of mail). Kies een blok om het te bewerken.</p>';
   b += '<div id="wo-blok-lijst"></div>';
   b += '<button type="button" class="wbx-chip-add" id="wo-blok-nieuw">'+_LF_PLUS+'Blok toevoegen</button>';
   lfOpen('Blokken \u00b7 '+(type.naam||''), b, 'Opslaan', 'wo-blok-opslaan');
@@ -40441,7 +40450,7 @@ function _vtShell(o){
     + '<div><div class="vt-titel">'+o.titel+'</div>'+(o.sub ? '<div class="vt-sub">'+o.sub+'</div>' : '')+'</div></div>';
   h += (o.kop||'');
   h += '<div class="vt-kolommen"><div class="vt-achter"></div><div class="vt-links"><div class="vt-links-kop"><span>Toevoegen</span><button type="button" class="vt-links-dicht" aria-label="Sluiten">'+_LF_X+'</button></div>'+o.toevoegen+'</div>';
-  h += '<div><div class="lf-groep lf-groep-knop"><span>Opbouw \u00b7 '+o.aantal+'</span><span class="lf-hint vt-alleen-breed">Tik op een veld om het te bewerken</span></div>';
+  h += '<div><div class="lf-groep lf-groep-knop"><span>Opbouw \u00b7 '+o.aantal+'</span><span class="lf-hint vt-alleen-breed">Kies een veld om het te bewerken</span></div>';
   h += '<div id="'+o.lijstId+'">'+o.lijst+'</div>';
   h += '<button type="button" class="wbx-chip-add vt-toevoeg-knop">'+_LF_PLUS+'Veld of sectie toevoegen</button></div></div>';
   h += '<div class="vt-voet"><button type="button" class="btn btn-primary lf-knop" id="'+o.knopId+'">'+o.knopTekst+'</button></div>';
