@@ -2300,6 +2300,11 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .periode-nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 @media (pointer:coarse){.periode-nav button{width:44px;height:44px}}
 .ag-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+/* Keuzelijsten in de werkbalk en bij de filters: eigen pijltje, zelfde vorm in elke browser */
+.werkbalk select.input,select.chip-sel{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237a8499' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;padding-right:36px}
+select.chip-sel{max-width:220px;height:30px;border:1px solid var(--border);border-radius:var(--radius-pill);background-color:var(--surface);color:var(--text);font:600 12px 'Instrument Sans',sans-serif;padding-left:14px;cursor:pointer}
+select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
+.plan-kolom-naam{font:600 13px 'Instrument Sans',sans-serif;text-transform:none;letter-spacing:0}
 .periode-rij{display:flex;margin-bottom:12px}
 .periode-rij .periode-nav{flex:1;justify-content:space-between}
 @media (max-width:768px){
@@ -12641,10 +12646,11 @@ function renderServiceklanten() {
   h+='</div>';
 
   h+='<div class="filter-row sk-chips">';
+  var _skCt = getContracten().some(function(ct){ return _skFilter===ct.id; });
+  h+='<select class="chip-sel'+(_skCt?' aan':'')+'" id="sk-contract-filter" aria-label="Filter op contract"><option value="">Alle contracten</option>'
+    + getContracten().map(function(ct){ return '<option value="'+esc(ct.id)+'"'+(_skFilter===ct.id?' selected':'')+'>'+esc(ct.code)+(ct.naam?' \u2014 '+esc(ct.naam):'')+'</option>'; }).join('')
+    + '</select>';
   h+='<button class="chip'+(_skFilter==='alle'?' active':'')+'" data-filter="alle">Alle</button>';
-  getContracten().forEach(function(ct){
-    h+='<button class="chip'+(_skFilter===ct.id?' active':'')+'" data-filter="'+ct.id+'">'+esc(ct.code)+'</button>';
-  });
   h+='<button class="chip'+(_skFilter==='vervallen'?' active':'')+'" data-filter="vervallen">Vervallen</button>';
   if(heeftAanvullingen()) h+='<button class="chip'+(_skFilter==='bcontract'?' active':'')+'" data-filter="bcontract" style="background:rgba(245,158,11,.12);color:var(--orange-t);border-color:rgba(245,158,11,.3)'+(_skFilter==='bcontract'?';font-weight:700':'')+'">'+esc(aanvullingTitel())+'</button>';
   h+='<button class="chip'+(_skFilter==='extern'?' active':'')+'" data-filter="extern" style="background:rgba(245,158,11,.08);color:var(--orange-t)'+(_skFilter==='extern'?';font-weight:700':'')+'">Extern/ZZP</button>';
@@ -12748,6 +12754,8 @@ function renderServiceklanten() {
     debounceRender('sk', renderServiceklanten, 'sk-zoek');
   });
   el.querySelectorAll('.chip[data-filter]').forEach(function(b){b.addEventListener('click',function(){_skFilter=b.dataset.filter;_skPage=1;renderServiceklanten();});});
+  var _skCtSel = el.querySelector('#sk-contract-filter');
+  if(_skCtSel) _skCtSel.addEventListener('change', function(){ _skFilter = _skCtSel.value || 'alle'; _skPage=1; renderServiceklanten(); });
   el.querySelectorAll('.sk-sort-th').forEach(function(th){th.addEventListener('click',function(){
     if(_skSortKey===th.dataset.sort) _skSortDir*=-1; else{_skSortKey=th.dataset.sort;_skSortDir=1;}
     _skPage=1; renderServiceklanten();
@@ -13532,6 +13540,15 @@ function debSyncContactVelden(d){
 }
 
 // Korte datum+tijd weergave voor de maillog (bijv. "20-08-2026 16:50").
+// De server legt verzonden mails vast met 'op' (tijdstempel) en 'doorNaam'; 'door' is daar het
+// gebruikers-id. Gelijktrekken met wat de app zelf vastlegt (datum, door = naam).
+function _mailNorm(m){
+  if(!m) return m;
+  if(!m.datum && m.op) m.datum = new Date(m.op).toISOString();
+  if(m.doorNaam) m.door = m.doorNaam;
+  else if(m.door && /^[A-Za-z0-9]{20,}$/.test(m.door)) m.door = '';
+  return m;
+}
 function _dpMailDatumKort(iso){
   if(!iso) return '';
   var d = new Date(iso);
@@ -13697,6 +13714,7 @@ function openDebPanel(id, opties){
   var _opdrachtIdsVanKlant = (APP.opdrachten||[]).filter(function(o){
     return String(o.debId)===String(_debIdVoorMail) || (o.skId && _skIdsVanKlant.indexOf(String(o.skId))>=0);
   }).map(function(o){ return String(o.id); });
+  (APP.mailLog||[]).forEach(_mailNorm);
   var _klantMails = (APP.mailLog||[]).filter(function(m){
     if(m.refType==='debiteur' && String(m.refId)===String(_debIdVoorMail)) return true;
     if(m.refType==='opdracht' && _opdrachtIdsVanKlant.indexOf(String(m.refId))>=0) return true;
@@ -20145,12 +20163,12 @@ function renderPlanDag(monteurs) {
     h += '<div style="display:flex;align-items:center;justify-content:center;gap:6px">';
     if(k.m){
       h += '<div class="avatar" style="width:28px;height:28px;font-size:11px;background:'+medKleur(k.m)+';color:'+_tekstOpKleur(medKleur(k.m))+'">'+initials(k.m)+'</div>';
-      h += '<span style="font-size:12px;font-weight:600">'+esc(k.m.voornaam+' '+k.m.achternaam)+'</span>';
+      h += '<span class="plan-kolom-naam">'+esc(k.m.voornaam+' '+k.m.achternaam)+'</span>';
       // De dag ligt hier al vast, dus de kolomkop is precies één monteur op één dag.
       if(magSchrijven('planning') && k.ops.length) h += '<button class="btn btn-ghost btn-sm plan-dagplan-dag" data-datum="'+esc(_planDatum)+'" data-monteur="'+esc(String(k.m.id))+'" title="Route van '+esc(k.m.voornaam+' '+k.m.achternaam)+' op '+esc(fmtD(_planDatum))+'" style="padding:1px 5px;line-height:1;display:inline-flex;align-items:center">'+_routeIcoon(12)+'</button>';
     } else {
       h += '<div class="avatar" style="width:28px;height:28px;font-size:11px;background:var(--border);color:var(--muted)">?</div>';
-      h += '<span style="font-size:12px;font-weight:600;color:var(--muted)">'+(k.nietInPlanning ? 'Niet in planning' : 'Niet toegewezen')+'</span>';
+      h += '<span class="plan-kolom-naam" style="color:var(--muted)">'+(k.nietInPlanning ? 'Niet in planning' : 'Niet toegewezen')+'</span>';
     }
     h += '</div>';
     // Terugtijd onder de naam — dezelfde berekening als de retourregel in de lijst.
@@ -21633,7 +21651,7 @@ function renderOveruren() {
   var openUren  = filterEigen(APP.overuren,'medId','overuren').filter(function(o){return o.status==='aangevraagd';}).reduce(function(s,o){return s+(o.uren||0);},0);
   var compUren  = zichtbaarOU.filter(function(o){return o.status==='gecompenseerd';}).reduce(function(s,o){return s+(o.uren||0);},0);
   var uitbUren  = zichtbaarOU.filter(function(o){return o.status==='uitbetaald';}).reduce(function(s,o){return s+(o.uren||0);},0);
-  var saldoUren = Math.round((compUren - uitbUren) * 10) / 10;
+  var saldoUren = Math.round((compUren - uitbUren) * 100) / 100;
 
   var h = '';
 
@@ -21651,10 +21669,10 @@ function renderOveruren() {
 
   // ── Stats ──
   h += '<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
-  h += statCard('Open (alle jaren)',           openUren+'u',    '#f59e0b', SVGS.alert);
-  h += statCard('Gecompenseerd '+jaarStr,      compUren+'u',    '#4f6ef5', SVGS.file);
-  h += statCard('Uitbetaald '+jaarStr,         uitbUren+'u',    '#10b981', SVGS.file);
-  h += statCard('Saldo '+jaarStr,              saldoUren+'u',   saldoUren>0?'#4f6ef5':'#6b7694', SVGS.alert);
+  h += statCard('Open (alle jaren)',           _nlUren(openUren)+'u',    '#f59e0b', SVGS.alert);
+  h += statCard('Gecompenseerd '+jaarStr,      _nlUren(compUren)+'u',    '#4f6ef5', SVGS.file);
+  h += statCard('Uitbetaald '+jaarStr,         _nlUren(uitbUren)+'u',    '#10b981', SVGS.file);
+  h += statCard('Saldo '+jaarStr,              _nlUren(saldoUren)+'u',   saldoUren>0?'#4f6ef5':'#6b7694', SVGS.alert);
   h += '</div>';
 
   // ── Filter chips ──
@@ -21730,7 +21748,7 @@ function renderOveruren() {
     h += '<div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px">';
     if(heeftItems) {
       h += '<span>'+items.length+' registratie'+(items.length===1?'':'s')+'</span>';
-      h += '<span>·</span><span>'+totUren+'u totaal</span>';
+      h += '<span>·</span><span>'+_nlUren(totUren)+'u totaal</span>';
     } else {
       h += '<span>Geen overuren in '+jaarStr+'</span>';
     }
@@ -21766,7 +21784,7 @@ function renderOveruren() {
         }[o.status] || '<span class="tag tag-muted">'+esc(o.status)+'</span>';
         h += '<tr class="ou-rij" data-id="'+o.id+'" style="cursor:pointer">';
         h += '<td style="white-space:nowrap">'+fmtD(o.datum)+'</td>';
-        h += '<td style="font-weight:700;color:var(--accent-t)">'+String(o.uren||0).replace('.', ',')+'u</td>';
+        h += '<td style="font-weight:700;color:var(--accent-t)">'+_nlUren(o.uren)+'u</td>';
         h += '<td><span class="tag '+(o.type==='uitbetaling'?'tag-muted':'tag-blue')+'">'+(o.type==='uitbetaling'?ICO.euro+' Uitbetaling':ICO.refresh+' Compensatie')+'</span></td>';
         h += '<td style="font-size:12px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.omschrijving||'—')+'</td>';
         h += '<td>'+statusTag+'</td>';
@@ -21840,7 +21858,7 @@ function renderOveruren() {
   el.querySelectorAll('.ou-uitb-btn').forEach(function(b){b.addEventListener('click',function(){
     var o=APP.overuren.find(function(x){return String(x.id)===String(b.dataset.id);}); if(!o) return;
     var m=getMed(o.medId); var naam=m?m.voornaam+' '+m.achternaam:'onbekend';
-    bevestigActie('Uitbetaling bevestigen','Weet je zeker dat je '+o.uren+'u overuren van '+esc(naam)+' uitbetaalt? Dit kan niet ongedaan gemaakt worden.',function(){_voerKeuringOveruren(b.dataset.id,'uitbetaald',null);});
+    bevestigActie('Uitbetaling bevestigen','Weet je zeker dat je '+_nlUren(o.uren)+'u overuren van '+esc(naam)+' uitbetaalt? Dit kan niet ongedaan gemaakt worden.',function(){_voerKeuringOveruren(b.dataset.id,'uitbetaald',null);});
   });});
   el.querySelectorAll('.ou-del-btn').forEach(function(b){b.addEventListener('click',function(e){
     e.stopPropagation();
@@ -21849,7 +21867,7 @@ function renderOveruren() {
     var waarschuwing = o.status==='gecompenseerd'
       ? '\n\nLet op: de gecompenseerde verlofdagen worden van het saldo afgetrokken.'
       : '';
-    bevestigActie('Overuren verwijderen','Weet je zeker dat je de overuren registratie van '+esc(naam)+' ('+o.uren+'u) wilt verwijderen?'+waarschuwing,function(){
+    bevestigActie('Overuren verwijderen','Weet je zeker dat je de overuren registratie van '+esc(naam)+' ('+_nlUren(o.uren)+'u) wilt verwijderen?'+waarschuwing,function(){
       _verwijderOveruren(b.dataset.id);
     });
   });});
@@ -22023,7 +22041,7 @@ function _voerKeuringOveruren(id, status, reden) {
   if(typeof stuurNotificatie==='function' && magNotificatie('overuren', status)) {
     var ouTitels = {gecompenseerd:'Overuren goedgekeurd & gecompenseerd', afgewezen:'Overuren afgewezen', uitbetaald:'Overuren uitbetaald'};
     stuurNotificatie(o.medId,'overuren',ouTitels[status]||status,
-      'Jouw overuren registratie ('+o.uren+'u) is '+(status==='gecompenseerd'?'goedgekeurd en gecompenseerd':status)+(reden?' — '+reden:'')+'.','overuren');
+      'Jouw overuren registratie ('+_nlUren(o.uren)+'u) is '+(status==='gecompenseerd'?'goedgekeurd en gecompenseerd':status)+(reden?' — '+reden:'')+'.','overuren');
   }
 }
 
@@ -24363,7 +24381,7 @@ function logVerzondenMail(gegevens){
 
 // Toon de inhoud van een gelogde mail (onderwerp, ontvangers, datum, afzender, body).
 function toonMailInhoud(mailId){
-  var m = (APP.mailLog||[]).find(function(x){ return String(x.id)===String(mailId); });
+  var m = _mailNorm((APP.mailLog||[]).find(function(x){ return String(x.id)===String(mailId); }));
   if(!m){ toast('Mail niet gevonden','warning'); return; }
   var _tplNaam = m.templateId ? ((getMailTemplates()[m.templateId]||{}).naam || '') : '';
   var rij = function(ico, label, waarde, sub){ return waarde ? lfRij(ico, esc(label), esc(waarde), sub ? {sub:esc(sub)} : null) : ''; };
@@ -29244,7 +29262,7 @@ function renderStoringsdienst() {
 
   if(_sdView==='jaar') {
     // Jaarweergave: compacte tabel, 1 rij per week, 7 dag-cellen
-    h+='<div class="card" style="padding:0"><div class="table-wrap"><table style="width:100%;max-width:1100px"><thead><tr>';
+    h+='<div class="card" style="padding:0"><div class="table-wrap"><table style="width:100%"><thead><tr>';
     h+='<th style="width:60px">Week</th><th class="sd-periode" style="width:120px">Periode</th>';
     dagNamen.forEach(function(d){h+='<th style="text-align:center;padding:6px 4px">'+d+'</th>';});
     h+='</tr></thead><tbody>';
@@ -29292,7 +29310,7 @@ function renderStoringsdienst() {
 
   } else {
     // Kwartaalweergave: uitgebreide tabel met dag-knoppen per week
-    h+='<div class="card" style="padding:0"><div class="table-wrap"><table style="width:100%;max-width:1100px"><thead><tr>';
+    h+='<div class="card" style="padding:0"><div class="table-wrap"><table style="width:100%"><thead><tr>';
     h+='<th style="width:70px">Week</th><th style="width:150px">Periode</th>';
     h+='<th style="width:240px">Weekdienst</th>';
     dagNamen.forEach(function(d){h+='<th style="text-align:center;width:70px">'+d+'</th>';});
@@ -31241,7 +31259,7 @@ function renderKlantmails() {
 
   // Stats
   h += '<div class="km-pils" style="display:flex;gap:8px;flex-wrap:wrap">';
-  var _af = function(f){ return _mailStatusFilter===f ? ';outline:2px solid currentColor;outline-offset:1px' : ''; };
+  var _af = function(f){ return _mailStatusFilter===f ? ';outline:2px solid var(--accent);outline-offset:1px' : ''; };
   h += '<span class="km-pil" data-filter="" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 12px;font-size:13px;cursor:pointer'+_af('')+'"><strong>'+totaal+'</strong> opdrachten</span>';
   if (nogTeDoen)  h += '<span class="km-pil tag tag-orange" data-filter="teversturen" style="padding:5px 12px;cursor:pointer'+_af('teversturen')+'"><strong>'+nogTeDoen+'</strong> te versturen</span>';
   if (alVerzonden)h += '<span class="km-pil tag tag-green" data-filter="verstuurd" style="padding:5px 12px;cursor:pointer'+_af('verstuurd')+'"><strong>'+alVerzonden+'</strong> verstuurd</span>';
@@ -31315,7 +31333,7 @@ function renderKlantmails() {
         h += '<div style="font-size:11px;color:var(--green-t);margin-bottom:3px">'+_IC_VINK+fmtD(laasteMail.datum)+'</div>';
         h += '<button class="btn btn-ghost btn-sm mail-bulk-btn" data-id="'+o.id+'" style="font-size:11px;padding:3px 8px;display:inline-flex;align-items:center">'+_IC_VERVERS+'Opnieuw</button>';
       } else {
-        h += '<button class="btn btn-primary btn-sm mail-bulk-btn" data-id="'+o.id+'">'+ICO.mail+' Versturen</button>';
+        h += '<button class="btn btn-ghost btn-rij mail-bulk-btn" data-id="'+o.id+'">'+ICO.mail+' Versturen</button>';
       }
       h += '</td>';
       h += '</tr>';
@@ -31450,7 +31468,7 @@ function _mailKlantNaam(m){
 }
 
 function _renderMailVerzondenTab() {
-  var mails = (APP.mailLog||[]).slice();
+  var mails = (APP.mailLog||[]).map(_mailNorm);
   // Nieuwste eerst
   mails.sort(function(a,b){ return (b.datum||'').localeCompare(a.datum||''); });
 
@@ -31466,9 +31484,10 @@ function _renderMailVerzondenTab() {
   });
 
   var h = '';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">';
-  h += '<div style="font-size:13px;color:var(--muted)">'+gefilterd.length+' verzonden mail'+(gefilterd.length===1?'':'s')+'</div>';
+  h += '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h += '<input class="input" id="mail-verz-zoek" placeholder="Zoek op klant, onderwerp, ontvanger…" value="'+esc(zoek)+'" style="max-width:300px">';
+  h += '<div style="flex:1"></div>';
+  h += '<div style="font-size:13px;color:var(--muted)">'+gefilterd.length+' verzonden mail'+(gefilterd.length===1?'':'s')+'</div>';
   h += '</div>';
 
   if(!mails.length){
@@ -31525,33 +31544,15 @@ function _renderMailTemplatesTab() {
   var tplArr = Object.values(templates);
 
   var h = '';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">';
-  h += '<div style="font-size:13px;color:var(--muted)">Klantmail-templates die je aan opdracht- en werkordertypes kunt koppelen.</div>';
-  h += '<button class="btn btn-primary btn-sm" id="tpl-add">+ Nieuwe template</button>';
-  h += '</div>';
-
-  var gefilterd = tplArr;
-
-  h += '<div style="display:flex;flex-direction:column;gap:12px">';
-  gefilterd.forEach(function(tpl){
+  var b = tplArr.map(function(tpl){
     var isStandaard = STANDAARD_TPL_IDS.indexOf(tpl.id) >= 0;
-    h += '<div class="card" style="padding:14px 16px">';
-    h += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">';
-    h += '<div style="flex:1;min-width:0">';
-    h += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">';
-    h += '<span style="font-weight:700;font-size:14px">'+esc(tpl.naam)+'</span>';
-    if(isStandaard) h += '<span class="tag" style="background:rgba(107,118,148,.15);color:var(--muted);font-size:10px">Standaard</span>';
-    h += '</div>';
-    h += '<div style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(tpl.onderwerp)+'</div>';
-    h += '</div>';
-    h += '<div style="display:flex;gap:6px;flex-shrink:0">';
-    h += '<button class="btn btn-ghost btn-sm tpl-edit" data-id="'+esc(tpl.id)+'" style="display:inline-flex;align-items:center;gap:4px">'+ICO.edit+' Bewerken</button>';
-    if(!isStandaard) h += '<button class="btn btn-ghost btn-sm tpl-del btn-wis" data-id="'+esc(tpl.id)+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-    h += '</div>';
-    h += '</div>';
-    h += '</div>';
-  });
-  h += '</div>';
+    return _istNavRij('tpl-edit', 'data-id="'+esc(tpl.id)+'"', _lfIco(_LF_MAIL),
+      esc(tpl.naam)+(isStandaard ? ' <span class="zp-tag zp-tag-grijs">Standaard</span>' : ''), esc(tpl.onderwerp||''),
+      isStandaard ? '' : '<button type="button" class="btn btn-ghost btn-wis btn-icoon tpl-del" data-id="'+esc(tpl.id)+'" aria-label="Template verwijderen" title="Verwijderen">'+ICO.trash+'</button>');
+  }).join('');
+  if(!tplArr.length) b = '<p class="lf-leeg">Nog geen templates.</p>';
+  b += _zpToevoeg('tpl-add', 'Template toevoegen');
+  var h = '<div class="ist-wrap lf">'+_istKaart('Templates \u00b7 '+tplArr.length, 'Klantmails die je aan opdracht- en werkordertypes kunt koppelen. Tik op een template om hem te wijzigen.', b, null)+'</div>';
   return h;
 }
 
@@ -31562,7 +31563,7 @@ function _bindMailTemplatesTab(el) {
     btn.addEventListener('click',function(){ openMailTemplateEditor(btn.dataset.id); });
   });
   el.querySelectorAll('.tpl-del').forEach(function(btn){
-    btn.addEventListener('click',function(){
+    btn.addEventListener('click',function(e){ e.stopPropagation();
       bevestigActie('Template verwijderen','Weet je zeker dat je "'+btn.dataset.id+'" wilt verwijderen?',function(){
         var tpl = getMailTemplates();
         delete tpl[btn.dataset.id];
@@ -31855,6 +31856,8 @@ function _nlGetal(n, dec){
 }
 // Uren/dagen: één decimaal alleen als die er is ("40", "5,5"); vangt ook optelruis (0.1+0.2) af.
 function _nlAantal(n){ var x = Math.round((Number(n)||0)*10)/10; return _nlGetal(x, x%1 ? 1 : 0); }
+// Uren in kwartieren (overuren): "23,75", "7,4", "40" — hooguit twee decimalen.
+function _nlUren(n){ var x = Math.round((Number(n)||0)*100)/100; return _nlGetal(x, x%1 ? (Math.round(x*10) === x*10 ? 1 : 2) : 0); }
 function _nlEuro(n, dec){ return '€ '+_nlGetal(n, dec==null ? 2 : dec); }
 // Voor de export: een echt getal (geen tekst als "1.5"), zodat Excel ermee kan rekenen.
 function _rapExportGetal(n){ return Math.round((Number(n)||0)*10)/10; }
