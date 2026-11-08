@@ -11155,8 +11155,7 @@ var DASH_RENDER = {
       + '</div>' + _dashBalken(perWeek, wk.map(function(w){ return w.label; }), 'verwerkt', 'Verwerkt per week');
   },
   planning: function(c){
-    var ma = getMaandagVan(c.vandaag), dagen = [];
-    for(var i=0; i<5; i++){ var d = new Date(ma); d.setDate(d.getDate()+i); dagen.push(dateToStr(d)); }
+    var ma = getMaandagVan(c.vandaag), dagen = _planWeekDagen(c.vandaag);
     var rollen = APP.planningRollen || ['monteur','extern'];
     var monteurs = APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0; });
     var h = _dashKop(_DASH_ICO.plan, 'Planning deze week', 'planning', 'Week '+isoWeekNr(ma));
@@ -11167,7 +11166,7 @@ var DASH_RENDER = {
         .reduce(function(s, o){ return s + _dashUren(o); }, 0);
       var perDag = _verlofUrenPerDagVan(m), beschikbaar = 0;
       dagen.forEach(function(dag){
-        if(verzuimOpDag(m.id, dag)) return;
+        if(!_planIsWerkdag(dag) || verzuimOpDag(m.id, dag)) return;
         var vl = APP.verlof.find(function(v){ return String(v.medId) === String(m.id) && v.status === 'goedgekeurd' && dag >= v.van && dag <= (v.tot || v.van); });
         beschikbaar += vl ? (vl.gedeeltelijk ? perDag/2 : 0) : perDag;
       });
@@ -18746,19 +18745,10 @@ function renderPlanning() {
   });
   h += '</div>';
 
-  // Periode selector (alleen lijst view)
-  if (_planView === 'lijst') {
-    h += '<div class="ag-switcher">';
-    [['maand','Maand'],['kwartaal','Kwartaal']].forEach(function(p){
-      h += '<button class="plan-view-btn'+(_planPeriode===p[0]?' active':'')+'" data-periode="'+p[0]+'">'+p[1]+'</button>';
-    });
-    h += '</div>';
-  }
 
   h += '<div style="flex:1"></div>';
   h += '<button class="btn btn-ghost btn-sm" id="plan-dagplan-btn" style="display:inline-flex;align-items:center;gap:5px">'+_routeIcoon(14)+' Route</button>';
-  if (_planView === 'lijst') h += '<button class="btn btn-ghost btn-sm" id="plan-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
-  if (_planView === 'lijst') h += '<button class="btn btn-ghost btn-sm hide-mobile" id="plan-export-btn">'+ICO.download+' Export</button>';
+  if (_planView === 'lijst') h += _meerMenu([{id:'plan-kolom-toolbar-btn', label:'Kolommen kiezen', icon:ICO.settings}, {id:'plan-export-btn', label:'Exporteren', icon:ICO.download}]);
   if (magSchrijven('planning') && !_planMob) h += '<button class="btn btn-primary btn-sm" id="plan-add-btn">'+_LF_PLUS+'Opdracht</button>';
   h += '</div>'; // sluit toolbar flex
 
@@ -18767,6 +18757,14 @@ function renderPlanning() {
   h += '<div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:16px">';
   h += _periodeNav('plan-prev', 'plan-next', '', 'Vorige periode', 'Volgende periode').replace('<b>', '<b id="plan-periode-label">');
   h += '<button type="button" class="btn btn-ghost" id="plan-today">Vandaag</button>';
+  // Maand of kwartaal hoort bij de periode, dus naast de periodekiezer (alleen lijst)
+  if (_planView === 'lijst') {
+    h += '<div class="ag-switcher">';
+    [['maand','Maand'],['kwartaal','Kwartaal']].forEach(function(p){
+      h += '<button class="plan-view-btn'+(_planPeriode===p[0]?' active':'')+'" data-periode="'+p[0]+'">'+p[1]+'</button>';
+    });
+    h += '</div>';
+  }
   if (_planMob && magSchrijven('planning')) {
     h += '<button class="btn btn-primary btn-sm" id="plan-add-btn" style="flex-shrink:0;margin-left:auto">'+_LF_PLUS+'Opdracht</button>';
   }
@@ -18864,10 +18862,9 @@ function _periodeDagLabel(ds){
 function getPeriodeLabel(datum, view, periode) {
   var mndKort = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
   if (view !== 'lijst') {
-    var maandag = getMaandagVan(datum);
-    var vrijdag = new Date(maandag); vrijdag.setDate(vrijdag.getDate() + 4);
     if (view === 'dag') return _periodeDagLabel(datum);
-    return _periodeWeekLabel(maandag, vrijdag);
+    var _wd = _planWeekDagen(datum);
+    return _periodeWeekLabel(new Date(_wd[0]+'T00:00:00'), new Date(_wd[_wd.length-1]+'T00:00:00'));
   }
   var jaar = parseInt(datum.slice(0,4));
   var mnd  = parseInt(datum.slice(5,7));
@@ -18875,7 +18872,7 @@ function getPeriodeLabel(datum, view, periode) {
     var q = Math.ceil(mnd / 3);
     return 'Q' + q + ' ' + jaar;
   }
-  return mndKort[mnd-1] + ' ' + jaar;
+  return ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'][mnd-1] + ' ' + jaar;
 }
 
 function getPeriodeBereik(datum, periode) {
@@ -19263,7 +19260,7 @@ function _plmToolbarHtml(monteurs){
     lbl = _PLM_DAGK[dd.getDay()]+' '+dd.getDate()+' '+_PLM_MND[dd.getMonth()].slice(0,3);
     sub = _planDatum === vandaagISO() ? 'Vandaag' : String(dd.getFullYear());
   } else if(_planView === 'week'){
-    var ma = getMaandagVan(_planDatum), vr = new Date(ma); vr.setDate(vr.getDate() + 4);
+    var _wd = _planWeekDagen(_planDatum), ma = new Date(_wd[0]+'T00:00:00'), vr = new Date(_wd[_wd.length-1]+'T00:00:00');
     lbl = 'Week '+isoWeekNr(ma);
     sub = ma.getDate()+(ma.getMonth() !== vr.getMonth() ? ' '+_PLM_MND[ma.getMonth()].slice(0,3) : '')+' – '+vr.getDate()+' '+_PLM_MND[vr.getMonth()].slice(0,3)+' '+vr.getFullYear();
   } else {
@@ -19283,8 +19280,7 @@ function _plmToolbarHtml(monteurs){
   var telOps;
   if(_planView === 'dag') telOps = APP.opdrachten.filter(function(o){ return o.datum === _planDatum && _planZoekMatch(o); });
   else if(_planView === 'week'){
-    var ma2 = getMaandagVan(_planDatum), dg = [];
-    for(var i=0; i<5; i++){ var x = new Date(ma2); x.setDate(x.getDate() + i); dg.push(dateToStr(x)); }
+    var dg = _planWeekDagen(_planDatum);
     telOps = APP.opdrachten.filter(function(o){ return dg.indexOf(o.datum) >= 0 && _planZoekMatch(o); });
   } else {
     var br = getPeriodeBereik(_planDatum, _planPeriode);
@@ -19435,9 +19431,22 @@ function renderPlanDagMobiel(monteurs){
   return h;
 }
 
+// Dagen die Planning in een week toont: de werkdagen uit Instellingen, plus elke dag waarop een
+// opdracht staat. Zo verdwijnt een storing op zaterdag of zondag nooit uit het planscherm.
+function _planIsWerkdag(ds){
+  var werk = (APP.planningInst && APP.planningInst.werkdagen) || ['ma','di','wo','do','vr'];
+  return werk.indexOf(['zo','ma','di','wo','do','vr','za'][new Date(ds+'T00:00:00').getDay()]) >= 0;
+}
+function _planWeekDagen(datum){
+  var ma = getMaandagVan(datum), r = [];
+  for(var i=0; i<7; i++){
+    var d = new Date(ma); d.setDate(d.getDate() + i); var ds = dateToStr(d);
+    if(_planIsWerkdag(ds) || (APP.opdrachten||[]).some(function(o){ return o.datum === ds; })) r.push(ds);
+  }
+  return r.length ? r : [dateToStr(ma)];
+}
 function renderPlanWeekMobiel(monteurs){
-  var ma = getMaandagVan(_planDatum), dagen = [];
-  for(var i=0; i<5; i++){ var d = new Date(ma); d.setDate(d.getDate() + i); dagen.push(dateToStr(d)); }
+  var dagen = _planWeekDagen(_planDatum);
   var nu = vandaagISO();
   var past = function(o){ return _planZoekMatch(o) && (_planFilter === 'alle' || _planHeeftMonteur(o, _planFilter)); };
   var weekOps = APP.opdrachten.filter(function(o){ return dagen.indexOf(o.datum) >= 0 && past(o); });
@@ -19657,7 +19666,7 @@ function renderPlanLijst(monteurs) {
     var d         = datum !== '_geen' ? new Date(datum+'T00:00:00') : null;
     var isVandaag = datum === nu;
     var isVerleden= d && datum < nu;
-    var dagNaam   = datum === '_geen' ? 'Geen datum' : dagNamen[d.getDay()]+' '+fmtD(datum);
+    var dagNaam   = datum === '_geen' ? 'Geen datum' : dagNamen[d.getDay()]+' '+d.getDate()+' '+['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'][d.getMonth()];
 
     // Dag header: datum bovenaan, dan sub-header rij met kolomnamen
     // Dag header
@@ -19687,7 +19696,7 @@ function renderPlanLijst(monteurs) {
     h += '<span style="font-weight:700;font-size:13.5px;color:'+(blokkadeLijst?'var(--red-t)':isVandaag?'var(--accent-t)':'var(--text)')+'">'+dagNaam+'</span>';
     if(blokkadeLijst) h += '<span class="tag" style="font-size:11px;background:rgba(239,68,68,.15);color:var(--red-t);display:inline-flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>'+esc(blokkadeLijst.label||'Geblokkeerd')+'</span>';
     if(isVandaag) h += '<span class="tag tag-blue" style="font-size:11px">Vandaag</span>';
-    h += '<span style="font-size:12px;color:var(--muted);font-weight:600;background:var(--surface);border:1px solid var(--border);padding:2px 8px;border-radius:var(--radius-sm)">'+totDag+' opdracht'+(totDag===1?'':'en')+'</span>';
+    h += '<span style="font-size:12px;color:var(--muted);font-weight:600;background:var(--surface);border:1px solid var(--border);padding:2px 8px;border-radius:var(--radius-sm)">'+(totDag ? totDag+' opdracht'+(totDag===1?'':'en') : 'Geen opdrachten')+'</span>';
     if(kanSchrijven && !blokkadeLijst && datum !== '_geen') {
       var prefillDatum = datum;
       var prefillMont = _planFilter !== 'alle' ? _planFilter : '';
@@ -19719,10 +19728,8 @@ function renderPlanLijst(monteurs) {
     h += '</td></tr>';
 
     // Als geen opdrachten: toon lege staat rij
-    if(totDag === 0) {
-      h += '<tr><td colspan="99" style="padding:8px 14px 10px;color:var(--muted);font-size:12px;font-style:italic;border-bottom:1px solid var(--border)">Geen opdrachten gepland</td></tr>';
-      return; // ga naar volgende dag
-    }
+    // Lege dag: alleen de dagkop (met "Geen opdrachten"); geen extra regel eronder
+    if(totDag === 0) return;
 
     // Kolom header rij per dag (klikbaar voor sortering)
     var planSortKeys = { tijd:'tijdVan', debNr:'klantNaam', naam:'klantNaam', contract:'contractType', adres:'adres', postcode:'postcode', plaats:'plaats', type:'type', status:'status', notitie:'notitie', pomptype:'pomptype', monteurs:'monteurNaam' };
@@ -20060,14 +20067,8 @@ function _routeIcoon(px){
 }
 
 function renderPlanWeek(monteurs) {
-  var maandag = getMaandagVan(_planDatum);
-  var dagen = [];
-  for (var i=0; i<5; i++) {
-    var d = new Date(maandag);
-    d.setDate(d.getDate() + i);
-    dagen.push(dateToStr(d));
-  }
-  var dagKort = ['Ma','Di','Wo','Do','Vr'];
+  var dagen = _planWeekDagen(_planDatum);
+  var dagKort = dagen.map(function(ds){ return _PLM_DAGK[new Date(ds+'T00:00:00').getDay()]; });
   var nu = vandaagISO();
   var zichtbareMonteurs = _planFilter === 'alle' ? monteurs : monteurs.filter(function(m){ return String(m.id) === _planFilter; });
 
