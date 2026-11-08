@@ -20517,8 +20517,8 @@ function openOpdrachtPanel(id) {
     h += _zpMelding('actie', 'Actie vereist', _at);
   }
 
-  // Bellen, navigeren en mailen met één tik
-  h += _klActies([o.adres, [o.postcode, o.plaats].filter(Boolean).join(' ')].filter(Boolean).join(', '), klantInfo && klantInfo.telefoon, klantInfo && klantInfo.email);
+  // Geen knoppenrij Bellen/Navigeren/Mailen: dit paneel is voor planners. Telefoon en e-mail zijn
+  // aanklikbare regels, "Mail versturen" (met templates en maillog) staat onder Acties, en het adres opent de route.
 
   // Afspraak: datum, tijd en monteur(s) — ondersteunt meerdere monteurs via monteurIds
   var afs = _zpRij(ICO.kalender, 'Datum', o.datum ? esc(fmtD(o.datum)) : '')
@@ -20540,7 +20540,8 @@ function openOpdrachtPanel(id) {
   h += _zpGroep('Afspraak') + _zpKaart(afs);
 
   // Locatie en klantgegevens
-  var loc = _zpRij(ICO.locatie, 'Adres', _zpAdres(o.adres, o.postcode, o.plaats));
+  var _adresTxt = [o.adres, [o.postcode, o.plaats].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  var loc = _zpRij(ICO.locatie, 'Adres', _adresTxt ? '<a class="zp-link" href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(_adresTxt)+'" target="_blank" rel="noopener" title="Route in Google Maps">'+_zpAdres(o.adres, o.postcode, o.plaats)+'</a>' : '');
   if (klantInfo) {
     if (klantInfo.contactpersoon) loc += _zpRij(ICO.user, 'Contactpersoon', esc(klantInfo.contactpersoon));
     if (klantInfo.telefoon) loc += _zpRij(_LF_TEL, 'Telefoon', _zpLink(klantInfo.telefoon, _klTel(klantInfo.telefoon)));
