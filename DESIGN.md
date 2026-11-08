@@ -74,7 +74,17 @@ typography:
     fontSize: "14.5px"
     fontWeight: 600
     fontFeature: "tnum"
+  uitleg:
+    fontFamily: "Instrument Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: 1.45
+  klein:
+    fontFamily: "Instrument Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "12px"
+    fontWeight: 400
 rounded:
+  mini: "4px"
   sm: "8px"
   md: "12px"
   lg: "14px"
@@ -214,6 +224,8 @@ Neutrale werkvlakken met één blauw voor handelingen en vier statuskleuren die 
 - **Body** (400, 13.5–14px, 1.45): uitleg, meldingen, formuliertekst.
 - **Label** (Space Mono 400, 11px, 0.08em, HOOFDLETTERS): kolomkoppen, groepslabels (`lf-groep`) en meldingskoppen.
 - **Cijfer** (600, 14.5px, tabelcijfers): waarden in statchips en totalen. In Rapportage-tegels 20px.
+- **Uitleg** (400, 13px, 1.45): uitleg onder een kaartkop, filterpillen, kleine knoppen.
+- **Klein** (400, 12px): tweede regel in een lijstrij, kolomtekst die minder belangrijk is, hints bij een knop. Dit is na 13px de meest gebruikte maat. Ga niet onder 11px, behalve bij avatar-initialen en in mini-voorbeelden zoals de werkbon-pdf in Instellingen.
 
 ### Named Rules
 **The 700 Rule.** Koppen en cijfers gebruiken gewicht 600–700. 800 komt alleen in het Syne-woordmerk voor.
@@ -229,6 +241,10 @@ Elke pagina heeft dezelfde opbouw. Bovenaan staat de **werkbalk** (`.werkbalk`):
 Breekpunt 768px: daaronder is het de telefoonweergave, met een onderbalk voor navigatie, schuifbladen in plaats van zijpanelen en een eigen werkbalk voor Planning. Boven 768px staat de zijbalk links. Gebruik `(pointer:coarse)` voor tikvlakken van 44px, los van de breedte.
 
 **Statchips** staan op de computer als rij met omloop. Op de telefoon worden ze één smalle schuifrij, zodat de lijst zelf snel in beeld komt. Alleen Rapportage toont cijfers als tegels van 2 × 2, want daar zijn de cijfers de inhoud.
+
+**Weken** tonen de werkdagen uit Instellingen › Planning (standaard ma–vr), plus elke dag waarop werk staat (`_planWeekDagen`). Werk in het weekend is dus nooit onzichtbaar. Voor capaciteit tellen alleen de werkdagen mee (`_planIsWerkdag`): een weekenddag met werk telt als gepland, niet als extra beschikbare uren.
+
+**Zeldzame acties** (kolommen kiezen, exporteren, importeren) staan in het "…"-menu (`_meerMenu`), zodat de werkbalk op één regel past. Een keuze die bij de periode hoort, zoals Maand/Kwartaal, staat naast de periodekiezer, niet als tweede kiezer in de werkbalk.
 
 **Tabellen** die breder zijn dan het scherm vervagen aan de kant waar nog kolommen staan (`kan-links` en `kan-rechts`, automatisch op elke `.table-wrap`). Geef kolommen een bewuste breedte. Een kolom zonder breedte slokt alle ruimte op.
 
@@ -257,7 +273,7 @@ Vier radii met elk een eigen rol. Daarnaast zijn er een paar vaste uitzonderinge
 - **Kaart** (`--radius-lg`, 14px): kaarten, inklapbare blokken en de lege-staat-tegel.
 - **Veld** (`--radius`, 12px): invoervelden, icoontegels, meldingen (`zp-memo`) en segmentkiezers.
 - **Klein** (`--radius-sm`, 8px): mini-tegels, kleurvakjes, balkjes en de segmenten binnen een kiezer.
-- **Uitzonderingen:** vensters 18px, schuifbladen op de telefoon 20px, mini-labels en agendablokjes met een gekleurde linkerrand 4–5px.
+- **Uitzonderingen:** vensters 18px, schuifbladen op de telefoon 20px. Mini-labels, grepen, voortgangsbalkjes en agendablokjes met een gekleurde linkerrand gebruiken 2–5px; gebruik daarvoor bij voorkeur `mini` (4px).
 
 Iconen zijn altijd SVG uit de `ICO`-set met lijndikte 1.8 (12–24px). Mini-iconen onder 12px en grote illustraties (1.5) houden hun eigen dikte. Gebruik nooit emoji.
 
@@ -288,6 +304,8 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 - **Style:** `--surface2`-vlak, naad, 12px radius, 12px 14px binnenruimte, 14px tekst. In de werkbalk 38px hoog met een `--surface`-vlak. Keuzelijsten hebben een eigen chevron.
 - **Focus:** naad wordt Signaalblauw, met focusgloed.
 - **Placeholder:** `--muted2`. Een placeholder is geen label: zet het label ernaast of erboven.
+- **Leeg veld in een lijstrij** (Instellingen): toont "Niet ingevuld" in `--muted2`, krijgt een `--surface2`-vlak bij aanwijzen en een blauwe rand bij bewerken. Een veld moet er altijd uitzien als iets wat je kunt invullen.
+- **Verplichte velden:** de knop blijft uit tot alles is ingevuld (`lfBind`), maar zegt dan wat er ontbreekt: "Nog invullen: Startdatum, Einddatum". Een uitgeschakelde knop is gedempt (`--surface2`-vlak, `--muted`-tekst), niet doorzichtig.
 - **Error:** een rode rand met de melding direct onder het veld.
 
 ### Navigation
@@ -306,6 +324,21 @@ Het hart van de lijststijl (`lfRij`, `_istNavRij`). Een rij van minimaal 58px me
 - **Venster** (`openModal`, `openBovenModal`, `lfOpen`): 18px radius met de vensterschaduw. Het is een echte dialoog: de focus gaat het venster in, Tab blijft erbinnen, Esc sluit het bovenste venster en de focus keert terug naar de knop waarmee het werd geopend. Heb je iets ingevuld, dan vraagt een klik ernaast of Esc eerst "Wijzigingen verwerpen?".
 - **Bevestiging** (`bevestigActie`): het werkwoord uit de titel staat op de knop ("Opdracht verwijderen" → **Verwijderen**). Rood met prullenbak alleen bij weghalen (verwijderen, wissen, verwerpen, intrekken, ontkoppelen). Al het andere krijgt een blauwe knop. De focus staat op Annuleren.
 
+### Opslaan
+Drie vaste manieren, elk met een eigen reden:
+- **Direct opslaan:** lijsten en schakelaars (Opdrachttypes, Notificaties, Administraties, blokkadedagen). Het tabblad zegt bovenaan "Wijzigingen worden direct opgeslagen" (`_INST_DIRECT`).
+- **Eén Opslaan per blok:** formulieren (Bedrijf, Planning, Team & Verlof, Goedkeuring, Werkbonnen), met een markering voor niet-opgeslagen wijzigingen. Een lijstvenster (`lfOpen`) heeft één brede Opslaan-knop onderin.
+- **Opslagbalk:** alleen voor een groot raster waarin je veel vakjes tegelijk wijzigt (de rechtenmatrix). De balk verschijnt pas bij een wijziging, met "Ongedaan maken".
+
+### Verwijderen
+- **Niet in de lijstrij.** Een rij openen en iets weghalen zijn twee handelingen. "… verwijderen" staat onderaan het paneel (`_zpVerwijder`) of het bewerkvenster (`_lfVerwijderInVenster`), met een bevestiging.
+- **Uitzonderingen:** lijstjes binnen een formulier dat je bewerkt (uurregels, materiaal, documenten, pauzes, blokkadedagen) houden hun prullenbak. Tabellen zonder paneel of venster (Gebruikers) ook. Verlof heeft geen paneel: bij een open aanvraag staan alleen Goedkeuren en Afwijzen, en pas na beoordelen verschijnt de prullenbak.
+- Selectie met een bulkactie ("Verwijder selectie") is een goed alternatief voor lange lijsten (Materialen).
+
+### Panelen
+- **Knoppenrij** (Bellen · Navigeren · Mailen, `_klActies`) alleen in contactpanelen: Debiteur, Serviceklant en Medewerker. Panelen voor kantoorwerk, zoals het opdrachtpaneel, hebben die rij niet. Telefoon en e-mail zijn daar aanklikbare regels, het adres opent de route en "Mail versturen" (met templates en maillog) staat onder Acties.
+- Onderaan staat de hoofdactie in de voet, met "… verwijderen" erboven.
+
 ### Meldingen en lege staat
 - **Melding in de pagina** (`_zpMelding`): een vlak met icoon, een kop als label en één of twee zinnen. Rood is een fout, oranje een actie, blauw informatie en groen opgelost.
 - **Toast** (`toast`): een pil onderin. Bij een fout vertaalt `_foutNL` technische Firebase-tekst naar gewone taal ("je hebt hier geen rechten voor", "geen verbinding met de server").
@@ -322,6 +355,8 @@ Het hart van de lijststijl (`lfRij`, `_istNavRij`). Een rij van minimaal 58px me
 - **Do** schrijf uitleg neutraal voor muis en vinger: "Kies een type om het te wijzigen", niet "Tik op…".
 - **Do** schrijf eenheden uit ("8 uur", "1 dag") en getallen met een komma.
 - **Do** begin chips, tags en rolnamen met een hoofdletter; toon rollen met de naam uit Rollen & rechten (`_rolNaam`).
+- **Do** zet verwijderen in het paneel of bewerkvenster, en laat een uitgeschakelde knop zeggen wat er nog ontbreekt.
+- **Do** schrijf datums als dag-maand-jaar ("2 november 2026", "02-11-2026").
 
 ### Don't:
 - **Don't** zet `opacity` op tekst of knoppen om iets te dempen.
@@ -332,3 +367,5 @@ Het hart van de lijststijl (`lfRij`, `_istNavRij`). Een rij van minimaal 58px me
 - **Don't** verzin een eigen weergavekiezer, periodelabel of datumformaat: gebruik `.ag-switcher` (Dag · Week · Maand · Lijst) en `_periodeNav()` met de vaste labels.
 - **Don't** blokkeer inzoomen (`user-scalable=no`); los een te kleine veldtekst op met 16px.
 - **Don't** toon ruwe Firebase- of foutcodes aan de gebruiker; laat de technische tekst in het logboek.
+- **Don't** zet een rode prullenbak in een lijstrij naast een veelgebruikte actie zoals Goedkeuren.
+- **Don't** verberg werk: een week toont altijd de dagen waarop iets gepland staat.
