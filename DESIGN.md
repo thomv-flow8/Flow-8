@@ -248,7 +248,11 @@ Breekpunt 768px: daaronder is het de telefoonweergave, met een onderbalk voor na
 
 **Planning-lijst:** bij het openen, bij een andere periode en bij de knop Vandaag staat vandaag bovenaan in beeld (`_planNaarVandaag`). Bij hertekenen na een wijziging springt de lijst niet. Een reeks van twee of meer lege dagen wordt één regel (`.leeg-reeks`) met per dag een knopje "+ ma 2". Vandaag, dagen met werk, geblokkeerde dagen en een losse lege dag houden hun eigen dagblok.
 
-**Zeldzame acties** (kolommen kiezen, exporteren, importeren) staan in het "…"-menu (`_meerMenu`), zodat de werkbalk op één regel past. Een keuze die bij de periode hoort, zoals Maand/Kwartaal of Kwartaal/Jaar, staat rechts naast de periodekiezer en "Vandaag" (`.ag-switcher`), niet als tweede kiezer in de werkbalk.
+**Werkbalk van Planning:** op desktop blijft de werkbalk bovenaan staan terwijl lijst, week of dag eronder scrolt (`.plan-kop`), met een dun randje zodra er iets onder schuift. Naar vandaag scrollen stopt net onder de werkbalk. Op de telefoon scrolt hij mee: vast zou hij ruim een kwart van het scherm innemen, en "+ Opdracht" zweeft daar al.
+
+**Kaart in Week en Dag** (`.wk-kaart`): bovenaan tijd en status op één regel (`_wkKaartKop`), daaronder de klantnaam over de volle breedte, dan het type (`_wkType`) en het adres. De status zweeft niet: een zwevende badge knijpt de naam af. Vlak en linkerrand in de typekleur. Afgehandeld en verwerkt zijn gedempt (`.wk-klaar`: geen vlak, dun kader, `--muted`-tekst), zodat open werk eruit springt. "+ opdracht" in een weekcel verschijnt bij aanwijzen of toetsenbordfocus, op een aanraakscherm altijd.
+
+**Zeldzame acties** (kolommen kiezen, exporteren, importeren) staan in het "…"-menu (`_meerMenu`), zodat de werkbalk op één regel past. Ook een losse "Export" gaat in het menu. De volgorde is vast: eerst de eigen acties van de pagina (Jaarplanning, Jaar bijschrijven), dan Kolommen kiezen, Exporteren en Importeren ("Debiteuren importeren"). Een keuze die bij de periode hoort, zoals Maand/Kwartaal of Kwartaal/Jaar, staat rechts naast de periodekiezer en "Vandaag" (`.ag-switcher`), niet als tweede kiezer in de werkbalk.
 
 **Tabellen** die breder zijn dan het scherm vervagen aan de kant waar nog kolommen staan (`kan-links` en `kan-rechts`, automatisch op elke `.table-wrap`). Geef kolommen een bewuste breedte. Een kolom zonder breedte slokt alle ruimte op.
 
@@ -257,7 +261,7 @@ Breekpunt 768px: daaronder is het de telefoonweergave, met een onderbalk voor na
 
 ## Elevation & Depth
 
-Flow8 is vlak in rust. Kaarten, statchips en lijsten hebben een dunne naad (`1px solid var(--border)`) en geen schaduw. In het lichte thema staat dat zelfs expliciet uit (`body.light .card{box-shadow:none}`). Diepte komt van tonale lagen: de pagina (`--bg`), daarop het werkvlak (`--surface`), daarin velden en tegels (`--surface2`). Schaduw is voor wat boven de pagina zweeft: vensters, meldingen en het zijpaneel.
+Flow8 is vlak in rust. Kaarten, statchips en lijsten hebben een dunne naad (`1px solid var(--border)`) en geen schaduw. In het lichte thema staat dat zelfs expliciet uit (`body.light .card{box-shadow:none}`); zet daar geen kaartschaduw overheen. Diepte komt van tonale lagen: de pagina (`--bg`), daarop het werkvlak (`--surface`), daarin velden en tegels (`--surface2`). Schaduw is voor wat boven de pagina zweeft: vensters, meldingen en het zijpaneel.
 
 ### Shadow Vocabulary
 - **Venster** (`box-shadow: 0 24px 70px rgba(0,0,0,.55)`, licht: `0 24px 70px rgba(20,26,60,.18)`): vensters en bevestigingen.
@@ -297,6 +301,7 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 ### Chips
 - **Filterchip / segment:** pil met een naad. Gekozen heeft een `--accent-knop`-vlak met witte tekst, of in een segmentkiezer een werkvlak met `--accent-t`-tekst en de segmentschaduw.
 - **Statustag** (`.tag`, `.zp-tag`): pil met een tint van de statuskleur en tekst in de `-t`-variant, met een hoofdletter ("Aangevraagd", "Vakantie").
+- **Status van een opdracht** (`tagStatus`, op kaarten `wkStatusBadge`): Ingepland blauw, Gereserveerd paars gestippeld, Klaargezet grijs, Opgehaald cyaan (`.tag-opgehaald`), Actie vereist oranje, Afgehandeld groen, Verwerkt leisteen. Overal dezelfde naam en kleur, ook in het Kaartoverzicht en de statustellers. Spoed is geen status (zie The Spoed Rule).
 - **Statchip:** pil met icoontegel, cijfer (600, tabelcijfers) en label in `--muted`. Klikbare statchips filteren de lijst.
 
 ### Cards / Containers
@@ -315,7 +320,7 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 - **Error:** een rode rand met de melding direct onder het veld.
 
 ### Navigation
-- **Zijbalk (desktop):** items van 14px in `--muted` met icoon, radius 12px, 8px 12px binnenruimte (44px hoog op aanraakschermen). Het actieve item heeft een blauwe tint en is 600, en `aria-current="page"`. In het lichte thema is de tekst `--accent-t`. De items zijn met Tab en Enter te bedienen (`role="link"`). Staat er onder de vouw nog meer, dan vervaagt de onderkant (`kan-onder`).
+- **Zijbalk (desktop):** items van 14px in `--muted` met icoon, radius 12px, 6px 12px binnenruimte (44px hoog op aanraakschermen), zodat Team op een laptop van 860px hoog in beeld staat. Rapportage en Instellingen staan onderaan in hetzelfde scrollende menu, in een rustiger blok (`.nav-systeem`), niet vast onderin. Het actieve item heeft een blauwe tint en is 600, en `aria-current="page"`. In het lichte thema is de tekst `--accent-t`. De items zijn met Tab en Enter te bedienen (`role="link"`). Staat er onder de vouw nog meer, dan vervaagt de onderkant (`kan-onder`).
 - **Onderbalk (telefoon):** vier vaste bestemmingen en "Meer" voor de rest.
 - **Tabs:** tekst met een onderstreping in Signaalblauw. Op de telefoon schuifbare pillen.
 
@@ -365,6 +370,7 @@ Drie vaste manieren, elk met een eigen reden:
 - **Do** begin chips, tags en rolnamen met een hoofdletter; toon rollen met de naam uit Rollen & rechten (`_rolNaam`).
 - **Do** zet verwijderen in het paneel of bewerkvenster, en laat een uitgeschakelde knop zeggen wat er nog ontbreekt.
 - **Do** schrijf datums als dag-maand-jaar ("2 november 2026", "02-11-2026").
+- **Do** demp afgehandeld werk in de planning (`.wk-klaar`), zodat open werk opvalt.
 - **Do** maak alles wat klikbaar is ook met het toetsenbord bereikbaar (`role` en tabindex, of een echte knop of link), en geef panelen en vensters dialooggedrag.
 
 ### Don't:
@@ -379,3 +385,6 @@ Drie vaste manieren, elk met een eigen reden:
 - **Don't** zet een rode prullenbak in een lijstrij naast een veelgebruikte actie zoals Goedkeuren.
 - **Don't** verberg werk: een week toont altijd de dagen waarop iets gepland staat.
 - **Don't** markeer spoed met de typekleur of een los icoontje: gebruik altijd het label "Spoed" en de rode rand.
+- **Don't** zet Kolommen, Export of Importeren als losse knop in de werkbalk: die horen in het "…"-menu.
+- **Don't** laat een badge naast de klantnaam zweven; zet status en tijd samen op een eigen regel.
+- **Don't** gebruik een dollaricoon voor geld: Flow8 rekent in euro (`ICO.euro`).
