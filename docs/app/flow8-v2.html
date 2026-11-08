@@ -1347,6 +1347,10 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .plm-chip.aan{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
 .plm-chip-n{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
 .plm-inhoud{padding-bottom:88px}
+/* Planning: de werkbalk blijft staan terwijl lijst, week of dag eronder scrolt (Vaste-plek Rule) */
+.plan-kop{--pk:24px;position:sticky;top:calc(var(--pk) * -1);z-index:6;display:flow-root;margin:calc(var(--pk) * -1) calc(var(--pk) * -1) 0;padding:var(--pk) var(--pk) 0;background:var(--bg)}
+@media (max-width:768px){.plan-kop{position:static;margin:0;padding:0;background:none}}
+.plan-kop.vast{box-shadow:0 1px 0 var(--border)}
 .plm-dagkop{position:sticky;top:0;z-index:3;background:var(--bg);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 2px 8px}
 .plm-dagkop b{font-size:15px}
 .plm-dagkop .tag{font-size:12px}
@@ -18893,7 +18897,7 @@ function renderPlanning() {
 
   // Telefoon: eigen werkbalk (twee rijen, monteurs als chips, filters in een vel).
   if (_planMob) h = _plmToolbarHtml(monteurs);
-  el.innerHTML = h + '<div id="plan-content"'+(_planMob?' class="plm-inhoud"':'')+'>Laden...</div>';
+  el.innerHTML = '<div class="plan-kop">'+h+'</div><div id="plan-content"'+(_planMob?' class="plm-inhoud"':'')+'>Laden...</div>';
 
   // Events
   el.querySelectorAll('.plan-view-btn[data-view]').forEach(function(b){
@@ -18936,6 +18940,7 @@ function renderPlanning() {
 
   // Post-render events
   bindPlanningEvents();
+  _planKopRand();
   _planNaarVandaag(pc);
   // Alleen de eerste tien en daarna uitschieters loggen: bij een renderlus verdringen
   // deze regels anders alle andere meldingen (het log bewaart er 300).
@@ -19345,6 +19350,17 @@ function _planLeegReeksHtml(dagen, monteurId){
 }
 // Lijst: bij een nieuwe periode (of de knop Vandaag) naar vandaag scrollen, niet bij elk hertekenen.
 var _planVandaagSleutel = '', _planVandaagTimer = null, _planVandaagTot = 0;
+// Hoogte van de plakkende werkbalk, voor het scrollen naar vandaag (0 als hij meescrolt, zoals op de telefoon)
+function _planKopHoogte(){
+  var k = document.querySelector('#content > .plan-kop'), sc = document.getElementById('content');
+  if(!k || !sc || getComputedStyle(k).position !== 'sticky') return 0;
+  return Math.round(k.getBoundingClientRect().bottom - sc.getBoundingClientRect().top);
+}
+function _planKopRand(){
+  var k = document.querySelector('#content > .plan-kop'), sc = document.getElementById('content');
+  if(k && sc) k.classList.toggle('vast', sc.scrollTop > 4);
+}
+document.addEventListener('scroll', function(e){ if(e.target && e.target.id === 'content') _planKopRand(); }, true);
 function _planNaarVandaag(pc){
   if(_planView !== 'lijst'){ _planVandaagSleutel = ''; return; }
   var sl = _planPeriode+'|'+_planDatum.slice(0, 7)+'|'+(window.innerWidth <= 768 ? 'm' : 'd');
@@ -19362,7 +19378,9 @@ function _planNaarVandaag(pc){
     if(!sc.clientHeight || !doelEl.getClientRects().length){ _planVandaagSleutel = ''; return; }   // nog niet zichtbaar
     // Eerst naar boven: een plakkende dagkop (telefoon) geeft tijdens het scrollen zijn plakpositie door
     sc.scrollTop = 0;
-    var top = doelEl.getBoundingClientRect().top - sc.getBoundingClientRect().top - 12;
+    // Vandaag komt net onder de werkbalk, die zelf blijft staan
+    var kh = _planKopHoogte();
+    var top = doelEl.getBoundingClientRect().top - sc.getBoundingClientRect().top - (kh ? kh + 8 : 12);
     if(top > 40){ sc.scrollTop = top; _planVandaagTot = Date.now() + 1500; }
   }, 120);
 }
