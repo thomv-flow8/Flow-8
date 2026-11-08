@@ -31663,6 +31663,13 @@ var _rapTab   = 'persoonlijk';
 var _rapJaar  = new Date().getFullYear();
 var _rapMedId = 'alle';
 
+// Export van het open tabblad. Elk tabblad geeft zijn exportfunctie door met _rapZetExport;
+// de knop staat rechtsboven in de balk, zoals Export elders in de app in de werkbalk staat.
+var _rapExport = null;
+function _rapZetExport(fn){
+  _rapExport = fn || null;
+  var b = document.getElementById('rap-export'); if(b) b.disabled = !_rapExport;
+}
 function renderRapportage() {
   var el = document.getElementById('content');
   var tabs = [
@@ -31688,6 +31695,7 @@ function renderRapportage() {
     });
     h += '</select>';
   }
+  h += '<button type="button" class="btn btn-ghost btn-sm" id="rap-export" style="margin-left:auto" disabled title="Exporteer dit tabblad als CSV">'+ICO.download+' Export</button>';
   h += '</div>';
   h += '<div class="tabs rap-tabs" style="margin-bottom:18px;border-bottom:2px solid var(--border);flex-wrap:wrap">';
   tabs.forEach(function(t){
@@ -31704,6 +31712,8 @@ function renderRapportage() {
     t.addEventListener('click',function(){_rapTab=t.dataset.rapTab;renderRapportage();});
   });
   var mf=el.querySelector('#rap-med-filter'); if(mf) mf.addEventListener('change',function(){_rapMedId=mf.value;renderRapportage();});
+  el.querySelector('#rap-export').addEventListener('click', function(){ if(_rapExport) _rapExport(); });
+  _rapZetExport(null);
   var rc=document.getElementById('rap-content');
   if      (_rapTab==='persoonlijk')    renderRapPersoonlijk(rc);
   else if (_rapTab==='opdrachten')     renderRapOpdrachten(rc);
@@ -32230,7 +32240,6 @@ function renderRapOpdrachten(el) {
     h += '<tr><td style="font-weight:600">'+r.mndLabel+'</td><td>'+r.totaal+'</td><td style="color:var(--green-t)">'+r.afgehandeld+'</td><td style="color:var(--muted)">'+r.open+'</td></tr>';
   });
   h += '</tbody></table></div>';
-  h += '<button class="btn btn-ghost btn-sm" id="rap-op-export" style="margin-top:12px">'+ICO.download+' Export</button>';
   h += '</div>';
 
   el.innerHTML = h;
@@ -32243,8 +32252,7 @@ function renderRapOpdrachten(el) {
   el.querySelectorAll('.sw-link').forEach(function(b){ b.addEventListener('click', function(){ _rapMedId = String(b.dataset.med); renderRapportage(); }); });
   el.querySelectorAll('.rap-opmont-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOpMontSortKey===k)_rapOpMontSortDir*=-1; else{_rapOpMontSortKey=k;_rapOpMontSortDir=(k==='naam')?1:-1;} renderRapOpdrachten(el); }); });
   el.querySelectorAll('.rap-opmnd-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOpMndSortKey===k)_rapOpMndSortDir*=-1; else{_rapOpMndSortKey=k;_rapOpMndSortDir=(k==='mnd')?1:-1;} renderRapOpdrachten(el); }); });
-  var expBtn = el.querySelector('#rap-op-export');
-  if(expBtn) expBtn.addEventListener('click', function(){
+  _rapZetExport(function(){
     var rows = opJaar.map(function(o){
       var mont = o.monteurId ? getMed(o.monteurId) : null;
       return [o.datum, o.klantNaam||'', o.adres||'', o.type||'', mont?(mont.voornaam+' '+mont.achternaam):'', o.status||'', o.tijdVan||'', o.tijdTot||''];
@@ -32384,7 +32392,6 @@ function renderRapServiceklanten(el) {
       h += '</tr>';
     });
     h += '</tbody></table></div>';
-    h += '<button class="btn btn-ghost btn-sm" id="rap-sk-export" style="margin-top:12px">'+ICO.download+' Export</button>';
     h += '</div>';
   }
 
@@ -32393,8 +32400,8 @@ function renderRapServiceklanten(el) {
   el.querySelectorAll('.rap-skct-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapSkCtSortKey===k)_rapSkCtSortDir*=-1; else{_rapSkCtSortKey=k;_rapSkCtSortDir=(k==='code')?1:-1;} renderRapServiceklanten(el); }); });
   el.querySelectorAll('.rap-skverv-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapSkVervSortKey===k)_rapSkVervSortDir*=-1; else{_rapSkVervSortKey=k;_rapSkVervSortDir=(k==='naam'||k==='contract')?1:-1;} renderRapServiceklanten(el); }); });
 
-  var expBtn = el.querySelector('#rap-sk-export');
-  if(expBtn) expBtn.addEventListener('click', function(){
+  // Alleen als er vervallen klanten zijn, zoals de knop voorheen
+  if(vervallen.length) _rapZetExport(function(){
     var rows = vervallen.map(function(k){
       return [k.naam||'', k.contractType||'', fmtD(k.laatsteDatum), fmtD(k.volgendeDatum), k.postcode||'', k.plaats||'', k.email||'', k.telefoon||''];
     });
@@ -32515,6 +32522,18 @@ function renderRapWerkorders(el) {
     h += statCard('Open', open, '#f59e0b', SVGS.alert);
     h += statCard('Gem. doorlooptijd', gemDltStr, '#8b5cf6', SVGS.file);
     h += '</div>';
+
+    // Export per werkorder. Het laden is async: alleen doorgeven als dit tabblad nog open staat.
+    if(_rapTab === 'werkorders') _rapZetExport(totaal ? function(){
+      csvExport(['Nummer','Type','Klant','Aangemaakt','Status','Afgehandeld','Doorlooptijd (dagen)','Uren'],
+        woJaar.map(function(w){
+          var t = typeVan(w);
+          var st = (Array.isArray(t.statussen) ? t.statussen : []).find(function(x){ return x.key===w.status; });
+          var dlt = _woRapDoorlooptijdDagen(w, t);
+          return [_woNummerPlat(w), t.naam||'', _woKlantKort(w), fmtD(_woRapAanmaakISO(w)), st ? st.naam : (w.status||''),
+            _woIsAfgehandeld(w, t) ? 'ja' : 'nee', dlt!=null ? _rapExportGetal(dlt) : '', _rapExportGetal(_woRapUrenSom(w))];
+        }), 'werkorders_'+_rapJaar);
+    } : null);
 
     if(totaal === 0){
       h += '<div style="padding:30px;text-align:center;color:var(--muted)">Geen werkorders in '+_rapJaar+'.</div>';
@@ -32828,13 +32847,12 @@ function renderRapPersoonlijk(el) {
     h+='</tr>';
   });
   h+='</tbody></table></div></div>';
-  h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-pers-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
   el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){
     r.addEventListener('click',function(){ openRapMedPersoonlijkPanel(r.dataset.id); });
   });
   el.querySelectorAll('.rap-pers-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapPersSortKey===k)_rapPersSortDir*=-1; else{_rapPersSortKey=k;_rapPersSortDir=(k==='naam')?1:-1;} renderRapPersoonlijk(el); }); });
-  el.querySelector('#rap-pers-export').addEventListener('click',function(){
+  _rapZetExport(function(){
     var vandaag2=vandaagISO();
     csvExport(['Naam','Rol','Verlofsaldo (uren)','Verlof opgenomen (uren)','Overuren','Onkosten totaal','Verzuim (uren)'],
       actieve.map(function(m){
@@ -32947,11 +32965,10 @@ function renderRapOveruren(el) {
   });
   if(!ouRijen.length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
-  h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-ou-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
   el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'overuren');});});
   el.querySelectorAll('.rap-ou-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOuSortKey===k)_rapOuSortDir*=-1; else{_rapOuSortKey=k;_rapOuSortDir=(k==='naam')?1:-1;} renderRapOveruren(el); }); });
-  el.querySelector('#rap-ou-export').addEventListener('click',function(){csvExport(['Medewerker','Datum','Uren','Type','Status','Omschrijving'],data.map(function(o){var m=getMed(o.medId);return[m?m.voornaam+' '+m.achternaam:'',fmtD(o.datum),o.uren,o.type,o.status,o.omschrijving||''];}), 'overuren_'+_rapJaar);});
+  _rapZetExport(function(){csvExport(['Medewerker','Datum','Uren','Type','Status','Omschrijving'],data.map(function(o){var m=getMed(o.medId);return[m?m.voornaam+' '+m.achternaam:'',fmtD(o.datum),o.uren,o.type,o.status,o.omschrijving||''];}), 'overuren_'+_rapJaar);});
 }
 
 // ── TAB: ONKOSTEN ────────────────────────────────────────────────
@@ -33010,11 +33027,10 @@ function renderRapOnkosten(el) {
   });
   if(!Object.keys(perMed).length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
-  h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-ok-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
   el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'onkosten');});});
   el.querySelectorAll('.rap-onk-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapOnkSortKey===k)_rapOnkSortDir*=-1; else{_rapOnkSortKey=k;_rapOnkSortDir=(k==='naam')?1:-1;} renderRapOnkosten(el); }); });
-  el.querySelector('#rap-ok-export').addEventListener('click',function(){csvExport(['Medewerker','Datum','Categorie','Bedrag','Status'],data.map(function(o){var m=getMed(o.medId);return[m?m.voornaam+' '+m.achternaam:'',fmtD(o.datum),o.categorie||'',o.bedrag||0,o.status];}),'onkosten_'+_rapJaar);});
+  _rapZetExport(function(){csvExport(['Medewerker','Datum','Categorie','Bedrag','Status'],data.map(function(o){var m=getMed(o.medId);return[m?m.voornaam+' '+m.achternaam:'',fmtD(o.datum),o.categorie||'',o.bedrag||0,o.status];}),'onkosten_'+_rapJaar);});
 }
 
 // ── TAB: VERLOF ──────────────────────────────────────────────────
@@ -33084,11 +33100,10 @@ function renderRapVerlof(el) {
     h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)')+'">'+_nlAantal(saldo)+'u</td><td style="padding:10px 14px">'+_nlAantal(op)+'u</td><td style="padding:10px 14px;color:var(--muted)">'+r.aanvragen+'</td></tr>';
   });
   h+='</tbody></table></div></div>';
-  h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-vl-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
   el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'verlof');});});
   el.querySelectorAll('.rap-vl-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapVlSortKey===k)_rapVlSortDir*=-1; else{_rapVlSortKey=k;_rapVlSortDir=(k==='naam')?1:-1;} renderRapVerlof(el); }); });
-  el.querySelector('#rap-vl-export').addEventListener('click',function(){csvExport(['Medewerker','Verlofsaldo (uren)','Verlofsaldo (dagen)','Opgenomen '+jaarStr+' (uren)','Aanvragen'],actieve.map(function(m){var vlM=verlofJaar.filter(function(v){return String(v.medId)===String(m.id);});var _su=getVerlofSaldoUren(m);return[m.voornaam+' '+m.achternaam,_rapExportGetal(_su),_rapExportGetal(verlofUrenNaarDagen(_su, m)),_rapExportGetal(verlofOpgenomenUren(vlM, m)),vlM.length];}),'verlof_'+_rapJaar);});
+  _rapZetExport(function(){csvExport(['Medewerker','Verlofsaldo (uren)','Verlofsaldo (dagen)','Opgenomen '+jaarStr+' (uren)','Aanvragen'],actieve.map(function(m){var vlM=verlofJaar.filter(function(v){return String(v.medId)===String(m.id);});var _su=getVerlofSaldoUren(m);return[m.voornaam+' '+m.achternaam,_rapExportGetal(_su),_rapExportGetal(verlofUrenNaarDagen(_su, m)),_rapExportGetal(verlofOpgenomenUren(vlM, m)),vlM.length];}),'verlof_'+_rapJaar);});
 }
 
 // ── TAB: VERZUIM ─────────────────────────────────────────────────
@@ -33287,11 +33302,10 @@ function renderRapVerzuim(el) {
     h+='<td style="padding:10px 14px">'+(langd?'<span class="tag tag-orange">'+langd+'</span>':'<span style="color:var(--muted)">—</span>')+'</td></tr>';
   });
   h+='</tbody></table></div></div>';
-  h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-vz-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
   el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'verzuim');});});
   el.querySelectorAll('.rap-vz-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapVzSortKey===k)_rapVzSortDir*=-1; else{_rapVzSortKey=k;_rapVzSortDir=(k==='naam')?1:-1;} renderRapVerzuim(el); }); });
-  el.querySelector('#rap-vz-export').addEventListener('click',function(){csvExport(['Medewerker','Meldingen','Verzuim (uren)','Verzuim%'],actieve.map(function(m){var vzM=vzJaar.filter(function(v){return String(v.medId)===String(m.id);});var d=verzuimUrenJaar(m.id, jaarStr, vzUrenLijst), ru=roosterUren(m, _vzVan, _vzTot);return[m.voornaam+' '+m.achternaam,vzM.length,d,ru?Math.round(d/ru*1000)/10:0];}),'verzuim_'+_rapJaar);});
+  _rapZetExport(function(){csvExport(['Medewerker','Meldingen','Verzuim (uren)','Verzuim%'],actieve.map(function(m){var vzM=vzJaar.filter(function(v){return String(v.medId)===String(m.id);});var d=verzuimUrenJaar(m.id, jaarStr, vzUrenLijst), ru=roosterUren(m, _vzVan, _vzTot);return[m.voornaam+' '+m.achternaam,vzM.length,d,ru?Math.round(d/ru*1000)/10:0];}),'verzuim_'+_rapJaar);});
 }
 
 // ── TAB: STORINGSDIENST ──────────────────────────────────────────
@@ -33333,11 +33347,10 @@ function renderRapStoringsdienst(el) {
   });
   if(!gesorteerd.length)h+='<tr><td colspan="4" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
-  h+='<div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="rap-sd-export"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span style="vertical-align:middle">Export</span></button></div>';
   el.innerHTML=h; initGrafiekInteractie(el);
   el.querySelectorAll('.rap-med-rij').forEach(function(r){r.addEventListener('click',function(){openRapMedPanel(r.dataset.id,'storingsdienst');});});
   el.querySelectorAll('.rap-sd-th').forEach(function(th){ th.addEventListener('click',function(){ var k=th.dataset.sort; if(_rapSdSortKey===k)_rapSdSortDir*=-1; else{_rapSdSortKey=k;_rapSdSortDir=(k==='naam')?1:-1;} renderRapStoringsdienst(el); }); });
-  el.querySelector('#rap-sd-export').addEventListener('click',function(){csvExport(['Medewerker','Weekdiensten','Dagwissels','Totaal'],gesorteerd.map(function(mid){var m=getMed(mid);var t=tellers[mid];return[m?m.voornaam+' '+m.achternaam:'?',t.weken,t.dagwissels,t.weken+t.dagwissels];}),'storingsdienst_'+_rapJaar);});
+  _rapZetExport(function(){csvExport(['Medewerker','Weekdiensten','Dagwissels','Totaal'],gesorteerd.map(function(mid){var m=getMed(mid);var t=tellers[mid];return[m?m.voornaam+' '+m.achternaam:'?',t.weken,t.dagwissels,t.weken+t.dagwissels];}),'storingsdienst_'+_rapJaar);});
 }
 // ═══════════════════════════════════════════════════════════════
 // MODULE: INSTELLINGEN
