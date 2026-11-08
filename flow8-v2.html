@@ -722,6 +722,9 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 @media(max-width:768px){.obj-twee > .zp-klap + .zp-klap{margin-top:8px}}
 /* Checklists in de werkbon */
 .cl-kaart + .cl-kaart{margin-top:8px}
+/* Witte kaart met rand, zodat de lichte invulvelden erin opvallen (zoals op de objectpagina) */
+.zp-klap.cl-kaart{background:var(--surface);border:1px solid var(--border)}
+.cl-kaart .lf-ic{background:var(--surface2)}
 .cl-voortgang{font:700 12px 'Space Mono',monospace;color:var(--orange-t);background:rgba(245,158,11,.12);border-radius:var(--radius-pill);padding:3px 9px;flex:none}
 .cl-voortgang.klaar{color:var(--green-t);background:rgba(16,185,129,.14)}
 .cl-acties{display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:4px;margin-top:4px}
@@ -777,6 +780,25 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .kk-uitleg{padding-top:0}
 .kk-rij.uit .lf-l{color:var(--muted)}
 .lf-rij.kk-kaal{grid-template-columns:minmax(0,1fr) auto;cursor:pointer}
+/* Importvensters */
+.imp-uitleg{padding-top:0}
+.imp-kies{display:flex;align-items:center;gap:14px;padding:16px;border:1.5px dashed var(--border);border-radius:var(--radius-lg);background:var(--surface2);cursor:pointer;transition:border-color .15s,background .15s}
+.imp-kies[hidden]{display:none}
+.imp-kies:hover,.imp-kies.sleep{border-color:var(--accent);background:rgba(79,110,245,.06)}
+.imp-kies-ic{width:44px;height:44px;border-radius:12px;background:rgba(79,110,245,.14);color:var(--accent-t);display:grid;place-items:center;flex:none}
+.imp-kies b{display:block;font-size:15px;font-weight:600}
+.imp-kies small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+.imp-kop-ic{background:rgba(16,185,129,.14);color:var(--green-t)}
+.imp-bestand .lf-link{margin-left:auto;flex:none}
+.imp-tal{font:700 16px 'Space Mono',monospace}
+.imp-voorbeeld{background:var(--surface2);border-radius:var(--radius-lg);padding:12px 14px;font-size:13.5px;line-height:1.7;overflow-wrap:anywhere}
+.imp-voorbeeld.imp-lang{max-height:220px;overflow:auto}
+.imp-status{margin-top:12px}
+.zp-memo[hidden]{display:none}
+.imp-tussen{height:12px}
+.modal-lf .modal-footer .lf-knop-tweede svg{width:16px;height:16px}
+.modal-lf .modal-footer .lf-knop-tweede{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.lf-knop.imp-knop-oranje{background:var(--orange);border-color:var(--orange);color:#1a1200}
 .mi-bericht{background:var(--surface2);border-radius:var(--radius-lg);padding:14px;font-size:14px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow-y:auto}
 .lf .mono{font-family:'Space Mono',monospace;font-weight:700}
 .lf-alleen-lezen{cursor:default}
@@ -12308,6 +12330,40 @@ function _lfTweedeKnop(id, tekst, cls){
   var f = document.getElementById('modal-footer'); if(!f) return;
   f.insertAdjacentHTML('afterbegin', '<button type="button" class="btn lf-knop lf-knop-tweede'+(cls ? ' '+cls : '')+'" id="'+id+'">'+esc(tekst)+'</button>');
 }
+// ── Importvensters (lijststijl) ──
+// Stap 1: uitleg en een grote kaart om een bestand te kiezen. Na het inlezen verdwijnt de kaart
+// en staat bovenaan het aantal rijen met "Ander bestand". De importknop staat uit tot alles
+// klopt: dat loopt via het verborgen verplichte veld #imp-klaar, dat lfBind meeleest.
+var _ZP_UPLOAD = '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>';
+var _ZP_TABEL  = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>';
+var _ZP_NIEUW  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+var _ZP_BIJ    = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4-4.64 4.36A9 9 0 013.51 15"/></svg>';
+var _ZP_OVER   = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg>';
+function _impKies(inputId, accept, tekst, sub){
+  return '<input type="file" id="'+inputId+'" accept="'+accept+'" hidden>'
+    + '<label class="imp-kies" for="'+inputId+'" id="'+inputId+'-kaart"><span class="imp-kies-ic">'+_ZP_UPLOAD+'</span><span><b>'+esc(tekst)+'</b><small>'+esc(sub)+'</small></span></label>';
+}
+function _impBestandKop(inputId, aantal, naam){
+  var k = document.getElementById(inputId+'-kaart'); if(k) k.hidden = true;
+  return '<div class="lf-persoon imp-bestand"><span class="lf-av imp-kop-ic" aria-hidden="true">'+_ZP_TABEL+'</span><span class="lf-pt"><b>'+aantal+' rij'+(aantal===1?'':'en')+' gevonden</b><small>'+esc(naam||'')+'</small></span><label class="lf-link" for="'+inputId+'">Ander bestand</label></div>';
+}
+// Koppelregel: veld links, gekozen kolom rechts; tikken opent de keuzelijst.
+function _impMapRij(cls, veld, label, verplicht, opties){
+  return '<div class="lf-rij lf-kies kk-kaal" role="button" tabindex="0" data-lf-titel="'+esc(label)+'">'+_lfLabel(esc(label), {verplicht:verplicht})
+    + '<span class="lf-w"><span class="lf-kw"></span>'+_LF_CHEV+'</span>'
+    + '<select class="lf-sel '+cls+'" tabindex="-1" aria-hidden="true" data-veld="'+esc(veld)+'">'+opties+'</select></div>';
+}
+function _impKolOpties(kolommen, sel){
+  return '<option value="">niet importeren</option>' + kolommen.map(function(k){ return '<option value="'+esc(k)+'"'+(k===sel?' selected':'')+'>'+esc(k)+'</option>'; }).join('');
+}
+function _impTelRij(ico, label, n, kleur, sub){ return lfRij(ico, esc(label), '<b class="imp-tal" style="color:'+kleur+'">'+n+'</b>', sub ? {sub:sub} : null); }
+function _impVoorbeeld(regels){ return regels.length ? _zpGroep('Voorbeeld') + '<div class="imp-voorbeeld">'+regels.map(esc).join('<br>')+'</div>' : ''; }
+function _impKlaar(klaar, tekst){
+  var v = document.getElementById('imp-klaar'); if(!v) return;
+  v.value = klaar ? '1' : '';
+  v.dispatchEvent(new Event('change', {bubbles:true}));
+  var k = document.querySelector('#modal-footer .lf-knop:not(.lf-knop-tweede)'); if(k && tekst) k.textContent = tekst;
+}
 var _ZP_VINK     = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 function _zpOpen(titel, body){
   openPanel(titel, '<div class="lf zp-body">'+body+'</div>');
@@ -14328,26 +14384,29 @@ function verwijderDeb(id){
 // overgeslagen) en bij méér dan één onderhoudscontract per debiteur wordt niets
 // gewijzigd — dat is een conflict dat een mens moet beoordelen.
 function _openContractImport(){
-  var b = '';
-  b += '<p style="font-size:13px;color:var(--muted);margin-bottom:14px">Importeer contracten (abonnementen) uit Unit4. Elke rij is één contract: een debiteurnummer met een contractcode. Heeft een klant meerdere contracten (bijv. <strong>A12 + B</strong>), zet die dan als aparte rijen in het bestand.</p>';
-  b += '<div style="font-size:12px;color:var(--muted);background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.6">';
-  b += '<strong>B-contracten</strong> worden herkend als 24-uurs storingsdienst en aangevinkt bij de serviceklant. Andere codes (A, C, …) komen in het veld Contracttype.<br>';
-  b += 'Bestaande serviceklanten worden bijgewerkt. Debiteuren die nog geen serviceklant zijn, kun je hieronder automatisch laten aanmaken.';
-  b += '</div>';
-  b += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--surface2);border-radius:8px;cursor:pointer;margin-bottom:14px">';
-  b += '<input type="checkbox" id="cimp-maak-sk" style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;margin-top:2px">';
-  b += '<span style="font-size:12.5px;line-height:1.5"><strong>Ontbrekende serviceklanten aanmaken</strong><br>';
-  b += '<span style="color:var(--muted)">Van elke debiteur met een contract wordt een serviceklant gemaakt, met het contracttype en het B-vinkje. Pompgegevens, serviceduur en uitvoeringsdatums moet je daarna zelf invullen. Debiteurnummers die niet in Flow8 bestaan blijven overgeslagen.</span></span></label>';
-  b += '<label class="btn btn-ghost" style="cursor:pointer;width:100%;justify-content:center;padding:14px;border:1.5px dashed var(--border)">Bestand kiezen (.xlsx / .csv)<input type="file" id="cimp-file" accept=".xlsx,.xls,.csv" style="display:none"></label>';
-  b += '<div id="cimp-stap2" style="display:none;margin-top:16px"></div>';
-  var f = '<button class="btn btn-ghost" id="cimp-cancel">Annuleren</button><button class="btn btn-primary" id="cimp-doen" style="display:none">Importeren</button>';
-  openModal('Contracten importeren', b, f);
+  // Welke code een basiscontract of een aanvulling is, komt uit Instellingen → Contracten
+  // (zelfde indeling als het debiteurformulier). Er zit geen vaste code meer in de import.
+  var _code = function(c){ return String(c.code||c.id||'').toUpperCase(); };
+  var _basisCodes = getBasisContracten().map(_code).filter(Boolean);
+  var _aanvCodes  = getAanvullingen().map(_code).filter(Boolean);
+  var _metAanv = _aanvCodes.length > 0;
 
-  var _rijen = [], _kolommen = [];
-  document.getElementById('cimp-cancel').addEventListener('click', closeModal);
+  var b = '<p class="lf-uitleg imp-uitleg">Importeer contracten (abonnementen) uit Unit4. Elke rij is één contract: een debiteurnummer met een contractcode. Heeft een klant meerdere contracten, dan staan die op aparte rijen.</p>';
+  b += _zpMelding('info', 'Hoe het werkt',
+    'Basiscontracten'+(_basisCodes.length ? ' ('+esc(_basisCodes.join(', '))+')' : '')+' komen in het veld Contracttype.'
+    + (_metAanv ? ' Aanvullingen ('+esc(_aanvCodes.map(function(c){ return aanvullingLabel(c); }).join(', '))+') gelden bovenop het basiscontract.' : '')
+    + ' Welke code wat is, stel je in bij Instellingen → Contracten. Bestaande serviceklanten worden bijgewerkt.');
+  b += _zpKaart('<label class="lf-rij">'+_lfIco(_ZP_NIEUW)+'<span class="lf-l">Ontbrekende serviceklanten aanmaken<small>Met het contracttype'+(_metAanv ? ' en de aanvulling' : '')+'; pompgegevens, serviceduur en datums vul je daarna zelf in. Onbekende debiteurnummers worden overgeslagen.</small></span>'
+    + '<span class="lf-w"><span class="lf-sw"><input type="checkbox" role="switch" id="cimp-maak-sk"><i></i></span></span></label>');
+  b += '<div class="imp-tussen"></div>' + _impKies('cimp-file', '.xlsx,.xls,.csv', 'Bestand kiezen', '.xlsx of .csv');
+  b += '<div id="cimp-stap2" hidden></div><input type="hidden" id="imp-klaar" required>';
+  lfOpen('Contracten importeren', b, 'Importeren', 'cimp-doen');
+
+  var _rijen = [], _kolommen = [], _bestand = '';
   document.getElementById('cimp-file').addEventListener('change', function(){
     var file = this.files && this.files[0]; if(!file) return;
     if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    _bestand = file.name;
     var rd = new FileReader();
     rd.onload = function(e){
       try {
@@ -14360,6 +14419,8 @@ function _openContractImport(){
     };
     rd.readAsArrayBuffer(file);
   });
+  var mkCb = document.getElementById('cimp-maak-sk');
+  if(mkCb) mkCb.addEventListener('change', function(){ if(document.getElementById('cimp-preview')) _preview(); });
 
   function _autoMatch(namen){
     var lc = _kolommen.map(function(k){return k.toLowerCase();});
@@ -14369,32 +14430,30 @@ function _openContractImport(){
     }
     return '';
   }
-  function _kolOpties(sel){
-    var o = '<option value="">— niet importeren —</option>';
-    _kolommen.forEach(function(k){ o += '<option value="'+esc(k)+'"'+(k===sel?' selected':'')+'>'+esc(k)+'</option>'; });
-    return o;
-  }
 
   function _toonMapping(){
     var velden = [
-      { k:'nr',   l:'Debiteurnummer *', match:['debiteurnummer','debiteur','klantnummer','relatienummer','nr'] },
-      { k:'code', l:'Contractcode *',   match:['contractcode','contracttype','abonnement','contract','code','artikel'] }
+      { k:'nr',   l:'Debiteurnummer', match:['debiteurnummer','debiteur','klantnummer','relatienummer','nr'] },
+      { k:'code', l:'Contractcode',   match:['contractcode','contracttype','abonnement','contract','code','artikel'] }
     ];
-    var h = '<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+_rijen.length+' rijen gevonden</div>';
-    h += '<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Koppel de kolommen uit je bestand aan de velden:</p>';
-    h += '<div style="display:flex;flex-direction:column;gap:8px">';
-    velden.forEach(function(v){
-      h += '<div style="display:flex;align-items:center;gap:10px"><span style="flex:0 0 130px;font-size:13px">'+v.l+'</span>';
-      h += '<select class="input cimp-map" data-veld="'+v.k+'" style="flex:1">'+_kolOpties(_autoMatch(v.match))+'</select></div>';
-    });
-    h += '</div><div id="cimp-preview" style="margin-top:14px"></div>';
-    document.getElementById('cimp-stap2').style.display='';
-    document.getElementById('cimp-stap2').innerHTML = h;
-    document.getElementById('cimp-doen').style.display='';
+    var h = _impBestandKop('cimp-file', _rijen.length, _bestand);
+    h += _zpGroep('Kolommen koppelen') + _zpKaart(velden.map(function(v){ return _impMapRij('cimp-map', v.k, v.l, true, _impKolOpties(_kolommen, _autoMatch(v.match))); }).join(''));
+    h += '<div id="cimp-preview"></div>';
+    var st = document.getElementById('cimp-stap2'); st.hidden = false; st.innerHTML = h;
+    _lfBindKies(st);
     document.querySelectorAll('.cimp-map').forEach(function(s){ s.addEventListener('change', _preview); });
-    var mkCb = document.getElementById('cimp-maak-sk');
-    if(mkCb && !mkCb._geb){ mkCb._geb = true; mkCb.addEventListener('change', _preview); }
     _preview();
+  }
+
+  // Soort van een code volgens de instellingen. Een variant op een aanvulling (bijv. "B24" bij
+  // aanvulling "B") telt als die aanvulling — zoals de import dat altijd deed, maar nu op de
+  // ingestelde codes. Een exacte basiscode gaat altijd voor.
+  function _soortVan(code){
+    if(_aanvCodes.indexOf(code) >= 0) return { aanv:code };
+    if(_basisCodes.indexOf(code) >= 0) return { basis:code };
+    var pre = _aanvCodes.find(function(a){ return code.indexOf(a) === 0; });
+    if(pre) return { aanv:pre };
+    return { basis:code };   // onbekend: wordt hieronder gemeld als onbekende code
   }
 
   // Analyse van de rijen: groepeer per debiteur en bepaal wat er zou gebeuren.
@@ -14406,16 +14465,17 @@ function _openContractImport(){
       var nr = String(r[map.nr]==null?'':r[map.nr]).trim();
       var code = String(r[map.code]==null?'':r[map.code]).trim().toUpperCase();
       if(!nr || !code) return;
-      if(!perDeb[nr]) perDeb[nr] = { nr:nr, b:false, onderhoud:[] };
-      // Een code die met B begint is een 24-uurs servicecontract.
-      if(/^B/.test(code)) perDeb[nr].b = true;
-      else if(perDeb[nr].onderhoud.indexOf(code)<0) perDeb[nr].onderhoud.push(code);
+      if(!perDeb[nr]) perDeb[nr] = { nr:nr, aanv:[], onderhoud:[] };
+      var sv = _soortVan(code);
+      if(sv.aanv){ if(perDeb[nr].aanv.indexOf(sv.aanv)<0) perDeb[nr].aanv.push(sv.aanv); }
+      else if(perDeb[nr].onderhoud.indexOf(sv.basis)<0) perDeb[nr].onderhoud.push(sv.basis);
     });
     var maakSk = !!(document.getElementById('cimp-maak-sk') && document.getElementById('cimp-maak-sk').checked);
-    var res = { bij:[], geenSk:[], conflict:[], onbekendeCode:[], bWeg:[], nieuw:[], geenDeb:[], maakSk:maakSk };
-    var geldig = (typeof getContracten==='function' ? getContracten() : []).map(function(c){ return String(c.code||c.id).toUpperCase(); });
+    var res = { bij:[], geenSk:[], conflict:[], onbekendeCode:[], aanvWeg:[], nieuw:[], geenDeb:[], maakSk:maakSk };
+    var geldig = getContracten().map(_code);
     Object.keys(perDeb).forEach(function(nr){
       var d = perDeb[nr];
+      var aanv = d.aanv[0] || null;   // een klant heeft één aanvulling; de eerste uit het bestand telt
       var sk = (APP.serviceklanten||[]).find(function(k){
         if(k.debNr && String(k.debNr).trim()===nr) return true;
         if(k.debId){ var db=(APP.debiteuren||[]).find(function(x){ return String(x.id)===String(k.debId); }); if(db && db.nr && String(db.nr).trim()===nr) return true; }
@@ -14424,7 +14484,7 @@ function _openContractImport(){
       if(!sk){
         // Zonder serviceklant: aanmaken kan alleen als de debiteur wél bestaat.
         var db2 = (APP.debiteuren||[]).find(function(x){ return x.nr && String(x.nr).trim()===nr; });
-        if(maakSk && db2 && d.onderhoud.length<=1){ res.nieuw.push({ deb:db2, code:d.onderhoud[0]||'', b:d.b }); }
+        if(maakSk && db2 && d.onderhoud.length<=1){ res.nieuw.push({ deb:db2, code:d.onderhoud[0]||'', aanv:aanv }); }
         else if(maakSk && db2 && d.onderhoud.length>1){ res.conflict.push({ nr:nr, naam:db2.naam, codes:d.onderhoud }); }
         else if(maakSk){ res.geenDeb.push(d); }
         else { res.geenSk.push(d); }
@@ -14440,11 +14500,11 @@ function _openContractImport(){
         res.onbekendeCode.push({ nr:nr, naam:sk.naam, code:code });
         return;
       }
-      // Klant staat wél in het bestand, maar zonder B-rij terwijl het vinkje aanstaat:
-      // het 24-uurscontract is mogelijk beëindigd. Alleen melden, nooit automatisch
-      // uitvinken — bij een deellijst zou dat onterecht contracten wissen.
-      if(!d.b && klantAanvulling(sk)) res.bWeg.push({ nr:nr, naam:sk.naam, sk:sk });
-      res.bij.push({ sk:sk, code:code, b:d.b });
+      // Klant staat wél in het bestand, maar zonder aanvulling terwijl die bij de klant aanstaat:
+      // de aanvulling is mogelijk beëindigd. Alleen melden, nooit automatisch uitzetten — bij
+      // een deellijst zou dat onterecht contracten wissen.
+      if(!aanv && klantAanvulling(sk)) res.aanvWeg.push({ nr:nr, naam:sk.naam, sk:sk });
+      res.bij.push({ sk:sk, code:code, aanv:aanv });
     });
     return res;
   }
@@ -14452,27 +14512,23 @@ function _openContractImport(){
   function _preview(){
     var a = _analyseer();
     var el2 = document.getElementById('cimp-preview'); if(!el2) return;
-    if(!a){ el2.innerHTML = '<div style="font-size:12px;color:var(--orange-t)">Koppel eerst debiteurnummer én contractcode.</div>'; return; }
-    var h = '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:10px 12px;line-height:1.7">';
-    h += '<div><strong style="color:var(--green-t)">'+a.bij.length+'</strong> serviceklant(en) worden bijgewerkt</div>';
-    if(a.nieuw.length)         h += '<div><strong style="color:var(--accent)">'+a.nieuw.length+'</strong> nieuwe serviceklant(en) worden aangemaakt</div>';
-    if(a.conflict.length)      h += '<div><strong style="color:var(--red)">'+a.conflict.length+'</strong> met meerdere onderhoudscontracten — worden overgeslagen</div>';
-    if(a.geenSk.length)        h += '<div><strong style="color:var(--orange-t)">'+a.geenSk.length+'</strong> debiteurnummer(s) zonder serviceklant — worden overgeslagen</div>';
-    if(a.geenDeb.length)       h += '<div><strong style="color:var(--orange-t)">'+a.geenDeb.length+'</strong> debiteurnummer(s) bestaan niet in Flow8 — worden overgeslagen</div>';
+    if(!a){ el2.innerHTML = _zpMelding('actie', 'Nog niet klaar', 'Koppel eerst debiteurnummer én contractcode.'); _impKlaar(false, 'Importeren'); return; }
+    var r = _impTelRij(_ZP_BIJ, 'Serviceklanten bijgewerkt', a.bij.length, 'var(--green-t)');
+    if(a.nieuw.length)    r += _impTelRij(_ZP_NIEUW, 'Nieuwe serviceklanten', a.nieuw.length, 'var(--accent-t)');
+    if(a.conflict.length) r += _impTelRij(_ZP_OVER, 'Meerdere basiscontracten', a.conflict.length, 'var(--red-t)', 'Worden overgeslagen');
+    if(a.geenSk.length)   r += _impTelRij(_ZP_OVER, 'Zonder serviceklant', a.geenSk.length, 'var(--orange-t)', 'Worden overgeslagen');
+    if(a.geenDeb.length)  r += _impTelRij(_ZP_OVER, 'Debiteur bestaat niet in Flow8', a.geenDeb.length, 'var(--orange-t)', 'Worden overgeslagen');
     if(a.onbekendeCode.length){
-      h += '<div><strong style="color:var(--red)">'+a.onbekendeCode.length+'</strong> onbekende contractcode(s) — <strong>worden niet geïmporteerd</strong></div>';
       var _codes = a.onbekendeCode.map(function(x){ return x.code; }).filter(function(v,i,z){ return z.indexOf(v)===i; });
-      h += '<div style="font-size:11.5px;color:var(--muted);margin:2px 0 6px">Voeg de code eerst toe bij Instellingen \u2192 Contracten, of corrigeer het bestand: '
-         + esc(_codes.slice(0,6).join(', ')) + (_codes.length>6?' \u2026':'') + '</div>';
+      r += _impTelRij(_ZP_OVER, 'Onbekende contractcode', a.onbekendeCode.length, 'var(--red-t)',
+        'Worden niet geïmporteerd. Voeg de code toe bij Instellingen → Contracten of corrigeer het bestand: '+esc(_codes.slice(0,6).join(', '))+(_codes.length>6?' …':''));
     }
-    if(a.bWeg.length)          h += '<div><strong style="color:var(--orange-t)">'+a.bWeg.length+'</strong> met B-vinkje maar zónder B in het bestand — ter controle, niets wordt uitgevinkt</div>';
-    h += '</div>';
-    if(a.bij.length){
-      h += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Voorbeeld (eerste 3):</div><div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-top:4px">';
-      h += a.bij.slice(0,3).map(function(x){ return esc(x.sk.naam)+' → '+esc(x.code||'(geen wijziging)')+(x.b?' + B (24u)':''); }).join('<br>');
-      h += '</div>';
-    }
+    if(a.aanvWeg.length)  r += _impTelRij(_ZP_OVER, 'Aanvulling niet meer in het bestand', a.aanvWeg.length, 'var(--orange-t)', 'Ter controle; er wordt niets uitgezet');
+    var h = _zpGroep('Wat er gebeurt') + _zpKaart(r);
+    h += _impVoorbeeld(a.bij.slice(0,3).map(function(x){ return x.sk.naam+' → '+(x.code||'(geen wijziging)')+(x.aanv ? ' + '+aanvullingLabel(x.aanv) : ''); }));
     el2.innerHTML = h;
+    var n = a.bij.length + a.nieuw.length;
+    _impKlaar(n > 0, 'Importeren ('+n+')');
   }
 
   document.getElementById('cimp-doen').addEventListener('click', function(){
@@ -14482,7 +14538,7 @@ function _openContractImport(){
     var vraag = a.bij.length+' serviceklant(en) bijwerken';
     if(a.nieuw.length) vraag += ' en '+a.nieuw.length+' nieuwe aanmaken';
     vraag += '?';
-    if(a.conflict.length) vraag += ' '+a.conflict.length+' met meerdere onderhoudscontracten worden overgeslagen.';
+    if(a.conflict.length) vraag += ' '+a.conflict.length+' met meerdere basiscontracten worden overgeslagen.';
     if(a.geenSk.length)   vraag += ' '+a.geenSk.length+' zonder serviceklant worden overgeslagen.';
     if(a.geenDeb.length)  vraag += ' '+a.geenDeb.length+' onbekende debiteurnummer(s) worden overgeslagen.';
     bevestigActie('Contracten importeren', vraag, function(){
@@ -14490,11 +14546,11 @@ function _openContractImport(){
       a.bij.forEach(function(x){
         var k = x.sk, veranderd = false;
         if(x.code && k.contractType !== x.code){ k.contractType = x.code; veranderd = true; }
-        if(x.b && !klantAanvulling(k)){ k.aanvulling = 'B'; k.heeftBContract = null; veranderd = true; }
+        if(x.aanv && klantAanvulling(k) !== x.aanv){ k.aanvulling = x.aanv; k.heeftBContract = null; veranderd = true; }
         if(veranderd){ dbSaveItem('serviceklanten', k.id, k); gew++; }
       });
       // Nieuwe serviceklanten: gegevens uit de debiteur, contract uit het bestand.
-      // De rest (pomp, duur, datums) vult Homa daarna handmatig aan.
+      // De rest (pomp, duur, datums) wordt daarna handmatig aangevuld.
       a.nieuw.forEach(function(x){
         var d = x.deb;
         var sk = {
@@ -14509,7 +14565,7 @@ function _openContractImport(){
           email: d.email||'',
           telefoon: d.telefoon||'',
           contractType: x.code||'',
-          aanvulling:     x.b ? 'B' : null,
+          aanvulling:     x.aanv || null,
           uitvoerder: 'intern',
           pomptype: '',
           besturing: '',
@@ -14530,44 +14586,35 @@ function _openContractImport(){
       renderDebiteuren();
       toast(gew+' bijgewerkt'+(nw?(' · '+nw+' aangemaakt'):''),'success');
       // Overgeslagen rijen tonen zodat je ze handmatig kunt nalopen.
-      if(a.conflict.length || a.geenSk.length || a.bWeg.length || a.geenDeb.length){
+      if(a.conflict.length || a.geenSk.length || a.aanvWeg.length || a.geenDeb.length){
         var r = '';
+        var lijst = function(regels){ return '<div class="imp-voorbeeld imp-lang">'+regels.join('<br>')+'</div>'; };
         if(a.conflict.length){
-          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--red)">Meerdere onderhoudscontracten ('+a.conflict.length+')</div>';
-          r += '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze klanten hebben meer dan één A/C-contract in het bestand. Er is niets gewijzigd — kies zelf welk contract leidend is.</p>';
-          r += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-bottom:14px;max-height:160px;overflow:auto">';
-          r += a.conflict.map(function(c){ return esc(c.nr)+' · '+esc(c.naam||'')+' → '+esc(c.codes.join(', ')); }).join('<br>');
-          r += '</div>';
+          r += _zpGroep('Meerdere basiscontracten · '+a.conflict.length);
+          r += '<p class="lf-uitleg imp-uitleg">Deze klanten hebben meer dan één basiscontract in het bestand. Er is niets gewijzigd — kies zelf welk contract leidend is.</p>';
+          r += lijst(a.conflict.map(function(c){ return esc(c.nr)+' · '+esc(c.naam||'')+' → '+esc(c.codes.join(', ')); }));
         }
-        if(a.bWeg.length){
-          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange-t)">Controleer 24-uurscontract ('+a.bWeg.length+')</div>';
-          r += '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze klanten hebben het B-vinkje aanstaan, maar kwamen in dit bestand niet voor met een B-contract. Mogelijk is het 24-uurscontract beëindigd. Er is niets gewijzigd — vink zelf uit waar dat klopt.</p>';
-          r += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-bottom:14px;max-height:160px;overflow:auto">';
-          r += a.bWeg.map(function(x){
-            return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0">'
-              + '<span style="flex:1">'+esc(x.nr)+' · '+esc(x.naam||'')+'</span>'
-              + '<button type="button" class="btn btn-ghost btn-sm cimp-bweg" data-id="'+esc(x.sk.id)+'" style="font-size:11px;padding:2px 8px;color:var(--red)">B uitvinken</button>'
-              + '</div>';
-          }).join('');
-          r += '</div>';
+        if(a.aanvWeg.length){
+          r += _zpGroep('Controleer aanvulling · '+a.aanvWeg.length);
+          r += '<p class="lf-uitleg imp-uitleg">Bij deze klanten staat een aanvulling aan, maar ze kwamen in dit bestand niet voor met die aanvulling. Mogelijk is die beëindigd. Er is niets gewijzigd — zet zelf uit waar dat klopt.</p>';
+          r += _zpKaart(a.aanvWeg.map(function(x){
+            return lfRij('', esc(x.nr)+' · '+esc(x.naam||''), '<button type="button" class="lf-link cimp-bweg" data-id="'+esc(x.sk.id)+'">Uitzetten</button>', {sub:esc(aanvullingLabel(klantAanvulling(x.sk)))});
+          }).join(''));
         }
         if(a.geenDeb.length){
-          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange-t)">Debiteur niet gevonden ('+a.geenDeb.length+')</div>';
-          r += '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze debiteurnummers staan niet in Flow8, dus er kon geen serviceklant worden aangemaakt. Importeer eerst de debiteuren.</p>';
-          r += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-bottom:14px;max-height:160px;overflow:auto">';
-          r += a.geenDeb.map(function(d){ return esc(d.nr)+' → '+esc(d.onderhoud.join(', '))+(d.b?(d.onderhoud.length?' + B':'B'):''); }).join('<br>');
-          r += '</div>';
+          r += _zpGroep('Debiteur niet gevonden · '+a.geenDeb.length);
+          r += '<p class="lf-uitleg imp-uitleg">Deze debiteurnummers staan niet in Flow8, dus er kon geen serviceklant worden aangemaakt. Importeer eerst de debiteuren.</p>';
+          r += lijst(a.geenDeb.map(function(d){ return esc(d.nr)+' → '+esc(d.onderhoud.concat(d.aanv).join(', ')); }));
         }
         if(a.geenSk.length){
-          r += '<div style="font-weight:700;font-size:13px;margin-bottom:6px;color:var(--orange-t)">Geen serviceklant gevonden ('+a.geenSk.length+')</div>';
-          r += '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze debiteurnummers hebben nog geen serviceklant. Vink bij de debiteur eerst \u201cook serviceklant\u201d aan en importeer daarna opnieuw.</p>';
-          r += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;max-height:160px;overflow:auto">';
-          r += a.geenSk.map(function(d){ return esc(d.nr)+' → '+esc(d.onderhoud.join(', '))+(d.b?(d.onderhoud.length?' + B':'B'):''); }).join('<br>');
-          r += '</div>';
+          r += _zpGroep('Geen serviceklant gevonden · '+a.geenSk.length);
+          r += '<p class="lf-uitleg imp-uitleg">Deze debiteurnummers hebben nog geen serviceklant. Vink bij de debiteur eerst “ook serviceklant” aan, of zet bij het importeren “Ontbrekende serviceklanten aanmaken” aan.</p>';
+          r += lijst(a.geenSk.map(function(d){ return esc(d.nr)+' → '+esc(d.onderhoud.concat(d.aanv).join(', ')); }));
         }
         setTimeout(function(){
-          openModal('Controleren na import', r, '<button class="btn btn-primary" onclick="closeModal()">Sluiten</button>');
-          // Per klant het B-vinkje kunnen uitzetten, zonder de modal te verlaten.
+          lfOpen('Controleren na import', r, 'Sluiten', 'cimp-na-ok');
+          document.getElementById('cimp-na-ok').addEventListener('click', closeModal);
+          // Per klant de aanvulling kunnen uitzetten, zonder het venster te verlaten.
           document.querySelectorAll('.cimp-bweg').forEach(function(bt){
             bt.addEventListener('click', function(){
               var k = (APP.serviceklanten||[]).find(function(x){ return String(x.id)===String(bt.dataset.id); });
@@ -14575,7 +14622,7 @@ function _openContractImport(){
               k.aanvulling = null;
               k.heeftBContract = null;
               dbSaveItem('serviceklanten', k.id, k);
-              bt.outerHTML = '<span style="font-size:11px;color:var(--green-t);font-weight:600">Uitgevinkt</span>';
+              bt.outerHTML = '<span class="zp-groen">Uitgezet</span>';
               renderDebiteuren();
             });
           });
@@ -14593,17 +14640,16 @@ function _openContractImport(){
 // w(veldKey) die de opgeschoonde celwaarde geeft, en geeft {nieuw:[], bij:[], over:[{tekst}]}
 // terug, of {fout:'...'} als de koppeling nog niet klopt.
 function _excelImport(o){
-  var b = '<p style="font-size:13px;color:var(--muted);margin-bottom:14px">'+o.uitleg+'</p>';
-  b += '<label class="btn btn-ghost" style="cursor:pointer;width:100%;justify-content:center;padding:14px;border:1.5px dashed var(--border)">Bestand kiezen (.xlsx / .csv)<input type="file" id="ximp-file" accept=".xlsx,.xls,.csv" style="display:none"></label>';
-  b += '<div id="ximp-stap2" style="display:none;margin-top:16px"></div>';
-  var f = '<button class="btn btn-ghost" id="ximp-cancel">Annuleren</button><button class="btn btn-primary" id="ximp-doen" style="display:none">Importeren</button>';
-  openModal(o.titel, b, f);
+  var b = '<p class="lf-uitleg imp-uitleg">'+o.uitleg+'</p>';
+  b += _impKies('ximp-file', '.xlsx,.xls,.csv', 'Bestand kiezen', '.xlsx of .csv');
+  b += '<div id="ximp-stap2" hidden></div><input type="hidden" id="imp-klaar" required>';
+  lfOpen(o.titel, b, 'Importeren', 'ximp-doen');
 
-  var _rijen = [], _kolommen = [];
-  document.getElementById('ximp-cancel').addEventListener('click', closeModal);
+  var _rijen = [], _kolommen = [], _bestand = '';
   document.getElementById('ximp-file').addEventListener('change', function(){
     var file = this.files && this.files[0]; if(!file) return;
     if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    _bestand = file.name;
     var rd = new FileReader();
     rd.onload = function(e){
       try {
@@ -14625,27 +14671,18 @@ function _excelImport(o){
     }
     return '';
   }
-  function _kolOpties(sel){
-    var opt = '<option value="">— niet importeren —</option>';
-    _kolommen.forEach(function(k){ opt += '<option value="'+esc(k)+'"'+(k===sel?' selected':'')+'>'+esc(k)+'</option>'; });
-    return opt;
-  }
   function _toonMapping(){
-    var h = '<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+_rijen.length+' rijen gevonden</div>';
-    h += '<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Koppel de kolommen uit je bestand aan de velden:</p>';
-    h += '<div style="display:flex;flex-direction:column;gap:8px">';
-    var gebruikt = [];
+    var gebruikt = [], rijen = '';
     o.velden.forEach(function(v){
       var kies = _autoMatch(v.match||[]);
       if(gebruikt.indexOf(kies) >= 0) kies = '';   // één kolom niet aan twee velden koppelen
       if(kies) gebruikt.push(kies);
-      h += '<div style="display:flex;align-items:center;gap:10px"><span style="flex:0 0 150px;font-size:13px">'+esc(v.l)+(v.verplicht?' *':'')+'</span>';
-      h += '<select class="input ximp-map" data-veld="'+esc(v.k)+'" style="flex:1">'+_kolOpties(kies)+'</select></div>';
+      rijen += _impMapRij('ximp-map', v.k, v.l, !!v.verplicht, _impKolOpties(_kolommen, kies));
     });
-    h += '</div><div id="ximp-preview" style="margin-top:14px"></div>';
-    document.getElementById('ximp-stap2').style.display = '';
-    document.getElementById('ximp-stap2').innerHTML = h;
-    document.getElementById('ximp-doen').style.display = '';
+    var h = _impBestandKop('ximp-file', _rijen.length, _bestand);
+    h += _zpGroep('Kolommen koppelen') + _zpKaart(rijen) + '<div id="ximp-preview"></div>';
+    var st = document.getElementById('ximp-stap2'); st.hidden = false; st.innerHTML = h;
+    _lfBindKies(st);
     document.querySelectorAll('.ximp-map').forEach(function(s){ s.addEventListener('change', _preview); });
     _preview();
   }
@@ -14660,18 +14697,15 @@ function _excelImport(o){
   }
   function _preview(){
     var a = _analyse(), el2 = document.getElementById('ximp-preview'); if(!el2) return;
-    if(a.fout){ el2.innerHTML = '<div style="font-size:12px;color:var(--orange-t)">'+esc(a.fout)+'</div>'; return; }
-    var h = '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:10px 12px;line-height:1.7">';
-    h += '<div><strong style="color:var(--accent)">'+a.nieuw.length+'</strong> nieuw</div>';
-    h += '<div><strong style="color:var(--green-t)">'+a.bij.length+'</strong> bestaand, worden bijgewerkt</div>';
-    if(a.over.length) h += '<div><strong style="color:var(--orange-t)">'+a.over.length+'</strong> overgeslagen (na de import zie je welke)</div>';
-    h += '</div>';
-    var vb = a.nieuw.concat(a.bij).slice(0,3);
-    if(vb.length){
-      h += '<div style="font-size:11px;color:var(--muted);margin-top:8px">Voorbeeld (eerste 3):</div><div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;margin-top:4px">';
-      h += vb.map(function(x){ return esc(o.regel(x)); }).join('<br>') + '</div>';
-    }
+    if(a.fout){ el2.innerHTML = _zpMelding('actie', 'Nog niet klaar', esc(a.fout)); _impKlaar(false, 'Importeren'); return; }
+    var h = _zpGroep('Wat er gebeurt') + _zpKaart(
+      _impTelRij(_ZP_NIEUW, 'Nieuw', a.nieuw.length, 'var(--accent-t)')
+      + _impTelRij(_ZP_BIJ, 'Bestaand, wordt bijgewerkt', a.bij.length, 'var(--green-t)')
+      + (a.over.length ? _impTelRij(_ZP_OVER, 'Overgeslagen', a.over.length, 'var(--orange-t)', 'Na de import zie je welke') : ''));
+    h += _impVoorbeeld(a.nieuw.concat(a.bij).slice(0,3).map(function(x){ return o.regel(x); }));
     el2.innerHTML = h;
+    var n = a.nieuw.length + a.bij.length;
+    _impKlaar(n > 0, 'Importeren ('+n+')');
   }
   document.getElementById('ximp-doen').addEventListener('click', function(){
     var a = _analyse();
@@ -14684,9 +14718,12 @@ function _excelImport(o){
       toast(r.nieuw+' aangemaakt · '+r.bij+' bijgewerkt','success');
       if(o.naAfloop) o.naAfloop();
       if(a.over.length){
-        var lijst = '<p style="font-size:12px;color:var(--muted);margin-bottom:8px">Deze rijen zijn niet geïmporteerd. Pas het bestand aan en importeer opnieuw; wat al is geïmporteerd wordt dan bijgewerkt, niet dubbel aangemaakt.</p>';
-        lijst += '<div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px;max-height:260px;overflow:auto">' + a.over.map(function(x){ return esc(x.tekst); }).join('<br>') + '</div>';
-        setTimeout(function(){ openModal('Overgeslagen bij import ('+a.over.length+')', lijst, '<button class="btn btn-primary" onclick="closeModal()">Sluiten</button>'); }, 400);
+        var lijst = '<p class="lf-uitleg imp-uitleg">Deze rijen zijn niet geïmporteerd. Pas het bestand aan en importeer opnieuw; wat al is geïmporteerd wordt dan bijgewerkt, niet dubbel aangemaakt.</p>';
+        lijst += '<div class="imp-voorbeeld imp-lang">' + a.over.map(function(x){ return esc(x.tekst); }).join('<br>') + '</div>';
+        setTimeout(function(){
+          lfOpen('Overgeslagen bij import ('+a.over.length+')', lijst, 'Sluiten', 'ximp-over-ok');
+          document.getElementById('ximp-over-ok').addEventListener('click', closeModal);
+        }, 400);
       }
     });
   });
@@ -14886,20 +14923,19 @@ function _openMedewerkerImport(){
 }
 
 function _openDebImport(){
-  var b = '';
-  b += '<p style="font-size:13px;color:var(--muted);margin-bottom:14px">Importeer debiteuren uit een Excel- of CSV-bestand (bijv. een export uit Unit4). De eerste rij moet kolomkoppen bevatten. Bestaande debiteuren worden op debiteurnummer (anders naam) bijgewerkt; locaties en serviceklant-koppelingen blijven behouden.</p>';
-  b += '<label class="btn btn-ghost" style="cursor:pointer;width:100%;justify-content:center;padding:14px;border:1.5px dashed var(--border)">Bestand kiezen (.xlsx / .csv)<input type="file" id="dimp-file" accept=".xlsx,.xls,.csv" style="display:none"></label>';
-  b += '<div id="dimp-stap2" style="display:none;margin-top:16px"></div>';
-  var f = '<button class="btn btn-ghost" id="dimp-cancel">Annuleren</button><button class="btn btn-primary" id="dimp-doen" style="display:none">Importeren</button>';
-  openModal('Debiteuren importeren', b, f);
+  var b = '<p class="lf-uitleg imp-uitleg">Importeer debiteuren uit een Excel- of CSV-bestand, bijvoorbeeld een export uit Unit4. De eerste rij bevat de kolomkoppen. Bestaande debiteuren worden bijgewerkt op debiteurnummer (anders op naam); locaties en serviceklant-koppelingen blijven staan.</p>';
+  b += _impKies('dimp-file', '.xlsx,.xls,.csv', 'Bestand kiezen', '.xlsx of .csv');
+  b += '<div id="dimp-stap2" hidden></div><input type="hidden" id="imp-klaar" required>';
+  lfOpen('Debiteuren importeren', b, 'Importeren', 'dimp-doen');
 
   var _rijen = [];
   var _kolommen = [];
+  var _bestand = '';
 
-  document.getElementById('dimp-cancel').addEventListener('click', closeModal);
   document.getElementById('dimp-file').addEventListener('change', function(){
     var file = this.files && this.files[0]; if(!file) return;
     if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    _bestand = file.name;
     var rd = new FileReader();
     rd.onload = function(e){
       try {
@@ -14923,15 +14959,10 @@ function _openDebImport(){
     }
     return '';
   }
-  function _kolOpties(sel){
-    var o = '<option value="">— niet importeren —</option>';
-    _kolommen.forEach(function(k){ o += '<option value="'+esc(k)+'"'+(k===sel?' selected':'')+'>'+esc(k)+'</option>'; });
-    return o;
-  }
 
   function _toonMapping(){
     var velden = [
-      { k:'naam',          l:'Naam *',         match:['naam (relatie)','bedrijfsnaam','naam','relatie'] },
+      { k:'naam',          l:'Naam', v:true,   match:['naam (relatie)','bedrijfsnaam','naam','relatie'] },
       { k:'nr',            l:'Debiteurnummer', match:['debiteurnummer','debiteur','klantnummer','relatienummer','nr'] },
       { k:'adres',         l:'Adres',          match:['straatnaam','straat','adres'] },
       { k:'postcode',      l:'Postcode',       match:['postcode'] },
@@ -14940,27 +14971,35 @@ function _openDebImport(){
       { k:'email',         l:'E-mail',         match:['e-mail','email','mail'] },
       { k:'telefoon',      l:'Telefoon',       match:['telefoonnummer','telefoon','tel'] }
     ];
-    var h = '<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+_rijen.length+' rijen gevonden</div>';
-    h += '<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Koppel de kolommen uit je bestand aan de velden:</p>';
-    h += '<div style="display:flex;flex-direction:column;gap:8px">';
-    velden.forEach(function(v){
-      h += '<div style="display:flex;align-items:center;gap:10px"><span style="flex:0 0 130px;font-size:13px">'+v.l+'</span>';
-      h += '<select class="input dimp-map" data-veld="'+v.k+'" style="flex:1">'+_kolOpties(_autoMatch(v.match))+'</select></div>';
-    });
-    h += '</div>';
-    h += '<div id="dimp-preview" style="margin-top:14px"></div>';
-    document.getElementById('dimp-stap2').style.display='';
-    document.getElementById('dimp-stap2').innerHTML = h;
-    document.getElementById('dimp-doen').style.display='';
+    var h = _impBestandKop('dimp-file', _rijen.length, _bestand);
+    h += _zpGroep('Kolommen koppelen') + _zpKaart(velden.map(function(v){ return _impMapRij('dimp-map', v.k, v.l, v.v, _impKolOpties(_kolommen, _autoMatch(v.match))); }).join(''));
+    h += '<div id="dimp-preview"></div>';
+    var st = document.getElementById('dimp-stap2'); st.hidden = false; st.innerHTML = h;
+    _lfBindKies(st);
 
     function _preview(){
       var map = {}; document.querySelectorAll('.dimp-map').forEach(function(s){ map[s.dataset.veld]=s.value; });
+      var el2 = document.getElementById('dimp-preview');
+      if(!map.naam){ el2.innerHTML = _zpMelding('actie', 'Nog niet klaar', 'Koppel minimaal het veld Naam.'); _impKlaar(false, 'Importeren'); return; }
+      // Zelfde herkenning als bij het importeren: op nummer, anders op naam
+      var nw = 0, bij = 0, over = 0;
+      _rijen.forEach(function(r){
+        var naam = String(r[map.naam]==null?'':r[map.naam]).trim();
+        if(!naam){ over++; return; }
+        var nr = map.nr ? String(r[map.nr]==null?'':r[map.nr]).trim() : '';
+        var best = nr
+          ? APP.debiteuren.find(function(d){ return d.nr && String(d.nr).trim()===nr; })
+          : APP.debiteuren.find(function(d){ return d.naam && d.naam.toLowerCase()===naam.toLowerCase(); });
+        if(best) bij++; else nw++;
+      });
       var voorbeeld = _rijen.slice(0,3).map(function(r){
         var nm = map.naam ? r[map.naam] : '?';
         var pl = map.plaats ? r[map.plaats] : '';
         return nm + (pl?(' — '+pl):'');
       });
-      document.getElementById('dimp-preview').innerHTML = '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">Voorbeeld (eerste 3):</div><div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px">'+voorbeeld.map(esc).join('<br>')+'</div>';
+      el2.innerHTML = _zpGroep('Wat er gebeurt') + _zpKaart(_impTelRij(_ZP_NIEUW, 'Nieuw', nw, 'var(--accent-t)') + _impTelRij(_ZP_BIJ, 'Bestaand, wordt bijgewerkt', bij, 'var(--green-t)') + (over ? _impTelRij(_ZP_OVER, 'Overgeslagen (geen naam)', over, 'var(--orange-t)') : ''))
+        + _impVoorbeeld(voorbeeld);
+      _impKlaar(nw+bij > 0, 'Importeren ('+(nw+bij)+')');
     }
     document.querySelectorAll('.dimp-map').forEach(function(s){ s.addEventListener('change', _preview); });
     _preview();
@@ -25951,20 +25990,19 @@ function _openArtikelEditor(artikel){
 
 // ── Import uit Excel/CSV (Unit4-export) met kolom-mapping en preview ──
 function _openArtikelImport(){
-  var b = '';
-  b += '<p style="font-size:13px;color:var(--muted);margin-bottom:14px">Importeer artikelen uit een Excel- of CSV-bestand (bijv. een export uit Unit4). De eerste rij moet kolomkoppen bevatten.</p>';
-  b += '<label class="btn btn-ghost" style="cursor:pointer;width:100%;justify-content:center;padding:14px;border:1.5px dashed var(--border)">Bestand kiezen (.xlsx / .csv)<input type="file" id="imp-file" accept=".xlsx,.xls,.csv" style="display:none"></label>';
-  b += '<div id="imp-stap2" style="display:none;margin-top:16px"></div>';
-  var f = '<button class="btn btn-ghost" id="imp-cancel">Annuleren</button><button class="btn btn-primary" id="imp-doen" style="display:none">Importeren</button>';
-  openModal('Artikelen importeren', b, f);
+  var b = '<p class="lf-uitleg imp-uitleg">Importeer artikelen uit een Excel- of CSV-bestand, bijvoorbeeld een export uit Unit4. De eerste rij bevat de kolomkoppen. Bestaande artikelen worden op artikelcode herkend en bijgewerkt.</p>';
+  b += _impKies('imp-file', '.xlsx,.xls,.csv', 'Bestand kiezen', '.xlsx of .csv');
+  b += '<div id="imp-stap2" hidden></div><input type="hidden" id="imp-klaar" required>';
+  lfOpen('Artikelen importeren', b, 'Importeren', 'imp-doen');
 
   var _rijen = [];    // ruwe data (array of objects)
   var _kolommen = []; // kolomnamen uit het bestand
+  var _bestand = '';
 
-  document.getElementById('imp-cancel').addEventListener('click', closeModal);
   document.getElementById('imp-file').addEventListener('change', function(){
     var file = this.files && this.files[0]; if(!file) return;
     if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    _bestand = file.name;
     var rd = new FileReader();
     rd.onload = function(e){
       try {
@@ -25989,40 +26027,44 @@ function _openArtikelImport(){
     }
     return '';
   }
-  function _kolOpties(sel){
-    var o = '<option value="">— niet importeren —</option>';
-    _kolommen.forEach(function(k){ o += '<option value="'+esc(k)+'"'+(k===sel?' selected':'')+'>'+esc(k)+'</option>'; });
-    return o;
+  // Bestaande artikelcodes, om vooraf te tellen wat nieuw is en wat wordt bijgewerkt
+  function _bestaandeCodes(){
+    var best = {};
+    (APP.artikelenCache||[]).forEach(function(a){ var c=String(a.code||'').trim().toLowerCase(); if(c && !best[c]) best[c]=1; });
+    return best;
   }
 
   function _toonMapping(){
     var velden = [
-      { k:'code',        l:'Artikelcode *', match:['artikelnummer','artikelcode','code','nummer'] },
-      { k:'omschrijving',l:'Omschrijving *', match:['omschrijving','omschr','naam','artikel'] },
+      { k:'code',        l:'Artikelcode', v:true,  match:['artikelnummer','artikelcode','code','nummer'] },
+      { k:'omschrijving',l:'Omschrijving', v:true, match:['omschrijving','omschr','naam','artikel'] },
       { k:'ean',         l:'EAN-code',      match:['ean','barcode'] },
       { k:'stuksprijs',  l:'Stuksprijs',    match:['prijs','stuksprijs','bedrag','verkoop'] },
       { k:'btw',         l:'BTW-percentage',match:['btw'] },
       { k:'eenheid',     l:'Eenheid',       match:['eenheid','unit'] }
     ];
-    var h = '<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+_rijen.length+' rijen gevonden</div>';
-    h += '<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Koppel de kolommen uit je bestand aan de velden:</p>';
-    h += '<div style="display:flex;flex-direction:column;gap:8px">';
-    velden.forEach(function(v){
-      h += '<div style="display:flex;align-items:center;gap:10px"><span style="flex:0 0 130px;font-size:13px">'+v.l+'</span>';
-      h += '<select class="input imp-map" data-veld="'+v.k+'" style="flex:1">'+_kolOpties(_autoMatch(v.match))+'</select></div>';
-    });
-    h += '</div>';
-    h += '<div id="imp-preview" style="margin-top:14px"></div>';
-    document.getElementById('imp-stap2').style.display='';
-    document.getElementById('imp-stap2').innerHTML = h;
-    document.getElementById('imp-doen').style.display='';
+    var h = _impBestandKop('imp-file', _rijen.length, _bestand);
+    h += _zpGroep('Kolommen koppelen') + _zpKaart(velden.map(function(v){ return _impMapRij('imp-map', v.k, v.l, v.v, _impKolOpties(_kolommen, _autoMatch(v.match))); }).join(''));
+    h += '<div id="imp-preview"></div>';
+    var st = document.getElementById('imp-stap2'); st.hidden = false; st.innerHTML = h;
+    _lfBindKies(st);
 
     function _preview(){
       var map = {}; document.querySelectorAll('.imp-map').forEach(function(s){ map[s.dataset.veld]=s.value; });
+      var el2 = document.getElementById('imp-preview');
+      if(!map.code || !map.omschrijving){ el2.innerHTML = _zpMelding('actie', 'Nog niet klaar', 'Koppel minimaal Artikelcode en Omschrijving.'); _impKlaar(false, 'Importeren'); return; }
+      var best = _bestaandeCodes(), nw = 0, bij = 0, over = 0;
+      _rijen.forEach(function(r){
+        var c = String(r[map.code]==null?'':r[map.code]).trim().toLowerCase();
+        if(!c){ over++; return; }
+        if(best[c]) bij++; else nw++;
+      });
       var voorbeeld = _rijen.slice(0,3).map(function(r){
         return (map.code?r[map.code]:'?')+' — '+(map.omschrijving?r[map.omschrijving]:'?');
       });
-      document.getElementById('imp-preview').innerHTML = '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">Voorbeeld (eerste 3):</div><div style="font-size:12px;background:var(--surface2);border-radius:8px;padding:8px">'+voorbeeld.map(esc).join('<br>')+'</div>';
+      el2.innerHTML = _zpGroep('Wat er gebeurt') + _zpKaart(_impTelRij(_ZP_NIEUW, 'Nieuw', nw, 'var(--accent-t)') + _impTelRij(_ZP_BIJ, 'Bestaand, wordt bijgewerkt', bij, 'var(--green-t)') + (over ? _impTelRij(_ZP_OVER, 'Overgeslagen (geen artikelcode)', over, 'var(--orange-t)') : ''))
+        + _impVoorbeeld(voorbeeld);
+      _impKlaar(nw+bij > 0, 'Importeren ('+(nw+bij)+')');
     }
     document.querySelectorAll('.imp-map').forEach(function(s){ s.addEventListener('change', _preview); });
     _preview();
@@ -26047,10 +26089,7 @@ function _openArtikelImport(){
     }).filter(function(x){ return x.code; });
     if(!nieuwe.length){ toast('Geen geldige rijen (artikelcode ontbreekt)','warning'); return; }
     // Vooraf tellen wat nieuw is en wat wordt bijgewerkt, zodat de bevestiging klopt.
-    var _best = {};
-    (APP.artikelenCache||[]).forEach(function(a){
-      var c=String(a.code||'').trim().toLowerCase(); if(c && !_best[c]) _best[c]=1;
-    });
+    var _best = _bestaandeCodes();
     var _nAant=0, _bAant=0;
     nieuwe.forEach(function(x){
       if(_best[String(x.code).trim().toLowerCase()]) _bAant++; else _nAant++;
@@ -26059,9 +26098,9 @@ function _openArtikelImport(){
     if(_nAant) _tekst.push(_nAant+' nieuw');
     if(_bAant) _tekst.push(_bAant+' bijgewerkt');
     bevestigActie('Importeren',
-      nieuwe.length+' regels verwerken: '+_tekst.join(' en ')+'. Bestaande artikelen worden op artikelcode herkend en bijgewerkt \u2014 notities, foto en gekoppelde documenten blijven behouden.',
+      nieuwe.length+' regels verwerken: '+_tekst.join(' en ')+'. Bestaande artikelen worden op artikelcode herkend en bijgewerkt — notities, foto en gekoppelde documenten blijven behouden.',
       function(){
-        toast('Importeren\u2026','info');
+        toast('Importeren…','info');
         fsArtikelenBatchImport(nieuwe).then(function(res){
           return laadArtikelenCache(true).then(function(){ return res; });
         }).then(function(res){
@@ -28356,34 +28395,32 @@ function openPdfImportModal(pompId) {
   var pomp = (APP.wp_pompen||[]).find(function(p){return String(p.id)===String(pompId);});
   if(!pomp) return;
 
-  var b = '<div style="font-size:13px;color:var(--muted);margin-bottom:14px">Upload een PDF onderdelenlijst (bijv. van Homa). De onderdelen worden automatisch herkend via tekstextractie. Controleer het resultaat voor je opslaat.</div>';
+  var b = '<p class="lf-uitleg imp-uitleg">Kies een pdf-onderdelenlijst (bijv. van Homa). De onderdelen worden automatisch herkend via tekstextractie. Controleer het resultaat voor je opslaat.</p>';
   // Knop: bestaande onderdelenlijst (van pomp of artikel) analyseren zonder opnieuw te uploaden
   var _bestaandDoc = _prVindOnderdelenlijstDoc(pomp);
   if(_bestaandDoc){
-    b += '<div style="background:rgba(74,108,247,.06);border:1px solid rgba(74,108,247,.2);border-radius:10px;padding:12px 14px;margin-bottom:14px">';
-    b += '<div style="font-size:12px;font-weight:600;margin-bottom:2px">Onderdelenlijst gevonden</div>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">'+esc(_bestaandDoc.naam||_bestaandDoc.bestandsnaam||'onderdelenlijst.pdf')+(_bestaandDoc._bron?(' · '+_bestaandDoc._bron):'')+'</div>';
-    b += '<button class="btn btn-primary btn-sm" id="pr-pdf-bestaand-btn">'+ICO.search+' Analyseer deze lijst</button>';
-    b += '</div>';
-    b += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">Of upload een afwijkende lijst:</div>';
+    b += _zpMelding('info', 'Onderdelenlijst gevonden',
+      esc(_bestaandDoc.naam||_bestaandDoc.bestandsnaam||'onderdelenlijst.pdf')+(_bestaandDoc._bron?(' · '+esc(_bestaandDoc._bron)):'')
+      + '<button type="button" class="lf-link" id="pr-pdf-bestaand-btn">Analyseer deze lijst</button>');
+    b += '<p class="lf-uitleg imp-uitleg">Of kies een afwijkende lijst:</p>';
   }
-  b += '<div id="pr-pdf-drop-zone" style="border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--surface2);margin-bottom:12px" ';
-  b += 'ondragover="event.preventDefault();this.style.borderColor=\'var(--accent)\';this.style.background=\'rgba(74,108,247,.08)\'" ';
-  b += 'ondragleave="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--surface2)\'" ';
-  b += 'ondrop="event.preventDefault();this.style.borderColor=\'var(--border)\';this.style.background=\'var(--surface2)\';_handleDrop(\'pr-pdf-file\', event)">';
-  b += '<input type="file" id="pr-pdf-file" accept=".pdf" style="display:none">';
-  b += '<div style="color:var(--muted);font-size:13px">'+ICO.pdf+'<br><label for="pr-pdf-file" style="color:var(--accent);cursor:pointer;text-decoration:underline">Klik om PDF te kiezen</label> of sleep hierheen</div>';
-  b += '<div id="pr-pdf-file-label" style="font-size:12px;color:var(--accent);margin-top:8px;font-weight:500"></div>';
-  b += '</div>';
-  b += '<div id="pr-pdf-status" style="display:none;padding:10px;background:var(--surface2);border-radius:8px;font-size:12px;margin-bottom:12px"></div>';
+  // Kiezen of slepen; de drop gaat via de bestaande _handleDrop-hulp
+  b += '<input type="file" id="pr-pdf-file" accept=".pdf" hidden>';
+  b += '<label class="imp-kies" for="pr-pdf-file" id="pr-pdf-drop-zone" '
+    + 'ondragover="event.preventDefault();this.classList.add(\'sleep\')" '
+    + 'ondragleave="this.classList.remove(\'sleep\')" '
+    + 'ondrop="event.preventDefault();this.classList.remove(\'sleep\');_handleDrop(\'pr-pdf-file\', event)">'
+    + '<span class="imp-kies-ic">'+_ZP_DOC.replace('width="18" height="18"', 'width="22" height="22"')+'</span>'
+    + '<span><b>Pdf kiezen</b><small id="pr-pdf-file-label">of sleep het bestand hierheen</small></span></label>';
+  b += '<div id="pr-pdf-status" class="zp-memo imp-status" hidden></div>';
   b += '<div id="pr-pdf-preview" style="display:none"></div>';
 
-  var f = '<button class="btn btn-ghost" id="pr-pdf-cancel">Annuleren</button>';
-  f += '<button class="btn btn-ghost btn-sm" id="pr-pdf-extract-btn">'+ICO.search+' Analyseer PDF</button>';
-  f += '<button class="btn btn-primary" id="pr-pdf-save-btn" style="display:none">Opslaan als lijst</button>';
-  openModal('Onderdelenlijst importeren uit PDF', b, f);
+  lfOpen('Onderdelenlijst uit pdf', b, 'Opslaan als lijst', 'pr-pdf-save-btn');
+  document.getElementById('pr-pdf-save-btn').style.display = 'none';
+  document.getElementById('modal-footer').insertAdjacentHTML('afterbegin', '<button type="button" class="btn lf-knop lf-knop-tweede" id="pr-pdf-extract-btn">'+_LF_ZOEK+' Analyseer pdf</button>');
 
-  document.getElementById('pr-pdf-cancel').addEventListener('click', closeModal);
+  // Status tonen in de melding (de analyse-hulp schrijft er zelf ook in)
+  var _status = function(html){ var s = document.getElementById('pr-pdf-status'); s.hidden = false; s.style.display = ''; s.innerHTML = '<div class="zp-memo-in">'+html+'</div>'; };
 
   // Bestand kiezen label updaten
   var fileEl2 = document.getElementById('pr-pdf-file');
@@ -28407,17 +28444,17 @@ function openPdfImportModal(pompId) {
     var saveBtn = document.getElementById('pr-pdf-save-btn');
     var doc = _prVindOnderdelenlijstDoc(pomp);
     if(!doc || !doc.url){ toast('Geen onderdelenlijst-document gevonden','error'); return; }
-    statusEl.style.display='block'; statusEl.innerHTML='<div style="color:var(--accent)">⏳ Document ophalen...</div>';
+    _status('Document ophalen…');
     previewEl.style.display='none'; saveBtn.style.display='none';
     this.disabled=true;
     try {
       var resp = await fetch(doc.url);
       if(!resp.ok) throw new Error('Ophalen mislukt (status '+resp.status+')');
       var buf = await resp.arrayBuffer();
-      statusEl.innerHTML='<div style="color:var(--accent)">⏳ PDF wordt geanalyseerd...</div>';
+      _status('Pdf wordt geanalyseerd…');
       await _prAnalyseerPdfBuffer(buf, statusEl, previewEl, saveBtn, _zetResult);
     } catch(e){
-      statusEl.innerHTML='<div style="color:var(--red)">✗ Kon document niet analyseren: '+esc(e.message)+'</div><div style="font-size:11px;color:var(--muted);margin-top:6px">Tip: als dit een CORS-fout is, upload de lijst dan handmatig hieronder.</div>';
+      _status('<span class="zp-fout">Kon het document niet analyseren: '+esc(e.message)+'</span><small>Tip: is dit een CORS-fout, kies de lijst dan hierboven handmatig.</small>');
     }
     this.disabled=false;
   });
@@ -28427,28 +28464,27 @@ function openPdfImportModal(pompId) {
     var previewEl = document.getElementById('pr-pdf-preview');
     var saveBtn = document.getElementById('pr-pdf-save-btn');
     var files = _getDropFiles('pr-pdf-file');
-    if(!files||!files[0]) { toast('Selecteer eerst een PDF bestand','error'); return; }
+    if(!files||!files[0]) { toast('Kies eerst een pdf-bestand','error'); return; }
     var file = files[0];
-    if(file.type !== 'application/pdf') { toast('Alleen PDF bestanden toegestaan','error'); return; }
-    statusEl.style.display='block'; statusEl.innerHTML='<div style="color:var(--accent)">⏳ PDF wordt geanalyseerd...</div>';
+    if(file.type !== 'application/pdf') { toast('Alleen pdf-bestanden toegestaan','error'); return; }
+    _status('Pdf wordt geanalyseerd…');
     previewEl.style.display='none'; saveBtn.style.display='none';
-    this.disabled=true; this.textContent='Bezig...';
+    this.disabled=true; this.textContent='Bezig…';
     var arrayBuffer = await file.arrayBuffer();
     await _prAnalyseerPdfBuffer(arrayBuffer, statusEl, previewEl, saveBtn, _zetResult);
-    this.disabled=false; this.innerHTML=ICO.search+' Analyseer PDF';
+    this.disabled=false; this.innerHTML=_LF_ZOEK+' Analyseer pdf';
   });
 
   document.getElementById('pr-pdf-save-btn').addEventListener('click', function(){
     if(!_geextraheerdeOnderdelen.length) return;
     var heeftBestaand = pomp.onderdelen && Object.keys(pomp.onderdelen).length;
     if(heeftBestaand){
-      // Keuze: vervangen of toevoegen (eigen modal met drie knoppen)
-      var kb = '<div style="font-size:13px;color:var(--muted);line-height:1.6">Er is al een onderdelenlijst ('+Object.keys(pomp.onderdelen).length+' onderdelen). Wat wil je doen met de '+_geextraheerdeOnderdelen.length+' nieuw herkende onderdelen?</div>';
-      var kf = '<button class="btn btn-ghost" id="pr-ond-annuleer">Annuleren</button>';
-      kf += '<button class="btn btn-ghost" id="pr-ond-voegtoe">Toevoegen</button>';
-      kf += '<button class="btn btn-primary" id="pr-ond-vervang" style="background:var(--orange);border-color:var(--orange);color:#1a1200">Vervangen</button>';
-      openModal('Onderdelen opslaan', kb, kf);
-      document.getElementById('pr-ond-annuleer').addEventListener('click', closeModal);
+      // Keuze: vervangen of toevoegen; annuleren met het kruisje
+      var kb = '<p class="lf-uitleg imp-uitleg">Er is al een onderdelenlijst ('+Object.keys(pomp.onderdelen).length+' onderdelen). Wat wil je doen met de '+_geextraheerdeOnderdelen.length+' nieuw herkende onderdelen?</p>'
+        + _zpKaart(lfRij(_ZP_NIEUW, 'Toevoegen', '', {sub:'De bestaande onderdelen blijven staan'}) + lfRij(_ZP_BIJ, 'Vervangen', '', {sub:'De bestaande lijst wordt gewist'}));
+      lfOpen('Onderdelen opslaan', kb, 'Vervangen', 'pr-ond-vervang');
+      document.getElementById('pr-ond-vervang').classList.add('imp-knop-oranje');
+      _lfTweedeKnop('pr-ond-voegtoe', 'Toevoegen');
       document.getElementById('pr-ond-voegtoe').addEventListener('click', function(){ _prOnderdelenOpslaan(pompId, _geextraheerdeOnderdelen, 'voegtoe'); });
       document.getElementById('pr-ond-vervang').addEventListener('click', function(){ _prOnderdelenOpslaan(pompId, _geextraheerdeOnderdelen, 'vervang'); });
     } else {
