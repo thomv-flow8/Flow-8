@@ -1972,6 +1972,8 @@ tr.sleept td{background:rgba(74,108,247,.16)!important}
 .wbl-pagina{padding:16px;max-width:792px}
 .wbl-balk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .wbl-balk #wb-zoek{flex:1 1 160px;min-width:0}
+/* Zoek- en keuzevelden in de werkbalk staan op de pagina-achtergrond: wit, zoals de kaarten op de pagina */
+.werkbalk .input,.wbl-balk #wb-zoek{background:var(--surface)}
 .wbl-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
 .wbl-filters:empty{display:none}
 .wbl-chip{min-height:32px;padding:0 12px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
@@ -15312,7 +15314,7 @@ function renderVerlof(){
           var _mutCount = getMutaties(m.id).length;
           h2 += '<div style="margin-bottom:10px;border:1px solid var(--border);border-radius:10px;overflow:hidden">';
           // Accordion-kop (klikbaar)
-          h2 += '<div class="vl-saldo-kop" data-saldo-toggle="'+m.id+'" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;background:var(--surface2);user-select:none">';
+          h2 += '<div class="vl-saldo-kop" data-saldo-toggle="'+m.id+'" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;background:var(--surface);user-select:none">';
           h2 += '<svg class="vl-chevron" style="width:16px;height:16px;flex-shrink:0;transition:transform .2s;transform:rotate('+(_open?'90':'0')+'deg);color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18l6-6-6-6"/></svg>';
           h2 += '<div class="avatar" style="width:32px;height:32px;font-size:11px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
           h2 += '<div style="font-weight:700">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
@@ -27006,7 +27008,7 @@ function _renderPompOverzichtAccordion(pomp, klantNm, kanSchrijven, kanDocUpload
   function prAccSectie(key, titel, badge, inhoud) {
     var open = _prAccordion[key];
     h += '<div style="border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden">';
-    h += '<div class="pr-acc-hdr wb-acc-hdr" data-sectie="'+key+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;background:var(--surface2);user-select:none">';
+    h += '<div class="pr-acc-hdr wb-acc-hdr" data-sectie="'+key+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;background:var(--surface);user-select:none">';
     h += '<div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;font-size:14px">'+titel+'</span>';
     if(badge) h += badge;
     h += '</div></div>';
@@ -31118,7 +31120,7 @@ function renderKlantmails() {
   // Stats
   h += '<div class="km-pils" style="display:flex;gap:8px;flex-wrap:wrap">';
   var _af = function(f){ return _mailStatusFilter===f ? ';outline:2px solid currentColor;outline-offset:1px' : ''; };
-  h += '<span class="km-pil" data-filter="" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer'+_af('')+'"><strong>'+totaal+'</strong> opdrachten</span>';
+  h += '<span class="km-pil" data-filter="" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer'+_af('')+'"><strong>'+totaal+'</strong> opdrachten</span>';
   if (nogTeDoen)  h += '<span class="km-pil tag tag-orange" data-filter="teversturen" style="padding:5px 12px;cursor:pointer'+_af('teversturen')+'"><strong>'+nogTeDoen+'</strong> te versturen</span>';
   if (alVerzonden)h += '<span class="km-pil tag tag-green" data-filter="verstuurd" style="padding:5px 12px;cursor:pointer'+_af('verstuurd')+'"><strong>'+alVerzonden+'</strong> verstuurd</span>';
   if (metEmail < totaal) h += '<span class="km-pil tag tag-muted" data-filter="zondermail" style="padding:5px 12px;cursor:pointer'+_af('zondermail')+'">'+(totaal-metEmail)+' zonder e-mail</span>';
@@ -34222,7 +34224,7 @@ function renderInstRollen(el) {
   rolNamen.forEach(function(r){
     var rol = rollen[r]||{};
     var kl  = rol.kleur||'#6b7694';
-    h += '<div style="display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 8px 4px 10px">';
+    h += '<div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 8px 4px 10px">';
     h += '<div style="width:10px;height:10px;border-radius:50%;background:'+kl+';flex-shrink:0"></div>';
     h += '<span style="font-size:13px;font-weight:600">'+esc(r)+'</span>';
     if(r!=='admin') {
@@ -36433,7 +36435,7 @@ function _woRenderWerkdocs(wrap, kanSchrijven){
         kanSchrijven ? 'Voeg hierboven het eerste document toe. Iedereen met toegang tot werkorders kan het daarna raadplegen.' : 'Er zijn nog geen documenten toegevoegd.');
     } else {
       docs.forEach(function(d){
-        h += '<div class="wo-wd-rij" data-id="'+esc(d.id)+'" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;cursor:pointer">';
+        h += '<div class="wo-wd-rij" data-id="'+esc(d.id)+'" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer">';
         h += '<span style="flex-shrink:0;color:var(--accent)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+(typeof _wbDocIcoon==='function'?_wbDocIcoon(d.mime,d.naam):'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>')+'</svg></span>';
         h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.naam||'bestand')+'</div>';
         if(d.grootte) h += '<div style="font-size:11px;color:var(--muted)">'+esc(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.grootte):(Math.round(d.grootte/1024)+' KB'))+'</div>';
