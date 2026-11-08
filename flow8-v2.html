@@ -712,6 +712,11 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .obj-knoppen{display:flex;gap:8px;padding:0 0 12px}
 .obj-notitie{display:block}
 .obj-memo-lees{padding:12px 0;margin:0}
+/* Op de pagina-achtergrond: witte kaarten met rand, zoals de andere pagina's (in panelen blijven ze licht grijs) */
+.obj-pagina :is(.lf-kaart,.zp-klap){background:var(--surface);border:1px solid var(--border)}
+.obj-pagina :is(.lf-kaart,.zp-klap) .lf-ic{background:var(--surface2)}
+.obj-pagina .lf-kaart .lf-ic:empty{background:none}
+.obj-pagina .lf-notitie.obj-notitie{background:var(--surface)}
 @media(max-width:768px){.obj-twee > .zp-klap + .zp-klap{margin-top:8px}}
 /* Checklists in de werkbon */
 .cl-kaart + .cl-kaart{margin-top:8px}
