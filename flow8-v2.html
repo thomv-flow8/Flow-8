@@ -1368,6 +1368,12 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .plm-onder>span[title]{float:none;margin:0}
 .plm-typ{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
 .plm-typ i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.leeg-reeks{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;border:1px dashed var(--border);border-radius:var(--radius-lg);padding:8px 8px 8px 14px;color:var(--muted);font-size:13px;background:var(--surface)}
+.leeg-reeks b{color:var(--text);font-weight:600}
+.leeg-reeks-dagen{display:flex;gap:6px;flex-wrap:wrap}
+/* In de brede planningtabel blijft de regel binnen het zichtbare deel (de tabel kan breder zijn dan het scherm) */
+.plan-leeg-reeks .leeg-reeks{position:sticky;left:6px;max-width:calc(100vw - 300px)}
+.plm-inhoud .leeg-reeks{margin:10px 0}
 .plm-spoed{font-size:12px;font-weight:700;color:var(--red-t);display:inline-flex;align-items:center;gap:3px}
 .spoed-label{display:inline-flex;align-items:center;gap:3px;background:var(--red-knop);color:#fff;font-size:11px;font-weight:700;line-height:1;padding:3px 7px 3px 5px;border-radius:var(--radius-pill);white-space:nowrap;vertical-align:middle}
 .spoed-label svg{width:11px;height:11px;flex:none}
@@ -18816,6 +18822,7 @@ function _planHertekenInhoud(){
   });
   pc.innerHTML = _planInhoudHtml(monteurs);
   bindPlanningEvents();
+  _planNaarVandaag(pc);
 }
 
 function renderPlanning() {
@@ -18894,7 +18901,7 @@ function renderPlanning() {
   });
   el.querySelector('#plan-prev').addEventListener('click', function(){ _planDatum = verschuifDatum(_planDatum, _planView, -1); _planPage=1; renderPlanning(); });
   el.querySelector('#plan-next').addEventListener('click', function(){ _planDatum = verschuifDatum(_planDatum, _planView, 1); _planPage=1; renderPlanning(); });
-  el.querySelector('#plan-today').addEventListener('click', function(){ _planDatum = vandaagISO(); _planPage=1; renderPlanning(); });
+  el.querySelector('#plan-today').addEventListener('click', function(){ _planDatum = vandaagISO(); _planPage=1; _planVandaagSleutel = ''; renderPlanning(); });
   var montFilter = el.querySelector('#plan-mont-filter');
   if (montFilter) montFilter.addEventListener('change', function(e){ _planFilter = e.target.value; _planPage=1; renderPlanning(); });
   var addBtn = el.querySelector('#plan-add-btn'); if(addBtn) addBtn.addEventListener('click', function(){ openOpdrachtModal(null); });
@@ -18926,6 +18933,7 @@ function renderPlanning() {
 
   // Post-render events
   bindPlanningEvents();
+  _planNaarVandaag(pc);
   // Alleen de eerste tien en daarna uitschieters loggen: bij een renderlus verdringen
   // deze regels anders alle andere meldingen (het log bewaart er 300).
   var _msPlan = _tik() - _tPlan;
@@ -19308,6 +19316,53 @@ function _plmRij(o){
   h += '<span class="plm-k">'+(spoed ? _spoedLabel()+' ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+'</span>';
   return h + _plmAvatars(o) + '</div>';
 }
+// Reeksen van twee of meer lege dagen achter elkaar (niet vandaag, geen blokkadedag) worden één
+// regel: "ma 2 – vr 6 nov · niets gepland", met per dag een knopje om daar een opdracht te plannen.
+// Geeft { startdag: [dagen], andere dag uit de reeks: false }.
+function _planLeegReeksen(dagen, heeftWerk){
+  var nu = vandaagISO(), r = {}, run = [];
+  var sluit = function(){ if(run.length >= 2){ r[run[0]] = run.slice(); run.slice(1).forEach(function(d){ r[d] = false; }); } run = []; };
+  dagen.forEach(function(d){
+    var leeg = d !== '_geen' && !heeftWerk(d) && d !== nu && !(APP.blokkadeDagen && APP.blokkadeDagen[d]);
+    if(leeg) run.push(d); else sluit();
+  });
+  sluit();
+  return r;
+}
+function _planLeegReeksHtml(dagen, monteurId){
+  var k = ['zo','ma','di','wo','do','vr','za'], mn = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  var a = new Date(dagen[0]+'T00:00:00'), b = new Date(dagen[dagen.length-1]+'T00:00:00');
+  var tekst = k[a.getDay()]+' '+a.getDate()+(a.getMonth() !== b.getMonth() ? ' '+mn[a.getMonth()] : '')+' – '+k[b.getDay()]+' '+b.getDate()+' '+mn[b.getMonth()];
+  var h = '<div class="leeg-reeks"><span><b>'+esc(tekst)+'</b> · niets gepland</span>';
+  if(magSchrijven('planning')) h += '<span class="leeg-reeks-dagen">'+dagen.map(function(d){
+    var x = new Date(d+'T00:00:00');
+    return '<button type="button" class="btn btn-ghost btn-sm btn-rij plan-add-dag" data-datum="'+esc(d)+'" data-monteur="'+esc(monteurId || '')+'" aria-label="Opdracht plannen op '+esc(_periodeDagLabel(d))+'">+ '+k[x.getDay()]+' '+x.getDate()+'</button>';
+  }).join('')+'</span>';
+  return h + '</div>';
+}
+// Lijst: bij een nieuwe periode (of de knop Vandaag) naar vandaag scrollen, niet bij elk hertekenen.
+var _planVandaagSleutel = '', _planVandaagTimer = null, _planVandaagTot = 0;
+function _planNaarVandaag(pc){
+  if(_planView !== 'lijst'){ _planVandaagSleutel = ''; return; }
+  var sl = _planPeriode+'|'+_planDatum.slice(0, 7)+'|'+(window.innerWidth <= 768 ? 'm' : 'd');
+  // Zelfde periode: niets doen, behalve vlak na het scrollen (dan tekent de telefoonversie soms nog na)
+  if(sl === _planVandaagSleutel && !_planVandaagTimer && Date.now() > _planVandaagTot) return;
+  _planVandaagSleutel = sl;
+  // Pas scrollen als het tekenen klaar is: bij het openen tekent de planning soms twee keer, en een
+  // tweede tekenronde zet de scrollpositie terug. Elke aanroep schuift het moment dus op.
+  clearTimeout(_planVandaagTimer);
+  _planVandaagTimer = setTimeout(function(){
+    _planVandaagTimer = null;
+    var pcNu = document.getElementById('plan-content'), sc = document.getElementById('content');
+    var doelEl = pcNu && pcNu.querySelector('[data-vandaag], #plm-vandaag');
+    if(!doelEl || !sc) return;                                   // vandaag valt niet in deze periode
+    if(!sc.clientHeight || !doelEl.getClientRects().length){ _planVandaagSleutel = ''; return; }   // nog niet zichtbaar
+    // Eerst naar boven: een plakkende dagkop (telefoon) geeft tijdens het scrollen zijn plakpositie door
+    sc.scrollTop = 0;
+    var top = doelEl.getBoundingClientRect().top - sc.getBoundingClientRect().top - 12;
+    if(top > 40){ sc.scrollTop = top; _planVandaagTot = Date.now() + 1500; }
+  }, 120);
+}
 function _plmLeeg(datum, monteurId){
   var blok = APP.blokkadeDagen && APP.blokkadeDagen[datum];
   var kan = magSchrijven('planning') && !blok && datum !== '_geen';
@@ -19448,7 +19503,10 @@ function renderPlanLijstMobiel(monteurs){
   if(!dagen.length) return h + legeStaat('<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>', 'Niets gevonden', 'Geen opdrachten die passen bij dit filter in deze periode.');
 
   var naamVan = function(id){ var m = getMed(id); return m ? (m.voornaam+' '+m.achternaam) : ''; };
+  var _leegReeks = _planLeegReeksen(dagen, function(d){ return !!groepen[d]; });
   dagen.forEach(function(datum){
+    if(_leegReeks[datum] === false) return;
+    if(_leegReeks[datum]){ h += _planLeegReeksHtml(_leegReeks[datum], _planFilter !== 'alle' ? _planFilter : ''); return; }
     var dagOps = groepen[datum] || [];
     h += _plmDagkop(datum, dagOps.length, datum === vandaagISO() ? 'plm-vandaag' : '');
     if(!dagOps.length){ h += _plmLeeg(datum, _planFilter !== 'alle' ? _planFilter : ''); return; }
@@ -19752,13 +19810,16 @@ function renderPlanLijst(monteurs) {
 
   var kanSchrijven = magSchrijven('planning');
 
+  var _leegReeks = _planLeegReeksen(alleDagen, function(d){ return !!dagGroepen[d]; });
   var _dagTeller = 0;
   alleDagen.forEach(function(datum) {
+    if(_leegReeks[datum] === false) return;   // valt in een samengevoegde reeks
     // Extra witruimte tussen dagblokken (niet vóór de eerste dag)
     if(_dagTeller > 0) {
       h += '<tr class="dag-spacer"><td colspan="99" style="height:18px;padding:0;border:none;background:transparent"></td></tr>';
     }
     _dagTeller++;
+    if(_leegReeks[datum]){ h += '<tr class="plan-leeg-reeks"><td colspan="99" style="padding:0 6px">'+_planLeegReeksHtml(_leegReeks[datum], _planFilter !== 'alle' ? _planFilter : '')+'</td></tr>'; return; }
     var d         = datum !== '_geen' ? new Date(datum+'T00:00:00') : null;
     var isVandaag = datum === nu;
     var isVerleden= d && datum < nu;
@@ -19772,7 +19833,7 @@ function renderPlanLijst(monteurs) {
     // Datum rij
     var blokkadeLijst = APP.blokkadeDagen && APP.blokkadeDagen[datum];
     var _dhAccent = blokkadeLijst?'var(--red)':isVandaag?'var(--accent)':isVerleden?'var(--muted)':'#5b6b8c';
-    h += '<tr>';
+    h += '<tr'+(isVandaag ? ' data-vandaag="1"' : '')+'>';
     h += '<td colspan="99" style="padding:10px 6px 4px">';
     // Dagkop met een eigen datumvak: het dagnummer groot links, de rest ernaast.
     // Vandaag krijgt een gevuld blauw vak, een blokkadedag rood, het verleden vervaagt.
