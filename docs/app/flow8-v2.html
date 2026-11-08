@@ -857,6 +857,7 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .ist-persoon small.ist-fout{color:var(--red-t)}
 .ist-persoon .lf-ic{width:28px;height:28px;border-radius:50%}
 .ist-voet.ist-voet-twee{gap:8px}
+.ist-kolom{display:grid;align-content:start;min-width:0}
 .lf .lf-notitie.ist-mailtekst{resize:vertical;overflow:auto;min-height:88px}
 .ist-kleurkies{width:44px;height:32px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;padding:2px}
 .ist-pdfgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,300px);gap:28px;align-items:start}
@@ -33759,6 +33760,8 @@ function _istNavRij(cls, data, ico, label, sub, rechts){
 // Gekleurde tegel met een code of icoon (contracttype, opdrachttype)
 function _istKleurTegel(inhoud, kl){ return '<span class="lf-ic ist-codetegel" aria-hidden="true" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+'">'+inhoud+'</span>'; }
 function _istWisKnop(cls, id, wat){ return '<button type="button" class="btn btn-ghost btn-wis btn-icoon '+cls+'" data-id="'+esc(id)+'" aria-label="'+wat+' verwijderen" title="Verwijderen">'+ICO.trash+'</button>'; }
+var _ZP_POSTCODE = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>';
+var _ZP_PLAATS = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V10l5-3v14M10 21V4l9 4v13M14 10h1M14 14h1M14 18h1"/></svg>';
 var _ZP_PERSOON = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
 var _ZP_SCHILD = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
 var _ZP_SLOT = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>';
@@ -33813,9 +33816,9 @@ function renderInstBedrijf(el) {
     + lfRij(_LF_TEL, 'Telefoon', _istTekst('bg-tel','tel', bg.telefoon), {voor:'bg-tel'})
     + lfRij(ICO.locatie, 'Adres', _istTekst('bg-adres','text', bg.adres), {voor:'bg-adres'})
     + lfRij(_LF_MAIL, 'E-mail service', _istTekst('bg-email','email', bg.email), {voor:'bg-email'})
-    + lfRij('', 'Postcode', _istTekst('bg-pc','text', bg.postcode), {voor:'bg-pc'})
+    + lfRij(_ZP_POSTCODE, 'Postcode', _istTekst('bg-pc','text', bg.postcode), {voor:'bg-pc'})
     + lfRij(_ZP_WEB, 'Website', _istTekst('bg-web','url', bg.website), {voor:'bg-web'})
-    + lfRij('', 'Plaats', _istTekst('bg-pl','text', bg.plaats), {voor:'bg-pl'})
+    + lfRij(_ZP_PLAATS, 'Plaats', _istTekst('bg-pl','text', bg.plaats), {voor:'bg-pl'})
     + lfRij(_ZP_DOC, 'KvK-nummer', _istTekst('bg-kvk','text', bg.kvk), {voor:'bg-kvk'})
     + lfRij(_ZP_DOC, 'BTW-nummer', _istTekst('bg-btw','text', bg.btw), {voor:'bg-btw'})
     + '</div>'
@@ -36266,9 +36269,9 @@ function renderInstWerkbonnen(el) {
   var h = '<div class="ist-wrap ist-breed lf">';
   h += _istAccEen('wbi-uitvoering-save', _ZP_SCHILD, 'Uitvoering', 'Uitvoerende rollen, reistijd en extern nummer',
     _istKaart('Uitvoerende rollen', 'Te kiezen bij het aanmaken van een werkbon en bij het registreren van uren. Kantoorrollen wil je hier meestal niet in.', _istRolSchakels('wbi-urenrol-cb', wbi.urenRollen), 'wbi-urenrol-save')
-    + _istKaart('Reistijd', '', _istSchakelRij(_lfIco(_ZP_ROUTE), 'Reistijd apart bijhouden', 'De monteur kiest bij het starten van de timer tussen werktijd en reistijd; reistijd komt als aparte regel op de werkbon.', 'id="wbi-reistijd"', reistijdAan()), 'wbi-reistijd-save')
+    + '<div class="ist-kolom">'+_istKaart('Reistijd', '', _istSchakelRij(_lfIco(_ZP_ROUTE), 'Reistijd apart bijhouden', 'De monteur kiest bij het starten van de timer tussen werktijd en reistijd; reistijd komt als aparte regel op de werkbon.', 'id="wbi-reistijd"', reistijdAan()), 'wbi-reistijd-save')
     + _istKaart('Extern nummer', 'Naam van het veld voor het nummer uit je eigen systeem, bijvoorbeeld het ordernummer uit je ERP. Het veld verschijnt bij een opdracht, op de werkbon en op de pdf.',
-        lfRij(_ZP_LABEL, 'Veldnaam', '<input class="lf-tekst" id="wbi-externnr-lbl" value="'+esc(externNrLabel())+'" maxlength="30" placeholder="Extern nummer">', {voor:'wbi-externnr-lbl'}), 'wbi-externnr-save'));
+        lfRij(_ZP_LABEL, 'Veldnaam', '<input class="lf-tekst" id="wbi-externnr-lbl" value="'+esc(externNrLabel())+'" maxlength="30" placeholder="Extern nummer">', {voor:'wbi-externnr-lbl'}), 'wbi-externnr-save')+'</div>');
   h += _istAcc(_ZP_OOG, 'Weergave', 'Prijzen op de werkbon',
     _istSchakelRij(_lfIco('<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'), 'Prijzen tonen op werkbon', 'Standaard voor nieuwe werkbonnen; de monteur kan het per werkbon aan- of uitzetten. Wordt direct opgeslagen.', 'id="wbi-prijzen"', !(wbi.prijzenTonen===false)));
   h += _istAcc(_ZP_DOC, 'PDF-opmaak', 'Kleuren, kopregel, logo, secties en voettekst', _pdfWerkbonUIhtml());
