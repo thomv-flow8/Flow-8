@@ -837,6 +837,24 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .ist-acc .ist-kaart{background:none;border:0;border-radius:0;padding:14px 0 0}
 .ist-intro{margin:0 0 2px;font-size:13px;color:var(--muted)}
 .lf-rij.ist-geen-ic{grid-template-columns:minmax(0,1fr) auto}
+.ist-navrij{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.ist-navrij:active{background:var(--surface2)}
+.ist-navrij:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--radius)}
+.ist-navrij .lf-w{gap:4px}
+.lf-ic.ist-codetegel{font:700 11.5px 'Space Mono',monospace;letter-spacing:-.02em}
+.ist-codetegel svg{width:18px;height:18px}
+.zp-tag.ist-tag-aanv{margin-left:6px;background:rgba(245,158,11,.14);color:var(--orange-t);border-color:rgba(245,158,11,.32);vertical-align:1px}
+.ist-mono{font-family:'Space Mono',monospace;font-size:13px}
+.btn.ist-klein{height:34px;min-height:34px;padding:0 14px;font-size:13px;border-radius:var(--radius-pill)}
+.ist-exp-knoppen{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+.ist-exp-knoppen .ist-knop{margin-left:auto;display:inline-flex;align-items:center;gap:6px}
+.ist-exp-knoppen .ist-knop svg{width:16px;height:16px}
+.ist-gb table{min-width:560px}
+.ist-gb td:first-child{min-width:230px}
+.ist-persoon small.ist-let{color:var(--orange-t)}
+.ist-persoon small.ist-fout{color:var(--red-t)}
+.ist-persoon .lf-ic{width:28px;height:28px;border-radius:50%}
+@media(max-width:768px){.ist-gb.rap-kaarten tr{grid-template-columns:minmax(0,1fr) auto auto;align-items:end}}
 .ist-acc .inst-acc-body > .lf-rij:last-child{border-bottom:0}
 .ist-raster{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px;align-items:start}
 .ist-schakel{cursor:pointer}
@@ -33670,6 +33688,20 @@ var _ZP_GROEP = '<svg width="18" height="18" fill="none" stroke="currentColor" s
 var _ZP_ROUTE = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M12 19h4.5a3.5 3.5 0 000-7h-9a3.5 3.5 0 010-7H12"/></svg>';
 var _ZP_SCHUIF = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 4 7l4 4M4 7h16M16 21l4-4-4-4M20 17H4"/></svg>';
 var _ZP_BLOK = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9.5 14.5l5 5M14.5 14.5l-5 5"/></svg>';
+// Klikbare regel in een lijst (opent het bewerkvenster); rechts eventueel knoppen en een pijltje.
+// Enter en spatie werken via de algemene toetsafhandeling voor [role="button"].
+function _istNavRij(cls, data, ico, label, sub, rechts){
+  return '<div class="lf-rij ist-navrij '+cls+'" role="button" tabindex="0" '+data+'>'+ico+'<span class="lf-l">'+label+(sub ? '<small>'+sub+'</small>' : '')+'</span>'
+    + '<span class="lf-w">'+(rechts||'')+_LF_CHEV+'</span></div>';
+}
+// Gekleurde tegel met een code of icoon (contracttype, opdrachttype)
+function _istKleurTegel(inhoud, kl){ return '<span class="lf-ic ist-codetegel" aria-hidden="true" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+'">'+inhoud+'</span>'; }
+function _istWisKnop(cls, id, wat){ return '<button type="button" class="btn btn-ghost btn-wis btn-icoon '+cls+'" data-id="'+esc(id)+'" aria-label="'+wat+' verwijderen" title="Verwijderen">'+ICO.trash+'</button>'; }
+var _ZP_PERSOON = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+var _ZP_SCHILD = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+var _ZP_SLOT = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>';
+var _ZP_DOWNLOAD = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>';
+var _ZP_DATABASE = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>';
 function renderInstBedrijf(el) {
   var bg = APP.bedrijfGegevens || {};
   var _mk = (bg.mailKleur || '#1c3d5a');
@@ -33836,21 +33868,15 @@ function renderInstNotificaties(el) {
 // ── TAB: ADMINISTRATIES ─────────────────────────────────────────
 function renderInstAdministraties(el) {
   var bg = APP.bedrijfGegevens || {};
-  var h = '<div style="max-width:680px">';
+  var h = '<div class="ist-wrap lf">';
+  h += _istKaart('Huidige administratie', '',
+    lfRij(ICO.gebouw, 'Bedrijfsnaam', esc(bg.naam||'—'))
+    + lfRij(_ZP_DATABASE, 'Administratie-ID', '<span class="ist-mono">'+esc(APP.bedrijfId||'demo')+'</span>'), null);
 
-  // Huidige administratie info
-  h += '<div class="card" style="margin-bottom:16px;padding:16px 20px">';
-  h += '<div style="font-weight:700;font-size:14px;margin-bottom:12px">Huidige administratie</div>';
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-  h += '<div><div style="font-size:11px;color:var(--muted);margin-bottom:2px">Bedrijfsnaam</div><div style="font-size:14px;font-weight:600">'+esc(bg.naam||'—')+'</div></div>';
-  h += '<div><div style="font-size:11px;color:var(--muted);margin-bottom:2px">Administratie ID</div><div style="font-size:13px;font-family:\'Space Mono\',monospace;background:var(--surface2);padding:3px 8px;border-radius:4px;display:inline-block">'+esc(APP.bedrijfId||'demo')+'</div></div>';
-  h += '</div></div>';
-
-  // Export sectie (accordion)
+  // Exporteren: per onderdeel een schuifje
   var aExp = '';
-  aExp += '<div style="font-size:12px;color:var(--muted);margin-bottom:16px">Download alle data als JSON backup bestand. Selecteer welke modules je wilt exporteren.</div>';
-
   var modules = [
+
     { k:'medewerkers',    l:'Medewerkers',      svg:'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
     { k:'serviceklanten', l:'Serviceklanten',   svg:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' },
     { k:'debiteuren',     l:'Debiteuren',       svg:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>' },
@@ -33869,49 +33895,34 @@ function renderInstAdministraties(el) {
     { k:'wp_pompen',      l:'Register',     svg:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/>' },
   ];
 
-  aExp += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
+  aExp += '<div class="ist-twee">';
   modules.forEach(function(m){
-    aExp += '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-    aExp += '<input type="checkbox" class="exp-module" data-key="'+m.k+'" checked>';
-    aExp += '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0;opacity:.7">'+m.svg+'</svg>';
-    aExp += '<span style="font-size:13px">'+m.l+'</span>';
-    aExp += '</label>';
+    aExp += _istSchakelRij(_lfIco('<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">'+m.svg+'</svg>'), m.l, '', 'class="exp-module" data-key="'+m.k+'" aria-label="'+m.l+'"', true);
   });
   aExp += '</div>';
-  aExp += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
-  aExp += '<button class="btn btn-ghost btn-sm" id="exp-all">Alles selecteren</button>';
-  aExp += '<button class="btn btn-ghost btn-sm" id="exp-none">Niets selecteren</button>';
-  aExp += '<button class="btn btn-ghost btn-sm" id="exp-basis">Alleen basisdata</button>';
-  aExp += '<button class="btn btn-primary" id="exp-start" style="margin-left:auto"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exporteer JSON</button>';
-  aExp += '</div>';
-  h += '<div class="inst-acc-grid">';
-  h += instAcc('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>', 'Exporteer administratie', '', aExp, true);
+  aExp += '<div class="ist-exp-knoppen">'
+    + '<button type="button" class="btn btn-ghost ist-klein" id="exp-all">Alles</button>'
+    + '<button type="button" class="btn btn-ghost ist-klein" id="exp-none">Niets</button>'
+    + '<button type="button" class="btn btn-ghost ist-klein" id="exp-basis">Alleen basisdata</button>'
+    + '<button type="button" class="btn btn-primary ist-knop" id="exp-start">'+_ZP_DOWNLOAD+'Exporteren</button></div>';
+  h += _istAcc(_ZP_DOWNLOAD, 'Exporteren', 'Download een JSON-back-up van de gekozen onderdelen', aExp);
 
-  // Import sectie (accordion)
-  var aImp = '';
-  aImp += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Upload een eerder geëxporteerd JSON bestand. Let op: bestaande data wordt overschreven.</div>';
-  aImp += '<label class="btn btn-ghost" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">';
-  aImp += '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
-  aImp += 'Kies JSON bestand<input type="file" id="imp-file" accept=".json" style="display:none"></label>';
-  aImp += ' <span id="imp-bestandsnaam" style="font-size:12px;color:var(--muted)">Geen bestand gekozen</span>';
-  aImp += '<div id="imp-preview" style="display:none;margin-top:12px"></div>';
-  h += instAcc('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>', 'Importeer administratie', '', aImp, true);
+  // Importeren
+  var aImp = lfRij(_ZP_UPLOAD, 'JSON-bestand',
+      '<label class="lf-link ist-upload">Bestand kiezen<input type="file" id="imp-file" accept=".json" hidden></label>',
+      {sub:'<span id="imp-bestandsnaam">Geen bestand gekozen</span>'})
+    + '<div id="imp-preview" style="display:none"></div>';
+  h += _istAcc(_ZP_UPLOAD, 'Importeren', 'Zet een eerder gemaakte export terug; bestaande gegevens worden overschreven', aImp);
 
-  // Nieuwe administratie aanmaken (accordion) — platformbeheer only: dit schrijft buiten
+  // Nieuwe administratie aanmaken — platformbeheer only: dit schrijft buiten
   // het eigen bedrijf. Export/import hierboven blijft wel gewoon voor de bedrijfsadmin.
   if(isPlatformBeheer()) {
-  var aNieuw = '';
-  aNieuw += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Maak een lege nieuwe administratie aan. Je kunt daarna data importeren via het importeer-veld hierboven.</div>';
-  aNieuw += '<div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">';
-  aNieuw += '<div style="flex:1;min-width:180px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Administratie ID</label>';
-  aNieuw += '<input class="input" id="nieuw-admin-id" placeholder="bijv. homapompen" style="font-family:\'Space Mono\',monospace"></div>';
-  aNieuw += '<div style="flex:1;min-width:180px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Bedrijfsnaam</label>';
-  aNieuw += '<input class="input" id="nieuw-admin-naam" placeholder="bijv. Homa Pompen B.V."></div>';
-  aNieuw += '<button class="btn btn-primary" id="nieuw-admin-btn">Aanmaken</button>';
-  aNieuw += '</div>';
-  h += instAcc('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>', 'Nieuwe administratie aanmaken', '', aNieuw, true);
+    var aNieuw = lfRij(_ZP_DATABASE, 'Administratie-ID', '<input class="lf-tekst ist-mono" id="nieuw-admin-id" placeholder="bijv. voorbeeldbv">', {voor:'nieuw-admin-id'})
+      + lfRij(ICO.gebouw, 'Bedrijfsnaam', '<input class="lf-tekst" id="nieuw-admin-naam" placeholder="bijv. Voorbeeld B.V.">', {voor:'nieuw-admin-naam'})
+      + '<p class="lf-uitleg">Maakt een lege administratie aan. Daarna kun je gegevens importeren via Importeren hierboven.</p>'
+      + '<div class="ist-voet"><button type="button" class="btn btn-primary ist-knop" id="nieuw-admin-btn">Aanmaken</button></div>';
+    h += _istAcc(_LF_PLUS, 'Nieuwe administratie aanmaken', 'Alleen voor platformbeheer', aNieuw);
   }
-  h += '</div>';
   h += '</div>';
 
   el.innerHTML = h;
@@ -33964,15 +33975,12 @@ function renderInstAdministraties(el) {
         var moduleList=Object.keys(data.data).filter(function(k){ return data.data[k]!==null; });
         var prev=el.querySelector('#imp-preview');
         prev.style.display='block';
-        prev.innerHTML='<div style="background:var(--surface2);border-radius:8px;padding:12px 16px;border:1px solid var(--border)">'
-          +'<div style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Bestand geanalyseerd</div>'
-          +'<div style="font-size:12px;color:var(--muted);margin-bottom:3px">Exportdatum: '+new Date(data.meta.exportDatum).toLocaleString('nl-NL')+'</div>'
-          +'<div style="font-size:12px;color:var(--muted);margin-bottom:3px">Bron: <code>'+esc(data.meta.bedrijfId)+'</code> — '+esc(data.meta.bedrijfNaam||'')+'</div>'
-          +'<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Modules: '+moduleList.map(function(m){return'<span class="tag">'+esc(m)+'</span>';}).join(' ')+'</div>'
-          +'<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--red);margin-bottom:12px">'
-          +'Bestaande data in <strong>'+esc(APP.bedrijfId)+'</strong> wordt overschreven.</div>'
-          +'<button class="btn btn-primary" id="imp-bevestig" style="background:var(--red)">Importeer naar '+esc(APP.bedrijfId)+'</button>'
-          +'</div>';
+        prev.innerHTML = '<div class="lf-groep">Inhoud van het bestand</div>'
+          + lfRij(_ZP_KAL, 'Exportdatum', esc(new Date(data.meta.exportDatum).toLocaleString('nl-NL')))
+          + lfRij(ICO.gebouw, 'Bron', esc(data.meta.bedrijfId), {sub: esc(data.meta.bedrijfNaam||'')})
+          + lfRij(_ZP_LIJST, 'Onderdelen', String(moduleList.length), {sub: moduleList.map(esc).join(', ')})
+          + _zpMelding('waarschuwing', 'Let op', 'Bestaande gegevens in <b>'+esc(APP.bedrijfId)+'</b> worden overschreven. Dit kan niet ongedaan worden gemaakt.')
+          + '<div class="ist-voet"><button type="button" class="btn btn-danger ist-knop" id="imp-bevestig">Importeer naar '+esc(APP.bedrijfId)+'</button></div>';
         prev.querySelector('#imp-bevestig').addEventListener('click',function(){
           bevestigActie('Import bevestigen','Weet je zeker dat je '+moduleList.length+' modules importeert naar "'+APP.bedrijfId+'"? Dit kan niet ongedaan worden gemaakt.',async function(){
             toast('Bezig met importeren...','success');
@@ -34017,35 +34025,22 @@ function renderInstContracten(el) {
   if(typeof _ctSortKey==='undefined'){ window._ctSortKey='code'; window._ctSortDir=1; }
   contracten = sorteerLijst(contracten, _ctSortKey, _ctSortDir);
 
-  var h = '<div class="inst-kop-rij" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">';
-  h += '<div style="font-weight:700;font-size:16px">Contracttypes</div>';
-  h += '<button class="btn btn-primary btn-sm" id="ct-add">+ Nieuw contracttype</button></div>';
-  h += '<div class="card" style="padding:0"><div class="table-wrap"><table style="width:100%"><thead><tr>';
-  [['code','Code'],['naam','Naam'],['intervalMaanden','Interval'],['aantalMonteurs','Monteurs']].forEach(function(c){
-    var _act = _ctSortKey===c[0]; var ico = sortArrow(_act,_ctSortDir);
-    h += '<th class="ct-sort-th '+sortCls(_act)+'" data-sort="'+c[0]+'" style="cursor:pointer;user-select:none;white-space:nowrap">'+c[1]+ico+'</th>';
-  });
-  h += '<th style="width:100px"></th></tr></thead><tbody>';
-  contracten.forEach(function(ct){
-    h += '<tr>';
-    h += '<td style="padding:10px 14px;font-weight:700;font-size:14px"><span class="tag" style="background:'+_kleurTint(ct.kleur,'22')+';color:'+_klTekst(ct.kleur)+'">'+esc(ct.code)+'</span></td>';
-    h += '<td style="padding:10px 14px;font-size:13px">'+esc(ct.naam)
-       + (contractIsAanvulling(ct) ? ' <span class="tag" style="background:rgba(245,158,11,.15);color:var(--orange-t);font-size:10px">Aanvulling</span>' : '')
-       + '</td>';
-    h += '<td style="padding:10px 14px;font-size:12px;color:var(--muted)">'+(ct.intervalMaanden?ct.intervalMaanden+' mnd':'Op aanvraag')+'</td>';
-    h += '<td style="padding:10px 14px;font-size:12px;color:var(--muted)">'+(ct.aantalMonteurs||1)+' man</td>';
-    h += '<td style="padding:10px 14px"><div style="width:24px;height:24px;border-radius:50%;background:'+ct.kleur+'"></div></td>';
-    h += '<td style="padding:6px 10px;white-space:nowrap"><button class="btn btn-ghost btn-sm ct-edit btn-icoon" data-id="'+ct.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm ct-del btn-wis" data-id="'+ct.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
-    h += '</tr>';
-  });
-  h += '</tbody></table></div></div>';
-  el.innerHTML = h;
+  contracten = sorteerLijst(getContracten(), 'code', 1);
+  var b = contracten.map(function(ct){
+    var sub = (ct.intervalMaanden ? 'Elke '+ct.intervalMaanden+' mnd' : 'Op aanvraag')+' · '+(ct.aantalMonteurs||1)+' man';
+    return _istNavRij('ct-edit', 'data-id="'+esc(ct.id)+'"', _istKleurTegel(esc(ct.code), ct.kleur),
+      esc(ct.naam)+(contractIsAanvulling(ct) ? ' <span class="zp-tag ist-tag-aanv">Aanvulling</span>' : ''), sub,
+      _istWisKnop('ct-del', ct.id, 'Contracttype'));
+  }).join('');
+  if(!contracten.length) b = '<p class="lf-leeg">Nog geen contracttypes.</p>';
+  b += _zpToevoeg('ct-add', 'Contracttype toevoegen');
+  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Contracttypes · '+contracten.length, 'Tik op een contracttype om het te wijzigen. De code en kleur zie je terug bij serviceklanten en in de planning.', b, null)+'</div>';
   el.querySelectorAll('.ct-sort-th').forEach(function(th){
     th.addEventListener('click', function(){ if(_ctSortKey===th.dataset.sort)_ctSortDir*=-1;else{_ctSortKey=th.dataset.sort;_ctSortDir=1;} renderInstellingen(); });
   });
   el.querySelector('#ct-add').addEventListener('click', function(){ openContractModal(null); });
   el.querySelectorAll('.ct-edit').forEach(function(b){ b.addEventListener('click',function(){ openContractModal(b.dataset.id); }); });
-  el.querySelectorAll('.ct-del').forEach(function(b){ b.addEventListener('click',function(){
+  el.querySelectorAll('.ct-del').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation();
     bevestigActie('Contracttype verwijderen','Weet je zeker dat je dit contracttype wilt verwijderen?',function(){
       APP.contracten = APP.contracten.filter(function(c){return c.id!==b.dataset.id;});
       _instBevestig(FB.ref(dbPath('contracten')).set(APP.contracten));
@@ -34146,29 +34141,17 @@ function renderInstOpdrachten(el) {
   if(typeof _otSortKey==='undefined'){ window._otSortKey='label'; window._otSortDir=1; }
   types = sorteerLijst(types, _otSortKey, _otSortDir);
 
-  var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
-  h += '<div style="font-weight:700;font-size:16px">Opdrachttypes</div>';
-  h += '<button class="btn btn-primary btn-sm" id="ot-add">+ Nieuw type</button></div>';
-  h += '<div class="card" style="padding:0"><div class="table-wrap"><table style="width:100%"><thead><tr>';
-  h += '<th>Icoon</th>';
-  var _act = _otSortKey==='label'; var ico = sortArrow(_act,_otSortDir);
-  h += '<th class="ot-sort-th '+sortCls(_act)+'" data-sort="label" style="cursor:pointer;user-select:none">Label'+ico+'</th>';
-  h += '<th>Kleur</th>';
-  h += '<th>Mail template (klantmails)</th>';
-  h += '<th style="width:100px"></th></tr></thead><tbody>';
-  var tplOpties2 = Object.values(getMailTemplates()).filter(function(t){return !t.categorie||t.categorie==='planning';});
-  types.forEach(function(ot){
-    h += '<tr><td style="padding:10px 14px;color:var(--muted)">'+getOtSvg(ot.icon)+'</td>';
-    h += '<td style="padding:10px 14px"><span class="tag" style="background:'+_kleurTint(ot.kleur,'22')+';color:'+_klTekst(ot.kleur)+'">'+esc(ot.label)+'</span></td>';
-    h += '<td style="padding:10px 14px"><div style="width:24px;height:24px;border-radius:50%;background:'+ot.kleur+'"></div></td>';
-    h += '<td style="padding:6px 14px"><select class="input ot-tpl-inline" data-id="'+esc(ot.id)+'" data-veld="mailTemplate" style="font-size:12px;padding:4px 8px">';
-    h += '<option value="">— Geen —</option>';
-    tplOpties2.forEach(function(t){ h += '<option value="'+esc(t.id)+'"'+(ot.mailTemplate===t.id?' selected':'')+'>'+esc(t.naam||t.id)+'</option>'; });
-    h += '</select></td>';
-    h += '<td style="padding:6px 10px;white-space:nowrap"><button class="btn btn-ghost btn-sm ot-edit btn-icoon" data-id="'+ot.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm ot-del btn-wis" data-id="'+ot.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td></tr>';
-  });
-  h += '</tbody></table></div></div>';
-  el.innerHTML = h;
+  types = sorteerLijst(getOpdrachttypes(), 'label', 1);
+  var _tplNaam = {};
+  Object.values(getMailTemplates()).forEach(function(t){ _tplNaam[t.id] = t.naam || t.id; });
+  var b = types.map(function(ot){
+    var tpl = ot.mailTemplate && _tplNaam[ot.mailTemplate];
+    return _istNavRij('ot-edit', 'data-id="'+esc(ot.id)+'"', _istKleurTegel(getOtSvg(ot.icon), ot.kleur), esc(ot.label),
+      tpl ? 'Mailtemplate: '+esc(tpl) : 'Geen mailtemplate', _istWisKnop('ot-del', ot.id, 'Opdrachttype'));
+  }).join('');
+  if(!types.length) b = '<p class="lf-leeg">Nog geen opdrachttypes.</p>';
+  b += _zpToevoeg('ot-add', 'Opdrachttype toevoegen');
+  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Opdrachttypes · '+types.length, 'Tik op een type om naam, icoon, kleur of de mailtemplate voor klantmails te wijzigen.', b, null)+'</div>';
   el.querySelectorAll('.ot-sort-th').forEach(function(th){
     th.addEventListener('click', function(){ if(_otSortKey===th.dataset.sort)_otSortDir*=-1;else{_otSortKey=th.dataset.sort;_otSortDir=1;} renderInstellingen(); });
   });
@@ -34181,7 +34164,7 @@ function renderInstOpdrachten(el) {
   });
   var _otAddBtn=el.querySelector('#ot-add'); if(_otAddBtn) _otAddBtn.addEventListener('click',function(){ openOpdrachtTypeModal(); });
   el.querySelectorAll('.ot-edit').forEach(function(b){ b.addEventListener('click',function(){ openOpdrachtTypeModal(b.dataset.id); }); });
-  el.querySelectorAll('.ot-del').forEach(function(b){ b.addEventListener('click',function(){
+  el.querySelectorAll('.ot-del').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation();
     bevestigActie('Opdrachttype verwijderen','Weet je zeker dat je dit type wilt verwijderen?',function(){
       APP.opdrachttypes = APP.opdrachttypes.filter(function(o){return o.id!==b.dataset.id;});
       _instBevestig(FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes));
@@ -35175,82 +35158,68 @@ function renderInstTeam(el) {
 // ── TAB: GEBRUIKERS ────────────────────────────────────────────
 function renderInstGebruikers(el) {
   var gbNode = dbPath('gebruikers'); // bedrijfspad: flow8/bedrijven/{id}/gebruikers
-  var h = '<div style="display:flex;flex-direction:column;gap:20px;max-width:680px">';
-
-  // Tabel bestaande gebruikers
-  h += '<div class="card" style="padding:0;overflow:hidden">';
-  h += '<div style="padding:16px 20px;border-bottom:1px solid var(--border)">';
-  h += '<div style="font-weight:700;font-size:15px">Gebruikersbeheer</div>';
-  h += '<div style="font-size:13px;color:var(--muted);margin-top:4px">Maak loginaccounts aan voor medewerkers. Koppel een Firebase-account aan een medewerker via hun e-mailadres.</div>';
-  h += '</div><p style="font-size:12px;color:var(--muted);margin:0 0 12px">De rol hier bepaalt wat iemand in de app mag zien en wijzigen. Dat staat los van de rol bij Medewerkers, die alleen bepaalt of iemand planbaar is en beschikbaarheid krijgt.</p><div id="gb-tabel-wrap"><div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">Gebruikers laden...</div></div></div>';
-
-  // Nieuw account aanmaken
-  h += '<div class="card"><div style="font-size:14px;font-weight:700;margin-bottom:14px">Nieuw account aanmaken</div>';
-  h += fg('Medewerker','<select class="input" id="gb-med"><option value="">— Kies medewerker —</option>'
-    +(APP.medewerkers||[]).filter(function(m){return m.status!=='inactief';}).map(function(m){
-      return '<option value="'+m.id+'">'+esc(m.voornaam+' '+m.achternaam)+'</option>';
-    }).join('')+'</select>');
-  h += fg('E-mailadres','<input class="input" type="email" id="gb-email" placeholder="naam@homapompen.nl">');
   var _alleRollen = Object.keys(APP.rollen||{});
   if(!_alleRollen.length) _alleRollen=['admin','planner','monteur','extern','verkoop','administratie','magazijn'];
-  h += fg('Rol (rechten in de app)','<select class="input" id="gb-rol-nieuw">'+_alleRollen.map(function(r){
-      var rr=(APP.rollen||{})[r]||{};
-      return '<option value="'+esc(r)+'"'+(r==='monteur'?' selected':'')+'>'+esc(rr.naam||r)+'</option>';
-    }).join('')+'</select>');
-  h += fg('Wachtwoord (tijdelijk)','<input class="input" type="password" id="gb-pw" placeholder="Min. 6 tekens">');
-  h += '<p style="font-size:12px;color:var(--muted);margin:3px 0 12px">De medewerker kan dit wachtwoord zelf wijzigen. Wil je liever geen wachtwoord doorgeven, gebruik dan hieronder de resetmail.</p>';
-  h += '<button class="btn btn-primary btn-sm" id="gb-aanmaken">Account aanmaken</button></div>';
-
+  var h = '<div class="ist-wrap lf">';
+  h += _istKaart('Gebruikers', 'Wie kan inloggen en met welke rechten. De rol hier bepaalt wat iemand in de app mag zien en wijzigen; de rol bij Medewerkers bepaalt alleen of iemand planbaar is en beschikbaarheid krijgt.',
+    '<div id="gb-tabel-wrap"><p class="lf-leeg">Laden…</p></div>', null);
   // Medewerkers zonder login — het uitgangspunt: zien wie er nog geen account heeft.
-  h += '<div class="card"><div style="font-size:14px;font-weight:700;margin-bottom:4px">Medewerkers zonder login</div>';
-  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Klik op een naam om het formulier hierboven in te vullen.</div>';
-  h += '<div id="gb-zonder-wrap"><div style="font-size:13px;color:var(--muted)">Laden...</div></div></div>';
-
+  h += _istKaart('Medewerkers zonder login', 'Tik op een naam om het formulier hieronder in te vullen.', '<div id="gb-zonder-wrap"><p class="lf-leeg">Laden…</p></div>', null);
+  // Nieuw account aanmaken
+  h += _istKaart('Nieuw account', '',
+    lfKies(_ZP_PERSOON, 'Medewerker', '<select class="input" id="gb-med"><option value="">Kies een medewerker</option>'
+      + (APP.medewerkers||[]).filter(function(m){ return m.status!=='inactief'; }).map(function(m){
+          return '<option value="'+m.id+'">'+esc(m.voornaam+' '+m.achternaam)+'</option>';
+        }).join('')+'</select>', {titel:'Medewerker'})
+    + lfRij(_LF_MAIL, 'E-mailadres', '<input class="lf-tekst" type="email" id="gb-email" placeholder="naam@bedrijf.nl" autocomplete="off">', {voor:'gb-email'})
+    + lfKies(_ZP_SCHILD, 'Rol', '<select class="input" id="gb-rol-nieuw">'+_alleRollen.map(function(r){
+        var rr=(APP.rollen||{})[r]||{};
+        return '<option value="'+esc(r)+'"'+(r==='monteur'?' selected':'')+'>'+esc(rr.naam||r)+'</option>';
+      }).join('')+'</select>', {titel:'Rol (rechten in de app)', sub:'Rechten in de app'})
+    + lfRij(_ZP_SLOT, 'Tijdelijk wachtwoord', '<input class="lf-tekst" type="password" id="gb-pw" placeholder="Min. 6 tekens" autocomplete="new-password">', {voor:'gb-pw'})
+    + '<p class="lf-uitleg">De medewerker kan dit wachtwoord zelf wijzigen. Wil je liever geen wachtwoord doorgeven, stuur dan hieronder een resetmail.</p>',
+    'gb-aanmaken', 'Account aanmaken');
   // Wachtwoord reset
-  h += '<div class="card"><div style="font-size:14px;font-weight:700;margin-bottom:14px">Wachtwoord reset versturen</div>';
-  h += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
-  h += '<input class="input" type="email" id="gb-reset-email" placeholder="E-mailadres medewerker" style="flex:1;min-width:200px">';
-  h += '<button class="btn btn-ghost btn-sm" id="gb-reset-sturen" style="flex-shrink:0">Reset e-mail sturen</button>';
-  h += '</div></div>';
+  h += _istKaart('Wachtwoord opnieuw instellen', 'De medewerker krijgt een e-mail met een link om zelf een nieuw wachtwoord te kiezen.',
+    lfRij(_LF_MAIL, 'E-mailadres', '<input class="lf-tekst" type="email" id="gb-reset-email" placeholder="naam@bedrijf.nl" autocomplete="off">', {voor:'gb-reset-email'}),
+    'gb-reset-sturen', 'Resetmail sturen');
   h += '</div>';
   el.innerHTML = h;
+  lfBind(el.querySelector('.ist-wrap'), el.querySelector('#gb-aanmaken'));
 
   // Laad gebruikers
   function renderGbTabel(data) {
     var items=Object.entries(data||{}).map(function(e){return Object.assign({_key:e[0]},e[1]);});
     var wrap=el.querySelector('#gb-tabel-wrap');
     if(!wrap) return;
-    if(!items.length){wrap.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">Nog geen gebruikers aangemaakt</div>';return;}
+    if(!items.length){wrap.innerHTML='<p class="lf-leeg">Nog geen gebruikers aangemaakt.</p>';return;}
     var alleRolIds = Object.keys(APP.rollen||{});
     if(!alleRolIds.length) alleRolIds=['admin','planner','monteur','extern','verkoop','administratie','magazijn'];
 
-    var html='<div class="table-wrap"><table><thead><tr>';
-    html+='<th>Medewerker</th><th>E-mail</th><th style="width:150px">Rol (rechten)</th><th style="width:120px">Toegang</th><th style="width:40px"></th>';
+    var html='<div class="table-wrap ist-tabel ist-gb"><table><thead><tr>';
+    html+='<th>Gebruiker</th><th style="width:180px">Rol (rechten)</th><th style="width:90px">Toegang</th><th style="width:48px"></th>';
     html+='</tr></thead><tbody>';
     items.forEach(function(gb){
       var med=(APP.medewerkers||[]).find(function(m){return String(m.id)===String(gb.medId);});
-      var kl=med?medKleur(med):'#6b7694';
+      var kl=med?medKleur(med):'';
       var isActief = gb.actief === true;
-      html+='<tr>';
-      html+='<td><div style="display:flex;align-items:center;gap:10px">';
-      if(med) html+='<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(med)+'</div>';
-      html+='<div style="min-width:0"><div style="font-size:13px;font-weight:600">'+esc(med?med.voornaam+' '+med.achternaam:gb.email||'Onbekend')+'</div>';
-      if(!med) html+='<div style="font-size:10px;color:var(--orange-t)">Niet gekoppeld aan een medewerker</div>';
-      if(gb._profielOntbreekt) html+='<div style="font-size:10px;color:var(--red)">Profiel ontbreekt — kan niet inloggen</div>';
-      html+='</div></div></td>';
-      html+='<td style="font-size:12px;color:var(--muted)">'+esc(gb.email||'—')+'</td>';
+      html+='<tr><td><div class="ist-persoon">';
+      html+= med ? '<span class="lf-av klein" aria-hidden="true" style="background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(med)+'</span>'
+                 : '<span class="lf-ic" aria-hidden="true">'+_ZP_PERSOON+'</span>';
+      html+='<span><b>'+esc(med?med.voornaam+' '+med.achternaam:gb.email||'Onbekend')+'</b><small>'+esc(gb.email||'—')+'</small>';
+      if(!med) html+='<small class="ist-let">Niet gekoppeld aan een medewerker</small>';
+      if(gb._profielOntbreekt) html+='<small class="ist-fout">Profiel ontbreekt — kan niet inloggen</small>';
+      html+='</span></div></td>';
       // Rol direct wijzigen: schrijft naar het globale profiel (bepaalt de rechten) en
       // naar het bedrijfspad (voedt deze lijst), zodat de twee niet uit elkaar lopen.
-      html+='<td><select class="input gb-rol" data-key="'+esc(gb._key)+'" style="padding:5px 8px;font-size:12px">';
+      html+='<td><select class="input ist-cel gb-rol" data-key="'+esc(gb._key)+'" aria-label="Rol">';
       html+=alleRolIds.map(function(r){
         var rr=(APP.rollen||{})[r]||{};
         return '<option value="'+esc(r)+'"'+(gb.rol===r?' selected':'')+'>'+esc(rr.naam||r)+'</option>';
       }).join('');
       html+='</select></td>';
-      html+='<td><button class="btn btn-sm gb-actief" data-key="'+esc(gb._key)+'" data-nu="'+(isActief?'1':'0')+'" '
-           +'style="background:'+(isActief?'#10b98122':'#6b769422')+';color:'+(isActief?'#10b981':'#6b7694')+';border:none;font-size:11px;padding:4px 10px">'
-           +(isActief?'Actief':'Geblokkeerd')+'</button></td>';
-      html+='<td><button class="btn btn-ghost btn-sm gb-del btn-wis" data-key="'+esc(gb._key)+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
+      html+='<td><label class="lf-sw ist-sw-in" title="'+(isActief?'Toegang actief':'Toegang geblokkeerd')+'"><input type="checkbox" role="switch" class="gb-actief" data-key="'+esc(gb._key)+'" data-nu="'+(isActief?'1':'0')+'" aria-label="Toegang"'+(isActief?' checked':'')+'><i></i></label></td>';
+      html+='<td><button type="button" class="btn btn-ghost btn-wis btn-icoon gb-del" data-key="'+esc(gb._key)+'" aria-label="Gebruiker verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
       html+='</tr>';
     });
     html+='</tbody></table></div>';
@@ -35287,6 +35256,7 @@ function renderInstGebruikers(el) {
       btn.addEventListener('click', function(){
         var uid = btn.dataset.key, wordt = btn.dataset.nu !== '1';
         if(APP.profiel && APP.profiel.uid === uid && !wordt) {
+          btn.checked = true;
           toast('Je kunt je eigen toegang niet blokkeren','error');
           return;
         }
@@ -35298,6 +35268,7 @@ function renderInstGebruikers(el) {
           })
           .catch(function(e){
             btn.disabled = false;
+            btn.checked = !wordt;
             log('ERROR','GEBRUIKER','Toegang wijzigen mislukt: '+e.message);
             toast('Wijzigen mislukt: '+e.message,'error');
           });
@@ -35336,21 +35307,15 @@ function renderInstGebruikers(el) {
       return m.status !== 'inactief' && gekoppeldeMedIds.indexOf(String(m.id)) < 0;
     });
     if(!zonder.length) {
-      wrap.innerHTML = '<div style="font-size:13px;color:var(--muted)">Alle actieve medewerkers hebben een loginaccount.</div>';
+      wrap.innerHTML = '<p class="lf-leeg">Alle actieve medewerkers hebben een loginaccount.</p>';
       return;
     }
-    wrap.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px">' + zonder.map(function(m){
+    wrap.innerHTML = zonder.map(function(m){
       var kl = medKleur(m);
-      return '<div class="gb-zonder-item" data-med="'+esc(String(m.id))+'" '
-        + 'style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:8px;cursor:pointer">'
-        + '<div class="avatar" style="width:26px;height:26px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>'
-        + '<div style="flex:1;min-width:0">'
-        + '<div style="font-size:13px;font-weight:600">'+esc((m.voornaam||'')+' '+(m.achternaam||''))+'</div>'
-        + '<div style="font-size:11px;color:var(--muted)">'+esc(m.email||'geen e-mailadres bekend')+'</div>'
-        + '</div>'
-        + '<span style="font-size:11px;color:var(--accent);font-weight:600;flex-shrink:0">Account aanmaken</span>'
-        + '</div>';
-    }).join('') + '</div>';
+      return _istNavRij('gb-zonder-item', 'data-med="'+esc(String(m.id))+'"',
+        '<span class="lf-av klein" aria-hidden="true" style="background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</span>',
+        esc((m.voornaam||'')+' '+(m.achternaam||'')), esc(m.email||'geen e-mailadres bekend'), '<span class="lf-link">Account aanmaken</span>');
+    }).join('');
 
     wrap.querySelectorAll('.gb-zonder-item').forEach(function(item){
       item.addEventListener('click', function(){
@@ -35360,6 +35325,7 @@ function renderInstGebruikers(el) {
         if(medSel)  medSel.value  = m.id;
         if(mailInp) mailInp.value = m.email || '';
         if(rolSel && m.rol) rolSel.value = m.rol;
+        if(medSel) lfKiesTekst(medSel); if(rolSel) lfKiesTekst(rolSel);
         var pw = el.querySelector('#gb-pw'); if(pw) pw.focus();
         if(!m.email) toast('Deze medewerker heeft nog geen e-mailadres — vul het handmatig in','warn');
       });
@@ -35372,7 +35338,7 @@ function renderInstGebruikers(el) {
     var m = (APP.medewerkers||[]).find(function(x){ return String(x.id)===_medSel.value; });
     var mailInp = el.querySelector('#gb-email'), rolSel = el.querySelector('#gb-rol-nieuw');
     if(m && mailInp && !mailInp.value) mailInp.value = m.email || '';
-    if(m && rolSel && m.rol) rolSel.value = m.rol;
+    if(m && rolSel && m.rol){ rolSel.value = m.rol; lfKiesTekst(rolSel); }
   });
 
   // Laad gebruikers. Het bedrijfspad is de bron voor de lijst; de rules staan niet toe
@@ -35401,7 +35367,7 @@ function renderInstGebruikers(el) {
     });
   }, function(err){
     var wrap = el.querySelector('#gb-tabel-wrap');
-    if(wrap) wrap.innerHTML = '<div style="padding:20px;color:var(--red);font-size:13px">Fout bij laden gebruikers: '+esc(String(err))+'</div>';
+    if(wrap) wrap.innerHTML = _zpMelding('waarschuwing', 'Gebruikers laden mislukt', esc(String(err)));
   });
 
   el.querySelector('#gb-aanmaken').addEventListener('click',function(){
