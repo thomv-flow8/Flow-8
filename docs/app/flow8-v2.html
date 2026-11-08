@@ -1083,8 +1083,8 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
 .sidebar-logo-text{font-family:'Instrument Sans',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.02em}
 .sidebar-logo-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.nav-section{padding:14px 18px 6px;font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:11px;padding:11px 14px;color:var(--muted);cursor:pointer;font-size:14px;font-weight:400;border-radius:var(--radius);margin:2px 8px;position:relative;transition:background .15s ease,color .15s ease}
+.nav-section{padding:12px 18px 4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:11px;padding:8px 12px;color:var(--muted);cursor:pointer;font-size:14px;font-weight:400;border-radius:var(--radius);margin:1px 8px;position:relative;transition:background .15s ease,color .15s ease}
 .wb-acc-hdr:hover { background: rgba(79,110,245,.06) !important; }
 @media(max-width:768px){
   .wb-info-grid { grid-template-columns:1fr !important; max-width:680px; }
@@ -1425,6 +1425,9 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
   .wo-kaarten{display:block}
 }
 .nav-scheiding{height:1px;background:var(--border);margin:10px 12px 2px}
+@media (pointer:coarse){.nav-item{min-height:44px}}
+/* Staat er onder in de zijbalk nog meer, dan vervaagt de onderkant (zie _a11yKlikbaar/tabelhint) */
+#sidebar-nav.kan-onder{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 40px),transparent)}
 /* Beheerblok onderaan: scrollt niet mee en staat visueel op de achtergrond. */
 .nav-systeem{flex-shrink:0;border-top:1px solid var(--border);padding:4px 0 6px}
 .nav-systeem .nav-item{font-size:13px;opacity:.78}
@@ -2327,7 +2330,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 /* Medewerker zonder registraties dit jaar: rustiger, maar leesbaar (geen doorzichtigheid op tekst en knoppen) */
 .hr-leeg{color:var(--muted)}
 .hr-leeg .avatar{filter:saturate(.35)}
-.modal:focus{outline:none}
+.modal:focus,.panel:focus{outline:none}
 #theme-cb:focus-visible + #theme-track{outline:2px solid var(--accent);outline-offset:2px}
 /* Keuzelijsten in de werkbalk en bij de filters: eigen pijltje, zelfde vorm in elke browser */
 .werkbalk select.input,select.chip-sel{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237a8499' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;padding-right:36px}
@@ -2955,7 +2958,7 @@ button.sd-m-dag{cursor:pointer}
 
 <!-- Panel -->
 <div class="panel-overlay" id="panel-overlay"></div>
-<div class="panel" id="panel">
+<div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" tabindex="-1">
   <div class="panel-header">
     <div class="panel-title" id="panel-title">—</div>
     <button class="modal-close" id="panel-close" aria-label="Sluiten" title="Sluiten"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
@@ -8477,6 +8480,7 @@ function bouwNav() {
     }
     var el = document.createElement('div');
     el.className = 'nav-item';
+    el.setAttribute('role', 'link'); el.tabIndex = 0; el.setAttribute('data-klik', '');
     el.id = 'nav-' + m.id;
     el.dataset.page = m.id;
     el.dataset.tip = m.label; // tooltip voor collapsed mode
@@ -8630,8 +8634,8 @@ function toonPagina(id) {
       '<div style="font-family:\'Instrument Sans\',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px">Geen toegang</div>' +
       '<div style="font-size:14px;color:var(--muted)">Je hebt geen rechten voor deze module.<br>Neem contact op met de beheerder.</div>' +
       '</div>';
-    document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.toggle('active', el.dataset.page === id); });
-    document.querySelectorAll('#bottom-nav .bn-item').forEach(function(el) { el.classList.toggle('active', el.dataset.page === id); });
+    document.querySelectorAll('.nav-item').forEach(function(el) { var _ak = el.dataset.page === id; el.classList.toggle('active', _ak); if(_ak) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
+    document.querySelectorAll('#bottom-nav .bn-item').forEach(function(el) { var _ak = el.dataset.page === id; el.classList.toggle('active', _ak); if(_ak) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
     document.getElementById('sidebar').classList.remove('open');
     var ov = document.getElementById('sidebar-overlay'); if(ov) ov.classList.remove('open');
     var mod = NAV.find(function(m) { return m.id === id; });
@@ -8640,8 +8644,8 @@ function toonPagina(id) {
   }
   APP.activePage = id;
   document.getElementById('content').dataset.pagina = id;
-  document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.toggle('active', el.dataset.page === id); });
-  document.querySelectorAll('#bottom-nav .bn-item').forEach(function(el) { el.classList.toggle('active', el.dataset.page === id); });
+  document.querySelectorAll('.nav-item').forEach(function(el) { var _ak = el.dataset.page === id; el.classList.toggle('active', _ak); if(_ak) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
+  document.querySelectorAll('#bottom-nav .bn-item').forEach(function(el) { var _ak = el.dataset.page === id; el.classList.toggle('active', _ak); if(_ak) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
   // Sluit sidebar op mobiel na navigatie
   document.getElementById('sidebar').classList.remove('open');
   var ov = document.getElementById('sidebar-overlay'); if(ov) ov.classList.remove('open');
@@ -9526,10 +9530,17 @@ function _modalProbeerSluiten(){
 }
 document.addEventListener('keydown', function(e){
   if(e.defaultPrevented || (e.key !== 'Escape' && e.key !== 'Tab')) return;
-  var ov = _dlgBovenste(); if(!ov) return;
+  var ov = _dlgBovenste(), pn = null;
+  if(!ov){
+    // Geen venster open: het zijpaneel gedraagt zich dan als dialoog
+    pn = document.getElementById('panel');
+    if(!pn || !pn.classList.contains('open')) return;
+    ov = pn;
+  }
   // Ligt er iets anders bovenop (keuzelijst, foto, zoeken)? Dan regelt dat zijn eigen toetsen.
   var top = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-  if(top && !ov.contains(top)) return;
+  if(top && !ov.contains(top) && !(pn && top.id === 'panel-overlay')) return;
+  if(pn && e.key === 'Escape'){ e.preventDefault(); closePanel(); return; }
   var md = ov.querySelector('.modal') || ov;
   if(e.key === 'Escape'){
     e.preventDefault();
@@ -9598,6 +9609,7 @@ function closeModal() {
 }
 
 // Panel
+var _panelTerugFocus = null;
 function openPanel(title, bodyHtml) {
   var _p = document.getElementById('panel');
   _p.classList.remove('wbx-md'); // werkbon-master-detail nooit erven naar andere panelen
@@ -9605,8 +9617,12 @@ function openPanel(title, bodyHtml) {
   _p.classList.remove('wbx-af-breed');
   document.getElementById('panel-title').textContent = title;
   document.getElementById('panel-body').innerHTML = bodyHtml;
+  // Waar de focus vandaan kwam (niet bij hertekenen vanuit het paneel zelf), en de focus het paneel in
+  var _pa = document.activeElement;
+  if(_pa && _pa !== document.body && !_pa.closest('#panel') && !_pa.closest('.modal-overlay')) _panelTerugFocus = _pa;
   _p.classList.add('open');
   document.getElementById('panel-overlay').classList.add('open');
+  _dlgFocusIn(_p);
 }
 function closePanel() {
   var _p = document.getElementById('panel');
@@ -9617,6 +9633,7 @@ function closePanel() {
   document.getElementById('panel-overlay').classList.remove('open');
   var _ph = document.querySelector('#panel .panel-header'); if(_ph) _ph.style.display='';
   if(typeof _wbTimerInterval !== 'undefined' && _wbTimerInterval){ clearInterval(_wbTimerInterval); _wbTimerInterval = null; }
+  var _pt = _panelTerugFocus; _panelTerugFocus = null; _dlgTerug(_pt);
 }
 
 // Helpers
@@ -9736,9 +9753,11 @@ function _a11yKlikbaar(){
     w.classList.toggle('kan-links', max > 2 && w.scrollLeft > 2);
     w.classList.toggle('kan-rechts', max > 2 && w.scrollLeft < max - 2);
   }
-  function alles(){ gepland = false; document.querySelectorAll('.table-wrap').forEach(werkBij); }
+  // Zijbalk: vervaag de onderkant als er onder de vouw nog menu-items staan
+  function zijbalk(){ var sn = document.getElementById('sidebar-nav'); if(!sn) return; var mx = sn.scrollHeight - sn.clientHeight; sn.classList.toggle('kan-onder', mx > 2 && sn.scrollTop < mx - 2); }
+  function alles(){ gepland = false; document.querySelectorAll('.table-wrap').forEach(werkBij); zijbalk(); }
   function plan(){ if(!gepland){ gepland = true; requestAnimationFrame(alles); } }
-  document.addEventListener('scroll', function(e){ var t = e.target; if(t && t.classList && t.classList.contains('table-wrap')) werkBij(t); }, true);
+  document.addEventListener('scroll', function(e){ var t = e.target; if(t && t.classList && t.classList.contains('table-wrap')) werkBij(t); else if(t && t.id === 'sidebar-nav') zijbalk(); }, true);
   window.addEventListener('resize', plan);
   function start(){ new MutationObserver(plan).observe(document.body, { childList:true, subtree:true }); plan(); }
   if(document.body) start(); else document.addEventListener('DOMContentLoaded', start);
