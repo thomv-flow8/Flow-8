@@ -836,6 +836,8 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .ist-acc .ist-raster{column-gap:40px;row-gap:8px}
 .ist-acc .ist-kaart{background:none;border:0;border-radius:0;padding:14px 0 0}
 .ist-intro{margin:0 0 2px;font-size:13px;color:var(--muted)}
+.ist-acc-een .ist-kaart > .ist-voet{display:none}
+.ist-voet.ist-blokvoet{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
 .lf-rij.ist-geen-ic{grid-template-columns:minmax(0,1fr) auto}
 .ist-navrij{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
 .ist-navrij:active{background:var(--surface2)}
@@ -854,6 +856,29 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .ist-persoon small.ist-let{color:var(--orange-t)}
 .ist-persoon small.ist-fout{color:var(--red-t)}
 .ist-persoon .lf-ic{width:28px;height:28px;border-radius:50%}
+.ist-voet.ist-voet-twee{gap:8px}
+.lf .lf-notitie.ist-mailtekst{resize:vertical;overflow:auto;min-height:88px}
+.ist-kleurkies{width:44px;height:32px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;padding:2px}
+.ist-pdfgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,300px);gap:28px;align-items:start}
+.ist-pdfvb{position:sticky;top:12px}
+.ist-pdfgrid > *{min-width:0}
+.ist-pdflogo{display:inline-flex;align-items:center;justify-content:center;height:36px;min-width:64px;border:1px solid var(--border);border-radius:8px;background:#fff;padding:3px;font-size:11px;color:#6b7280}
+.ist-pdflogo img{max-height:30px;max-width:100px;object-fit:contain}
+.ist-rolmatrix table{width:100%;border-collapse:collapse}
+.ist-rolmatrix th{padding:8px;text-align:center;white-space:nowrap}
+.ist-rolmatrix .ist-rm-mod{text-align:left;min-width:130px;position:sticky;left:0;background:var(--surface);z-index:1}
+.ist-rolmatrix td{padding:6px 8px;border-top:1px solid var(--border)}
+.ist-rolmatrix td.ist-rm-mod{font-size:14px}
+.ist-rm-cel{text-align:center;white-space:nowrap}
+.ist-rm-stip{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.ist-rm-ster{color:var(--accent);display:inline-flex}
+.ist-legenda{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.ist-legenda b{font:700 12px 'Space Mono',monospace;color:var(--text);margin-right:4px}
+.ist-legenda b.ist-rm-ster{color:var(--accent)}
+.ist-uitleg-t{font-size:13px;color:var(--muted);line-height:1.6}
+.ist-uitleg-twee{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}
+.ist-uitleg-voet{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:12px}
+@media(max-width:768px){.ist-pdfgrid{grid-template-columns:1fr}.ist-pdfvb{position:static}.ist-uitleg-twee{grid-template-columns:1fr}}
 @media(max-width:768px){.ist-gb.rap-kaarten tr{grid-template-columns:minmax(0,1fr) auto auto;align-items:end}}
 .ist-acc .inst-acc-body > .lf-rij:last-child{border-bottom:0}
 .ist-raster{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px;align-items:start}
@@ -33470,18 +33495,32 @@ var _instTab = 'bedrijf';
 // Schrijven in Instellingen: de melding pas na bevestiging van de database. Een losse .set()
 // met direct een toast meldde "opgeslagen" ook als de rules weigerden (Firebase draait de
 // wijziging dan stil terug) of als er geen verbinding was. Zonder melding: alleen fouten tonen.
+// Tijdens 'Opslaan' van een heel blok verzamelt _instBevestig de opslagacties, zodat er één melding komt.
+var _instVerzamel = null;
+// Laatste klik in de instellingen: daaraan zie je welke kaart net is opgeslagen.
+var _instLaatsteKlik = null;
+document.addEventListener('click', function(e){
+  var c = document.getElementById('inst-content');
+  if(c && e.target && c.contains(e.target)) _instLaatsteKlik = e.target;
+}, true);
+function _instFoutMelding(e){
+  var m = String((e && (e.code||e.message)) || e || '');
+  toast('Opslaan mislukt: '+(/permission|denied/i.test(m) ? 'je hebt hier geen rechten voor' : m),'error');
+  log('WARN','INSTELLINGEN','Opslaan mislukt: '+m);
+}
 function _instBevestig(belofte, melding){
+  if(_instVerzamel){ _instVerzamel.push(Array.isArray(belofte) ? Promise.all(belofte) : Promise.resolve(belofte)); return Promise.resolve(true); }
   var online = _fbVerbonden;
-  // Wat nu is opgeslagen is de nieuwe uitgangswaarde: geen 'niet opgeslagen'-vraag meer
-  _instBasis(document.getElementById('inst-content')); _instVuilTonen();
+  // Wat nu is opgeslagen is de nieuwe uitgangswaarde: alleen de kaart waarin geklikt is (anders het hele tabblad),
+  // zodat een niet-opgeslagen wijziging in een ander onderdeel de vraag bij het verlaten nog oproept.
+  var c = document.getElementById('inst-content'), k = _instLaatsteKlik;
+  _instBasis((k && k.isConnected && c && c.contains(k) && k.closest('.ist-kaart')) || c); _instVuilTonen();
   if(!online && melding) toast('Geen verbinding: de wijziging wordt verstuurd zodra je weer online bent','info');
   return (Array.isArray(belofte) ? Promise.all(belofte) : Promise.resolve(belofte)).then(function(){
     if(melding && online) toast(melding,'success');
     return true;
   }).catch(function(e){
-    var m = String((e && (e.code||e.message)) || e || '');
-    toast('Opslaan mislukt: '+(/permission|denied/i.test(m) ? 'je hebt hier geen rechten voor' : m),'error');
-    log('WARN','INSTELLINGEN','Opslaan mislukt: '+m);
+    _instFoutMelding(e);
     return false;
   });
 }
@@ -33683,6 +33722,29 @@ function _istAcc(ico, titel, sub, inhoud){
     + '<div class="inst-acc-body">'+inhoud+'</div></div>';
 }
 function _istAccRaster(ico, titel, sub, inhoud){ return _istAcc(ico, titel, sub, '<div class="ist-raster">'+inhoud+'</div>'); }
+// Blok met meerdere onderdelen en één knop Opslaan onderaan; de knoppen van de onderdelen zelf zijn verborgen
+function _istAccEen(id, ico, titel, sub, inhoud){
+  return _istAcc(ico, titel, sub, '<div class="ist-raster">'+inhoud+'</div><div class="ist-voet ist-blokvoet"><button type="button" class="btn btn-primary ist-knop ist-blokknop" id="'+id+'">Opslaan</button></div>')
+    .replace('class="inst-acc ist-acc"', 'class="inst-acc ist-acc ist-acc-een"');
+}
+// Opslaan van een blok: alleen de gewijzigde onderdelen, via hun eigen (verborgen) knop, met één melding
+function _istBindBlokOpslaan(root){
+  root.querySelectorAll('.ist-blokknop').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var acc = btn.closest('.ist-acc'); if(!acc) return;
+      var knoppen = [].filter.call(acc.querySelectorAll('.ist-kaart'), function(k){ return _instVelden(k).some(_instVeldGewijzigd); })
+        .map(function(k){ return k.querySelector('.ist-voet .ist-knop'); }).filter(Boolean);
+      if(!knoppen.length){ toast('Er is niets gewijzigd','info'); return; }
+      var lijst;
+      _instVerzamel = [];
+      try { knoppen.forEach(function(k){ k.click(); }); } finally { lijst = _instVerzamel; _instVerzamel = null; }
+      var online = _fbVerbonden, titel = ((acc.querySelector('.ist-acc-t b')||{}).textContent || 'Instellingen');
+      _instBasis(acc); _instVuilTonen();
+      if(!online) toast('Geen verbinding: de wijziging wordt verstuurd zodra je weer online bent','info');
+      Promise.all(lijst).then(function(){ if(online) toast(titel+' opgeslagen','success'); }).catch(_instFoutMelding);
+    });
+  });
+}
 var _ZP_KAL = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 var _ZP_GROEP = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>';
 var _ZP_ROUTE = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M12 19h4.5a3.5 3.5 0 000-7h-9a3.5 3.5 0 010-7H12"/></svg>';
@@ -33702,6 +33764,46 @@ var _ZP_SCHILD = '<svg width="18" height="18" fill="none" stroke="currentColor" 
 var _ZP_SLOT = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>';
 var _ZP_DOWNLOAD = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>';
 var _ZP_DATABASE = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>';
+// Rollen als schuifjes (uitvoerende rollen bij werkbonnen en werkorders)
+function _istRolSchakels(cls, gekozen){
+  var alle = Object.keys(APP.rollen||{});
+  if(!alle.length) alle = ['admin','planner','monteur','extern','verkoop','administratie','magazijn'];
+  return alle.map(function(r){
+    var rol = (APP.rollen||{})[r] || {};
+    return _istSchakelRij(_istKleurIc(rol.kleur||'#6b7694'), esc(rol.naam||r), '', 'class="'+cls+'" data-rol="'+esc(r)+'" aria-label="'+esc(rol.naam||r)+'"', (gekozen||[]).indexOf(r)>=0);
+  }).join('');
+}
+// Mailtemplate (werkbon of werkorder): onderwerp, bericht en afsluiting
+function _istMailVelden(pre, w, std, velden){
+  return '<p class="lf-uitleg">Beschikbare velden: '+velden.map(function(v){ return '<code>{'+v+'}</code>'; }).join(' ')+'</p>'
+    + lfRij(_LF_MAIL, 'Onderwerp', '<input class="lf-tekst" type="text" id="'+pre+'-mail-onderwerp" value="'+esc(w.mailOnderwerp||std.onderwerp)+'">', {voor:pre+'-mail-onderwerp'})
+    + lfRij(_ZP_TEKST, 'Bericht', '<textarea class="lf-notitie ist-mailtekst" id="'+pre+'-mail-body" rows="5">'+esc(w.mailBody||std.body)+'</textarea>', {blok:true, voor:pre+'-mail-body'})
+    + lfRij(_ZP_NOTITIE, 'Afsluiting', '<textarea class="lf-notitie ist-mailtekst" id="'+pre+'-mail-handtekening" rows="3">'+esc(w.mailHandtekening!=null?w.mailHandtekening:std.handtekening)+'</textarea>', {blok:true, voor:pre+'-mail-handtekening'})
+    + '<div class="ist-voet ist-voet-twee"><button type="button" class="btn btn-ghost ist-knop" id="'+pre+'-mail-herstel">Terug naar standaard</button><button type="button" class="btn btn-primary ist-knop" id="'+pre+'-mail-save">Opslaan</button></div>';
+}
+// PDF-opmaak: kleuren en logo (gedeeld door werkbon en werkorder); pre = 'ptw' of 'pto'
+function _istPdfKleurenLogo(pre, t){
+  var b = '<div class="lf-groep">Kleuren</div>';
+  [['accent','Accent (koppen)'],['tekst','Tekstkleur'],['label','Labelkleur'],['lijn','Lijnkleur']].forEach(function(kv){
+    b += lfRij(_LF_KLEUR, kv[1], '<input type="color" class="'+pre+'-kleur ist-kleurkies" data-veld="'+kv[0]+'" value="'+esc(t[kv[0]])+'" aria-label="'+kv[1]+'">');
+  });
+  b += '<div class="lf-groep">Kopregel</div>';
+  return b;
+}
+function _istPdfLogo(pre, t){
+  return _istSchakelRij(_lfIco(_ZP_UPLOAD), 'Logo tonen', 'Linksboven op de pdf', 'id="'+pre+'-logo-tonen"', !!t.logoTonen)
+    + '<div id="'+pre+'-logo-blok"'+(t.logoTonen?'':' style="display:none"')+'>'
+    + '<div class="lf-rij">'+_lfIco('')+'<span class="lf-l">Eigen logo<small>Leeg = het bedrijfslogo uit Bedrijfsgegevens</small></span>'
+    + '<span class="lf-w"><span id="'+pre+'-logo-preview" class="ist-pdflogo">'+(t.logoData?'<img src="'+esc(t.logoData)+'" alt="Logo">':'<span>Bedrijfslogo</span>')+'</span>'
+    + '<button type="button" class="btn btn-ghost btn-wis btn-icoon" id="'+pre+'-logo-wis"'+(t.logoData?'':' style="display:none"')+' aria-label="Eigen logo verwijderen" title="Verwijderen">'+ICO.trash+'</button>'
+    + '<button type="button" class="lf-link" id="'+pre+'-logo-upload">Kiezen</button>'
+    + '<input type="file" id="'+pre+'-logo-file" accept="image/png,image/jpeg" hidden></span></div></div>';
+}
+function _istPdfVoorbeeld(pre){
+  return '<div class="ist-pdfvb"><div class="lf-groep">Voorbeeld</div>'
+    + '<div id="'+pre+'-preview" style="background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 6px 20px rgba(20,24,36,.1);aspect-ratio:210/297;overflow:hidden;font-size:8.5px"></div>'
+    + '<p class="lf-uitleg">Live voorbeeld, representatief voor de echte pdf.</p></div>';
+}
 function renderInstBedrijf(el) {
   var bg = APP.bedrijfGegevens || {};
   var _mk = (bg.mailKleur || '#1c3d5a');
@@ -34269,104 +34371,97 @@ function renderInstRollen(el) {
     }).join('');
   }
 
-  var h = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">';
-  h += '<div style="font-weight:700;font-size:16px">Rollen & rechten</div>';
-  h += '<button class="btn btn-primary btn-sm" id="rol-nieuw">+ Nieuwe rol</button></div>';
-
-  // Rol beheer chips
-  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
+  var h = '<div class="ist-wrap ist-breed lf">';
+  // Rollen: tik om naam en kleur te wijzigen
+  var _rb = '';
   rolNamen.forEach(function(r){
-    var rol = rollen[r]||{};
-    var kl  = rol.kleur||'#6b7694';
-    h += '<div style="display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 8px 4px 10px">';
-    h += '<div style="width:10px;height:10px;border-radius:50%;background:'+kl+';flex-shrink:0"></div>';
-    h += '<span style="font-size:13px;font-weight:600">'+esc(r)+'</span>';
-    if(r!=='admin') {
-      h += '<button type="button" class="ikn-knop rol-bewerk btn btn-ghost btn-icoon" data-rol="'+r+'" title="Bewerken" aria-label="Rol '+esc(r)+' bewerken">'+ICO.edit+'</button>';
-      h += '<button type="button" class="btn btn-ghost btn-wis rol-verwijder" data-rol="'+r+'" title="Verwijderen" aria-label="Rol '+esc(r)+' verwijderen"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>';
-    } else {
-      h += '<span style="margin-left:4px;display:inline-flex;align-items:center"><svg width="12" height="12" fill="var(--accent)" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>';
+    var rol = rollen[r]||{}, kl = rol.kleur||'#6b7694';
+    if(r==='admin'){
+      _rb += '<div class="lf-rij">'+_istKleurIc(kl)+'<span class="lf-l">'+esc(rol.naam||r)+'<small>Altijd volledige toegang; niet te wijzigen</small></span><span class="lf-w"><span class="zp-tag zp-tag-grijs">Vast</span></span></div>';
+      return;
     }
-    h += '</div>';
+    _rb += _istNavRij('rol-bewerk', 'data-rol="'+esc(r)+'"', _istKleurIc(kl), esc(rol.naam||r), (rol.naam && rol.naam!==r) ? esc(r) : '',
+      '<button type="button" class="btn btn-ghost btn-wis btn-icoon rol-verwijder" data-rol="'+esc(r)+'" aria-label="Rol '+esc(r)+' verwijderen" title="Verwijderen">'+ICO.trash+'</button>');
   });
-  h += '</div>';
+  _rb += _zpToevoeg('rol-nieuw', 'Rol toevoegen');
+  h += _istKaart('Rollen · '+rolNamen.length, 'Tik op een rol om de naam of kleur te wijzigen. Welke rol iemand heeft, stel je in bij Gebruikers.', _rb, null);
 
   // Rechten matrix
-  h += '<div class="table-wrap rol-tabel-wrap" data-geen-kaarten style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">';
-  h += '<table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--surface2)">';
-  h += '<th style="padding:8px 14px;text-align:left;min-width:140px">Module</th>';
+  var _rm = '<div class="table-wrap rol-tabel-wrap ist-rolmatrix" data-geen-kaarten><table><thead><tr>';
+  _rm += '<th class="ist-rm-mod">Module</th>';
   rolNamen.forEach(function(r){
     var rol = rollen[r]||{}; var kl = rol.kleur||'#6b7694';
-    h += '<th style="padding:8px 10px;text-align:center;min-width:80px"><span style="font-size:12px;font-weight:700;color:'+_klTekst(kl)+'">'+esc(r)+'</span></th>';
+    _rm += '<th class="ist-rm-rol"><span class="ist-rm-stip" style="background:'+kl+'"></span>'+esc(rol.naam||r)+'</th>';
   });
-  h += '</tr></thead><tbody>';
-
-  modules.forEach(function(mod, mi){
-    h += '<tr style="'+(mi%2===0?'background:var(--surface)':'background:var(--surface2)')+';border-bottom:1px solid var(--border)">';
-    h += '<td style="padding:8px 14px;font-size:13px;font-weight:500">'+mod.l+'</td>';
+  _rm += '</tr></thead><tbody>';
+  modules.forEach(function(mod){
+    _rm += '<tr><td class="ist-rm-mod">'+mod.l+'</td>';
     rolNamen.forEach(function(r){
-      var rDef = rollen[r]||{};
-      var rechten = rDef.rechten||{};
-      h += '<td style="padding:6px 10px;text-align:center">';
+      var rechten = (rollen[r]||{}).rechten||{};
+      _rm += '<td class="ist-rm-cel">';
       if(r==='admin'){
-        h += '<span title="Admin: altijd volledige toegang" style="display:inline-flex;align-items:center;justify-content:center">'+
-          '<svg width="16" height="16" fill="var(--accent)" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'+
-          '</span>';
+        _rm += '<span class="ist-rm-ster" title="Admin: altijd volledige toegang"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>';
       } else {
-        h += '<span class="rol-cel">'+_rolLetters(r, mod, rechten, false)+'</span>';
+        _rm += '<span class="rol-cel">'+_rolLetters(r, mod, rechten, false)+'</span>';
       }
-      h += '</td>';
+      _rm += '</td>';
     });
-    h += '</tr>';
+    _rm += '</tr>';
   });
-  h += '</tbody></table></div>';
+  _rm += '</tbody></table></div>';
   // Telefoon: per rol een uitklapbare kaart met de modules eronder (de matrix past daar niet)
   var _chev = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
-  h += '<div class="rol-mob">';
+  _rm += '<div class="rol-mob">';
   rolNamen.forEach(function(r){
     var kl = (rollen[r]||{}).kleur||'#6b7694', rechten = (rollen[r]||{}).rechten||{};
-    if(r==='admin'){ h += '<div class="rol-mk"><div class="rol-mk-kop"><i style="background:'+kl+'"></i><b>'+esc(r)+'</b><small>alle rechten</small></div></div>'; return; }
-    h += '<div class="rol-mk"><button type="button" class="rol-mk-kop" aria-expanded="false"><i style="background:'+kl+'"></i><b>'+esc(r)+'</b>'+_chev+'</button><div class="rol-mk-body" hidden>';
-    modules.forEach(function(mod){ h += '<div class="rol-mk-mod"><span>'+mod.l+'</span><span class="rol-cel">'+_rolLetters(r, mod, rechten, true)+'</span></div>'; });
-    h += '</div></div>';
+    if(r==='admin'){ _rm += '<div class="rol-mk"><div class="rol-mk-kop"><i style="background:'+kl+'"></i><b>'+esc(r)+'</b><small>alle rechten</small></div></div>'; return; }
+    _rm += '<div class="rol-mk"><button type="button" class="rol-mk-kop" aria-expanded="false"><i style="background:'+kl+'"></i><b>'+esc(r)+'</b>'+_chev+'</button><div class="rol-mk-body" hidden>';
+    modules.forEach(function(mod){ _rm += '<div class="rol-mk-mod"><span>'+mod.l+'</span><span class="rol-cel">'+_rolLetters(r, mod, rechten, true)+'</span></div>'; });
+    _rm += '</div></div>';
   });
-  h += '</div>';
+  _rm += '</div>';
+  _rm += '<div class="ist-legenda"><span><b>L</b> lezen</span><span><b>E</b> alleen eigen gegevens</span><span><b>S</b> schrijven en bewerken</span><span><b>B</b> beheren (werkorders)</span><span><b>I</b> inzage alle verzuimdossiers</span><span><b class="ist-rm-ster">★</b> admin heeft altijd alles</span></div>';
+  h += _istKaart('Rechten per module', 'Zet per rol en module aan wat iemand mag. Een gekleurde letter staat aan. Wijzigingen bewaar je met de balk onderin.', _rm, null);
   // Opslagbalk: verschijnt bij een wijziging en blijft onderin in beeld tijdens het scrollen
   h += '<div class="rol-balk" id="rol-balk" role="status"><span class="rol-balk-n" id="rol-balk-n"></span><button type="button" class="btn btn-ghost" id="rol-terug">Ongedaan maken</button><button class="btn btn-primary" id="rol-save">Rechten opslaan</button></div>';
-  h += '<div style="font-size:11px;color:var(--muted);margin-top:8px">L = Lezen &nbsp;·&nbsp; E = Alleen eigen gegevens &nbsp;·&nbsp; S = Schrijven/bewerken &nbsp;·&nbsp; <span style="color:#8b5cf6;font-weight:700">B</span> = Beheren (alleen werkorders) &nbsp;·&nbsp; <span style="color:#ef4444;font-weight:700">I</span> = Inzage alle verzuimdossiers &nbsp;·&nbsp; '+ICO.ster+' = Admin heeft altijd volledige toegang</div>';
+  // Uitleg bij de letters, standaard ingeklapt
+  var _ua = _istAcc(ICO.info, 'Uitleg bij de rechten', 'Wat L, E, S, B en I precies betekenen', '\u0000').split('\u0000');
+  h += _ua[0];
   // Uitleg bij het I-recht: verzuim is AVG-gevoelig, dus inzage is bewust apart.
-  h += '<div style="margin-top:12px;padding:12px 14px;background:var(--surface2);border-radius:8px;border-left:3px solid #ef4444">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:#ef4444">Wat betekent I (Inzage) bij verzuim?</div>';
-  h += '<div style="font-size:12px;color:var(--muted);line-height:1.6">';
-  h += 'Verzuimdossiers bevatten <strong>bijzondere persoonsgegevens</strong> (ziektegegevens). Daarom geeft gewoon lees- of schrijfrecht hier géén inzage in andermans dossiers. Alleen rollen met <strong style="color:#ef4444">I</strong> zien álle verzuimdossiers; zonder dat vinkje ziet een medewerker uitsluitend zijn <em>eigen</em> dossier. Zet I alleen aan voor rollen die dit functioneel nodig hebben (HR, directie).';
+  h += '<div class="ist-uitleg">';
+  h += '<div class="lf-groep">Wat betekent I (Inzage) bij verzuim?</div>';
+  h += '<div class="ist-uitleg-t">';
+  h += 'Verzuimdossiers bevatten <strong>bijzondere persoonsgegevens</strong> (ziektegegevens). Daarom geeft gewoon lees- of schrijfrecht hier géén inzage in andermans dossiers. Alleen rollen met <strong style="color:var(--red-t)">I</strong> zien álle verzuimdossiers; zonder dat vinkje ziet een medewerker uitsluitend zijn <em>eigen</em> dossier. Zet I alleen aan voor rollen die dit functioneel nodig hebben (HR, directie).';
   h += '</div></div>';
   // Uitleg bij het B-recht: het onderscheid uitvoeren vs. beheren is niet vanzelf duidelijk.
-  h += '<div style="margin-top:12px;padding:12px 14px;background:var(--surface2);border-radius:8px;border-left:3px solid #8b5cf6">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:#8b5cf6">Wat betekent B (Beheren) bij werkorders?</div>';
-  h += '<div style="font-size:12px;color:var(--muted);line-height:1.6">';
+  h += '<div class="ist-uitleg">';
+  h += '<div class="lf-groep">Wat betekent B (Beheren) bij werkorders?</div>';
+  h += '<div class="ist-uitleg-t">';
   h += 'Bij werkorders is <strong>S (Schrijven)</strong> het <em>uitvoeren</em> en <strong>B (Beheren)</strong> het <em>regelen</em>. Zo kan een monteur zijn werk volledig invullen en afronden, zonder werkorders te kunnen aanmaken, verwijderen of statussen te forceren.';
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px">';
+  h += '<div class="ist-uitleg-twee">';
   h += '<div><div style="font-weight:700;color:var(--accent);margin-bottom:3px">S — Uitvoeren</div>';
   h += 'Velden invullen · uren, materialen, foto\u2019s en documenten toevoegen · handtekening zetten · blok of werkorder afronden en versturen</div>';
-  h += '<div><div style="font-weight:700;color:#8b5cf6;margin-bottom:3px">B — Beheren</div>';
+  h += '<div><div style="font-weight:700;color:var(--purple-t);margin-bottom:3px">B — Beheren</div>';
   h += 'Werkorder aanmaken en verwijderen · klant, deadline en details wijzigen · prioriteit zetten · status handmatig wisselen · afgeronde werkorders heropenen en terughalen uit het archief · werkdocumenten-map beheren</div>';
   h += '</div>';
-  h += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11px">Werkdocumenten <em>raadplegen</em> kan iedereen met L; alleen uploaden, hernoemen en verwijderen vraagt B.</div>';
+  h += '<div class="ist-uitleg-voet">Werkdocumenten <em>raadplegen</em> kan iedereen met L; alleen uploaden, hernoemen en verwijderen vraagt B.</div>';
   h += '</div></div>';
   // Uitleg bij E en S: de betekenis verschilt per module, met een status-slot bij aanvragen.
-  h += '<div style="margin-top:12px;padding:12px 14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--orange)">';
-  h += '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--orange-t)">Wat betekenen E (Eigen) en S (Schrijven) precies?</div>';
-  h += '<div style="font-size:12px;color:var(--muted);line-height:1.6">';
+  h += '<div class="ist-uitleg">';
+  h += '<div class="lf-groep">Wat betekenen E (Eigen) en S (Schrijven) precies?</div>';
+  h += '<div class="ist-uitleg-t">';
   h += '<strong style="color:var(--accent)">S (Schrijven)</strong> geeft volledige toegang binnen de module: alle records van iedereen zien, aanmaken, bewerken en goedkeuren. <strong style="color:var(--orange-t)">E (Eigen)</strong> beperkt tot de eigen gegevens \u2014 wat \u201ceigen\u201d betekent, verschilt per module:';
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px">';
+  h += '<div class="ist-uitleg-twee">';
   h += '<div><div style="font-weight:700;color:var(--accent);margin-bottom:3px">Werkbonnen</div>';
   h += 'Met E ziet en bewerkt een monteur alleen de werkbonnen die <em>aan hem zijn toegewezen</em> \u2014 niet die van collega\u2019s.</div>';
   h += '<div><div style="font-weight:700;color:var(--accent);margin-bottom:3px">Overuren · Onkosten · Verlof</div>';
   h += 'Met E dient een medewerker zijn <em>eigen</em> aanvragen in en bewerkt of verwijdert ze \u2014 maar alleen zolang de status <em>Aangevraagd</em> is. Na goedkeuring of afwijzing staat de aanvraag op slot; alleen een goedkeurder kan hem dan nog wijzigen.</div>';
   h += '</div>';
-  h += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11px">Verzuim werkt anders: dat kan niet met E worden ingediend. Registreren vraagt <strong style="color:var(--accent)">S</strong> (voor HR/administratie); zonder S ziet een medewerker alleen het feit d\u00e1t er verzuim is en \u2014 met <strong style="color:#ef4444">I</strong> \u2014 de volledige dossiers. Zie de uitleg hierboven.</div>';
+  h += '<div class="ist-uitleg-voet">Verzuim werkt anders: dat kan niet met E worden ingediend. Registreren vraagt <strong style="color:var(--accent)">S</strong> (voor HR/administratie); zonder S ziet een medewerker alleen het feit d\u00e1t er verzuim is en \u2014 met <strong style="color:var(--red-t)">I</strong> \u2014 de volledige dossiers. Zie de uitleg hierboven.</div>';
   h += '</div></div>';
+  h += _ua[1] + '</div>';
   el.innerHTML = h;
+  bindInstAccordions(el);
   // Telefoonkaarten en matrix tonen dezelfde rechten: een letter in de ene zet de andere mee
   el.addEventListener('change', function(e){
     var cb = e.target;
@@ -34389,7 +34484,7 @@ function renderInstRollen(el) {
     b.addEventListener('click',function(){ openRolModal(b.dataset.rol, rollen); });
   });
   el.querySelectorAll('.rol-verwijder').forEach(function(b){
-    b.addEventListener('click',function(){
+    b.addEventListener('click',function(e){ e.stopPropagation();
       bevestigActie('Rol verwijderen','Weet je zeker dat je de rol "'+b.dataset.rol+'" wilt verwijderen? Medewerkers met deze rol verliezen hun rechten.',function(){
         var nieuweRollen = JSON.parse(JSON.stringify(APP.rollen||{}));
         delete nieuweRollen[b.dataset.rol];
@@ -34865,7 +34960,7 @@ function renderInstPlanning(el) {
   var h = '<div class="ist-wrap ist-breed lf">';
 
   // ─── Medewerkers en rollen ───
-  h += _istAccRaster(_ZP_GROEP, 'Medewerkers en rollen', 'Zichtbaar in planning en beschikbaarheidsbalk',
+  h += _istAccEen('plan-rollen-save', _ZP_GROEP, 'Medewerkers en rollen', 'Zichtbaar in planning en beschikbaarheidsbalk',
     _istKaart('Zichtbaar in planning', 'Welke rollen als monteur verschijnen in de week- en dagweergave.', _rolRijen('planrol-cb', planRollen), 'planrol-save')
     + _istKaart('Beschikbaarheidsbalk', 'Welke rollen meetellen in de beschikbaarheid per dag in de lijstweergave.', _rolRijen('beschikbrol-cb', beschikbRollen), 'beschikbrol-save'));
 
@@ -34894,7 +34989,7 @@ function renderInstPlanning(el) {
   var typeRijen = alleOpdrachttypes.length ? alleOpdrachttypes.map(function(ot){
     return _istSchakelRij(_istKleurIc(ot.kleur), esc(ot.label), '', 'class="servicetype-cb" data-id="'+esc(ot.id)+'" aria-label="'+esc(ot.label)+'"', serviceTypes.indexOf(ot.id)>=0);
   }).join('') : '<p class="lf-leeg">Nog geen opdrachttypes. Maak ze aan onder Opdrachttypes.</p>';
-  h += _istAccRaster(_ZP_CONTRACT, 'Servicecontract planning', 'Opdrachttypes, termijnen en speelruimte jaarplanner',
+  h += _istAccEen('plan-service-save', _ZP_CONTRACT, 'Servicecontract planning', 'Opdrachttypes, termijnen en speelruimte jaarplanner',
     _istKaart('Opdrachttypes voor servicecontracten', 'Alleen deze types herkent de auto-planner bij de dubbelcheck en bij het berekenen van de volgende beurtdatum.', typeRijen, alleOpdrachttypes.length ? 'servicetype-save' : null)
     + _istKaart('Termijnen', 'Wanneer een serviceklant als vervallen telt, en hoe ver vooruit het beschikbaarheidsoverzicht kijkt bij opnieuw inplannen.',
         lfRij(ICO.clock, 'Vervallen marge', _istStap('id="plan-marge"', marge, 0, 12, 1, 'Vervallen marge', 'mnd'), {voor:'plan-marge', sub:'Maanden na de beurtdatum'})
@@ -34909,7 +35004,7 @@ function renderInstPlanning(el) {
 
   // ─── Reistijden ───
   var _stKleur = {klaargezet:'#6b7694', ingepland:'#4f6ef5', actie_vereist:'#f59e0b', afgehandeld:'#10b981', gereserveerd:'#8b5cf6'};
-  h += _istAccRaster(_ZP_ROUTE, 'Reistijden', 'Bereik, bewaartermijn en tonen bij status',
+  h += _istAccEen('plan-reistijd-save', _ZP_ROUTE, 'Reistijden', 'Bereik, bewaartermijn en tonen bij status',
     _istKaart('Bereik en bewaartermijn', 'Bewaarde routes staan direct in beeld zonder op Google te wachten.',
         lfRij(_ZP_KAL, 'Berekenen', _istStap('id="rt-dagen-vooruit"', getReistijdDagenVooruit(), 0, 60, 1, 'Vooruit berekenen', 'dgn'), {voor:'rt-dagen-vooruit', sub:'Dagen vooruit'})
         + lfRij(ICO.clock, 'Bewaren', _istStap('id="rt-cache-dagen"', getReistijdCacheDagen(), 1, 30, 1, 'Bewaren', 'dgn'), {voor:'rt-cache-dagen', sub:'Maximaal 30'})
@@ -34925,6 +35020,7 @@ function renderInstPlanning(el) {
   el.innerHTML = h;
   lfBind(el.querySelector('.ist-wrap'), el.querySelector('#planrol-save'));
   bindInstAccordions(el);
+  _istBindBlokOpslaan(el);
 
   // ── Event handlers ──────────────────────────────────────────
 
@@ -35110,13 +35206,45 @@ function renderInstTeam(el) {
   h += '</div>';
   el.innerHTML = h;
   lfBind(el.querySelector('.ist-wrap'), el.querySelector('#ti-verlof-save'));
+  // Na opslaan alleen de afgeleide teksten bijwerken: opnieuw tekenen zou niet-opgeslagen invoer in de andere kaart wissen
+  function _tiOmrekening(wu){
+    var sm = el.querySelector('#ti-urenperdag').closest('.lf-rij').querySelector('.lf-l small');
+    if(sm) sm.textContent = '4 uur = '+_r1(4/wu)+' dag \u00b7 '+_r1(wu)+' uur = 1 dag';
+  }
+  function _tiUren(){
+    el.querySelectorAll('.ti-dag-rij').forEach(function(rij){
+      var u = nettoUrenDag(rij.dataset.dag), sp = rij.querySelector('.ist-uren');
+      if(sp) sp.textContent = u ? _r1(u)+' u' : '\u2014';
+    });
+  }
+  // Pauzes zoals ze nu op het scherm staan, ook als ze nog niet zijn opgeslagen
+  function _tiPauzesUitScherm(){
+    var vs = el.querySelectorAll('.ti-pauze-van'), ts = el.querySelectorAll('.ti-pauze-tot');
+    pauzes = [].map.call(vs, function(v, i){ return {van:v.value, tot:(ts[i]||{}).value||''}; });
+  }
+  // Pauze toevoegen/verwijderen tekent opnieuw; neem de invoer van verlof en werkdagen mee
+  function _tiHerteken(){
+    var v = {}, d = {};
+    el.querySelectorAll('#ti-verlofbasis,#ti-urenperdag').forEach(function(i){ v[i.id] = i.value; });
+    el.querySelectorAll('.ti-dag-rij').forEach(function(r){ d[r.dataset.dag] = [r.querySelector('.ti-dag-actief').checked, r.querySelector('.ti-dag-van').value, r.querySelector('.ti-dag-tot').value]; });
+    renderInstTeam(el);
+    Object.keys(v).forEach(function(id){ var i = el.querySelector('#'+id); if(i) i.value = v[id]; });
+    el.querySelectorAll('.ti-dag-rij').forEach(function(r){
+      var x = d[r.dataset.dag]; if(!x) return;
+      r.querySelector('.ti-dag-van').value = x[1]; r.querySelector('.ti-dag-tot').value = x[2];
+      var cb = r.querySelector('.ti-dag-actief');
+      if(cb.checked !== x[0]){ cb.checked = x[0]; cb.dispatchEvent(new Event('change')); }
+    });
+    _instVuilTonen();
+  }
 
   el.querySelector('#ti-verlof-save').addEventListener('click',function(){
     var vb=parseFloat(document.getElementById('ti-verlofbasis').value)||25;
     var wu=parseFloat(document.getElementById('ti-urenperdag').value)||8;
     if(!APP.teamInstellingen) APP.teamInstellingen={};
     APP.teamInstellingen.verlofBasis=vb; APP.teamInstellingen.werkUrenPerDag=wu;
-    _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen')).update({verlofBasis:vb,werkUrenPerDag:wu}), 'Verlofbasis opgeslagen'); renderInstTeam(el);
+    _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen')).update({verlofBasis:vb,werkUrenPerDag:wu}), 'Verlofbasis opgeslagen');
+    _tiOmrekening(wu);
   });
   el.querySelector('#ti-werktijd-save').addEventListener('click',function(){
     var nt={};
@@ -35127,7 +35255,8 @@ function renderInstTeam(el) {
     vs.forEach(function(v,i){if(v.value&&ts[i]&&ts[i].value)np.push({van:v.value,tot:ts[i].value});});
     if(!APP.teamInstellingen) APP.teamInstellingen={};
     APP.teamInstellingen.werktijdenPerDag=nt; APP.teamInstellingen.pauzes=np;
-    _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen')).update({werktijdenPerDag:nt,pauzes:np}), 'Werktijden opgeslagen'); renderInstTeam(el);
+    _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen')).update({werktijdenPerDag:nt,pauzes:np}), 'Werktijden opgeslagen');
+    stdWerktijden = nt; pauzes = np; _tiUren();
   });
   el.querySelectorAll('.ti-dag-actief').forEach(function(cb){
     cb.addEventListener('change',function(){
@@ -35140,18 +35269,20 @@ function renderInstTeam(el) {
   });
   el.querySelectorAll('.ti-pauze-del').forEach(function(btn){
     btn.addEventListener('click',function(){
+      _tiPauzesUitScherm();
       pauzes.splice(parseInt(btn.dataset.idx),1);
       if(!APP.teamInstellingen) APP.teamInstellingen={};
       APP.teamInstellingen.pauzes=pauzes;
-      _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen','pauzes')).set(pauzes));
-      renderInstTeam(el);
+      _instBevestig(FB.ref(dbPath('instellingen','teamInstellingen','pauzes')).set(pauzes.filter(function(p){ return p.van && p.tot; })));
+      _tiHerteken();
     });
   });
   el.querySelector('#ti-pauze-add').addEventListener('click',function(){
+    _tiPauzesUitScherm();
     pauzes.push({van:'',tot:''});
     if(!APP.teamInstellingen) APP.teamInstellingen={};
     APP.teamInstellingen.pauzes=pauzes;
-    renderInstTeam(el);
+    _tiHerteken();
   });
 }
 
@@ -36130,74 +36261,27 @@ function renderInstWerkbonnen(el) {
   var alleRollen = Object.keys(APP.rollen||{});
   if(!alleRollen.length) alleRollen=['admin','planner','monteur','extern','verkoop','administratie','magazijn'];
 
-  var _icoRol  = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
-  var _icoLijst= '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>';
-
-  // ── Groep: Rechten & rollen ──
-  var rBody = '<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Welke rollen voeren werkbonnen uit? Deze rollen zijn te kiezen bij het aanmaken van een werkbon en bij het registreren van uren. Kantoorrollen wil je hier meestal niet in.</p>';
-  rBody += '<div style="display:flex;flex-direction:column;gap:8px">';
-  alleRollen.forEach(function(r){
-    var checked = (wbi.urenRollen||[]).indexOf(r)>=0;
-    var rol = (APP.rollen||{})[r]||{};
-    var kl = rol.kleur||'#6b7694';
-    rBody += '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-    rBody += '<input type="checkbox" class="wbi-urenrol-cb" data-rol="'+r+'"'+(checked?' checked':'')+' style="width:15px;height:15px">';
-    rBody += '<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+'">'+esc(r)+'</span>';
-    rBody += '<span style="font-size:13px">'+esc(rol.naam||r)+'</span></label>';
-  });
-  rBody += '</div><button class="btn btn-primary btn-sm" id="wbi-urenrol-save" style="margin-top:14px">Opslaan</button>';
-  var h = '<div style="display:flex;flex-direction:column;gap:16px">';
-  // Reistijd apart bijhouden is niet voor iedereen zinvol; standaard uit.
-  var reisBody = '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:9px;cursor:pointer">'
-    + '<input type="checkbox" id="wbi-reistijd"'+(reistijdAan()?' checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)">'
-    + '<span><span style="font-size:13px;font-weight:600">Reistijd apart bijhouden</span>'
-    + '<span style="display:block;font-size:12px;color:var(--muted);margin-top:2px">De monteur kiest bij het starten van de timer tussen werktijd en reistijd. Reistijd komt als aparte regel op de werkbon.</span></span></label>'
-    + '<button class="btn btn-primary btn-sm" id="wbi-reistijd-save" style="margin-top:12px">Opslaan</button>';
-
-  // Nummer uit een ander systeem: elk bedrijf noemt dat anders.
-  var extBody = '<p style="font-size:12.5px;color:var(--muted);margin-bottom:10px">Naam van het veld waarin het nummer uit je eigen systeem staat — bijvoorbeeld het ordernummer uit je ERP. Het veld verschijnt bij een opdracht, op de werkbon en op de PDF.</p>'
-    + '<input class="input" id="wbi-externnr-lbl" value="'+esc(externNrLabel())+'" maxlength="30" placeholder="Extern nummer" style="max-width:260px">'
-    + '<button class="btn btn-primary btn-sm" id="wbi-externnr-save" style="margin-top:12px;display:block">Opslaan</button>';
-
-  h += instAcc(_icoRol, 'Rechten & rollen', '', '<div class="card">'+instBlokTitel('Uitvoerende rollen')+rBody+'</div>'
-       + '<div class="card">'+instBlokTitel('Reistijd')+reisBody+'</div>'
-       + '<div class="card">'+instBlokTitel('Extern nummer')+extBody+'</div>', true);
-
-  // ── Groep: Weergave ──
-  var _icoOog = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-  var globaalAan = !(wbi.prijzenTonen===false);
-  var wBody = '<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Bepaalt of prijzen en totalen standaard op de werkbon getoond worden. De monteur kan dit per werkbon nog aan- of uitzetten.</p>';
-  wBody += '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-  wBody += '<input type="checkbox" id="wbi-prijzen"'+(globaalAan?' checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)">';
-  wBody += '<span style="font-size:13px">Prijzen tonen op werkbon (standaard)</span></label>';
-  h += instAcc(_icoOog, 'Weergave', '', '<div class="card">'+instBlokTitel('Prijzen')+wBody+'</div>', true);
-
-  // ── Groep: PDF-opmaak ──
-  var _icoPdf = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>';
-  h += instAcc(_icoPdf, 'PDF-opmaak (werkbon)', 'kleuren, logo, titel, secties', '<div class="card">'+_pdfWerkbonUIhtml()+'</div>', true);
-
-  // ── Groep: E-mail ──
-  var _icoMail = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M22 6l-10 7L2 6"/></svg>';
   var _wbi = APP.werkbonnenInst || {};
-  var mBody2 = '<p style="font-size:13px;color:var(--muted);margin-bottom:6px">Onderwerp, bericht en afsluiting van de e-mail waarmee de werkbon (als PDF-bijlage) wordt verstuurd.</p>';
-  mBody2 += '<div style="font-size:11px;color:var(--muted);margin-bottom:14px">Beschikbare velden: <code>{klantNaam}</code> <code>{contactNaam}</code> <code>{datum}</code> <code>{bonnummer}</code> <code>{typeWerk}</code> <code>{monteur}</code> <code>{bedrijfsnaam}</code></div>';
-  mBody2 += '<label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Onderwerp</label>';
-  mBody2 += '<input class="input" id="wbi-mail-onderwerp" type="text" value="'+esc(_wbi.mailOnderwerp||WB_MAIL_DEFAULT.onderwerp)+'" style="margin-bottom:12px">';
-  mBody2 += '<label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Bericht</label>';
-  mBody2 += '<textarea class="input" id="wbi-mail-body" rows="5" style="margin-bottom:12px">'+esc(_wbi.mailBody||WB_MAIL_DEFAULT.body)+'</textarea>';
-  mBody2 += '<label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Afsluiting / handtekening</label>';
-  mBody2 += '<textarea class="input" id="wbi-mail-handtekening" rows="3" style="margin-bottom:14px">'+esc(_wbi.mailHandtekening!=null?_wbi.mailHandtekening:WB_MAIL_DEFAULT.handtekening)+'</textarea>';
-  mBody2 += '<div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" id="wbi-mail-save">Opslaan</button><button class="btn btn-ghost btn-sm" id="wbi-mail-herstel">Terug naar standaard</button></div>';
-  h += instAcc(_icoMail, 'E-mail (werkbon versturen)', 'onderwerp, bericht, afsluiting', '<div class="card">'+mBody2+'</div>', true);
-
-  // ── Groep: Checklists / formulieren ──
-  var cBody = '<p style="font-size:13px;color:var(--muted);margin-bottom:14px">Beheer de checklist-/formuliersjablonen die aan opdrachten of werkbonnen gekoppeld kunnen worden (bijv. "Onderhoud — 1 pomp in put").</p>';
-  cBody += '<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-primary btn-sm" id="wbi-cl-nieuw">+ Nieuw sjabloon</button></div>';
-  cBody += '<div id="wbi-cl-lijst"><div style="font-size:12px;color:var(--muted)">Laden…</div></div>';
-  h += instAcc(_icoLijst, 'Checklists / formulieren', '', '<div class="card">'+cBody+'</div>', true);
+  var _ZP_MAILIC = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M22 6l-10 7L2 6"/></svg>';
+  var h = '<div class="ist-wrap ist-breed lf">';
+  h += _istAccEen('wbi-uitvoering-save', _ZP_SCHILD, 'Uitvoering', 'Uitvoerende rollen, reistijd en extern nummer',
+    _istKaart('Uitvoerende rollen', 'Te kiezen bij het aanmaken van een werkbon en bij het registreren van uren. Kantoorrollen wil je hier meestal niet in.', _istRolSchakels('wbi-urenrol-cb', wbi.urenRollen), 'wbi-urenrol-save')
+    + _istKaart('Reistijd', '', _istSchakelRij(_lfIco(_ZP_ROUTE), 'Reistijd apart bijhouden', 'De monteur kiest bij het starten van de timer tussen werktijd en reistijd; reistijd komt als aparte regel op de werkbon.', 'id="wbi-reistijd"', reistijdAan()), 'wbi-reistijd-save')
+    + _istKaart('Extern nummer', 'Naam van het veld voor het nummer uit je eigen systeem, bijvoorbeeld het ordernummer uit je ERP. Het veld verschijnt bij een opdracht, op de werkbon en op de pdf.',
+        lfRij(_ZP_LABEL, 'Veldnaam', '<input class="lf-tekst" id="wbi-externnr-lbl" value="'+esc(externNrLabel())+'" maxlength="30" placeholder="Extern nummer">', {voor:'wbi-externnr-lbl'}), 'wbi-externnr-save'));
+  h += _istAcc(_ZP_OOG, 'Weergave', 'Prijzen op de werkbon',
+    _istSchakelRij(_lfIco('<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'), 'Prijzen tonen op werkbon', 'Standaard voor nieuwe werkbonnen; de monteur kan het per werkbon aan- of uitzetten. Wordt direct opgeslagen.', 'id="wbi-prijzen"', !(wbi.prijzenTonen===false)));
+  h += _istAcc(_ZP_DOC, 'PDF-opmaak', 'Kleuren, kopregel, logo, secties en voettekst', _pdfWerkbonUIhtml());
+  h += _istAcc(_ZP_MAILIC, 'E-mail', 'De mail waarmee de werkbon als pdf wordt verstuurd',
+    _istMailVelden('wbi', _wbi, WB_MAIL_DEFAULT, ['klantNaam','contactNaam','datum','bonnummer','typeWerk','monteur','bedrijfsnaam','samenvatting']));
+  h += _istAcc(_ZP_CHECK, 'Checklists en formulieren', 'Sjablonen om aan opdrachten of werkbonnen te koppelen',
+    '<p class="lf-uitleg">Bijvoorbeeld "Onderhoud — 1 pomp in put". Werkbonnen die een sjabloon al gebruiken, houden hun eigen kopie.</p>'
+    + '<div id="wbi-cl-lijst"><p class="lf-leeg">Laden…</p></div>' + _zpToevoeg('wbi-cl-nieuw', 'Sjabloon toevoegen'));
   h += '</div>';
   el.innerHTML = h;
   bindInstAccordions(el);
+  lfBind(el.querySelector('.ist-wrap'), el.querySelector('#wbi-urenrol-save'));
+  _istBindBlokOpslaan(el);
   _bindPdfTemplateWerkbon(el);
 
   // Rollen opslaan
@@ -36267,7 +36351,7 @@ function renderInstWerkbonnen(el) {
     _renderChecklistTemplateLijst(el);
   }).catch(function(e){
     var lijstEl = el.querySelector('#wbi-cl-lijst');
-    if(lijstEl) lijstEl.innerHTML = '<div style="font-size:12px;color:var(--red)">Laden mislukt: '+esc(e.message||e)+'</div>';
+    if(lijstEl) lijstEl.innerHTML = _zpMelding('waarschuwing', 'Laden mislukt', esc(e.message||e));
   });
 
   var nieuwBtn = el.querySelector('#wbi-cl-nieuw');
@@ -39328,69 +39412,24 @@ function renderInstWerkorders(el) {
   var alleRollen = Object.keys(APP.rollen||{});
   if(!alleRollen.length) alleRollen=['admin','planner','monteur','extern','verkoop','administratie','magazijn'];
 
-  var _icoRol = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
-  var _icoOog = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-  var _icoLijst = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>';
-
-  var h = '<div style="display:flex;flex-direction:column;gap:16px">';
-
-  // ── Rechten & rollen (uren-registratie) ──
-  var rBody = '<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Welke rollen mogen als medewerker gekozen worden bij het registreren van uren op een werkorder? (Kantoorrollen wil je hier meestal niet in.)</p>';
-  rBody += '<div style="display:flex;flex-direction:column;gap:8px">';
-  alleRollen.forEach(function(r){
-    var checked = (woi.urenRollen||[]).indexOf(r)>=0;
-    var rol = (APP.rollen||{})[r]||{};
-    var kl = rol.kleur||'#6b7694';
-    rBody += '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-    rBody += '<input type="checkbox" class="woi-urenrol-cb" data-rol="'+r+'"'+(checked?' checked':'')+' style="width:15px;height:15px">';
-    rBody += '<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+'">'+esc(r)+'</span>';
-    rBody += '<span style="font-size:13px">'+esc(rol.naam||r)+'</span></label>';
-  });
-  rBody += '</div><button class="btn btn-primary btn-sm" id="woi-urenrol-save" style="margin-top:14px">Opslaan</button>';
-  h += instAcc(_icoRol, 'Rechten & rollen', 'uren-registratie', '<div class="card">'+instBlokTitel('Uren-registratie')+rBody+'</div>', true);
-
-  // ── Weergave (prijzen) ──
-  var globaalAan = !(woi.prijzenTonen===false);
-  var wBody = '<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Bepaalt of materiaalprijzen en totalen op de werkorder en op de PDF getoond worden.</p>';
-  wBody += '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-  wBody += '<input type="checkbox" id="woi-prijzen"'+(globaalAan?' checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)">';
-  wBody += '<span style="font-size:13px">Prijzen tonen op werkorder</span></label>';
-
-  // Dringend-termijn (gebruikt door de dashboard-tegel)
+  var _ZP_MAILIC = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M22 6l-10 7L2 6"/></svg>';
   var _dringD = (woi.dringendDagen!=null) ? woi.dringendDagen : 7;
-  var dBody = '<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Een werkorder is dringend bij <strong>hoge prioriteit</strong>, een <strong>verstreken deadline</strong>, of een deadline die binnen het aantal dagen hieronder valt. Dringende werkorders verschijnen op het dashboard.</p>';
-  dBody += '<label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Deadline binnen (dagen)</label>';
-  dBody += '<input class="input" id="woi-dringend-dagen" type="number" min="0" max="365" value="'+esc(String(_dringD))+'" style="max-width:120px">';
-  dBody += '<div style="font-size:11px;color:var(--muted);margin-top:6px">0 = alleen verstreken deadlines en hoge prioriteit tellen mee.</div>';
-
-  h += instAcc(_icoOog, 'Weergave', 'prijzen, dringend', '<div class="card">'+instBlokTitel('Prijzen')+wBody+instBlokTitel('Dringende werkorders')+dBody+'</div>', true);
-
-  // ── E-mail (werkorder versturen) ──
-  var _icoMail = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M22 6l-10 7L2 6"/></svg>';
-  var mBody = '<p style="font-size:13px;color:var(--muted);margin-bottom:6px">Onderwerp, bericht en afsluiting van de e-mail waarmee een werkorder (als PDF-bijlage) wordt verstuurd.</p>';
-  mBody += '<div style="font-size:11px;color:var(--muted);margin-bottom:14px">Beschikbare velden: <code>{klantNaam}</code> <code>{contactNaam}</code> <code>{datum}</code> <code>{bonnummer}</code> <code>{typeWerk}</code> <code>{bedrijfsnaam}</code></div>';
-  mBody += '<label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Onderwerp</label>';
-  mBody += '<input class="input" id="woi-mail-onderwerp" type="text" value="'+esc(woi.mailOnderwerp||WO_MAIL_DEFAULT.onderwerp)+'" style="margin-bottom:12px">';
-  mBody += '<label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Bericht</label>';
-  mBody += '<textarea class="input" id="woi-mail-body" rows="5" style="margin-bottom:12px">'+esc(woi.mailBody||WO_MAIL_DEFAULT.body)+'</textarea>';
-  mBody += '<label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Afsluiting / handtekening</label>';
-  mBody += '<textarea class="input" id="woi-mail-handtekening" rows="3" style="margin-bottom:14px">'+esc(woi.mailHandtekening!=null?woi.mailHandtekening:WO_MAIL_DEFAULT.handtekening)+'</textarea>';
-  mBody += '<div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" id="woi-mail-save">Opslaan</button><button class="btn btn-ghost btn-sm" id="woi-mail-herstel">Terug naar standaard</button></div>';
-  h += instAcc(_icoMail, 'E-mail (werkorder versturen)', 'onderwerp, bericht, afsluiting', '<div class="card">'+mBody+'</div>', true);
-
-  // ── PDF-opmaak (werkorder) ──
-  var _icoPdfWo = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>';
-  h += instAcc(_icoPdfWo, 'PDF-opmaak (werkorder)', 'kleuren, logo, titel', '<div class="card">'+_pdfWerkorderUIhtml()+'</div>', true);
-
-  // ── Werkorder-typen ──
-  var tBody = '<div style="font-size:13px;color:var(--muted);margin-bottom:16px;max-width:620px">Stel hier je eigen werkorder-typen samen — bijvoorbeeld reparatie, onderhoud of productie. Elk type krijgt een eigen statusflow en eigen velden.</div>';
-  tBody += '<div id="wo-typen-lijst"><div style="font-size:12px;color:var(--muted);padding:8px 0">Laden…</div></div>';
-  tBody += '<button class="btn btn-primary btn-sm" id="wo-type-nieuw" style="margin-top:14px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:5px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span style="vertical-align:middle">Type toevoegen</span></button>';
-  h += instAcc(_icoLijst, 'Werkorder-typen', 'reparatie, onderhoud, productie', '<div class="card">'+tBody+'</div>', true);
-
+  var h = '<div class="ist-wrap ist-breed lf">';
+  h += _istAcc(_ZP_SCHILD, 'Uren registreren', 'Welke rollen uren op een werkorder kunnen boeken',
+    _istKaart('Uitvoerende rollen', 'Deze rollen zijn te kiezen als medewerker bij het registreren van uren. Kantoorrollen wil je hier meestal niet in.', _istRolSchakels('woi-urenrol-cb', woi.urenRollen), 'woi-urenrol-save'));
+  h += _istAccRaster(_ZP_OOG, 'Weergave', 'Prijzen en dringende werkorders',
+    _istKaart('Prijzen', '', _istSchakelRij(_lfIco('<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>'), 'Prijzen tonen op werkorder', 'Materiaalprijzen en totalen op de werkorder en de pdf. Wordt direct opgeslagen.', 'id="woi-prijzen"', !(woi.prijzenTonen===false)), null)
+    + _istKaart('Dringende werkorders', 'Dringend is: hoge prioriteit, een verstreken deadline, of een deadline binnen het aantal dagen hieronder. Ze verschijnen op het dashboard.',
+        lfRij(_ZP_KAL, 'Deadline binnen', _istStap('id="woi-dringend-dagen"', _dringD, 0, 365, 1, 'Deadline binnen', 'dgn'), {voor:'woi-dringend-dagen', sub:'0 = alleen verstreken en hoge prioriteit'}), null));
+  h += _istAcc(_ZP_MAILIC, 'E-mail', 'De mail waarmee een werkorder als pdf wordt verstuurd',
+    _istMailVelden('woi', woi, WO_MAIL_DEFAULT, ['klantNaam','contactNaam','datum','bonnummer','typeWerk','bedrijfsnaam']));
+  h += _istAcc(_ZP_DOC, 'PDF-opmaak', 'Kleuren, kopregel, logo, voettekst en bestandsnaam', _pdfWerkorderUIhtml());
+  h += _istAcc(_ZP_LIJST, 'Werkorder-typen', 'Eigen typen met een eigen statusflow en eigen velden',
+    '<p class="lf-uitleg">Bijvoorbeeld reparatie, onderhoud of productie.</p><div id="wo-typen-lijst"><p class="lf-leeg">Laden…</p></div>' + _zpToevoeg('wo-type-nieuw', 'Type toevoegen'));
   h += '</div>';
   el.innerHTML = h;
   bindInstAccordions(el);
+  lfBind(el.querySelector('.ist-wrap'), el.querySelector('#woi-urenrol-save'));
   if(typeof _bindPdfTemplateWerkorder==='function') _bindPdfTemplateWerkorder(el);
 
   _woRenderTypenLijst();
@@ -39416,11 +39455,14 @@ function renderInstWerkorders(el) {
 
   // Dringend-termijn (direct opslaan)
   var dringInp = el.querySelector('#woi-dringend-dagen');
+  var _dringT;
+  if(dringInp) dringInp.addEventListener('input', function(){ clearTimeout(_dringT); _dringT = setTimeout(function(){ dringInp.dispatchEvent(new Event('change')); }, 600); });
   if(dringInp) dringInp.addEventListener('change', function(){
     var v = parseInt(dringInp.value);
     if(isNaN(v) || v < 0) v = 7;
     if(v > 365) v = 365;
     dringInp.value = v;
+    if(APP.werkordersInst && APP.werkordersInst.dringendDagen === v) return;
     if(!APP.werkordersInst) APP.werkordersInst={};
     APP.werkordersInst.dringendDagen = v;
     _instBevestig(FB.ref(dbPath('instellingen','werkordersInst','dringendDagen')).set(v), 'Opgeslagen');
@@ -39451,22 +39493,14 @@ function _woRenderTypenLijst() {
   var wrap = document.getElementById('wo-typen-lijst'); if(!wrap) return;
   laadWerkorderTypenCache(true).then(function(typen){
     if(!typen.length){
-      wrap.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:16px;background:var(--surface2);border-radius:10px;text-align:center">Nog geen werkorder-typen. Voeg je eerste type toe om te beginnen.</div>';
+      wrap.innerHTML = '<p class="lf-leeg">Nog geen werkorder-typen. Voeg je eerste type toe om te beginnen.</p>';
       return;
     }
-    var h = '<div style="display:flex;flex-direction:column;gap:8px">';
+    var h = '';
     typen.forEach(function(t){
-      var icoSvg = _woTypeIcoon(t.icoon);
-      h += '<div class="card wo-type-rij" data-id="'+esc(t.id)+'" style="display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer">';
-      h += '<span style="display:flex;color:var(--accent);flex-shrink:0">'+icoSvg+'</span>';
-      h += '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">'+esc(t.naam||'Naamloos')+'</div>';
-      if(t.labelEnkelvoud||t.labelMeervoud) h += '<div style="font-size:11px;color:var(--muted)">Label: '+esc(t.labelEnkelvoud||'')+(t.labelMeervoud?(' / '+esc(t.labelMeervoud)):'')+'</div>';
-      h += '</div>';
-      if(t.actief===false) h += '<span class="tag tag-muted" style="font-size:10px">Inactief</span>';
-      h += '<svg width="16" height="16" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M9 18l6-6-6-6"/></svg>';
-      h += '</div>';
+      h += _istNavRij('wo-type-rij', 'data-id="'+esc(t.id)+'"', _lfIco(_woTypeIcoon(t.icoon)), esc(t.naam||'Naamloos')+(t.actief===false ? ' <span class="zp-tag zp-tag-grijs">Inactief</span>' : ''),
+        (t.labelEnkelvoud||t.labelMeervoud) ? 'Label: '+esc(t.labelEnkelvoud||'')+(t.labelMeervoud?(' / '+esc(t.labelMeervoud)):'') : '', '');
     });
-    h += '</div>';
     wrap.innerHTML = h;
     wrap.querySelectorAll('.wo-type-rij').forEach(function(r){
       r.addEventListener('click', function(){
@@ -39475,7 +39509,7 @@ function _woRenderTypenLijst() {
       });
     });
   }).catch(function(e){
-    wrap.innerHTML = '<div style="font-size:12px;color:var(--red);padding:8px 0">Laden mislukt: '+esc(e.message||String(e))+'</div>';
+    wrap.innerHTML = _zpMelding('waarschuwing', 'Laden mislukt', esc(e.message||String(e)));
   });
 }
 
@@ -40182,22 +40216,16 @@ function _renderChecklistTemplateLijst(el){
   var lijstEl = (el||document).querySelector('#wbi-cl-lijst');
   if(!lijstEl) return;
   if(!_instChecklistTemplates.length){
-    lijstEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">Nog geen sjablonen aangemaakt.</div>';
+    lijstEl.innerHTML = '<p class="lf-leeg">Nog geen sjablonen.</p>';
     return;
   }
-  var h = '<div style="display:flex;flex-direction:column;gap:8px">';
+  var h = '';
   _instChecklistTemplates.forEach(function(t){
     var aantal = (t.velden||[]).filter(function(v){ return v.type!=='header' && v.type!=='paragraaf' && v.type!=='paginaeinde'; }).length;
-    h += '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface2);border-radius:8px">';
-    h += '<div style="flex:1;min-width:0">';
-    h += '<div style="font-size:13px;font-weight:700">'+esc(t.naam||'(naamloos)')+'</div>';
-    h += '<div style="font-size:11px;color:var(--muted)">'+aantal+(aantal===1?' vraag':' vragen')+(t.omschrijving?(' \u00b7 '+esc(t.omschrijving)):'')+'</div>';
-    h += '</div>';
-    h += '<button class="btn btn-ghost btn-sm wbi-cl-bewerk" data-id="'+esc(t.id)+'">Bewerken</button>';
-    h += '<button class="btn btn-ghost btn-sm wbi-cl-verwijder btn-wis" data-id="'+esc(t.id)+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-    h += '</div>';
+    h += _istNavRij('wbi-cl-bewerk', 'data-id="'+esc(t.id)+'"', _lfIco(_ZP_CHECK), esc(t.naam||'(naamloos)'),
+      aantal+(aantal===1?' vraag':' vragen')+(t.omschrijving?(' · '+esc(t.omschrijving)):''),
+      '<button type="button" class="btn btn-ghost btn-wis btn-icoon wbi-cl-verwijder" data-id="'+esc(t.id)+'" aria-label="Sjabloon verwijderen" title="Verwijderen">'+ICO.trash+'</button>');
   });
-  h += '</div>';
   lijstEl.innerHTML = h;
 
   lijstEl.querySelectorAll('.wbi-cl-bewerk').forEach(function(b){
@@ -40207,7 +40235,7 @@ function _renderChecklistTemplateLijst(el){
     });
   });
   lijstEl.querySelectorAll('.wbi-cl-verwijder').forEach(function(b){
-    b.addEventListener('click', function(){
+    b.addEventListener('click', function(e){ e.stopPropagation();
       var t = _instChecklistTemplates.find(function(x){ return x.id===b.dataset.id; });
       bevestigActie('Sjabloon verwijderen', 'Weet je zeker dat je "'+(t?t.naam:'')+'" wilt verwijderen? Werkbonnen die dit sjabloon al gebruiken, behouden hun eigen kopie.', function(){
         fsChecklistTemplateVerwijderen(b.dataset.id).then(function(){
@@ -40575,37 +40603,15 @@ var _pdfWbSecLabels = {
 };
 function _pdfWerkorderUIhtml(){
   var t = getPdfTemplateWerkorder();
-  var b = '<p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kleuren, kopregel, logo en voettekst voor de werkorder-PDF. De volgorde van de inhoud volgt de opbouw van elk werkorder-type.</p>';
-  b += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start" class="pdf-tpl-grid">';
-  b += '<div>';
-  b += '<div style="font-weight:600;font-size:13px;margin-bottom:8px">Kleuren</div>';
-  [['accent','Accent (koppen)'],['tekst','Tekstkleur'],['label','Labelkleur'],['lijn','Lijnkleur']].forEach(function(kv){
-    b += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">'+kv[1]+'</span>';
-    b += '<input type="color" class="pto-kleur" data-veld="'+kv[0]+'" value="'+esc(t[kv[0]])+'" style="width:44px;height:30px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;padding:2px"></div>';
-  });
-  b += '<div style="font-weight:600;font-size:13px;margin:16px 0 8px">Kopregel</div>';
-  b += '<label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Titel</label>';
-  b += '<input class="input" id="pto-titel" type="text" value="'+esc(t.titel)+'" placeholder="WERKORDER" style="margin-bottom:4px">';
-  b += '<div style="font-size:11px;color:var(--muted);margin-bottom:12px">Leeg of "WERKORDER" = gebruik de naam van het type als titel.</div>';
-  b += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="pto-logo-tonen"'+(t.logoTonen?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent)"><span style="font-size:13px">Logo tonen (linksboven)</span></label>';
-  b += '<div id="pto-logo-blok" style="margin:0 0 12px 23px'+(t.logoTonen?'':';display:none')+'">';
-  b += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  b += '<div id="pto-logo-preview" style="height:40px;min-width:60px;border:1px solid var(--border);border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px">'+(t.logoData?'<img src="'+esc(t.logoData)+'" style="max-height:34px;max-width:100px;object-fit:contain">':'<span style="font-size:11px;color:var(--muted)">Bedrijfslogo</span>')+'</div>';
-  b += '<button class="btn btn-ghost btn-sm" id="pto-logo-upload">Eigen logo</button>';
-  b += '<button class="btn btn-ghost btn-sm btn-wis" id="pto-logo-wis" style="color:var(--red)'+(t.logoData?'':';display:none')+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-  b += '<input type="file" id="pto-logo-file" accept="image/png,image/jpeg" style="display:none">';
-  b += '</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Leeg = het bedrijfslogo uit Bedrijfsgegevens.</div></div>';
-  b += '<label style="font-size:12px;color:var(--muted);display:block;margin:12px 0 4px">Voettekst (leeg = bedrijfsnaam + adres)</label>';
-  b += '<input class="input" id="pto-voet" type="text" value="'+esc(t.voettekst)+'" placeholder="bijv. Homa Pompen B.V. \u00b7 Gorinchem" style="margin-bottom:14px">';
-  b += '<label style="font-size:12px;color:var(--muted);display:block;margin:0 0 4px">Bestandsnaam bij opslaan</label>';
-  b += '<input class="input" id="pto-bestandsnaam" type="text" value="'+esc((APP.werkordersInst&&APP.werkordersInst.pdfBestandsnaam)||'{type}_{nummer}')+'" placeholder="{type}_{nummer}" style="margin-bottom:4px">';
-  b += '<div style="font-size:11px;color:var(--muted);margin-bottom:14px">Beschikbaar: <code>{type}</code> <code>{nummer}</code> <code>{klant}</code> <code>{datum}</code> \u2014 bijv. <em>{type}_{nummer}</em> geeft Reparatie_REP-1001.pdf</div>';
-  b += '<div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" id="pto-opslaan">Template opslaan</button><button class="btn btn-ghost btn-sm" id="pto-herstel">Terug naar standaard</button></div>';
-  b += '</div>';
-  b += '<div><div style="font-weight:600;font-size:13px;margin-bottom:8px">Voorbeeld</div>';
-  b += '<div id="pto-preview" style="background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 6px 20px rgba(20,24,36,.1);aspect-ratio:210/297;overflow:hidden;font-size:8.5px"></div>';
-  b += '<div style="font-size:11px;color:var(--muted);margin-top:6px">Live voorbeeld \u2014 representatief voor de echte PDF.</div></div>';
-  b += '</div>';
+  var b = '<p class="lf-uitleg">De volgorde van de inhoud volgt de opbouw van elk werkorder-type.</p><div class="ist-pdfgrid pdf-tpl-grid"><div>';
+  b += _istPdfKleurenLogo('pto', t);
+  b += lfRij(_ZP_TEKST, 'Titel', '<input class="lf-tekst" id="pto-titel" type="text" value="'+esc(t.titel)+'" placeholder="WERKORDER">', {voor:'pto-titel', sub:'Leeg = naam van het type'});
+  b += _istPdfLogo('pto', t);
+  b += '<div class="lf-groep">Onderaan en bestand</div>';
+  b += lfRij(_ZP_NOTITIE, 'Voettekst', '<input class="lf-tekst" id="pto-voet" type="text" value="'+esc(t.voettekst)+'" placeholder="Bedrijfsnaam · plaats">', {voor:'pto-voet', sub:'Leeg = bedrijfsnaam en adres'});
+  b += lfRij(_ZP_DOC, 'Bestandsnaam', '<input class="lf-tekst ist-mono" id="pto-bestandsnaam" type="text" value="'+esc((APP.werkordersInst&&APP.werkordersInst.pdfBestandsnaam)||'{type}_{nummer}')+'" placeholder="{type}_{nummer}">', {voor:'pto-bestandsnaam', sub:'{type} {nummer} {klant} {datum}'});
+  b += '<div class="ist-voet ist-voet-twee"><button type="button" class="btn btn-ghost ist-knop" id="pto-herstel">Terug naar standaard</button><button type="button" class="btn btn-primary ist-knop" id="pto-opslaan">Template opslaan</button></div>';
+  b += '</div>'+_istPdfVoorbeeld('pto')+'</div>';
   return b;
 }
 
@@ -40691,43 +40697,18 @@ function _bindPdfTemplateWerkorder(el){
 
 function _pdfWerkbonUIhtml(){
   var t = getPdfTemplateWerkbon();
-  var b = '<p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kleuren, kopregel, logo, secties en voettekst voor de veld-werkbon PDF. Los van de andere PDF-templates.</p>';
-  b += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start" class="pdf-tpl-grid">';
-  b += '<div>';
-  b += '<div style="font-weight:600;font-size:13px;margin-bottom:8px">Kleuren</div>';
-  [['accent','Accent (koppen)'],['tekst','Tekstkleur'],['label','Labelkleur'],['lijn','Lijnkleur']].forEach(function(kv){
-    b += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">'+kv[1]+'</span>';
-    b += '<input type="color" class="ptw-kleur" data-veld="'+kv[0]+'" value="'+esc(t[kv[0]])+'" style="width:44px;height:30px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;padding:2px"></div>';
-  });
-  b += '<div style="font-weight:600;font-size:13px;margin:16px 0 8px">Kopregel</div>';
-  b += '<label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Titel</label>';
-  b += '<input class="input" id="ptw-titel" type="text" value="'+esc(t.titel)+'" placeholder="WERKBON" style="margin-bottom:12px">';
-  b += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:8px"><input type="checkbox" id="ptw-logo-tonen"'+(t.logoTonen?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent)"><span style="font-size:13px">Logo tonen (linksboven)</span></label>';
-  b += '<div id="ptw-logo-blok" style="margin:0 0 12px 23px'+(t.logoTonen?'':';display:none')+'">';
-  b += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-  b += '<div id="ptw-logo-preview" style="height:40px;min-width:60px;border:1px solid var(--border);border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;padding:3px">'+(t.logoData?'<img src="'+esc(t.logoData)+'" style="max-height:34px;max-width:100px;object-fit:contain">':'<span style="font-size:11px;color:var(--muted)">Bedrijfslogo</span>')+'</div>';
-  b += '<button class="btn btn-ghost btn-sm" id="ptw-logo-upload">Eigen logo</button>';
-  b += '<button class="btn btn-ghost btn-sm btn-wis" id="ptw-logo-wis" style="color:var(--red)'+(t.logoData?'':';display:none')+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-  b += '<input type="file" id="ptw-logo-file" accept="image/png,image/jpeg" style="display:none">';
-  b += '</div><div style="font-size:11px;color:var(--muted);margin-top:4px">Leeg = het bedrijfslogo uit Bedrijfsgegevens.</div></div>';
-  b += '<div style="font-weight:600;font-size:13px;margin:8px 0 8px">Secties (aan/uit)</div>';
-  b += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">De volgorde is vast en volgt de werkbon.</div>';
-  b += '<div id="ptw-secties">';
+  var b = '<p class="lf-uitleg">Los van de andere pdf-templates.</p><div class="ist-pdfgrid pdf-tpl-grid"><div>';
+  b += _istPdfKleurenLogo('ptw', t);
+  b += lfRij(_ZP_TEKST, 'Titel', '<input class="lf-tekst" id="ptw-titel" type="text" value="'+esc(t.titel)+'" placeholder="WERKBON">', {voor:'ptw-titel'});
+  b += _istPdfLogo('ptw', t);
+  b += '<div class="lf-groep">Secties · volgorde volgt de werkbon</div><div id="ptw-secties">';
   t.secties.forEach(function(sx){
-    b += '<div class="ptw-sectie-item" data-k="'+sx.k+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:8px;margin-bottom:6px">';
-    b += '<label style="display:inline-flex;align-items:center;cursor:pointer"><input type="checkbox" class="ptw-sectie-aan" data-k="'+sx.k+'"'+(sx.aan!==false?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent)"></label>';
-    b += '<span class="ptw-sectie-lbl" style="flex:1;font-size:13px;font-weight:600'+(sx.aan!==false?'':';color:var(--muted);text-decoration:line-through')+'">'+(_pdfWbSecLabels[sx.k]||sx.k)+'</span>';
-    b += '</div>';
+    b += '<div class="ptw-sectie-item" data-k="'+sx.k+'">'+_istSchakelRij('', '<span class="ptw-sectie-lbl"'+(sx.aan!==false?'':' style="color:var(--muted);text-decoration:line-through"')+'>'+(_pdfWbSecLabels[sx.k]||sx.k)+'</span>', '', 'class="ptw-sectie-aan" data-k="'+sx.k+'" aria-label="'+esc(_pdfWbSecLabels[sx.k]||sx.k)+'"', sx.aan!==false)+'</div>';
   });
-  b += '</div>';
-  b += '<label style="font-size:12px;color:var(--muted);display:block;margin:12px 0 4px">Voettekst (leeg = bedrijfsnaam + adres)</label>';
-  b += '<input class="input" id="ptw-voet" type="text" value="'+esc(t.voettekst)+'" placeholder="bijv. Homa Pompen B.V. \u00b7 Gorinchem" style="margin-bottom:14px">';
-  b += '<div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" id="ptw-opslaan">Template opslaan</button><button class="btn btn-ghost btn-sm" id="ptw-herstel">Terug naar standaard</button></div>';
-  b += '</div>';
-  b += '<div><div style="font-weight:600;font-size:13px;margin-bottom:8px">Voorbeeld</div>';
-  b += '<div id="ptw-preview" style="background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 6px 20px rgba(20,24,36,.1);aspect-ratio:210/297;overflow:hidden;font-size:8.5px"></div>';
-  b += '<div style="font-size:11px;color:var(--muted);margin-top:6px">Live voorbeeld \u2014 representatief voor de echte PDF.</div></div>';
-  b += '</div>';
+  b += '</div><div class="lf-groep">Onderaan</div>';
+  b += lfRij(_ZP_NOTITIE, 'Voettekst', '<input class="lf-tekst" id="ptw-voet" type="text" value="'+esc(t.voettekst)+'" placeholder="Bedrijfsnaam · plaats">', {voor:'ptw-voet', sub:'Leeg = bedrijfsnaam en adres'});
+  b += '<div class="ist-voet ist-voet-twee"><button type="button" class="btn btn-ghost ist-knop" id="ptw-herstel">Terug naar standaard</button><button type="button" class="btn btn-primary ist-knop" id="ptw-opslaan">Template opslaan</button></div>';
+  b += '</div>'+_istPdfVoorbeeld('ptw')+'</div>';
   return b;
 }
 
