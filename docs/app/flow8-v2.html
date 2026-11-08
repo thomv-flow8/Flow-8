@@ -18,9 +18,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://www.google.com/recaptcha/api.js?render=6LcdLcosAAAAAMmJBuLo1c8UclVTqT6hhYYbNN5I" async defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -2319,6 +2316,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .hr-leeg{color:var(--muted)}
 .hr-leeg .avatar{filter:saturate(.35)}
 .modal:focus{outline:none}
+#theme-cb:focus-visible + #theme-track{outline:2px solid var(--accent);outline-offset:2px}
 /* Keuzelijsten in de werkbalk en bij de filters: eigen pijltje, zelfde vorm in elke browser */
 .werkbalk select.input,select.chip-sel{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237a8499' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;padding-right:36px}
 select.chip-sel{max-width:220px;height:30px;border:1px solid var(--border);border-radius:var(--radius-pill);background-color:var(--surface);color:var(--text);font:600 12px 'Instrument Sans',sans-serif;padding-left:14px;cursor:pointer}
@@ -2905,7 +2903,7 @@ button.sd-m-dag{cursor:pointer}
           </div>
         </div>
         <label id="theme-toggle" title="Donker/Licht thema" style="position:relative;width:52px;height:28px;cursor:pointer;flex-shrink:0">
-          <input type="checkbox" id="theme-cb" style="opacity:0;width:0;height:0;position:absolute">
+          <input type="checkbox" id="theme-cb" role="switch" aria-label="Licht thema" style="opacity:0;width:0;height:0;position:absolute">
           <span id="theme-track" style="position:absolute;inset:0;border-radius:var(--radius-lg);background:#1e293b;border:1px solid var(--border);transition:background .3s">
             <!-- Zon icoon (licht) -->
             <span style="position:absolute;left:6px;top:50%;transform:translateY(-50%);transition:opacity .3s;opacity:1" id="theme-sun">
@@ -4999,7 +4997,7 @@ function _wbRenderFotos(state){
   state.fotos.forEach(function(f, i){
     h += '<div class="wbx-foto-item">';
     h += '<div class="wbx-ftop">';
-    h += '<div class="wbx-fthumb wb-foto-thumb'+(f._pending?' wbx-fpending':'')+'" data-full="'+esc(f.url)+'"><img src="'+esc(f.url)+'">';
+    h += '<div class="wbx-fthumb wb-foto-thumb'+(f._pending?' wbx-fpending':'')+'" data-full="'+esc(f.url)+'"><img src="'+esc(f.url)+'" alt="Werkbonfoto">';
     if(f._pending) h += '<span class="wbx-fpending-badge" title="Wacht op upload — wordt verstuurd zodra er verbinding is"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
     h += '</div>';
     h += '<div class="wbx-fnum">Foto '+(i+1)+'</div>';
@@ -5434,7 +5432,7 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
         h += '<div class="wbx-foto-item">';
         h += '<div class="wbx-ftop">';
         h += '<div class="wbx-fthumb cl-foto-thumb'+(f._pending?' wbx-fpending':'')+'"'+dset+'>';
-        if(bron) h += '<img src="'+esc(bron)+'">';
+        if(bron) h += '<img src="'+esc(bron)+'" alt="Foto bij checklist">';
         if(f._pending) h += '<span class="wbx-fpending-badge" title="Wacht op upload — wordt verstuurd zodra er verbinding is"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></span>';
         h += '</div>';
         h += '<div class="wbx-fnum">Foto '+(fi+1)+(f._pending?' \u00b7 wacht op upload':'')+'</div>';
@@ -5812,7 +5810,7 @@ function _wbChecklistToevoegenDialoog(state){
 function _wbSignStatusHtml(hasSign, dataUrl){
   if(hasSign && dataUrl){
     return '<div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px">'
-      + '<img src="'+esc(dataUrl)+'" style="height:48px;border-radius:var(--radius-sm);background:#fff;border:1px solid var(--border)">'
+      + '<img src="'+esc(dataUrl)+'" alt="Handtekening" style="height:48px;border-radius:var(--radius-sm);background:#fff;border:1px solid var(--border)">'
       + '<div style="font-size:12px;color:var(--green-t);font-weight:700">'+_IC_VINK+'Ondertekend</div></div>';
   }
   return '<div style="background:var(--surface2);border:1px dashed var(--border);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--muted);text-align:center">Nog niet ondertekend \u2014 gebruik de knop \u201cHandtekening\u201d onderaan.</div>';
@@ -9625,6 +9623,47 @@ function handtekeningNaarJpeg(canvas, kwaliteit) {
     return canvas.toDataURL('image/png');   // terugval: liever groot dan stuk
   }
 }
+// jsPDF, SheetJS en PDF.js zijn samen ± 1,5 MB en alleen nodig voor pdf's, Excel en de pdf-viewer.
+// Ze blokkeren het opstarten niet meer: na het laden van de app haalt de browser ze op de achtergrond
+// op, en een functie die er eerder om vraagt wacht via _laadLib tot ze er zijn.
+var _LIBS = {
+  jspdf: { url:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', klaar:function(){ return !!window.jspdf; } },
+  xlsx:  { url:'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', klaar:function(){ return !!window.XLSX; } },
+  pdfjs: { url:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', klaar:function(){ return typeof pdfjsLib !== 'undefined'; } }
+};
+var _libBeloften = {};
+function _laadLib(naam){
+  var lib = _LIBS[naam];
+  if(lib.klaar()) return Promise.resolve();
+  if(_libBeloften[naam]) return _libBeloften[naam];
+  _libBeloften[naam] = new Promise(function(ok, fout){
+    var sc = document.createElement('script'); sc.src = lib.url; sc.async = true;
+    sc.onload = function(){ if(lib.klaar()) ok(); else { delete _libBeloften[naam]; fout(new Error(naam)); } };
+    // Mislukt (geen verbinding): de belofte vervalt, zodat een volgende poging opnieuw laadt.
+    sc.onerror = function(){ delete _libBeloften[naam]; sc.remove(); fout(new Error(naam)); };
+    document.head.appendChild(sc);
+  });
+  return _libBeloften[naam];
+}
+function _libFout(){ toast('Dit onderdeel kon niet laden. Controleer de verbinding en probeer het opnieuw.', 'error'); }
+window.addEventListener('load', function(){
+  var start = function(){ Object.keys(_LIBS).forEach(function(n){ _laadLib(n).catch(function(){}); }); };
+  if(window.requestIdleCallback) requestIdleCallback(start, { timeout:4000 }); else setTimeout(start, 1500);
+});
+
+// Velden zonder gekoppeld label krijgen een naam voor schermlezers: de tekst van hun lijstrij,
+// een vaste naam (_A11Y_NAMEN) of de placeholder. Een bestaand label of aria-label gaat altijd voor.
+var _A11Y_NAMEN = { 'plan-mont-filter':'Monteur filteren', 'ag-med-filter':'Medewerker filteren', 'rap-med-filter':'Medewerker kiezen', 'loc-monteur-filter':'Monteur filteren' };
+function _a11yNaam(el){
+  if(el.type === 'hidden' || el.getAttribute('aria-labelledby') || el.title || (el.labels && el.labels.length)) return;
+  var rij = el.closest('.lf-rij'), l = rij && rij.querySelector('.lf-l');
+  var rijTekst = (l && l.firstChild && l.firstChild.nodeType === 3) ? l.firstChild.textContent : '';
+  // Selectievakje in een tabel: in de kop alles, in een rij die ene rij
+  var vak = el.type === 'checkbox' && el.closest('tr') ? (el.closest('thead') ? 'Alles selecteren' : 'Rij selecteren') : '';
+  var naam = (rijTekst || _A11Y_NAMEN[el.id] || vak || el.placeholder || '').replace(/[.…]+$/, '').trim();
+  if(naam) el.setAttribute('aria-label', naam);
+}
+
 // Toetsenbord en voorleessoftware voor klikbare elementen die geen echte knop zijn.
 // Tabs (.tab) en stat-filters (.wo-sc/.wp-sc) krijgen een rol en tabindex zodra ze in de
 // DOM komen; Enter en spatie werken op alles met role=button/tab of data-klik. Een eigen
@@ -9639,12 +9678,15 @@ function _a11yKlikbaar(){
   });
   // Klikbare rijen (medewerkers, verzuim, materialen, register): Tab + Enter. data-klik i.p.v.
   // role=button houdt de tabelstructuur intact; de globale keydown hieronder pakt beide.
-  document.querySelectorAll('tr.med-row,tr.vz-rij,tr.mat-rij,tr.pr-pomp-rij').forEach(function(r){
+  document.querySelectorAll('tr.med-row,tr.vz-rij,tr.mat-rij,tr.pr-pomp-rij,tr.deb-row,tr.opdracht-rij').forEach(function(r){
     if(!r.hasAttribute('tabindex')){ r.tabIndex = 0; r.setAttribute('data-klik',''); }
   });
   document.querySelectorAll('.vz-acc-header,.pr-acc-hdr').forEach(function(k){
     if(!k.hasAttribute('role')){ k.setAttribute('role','button'); k.tabIndex = 0; }
   });
+  document.querySelectorAll('input:not([aria-label]),select:not([aria-label]),textarea:not([aria-label])').forEach(_a11yNaam);
+  // Afbeeldingen zonder alt (bijv. later toegevoegd): leeg alt, zodat een schermlezer geen bestandsnaam voorleest.
+  document.querySelectorAll('img:not([alt])').forEach(function(i){ i.alt = ''; });
   document.querySelectorAll('.wo-sc,.wp-sc').forEach(function(c){
     if(!c.hasAttribute('role')){ c.setAttribute('role','button'); c.tabIndex = 0; }
     var aan = c.classList.contains('actief') ? 'true' : 'false';
@@ -12782,7 +12824,7 @@ function renderServiceklanten() {
   if (!_skBannerGesloten && _skBeheer) {
     h+='<div id="sk-info-banner" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(79,110,245,0.08);border:1px solid rgba(79,110,245,0.2);border-radius:var(--radius);margin-bottom:16px;font-size:12px;color:var(--muted)">';
     h+='<svg width="15" height="15" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-    h+='<span style="flex:1">Serviceklanten worden automatisch aangemaakt via <strong style="color:var(--text);cursor:pointer" onclick="navigateTo(\'debiteuren\')">Debiteuren</strong> — vink daar "Ook serviceklant" aan bij een debiteur.</span>';
+    h+='<span style="flex:1">Serviceklanten worden automatisch aangemaakt via <strong role="link" tabindex="0" data-klik style="color:var(--accent-t);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="navigateTo(\'debiteuren\')">Debiteuren</strong> — vink daar "Ook serviceklant" aan bij een debiteur.</span>';
     h+='<button id="sk-banner-sluit" title="Niet meer tonen" aria-label="Niet meer tonen" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:0;min-width:44px;min-height:44px;margin:-12px -10px -12px 0;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+ICO.cross+'</button>';
     h+='</div>';
   }
@@ -14722,7 +14764,7 @@ function _openContractImport(){
   var _rijen = [], _kolommen = [], _bestand = '';
   document.getElementById('cimp-file').addEventListener('change', function(){
     var file = this.files && this.files[0]; if(!file) return;
-    if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    if(!window.XLSX){ var _inp = this; _laadLib('xlsx').then(function(){ _inp.dispatchEvent(new Event('change')); }, _libFout); return; }
     _bestand = file.name;
     var rd = new FileReader();
     rd.onload = function(e){
@@ -14965,7 +15007,7 @@ function _excelImport(o){
   var _rijen = [], _kolommen = [], _bestand = '';
   document.getElementById('ximp-file').addEventListener('change', function(){
     var file = this.files && this.files[0]; if(!file) return;
-    if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    if(!window.XLSX){ var _inp = this; _laadLib('xlsx').then(function(){ _inp.dispatchEvent(new Event('change')); }, _libFout); return; }
     _bestand = file.name;
     var rd = new FileReader();
     rd.onload = function(e){
@@ -15251,7 +15293,7 @@ function _openDebImport(){
 
   document.getElementById('dimp-file').addEventListener('change', function(){
     var file = this.files && this.files[0]; if(!file) return;
-    if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    if(!window.XLSX){ var _inp = this; _laadLib('xlsx').then(function(){ _inp.dispatchEvent(new Event('change')); }, _libFout); return; }
     _bestand = file.name;
     var rd = new FileReader();
     rd.onload = function(e){
@@ -24888,6 +24930,7 @@ function _pdfZetVoet(doc, bg, tpl){
   if(r[1]) doc.text(r[1], 105, 291, {align:'center'});
 }
 function _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfActie) {
+  if(!window.jspdf){ _laadLib('jspdf').then(function(){ _bouwWerkbonPDF(wb, uren, fotos, werkbonId, uitvoer, naGeneratie, pdfActie); }, _libFout); return; }
   try {
     var { jsPDF } = window.jspdf;
     var doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4', compress:true });
@@ -25417,7 +25460,7 @@ function openFotoViewer(urls, startIndex) {
     var url = urls[idx];
     var meer = urls.length > 1;
     var body = '<div style="position:relative;background:var(--surface2);border-radius:var(--radius-sm);overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:min(60vh,520px);max-height:72vh">'
-      + '<img src="'+esc(url)+'" style="max-width:100%;max-height:72vh;object-fit:contain;display:block">';
+      + '<img src="'+esc(url)+'" alt="Foto" style="max-width:100%;max-height:72vh;object-fit:contain;display:block">';
     if(meer){
       body += '<button id="fv-prev" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:none;background:rgba(0,0,0,.5);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>';
       body += '<button id="fv-next" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:none;background:rgba(0,0,0,.5);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>';
@@ -25623,7 +25666,7 @@ function _pdfViewerOpruimen(){
 }
 
 function _pdfRenderPaginas(bron, container, klaar){
-  if(typeof pdfjsLib === 'undefined'){ klaar(false); return; }
+  if(typeof pdfjsLib === 'undefined'){ _laadLib('pdfjs').then(function(){ _pdfRenderPaginas(bron, container, klaar); }, function(){ klaar(false); }); return; }
   try {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     var bronKlaar;
@@ -25956,7 +25999,7 @@ function _matRijHtml(a, kanSchrijven){
   var gesel = !!_matSelectie[a.id];
   var h = '<tr class="mat-rij" data-id="'+esc(a.id)+'" style="cursor:pointer'+(gesel?';background:rgba(79,110,245,.06)':'')+'">';
   if(kanSchrijven) h += '<td class="hide-mobile" style="text-align:center"><input type="checkbox" class="mat-check" data-id="'+esc(a.id)+'"'+(gesel?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer"></td>';
-  h += '<td>'+(a.foto ? '<img src="'+esc(a.foto)+'" class="mat-foto" data-url="'+esc(a.foto)+'" style="width:34px;height:34px;object-fit:cover;border-radius:var(--radius-sm);cursor:pointer">' : '<div style="width:34px;height:34px;border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--muted)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>')+'</td>';
+  h += '<td>'+(a.foto ? '<img src="'+esc(a.foto)+'" alt="Foto van '+esc(a.omschrijving||'artikel')+'" class="mat-foto" data-url="'+esc(a.foto)+'" style="width:34px;height:34px;object-fit:cover;border-radius:var(--radius-sm);cursor:pointer">' : '<div style="width:34px;height:34px;border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--muted)"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>')+'</td>';
   var _docs = _matArtikelDocs(a);
   var _docKnop = _docs.length
     ? ' <button type="button" class="mat-docs" data-id="'+esc(a.id)+'" title="Documenten bekijken" '
@@ -26151,7 +26194,7 @@ function _openArtikelEditor(artikel){
   b += '<div class="lf-twee lf-klap-twee">';
   b += '<div class="art-acc lf-klap" id="art-acc-foto">'+_artKlapKop(ICO.foto, 'Foto', '<span class="art-acc-tel lf-tel" id="art-acc-foto-tel">'+(_heeftFoto?_IC_VINK:'')+'</span>');
   b += '<div class="art-acc-body lf-klap-b" style="display:none">';
-  b += '<div id="art-foto-preview" style="margin-bottom:8px">'+(_fotoData?'<img src="'+esc(_fotoData)+'" class="art-editor-foto" data-url="'+esc(_fotoData)+'" style="max-width:120px;max-height:120px;border-radius:var(--radius-sm);object-fit:cover;cursor:pointer">':'<div style="font-size:12px;color:var(--muted)">Geen foto</div>')+'</div>';
+  b += '<div id="art-foto-preview" style="margin-bottom:8px">'+(_fotoData?'<img src="'+esc(_fotoData)+'" alt="Artikelfoto" class="art-editor-foto" data-url="'+esc(_fotoData)+'" style="max-width:120px;max-height:120px;border-radius:var(--radius-sm);object-fit:cover;cursor:pointer">':'<div style="font-size:12px;color:var(--muted)">Geen foto</div>')+'</div>';
   b += '<label class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Foto kiezen<input type="file" id="art-foto-input" accept="image/*" hidden></label>';
   if(_fotoData) b += '<button type="button" class="lf-verwijder" id="art-foto-wis">'+ICO.trash+' Foto verwijderen</button>';
   b += '</div></div>';
@@ -26198,7 +26241,7 @@ function _openArtikelEditor(artikel){
     var file = fotoInput.files && fotoInput.files[0]; if(!file) return;
     nieuweFoto = file; fotoGewist = false;
     var rd = new FileReader();
-    rd.onload = function(){ document.getElementById('art-foto-preview').innerHTML = '<img src="'+rd.result+'" style="max-width:120px;max-height:120px;border-radius:var(--radius-sm);object-fit:cover">'; };
+    rd.onload = function(){ document.getElementById('art-foto-preview').innerHTML = '<img src="'+rd.result+'" alt="Artikelfoto" style="max-width:120px;max-height:120px;border-radius:var(--radius-sm);object-fit:cover">'; };
     rd.readAsDataURL(file);
     var _ft = document.getElementById('art-acc-foto-tel'); if(_ft) _ft.innerHTML = _IC_VINK;
   });
@@ -26310,7 +26353,7 @@ function _openArtikelImport(){
 
   document.getElementById('imp-file').addEventListener('change', function(){
     var file = this.files && this.files[0]; if(!file) return;
-    if(!window.XLSX){ toast('Import-bibliotheek niet geladen','error'); return; }
+    if(!window.XLSX){ var _inp = this; _laadLib('xlsx').then(function(){ _inp.dispatchEvent(new Event('change')); }, _libFout); return; }
     _bestand = file.name;
     var rd = new FileReader();
     rd.onload = function(e){
@@ -26736,7 +26779,7 @@ function renderPompObjectDetail(objId) {
       body += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">';
       ofotos.forEach(function(url, i){
         body += '<div style="position:relative">'
-          + '<img class="ofm-thumb" data-idx="'+i+'" src="'+esc(url)+'" style="width:76px;height:76px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer" title="Bekijken">';
+          + '<img class="ofm-thumb" data-idx="'+i+'" src="'+esc(url)+'" alt="Foto '+(i+1)+'" style="width:76px;height:76px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer" title="Bekijken">';
         if(kanSchrijven) body += '<button class="ofm-del" data-idx="'+i+'" title="Verwijderen" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:2px solid var(--surface);background:var(--red-knop);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0">×</button>';
         body += '</div>';
       });
@@ -28034,7 +28077,7 @@ function _renderPompInstallatieTab(pomp, klantNm, kanSchrijven) {
     h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">';
     fotos.forEach(function(url,idx){
       h += '<a href="'+esc(url)+'" target="_blank" style="display:block;flex-shrink:0">';
-      h += '<img src="'+esc(url)+'" style="width:140px;height:140px;object-fit:cover;border-radius:var(--radius);border:2px solid var(--border);transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'">';
+      h += '<img src="'+esc(url)+'" alt="Foto '+(idx+1)+'" style="width:140px;height:140px;object-fit:cover;border-radius:var(--radius);border:2px solid var(--border);transition:border-color .15s;cursor:pointer" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'">';
       h += '</a>';
     });
     h += '</div>';
@@ -28647,7 +28690,7 @@ function _prVindOnderdelenlijstDoc(pomp){
 // Analyseert een PDF (als ArrayBuffer) en geeft de herkende onderdelen terug via callback.
 async function _prAnalyseerPdfBuffer(arrayBuffer, statusEl, previewEl, saveBtn, setResult){
   try {
-    if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js bibliotheek niet geladen. Herlaad de pagina.');
+    if(typeof pdfjsLib === 'undefined') await _laadLib('pdfjs').catch(function(){ throw new Error('De pdf-lezer kon niet laden. Controleer de verbinding en probeer het opnieuw.'); });
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     var loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
     var pdf = await loadingTask.promise;
@@ -32208,7 +32251,8 @@ function staafDiagram(titel, mndData, maxVal, labelFn, kleurFn, legendaItems) {
 }
 
 function csvExport(headers,rows,naam) {
-  // Probeer xlsx via SheetJS, fallback naar csv
+  // Probeer xlsx via SheetJS (zo nodig eerst laden), fallback naar csv
+  if(!window.XLSX && !csvExport._geprobeerd){ csvExport._geprobeerd = true; var _ga = function(){ csvExport(headers, rows, naam); }; _laadLib('xlsx').then(_ga, _ga); return; }
   if(window.XLSX) {
     try {
       var data = [headers].concat(rows);
@@ -37414,6 +37458,7 @@ function genereerWerkorderPDF(opties){
 }
 
 function _genereerWoPDFsync(opties, _woFotoCache){
+  if(!window.jspdf){ _laadLib('jspdf').then(function(){ _genereerWoPDFsync(opties, _woFotoCache); }, _libFout); return; }
   opties = opties || {};
   var st = _woDetailState;
   if(!st){ toast('Open eerst een werkorder','warning'); return; }
@@ -40815,7 +40860,7 @@ function _bindPdfTemplateWerkorder(el){
     function kop(t){ return '<div style="color:'+accent+';font-weight:700;font-size:8px;border-bottom:1px solid '+tekst+';padding-bottom:1px;margin:6px 0 3px">'+t+'</div>'; }
     function kv(l,v){ return '<div style="display:flex;padding:1px 0"><div style="width:34%;color:'+label+';font-weight:700;font-size:6px;text-transform:uppercase">'+l+'</div><div style="flex:1;font-size:7px;color:'+tekst+'">'+v+'</div></div>'; }
     var logo = (cfg.logoTonen!==false) ? (cfg.logoData||bg.logo) : null;
-    var hdrLogo = logo ? '<img src="'+esc(logo)+'" style="max-height:16px;max-width:60px;object-fit:contain">' : '';
+    var hdrLogo = logo ? '<img src="'+esc(logo)+'" alt="Logo" style="max-height:16px;max-width:60px;object-fit:contain">' : '';
     var adr = '<div style="text-align:right;font-size:6px;color:'+tekst+';line-height:1.5">'+esc(bg.naam||'Homa Pompen BV')+'<br>'+esc(bg.adres||'Techniekweg 16-18')+'<br>'+esc([(bg.postcode||'4207 HD'),(bg.plaats||'Gorinchem')].join(' '))+'</div>';
     var body='';
     body += '<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid '+tekst+';padding-bottom:3px;margin-bottom:4px">';
@@ -40839,7 +40884,7 @@ function _bindPdfTemplateWerkorder(el){
   if(logoFile) logoFile.addEventListener('change', function(){
     var f=logoFile.files&&logoFile.files[0]; if(!f) return;
     var r=new FileReader(); r.onload=function(){ cfg.logoData=r.result;
-      el.querySelector('#pto-logo-preview').innerHTML='<img src="'+esc(r.result)+'" style="max-height:34px;max-width:100px;object-fit:contain">';
+      el.querySelector('#pto-logo-preview').innerHTML='<img src="'+esc(r.result)+'" alt="Logo" style="max-height:34px;max-width:100px;object-fit:contain">';
       el.querySelector('#pto-logo-wis').style.display=''; tekenPreview();
     }; r.readAsDataURL(f);
   });
@@ -40910,7 +40955,7 @@ function _bindPdfTemplateWerkbon(el){
     function kop(t){ return '<div style="color:'+accent+';font-weight:700;font-size:8px;border-bottom:1px solid '+tekst+';padding-bottom:1px;margin:6px 0 3px">'+t+'</div>'; }
     function kv(l,v){ return '<div style="display:flex;padding:1px 0"><div style="width:34%;color:'+label+';font-weight:700;font-size:6px;text-transform:uppercase">'+l+'</div><div style="flex:1;font-size:7px;color:'+tekst+'">'+v+'</div></div>'; }
     var logo = (cfg.logoTonen!==false) ? (cfg.logoData||bg.logo) : null;
-    var hdrLogo = logo ? '<img src="'+esc(logo)+'" style="max-height:16px;max-width:60px;object-fit:contain">' : '';
+    var hdrLogo = logo ? '<img src="'+esc(logo)+'" alt="Logo" style="max-height:16px;max-width:60px;object-fit:contain">' : '';
     var adr = '<div style="text-align:right;font-size:6px;color:'+tekst+';line-height:1.5">'+esc(bg.naam||'Homa Pompen BV')+'<br>'+esc(bg.adres||'Techniekweg 16-18')+'<br>'+esc([(bg.postcode||'4207 HD'),(bg.plaats||'Gorinchem')].join(' '))+'</div>';
 
     var body='';
@@ -40965,7 +41010,7 @@ function _bindPdfTemplateWerkbon(el){
       var rdr = new FileReader();
       rdr.onload = function(){
         cfg.logoData = rdr.result;
-        el.querySelector('#ptw-logo-preview').innerHTML = '<img src="'+cfg.logoData+'" style="max-height:34px;max-width:100px;object-fit:contain">';
+        el.querySelector('#ptw-logo-preview').innerHTML = '<img src="'+cfg.logoData+'" alt="Logo" style="max-height:34px;max-width:100px;object-fit:contain">';
         var wisBtn = el.querySelector('#ptw-logo-wis'); if(wisBtn) wisBtn.style.display='';
         herteken();
       };
