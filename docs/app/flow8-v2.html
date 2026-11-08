@@ -37,6 +37,8 @@ button,input,select,textarea{font-family:inherit}
   --accent-knop:#4c6aeb;
   /* Groen knopvlak met witte tekst: wit op #10b981 haalt 2,54:1, op #047857 5,48:1. */
   --green-knop:#047857;
+  /* Rood knopvlak met witte tekst (spoed, offline, verwijderen): wit op #ef4444 haalt 3,76:1, op #d42c2c 5,0:1. */
+  --red-knop:#d42c2c;
 
   /* Statuskleuren blijven ongewijzigd zodat gebruikers niets afleren.
      De *-t varianten zijn de leesbare tekstvariant op donkere vlakken. */
@@ -59,8 +61,9 @@ button,input,select,textarea{font-family:inherit}
 }
 body.light{
   --bg:#f5f6f8;--surface:#ffffff;--surface2:#f2f4f8;--border:#e2e5ec;
-  --text:#0d0f14;--muted:#5f6572;--muted2:#8a90a0;
+  --text:#0d0f14;--muted:#5f6572;--muted2:#6b7180;
   --bg-gradient:#f5f6f8;--dagkop:#e4e9f2;
+  /* --muted2: #8a90a0 haalde 3,19:1 op wit (placeholders, "Kies een medewerker"); #6b7180 haalt 4,9:1 op wit en 4,5:1 op --bg. */
   --green-t:#065f46;--orange-t:#92400e;--red-t:#b91c1c;--purple-t:#7040e0;--accent-t:#2f4bc8;--blok-t:#1d4ed8;--vast-t:#92400e;--kl-l:.45;
   /* --orange-t: #b97a09 haalde op --surface2 met een oranje tint maar 2,9:1. #92400e haalt
      overal minstens 5,8:1 en is dezelfde tint als --vast-t.
@@ -154,7 +157,7 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
 .modal-close{background:transparent;border:1px solid var(--border);border-radius:var(--radius);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;transition:background .18s,color .18s,border-color .18s}
 .modal-close:hover{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.4);color:var(--red-t)}
-.modal-close:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.modal-close:hover{background:var(--red-knop);color:#fff;border-color:var(--red)}
 /* ── Lijstformulier (HR-invulvensters): icoontegel, label links, waarde rechts ── */
 .modal.modal-lf{width:min(480px,95vw)}
 .modal-lf .modal-header{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;padding:16px 16px 4px}
@@ -231,7 +234,7 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
 .lf-pk-greep{width:40px;height:5px;border-radius:5px;background:var(--border);margin:0 auto 12px}
 .lf-pk-kop{font-size:16px;font-weight:600;margin-bottom:4px}
 .lf-pk-lijst button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:52px;border:0;border-bottom:1px solid var(--border);background:none;color:var(--text);font:15px 'Instrument Sans',sans-serif;text-align:left;cursor:pointer}
-.lf-pk-lijst button svg{color:var(--accent);opacity:0;flex:none}
+.lf-pk-lijst button svg{color:var(--accent-t);opacity:0;flex:none}
 .lf-pk-lijst button.aan{font-weight:600}.lf-pk-lijst button.aan svg{opacity:1}
 .lf-pk-lijst button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .lf-pk-leeg{padding:14px 0;font-size:14px;color:var(--muted)}
@@ -571,7 +574,7 @@ label.lf-rij{cursor:pointer}
 button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--border);background:none;font:inherit;color:var(--text);text-align:left;cursor:pointer}
 .lf-wis{flex:none;width:24px;height:24px;border-radius:50%;border:0;padding:0;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
 .lf-wis[hidden]{display:none}
-.lf-wis:hover{background:var(--red);color:#fff}
+.lf-wis:hover{background:var(--red-knop);color:#fff}
 .lf-zoek-res{max-height:260px;overflow:auto;border-bottom:1px solid var(--border)}
 .lf-zoek-res .lf-art:last-child{border-bottom:0}
 .lf-gevonden{display:flex;align-items:center;gap:6px;margin:8px 0 2px;font-size:12.5px;font-weight:600;color:var(--green-t)}
@@ -872,10 +875,10 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .ist-rolmatrix td.ist-rm-mod{font-size:14px}
 .ist-rm-cel{text-align:center;white-space:nowrap}
 .ist-rm-stip{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
-.ist-rm-ster{color:var(--accent);display:inline-flex}
+.ist-rm-ster{color:var(--accent-t);display:inline-flex}
 .ist-legenda{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:12.5px;color:var(--muted)}
 .ist-legenda b{font:700 12px 'Space Mono',monospace;color:var(--text);margin-right:4px}
-.ist-legenda b.ist-rm-ster{color:var(--accent)}
+.ist-legenda b.ist-rm-ster{color:var(--accent-t)}
 .ist-uitleg-t{font-size:13px;color:var(--muted);line-height:1.6}
 .ist-uitleg-twee{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}
 .ist-uitleg-voet{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:12px}
@@ -1084,7 +1087,7 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.05)}
 .nav-item.active{color:#fff;background:rgba(79,110,245,.16);font-weight:600;box-shadow:none}
 .nav-item.active::before{content:none}
-.nav-item svg{opacity:1;flex-shrink:0}.nav-item.active svg{opacity:1;color:var(--accent)}
+.nav-item svg{opacity:1;flex-shrink:0}.nav-item.active svg{opacity:1;color:var(--accent-t)}
 .nav-ico{display:flex;align-items:center;justify-content:center;width:22px;flex-shrink:0}
 .nav-ico svg{width:21px;height:21px}
 #sidebar.collapsed .nav-ico{width:auto}
@@ -1306,7 +1309,7 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .hr-actie+.hr-actie,.hr-wacht+.hr-actie{border-left:1px solid var(--border)}
 .hr-actie.goed{color:var(--green-t)}
 .hr-actie.af{color:var(--red-t)}
-.hr-actie.smal{flex:0 0 56px;color:var(--red)}
+.hr-actie.smal{flex:0 0 56px;color:var(--red-t)}
 .hr-wacht{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);padding:0 10px;text-align:center}
 @media(max-width:768px){
   #vl-prev-jaar,#vl-next-jaar,#ou-prev-jaar,#ou-next-jaar,#ok-prev-jaar,#ok-next-jaar{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
@@ -1490,7 +1493,7 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 #wb-fullscreen .wbx-md-navtop{padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
 #wb-fullscreen .wbx-md-terug{display:flex;align-items:center;gap:10px;color:var(--text);font-family:'Instrument Sans',sans-serif;font-size:17px;font-weight:600;letter-spacing:-.02em;cursor:pointer;margin-bottom:4px}
 #wb-fullscreen .wbx-md-terug svg{width:24px;height:24px;stroke-width:2.5;flex-shrink:0}
-#wb-fullscreen .wbx-md-terug:hover{color:var(--accent)}
+#wb-fullscreen .wbx-md-terug:hover{color:var(--accent-t)}
 #wb-fullscreen .wbx-md-bonnr{color:var(--muted);font-size:13px;font-weight:600}
 #wb-fullscreen .wbx-md-navlist{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:1px}
 #wb-fullscreen .wbx-md-navfoot{padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--border);flex-shrink:0}
@@ -1502,13 +1505,13 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 /* Detail-kolom: titel + scrollbare body */
 #wb-fullscreen .wbx-md-detail{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;background:var(--bg);border-radius:0 16px 16px 0}
 #wb-fullscreen .wbx-md-titel{font-family:'Instrument Sans',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.02em;padding:22px 32px 0;margin:0;display:flex;align-items:center;gap:10px;flex-shrink:0}
-#wb-fullscreen .wbx-md-titelico{display:flex;color:var(--accent)}
+#wb-fullscreen .wbx-md-titelico{display:flex;color:var(--accent-t)}
 #wb-fullscreen .wbx-md-detailbody{flex:1;overflow-y:auto;padding:18px 32px 28px}
 #wb-fullscreen .wbx-md-detailbody .wbx-sec{max-width:760px}
 #wb-fullscreen .wbx-md-navitem{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:var(--radius);color:var(--text);font-size:14px;cursor:pointer;user-select:none;margin-bottom:2px}
 #wb-fullscreen .wbx-md-navitem:hover{background:rgba(79,110,245,.06)}
 #wb-fullscreen .wbx-md-navitem.actief{background:rgba(79,110,245,.10);font-weight:600}
-#wb-fullscreen .wbx-md-navico{flex-shrink:0;display:flex;color:var(--accent)}
+#wb-fullscreen .wbx-md-navico{flex-shrink:0;display:flex;color:var(--accent-t)}
 #wb-fullscreen .wbx-md-navlbl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 #wb-fullscreen .wbx-md-navbadge{flex-shrink:0;font-size:11px;font-weight:700;min-width:20px;height:20px;padding:0 6px;border-radius:var(--radius-pill);background:rgba(79,110,245,.16);color:var(--accent-t);display:flex;align-items:center;justify-content:center;margin-left:auto}
 /* Sectie-headers verbergen (nav vervangt ze), body altijd tonen */
@@ -1543,7 +1546,7 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 .sleep-greep{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:26px;height:26px;
   border-radius:var(--radius-sm);color:var(--muted);cursor:grab;flex-shrink:0;touch-action:none;
   transition:background .13s,color .13s}
-.sleep-greep:hover{background:var(--surface2);color:var(--accent)}
+.sleep-greep:hover{background:var(--surface2);color:var(--accent-t)}
 .sleep-greep:active{cursor:grabbing}
 .sleept{opacity:.6;position:relative;z-index:5}
 .cl-veld-row.sleept{box-shadow:0 6px 18px rgba(20,25,35,.16)}
@@ -1658,7 +1661,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 #log-panel{position:fixed;bottom:0;right:0;width:480px;height:300px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius) 0 0 0;z-index:9998;display:flex;flex-direction:column;box-shadow:-4px -4px 20px rgba(0,0,0,.3)}
 #log-body{flex:1;overflow-y:auto;padding:8px 12px;font-family:monospace;font-size:11px}
 .log-entry{padding:3px 0;border-bottom:1px solid var(--border)}
-.log-entry .lt{color:var(--muted)}.log-entry .ll-OK{color:var(--green-t)}.log-entry .ll-INFO{color:var(--accent)}.log-entry .ll-WARN{color:var(--orange-t)}.log-entry .ll-ERROR{color:var(--red)}
+.log-entry .lt{color:var(--muted)}.log-entry .ll-OK{color:var(--green-t)}.log-entry .ll-INFO{color:var(--accent-t)}.log-entry .ll-WARN{color:var(--orange-t)}.log-entry .ll-ERROR{color:var(--red-t)}
 @media(max-width:768px){
   /* ── BODY & APP ── */
   body.app-active{flex-direction:column;overflow:hidden}
@@ -1840,7 +1843,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .inst-acc-hdr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:inherit}
 /* Dagregel bij Team & Verlof is zelf niet klikbaar (de algemene -rij-regel gaf een handje) */
 .ti-dag-rij{cursor:default}
-.inst-acc-hdr .inst-acc-ico{display:inline-flex;color:var(--accent);flex-shrink:0}
+.inst-acc-hdr .inst-acc-ico{display:inline-flex;color:var(--accent-t);flex-shrink:0}
 .inst-acc-hdr .inst-acc-titel{flex:1;font-weight:700;font-size:15px}
 .inst-acc-hdr .inst-acc-sub{font-size:11px;color:var(--muted);font-weight:400}
 .inst-acc-hdr .inst-acc-chev{transition:transform .2s;flex-shrink:0;color:var(--muted)}
@@ -2038,7 +2041,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .wbx-sec{margin:0 0 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .wbx-hdr{display:flex;align-items:center;gap:11px;padding:14px 15px;min-height:52px;cursor:pointer;user-select:none}
 .wbx-hdr:focus-visible{outline-offset:-2px}
-.wbx-hdr .wbx-ico{color:var(--accent);display:flex;flex-shrink:0}
+.wbx-hdr .wbx-ico{color:var(--accent-t);display:flex;flex-shrink:0}
 .wbx-hdr .wbx-naam{font-weight:600;font-size:14px;flex:1}
 .wbx-hdr .wbx-chev{color:var(--muted);transition:transform .2s;display:flex}
 .wbx-sec.open .wbx-hdr .wbx-chev{transform:rotate(180deg)}
@@ -2063,13 +2066,13 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .wbx-uur-regel .wbx-det .wbx-n{font-weight:600}
 .wbx-uur-regel .wbx-det .wbx-t{color:var(--muted);font-size:12px}
 .wbx-uur-regel .wbx-amt{font-weight:700;font-size:14px;flex-shrink:0}
-.wbx-uur-regel .wbx-del{color:var(--red);cursor:pointer;padding:0;min-width:44px;min-height:44px;margin:-6px -8px -6px 0;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:none;border:none}
+.wbx-uur-regel .wbx-del{color:var(--red-t);cursor:pointer;padding:0;min-width:44px;min-height:44px;margin:-6px -8px -6px 0;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:none;border:none}
 .wbx-uur-regel .wbx-del svg,.wbx-foto-item .wbx-fdelbtn svg,.wbx-foto-item .wbx-ftekenbtn svg,.wb-mat-verwijder svg,.wbx-cl-hernoem svg,.wbx-cl-verwijder svg{width:18px;height:18px}
 .wbx-foto-grid{margin-top:10px}
 .wbx-foto-thumb{aspect-ratio:1;border-radius:var(--radius);background:var(--surface2);border:1px solid var(--border);position:relative;overflow:hidden;cursor:pointer}
 .wbx-foto-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .wbx-foto-thumb .wbx-fdel{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px;line-height:1}
-.wbx-foto-add{aspect-ratio:1;border-radius:var(--radius);border:1px dashed rgba(79,110,245,.4);background:rgba(79,110,245,.08);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:600;cursor:pointer}
+.wbx-foto-add{aspect-ratio:1;border-radius:var(--radius);border:1px dashed rgba(79,110,245,.4);background:rgba(79,110,245,.08);color:var(--accent-t);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:600;cursor:pointer}
 .wbx-teken-note{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);margin-top:13px}
 .wbx-form-opts{display:flex;gap:8px;flex-wrap:wrap}
 .wbx-form-opt{border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 14px;min-height:44px;display:inline-flex;align-items:center;font-family:inherit;font-size:13px;color:var(--text);background:var(--surface2);cursor:pointer}
@@ -2115,7 +2118,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .wbl-kaart:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .wbl-swipe-wrap{position:relative;margin-bottom:10px;border-radius:var(--radius);overflow:hidden}
 .wbl-swipe-actie{position:absolute;top:0;right:0;bottom:0;width:96px;background:transparent;border:none;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;padding:8px}
-.wbl-swipe-actie .wbl-swipe-knop{width:56px;height:56px;border-radius:var(--radius-lg);background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(239,68,68,.35)}
+.wbl-swipe-actie .wbl-swipe-knop{width:56px;height:56px;border-radius:var(--radius-lg);background:var(--red-knop);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(239,68,68,.35)}
 .wbl-swipe-actie .wbl-swipe-lbl{font-size:12px;font-weight:600;color:var(--red-t)}
 .wbl-swipe-wrap .wbl-kaart{margin-bottom:0;position:relative;transition:transform .2s ease;will-change:transform;z-index:1;touch-action:pan-y;-webkit-user-select:none;user-select:none}
 .wbl-swipe-wrap.open .wbl-kaart{transform:translateX(-96px)}
@@ -2129,7 +2132,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .wbl-naam{font-weight:700;font-size:15px;margin-bottom:3px}
 .wbl-adres{font-size:13px;color:var(--muted);margin-bottom:5px;overflow-wrap:anywhere}
 .wbl-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.wbl-type{font-size:13px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:5px}
+.wbl-type{font-size:13px;font-weight:600;color:var(--accent-t);display:inline-flex;align-items:center;gap:5px}
 .wbl-type svg{flex-shrink:0}
 .wbl-obj,.wbl-mont{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}
 .wbl-status{flex-shrink:0;font-size:12px;font-weight:600;padding:4px 10px;border-radius:var(--radius-pill);white-space:nowrap}
@@ -2300,6 +2303,9 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .periode-nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 @media (pointer:coarse){.periode-nav button{width:44px;height:44px}}
 .ag-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+/* Medewerker zonder registraties dit jaar: rustiger, maar leesbaar (geen doorzichtigheid op tekst en knoppen) */
+.hr-leeg{color:var(--muted)}
+.hr-leeg .avatar{filter:saturate(.35)}
 /* Keuzelijsten in de werkbalk en bij de filters: eigen pijltje, zelfde vorm in elke browser */
 .werkbalk select.input,select.chip-sel{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237a8499' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;padding-right:36px}
 select.chip-sel{max-width:220px;height:30px;border:1px solid var(--border);border-radius:var(--radius-pill);background-color:var(--surface);color:var(--text);font:600 12px 'Instrument Sans',sans-serif;padding-left:14px;cursor:pointer}
@@ -2488,7 +2494,7 @@ button.sd-m-dag{cursor:pointer}
 .wbx-foto-item .wbx-fnum{flex:1;font-size:12px;font-weight:700;color:var(--accent-t)}
 .wbx-foto-item .wbx-fcap{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);resize:vertical;min-height:38px}
 .wbx-foto-item .wbx-fcap::placeholder{color:var(--muted)}
-.wbx-foto-item .wbx-fdelbtn{flex-shrink:0;color:var(--red);cursor:pointer;font-size:20px;line-height:1;padding:2px 8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none}
+.wbx-foto-item .wbx-fdelbtn{flex-shrink:0;color:var(--red-t);cursor:pointer;font-size:20px;line-height:1;padding:2px 8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none}
 .wbx-foto-item .wbx-ftekenbtn{flex-shrink:0;color:var(--accent-t);cursor:pointer;padding:4px 6px;min-width:44px;min-height:44px;background:none;border:none;display:flex;align-items:center;justify-content:center}
 /* ── Werkbon in lijststijl: zelfde rijen, icoontegels en knoppen als de invulformulieren ── */
 .wbx-sec{border-radius:var(--radius-lg)}
@@ -2810,7 +2816,7 @@ button.sd-m-dag{cursor:pointer}
         <div class="sb-user-info" style="flex:1;min-width:0;overflow:hidden">
           <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sb-naam">—</div>
           <div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sb-rol">—</div>
-          <div style="font-size:10px;color:var(--muted);opacity:.5;margin-top:1px" id="sb-versie">v2.0</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:1px" id="sb-versie">v2.0</div>
         </div>
         <button id="uitloggen-btn" class="btn btn-icon btn-ghost btn-sm" title="Uitloggen" style="flex-shrink:0">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -2820,10 +2826,10 @@ button.sd-m-dag{cursor:pointer}
   </nav>
   <div id="main">
     <!-- Offline / geen verbinding banner -->
-    <div id="offline-banner" style="display:none;position:fixed;top:calc(var(--safe-top,0px) + 8px);left:8px;right:8px;z-index:9999;background:#ef4444;color:#fff;padding:9px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;text-align:center;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(0,0,0,.28)">
+    <div id="offline-banner" style="display:none;position:fixed;top:calc(var(--safe-top,0px) + 8px);left:8px;right:8px;z-index:9999;background:var(--red-knop);color:#fff;padding:9px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;text-align:center;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(0,0,0,.28)">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
       <span id="offline-banner-tekst">Geen verbinding — bekijken werkt nog, opslaan is gepauzeerd</span>
-      <button id="offline-herverbind" style="margin-left:8px;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">Opnieuw proberen</button>
+      <button id="offline-herverbind" style="margin-left:8px;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.5);background:rgba(0,0,0,.18);color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">Opnieuw proberen</button>
     </div>
     <!-- Foto-upload wachtrij indicator (los van offline-banner) -->
     <div id="fq-teller" style="display:none;position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:9998;background:var(--orange,#f59e0b);color:#1a1200;padding:6px 14px;border-radius:var(--radius-pill);font-size:12px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25);white-space:nowrap"></div>
@@ -2842,7 +2848,7 @@ button.sd-m-dag{cursor:pointer}
         <div style="position:relative" id="notif-wrapper">
           <button id="notif-btn" aria-label="Meldingen" aria-expanded="false" aria-haspopup="true" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:4px 8px;cursor:pointer;display:flex;align-items:center;position:relative" title="Notificaties">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-            <span id="notif-badge" style="position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
+            <span id="notif-badge" style="position:absolute;top:-4px;right:-4px;background:var(--red-knop);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;align-items:center;justify-content:center;line-height:1">0</span>
           </button>
           <!-- Notificatie dropdown -->
           <div id="notif-panel" role="dialog" aria-label="Meldingen" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:380px;max-height:560px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:500;overflow:hidden;flex-direction:column">
@@ -4211,7 +4217,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   if(magOppakken){
     // Bon nog niet opgepakt: toon een duidelijke hint + oppak-knop. Invullen kan pas erna.
     h += '<div style="background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.3);border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:12px;color:var(--muted)">Pak de bon op om te starten \u2014 de planning ziet dan dat je onderweg/bezig bent. Daarna kun je invullen.</div>';
-    h += '<div class="wbx-actiebar"><button class="btn btn-primary" id="wb-oppakken" style="background:#06b6d4">Bon oppakken</button></div>';
+    h += '<div class="wbx-actiebar"><button class="btn btn-primary" id="wb-oppakken">Bon oppakken</button></div>';
   } else if(bewerkbaar && ['afgehandeld','verwerkt'].indexOf(wb.status) < 0){
     // Bewerkbare, nog niet afgeronde bon → altijd kunnen opslaan + ondertekenen/versturen.
     // (Geldt voor de monteur ná oppakken, en voor admin op elke bewerkbare status.)
@@ -4850,7 +4856,7 @@ function _wbObjectenHtml(pompen, wb){
       objLoc = [l.naam, l.plaats].filter(Boolean).join(', ');
     }
     h += '<div style="margin-bottom:12px">';
-    h += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;font-weight:700;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.03em">';
+    h += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;font-weight:700;font-size:12px;color:var(--accent-t);text-transform:uppercase;letter-spacing:.03em">';
     h += '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>';
     h += esc(objNaam)+'<span style="font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0">'+(objLoc?(' \u00b7 '+esc(objLoc)):'')+'</span>';
     h += '</div>';
@@ -5097,10 +5103,10 @@ function _wbRenderDocumenten(state){
   var h = '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">';
   lijst.forEach(function(d){
     h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm)">';
-    h += '<span style="flex-shrink:0;color:var(--accent)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+_wbDocIcoon(d.mime,d.naam)+'</svg></span>';
+    h += '<span style="flex-shrink:0;color:var(--accent-t)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+_wbDocIcoon(d.mime,d.naam)+'</svg></span>';
     h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.naam||'bestand')+'</div>';
     h += '<div style="font-size:11px;color:var(--muted)">'+esc(_wbFormatBytes(d.grootte))+'</div></div>';
-    h += '<button class="wb-doc-open" data-url="'+esc(d.url)+'" data-naam="'+esc(d.naam||'')+'" data-mime="'+esc(d.mime||'')+'" title="Openen" style="background:none;border:none;color:var(--accent);cursor:pointer;padding:4px;display:flex"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></button>';
+    h += '<button class="wb-doc-open" data-url="'+esc(d.url)+'" data-naam="'+esc(d.naam||'')+'" data-mime="'+esc(d.mime||'')+'" title="Openen" style="background:none;border:none;color:var(--accent-t);cursor:pointer;padding:4px;display:flex"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg></button>';
     if(state.bewerkbaar) h += '<button class="wb-doc-verwijder btn btn-ghost btn-wis" data-id="'+esc(d.id)+'" data-url="'+esc(d.url)+'" data-naam="'+esc(d.naam||'')+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
     h += '</div>';
   });
@@ -8577,7 +8583,7 @@ function bouwMeerMenu() {
     btn.dataset.page = m.id;
     btn.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:var(--surface2);border:none;border-radius:var(--radius);cursor:pointer;color:var(--text);width:100%';
     var svgInner = (SVGS[m.icon]||'<circle cx="12" cy="12" r="3"/>').replace(/<svg[^>]*>/,'').replace('</svg>','');
-    btn.innerHTML = '<span style="color:var(--accent)"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+svgInner+'</svg></span>'
+    btn.innerHTML = '<span style="color:var(--accent-t)"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+svgInner+'</svg></span>'
       + '<span style="font-size:11px;font-weight:600">'+m.label+'</span>';
     btn.addEventListener('click', function(){ sluitMeerMenu(); toonPagina(m.id); });
     grid.appendChild(btn);
@@ -8778,7 +8784,7 @@ function bouwAdminSwitcher() {
         return '<div class="admin-sw-item" data-id="'+esc(id)+'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:'+(actief?'default':'pointer')+';background:'+(actief?'rgba(79,110,245,.13)':'transparent')+';transition:background .15s">'
           + '<svg width="13" height="13" fill="none" stroke="'+(actief?'var(--accent)':'currentColor')+'" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>'
           + '<div style="flex:1;min-width:0">'
-          + '<div style="font-size:13px;font-weight:'+(actief?'700':'500')+';color:'+(actief?'var(--accent)':'var(--text)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(naam)+'</div>'
+          + '<div style="font-size:13px;font-weight:'+(actief?'700':'500')+';color:'+(actief?'var(--accent-t)':'var(--text)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(naam)+'</div>'
           + '<div style="font-size:10px;color:var(--muted);font-family:\'Space Mono\',monospace">'+esc(id)+'</div>'
           + '</div>'
           + (actief ? '<svg width="13" height="13" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : '')
@@ -8814,7 +8820,7 @@ function bouwAdminSwitcher() {
         });
       });
     } catch(e) {
-      lijst.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--red)">Fout: '+esc(e.message)+'</div>';
+      lijst.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--red-t)">Fout: '+esc(e.message)+'</div>';
     }
   });
 
@@ -9288,7 +9294,7 @@ function valideerVeld(elId, conditie, bericht) {
       var errEl = document.createElement('div');
       errEl.className = 'veld-fout';
       errEl.dataset.voor = elId;
-      errEl.style.cssText = 'font-size:11px;color:var(--red);margin-top:3px;font-weight:600';
+      errEl.style.cssText = 'font-size:11px;color:var(--red-t);margin-top:3px;font-weight:600';
       errEl.textContent = bericht;
       el.parentNode.insertBefore(errEl, el.nextSibling);
       el.dataset.errMsg = '1';
@@ -11717,7 +11723,7 @@ function renderMedewerkers() {
     var pctRest    = jaarTegoed > 0 ? Math.min(100, Math.max(0, Math.round(resterend / jaarTegoed * 100))) : 0;
     var balkKleur  = pctRest <= 20 ? 'var(--red)' : pctRest <= 50 ? 'var(--orange)' : 'var(--green)';
 
-    function pijl(v) { return v > 0 ? '<span style="color:var(--red)">'+_IC_NEER+v+'d</span>' : '<span style="color:var(--muted)">—</span>'; }
+    function pijl(v) { return v > 0 ? '<span style="color:var(--red-t)">'+_IC_NEER+v+'d</span>' : '<span style="color:var(--muted)">—</span>'; }
 
     h+='<tr data-id="'+m.id+'" class="med-row" style="cursor:pointer">';
 
@@ -11778,7 +11784,7 @@ function renderMedewerkers() {
       var _ouGecomp = APP.overuren ? APP.overuren.filter(function(o){return String(o.medId)===String(m.id)&&o.status==='gecompenseerd'&&(o.datum||'').startsWith(_ouJr);}).reduce(function(s,o){return s+(o.uren||0);},0) : 0;
       var _ouUitbet = APP.overuren ? APP.overuren.filter(function(o){return String(o.medId)===String(m.id)&&o.status==='uitbetaald'&&(o.datum||'').startsWith(_ouJr);}).reduce(function(s,o){return s+(o.uren||0);},0) : 0;
       var ouTotal = Math.round((_ouGecomp - _ouUitbet) * 10) / 10;
-      h+='<td data-col="overuren" style="font-size:12px;color:'+(ouTotal>0?'var(--orange)':'var(--muted)')+'">'+ouTotal+' uur</td>';
+      h+='<td data-col="overuren" style="font-size:12px;color:'+(ouTotal>0?'var(--orange-t)':'var(--muted)')+'">'+ouTotal+' uur</td>';
     }
 
     // Status
@@ -11819,7 +11825,7 @@ function renderMedewerkers() {
   });
   } catch(e) {
     console.error('renderMedewerkers fout:', e);
-    document.getElementById('content').innerHTML = '<div style="padding:40px;text-align:center;color:var(--red)"><div class="ic-los" style="margin-bottom:12px">'+_IC_WAARSCH.replace('width="13" height="13"','width="32" height="32"')+'</div><div style="font-weight:700;margin-bottom:8px">Fout bij laden medewerkers</div><div style="font-size:13px;color:var(--muted);margin-bottom:16px">'+esc(e.message)+'</div><button class="btn btn-primary" onclick="renderMedewerkers()">Opnieuw proberen</button></div>';
+    document.getElementById('content').innerHTML = '<div style="padding:40px;text-align:center;color:var(--red-t)"><div class="ic-los" style="margin-bottom:12px">'+_IC_WAARSCH.replace('width="13" height="13"','width="32" height="32"')+'</div><div style="font-weight:700;margin-bottom:8px">Fout bij laden medewerkers</div><div style="font-size:13px;color:var(--muted);margin-bottom:16px">'+esc(e.message)+'</div><button class="btn btn-primary" onclick="renderMedewerkers()">Opnieuw proberen</button></div>';
   }
 }
 
@@ -11981,7 +11987,7 @@ function openMedModal(id) {
       rij += '<div style="text-align:center">';
       rij += '<div style="font-size:10px;font-weight:600;color:var(--muted);margin-bottom:3px">'+DAGLBL[i]+'</div>';
       rij += '<input type="number" class="input wr-uren" data-week="'+weekNr+'" data-dag="'+d+'" value="'+uu+'" min="0" max="12" step="0.5" '+(heeftTijd?'readonly title="Berekend uit werktijden"':'')+' style="width:100%;text-align:center;padding:4px 2px;font-size:12px'+(uu===0?';opacity:.5':'')+(heeftTijd?';background:var(--surface);opacity:.7':'')+'">';
-      rij += '<button type="button" class="wr-tijd-toggle" data-week="'+weekNr+'" data-dag="'+d+'" title="Werktijden invoeren" style="background:none;border:none;cursor:pointer;color:'+(heeftTijd?'var(--accent)':'var(--muted)')+';font-size:9px;padding:2px;margin-top:1px">'+(heeftTijd?ICO.clock+' '+tijdenData[d].van+'-'+tijdenData[d].tot:ICO.clock+' tijd')+'</button>';
+      rij += '<button type="button" class="wr-tijd-toggle" data-week="'+weekNr+'" data-dag="'+d+'" title="Werktijden invoeren" style="background:none;border:none;cursor:pointer;color:'+(heeftTijd?'var(--accent-t)':'var(--muted)')+';font-size:9px;padding:2px;margin-top:1px">'+(heeftTijd?ICO.clock+' '+tijdenData[d].van+'-'+tijdenData[d].tot:ICO.clock+' tijd')+'</button>';
       rij += '<div class="wr-tijd-velden" data-week="'+weekNr+'" data-dag="'+d+'" style="'+(heeftTijd?'':'display:none;')+'margin-top:2px">';
       rij += '<input type="time" class="input wr-tijd-van" data-week="'+weekNr+'" data-dag="'+d+'" value="'+(heeftTijd?tijdenData[d].van:'')+'" style="width:100%;padding:2px;font-size:10px;margin-bottom:2px">';
       rij += '<input type="time" class="input wr-tijd-tot" data-week="'+weekNr+'" data-dag="'+d+'" value="'+(heeftTijd?tijdenData[d].tot:'')+'" style="width:100%;padding:2px;font-size:10px">';
@@ -12656,13 +12662,13 @@ function renderServiceklanten() {
   h+='<button class="chip'+(_skFilter==='extern'?' active':'')+'" data-filter="extern" style="background:rgba(245,158,11,.08);color:var(--orange-t)'+(_skFilter==='extern'?';font-weight:700':'')+'">Extern/ZZP</button>';
   h+='<button class="chip'+(_skFilter==='intern'?' active':'')+'" data-filter="intern"'+(_skFilter==='intern'?' style="font-weight:700"':'')+'>Intern</button>';
   var passiefAantal=APP.serviceklanten.filter(function(k){return k.status==='passief';}).length;
-  h+='<button class="chip'+(_skFilter==='passief'?' active':'')+' chip-muted" data-filter="passief" style="'+(passiefAantal?'':'opacity:.5')+'">Passief ('+passiefAantal+')</button>';
+  h+='<button class="chip'+(_skFilter==='passief'?' active':'')+' chip-muted" data-filter="passief" style="'+(passiefAantal?'':'color:var(--muted2)')+'">Passief ('+passiefAantal+')</button>';
   h+='</div>';
 
   var _skSortKeys = { debNr:'debNr', naam:'naam', adres:'adres', postcode:'postcode', plaats:'plaats', contact:'contactpersoon', contract:'contractType', duur:'duurUren', laatste:'laatsteDatum', volgende:'volgendeDatum', status:null };
   // Batch actie balk (verschijnt als er iets geselecteerd is)
   h+='<div id="sk-batch-bar" style="display:none;align-items:center;gap:12px;padding:10px 14px;background:rgba(79,110,245,0.1);border:1px solid rgba(79,110,245,0.25);border-radius:var(--radius);margin-bottom:12px">';
-  h+='<span id="sk-batch-teller" style="font-size:13px;font-weight:600;color:var(--accent)">0 geselecteerd</span>';
+  h+='<span id="sk-batch-teller" style="font-size:13px;font-weight:600;color:var(--accent-t)">0 geselecteerd</span>';
   h+='<button id="sk-batch-inplan" class="btn btn-primary btn-sm">'+ICO.kalender+' Inplannen</button>';
   h+='<button id="sk-batch-clear" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center">'+_IC_KRUIS+'Deselecteer</button>';
   h+='</div>';
@@ -12719,7 +12725,7 @@ function renderServiceklanten() {
         case 'pomptype': h+='<td data-col="pomptype" style="font-size:12px;color:var(--muted)">'+esc(k.pomptype||'—')+'</td>'; break;
         case 'duur':    h+='<td data-col="duur" style="font-size:12px;font-weight:600">'+(k.duurUren ? k.duurUren+'u' : '—')+'</td>'; break;
         case 'laatste': h+='<td data-col="laatste" style="font-size:12px;color:var(--muted);white-space:nowrap">'+fmtD(k.laatsteDatum)+'</td>'; break;
-        case 'volgende': h+='<td data-col="volgende" style="font-size:12px;font-weight:600;white-space:nowrap;color:'+(verv?'var(--red)':binnk?'var(--orange)':'var(--text)')+'">'+fmtD(k.volgendeDatum)+'</td>'; break;
+        case 'volgende': h+='<td data-col="volgende" style="font-size:12px;font-weight:600;white-space:nowrap;color:'+(verv?'var(--red-t)':binnk?'var(--orange-t)':'var(--text)')+'">'+fmtD(k.volgendeDatum)+'</td>'; break;
         case 'status':
           var _si = skStatusInfo(k);
           h += '<td data-col="status" title="'+esc(_si.uitleg)+'">'+_si.tag+'</td>';
@@ -13094,7 +13100,7 @@ function _sdPlakvenster(){
       if(gevonden.length > 50) u += '<div style="font-size:11px;color:var(--muted);margin-top:4px">en nog '+(gevonden.length-50)+' regels</div>';
     }
     if(fout.length){
-      u += '<div style="margin-top:10px;font-size:12px;color:var(--red)">Niet verwerkt:</div><ul style="margin:4px 0 0 18px;font-size:12px;color:var(--muted)">';
+      u += '<div style="margin-top:10px;font-size:12px;color:var(--red-t)">Niet verwerkt:</div><ul style="margin:4px 0 0 18px;font-size:12px;color:var(--muted)">';
       fout.slice(0,10).forEach(function(f2){ u += '<li>'+esc(f2.regel)+' — '+esc(f2.reden)+'</li>'; });
       u += '</ul>';
       if(fout.length > 10) u += '<div style="font-size:11px;color:var(--muted)">en nog '+(fout.length-10)+' regels</div>';
@@ -13397,7 +13403,7 @@ function renderDebiteuren(){
         case 'postcode':        h+='<td data-col="postcode" style="font-size:12px;font-weight:600">'+esc(d.postcode||'—')+'</td>'; break;
         case 'plaats':          h+='<td data-col="plaats" style="font-size:12px;color:var(--muted)">'+esc(d.plaats||'—')+'</td>'; break;
         case 'contact':         h+='<td data-col="contact" style="font-size:12px">'+esc(d.contactpersoon||'—')+'</td>'; break;
-        case 'email':           h+='<td data-col="email" style="font-size:12px;color:var(--accent)">'+esc(d.email||'—')+'</td>'; break;
+        case 'email':           h+='<td data-col="email" style="font-size:12px;color:var(--accent-t)">'+esc(d.email||'—')+'</td>'; break;
         case 'website':         h+='<td data-col="website" style="font-size:12px;color:var(--accent2)">'+(d.website?'<a href="'+esc(d.website)+'" target="_blank" style="color:var(--accent2)">'+esc(d.website.replace('https://','').replace('http://',''))+'</a>':'—')+'</td>'; break;
         case 'servicecontract': {
           var _ctTooltip = '';
@@ -15455,7 +15461,7 @@ function renderVerlof(){
             h2 += '<span style="font-weight:600;font-size:12.5px;flex:1;min-width:140px">'+esc(r.med.voornaam+' '+r.med.achternaam)+'</span>';
             h2 += '<span style="font-size:11.5px;color:var(--muted)">opgeslagen <strong style="color:var(--text)">'+String(r.huidig).replace('.',',')+'u</strong></span>';
             h2 += '<span style="font-size:11.5px;color:var(--muted)">volgens historie <strong style="color:var(--text)">'+String(r.volgensHistorie).replace('.',',')+'u</strong></span>';
-            h2 += '<span style="font-size:12px;font-weight:700;color:'+(r.verschil>0?'var(--green)':'var(--red)')+'">'+(r.verschil>0?'+':'')+String(r.verschil).replace('.',',')+'u</span>';
+            h2 += '<span style="font-size:12px;font-weight:700;color:'+(r.verschil>0?'var(--green-t)':'var(--red-t)')+'">'+(r.verschil>0?'+':'')+String(r.verschil).replace('.',',')+'u</span>';
             h2 += '<button class="btn btn-primary btn-sm" data-saldo-herstel="'+esc(r.med.id)+'" style="font-size:11px;padding:4px 10px">Herstellen</button>';
             h2 += '</div>';
           });
@@ -15575,7 +15581,7 @@ function renderVerlof(){
 
     h += '<div class="card" style="padding:0;margin-bottom:8px;overflow:hidden">';
     // ── Accordion Header ──
-    h += '<div class="vl-acc-header" data-mid="'+mid+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;transition:background .1s'+(heeftItems?'':';opacity:0.6')+'">';
+    h += '<div class="vl-acc-header'+(heeftItems?'':' hr-leeg')+'" data-mid="'+mid+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;transition:background .1s'+''+'">';
     h += '<div class="avatar" style="width:34px;height:34px;font-size:12px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
     h += '<div style="flex:1;min-width:0">';
     h += '<div style="font-weight:700;font-size:14px">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
@@ -15666,7 +15672,7 @@ function renderVerlof(){
           } else if(String(v.medId)===String(mijnId) && v.status==='aangevraagd'){
             // Eigen, nog niet getekende aanvraag: wijzigen of terugtrekken.
             h += '<button class="btn btn-ghost btn-sm vl-eigen-edit" data-id="'+v.id+'" style="font-size:11px">'+ICO.edit+' Wijzig</button>';
-            h += '<button class="btn btn-ghost btn-sm vl-eigen-intrek" data-id="'+v.id+'" style="font-size:11px;color:var(--red)">Intrekken</button>';
+            h += '<button class="btn btn-ghost btn-sm vl-eigen-intrek" data-id="'+v.id+'" style="font-size:11px;color:var(--red-t)">Intrekken</button>';
           }
           h += '</td>';
         }
@@ -16289,16 +16295,16 @@ function _renderDagplanning() {
     });
     content += '<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">';
     content += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">'
-       + '<span style="color:var(--accent);font-weight:700">'+_dpOpdrachten.length+'</span> opdrachten</div>';
+       + '<span style="color:var(--accent-t);font-weight:700">'+_dpOpdrachten.length+'</span> opdrachten</div>';
     content += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">'
-       + '<span style="color:var(--accent);font-weight:700">'+Math.floor(totWerk/60)+'u '+(totWerk%60)+'m</span> werktijd</div>';
+       + '<span style="color:var(--accent-t);font-weight:700">'+Math.floor(totWerk/60)+'u '+(totWerk%60)+'m</span> werktijd</div>';
     if(totReistijd > 0) {
       content += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">'
-         + '<span style="color:var(--accent);font-weight:700">'+Math.floor(totReistijd/60)+'u '+(totReistijd%60)+'m</span> reistijd</div>';
+         + '<span style="color:var(--accent-t);font-weight:700">'+Math.floor(totReistijd/60)+'u '+(totReistijd%60)+'m</span> reistijd</div>';
     }
     if(totKm > 0) {
       content += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px">'
-         + '<span style="color:var(--accent);font-weight:700">'+Math.round(totKm)+'</span> km</div>';
+         + '<span style="color:var(--accent-t);font-weight:700">'+Math.round(totKm)+'</span> km</div>';
     }
     content += '</div>';
 
@@ -16928,7 +16934,7 @@ function _dpTekenKaart() {
     var ot = getOpdrachttype(o.type);
     var tijdRegel = o._dpVan ? (o._dpVan + (o._dpTot ? ' – ' + o._dpTot : '')) : (o.tijdVan || '');
     var content = '<div style="font-family:\'Instrument Sans\',sans-serif;min-width:210px;padding:8px 4px 4px">'
-      + (_isSpoed(o) ? '<div style="background:#ef4444;color:white;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;margin-bottom:6px;display:inline-block">'+ICO.zap+' SPOED</div><br>' : '')
+      + (_isSpoed(o) ? '<div style="background:var(--red-knop);color:#fff;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;margin-bottom:6px;display:inline-block">'+ICO.zap+' SPOED</div><br>' : '')
       + '<div style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+mk+';color:white;font-weight:700;font-size:12px;margin-bottom:6px">'+(idx+1)+'</div> '
       + '<div style="font-weight:700;font-size:15px;color:#111;margin-bottom:4px;border-bottom:2px solid '+mk+';padding-bottom:5px">'+esc(o.klantNaam||'—')+'</div>'
       + '<div style="font-size:12px;color:#333;margin-bottom:3px">'+esc((o.adres||'')+((o.postcode||o.plaats)?', ':'')+(o.plaats||''))+'</div>'
@@ -17893,7 +17899,7 @@ function _jpRenderStap2(){
     + '<th style="padding:8px 12px">Uren nu</th><th style="padding:8px 12px">Uren voorstel</th><th style="padding:8px 12px">Al gepland</th></tr></thead><tbody>';
   res.maanden.forEach(function(m){
     b += '<tr><td style="padding:7px 12px;font-weight:600">'+_jpMaandLabel(m)+'</td>';
-    b += '<td style="padding:7px 12px">'+res.voor[m].n+'</td><td style="padding:7px 12px;font-weight:700;color:var(--accent)">'+res.na[m].n+'</td>';
+    b += '<td style="padding:7px 12px">'+res.voor[m].n+'</td><td style="padding:7px 12px;font-weight:700;color:var(--accent-t)">'+res.na[m].n+'</td>';
     b += '<td style="padding:7px 12px;color:var(--muted)">'+Math.round(res.voor[m].u)+'</td><td style="padding:7px 12px;color:var(--muted)">'+Math.round(res.na[m].u)+'</td>';
     b += '<td style="padding:7px 12px;color:var(--muted)">'+Math.round(res.bestaand[m]||0)+'</td></tr>';
   });
@@ -17908,7 +17914,7 @@ function _jpRenderStap2(){
       b += '<tr><td style="padding:6px 12px;font-size:13px">'+esc(v.naam)+(v.voorkeur?' <span class="tag tag-orange" style="font-size:10px">voorkeur</span>':'')+'</td>';
       b += '<td style="padding:6px 12px;font-size:12px;color:var(--muted)">'+esc(v.plaats)+'</td>';
       b += '<td style="padding:6px 12px;font-size:12px">'+_jpMaandLabel(v.van)+'</td>';
-      b += '<td style="padding:6px 12px;font-size:12px;font-weight:700;color:var(--accent)">'+_jpMaandLabel(v.naar)+'</td>';
+      b += '<td style="padding:6px 12px;font-size:12px;font-weight:700;color:var(--accent-t)">'+_jpMaandLabel(v.naar)+'</td>';
       b += '<td style="padding:6px 12px;font-size:12px;color:var(--muted)">'+v.dagen+'</td></tr>';
     });
     b += '</tbody></table></div>';
@@ -17960,7 +17966,7 @@ function _apStartBerekening(){
 
   function progMsg(txt,done){
     var el=document.getElementById('ap-progress'); if(!el)return;
-    el.innerHTML+='<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:'+(done?'var(--green)':'var(--muted)')+';margin-bottom:6px">'
+    el.innerHTML+='<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:'+(done?'var(--green-t)':'var(--muted)')+';margin-bottom:6px">'
       +'<div style="width:8px;height:8px;border-radius:50%;background:'+(done?'var(--green)':'var(--accent)')+';flex-shrink:0"></div>'+txt+'</div>';
   }
 
@@ -18295,11 +18301,11 @@ function _apRenderStap3(){
   var totKm=_apResultaat.reduce(function(s,r){return s+(r._apTotKm||0);},0);
   var uniekeDagen=[];_apResultaat.forEach(function(r){if(uniekeDagen.indexOf(r.datum)<0)uniekeDagen.push(r.datum);});
   b+='<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
-  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent);font-weight:700">'+totKlanten+'</span> opdrachten</div>';
-  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent);font-weight:700">'+uniekeDagen.length+'</span> dagen</div>';
-  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent);font-weight:700">'+Math.round(totWerk)+'u</span> werktijd</div>';
-  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent);font-weight:700">'+Math.floor(totReis/60)+'u '+Math.round(totReis%60)+'m</span> reistijd</div>';
-  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent);font-weight:700">'+totKm+'</span> km</div>';
+  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+totKlanten+'</span> opdrachten</div>';
+  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+uniekeDagen.length+'</span> dagen</div>';
+  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+Math.round(totWerk)+'u</span> werktijd</div>';
+  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+Math.floor(totReis/60)+'u '+Math.round(totReis%60)+'m</span> reistijd</div>';
+  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+totKm+'</span> km</div>';
   b+='</div>';
 
   var dagNamen=['zo','ma','di','wo','do','vr','za'];
@@ -18323,7 +18329,7 @@ function _apRenderStap3(){
     b+='</div>';
     // Waarschuwing als dag te lang is (werk + reistijd boven limiet, met kleine tolerantie)
     var dagTotaalUren=werkUren+((r._apTotReisMin||0)/60);
-    if(dagTotaalUren>_apMaxUren+0.25) b+='<div style="color:var(--red);font-size:10px;font-weight:700" title="Dag overschrijdt limiet ('+dagTotaalUren.toFixed(1)+'u)" class="ic-los">'+_IC_WAARSCH+'</div>';
+    if(dagTotaalUren>_apMaxUren+0.25) b+='<div style="color:var(--red-t);font-size:10px;font-weight:700" title="Dag overschrijdt limiet ('+dagTotaalUren.toFixed(1)+'u)" class="ic-los">'+_IC_WAARSCH+'</div>';
     b+='<div class="ap-chev" style="color:var(--muted);flex-shrink:0;transition:transform .2s;transform:rotate(0deg)">'
       +'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>';
     b+='</div>';
@@ -18346,18 +18352,18 @@ function _apRenderStap3(){
       b+='<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);font-size:13px">';
       b+='<div style="width:22px;height:22px;border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted);flex-shrink:0">'+(ki+1)+'</div>';
       b+='<div style="flex:1;min-width:0">';
-      b+='<div style="font-weight:700;font-size:13px">'+esc(k.naam||'—')+(k._apAantalMonteurs&&k._apAantalMonteurs>=2?' <span class="tag" style="background:var(--surface2);color:var(--accent);border:1px solid var(--border);font-size:10px;font-weight:700">'+k._apAantalMonteurs+' monteurs</span>':'')+'</div>';
+      b+='<div style="font-weight:700;font-size:13px">'+esc(k.naam||'—')+(k._apAantalMonteurs&&k._apAantalMonteurs>=2?' <span class="tag" style="background:var(--surface2);color:var(--accent-t);border:1px solid var(--border);font-size:10px;font-weight:700">'+k._apAantalMonteurs+' monteurs</span>':'')+'</div>';
       b+='<div style="font-size:11px;color:var(--muted)">'+(function(){var _ka=_apKlantAdres(k);return esc((_ka.adres||'')+(_ka.plaats?', '+_ka.plaats:''));})()+'</div>';
       b+='</div>';
       if(pompTxt) b+='<div style="font-size:11px;color:var(--muted)">'+ICO.wrench+' '+esc(pompTxt)+'</div>';
       // Bezoektijd
       if(k._apVan){
         b+='<div style="text-align:right;flex-shrink:0">';
-        b+='<div style="font-size:13px;font-weight:700;color:var(--accent)">'+k._apVan+'</div>';
+        b+='<div style="font-size:13px;font-weight:700;color:var(--accent-t)">'+k._apVan+'</div>';
         b+='<div style="font-size:10px;color:var(--muted)">→ '+k._apTot+'</div>';
         b+='</div>';
       } else {
-        b+='<div style="font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0">'+(k.duurUren||1.5)+'u</div>';
+        b+='<div style="font-size:12px;font-weight:700;color:var(--accent-t);flex-shrink:0">'+(k.duurUren||1.5)+'u</div>';
       }
       if(k.voorkeurDag||k.voorkeurWeek){
         b+='<div style="font-size:10px;color:var(--orange-t);flex-shrink:0" title="'+(k.voorkeurDag?'Voorkeurdag: '+k.voorkeurDag:'Voorkeurweek: '+k.voorkeurWeek)+'">'+ICO.ster+'</div>';
@@ -18366,7 +18372,7 @@ function _apRenderStap3(){
     });
     // Retour
     if(r._apRetourMin){
-      b+='<div style="display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:12px;color:var(--accent);font-weight:600">';
+      b+='<div style="display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:12px;color:var(--accent-t);font-weight:600">';
       b+='<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>';
       b+=r._apRetourTijd+' — Terug bij bedrijf · '+r._apRetourMin+' min retour</div>';
     }
@@ -19380,7 +19386,7 @@ function renderPlanLijst(monteurs) {
     _actieVolg.forEach(function(a){
       if(!_actieStats[a]) return;
       var actief = _planActieFilter === a;
-      h += '<span class="plan-actie-badge" data-actie="'+esc(a)+'" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;background:rgba(245,158,11,.10);color:#f5c97a;border:1px solid rgba(245,158,11,.18);'+(actief?'outline:2px solid #f5c97a;outline-offset:2px;':'')+'" title="Filter op: '+esc(a)+'">';
+      h += '<span class="plan-actie-badge" data-actie="'+esc(a)+'" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;background:rgba(245,158,11,.10);color:var(--orange-t);border:1px solid rgba(245,158,11,.32);'+(actief?'outline:2px solid var(--orange-t);outline-offset:2px;':'')+'" title="Filter op: '+esc(a)+'">';
       h += _actieIcons[a]||'';
       h += esc(a)+' <span style="background:rgba(245,158,11,.22);border-radius:4px;padding:0 5px;font-weight:700;font-size:11px">'+_actieStats[a]+'</span></span>';
     });
@@ -19506,7 +19512,7 @@ function renderPlanLijst(monteurs) {
     var _vakBg = blokkadeLijst ? 'var(--red)' : isVandaag ? 'var(--accent-knop)' : 'var(--surface)';
     var _vakKl = (blokkadeLijst || isVandaag) ? '#fff' : 'var(--text)';
     var _vakSub= blokkadeLijst ? 'rgba(255,255,255,.85)' : isVandaag ? '#fff' : 'var(--muted)';  // 85% wit op 9,5px haalde 3,8:1
-    h += '<div style="display:flex;align-items:stretch;border:1px solid '+(blokkadeLijst?'rgba(239,68,68,.35)':isVandaag?'rgba(79,110,245,.35)':'var(--border)')+';border-radius:var(--radius);overflow:hidden;background:var(--dagkop)'+(isVerleden&&!isVandaag?';opacity:.66':'')+'">';
+    h += '<div style="display:flex;align-items:stretch;border:1px solid '+(blokkadeLijst?'rgba(239,68,68,.35)':isVandaag?'rgba(79,110,245,.35)':'var(--border)')+';border-radius:var(--radius);overflow:hidden;background:var(--dagkop)'+(isVerleden&&!isVandaag?';color:var(--muted);filter:saturate(.45)':'')+'">';
     if(_dgNr){
       h += '<div class="dagkop-datum" style="flex:0 0 58px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;background:'+_vakBg+'">';
       h += '<div class="dagkop-dagnr" style="font-size:21px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:'+_vakKl+'">'+_dgNr+'</div>';
@@ -19539,7 +19545,7 @@ function renderPlanLijst(monteurs) {
         h += '<span style="width:8px;height:8px;border-radius:50%;background:'+dotKl+';flex-shrink:0;display:inline-block"></span>';
         h += '<span style="color:var(--muted)">'+aantalBeschikb+'/'+totBeschikb+' beschikbaar</span>';
         if(namenStr) h += '<span style="color:var(--text)">'+esc(namenStr)+'</span>';
-        if(onbeschikbStr) h += '<span style="color:var(--muted);opacity:.7">'+esc(onbeschikbStr)+'</span>';
+        if(onbeschikbStr) h += '<span style="color:var(--muted)">'+esc(onbeschikbStr)+'</span>';
         h += '</span>';
       }
     }
@@ -20227,7 +20233,7 @@ function renderPlanDag(monteurs) {
         if(uur===startVak || (_isStartUur && startVak<uren[0])){
           if(toonZiek){
             var zLbl2 = _zDag.type==='gedeeltelijk'?'Gedeeltelijk ziek':_zDag.status==='langdurig'?'Langdurig ziek':'Ziek';
-            h += '<div style="background:var(--red);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>'+esc(zLbl2)+'</div>';
+            h += '<div style="background:var(--red-knop);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>'+esc(zLbl2)+'</div>';
           } else if(toonVerlof){
             var tijdTxt2 = (_vDag.gedeeltelijk && _vDag.tijdVan) ? _vDag.tijdVan+(_vDag.tijdTot?'–'+_vDag.tijdTot:'') : 'Hele dag';
             h += '<div style="background:var(--orange);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#1a1200;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof '+esc(tijdTxt2)+'</div>';
@@ -20740,7 +20746,7 @@ function openOpdrachtModal(id, prefill) {
     var _nwNaam = (q||'').trim();
     var _nwOptie = _nwNaam ? '<div class="op-klant-nieuw" style="padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;background:rgba(79,110,245,.08);border-top:1px solid var(--border)">'
       + '<div style="width:28px;height:28px;border-radius:50%;background:var(--accent-knop);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;line-height:1">+</div>'
-      + '<div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nieuwe debiteur "'+esc(_nwNaam)+'" aanmaken</div>'
+      + '<div style="min-width:0"><div style="font-size:13px;font-weight:600;color:var(--accent-t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nieuwe debiteur "'+esc(_nwNaam)+'" aanmaken</div>'
       + '<div style="font-size:11px;color:var(--muted)">Direct koppelen aan deze opdracht</div></div></div>' : '';
 
     if(!resultaten.length){
@@ -21741,7 +21747,7 @@ function renderOveruren() {
     var heeftItems = items.length > 0;
 
     h += '<div class="card" style="padding:0;margin-bottom:8px;overflow:hidden">';
-    h += '<div class="ou-acc-header" data-mid="'+mid+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none'+(heeftItems?'':';opacity:0.6')+'">';
+    h += '<div class="ou-acc-header'+(heeftItems?'':' hr-leeg')+'" data-mid="'+mid+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none'+''+'">';
     h += '<div class="avatar" style="width:34px;height:34px;font-size:12px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
     h += '<div style="flex:1;min-width:0">';
     h += '<div style="font-weight:700;font-size:14px">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
@@ -22239,7 +22245,7 @@ function renderOnkosten() {
     var heeftItems = items.length > 0;
 
     h += '<div class="card" style="padding:0;margin-bottom:8px;overflow:hidden">';
-    h += '<div class="ok-acc-header" data-mid="'+mid+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none'+(heeftItems?'':';opacity:0.6')+'">';
+    h += '<div class="ok-acc-header'+(heeftItems?'':' hr-leeg')+'" data-mid="'+mid+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none'+''+'">';
     h += '<div class="avatar" style="width:34px;height:34px;font-size:12px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
     h += '<div style="flex:1;min-width:0">';
     h += '<div style="font-weight:700;font-size:14px">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
@@ -22684,7 +22690,7 @@ function renderVerzuim() {
     var heeftItems = items.length > 0;
 
     h += '<div class="card" style="padding:0;margin-bottom:8px;overflow:hidden">';
-    h += '<div class="vz-acc-header" data-mid="'+mid+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none'+(heeftItems?'':';opacity:0.6')+'">';
+    h += '<div class="vz-acc-header'+(heeftItems?'':' hr-leeg')+'" data-mid="'+mid+'" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none'+''+'">';
     h += '<div class="avatar" style="width:34px;height:34px;font-size:12px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
     h += '<div style="flex:1;min-width:0">';
     h += '<div style="font-weight:700;font-size:14px">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
@@ -24439,7 +24445,7 @@ function openMailVerzendModal(opts) {
         var ok = geldigEmail(a);
         var chip = document.createElement('span');
         chip.className = 'mv-chip';
-        chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid '+(ok?'var(--border)':'var(--red)')+';border-radius:var(--radius-lg);padding:3px 6px 3px 10px;font-size:12px;font-weight:600;color:'+(ok?'var(--text)':'var(--red)');
+        chip.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid '+(ok?'var(--border)':'var(--red)')+';border-radius:var(--radius-lg);padding:3px 6px 3px 10px;font-size:12px;font-weight:600;color:'+(ok?'var(--text)':'var(--red-t)');
         chip.textContent = a;
         var x = document.createElement('button');
         x.type='button'; x.title='Verwijderen'; x.textContent='\u2715';
@@ -25688,7 +25694,7 @@ function renderMaterialen() {
       h += '<div id="mat-bulkbalk" style="display:none;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px">';
       h += '<span id="mat-bulk-aantal" style="font-size:13px;font-weight:600"></span><div style="flex:1"></div>';
       h += '<button class="btn btn-ghost btn-sm" id="mat-bulk-deselect">Selectie wissen</button>';
-      if(kanSchrijven) h += '<button class="btn btn-sm" id="mat-bulk-verwijder" style="background:var(--red);color:#fff">'+ICO.trash+' Verwijder selectie</button>';
+      if(kanSchrijven) h += '<button class="btn btn-sm" id="mat-bulk-verwijder" style="background:var(--red-knop);color:#fff">'+ICO.trash+' Verwijder selectie</button>';
       h += '</div>';
 
       var gesorteerd = _matSorteer(gefilterd);
@@ -25743,7 +25749,7 @@ function renderMaterialen() {
     _matBindRijen(artikelen, kanSchrijven);
     _matBindSortSelectie(artikelen, kanSchrijven);
   }).catch(function(e){
-    el.innerHTML = '<div class="card" style="color:var(--red);padding:20px">Artikelen laden mislukt: '+esc(e.message||e)+'</div>';
+    el.innerHTML = '<div class="card" style="color:var(--red-t);padding:20px">Artikelen laden mislukt: '+esc(e.message||e)+'</div>';
   });
 }
 
@@ -25793,7 +25799,7 @@ function _matRijHtml(a, kanSchrijven){
   var _docs = _matArtikelDocs(a);
   var _docKnop = _docs.length
     ? ' <button type="button" class="mat-docs" data-id="'+esc(a.id)+'" title="Documenten bekijken" '
-      +'style="border:none;background:rgba(79,110,245,.12);color:var(--accent);border-radius:var(--radius-sm);padding:2px 7px;'
+      +'style="border:none;background:rgba(79,110,245,.12);color:var(--accent-t);border-radius:var(--radius-sm);padding:2px 7px;'
       +'font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:3px;vertical-align:middle">'
       +(ICO.pdf||'')+_docs.length+'</button>'
     : '';
@@ -26343,7 +26349,7 @@ function renderPompObjecten() {
       h += '<td class="hide-mobile" style="font-size:12px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(obj.omschrijving||'—')+'</td>';
       h += '<td class="hide-mobile" style="font-size:12px;color:var(--muted)">'+esc(locTekst)+'</td>';
       h += '<td class="hide-mobile" style="font-size:12px;color:var(--muted)">'+esc(obj.besturing||'—')+'</td>';
-      h += '<td><span class="tag" style="background:rgba(79,110,245,.13);color:var(--accent)">'+pompen.length+' pomp'+(pompen.length!==1?'en':'')+'</span></td>';
+      h += '<td><span class="tag" style="background:rgba(79,110,245,.13);color:var(--accent-t)">'+pompen.length+' pomp'+(pompen.length!==1?'en':'')+'</span></td>';
       h += '<td style="white-space:nowrap">';
       h += '<button class="btn btn-ghost btn-sm pr-obj-edit btn-icoon" data-id="'+esc(obj.id)+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button>';
       if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-obj-del btn-wis" data-id="'+esc(obj.id)+'" data-naam="'+esc(obj.naam||'')+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
@@ -26506,7 +26512,7 @@ function renderPompObjectDetail(objId) {
     // Checklists-historie uit dezelfde bonnen (gekoppeld aan dit object)
     _objChecklistAccordion('pr-obj-checklists', bonnen, obj.id);
   }).catch(function(){
-    var w=document.getElementById('pr-obj-werkbonnen'); if(w) w.innerHTML='<div style="font-size:12px;color:var(--red);padding:6px 0">Historie laden mislukt.</div>';
+    var w=document.getElementById('pr-obj-werkbonnen'); if(w) w.innerHTML='<div style="font-size:12px;color:var(--red-t);padding:6px 0">Historie laden mislukt.</div>';
     var c=document.getElementById('pr-obj-checklists'); if(c) c.innerHTML='';
   });
 
@@ -26570,7 +26576,7 @@ function renderPompObjectDetail(objId) {
       ofotos.forEach(function(url, i){
         body += '<div style="position:relative">'
           + '<img class="ofm-thumb" data-idx="'+i+'" src="'+esc(url)+'" style="width:76px;height:76px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer" title="Bekijken">';
-        if(kanSchrijven) body += '<button class="ofm-del" data-idx="'+i+'" title="Verwijderen" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:2px solid var(--surface);background:var(--red);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0">×</button>';
+        if(kanSchrijven) body += '<button class="ofm-del" data-idx="'+i+'" title="Verwijderen" style="position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:2px solid var(--surface);background:var(--red-knop);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0">×</button>';
         body += '</div>';
       });
       body += '</div>';
@@ -26580,7 +26586,7 @@ function renderPompObjectDetail(objId) {
         + 'ondragover="event.preventDefault();this.style.borderColor=\'var(--accent)\';this.style.background=\'rgba(79,110,245,.08)\'" '
         + 'ondragleave="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--surface2)\'" '
         + 'ondrop="event.preventDefault();this.style.borderColor=\'var(--border)\';this.style.background=\'var(--surface2)\';_prObjFotoUpload(event.dataTransfer.files)">'
-        + '<div style="color:var(--muted);font-size:13px">'+ICO.foto+'<br><label for="pr-obj-foto-inp" style="color:var(--accent);cursor:pointer;text-decoration:underline">Foto kiezen</label> of sleep hierheen</div>'
+        + '<div style="color:var(--muted);font-size:13px">'+ICO.foto+'<br><label for="pr-obj-foto-inp" style="color:var(--accent-t);cursor:pointer;text-decoration:underline">Foto kiezen</label> of sleep hierheen</div>'
         + '<input type="file" id="pr-obj-foto-inp" accept="image/*" multiple style="display:none"></div>';
     }
     openModal('Foto\'s', body, '<button class="btn btn-ghost" id="cb-modal-sluit">Sluiten</button>');
@@ -27032,7 +27038,7 @@ function renderPompLijst() {
           case 'documenten': {
             var docCnt=_pompDocAantal(p);
             h += '<td data-col="documenten" style="font-size:12px">';
-            h += docCnt ? '<span style="display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-weight:600">'+ICO.pdf+' '+docCnt+'</span>' : '<span style="color:var(--muted)">—</span>';
+            h += docCnt ? '<span style="display:inline-flex;align-items:center;gap:4px;color:var(--accent-t);font-weight:600">'+ICO.pdf+' '+docCnt+'</span>' : '<span style="color:var(--muted)">—</span>';
             h += '</td>'; break;
           }
           // Alle overige kolommen komen uit Instellingen → Register.
@@ -27168,7 +27174,7 @@ function _renderPompOverzichtAccordion(pomp, klantNm, kanSchrijven, kanDocUpload
   // Documenten
   var docs = pomp.documenten ? Object.values(pomp.documenten) : [];
   var docInhoud = renderPompDocumenten(pomp, kanDocUpload);
-  var docBadge = docs.length ? '<span class="tag" style="background:rgba(79,110,245,.15);color:var(--accent);font-size:10px">'+docs.length+' document'+(docs.length>1?'en':'')+'</span>' : '';
+  var docBadge = docs.length ? '<span class="tag" style="background:rgba(79,110,245,.15);color:var(--accent-t);font-size:10px">'+docs.length+' document'+(docs.length>1?'en':'')+'</span>' : '';
   // Open als documenten aanwezig
   if(docs.length && !_prAccordion.documenten) _prAccordion.documenten = true;
   prAccSectie('documenten', 'Documenten', docBadge, docInhoud);
@@ -27539,9 +27545,9 @@ function renderPompDocumenten(pomp, kanUpload) {
     h += 'ondragleave="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--surface2)\'" ';
     h += 'ondrop="event.preventDefault();this.style.borderColor=\'var(--border)\';this.style.background=\'var(--surface2)\';_handleDrop(\'pr-doc-file\', event)">';
     h += '<input type="file" id="pr-doc-file" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none">';
-    h += '<div style="color:var(--muted);font-size:13px">'+ICO.upload+'<br><label for="pr-doc-file" style="color:var(--accent);cursor:pointer;text-decoration:underline">Klik om te bladeren</label> of sleep hierheen</div>';
+    h += '<div style="color:var(--muted);font-size:13px">'+ICO.upload+'<br><label for="pr-doc-file" style="color:var(--accent-t);cursor:pointer;text-decoration:underline">Klik om te bladeren</label> of sleep hierheen</div>';
     h += '<div style="font-size:11px;color:var(--muted);margin-top:4px">PDF, JPG, PNG, WebP</div>';
-    h += '<div id="pr-doc-naam-label" style="font-size:12px;color:var(--accent);margin-top:6px;font-weight:500"></div>';
+    h += '<div id="pr-doc-naam-label" style="font-size:12px;color:var(--accent-t);margin-top:6px;font-weight:500"></div>';
     h += '</div>';
     h += '<button class="btn btn-primary btn-sm" id="pr-doc-upload-btn" style="display:none">Uploaden</button>';
     h += '</div>';
@@ -27586,7 +27592,7 @@ function renderPompDocumenten(pomp, kanUpload) {
       var verborgenDocs = artDocs.filter(function(d){ return d && d.url && verborgen.indexOf(d.url)>=0; });
       if(verborgenDocs.length && kanUpload){
         artDocHtml += '<div style="margin-top:8px;font-size:11px;color:var(--muted)">'+verborgenDocs.length+' standaarddocument'+(verborgenDocs.length!==1?'en':'')+' verborgen voor deze pomp. ';
-        artDocHtml += '<button class="pr-artdoc-herstel-all" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;text-decoration:underline;padding:0">Alles herstellen</button></div>';
+        artDocHtml += '<button class="pr-artdoc-herstel-all" style="background:none;border:none;color:var(--accent-t);cursor:pointer;font-size:11px;text-decoration:underline;padding:0">Alles herstellen</button></div>';
       }
       artDocHtml += '</div>';
     }
@@ -27749,7 +27755,7 @@ function renderPompOnderdelen(pomp, kanSchrijven) {
     h += '</tr></thead><tbody>';
     onderdelen.forEach(function(o, idx){
       h += '<tr>';
-      h += '<td style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent)">'+esc(o.positie||'')+'</td>';
+      h += '<td style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent-t)">'+esc(o.positie||'')+'</td>';
       h += '<td style="font-family:\'Space Mono\',monospace;font-size:12px">'+esc(o.artikelnr||'—')+'</td>';
       h += '<td><div style="font-weight:500">'+esc(o.omschrijving||'—')+'</div>'+(o.specificatie?'<div style="font-size:11px;color:var(--muted)">'+esc(o.specificatie)+'</div>':'')+'</td>';
       h += '<td style="text-align:right;font-weight:600">'+esc(String(o.standaardAantal||o.aantal||''))+'</td>';
@@ -27803,7 +27809,7 @@ function _renderPompInstallatieTab(pomp, klantNm, kanSchrijven) {
   if(pompObject) {
     h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(79,110,245,.08);border:1px solid rgba(79,110,245,.25);border-radius:var(--radius);margin-bottom:16px;cursor:pointer" id="pr-inst-obj-link">';
     h += '<svg width="16" height="16" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>';
-    h += '<div style="flex:1"><div style="font-size:12px;color:var(--accent);font-weight:600">Onderdeel van object</div>';
+    h += '<div style="flex:1"><div style="font-size:12px;color:var(--accent-t);font-weight:600">Onderdeel van object</div>';
     h += '<div style="font-size:13px;font-weight:700">'+esc(pompObject.naam||'—')+'</div></div>';
     h += '<svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
     h += '</div>';
@@ -27837,7 +27843,7 @@ function _renderPompInstallatieTab(pomp, klantNm, kanSchrijven) {
     var toonAdres = loc ? [loc.adres,loc.postcode,loc.plaats].filter(Boolean).join(', ') : [deb.adres,deb.postcode,deb.plaats].filter(Boolean).join(', ');
     h += '<div style="font-size:12px;color:var(--muted)" id="pr-loc-adres-toon">'+esc(toonAdres)+'</div>';
     if(loc&&loc.contactpersoon) h += '<div style="font-size:12px;color:var(--muted);margin-top:2px">'+esc(loc.contactpersoon)+(loc.telefoon?' · '+esc(loc.telefoon):'')+'</div>';
-    if(mapCoords) h += '<div style="font-size:11px;color:var(--accent);margin-top:6px">'+ICO.locatie+' Kaart gebruikt handmatige coördinaten</div>';
+    if(mapCoords) h += '<div style="font-size:11px;color:var(--accent-t);margin-top:6px">'+ICO.locatie+' Kaart gebruikt handmatige coördinaten</div>';
     if(kanSchrijven) h += '<button class="btn btn-primary btn-sm" id="pr-loc-opslaan" style="margin-top:10px">Opslaan</button>';
   }
   h += '</div>';
@@ -27881,8 +27887,8 @@ function _renderPompInstallatieTab(pomp, klantNm, kanSchrijven) {
     h += 'ondragleave="this.style.borderColor=\'var(--border)\';this.style.background=\'var(--surface2)\'" ';
     h += 'ondrop="event.preventDefault();this.style.borderColor=\'var(--border)\';this.style.background=\'var(--surface2)\';_handleDrop(\'pr-install-foto\',event)">';
     h += '<input type="file" id="pr-install-foto" accept="image/*" multiple style="display:none">';
-    h += '<div style="color:var(--muted);font-size:12px">'+ICO.foto+' <label for="pr-install-foto" style="color:var(--accent);cursor:pointer;text-decoration:underline">Foto kiezen</label> of sleep hierheen</div>';
-    h += '<div id="pr-install-foto-lbl" style="font-size:11px;color:var(--accent);margin-top:4px"></div>';
+    h += '<div style="color:var(--muted);font-size:12px">'+ICO.foto+' <label for="pr-install-foto" style="color:var(--accent-t);cursor:pointer;text-decoration:underline">Foto kiezen</label> of sleep hierheen</div>';
+    h += '<div id="pr-install-foto-lbl" style="font-size:11px;color:var(--accent-t);margin-top:4px"></div>';
     h += '</div>';
     h += '<button class="btn btn-primary btn-sm" id="pr-install-foto-upload" style="margin-top:8px;display:none">Uploaden</button>';
   }
@@ -28075,7 +28081,7 @@ function _pompWbHistorieVul(pomp, afgerondeOpdrachten, skIds){
     if(bonnen.length) _wbHistorieAccordion('pomp-wb-acc', bonnen, 'pomp', pomp.id, false);
   }).catch(function(){
     var w = document.getElementById('pomp-wb-hist');
-    if(w) w.innerHTML = '<div style="font-size:12px;color:var(--red);padding:6px 0">Werkbonnen laden mislukt.</div>';
+    if(w) w.innerHTML = '<div style="font-size:12px;color:var(--red-t);padding:6px 0">Werkbonnen laden mislukt.</div>';
   });
 }
 
@@ -28484,7 +28490,7 @@ async function _prAnalyseerPdfBuffer(arrayBuffer, statusEl, previewEl, saveBtn, 
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     var loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
     var pdf = await loadingTask.promise;
-    if(statusEl) statusEl.innerHTML = '<div style="color:var(--accent)">Pagina\'s lezen\u2026 ('+pdf.numPages+' pagina\'s)</div>';
+    if(statusEl) statusEl.innerHTML = '<div style="color:var(--accent-t)">Pagina\'s lezen\u2026 ('+pdf.numPages+' pagina\'s)</div>';
     var alleItems = [];
     for(var pNum=1; pNum<=pdf.numPages; pNum++){
       var page = await pdf.getPage(pNum);
@@ -28527,7 +28533,7 @@ async function _prAnalyseerPdfBuffer(arrayBuffer, statusEl, previewEl, saveBtn, 
     if(saveBtn) saveBtn.style.display='inline-flex';
     setResult(onderdelen);
   } catch(e){
-    if(statusEl) statusEl.innerHTML='<div style="color:var(--red)">'+_IC_WAARSCH+'Extractie mislukt: '+esc(e.message)+'</div>';
+    if(statusEl) statusEl.innerHTML='<div style="color:var(--red-t)">'+_IC_WAARSCH+'Extractie mislukt: '+esc(e.message)+'</div>';
     setResult([]);
   }
 }
@@ -29242,7 +29248,7 @@ function renderStoringsdienst() {
 
   // ── Huidige dienst banner ──
   h+='<div style="background:'+(huidigeMed?'rgba(79,110,245,.1)':'rgba(245,158,11,.08)')+';border:1px solid '+(huidigeMed?'rgba(79,110,245,.3)':'rgba(245,158,11,.3)')+';border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px">';
-  h+='<div style="display:inline-flex;align-items:center;color:var(--accent)"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div>';
+  h+='<div style="display:inline-flex;align-items:center;color:var(--accent-t)"><svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div>';
   h+='<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Storingsdienst vandaag (week '+huidigWeek+')</div>';
   if(huidigeMed){
     var kl=(APP.rollen[huidigeMed.rol]||{}).kleur||huidigeMed.kleur||'#4f6ef5';
@@ -29273,7 +29279,7 @@ function renderStoringsdienst() {
       var maStr=fmtD(dateToStr(w.ma));
       var zoStr=fmtD(dateToStr(w.zo));
       h+='<tr style="background:'+(isHuidige?'rgba(79,110,245,.06)':'')+'">';
-      h+='<td style="padding:8px 10px"><div style="font-weight:700;font-size:13px;color:'+(isHuidige?'var(--accent)':'var(--text)')+'">W'+w.week+'</div>'+(isHuidige?'<div style="font-size:9px;background:var(--accent-knop);color:#fff;border-radius:3px;padding:1px 4px;display:inline-block">Nu</div>':'')+'</td>';
+      h+='<td style="padding:8px 10px"><div style="font-weight:700;font-size:13px;color:'+(isHuidige?'var(--accent-t)':'var(--text)')+'">W'+w.week+'</div>'+(isHuidige?'<div style="font-size:9px;background:var(--accent-knop);color:#fff;border-radius:3px;padding:1px 4px;display:inline-block">Nu</div>':'')+'</td>';
       h+='<td class="sd-periode" style="font-size:11px;color:var(--muted);padding:8px 10px">'+maStr+'<br>'+zoStr+'</td>';
 
       for(var di=0;di<7;di++){
@@ -29326,8 +29332,8 @@ function renderStoringsdienst() {
       var zoStr=fmtD(dateToStr(w.zo));
       var verleden=w.zo<new Date();
 
-      h+='<tr style="background:'+(isHuidige?'rgba(79,110,245,.06)':'')+(verleden&&!weekMed?';opacity:.5':'')+'">';
-      h+='<td style="padding:10px 12px"><div style="font-weight:700;color:'+(isHuidige?'var(--accent)':'var(--text)')+'">W'+w.week+'</div>'+(isHuidige?'<div style="font-size:9px;background:var(--accent-knop);color:#fff;border-radius:3px;padding:1px 4px;display:inline-block">Nu</div>':'')+'</td>';
+      h+='<tr style="background:'+(isHuidige?'rgba(79,110,245,.06)':'')+(verleden&&!weekMed?';background:var(--surface2);color:var(--muted);filter:saturate(.35)':'')+'">';
+      h+='<td style="padding:10px 12px"><div style="font-weight:700;color:'+(isHuidige?'var(--accent-t)':(verleden&&!weekMed)?'var(--muted)':'var(--text)')+'">W'+w.week+'</div>'+(isHuidige?'<div style="font-size:9px;background:var(--accent-knop);color:#fff;border-radius:3px;padding:1px 4px;display:inline-block">Nu</div>':'')+'</td>';
       h+='<td style="font-size:12px;color:var(--muted);padding:10px 12px">'+maStr+'<br>'+zoStr+'</td>';
 
       // Weekdienst kolom
@@ -29937,7 +29943,7 @@ function _plaatsOpdrachtMarker(map, o, coord, markerKleur, numLabel, spoed, ot) 
   }).filter(Boolean).join(' · ');
   var iw = new google.maps.InfoWindow({content:
     '<div style="font-family:\'Instrument Sans\',sans-serif;min-width:210px;padding:8px 4px 4px">'
-    + (spoed ? '<div style="background:#ef4444;color:white;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;margin-bottom:6px;display:inline-block">'+ICO.zap+' SPOED</div><br>' : '')
+    + (spoed ? '<div style="background:var(--red-knop);color:#fff;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;margin-bottom:6px;display:inline-block">'+ICO.zap+' SPOED</div><br>' : '')
     + (numLabel ? '<div style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+markerKleur+';color:white;font-weight:700;font-size:12px;margin-bottom:6px">'+numLabel+'</div> ' : '')
     + '<div style="font-weight:700;font-size:15px;color:#111;margin-bottom:4px;border-bottom:2px solid '+markerKleur+';padding-bottom:5px">'+esc(o.klantNaam||'—')+'</div>'
     + '<div style="font-size:12px;color:#333;margin-bottom:3px">'+esc(o.adres||'')+'</div>'
@@ -30269,7 +30275,7 @@ function tekenMonteurRoute(map, monteurId) {
       var _iwMonteurIds = Array.isArray(o.monteurIds)&&o.monteurIds.length ? o.monteurIds : (o.monteurId?[String(o.monteurId)]:[]);
       var _iwMonteurNamen = _iwMonteurIds.map(function(mid){var mm=getMed(mid);return mm?esc(mm.voornaam+' '+mm.achternaam):null;}).filter(Boolean).join(' · ');
       var iwContent = '<div style="font-family:\'Instrument Sans\',sans-serif;min-width:210px;padding:8px 4px 4px">'
-        +(spoed?'<div style="background:#ef4444;color:white;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;margin-bottom:6px;display:inline-block">'+ICO.zap+' SPOED</div><br>':'')
+        +(spoed?'<div style="background:var(--red-knop);color:#fff;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;margin-bottom:6px;display:inline-block">'+ICO.zap+' SPOED</div><br>':'')
         +'<div style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:'+markerKleur+';color:white;font-weight:700;font-size:12px;margin-bottom:6px">'+numLabel+'</div> '
         +'<div style="font-weight:700;font-size:15px;color:#111;margin-bottom:4px;border-bottom:2px solid '+markerKleur+';padding-bottom:5px">'+esc(o.klantNaam||'—')+'</div>'
         +'<div style="font-size:12px;color:#333;margin-bottom:3px">'+esc(o.adres||'')+'</div>'
@@ -30511,7 +30517,7 @@ function _updateRoutePaneel() {
       var leg = data.legs[idx];
       if(leg) {
         h += '<div style="display:flex;align-items:center;gap:6px;padding:3px 0 3px 10px;border-left:2px solid '+kl+'22;margin-left:9px">';
-        h += '<span style="font-size:11px;color:var(--accent)">'+ICO.auto+' '+esc(leg.duration.text)+'</span>';
+        h += '<span style="font-size:11px;color:var(--accent-t)">'+ICO.auto+' '+esc(leg.duration.text)+'</span>';
         h += '<span style="font-size:11px;color:var(--muted)">· '+esc(leg.distance.text)+'</span>';
         h += '</div>';
       }
@@ -30814,7 +30820,7 @@ function renderLocatie() {
     if(_afstandRoute)  { _afstandRoute.setMap(null);  _afstandRoute=null;  }
     geocodeMetCache(invoer.value.trim()+', Nederland', function(coord){
       if(!coord) {
-        resultEl.innerHTML='<span style="color:var(--red)">Adres niet gevonden — probeer een andere zoekterm</span>';
+        resultEl.innerHTML='<span style="color:var(--red-t)">Adres niet gevonden — probeer een andere zoekterm</span>';
         return;
       }
       var destLoc = { lat: coord.lat, lng: coord.lng };
@@ -31310,14 +31316,14 @@ function renderKlantmails() {
 
       // Email
       if (email) {
-        h += '<td data-col="klantEmail" style="font-size:12px;color:var(--accent)">'+esc(email)+'</td>';
+        h += '<td data-col="klantEmail" style="font-size:12px;color:var(--accent-t)">'+esc(email)+'</td>';
       } else {
-        h += '<td data-col="klantEmail" style="font-size:12px;color:var(--red)">Geen e-mail</td>';
+        h += '<td data-col="klantEmail" style="font-size:12px;color:var(--red-t)">Geen e-mail</td>';
       }
 
       // Datum + tijd
       h += '<td data-col="datum" style="font-size:12px;font-weight:600;white-space:nowrap">'+fmtD(o.datum)+'</td>';
-      h += '<td data-col="tijdVan" style="font-size:12px;color:var(--accent);white-space:nowrap">'+esc(o.tijdVan||'—')+(o.tijdTot?' – '+esc(o.tijdTot):'')+'</td>';
+      h += '<td data-col="tijdVan" style="font-size:12px;color:var(--accent-t);white-space:nowrap">'+esc(o.tijdVan||'—')+(o.tijdTot?' – '+esc(o.tijdTot):'')+'</td>';
 
       // Monteur
       h += '<td data-col="monteurNaam" style="font-size:12px">'+(monteur?esc(monteur.voornaam+' '+monteur.achternaam):'<span style="color:var(--muted)">—</span>')+'</td>';
@@ -34431,7 +34437,7 @@ function renderInstRollen(el) {
   h += '<div class="ist-uitleg-t">';
   h += 'Bij werkorders is <strong>S (Schrijven)</strong> het <em>uitvoeren</em> en <strong>B (Beheren)</strong> het <em>regelen</em>. Zo kan een monteur zijn werk volledig invullen en afronden, zonder werkorders te kunnen aanmaken, verwijderen of statussen te forceren.';
   h += '<div class="ist-uitleg-twee">';
-  h += '<div><div style="font-weight:700;color:var(--accent);margin-bottom:3px">S — Uitvoeren</div>';
+  h += '<div><div style="font-weight:700;color:var(--accent-t);margin-bottom:3px">S — Uitvoeren</div>';
   h += 'Velden invullen · uren, materialen, foto\u2019s en documenten toevoegen · handtekening zetten · blok of werkorder afronden en versturen</div>';
   h += '<div><div style="font-weight:700;color:var(--purple-t);margin-bottom:3px">B — Beheren</div>';
   h += 'Werkorder aanmaken en verwijderen · klant, deadline en details wijzigen · prioriteit zetten · status handmatig wisselen · afgeronde werkorders heropenen en terughalen uit het archief · werkdocumenten-map beheren</div>';
@@ -34442,14 +34448,14 @@ function renderInstRollen(el) {
   h += '<div class="ist-uitleg">';
   h += '<div class="lf-groep">Wat betekenen E (Eigen) en S (Schrijven) precies?</div>';
   h += '<div class="ist-uitleg-t">';
-  h += '<strong style="color:var(--accent)">S (Schrijven)</strong> geeft volledige toegang binnen de module: alle records van iedereen zien, aanmaken, bewerken en goedkeuren. <strong style="color:var(--orange-t)">E (Eigen)</strong> beperkt tot de eigen gegevens \u2014 wat \u201ceigen\u201d betekent, verschilt per module:';
+  h += '<strong style="color:var(--accent-t)">S (Schrijven)</strong> geeft volledige toegang binnen de module: alle records van iedereen zien, aanmaken, bewerken en goedkeuren. <strong style="color:var(--orange-t)">E (Eigen)</strong> beperkt tot de eigen gegevens \u2014 wat \u201ceigen\u201d betekent, verschilt per module:';
   h += '<div class="ist-uitleg-twee">';
-  h += '<div><div style="font-weight:700;color:var(--accent);margin-bottom:3px">Werkbonnen</div>';
+  h += '<div><div style="font-weight:700;color:var(--accent-t);margin-bottom:3px">Werkbonnen</div>';
   h += 'Met E ziet en bewerkt een monteur alleen de werkbonnen die <em>aan hem zijn toegewezen</em> \u2014 niet die van collega\u2019s.</div>';
-  h += '<div><div style="font-weight:700;color:var(--accent);margin-bottom:3px">Overuren · Onkosten · Verlof</div>';
+  h += '<div><div style="font-weight:700;color:var(--accent-t);margin-bottom:3px">Overuren · Onkosten · Verlof</div>';
   h += 'Met E dient een medewerker zijn <em>eigen</em> aanvragen in en bewerkt of verwijdert ze \u2014 maar alleen zolang de status <em>Aangevraagd</em> is. Na goedkeuring of afwijzing staat de aanvraag op slot; alleen een goedkeurder kan hem dan nog wijzigen.</div>';
   h += '</div>';
-  h += '<div class="ist-uitleg-voet">Verzuim werkt anders: dat kan niet met E worden ingediend. Registreren vraagt <strong style="color:var(--accent)">S</strong> (voor HR/administratie); zonder S ziet een medewerker alleen het feit d\u00e1t er verzuim is en \u2014 met <strong style="color:var(--red-t)">I</strong> \u2014 de volledige dossiers. Zie de uitleg hierboven.</div>';
+  h += '<div class="ist-uitleg-voet">Verzuim werkt anders: dat kan niet met E worden ingediend. Registreren vraagt <strong style="color:var(--accent-t)">S</strong> (voor HR/administratie); zonder S ziet een medewerker alleen het feit d\u00e1t er verzuim is en \u2014 met <strong style="color:var(--red-t)">I</strong> \u2014 de volledige dossiers. Zie de uitleg hierboven.</div>';
   h += '</div></div>';
   h += _ua[1] + '</div>';
   el.innerHTML = h;
@@ -36379,7 +36385,7 @@ function _woRenderWerkdocs(wrap, kanSchrijven){
     } else {
       docs.forEach(function(d){
         h += '<div class="wo-wd-rij" data-id="'+esc(d.id)+'" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;cursor:pointer">';
-        h += '<span style="flex-shrink:0;color:var(--accent)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+(typeof _wbDocIcoon==='function'?_wbDocIcoon(d.mime,d.naam):'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>')+'</svg></span>';
+        h += '<span style="flex-shrink:0;color:var(--accent-t)"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+(typeof _wbDocIcoon==='function'?_wbDocIcoon(d.mime,d.naam):'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>')+'</svg></span>';
         h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.naam||'bestand')+'</div>';
         if(d.grootte) h += '<div style="font-size:11px;color:var(--muted)">'+esc(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.grootte):(Math.round(d.grootte/1024)+' KB'))+'</div>';
         h += '</div>';
@@ -36599,7 +36605,7 @@ function renderWerkorders() {
     _woRenderLijst(res[0], res[1], kanSchrijven);
   }).catch(function(e){
     var w = document.getElementById('wo-lijst-wrap');
-    if(w) w.innerHTML = '<div style="font-size:13px;color:var(--red);padding:16px 0">Laden mislukt: '+esc(e.message||String(e))+'</div>';
+    if(w) w.innerHTML = '<div style="font-size:13px;color:var(--red-t);padding:16px 0">Laden mislukt: '+esc(e.message||String(e))+'</div>';
   });
 }
 
@@ -36754,7 +36760,7 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
       var typeKl = (type && type.kleur) || '#6b7694';
       var dlVerstreken = !inArchief && _woDeadlineVerstreken(w);
       h += '<tr class="wo-rij" data-id="'+esc(w.id)+'" tabindex="0" data-klik style="cursor:pointer;border-top:1px solid var(--border)'+(inArchief?';opacity:.72':'')+'">';
-      h += '<td data-col="nummer" style="padding:11px;font-weight:700;color:var(--accent-t)">'+(isHoog?'<span title="Hoge prioriteit" style="color:var(--red);margin-right:4px;vertical-align:middle">'+ICO.flag+'</span>':'')+esc(_woNummerLabel(w))+'</td>';
+      h += '<td data-col="nummer" style="padding:11px;font-weight:700;color:var(--accent-t)">'+(isHoog?'<span title="Hoge prioriteit" style="color:var(--red-t);margin-right:4px;vertical-align:middle">'+ICO.flag+'</span>':'')+esc(_woNummerLabel(w))+'</td>';
       h += '<td data-col="type" style="padding:11px;font-size:13px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+typeKl+';margin-right:7px;vertical-align:middle"></span>'+esc(w.typeNaam||(type&&type.naam)||'\u2014')+'</td>';
       h += '<td data-col="klant" style="padding:11px;font-size:13px'+(w.tbvVoorraad?';color:var(--muted);font-style:italic':'')+'">'+esc(klantTekst||'\u2014')+'</td>';
       h += '<td data-col="details" style="padding:11px;font-size:12px;color:var(--muted);max-width:200px">'+esc(detailKort||'\u2014')+'</td>';
@@ -36775,7 +36781,7 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
 
       // Kaart voor mobiel: nummer + datum links, klant groot, type/deadline eronder.
       hk += '<div class="wo-rij wo-kaart'+(isHoog?' wo-hoog':'')+'" data-id="'+esc(w.id)+'" role="button" tabindex="0"'+(inArchief?' style="opacity:.72"':'')+'>';
-      hk += '<div class="wok-nr">'+(isHoog?'<span style="color:var(--red)">'+ICO.flag+'</span>':'')+esc(_woNummerLabel(w))+(datum?'<small>'+esc(datum)+'</small>':'')+'</div>';
+      hk += '<div class="wok-nr">'+(isHoog?'<span style="color:var(--red-t)">'+ICO.flag+'</span>':'')+esc(_woNummerLabel(w))+(datum?'<small>'+esc(datum)+'</small>':'')+'</div>';
       hk += '<div class="wok-body"><div class="wok-info">';
       hk += '<div class="wok-klant"'+(w.tbvVoorraad?' style="font-style:italic;color:var(--muted);font-weight:500"':'')+'>'+esc(klantTekst||'\u2014')+'</div>';
       var _mk = ['<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+typeKl+';margin-right:5px;vertical-align:middle"></span>'+esc(w.typeNaam||(type&&type.naam)||'\u2014')];
@@ -38691,7 +38697,7 @@ function _woWdAccordionVul(body){
     var h = '';
     docs.forEach(function(d){
       h += '<div class="wox-wd-rij" data-id="'+esc(d.id)+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:5px;cursor:pointer">';
-      h += '<span style="flex-shrink:0;color:var(--accent)"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+(typeof _wbDocIcoon==='function'?_wbDocIcoon(d.mime,d.naam):'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>')+'</svg></span>';
+      h += '<span style="flex-shrink:0;color:var(--accent-t)"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+(typeof _wbDocIcoon==='function'?_wbDocIcoon(d.mime,d.naam):'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>')+'</svg></span>';
       h += '<div style="flex:1;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.naam||'bestand')+'</div>';
       if(d.grootte) h += '<span style="font-size:11px;color:var(--muted);white-space:nowrap">'+esc(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.grootte):(Math.round(d.grootte/1024)+' KB'))+'</span>';
       h += '</div>';
