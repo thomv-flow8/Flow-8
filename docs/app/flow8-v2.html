@@ -89,7 +89,8 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:var(--radius-pill);font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid transparent;font-family:inherit;white-space:nowrap;transition:background .18s ease,border-color .18s ease,color .18s ease,filter .18s ease}
 /* Witte tekst op --accent-knop: 4,6:1. De hover maakt het vlak 6% donkerder (5,1:1); 8% lichter
    zakte naar 4,0:1, onder de grens voor knoptekst. */
-.btn-primary{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}.btn-primary:hover{filter:brightness(.94)}
+.btn-primary{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}
+.btn:disabled,.btn[disabled]{background:var(--surface2);border-color:var(--border);color:var(--muted);cursor:default;filter:none}.btn-primary:hover{filter:brightness(.94)}
 .btn-ghost{background:transparent;color:var(--muted);border-color:var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--muted2);background:transparent}
 .dagkop-tekst .btn-ghost{border-color:var(--muted2)}
 .btn-danger{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.4);color:var(--red-t)}.btn-danger:hover{background:rgba(239,68,68,.22)}.btn-sm{padding:5px 10px;font-size:12px}.btn-icon{padding:7px}
@@ -2055,7 +2056,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .bn-item svg{width:20px;height:20px}
 
 /* Hamburger */
-#hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);flex-shrink:0}
+#hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);flex-shrink:0;min-width:44px;min-height:44px;align-items:center;justify-content:center}
 @media(max-width:768px){
   #hamburger{display:flex}
   #bottom-nav{display:flex}
@@ -2845,7 +2846,7 @@ button.sd-m-dag{cursor:pointer}
         App installeren
       </button>
       <div style="display:flex;align-items:center;gap:10px;min-width:0">
-        <div class="avatar sb-user-info" id="sb-av" style="width:34px;height:34px;font-size:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;flex-shrink:0"></div>
+        <div class="avatar sb-user-info" id="sb-av" style="width:34px;height:34px;font-size:12px;background:var(--accent-knop);color:#fff;flex-shrink:0"></div>
         <div class="sb-user-info" style="flex:1;min-width:0;overflow:hidden">
           <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sb-naam">—</div>
           <div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sb-rol">—</div>
@@ -4071,7 +4072,7 @@ function _wbSecToggle(hdr){
 }
 function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerCompact) {
   var bewerkbaar = _magWerkbonBewerken(wb);
-  var _adr = function(a){ return a ? esc((a.adres||'')+', '+(a.postcode||'')+' '+(a.plaats||'')) : '\u2014'; };
+  var _adr = function(a){ return a ? (esc([a.adres, [a.postcode, a.plaats].filter(Boolean).join(' ')].filter(Boolean).join(', ')) || '\u2014') : '\u2014'; };
   var _statusLbl = { concept:'Concept', klaargezet:'Klaargezet', opgehaald:'Opgehaald', afgehandeld:'Afgehandeld', verwerkt:'Verwerkt', gearchiveerd:'Gearchiveerd' };
   var _statusKl  = { concept:'#94a3b8', klaargezet:'#6b7694', opgehaald:'#06b6d4', afgehandeld:'#10b981', verwerkt:'#64748b', gearchiveerd:'#94a3b8' };
   var kl = _statusKl[wb.status]||'#6b7694';
@@ -11164,6 +11165,7 @@ function _dashKpi(waarde, label, soort, doel){
 // Balkdiagram met één reeks: dunne balken met een afgeronde kop op de basislijn, rustige
 // rasterlijnen, alleen de laatste waarde als label. Waarde per balk via de tooltip (data-tip).
 function _dashBalken(data, labels, eenheid, titel){
+  if(!data.some(function(v){ return v > 0; })) return '<div class="dash-leeg">Nog niets '+esc(eenheid)+' in de afgelopen weken.</div>';
   var W = 520, H = 130, mb = 18, mt = 16, max = Math.max.apply(null, data.concat([1])), top = Math.ceil(max/5)*5 || 5;
   // Vaste maximale staafbreedte, gecentreerd in zijn vak: anders werden het blokken op een breed scherm.
   var vak = W / data.length, bw = Math.min(28, vak - 6), s = '';
@@ -11899,9 +11901,7 @@ function renderMedewerkers() {
   h+='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   h+='<input class="input" id="med-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_medZoek))+'" style="max-width:260px">';
   h+='<div style="flex:1"></div>';
-  h+='<button class="btn btn-ghost btn-sm hide-mobile" id="med-kolom-toolbar-btn">'+ICO.settings+' Kolommen</button>';
-  if (magSchrijven('medewerkers')) h+='<button class="btn btn-ghost btn-sm hide-mobile" id="med-import-btn">'+ICO.upload+' Importeren</button>';
-  h+='<button class="btn btn-ghost btn-sm hide-mobile" id="med-export-btn">'+ICO.download+' Export</button>';
+  h+=_meerMenu([{id:'med-kolom-toolbar-btn', label:'Kolommen kiezen', icon:ICO.settings}, magSchrijven('medewerkers') ? {id:'med-import-btn', label:'Medewerkers importeren', icon:ICO.upload} : null, {id:'med-export-btn', label:'Exporteren', icon:ICO.download}], true);
   if (magSchrijven('medewerkers')) h+='<button class="btn btn-primary btn-sm" id="med-add-btn">'+_LF_PLUS+'Medewerker</button>';
   h+='</div>';
 
@@ -12131,7 +12131,7 @@ function openMedPanel(id) {
     document.getElementById('mp-hist').classList.toggle('open', open);
   });
   var editBtn = pb.querySelector('#mp-edit');       if(editBtn)   editBtn.addEventListener('click',function(){openMedModal(id);closePanel();});
-  var delBtn  = pb.querySelector('#mp-del');        if(delBtn)    delBtn.addEventListener('click',function(){verwijderMed(id);closePanel();});
+  var delBtn  = pb.querySelector('#mp-del');        if(delBtn)    delBtn.addEventListener('click',function(){verwijderMed(id);});
   var corBtn  = pb.querySelector('#mp-correctie');  if(corBtn)    corBtn.addEventListener('click',function(){openCorrectieModal(id);});
 }
 
@@ -12590,6 +12590,7 @@ function verwijderMed(id) {
     _tekst+=' Let op: er '+((_lopendZiek+_openAanvr)!==1?'staan':'staat')+' nog '+_nog.join(' en ')+'. Die tellen na verwijderen nergens meer mee. Is de medewerker uit dienst, zet deze dan liever op inactief: dan blijft de historie bewaard.';
   }
   bevestigActie('Medewerker verwijderen', _tekst, function(){
+    if(document.getElementById('panel').classList.contains('open')) closePanel();
     var backup=JSON.parse(JSON.stringify(m));
     APP.medewerkers=APP.medewerkers.filter(function(x){return String(x.id)!==String(id);});
     renderMedewerkers();
@@ -15914,7 +15915,7 @@ function renderVerlof(){
           if(v.status==='aangevraagd'){
             // Alleen de ingestelde goedkeurder van deze medewerker (of admin) tekent.
             if(magGoedkeuren('verlof', v.medId)){
-              h += '<button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="1" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button> <button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="0" style="color:var(--red-t)">'+ICO.cross+' Afwijzen</button> ';
+              h += '<button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="0" style="color:var(--red-t)">'+ICO.cross+' Afwijzen</button> <button class="btn btn-ghost btn-sm vl-gk" data-id="'+v.id+'" data-ok="1" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button> ';
             } else {
               var _gkV = getGoedkeurderVoor(v.medId, 'verlof');
               h += '<span style="font-size:11px;color:var(--muted)">Wacht op '+esc(_gkV?(_gkV.voornaam||''):'beheerder')+'</span> ';
@@ -16370,6 +16371,8 @@ var OT_SVGS = {
   klant:        '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
 };
 function getOtSvg(icon) {
+  // Standaardtypes geven een complete SVG mee in plaats van een sleutel; toon die op de vaste maat.
+  if (icon && String(icon).indexOf('<svg') >= 0) return String(icon).replace(/width="\d+"/, 'width="14"').replace(/height="\d+"/, 'height="14"');
   return OT_SVGS[icon] || OT_SVGS['overig'];
 }
 
@@ -16562,7 +16565,7 @@ function _renderDagplanning() {
     content += '</div>';
 
     // Start marker
-    content += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:8px;border-radius:var(--radius);font-size:13px;font-weight:600;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:var(--green-t)">'
+    content += '<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:8px;border-radius:var(--radius);font-size:13px;font-weight:600;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:var(--green-t)">'
        + '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>'
        + _dpStarttijd+' — Vertrek vanaf bedrijfsadres</div>';
 
@@ -18639,7 +18642,7 @@ function _apRenderStap3(){
     _apNietIngepland.forEach(function(k){ b+='<div style="font-size:12px;color:var(--muted);padding:3px 0">'+esc(k.naam)+' — '+(k.duurUren||1.5)+'u'+(k._apNietReden?' <span style="color:var(--orange-t)">('+esc(k._apNietReden)+')</span>':'')+'</div>'; });
     b+='</div>';
   } else {
-    b+='<div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">';
+    b+='<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">';
     b+='<div style="font-size:13px;font-weight:600;color:var(--green-t)">'+_IC_VINK+'Alle servicebeurten zijn succesvol verdeeld</div></div>';
   }
 
@@ -20287,7 +20290,7 @@ function renderPlanWeek(monteurs) {
       if(opVerzuimDag.length) {
         var vz = opVerzuimDag[0];
         var zLabel = vz.type==='gedeeltelijk'?'Ged. ziek':vz.status==='langdurig'?'Langdurig ziek':'Ziek';
-        ziekBadge = '<div style="background:var(--red);border-radius:4px;padding:4px 7px;font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:4px"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>'+esc(zLabel)+'</div>';
+        ziekBadge = '<div style="background:var(--red-knop);border-radius:4px;padding:4px 7px;font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:4px"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>'+esc(zLabel)+'</div>';
       }
 
       var blokkadeDag = APP.blokkadeDagen && APP.blokkadeDagen[dag];
@@ -22141,8 +22144,8 @@ function renderOveruren() {
           h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
           if(o.status==='aangevraagd') {
             if(magTekenen) {
-              h += '<button class="btn btn-ghost btn-sm ou-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button>';
               h += '<button class="btn btn-ghost btn-sm ou-af-btn" data-id="'+o.id+'" style="color:var(--red-t)">'+ICO.cross+' Afwijzen</button>';
+              h += '<button class="btn btn-ghost btn-sm ou-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button>';
             } else {
               var _gk = getGoedkeurderVoor(mid, 'overuren');
               h += '<span style="font-size:11px;color:var(--muted)" title="Alleen de ingestelde goedkeurder kan tekenen">Wacht op '+esc(_gk?(_gk.voornaam||'')+' '+(_gk.achternaam||''):'beheerder')+'</span> ';
@@ -22629,8 +22632,8 @@ function renderOnkosten() {
           h += '<td style="white-space:nowrap" onclick="event.stopPropagation()">';
           if(o.status==='aangevraagd'){
             if(magTekenenOk){
-              h += '<button class="btn btn-ghost btn-sm ok-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button>';
               h += '<button class="btn btn-ghost btn-sm ok-af-btn" data-id="'+o.id+'" style="color:var(--red-t)">'+ICO.cross+' Afwijzen</button>';
+              h += '<button class="btn btn-ghost btn-sm ok-goed-btn" data-id="'+o.id+'" style="color:var(--green-t)">'+ICO.check+' Goedkeuren</button>';
             } else {
               var _gkK = getGoedkeurderVoor(o.medId, 'onkosten');
               h += '<span style="font-size:11px;color:var(--muted)">Wacht op '+esc(_gkK?(_gkK.voornaam||''):'beheerder')+'</span>';
@@ -23065,7 +23068,7 @@ function renderVerzuim() {
       items.forEach(function(v){
         var duren=v.van?telWerkdagen(v.van, v.tot&&v.tot<=vandaag?v.tot:null):0;
         var stKleur={actief:'var(--red)',langdurig:'var(--orange)',hersteld:'var(--green)'}[v.status]||'var(--muted)';
-        var stTag='<span class="tag" style="background:'+_kleurTint(stKleur,'22')+';color:'+_klTekst(stKleur)+'">'+esc(v.status)+'</span>';
+        var stTag='<span class="tag" style="background:'+_kleurTint(stKleur,'22')+';color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(v.status))+'</span>';
         var _vtmap={ziek:'Ziek',geoorloofd:'Geoorloofd',ongeoorloofd:'Ongeoorloofd',gedeeltelijk:'Gedeeltelijk'};
         var typeTag=(_vtmap[v.type]||esc(v.type||'—'))+(v.type==='gedeeltelijk'&&v.urenZiek?' <span style="font-size:11px;color:var(--muted)">('+v.urenZiek+'u ziek'+(v.urenWerk?'/'+v.urenWerk+'u werk':'')+')</span>':'');
         h += '<tr class="vz-rij" data-id="'+v.id+'" style="cursor:pointer">';
@@ -29527,15 +29530,14 @@ function renderStoringsdienst() {
   else {
   // ── Toolbar ──
   h='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
-  // View switcher
-  h+='<div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px;gap:2px">';
+  // Periode, Vandaag en daarnaast de keuze kwartaal/jaar (zelfde volgorde als Planning)
+  h+=_periodeNav('sd-prev', 'sd-next', (_sdView==='jaar' ? _sdJaar : 'Q'+_sdKwart+' '+_sdJaar), 'Vorige periode', 'Volgende periode');
+  h+='<button class="btn btn-ghost btn-sm" id="sd-vandaag">Vandaag</button>';
+  h+='<div class="ag-switcher">';
   [['kwartaal','Kwartaal'],['jaar','Jaar']].forEach(function(v){
     h+='<button class="plan-view-btn'+(_sdView===v[0]?' active':'')+'" data-sdview="'+v[0]+'">'+v[1]+'</button>';
   });
   h+='</div>';
-  // Jaar/kwartaal navigator
-  h+=_periodeNav('sd-prev', 'sd-next', (_sdView==='jaar' ? _sdJaar : 'Q'+_sdKwart+' '+_sdJaar), 'Vorige periode', 'Volgende periode');
-  h+='<button class="btn btn-ghost btn-sm" id="sd-vandaag">Vandaag</button>';
   h+='<div style="flex:1"></div>';
   if(_sdMag) h+='<button class="btn btn-primary btn-sm" id="sd-rouleer">'+ICO.refresh+' Voorstel genereren</button>';
   h+='</div>';
@@ -36984,7 +36986,7 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
   // weergave, zodat je ook afgehandelde werkorders per type kunt bekijken.
   var aantalArchief = alle.filter(function(w){ return _woIsAfgehandeld(w, _typeVan(w)); }).length;
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">';
-  h += '<button class="chip'+((_woLijstFilter.typeId===''&&!inArchief)?' active':'')+' wo-filter-chip" data-type="">Alle ('+basis.length+')</button>';
+  h += '<button class="chip'+((_woLijstFilter.typeId===''&&!inArchief)?' active':'')+' wo-filter-chip" data-type="">Open ('+basis.length+')</button>';
   actieveTypen.forEach(function(t){
     var n = basis.filter(function(w){ return String(w.typeId)===String(t.id); }).length;
     h += '<button class="chip'+(_woLijstFilter.typeId===t.id?' active':'')+' wo-filter-chip" data-type="'+esc(t.id)+'">'+esc(t.naam)+' ('+n+')</button>';
