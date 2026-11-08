@@ -756,6 +756,25 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .lf .lf-veld.sd-inp.ok{border-color:var(--green)}
 .lf .lf-veld.sd-inp.fout{border-color:var(--red)}
 /* Verzonden mail */
+/* Rapportage per medewerker */
+.rp-tegels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.rp-tegel{background:var(--surface2);border-radius:var(--radius-lg);padding:12px 14px}
+.rp-tegel span{display:block;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rp-tegel b{display:block;font:700 20px 'Space Mono',monospace;margin-top:6px;letter-spacing:-.02em}
+.rp-tegel:last-child:nth-child(odd){grid-column:1/-1}
+.rp-nav .lf-kw{font-family:'Space Mono',monospace;font-size:14px;color:var(--text)}
+.rp-terug{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 8px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);color:var(--text);font:600 13px 'Instrument Sans',sans-serif;margin:0 0 8px;cursor:pointer}
+.rp-getal{font:700 14px 'Space Mono',monospace;white-space:nowrap}
+.rp-weken{display:flex;flex-wrap:wrap;gap:8px}
+.rp-week{background:var(--surface2);border-radius:var(--radius);padding:8px 12px;min-width:64px}
+.rp-week b{display:block;font:700 14px 'Space Mono',monospace}
+.rp-week small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.rp-dag{background:rgba(245,158,11,.1)}
+.rp-dag b{color:var(--orange-t)}
+/* Kolomkiezers */
+.kk-uitleg{padding-top:0}
+.kk-rij.uit .lf-l{color:var(--muted)}
+.lf-rij.kk-kaal{grid-template-columns:minmax(0,1fr) auto;cursor:pointer}
 .mi-bericht{background:var(--surface2);border-radius:var(--radius-lg);padding:14px;font-size:14px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow-y:auto}
 .lf .mono{font-family:'Space Mono',monospace;font-weight:700}
 .lf-alleen-lezen{cursor:default}
@@ -15807,17 +15826,10 @@ function openMedKolomKiezer() {
     { k:'resterend',l:'Resterend saldo' },
     { k:'overuren', l:'Overuren' },
   ];
-  var b = '<div style="display:flex;flex-direction:column;gap:10px">';
-  kols.forEach(function(c) {
-    b += '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px;background:var(--surface2);border-radius:8px">';
-    b += '<input type="checkbox" id="mk-'+c.k+'"'+(_medKol[c.k]!==false?' checked':'')+' style="width:16px;height:16px;cursor:pointer">';
-    b += '<span style="font-size:13px;font-weight:500">'+c.l+'</span></label>';
-  });
-  b += '</div>';
-  var f = '<button class="btn btn-ghost" id="mk-cancel">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="mk-save">Toepassen</button>';
-  openModal('Kolommen kiezen', b, f);
-  document.getElementById('mk-cancel').addEventListener('click', closeModal);
+  var b = _zpKaart(kols.map(function(c){
+    return '<label class="lf-rij kk-kaal"><span class="lf-l">'+c.l+'</span><span class="lf-w"><span class="lf-sw"><input type="checkbox" id="mk-'+c.k+'"'+(_medKol[c.k]!==false?' checked':'')+'><i></i></span></span></label>';
+  }).join(''));
+  lfOpen('Kolommen', b, 'Toepassen', 'mk-save');
   document.getElementById('mk-save').addEventListener('click', function() {
     kols.forEach(function(c) { _medKol[c.k] = document.getElementById('mk-'+c.k).checked; });
     closeModal(); renderMedewerkers();
@@ -21223,61 +21235,34 @@ function verwijderOpdracht(id) {
 // ── PLANNING KOLOMKIEZER ───────────────────────────────────────────
 // ── GENERIEKE KOLOMKIEZER MET VOLGORDE ───────────────────────────
 function openKolomKiezer(titel, kolommen, onSave) {
-  var b = '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--muted);border:1px solid var(--border)">'
-    + '<span style="font-size:16px">⠿</span>'
-    + '<span>Sleep rijen om de volgorde te wijzigen · Vink aan om een kolom te tonen</span>'
-    + '</div>';
-  b += '<div id="gkol-lijst" style="display:flex;flex-direction:column;gap:6px">';
-  kolommen.forEach(function(c) {
-    var disabled = c.always ? ' disabled' : '';
-    b += '<div class="gkol-item" data-k="'+c.k+'" draggable="'+(c.always?'false':'true')+'" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;'+(c.always?'cursor:default;opacity:.7':'cursor:grab')+';border:1px solid var(--border)">';
-    b += '<span style="color:var(--muted);font-size:16px">'+(c.always?ICO.lock:'⠿')+'</span>';
-    b += '<input type="checkbox" class="gkol-check" data-k="'+c.k+'"'+(c.aan?' checked':'')+disabled+' style="width:16px;height:16px;cursor:'+(c.always?'default':'pointer')+'">';
-    b += '<span style="font-size:13px;font-weight:500;flex:1">'+c.l+'</span>';
-    b += '</div>';
-  });
-  b += '</div>';
-
-  var f = '<button class="btn btn-ghost" id="gk-cancel">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="gk-save">Toepassen</button>';
-  openModal(titel, b, f);
-
-  var lijst = document.getElementById('gkol-lijst');
-  var dragItem = null;
-
-  lijst.querySelectorAll('.gkol-item[draggable="true"]').forEach(function(item) {
-    item.addEventListener('dragstart', function(e) {
-      dragItem = item;
-      setTimeout(function(){ item.style.opacity='0.4'; }, 0);
+  // Werkkopie: volgorde en aan/uit gelden pas na Toepassen. Volgorde met pijltjes (slepen werkt
+  // niet op een telefoon); kolommen die altijd zichtbaar zijn, hebben een slotje.
+  var lijst = kolommen.map(function(c){ return { k:c.k, l:c.l, aan: c.always ? true : !!c.aan, always: c.always }; });
+  var b = '<p class="lf-uitleg kk-uitleg">Zet een kolom aan of uit; met de pijltjes verander je de volgorde.</p><div id="gkol-lijst"></div>';
+  lfOpen(titel, b, 'Toepassen', 'gk-save');
+  var wrap = document.getElementById('gkol-lijst');
+  function teken(){
+    wrap.innerHTML = _zpKaart(lijst.map(function(c, i){
+      return '<div class="lf-rij kk-rij'+(c.aan ? '' : ' uit')+'">'
+        + (c.always ? _lfIco(ICO.lock) : _lfVolgorde('kk', i, lijst.length))
+        + '<span class="lf-l">'+c.l+(c.always ? '<small>Altijd zichtbaar</small>' : '')+'</span>'
+        + '<span class="lf-w"><span class="lf-sw"><input type="checkbox" class="gkol-check" data-i="'+i+'"'+(c.aan ? ' checked' : '')+(c.always ? ' disabled' : '')+' aria-label="Kolom tonen"><i></i></span></span></div>';
+    }).join(''));
+    wrap.querySelectorAll('.gkol-check').forEach(function(cb){
+      cb.addEventListener('change', function(){ var c = lijst[+cb.dataset.i]; c.aan = cb.checked; cb.closest('.kk-rij').classList.toggle('uit', !c.aan); });
     });
-    item.addEventListener('dragend', function() {
-      item.style.opacity='1';
-      dragItem = null;
-      lijst.querySelectorAll('.gkol-item').forEach(function(i){ i.style.background='var(--surface2)'; });
+    wrap.querySelectorAll('.kk-up, .kk-down').forEach(function(bt){
+      bt.addEventListener('click', function(){
+        var i = +bt.dataset.i, j = bt.classList.contains('kk-up') ? i-1 : i+1;
+        if(j < 0 || j >= lijst.length) return;
+        var x = lijst[i]; lijst[i] = lijst[j]; lijst[j] = x;
+        teken();
+      });
     });
-    item.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      if (!dragItem || dragItem===item) return;
-      var target = item.dataset.k;
-      // Niet voor always kolommen
-      var targetDef = kolommen.find(function(c){return c.k===target;});
-      if (targetDef && targetDef.always) return;
-      item.style.background='rgba(74,108,247,.15)';
-      var na = e.clientY > item.getBoundingClientRect().top + item.getBoundingClientRect().height/2;
-      if (na) lijst.insertBefore(dragItem, item.nextSibling); else lijst.insertBefore(dragItem, item);
-    });
-    item.addEventListener('dragleave', function() { item.style.background='var(--surface2)'; });
-    item.addEventListener('drop', function(e) { e.preventDefault(); item.style.background='var(--surface2)'; });
-  });
-
-  document.getElementById('gk-cancel').addEventListener('click', closeModal);
+  }
+  teken();
   document.getElementById('gk-save').addEventListener('click', function() {
-    var nieuw = [];
-    lijst.querySelectorAll('.gkol-item').forEach(function(item) {
-      var k   = item.dataset.k;
-      var def = kolommen.find(function(c){ return c.k===k; });
-      if (def) nieuw.push({ k:k, l:def.l, aan: def.always ? true : item.querySelector('.gkol-check').checked, always:def.always });
-    });
+    var nieuw = lijst.map(function(c){ return { k:c.k, l:c.l, aan: c.always ? true : c.aan, always:c.always }; });
     closeModal();
     if (onSave) onSave(nieuw);
   });
@@ -21305,47 +21290,8 @@ function openActieModal(opId) {
 }
 
 function openPlanKolomKiezer() {
-  var b = '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Sleep rijen om de volgorde te wijzigen · Vink aan om te tonen</div>';
-  b += '<div id="kol-lijst" style="display:flex;flex-direction:column;gap:6px">';
-  _planKolom.forEach(function(c) {
-    b += '<div class="kol-item" data-k="'+c.k+'" draggable="true" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;cursor:grab;border:1px solid var(--border)">';
-    b += '<span style="color:var(--muted);font-size:16px">⠿</span>';
-    b += '<input type="checkbox" class="kol-check" data-k="'+c.k+'"'+(c.aan?' checked':'')+' style="width:16px;height:16px;cursor:pointer">';
-    b += '<span style="font-size:13px;font-weight:500;flex:1">'+c.l+'</span>';
-    b += '</div>';
-  });
-  b += '</div>';
-  var f = '<button class="btn btn-ghost" id="pk-cancel">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="pk-save">Toepassen</button>';
-  openModal('Kolommen kiezen & sorteren', b, f);
-
-  var lijst = document.getElementById('kol-lijst');
-  var dragItem = null;
-  lijst.querySelectorAll('.kol-item').forEach(function(item) {
-    item.addEventListener('dragstart', function(e) { dragItem = item; setTimeout(function(){ item.style.opacity='0.4'; }, 0); });
-    item.addEventListener('dragend',   function()  { item.style.opacity='1'; dragItem=null; lijst.querySelectorAll('.kol-item').forEach(function(i){i.style.background='var(--surface2)';}); });
-    item.addEventListener('dragover',  function(e) {
-      e.preventDefault();
-      if (!dragItem || dragItem===item) return;
-      item.style.background='rgba(74,108,247,.15)';
-      var na = e.clientY > item.getBoundingClientRect().top + item.getBoundingClientRect().height/2;
-      if (na) lijst.insertBefore(dragItem, item.nextSibling); else lijst.insertBefore(dragItem, item);
-    });
-    item.addEventListener('dragleave', function() { item.style.background='var(--surface2)'; });
-    item.addEventListener('drop', function(e) { e.preventDefault(); item.style.background='var(--surface2)'; });
-  });
-
-  document.getElementById('pk-cancel').addEventListener('click', closeModal);
-  document.getElementById('pk-save').addEventListener('click', function() {
-    var nieuw = [];
-    lijst.querySelectorAll('.kol-item').forEach(function(item) {
-      var k = item.dataset.k;
-      var def = _planKolom.find(function(c){ return c.k===k; });
-      if (def) nieuw.push({ k:k, l:def.l, aan:item.querySelector('.kol-check').checked });
-    });
-    _planKolom = nieuw;
-    closeModal(); renderPlanning();
-  });
+  // Dezelfde kiezer als bij de andere lijsten; 'Naam' blijft altijd zichtbaar.
+  openKolomKiezer('Kolommen', _planKolom, function(nieuw){ _planKolom = nieuw; renderPlanning(); });
 }
 function openBatchInplanModal(skIds) {
   var klanten = skIds.map(function(id){ return APP.serviceklanten.find(function(k){return String(k.id)===String(id);}); }).filter(Boolean);
@@ -31952,84 +31898,62 @@ function openRapMedPanel(medId, tabNaam) {
   var m = getMed(medId); if(!m) return;
   var jaarStr = String(_rapJaar);
   var vandaag = vandaagISO();
-  var kl = medKleur(m);
-
-  var h = '<div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:16px">';
-  h += '<div class="avatar" style="width:38px;height:38px;font-size:14px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>';
-  h += '<div><div style="font-weight:800;font-size:15px">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
-  h += '<div style="font-size:12px;color:var(--muted)">'+esc(m.rol||'')+'</div></div></div>';
+  var titels = { overuren:'Overuren', onkosten:'Onkosten', verlof:'Verlof', verzuim:'Verzuim', storingsdienst:'Storingsdienst' };
+  // Statuslabel in de kleur van de status, zoals in de lijsten
+  var tag = function(status, stKleur){ return '<span class="zp-tag" style="background:color-mix(in srgb,'+stKleur+' 14%,transparent);color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(status))+'</span>'; };
+  // Regel: datum en omschrijving links, aantal en status rechts
+  var rij = function(ico, label, sub, getal, tagHtml){
+    return '<div class="lf-rij">'+_lfIco(ico)+'<span class="lf-l">'+label+(sub ? '<small>'+sub+'</small>' : '')+'</span>'
+      + '<span class="lf-w lf-w-kol"><b class="rp-getal">'+getal+'</b>'+tagHtml+'</span></div>';
+  };
+  var kopSub = '', kopGetal = '', lijst = '';
 
   if(tabNaam==='overuren') {
     var data = filterEigen(APP.overuren,'medId','overuren').filter(function(o){return String(o.medId)===String(medId)&&(o.datum||'').startsWith(jaarStr);}).sort(function(a,b){return(b.datum||'')>(a.datum||'')?1:-1;});
     var totUren = data.reduce(function(s,o){return s+(o.uren||0);},0);
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data.length+' registraties · '+_nlAantal(totUren)+'u totaal in '+jaarStr+'</div>';
-    h += '<div style="display:flex;flex-direction:column;gap:6px">';
+    kopSub = 'Overuren '+jaarStr+' · '+data.length+' registratie'+(data.length===1?'':'s');
+    kopGetal = _zpKopGetal(_nlAantal(totUren), 'uur totaal', 'var(--accent-t)');
     data.forEach(function(o){
       var stKleur={aangevraagd:'var(--orange)',goedgekeurd:'var(--accent)',gecompenseerd:'var(--green)',uitbetaald:'var(--muted)',afgewezen:'var(--red)'}[o.status]||'var(--muted)';
-      h += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid '+stKleur+'">';
-      h += '<div style="display:flex;justify-content:space-between;align-items:center">';
-      h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(o.datum)+(o.omschrijving?' · '+esc(o.omschrijving):'')+'</div>';
-      h += '<div style="font-size:11px;color:var(--muted)">'+(o.type==='uitbetaling'?ICO.euro+' Uitbetaling':ICO.refresh+' Compensatie')+'</div></div>';
-      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--accent-t)">'+_nlAantal(o.uren)+'u</div>';
-      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(o.status))+'</div></div></div></div>';
+      lijst += rij(ICO.clock, esc(fmtD(o.datum))+(o.omschrijving?' · '+esc(o.omschrijving):''), o.type==='uitbetaling'?'Uitbetaling':'Compensatie', _nlAantal(o.uren)+' u', tag(o.status, stKleur));
     });
-    if(!data.length) h += '<div style="color:var(--muted);font-size:13px">Geen overuren in '+jaarStr+'</div>';
-    h += '</div>';
+    if(!data.length) lijst = '<p class="lf-leeg">Geen overuren in '+jaarStr+'.</p>';
 
   } else if(tabNaam==='onkosten') {
     var data2 = filterEigen(APP.onkosten,'medId','onkosten').filter(function(o){return String(o.medId)===String(medId)&&(o.datum||'').startsWith(jaarStr);}).sort(function(a,b){return(b.datum||'')>(a.datum||'')?1:-1;});
     var totBedrag = data2.reduce(function(s,o){return s+(o.bedrag||0);},0);
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data2.length+' declaraties · '+_nlEuro(totBedrag)+' totaal in '+jaarStr+'</div>';
-    h += '<div style="display:flex;flex-direction:column;gap:6px">';
+    kopSub = 'Onkosten '+jaarStr+' · '+data2.length+' declaratie'+(data2.length===1?'':'s');
+    kopGetal = _zpKopGetal(_nlEuro(totBedrag), 'totaal', 'var(--green-t)');
     data2.forEach(function(o){
       var stKleur={aangevraagd:'var(--orange)',goedgekeurd:'var(--accent)',uitbetaald:'var(--green)',afgewezen:'var(--red)'}[o.status]||'var(--muted)';
-      h += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid '+stKleur+'">';
-      h += '<div style="display:flex;justify-content:space-between;align-items:center">';
-      h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(o.datum)+' · '+esc(o.categorie||'—')+'</div>';
-      h += '<div style="font-size:11px;color:var(--muted)">'+esc(o.omschrijving||'')+'</div></div>';
-      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--green-t)">'+_nlEuro(o.bedrag)+'</div>';
-      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(o.status))+'</div></div></div></div>';
+      lijst += rij(ICO.euro, esc(fmtD(o.datum))+' · '+esc(o.categorie||'—'), esc(o.omschrijving||''), _nlEuro(o.bedrag), tag(o.status, stKleur));
     });
-    if(!data2.length) h += '<div style="color:var(--muted);font-size:13px">Geen onkosten in '+jaarStr+'</div>';
-    h += '</div>';
+    if(!data2.length) lijst = '<p class="lf-leeg">Geen onkosten in '+jaarStr+'.</p>';
 
   } else if(tabNaam==='verlof') {
     var data3 = filterEigen(APP.verlof,'medId','verlof').filter(function(v){return String(v.medId)===String(medId)&&(v.van||'').startsWith(jaarStr);}).sort(function(a,b){return(b.van||'')>(a.van||'')?1:-1;});
-    var totDagen = data3.filter(function(v){return v.status==='goedgekeurd';}).reduce(function(s,v){return s+(parseFloat(v.dagen)||0);},0);
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data3.length+' aanvragen · '+_nlAantal(verlofOpgenomenUren(data3.filter(function(v){return v.status==='goedgekeurd';}), m))+' uur opgenomen · Saldo: '+_nlAantal(getVerlofSaldoUren(m))+'u</div>';
-    h += '<div style="display:flex;flex-direction:column;gap:6px">';
+    var opUren = verlofOpgenomenUren(data3.filter(function(v){return v.status==='goedgekeurd';}), m);
+    kopSub = 'Verlof '+jaarStr+' · '+data3.length+' aanvra'+(data3.length===1?'ag':'gen')+' · saldo '+_nlAantal(getVerlofSaldoUren(m))+' u';
+    kopGetal = _zpKopGetal(_nlAantal(opUren), 'uur opgenomen', 'var(--accent-t)');
     data3.forEach(function(v){
       var stKleur={aangevraagd:'var(--orange)',goedgekeurd:'var(--green)',afgewezen:'var(--red)'}[v.status]||'var(--muted)';
-      h += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid '+stKleur+'">';
-      h += '<div style="display:flex;justify-content:space-between;align-items:center">';
-      h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(v.van)+(v.tot&&v.tot!==v.van?' t/m '+fmtD(v.tot):'')+'</div>';
-      h += '<div style="font-size:11px;color:var(--muted)">'+esc(v.type||'vakantie')+'</div></div>';
-      h += '<div style="text-align:right"><div style="font-weight:800;color:var(--accent-t)">'+_nlAantal(verlofOpgenomenUren([v], m))+'u</div>';
-      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(v.status))+'</div></div></div></div>';
+      lijst += rij(ICO.zon, esc(fmtD(v.van))+(v.tot&&v.tot!==v.van?' t/m '+esc(fmtD(v.tot)):''), esc(v.type||'vakantie'), _nlAantal(verlofOpgenomenUren([v], m))+' u', tag(v.status, stKleur));
     });
-    if(!data3.length) h += '<div style="color:var(--muted);font-size:13px">Geen verlofaanvragen in '+jaarStr+'</div>';
-    h += '</div>';
+    if(!data3.length) lijst = '<p class="lf-leeg">Geen verlofaanvragen in '+jaarStr+'.</p>';
 
   } else if(tabNaam==='verzuim') {
     var data4 = filterEigen(APP.verzuim,'medId','verzuim').filter(function(v){return String(v.medId)===String(medId)&&(v.van||'').startsWith(jaarStr);}).sort(function(a,b){return(b.van||'')>(a.van||'')?1:-1;});
     // Werkdagen, niet kalenderdagen: dezelfde telling als de verzuimmodule en de
     // rapportagetabel, zodat de snelle weergave geen hoger getal toont dan de lijst.
     var totVzUren = verzuimUrenJaar(medId, jaarStr, data4);
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+data4.length+' melding'+(data4.length===1?'':'en')+' · '+_nlAantal(totVzUren)+' uur verzuim in '+jaarStr+'</div>';
-    h += '<div style="display:flex;flex-direction:column;gap:6px">';
+    kopSub = 'Verzuim '+jaarStr+' · '+data4.length+' melding'+(data4.length===1?'':'en');
+    kopGetal = _zpKopGetal(_nlAantal(totVzUren), 'uur verzuim', totVzUren>80 ? 'var(--red-t)' : (totVzUren>0 ? 'var(--orange-t)' : 'var(--green-t)'));
     data4.forEach(function(v){
       var stKleur={actief:'var(--red)',langdurig:'var(--orange)',hersteld:'var(--green)'}[v.status]||'var(--muted)';
-      var duur=telWerkdagen(v.van, v.tot&&v.tot<=vandaag?v.tot:null);
       var typeLabel={ziek:'Ziek',geoorloofd:'Geoorloofd',ongeoorloofd:'Ongeoorloofd',gedeeltelijk:'Gedeeltelijk'}[v.type]||esc(v.type||'');
-      h += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid '+stKleur+'">';
-      h += '<div style="display:flex;justify-content:space-between;align-items:center">';
-      h += '<div><div style="font-size:13px;font-weight:600">'+fmtD(v.van)+(v.tot?' → '+fmtD(v.tot):'  → nog ziek')+'</div>';
-      h += '<div style="font-size:11px;color:var(--muted)">'+typeLabel+'</div></div>';
-      h += '<div style="text-align:right"><div style="font-weight:800;color:'+_klTekst(stKleur)+'">'+_nlAantal(verzuimUren(v))+'u</div>';
-      h += '<div style="font-size:11px;color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(v.status))+'</div></div></div></div>';
+      lijst += rij(ICO.thermo, esc(fmtD(v.van))+(v.tot?' → '+esc(fmtD(v.tot)):' → nog ziek'), typeLabel, _nlAantal(verzuimUren(v))+' u', tag(v.status, stKleur));
     });
-    if(!data4.length) h += '<div style="color:var(--muted);font-size:13px">Geen verzuim in '+jaarStr+'</div>';
-    h += '</div>';
+    if(!data4.length) lijst = '<p class="lf-leeg">Geen verzuim in '+jaarStr+'.</p>';
 
   } else if(tabNaam==='storingsdienst') {
     var sd=APP.storingsdienst||{};
@@ -32037,38 +31961,36 @@ function openRapMedPanel(medId, tabNaam) {
     Object.keys(sd).filter(function(k){return k.startsWith(jaarStr)&&sd[k]&&String(sd[k].medId)===String(medId);}).forEach(function(k){
       if(k.match(/W\d\d$/)) weken.push(k); else dagwissels.push(k);
     });
-    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px">'+weken.length+' weekdiensten · '+dagwissels.length+' dagwissels in '+jaarStr+'</div>';
+    kopSub = 'Storingsdienst '+jaarStr;
+    kopGetal = _zpKopGetal(String(weken.length), 'week'+(weken.length===1?'':'en')+' · '+dagwissels.length+' dagwissel'+(dagwissels.length===1?'':'s'), 'var(--accent-t)');
     if(weken.length) {
-      h += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Weekdiensten</div>';
-      h += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+      lijst += _zpGroep('Weekdiensten') + '<div class="rp-weken">';
       weken.sort().forEach(function(k){
         var week=k.slice(-2);
         var ma=getMaandagVanWeek(parseInt(jaarStr),parseInt(week));
-        h += '<div style="padding:5px 10px;background:var(--surface2);border-radius:6px;font-size:12px;font-weight:600"><div>W'+week+'</div><div style="font-size:10px;color:var(--muted)">'+(ma?fmtD(dateToStr(ma)):'')+'</div></div>';
+        lijst += '<div class="rp-week"><b>W'+week+'</b><small>'+(ma?fmtD(dateToStr(ma)):'')+'</small></div>';
       });
-      h += '</div>';
+      lijst += '</div>';
     }
     if(dagwissels.length) {
-      h += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Dagwissels</div>';
-      h += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      lijst += _zpGroep('Dagwissels') + '<div class="rp-weken">';
       dagwissels.sort().forEach(function(k){
         var dagNamen2=['ma','di','wo','do','vr','za','zo'];
         var dagIdx=parseInt(k.slice(-1));
         var week=parseInt(k.slice(k.indexOf('W')+1,k.lastIndexOf('-')));
         var ma2=getMaandagVanWeek(parseInt(jaarStr),week);
-        h += '<div style="padding:5px 10px;background:rgba(245,158,11,.1);border-radius:6px;font-size:12px;font-weight:600;color:var(--orange-t)">'+dagNamen2[dagIdx]+' W'+('0'+week).slice(-2)+'</div>';
+        lijst += '<div class="rp-week rp-dag"><b>'+dagNamen2[dagIdx]+' W'+('0'+week).slice(-2)+'</b>'+(ma2?'<small>week van '+fmtD(dateToStr(ma2))+'</small>':'')+'</div>';
       });
-      h += '</div>';
+      lijst += '</div>';
     }
-    if(!weken.length&&!dagwissels.length) h += '<div style="color:var(--muted);font-size:13px">Geen diensten in '+jaarStr+'</div>';
+    if(!weken.length&&!dagwissels.length) lijst = '<p class="lf-leeg">Geen diensten in '+jaarStr+'.</p>';
   }
 
-  h += '<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">';
-  h += '<button class="btn btn-ghost btn-sm" id="rap-panel-close">Sluiten</button>';
-  h += '</div>';
-  openPanel(m.voornaam+' '+m.achternaam+' — '+jaarStr, h);
-  var pb=document.getElementById('panel-body');
-  pb.querySelector('#rap-panel-close').addEventListener('click',closePanel);
+  var h = '<button type="button" class="rp-terug" id="rap-terug"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Overzicht '+jaarStr+'</button>';
+  h += _zpKop(_zpAv(m), m.voornaam+' '+m.achternaam, kopSub, '', kopGetal);
+  h += lijst.indexOf('class="lf-rij"') >= 0 ? _zpKaart(lijst) : lijst;
+  var pb = _zpOpen(titels[tabNaam]||'Overzicht', h);
+  pb.querySelector('#rap-terug').addEventListener('click', function(){ openRapMedPersoonlijkPanel(medId); });
 }
 
 // ── TAB: PERSOONLIJK ─────────────────────────────────────────────
@@ -32891,33 +32813,40 @@ function renderRapPersoonlijk(el) {
 function openRapMedPersoonlijkPanel(medId) {
   var m=getMed(medId); if(!m) return;
   var jaarStr=String(_rapJaar);
-  var vandaag=vandaagISO();
-  var kl=medKleur(m);
   var saldo=getVerlofSaldoUren(m);
-  var vlOp=verlofOpgenomenUren(APP.verlof.filter(function(v){return String(v.medId)===String(medId)&&v.status==='goedgekeurd'&&(v.van||'').startsWith(jaarStr);}));
+  var vlOp=verlofOpgenomenUren(APP.verlof.filter(function(v){return String(v.medId)===String(medId)&&v.status==='goedgekeurd'&&(v.van||'').startsWith(jaarStr);}), m);
   var ouTot=APP.overuren.filter(function(o){return String(o.medId)===String(medId)&&(o.datum||'').startsWith(jaarStr);}).reduce(function(s,o){return s+(o.uren||0);},0);
   var okTot=APP.onkosten.filter(function(o){return String(o.medId)===String(medId)&&(o.datum||'').startsWith(jaarStr);}).reduce(function(s,o){return s+(o.bedrag||0);},0);
   var vzDagen=verzuimUrenJaar(medId, jaarStr);
+  // Aantallen voor de regels: dezelfde selectie als het detailpaneel erachter
+  var telEigen = function(lijst, mod, veld){ return filterEigen(lijst, 'medId', mod).filter(function(x){ return String(x.medId)===String(medId) && (x[veld]||'').startsWith(jaarStr); }).length; };
+  var ouN = telEigen(APP.overuren, 'overuren', 'datum'), okN = telEigen(APP.onkosten, 'onkosten', 'datum');
+  var vlN = telEigen(APP.verlof, 'verlof', 'van'), vzN = telEigen(APP.verzuim, 'verzuim', 'van');
+  var sd = APP.storingsdienst||{}, sdW = 0, sdD = 0;
+  Object.keys(sd).forEach(function(k){ if(k.startsWith(jaarStr) && sd[k] && String(sd[k].medId)===String(medId)){ if(k.match(/W\d\d$/)) sdW++; else sdD++; } });
+  var meerv = function(n, een, veel){ return n+' '+(n===1 ? een : veel); };
 
-  var h='<div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:14px">';
-  h+='<div class="avatar" style="width:38px;height:38px;font-size:14px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>';
-  h+='<div><div style="font-weight:800;font-size:15px">'+esc(m.voornaam+' '+m.achternaam)+'</div><div style="font-size:12px;color:var(--muted)">'+esc(m.rol||'')+'</div></div></div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">';
-  function sb(l,v,kl2){return '<div style="background:var(--surface2);border-radius:8px;padding:8px 10px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px">'+l+'</div><div style="font-family:\'Instrument Sans\',sans-serif;font-size:18px;font-weight:800;color:'+(kl2||'var(--text)')+'">'+v+'</div></div>';}
-  h+=sb('Verlof saldo',_nlAantal(saldo)+'u',saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)');
-  h+=sb('Opgenomen '+jaarStr,_nlAantal(vlOp)+'u','var(--accent-t)');
-  h+=sb('Overuren '+jaarStr,_nlAantal(ouTot)+'u',ouTot?'var(--orange-t)':'var(--muted)');
-  h+=sb('Onkosten '+jaarStr,_nlEuro(okTot,0),okTot?'var(--green-t)':'var(--muted)');
-  h+=sb('Verzuim '+jaarStr,_nlAantal(vzDagen)+'u',vzDagen>80?'var(--red-t)':vzDagen>0?'var(--orange-t)':'var(--green-t)');
-  h+='</div>';
-  h+='<div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border);padding-top:12px">';
-  [['overuren',ICO.clock+' Bekijk overuren'],['onkosten','Bekijk onkosten'],['verlof','Bekijk verlof'],['verzuim','Bekijk verzuim'],['storingsdienst','Bekijk storingsdiensten']].forEach(function(x){
-    h+='<button class="btn btn-ghost rap-panel-nav" data-tab="'+x[0]+'" style="justify-content:flex-start">'+x[1]+'</button>';
-  });
-  h+='</div>';
-  openPanel(m.voornaam+' — Overzicht '+jaarStr, h);
-  document.getElementById('panel-body').querySelectorAll('.rap-panel-nav').forEach(function(b){
-    b.addEventListener('click',function(){closePanel(); openRapMedPanel(medId, b.dataset.tab);});
+  var rolNaam = (APP.rollen && APP.rollen[m.rol]) ? APP.rollen[m.rol].naam : (m.rol||'');
+  var h = _zpKop(_zpAv(m), m.voornaam+' '+m.achternaam, esc((rolNaam ? rolNaam+' · ' : '')+'overzicht '+jaarStr));
+  var tegel = function(l, v, kl){ return '<div class="rp-tegel"><span>'+esc(l)+'</span><b style="color:'+kl+'">'+esc(v)+'</b></div>'; };
+  h += '<div class="rp-tegels">'
+    + tegel('Verlof saldo', _nlAantal(saldo)+' u', saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)')
+    + tegel('Opgenomen', _nlAantal(vlOp)+' u', 'var(--accent-t)')
+    + tegel('Overuren', _nlAantal(ouTot)+' u', ouTot?'var(--orange-t)':'var(--muted)')
+    + tegel('Onkosten', _nlEuro(okTot,0), okTot?'var(--green-t)':'var(--muted)')
+    + tegel('Verzuim', _nlAantal(vzDagen)+' u', vzDagen>80?'var(--red-t)':vzDagen>0?'var(--orange-t)':'var(--green-t)')
+    + '</div>';
+  h += _zpGroep('Details per onderdeel') + '<div class="lf-kaart rp-nav">'
+    + _lfNavRij('rap-nav-overuren', ICO.clock, 'Overuren', meerv(ouN, 'registratie', 'registraties'), _nlAantal(ouTot)+' u')
+    + _lfNavRij('rap-nav-onkosten', ICO.euro, 'Onkosten', meerv(okN, 'declaratie', 'declaraties'), _nlEuro(okTot,0))
+    + _lfNavRij('rap-nav-verlof', ICO.zon, 'Verlof', meerv(vlN, 'aanvraag', 'aanvragen'), _nlAantal(vlOp)+' u')
+    + _lfNavRij('rap-nav-verzuim', ICO.thermo, 'Verzuim', meerv(vzN, 'melding', 'meldingen'), _nlAantal(vzDagen)+' u')
+    + _lfNavRij('rap-nav-storingsdienst', _LF_TEL, 'Storingsdienst', meerv(sdW, 'week', 'weken')+' · '+meerv(sdD, 'dagwissel', 'dagwissels'), '')
+    + '</div>';
+  var pb = _zpOpen('Overzicht '+jaarStr, h);
+  ['overuren','onkosten','verlof','verzuim','storingsdienst'].forEach(function(t){
+    var b = pb.querySelector('#rap-nav-'+t);
+    if(b) b.addEventListener('click', function(){ openRapMedPanel(medId, t); });
   });
 }
 
