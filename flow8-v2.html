@@ -1369,6 +1369,9 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .plm-typ{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
 .plm-typ i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .plm-spoed{font-size:12px;font-weight:700;color:var(--red-t);display:inline-flex;align-items:center;gap:3px}
+.spoed-label{display:inline-flex;align-items:center;gap:3px;background:var(--red-knop);color:#fff;font-size:11px;font-weight:700;line-height:1;padding:3px 7px 3px 5px;border-radius:var(--radius-pill);white-space:nowrap;vertical-align:middle}
+.spoed-label svg{width:11px;height:11px;flex:none}
+.spoed-kaart{outline:2px solid var(--red-knop);outline-offset:0}
 .plm-actie{font-size:12px;color:var(--orange-t)}
 .plm-retour{margin:0 4px 12px}
 .plm-leeg{border:1px dashed var(--border);border-radius:var(--radius-lg);padding:6px 6px 6px 14px;min-height:56px;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
@@ -10954,7 +10957,11 @@ function tagStatus(s) {
 }
 
 // Kleine rode spoed-badge, te tonen náást de statusbadge.
-function tagSpoed(){ return '<span class="tag tag-red" style="font-weight:700">'+ICO.zap+' Spoed</span>'; }
+// Spoed is een vlag, geen type en geen status. Overal hetzelfde teken: een gevuld rood label "Spoed"
+// (wit op --red-knop) en op kaarten een rode rand (.spoed-kaart). De typekleur blijft voor het type,
+// ook als dat rood is, zodat een gewone Storing nooit op een spoedopdracht lijkt.
+function _spoedLabel(){ return '<span class="spoed-label">'+ICO.zap+'Spoed</span>'; }
+function tagSpoed(){ return _spoedLabel(); }
 function tagVerlof(s) {
   var c={aangevraagd:'tag-orange',goedgekeurd:'tag-green',afgewezen:'tag-red'};
   var l={aangevraagd:'Aangevraagd',goedgekeurd:'Goedgekeurd',afgewezen:'Afgewezen'};
@@ -19266,7 +19273,7 @@ function _plmKaart(o, metMonteur){
   h += '<div class="plm-lijf"><div class="plm-klant">'+esc(o.klantNaam || '—')+'</div>';
   if(adres) h += '<div class="plm-adres">'+esc(adres)+'</div>';
   h += '<div class="plm-onder">';
-  if(spoed) h += '<span class="plm-spoed">'+ICO.zap+'Spoed</span>';
+  if(spoed) h += _spoedLabel();
   h += '<span class="plm-typ"><i style="background:'+ot.kleur+'"></i>'+esc(ot.label || '')+'</span>';
   h += wkStatusBadge(o.status);
   if(o.status === 'actie') h += '<span class="plm-actie">→ '+esc(o.actietype || 'Actie vereist')+'</span>';
@@ -19279,7 +19286,7 @@ function _plmRij(o){
   var adres = [o.adres, o.plaats].filter(Boolean).join(', ');
   var h = '<div class="plm-rij plan-event'+(spoed ? ' spoed' : '')+'" data-id="'+esc(o.id)+'" role="button" tabindex="0">';
   h += '<span class="plm-t'+(o.pinTijd ? ' vast' : (o.blokVan && o.blokTot) ? ' blok' : '')+'">'+esc(o.tijdVan || o.blokVan || '—')+'</span>';
-  h += '<span class="plm-k">'+(spoed ? '<span class="plm-spoed">'+ICO.zap+'</span> ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+'</span>';
+  h += '<span class="plm-k">'+(spoed ? _spoedLabel()+' ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+'</span>';
   return h + _plmAvatars(o) + '</div>';
 }
 function _plmLeeg(datum, monteurId){
@@ -19955,7 +19962,7 @@ function renderPlanLijst(monteurs) {
               }
               break;
             case 'naam':
-              h += '<td data-col="naam" style="padding:10px;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:'+(spoed?'var(--red-t)':'var(--text)')+'">'+( spoed?ICO.zap+' ':'')+(_skOpgezegd?'<span title="Contract opgezegd — controleer of deze opdracht nog nodig is" style="display:inline-flex;align-items:center;gap:2px;background:rgba(239,68,68,.15);color:var(--red-t);font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin-right:5px;vertical-align:middle">'+_IC_WAARSCH+'OPGEZEGD</span>':'')+esc(o.klantNaam||'—')+(function(){var _toegew=(o.monteurIds&&o.monteurIds.length)?o.monteurIds.length:(o.monteurId?1:0);var _n=Math.max(o.aantalMonteurs||0,_toegew);return _n>=2?'<span title="'+_n+' monteurs" style="display:inline-flex;align-items:center;gap:2px;background:rgba(79,110,245,.15);color:var(--accent-t);font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin-left:5px;vertical-align:middle">'+ICO.users+' '+_n+'</span>':'';})()+(o.notitie?'<span title="'+esc(o.notitie)+'" style="margin-left:5px;opacity:.7"><svg width="11" height="11" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:middle"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>':'')+'</td>';
+              h += '<td data-col="naam" style="padding:10px;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">'+(spoed?_spoedLabel()+' ':'')+(_skOpgezegd?'<span title="Contract opgezegd — controleer of deze opdracht nog nodig is" style="display:inline-flex;align-items:center;gap:2px;background:rgba(239,68,68,.15);color:var(--red-t);font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin-right:5px;vertical-align:middle">'+_IC_WAARSCH+'OPGEZEGD</span>':'')+esc(o.klantNaam||'—')+(function(){var _toegew=(o.monteurIds&&o.monteurIds.length)?o.monteurIds.length:(o.monteurId?1:0);var _n=Math.max(o.aantalMonteurs||0,_toegew);return _n>=2?'<span title="'+_n+' monteurs" style="display:inline-flex;align-items:center;gap:2px;background:rgba(79,110,245,.15);color:var(--accent-t);font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin-left:5px;vertical-align:middle">'+ICO.users+' '+_n+'</span>':'';})()+(o.notitie?'<span title="'+esc(o.notitie)+'" style="margin-left:5px;opacity:.7"><svg width="11" height="11" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:middle"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>':'')+'</td>';
               break;
             case 'tijd':
               var _tijdKl = o.pinTijd ? 'var(--vast-t)' : (o.blokVan && o.blokTot) ? 'var(--blok-t)' : 'var(--accent-t)';
@@ -20214,10 +20221,11 @@ function renderPlanWeek(monteurs) {
       dagOps.forEach(function(o){
         var ot    = getOpdrachttype(o.type);
         var spoed = _isSpoed(o);
-        h += '<div class="week-opdracht plan-event" draggable="true" data-id="'+o.id+'" data-monteur="'+m.id+'" data-dag="'+dag+'"';
-        h += ' style="background:'+(spoed?'rgba(239,68,68,.15)':_kleurTint(ot.kleur,'22'))+';border-left:3px solid '+(spoed?'var(--red)':ot.kleur)+';border-radius:5px;padding:5px 7px;margin-bottom:3px;cursor:grab;user-select:none;position:relative">';
+        h += '<div class="week-opdracht plan-event'+(spoed?' spoed-kaart':'')+'" draggable="true" data-id="'+o.id+'" data-monteur="'+m.id+'" data-dag="'+dag+'"';
+        h += ' style="background:'+_kleurTint(ot.kleur,'22')+';border-left:3px solid '+ot.kleur+';border-radius:5px;padding:5px 7px;margin-bottom:3px;cursor:grab;user-select:none;position:relative">';
         h += wkStatusBadge(o.status);
-        h += '<div style="font-size:11px;font-weight:700;color:'+(spoed?'var(--red-t)':_klTekst(ot.kleur))+'">'+(o.tijdVan||'')+(spoed?' '+ICO.zap:'')+'</div>';
+        if(spoed) h += '<div style="margin-bottom:3px">'+_spoedLabel()+'</div>';
+        h += '<div style="font-size:11px;font-weight:700;color:'+_klTekst(ot.kleur)+'">'+(o.tijdVan||'')+'</div>';
         h += '<div style="font-size:11px;font-weight:600;line-height:1.3;word-break:break-word;display:flex;align-items:flex-start;gap:3px">';
         if(o.notitie) h += '<svg width="9" height="9" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" title="'+esc(o.notitie)+'"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
         h += esc(o.klantNaam||'—')+'</div>';
@@ -20264,9 +20272,11 @@ function renderPlanWeek(monteurs) {
       h += '<td class="week-drop-cell" data-dag="'+dag+'" data-monteur="" style="padding:4px;vertical-align:top;border-left:1px solid var(--border);border-bottom:1px solid var(--border);min-height:60px;background:var(--surface)">';
       dagOps.forEach(function(o){
         var ot = getOpdrachttype(o.type);
-        h += '<div class="week-opdracht plan-event" draggable="true" data-id="'+o.id+'" data-monteur="" data-dag="'+dag+'"';
+        var _spN = _isSpoed(o);
+        h += '<div class="week-opdracht plan-event'+(_spN?' spoed-kaart':'')+'" draggable="true" data-id="'+o.id+'" data-monteur="" data-dag="'+dag+'"';
         h += ' style="background:'+_kleurTint(ot.kleur,'22')+';border-left:3px solid var(--muted);border-radius:5px;padding:5px 7px;margin-bottom:3px;cursor:grab;position:relative">';
         h += wkStatusBadge(o.status);
+        if(_spN) h += '<div style="margin-bottom:3px">'+_spoedLabel()+'</div>';
         h += '<div style="font-size:11px;font-weight:600">'+esc(o.klantNaam||'—')+'</div>';
         h += '<div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:3px">'+getOtSvg(ot.icon)+esc(ot.label)+'</div></div>';
       });
@@ -20380,8 +20390,10 @@ function renderPlanDag(monteurs) {
   // metMonteur: toon bij wie de opdracht hoort (kolom "Niet in planning")
   function kaart(o, metMonteur){
     var ot = getOpdrachttype(o.type);
-    var k = '<div class="plan-event" data-id="'+o.id+'" style="position:relative;background:'+_kleurTint(ot.kleur,'22')+';border-left:3px solid '+ot.kleur+';border-radius:4px;padding:4px 6px;cursor:pointer;margin-bottom:2px;display:flow-root">';
+    var _sp = _isSpoed(o);
+    var k = '<div class="plan-event'+(_sp?' spoed-kaart':'')+'" data-id="'+o.id+'" style="position:relative;background:'+_kleurTint(ot.kleur,'22')+';border-left:3px solid '+ot.kleur+';border-radius:4px;padding:4px 6px;cursor:pointer;margin-bottom:2px;display:flow-root">';
     k += wkStatusBadge(o.status);
+    if(_sp) k += '<div style="margin-bottom:3px">'+_spoedLabel()+'</div>';
     k += '<div style="font-size:11px;font-weight:600;display:flex;align-items:center;gap:3px">';
     if(o.notitie) k += '<svg width="9" height="9" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" title="'+esc(o.notitie)+'"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
     k += esc(o.klantNaam||'—')+'</div>';
