@@ -1085,8 +1085,8 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
 .sidebar-logo-text{font-family:'Instrument Sans',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.02em}
 .sidebar-logo-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.nav-section{padding:12px 18px 4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:11px;padding:8px 12px;color:var(--muted);cursor:pointer;font-size:14px;font-weight:400;border-radius:var(--radius);margin:1px 8px;position:relative;transition:background .15s ease,color .15s ease}
+.nav-section{padding:10px 18px 4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:11px;padding:6px 12px;color:var(--muted);cursor:pointer;font-size:14px;font-weight:400;border-radius:var(--radius);margin:1px 8px;position:relative;transition:background .15s ease,color .15s ease}
 .wb-acc-hdr:hover { background: rgba(79,110,245,.06) !important; }
 @media(max-width:768px){
   .wb-info-grid { grid-template-columns:1fr !important; max-width:680px; }
@@ -1456,7 +1456,7 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 /* Staat er onder in de zijbalk nog meer, dan vervaagt de onderkant (zie _a11yKlikbaar/tabelhint) */
 #sidebar-nav.kan-onder{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 40px),transparent)}
 /* Beheerblok onderaan: scrollt niet mee en staat visueel op de achtergrond. */
-.nav-systeem{flex-shrink:0;border-top:1px solid var(--border);padding:4px 0 6px}
+.nav-systeem{border-top:1px solid var(--border);margin-top:10px;padding:4px 0 2px}
 .nav-systeem .nav-item{font-size:13px;opacity:.78}
 .nav-systeem .nav-item:hover,.nav-systeem .nav-item.active{opacity:1}
 .nav-systeem .nav-section{opacity:.75}
@@ -2851,7 +2851,6 @@ button.sd-m-dag{cursor:pointer}
       </button>
     </div>
     <div id="sidebar-nav" style="flex:1;padding:8px 0;overflow-y:auto;min-height:0"></div>
-    <div id="sidebar-nav-systeem" class="nav-systeem"></div>
     <div class="sidebar-footer">
       <!-- PWA Install knop (alleen Android/Chrome) -->
       <button id="pwa-install-btn" onclick="
@@ -8482,13 +8481,13 @@ var SVGS = {
 
 function bouwNav() {
   var nav = document.getElementById('sidebar-nav');
-  // Systeem (Rapportage/Instellingen) staat in een eigen blok dat niet meescrollt,
-  // zodat de dagelijkse modules bovenaan blijven. Zie routekaart M1.
-  var navSys = document.getElementById('sidebar-nav-systeem');
+  // Systeem (Rapportage/Instellingen) staat onderaan in hetzelfde scrollende menu, in een eigen,
+  // rustiger blok. Vast onderin nam het op een laptop de plek van Team (Verlof, Overuren…) in.
+  var navSys = document.createElement('div');
+  navSys.className = 'nav-systeem';
   // Listeners op de sidebar zelf: zo werken beide blokken met dezelfde handlers.
   var navRoot = document.getElementById('sidebar') || nav;
   nav.innerHTML = '';
-  if (navSys) navSys.innerHTML = '';
   var sectie = '';
   NAV.forEach(function(m) {
     if (!magLezen(m.id) && !isAdmin()) return;
@@ -8514,6 +8513,7 @@ function bouwNav() {
     el.innerHTML = '<span class="nav-ico">' + (SVGS[m.icon]||'') + '</span><span class="nav-label">' + esc(m.label) + '</span>';
     doel.appendChild(el);
   });
+  if (navSys.children.length) nav.appendChild(navSys);
   navRoot.addEventListener('click', function(e) {
     var item = e.target.closest('.nav-item');
     if (item && item.dataset.page) toonPagina(item.dataset.page);
