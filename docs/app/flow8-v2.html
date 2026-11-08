@@ -795,6 +795,38 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .imp-voorbeeld.imp-lang{max-height:220px;overflow:auto}
 .imp-status{margin-top:12px}
 .zp-memo[hidden]{display:none}
+/* Instellingen in lijststijl: witte kaart per blok, regels zoals in de vensters */
+.ist-wrap{display:grid;gap:14px;max-width:860px}
+.ist-kaart{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px 18px;min-width:0}
+.ist-kop b{display:block;font-size:16px;font-weight:600}
+.ist-kop p{margin:4px 0;font-size:13px;color:var(--muted);line-height:1.45}
+.ist-kaart > .lf-groep:first-of-type{margin-top:12px}
+.ist-twee{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}
+.ist-voet{margin-top:14px;display:flex;justify-content:flex-end}
+.btn.ist-knop{height:38px;min-height:38px;padding:0 22px;font-size:14px;font-weight:600;border-radius:var(--radius-pill)}
+.ist-logo{height:40px;width:auto;max-width:140px;object-fit:contain;border:1px solid var(--border);border-radius:var(--radius);background:#fff;padding:3px}
+.ist-upload{cursor:pointer;white-space:nowrap}
+.ist-kleuren{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ist-sw{width:30px;height:30px;border-radius:50%;border:2px solid transparent;padding:0;cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.ist-eigen{display:inline-flex;align-items:center;gap:6px;margin-left:4px;font-size:13px;font-weight:600;color:var(--accent-t);cursor:pointer}
+.ist-eigen input{width:34px;height:30px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;padding:2px}
+.ist-mailvb{margin:10px 0 2px 48px;max-width:300px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;font-size:12px}
+.ist-mailvb div{padding:9px 12px}.ist-mailvb div:first-child{font-weight:700;font-size:13px}.ist-mailvb div:last-child{background:#fff;color:#3a4453}
+.lf .lf-veld.ist-tijd{min-width:0;width:92px!important;text-align:center;padding-left:8px;padding-right:8px}
+.ist-uren{font:700 13px 'Space Mono',monospace;min-width:38px;text-align:right}
+.lf-rij.ist-dag{grid-template-columns:50px minmax(0,1fr) auto}
+.ist-dag.uit .lf-l,.ist-dag.uit .ist-uren{color:var(--muted)}
+.ist-tabel table{width:100%;border-collapse:collapse}
+.ist-tabel td{padding:6px 6px;vertical-align:middle;border-top:1px solid var(--border)}
+.ist-tabel .input.ist-cel{height:36px;padding:0 10px;font-size:13.5px}
+.ist-nr{color:var(--muted);font:700 12px 'Space Mono',monospace;text-align:center}
+.ist-acties{white-space:nowrap;text-align:right}
+.ist-acties .btn-icoon:disabled{opacity:.3}
+.lf-sw.ist-sw-in{display:inline-block}
+.lf-rij.ist-nieuw{border-bottom:0;margin-top:4px}
+.ist-kaart .lf-rij.lf-kies{grid-template-columns:36px minmax(0,1fr) auto}
+.lf .lf-tekst.ist-veldnaam{text-align:left;max-width:none;padding:6px 0}
+@media(max-width:768px){.ist-twee{grid-template-columns:1fr}.lf-rij.ist-dag,.lf-rij.ist-pauze{row-gap:8px}.lf-rij.ist-dag > .lf-w,.lf-rij.ist-pauze > .lf-w{grid-column:2/-1;justify-self:start}.lf-rij.ist-pauze{grid-template-columns:36px minmax(0,1fr)}.lf-rij.ist-dag{grid-template-columns:50px minmax(0,1fr)}.ist-voet .ist-knop{flex:1;height:44px}.ist-mailvb{margin-left:0}}
 .imp-tussen{height:12px}
 .modal-lf .modal-footer .lf-knop-tweede svg{width:16px;height:16px}
 .modal-lf .modal-footer .lf-knop-tweede{display:inline-flex;align-items:center;justify-content:center;gap:8px}
@@ -33566,65 +33598,51 @@ function _leesbareTekstKleur(hex) {
   return lum > 0.6 ? '#16202e' : '#ffffff';
 }
 
+// ── Instellingen in lijststijl: per blok een witte kaart met regels, knop Opslaan rechts onderin ──
+var _ZP_KOFFIE = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4z"/><path d="M6 2v3M10 2v3M14 2v3"/></svg>';
+var _ZP_LABEL  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.59 13.41 13.42 20.58a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7" cy="7" r="1.5"/></svg>';
+var _ZP_OOG    = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+var _ZP_LIJST  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>';
+function _istKaart(titel, uitleg, inhoud, knopId, knopTekst){
+  return '<div class="ist-kaart"><div class="ist-kop"><b>'+titel+'</b>'+(uitleg ? '<p>'+uitleg+'</p>' : '')+'</div>'+inhoud
+    + (knopId ? '<div class="ist-voet"><button type="button" class="btn btn-primary ist-knop" id="'+knopId+'">'+(knopTekst||'Opslaan')+'</button></div>' : '')+'</div>';
+}
+// Tekstveld rechts in een regel (lijststijl)
+function _istTekst(id, type, waarde, ph, max){
+  return '<input class="lf-tekst" type="'+(type||'text')+'" id="'+id+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(max ? ' maxlength="'+max+'"' : '')+'>';
+}
 function renderInstBedrijf(el) {
   var bg = APP.bedrijfGegevens || {};
-  var h = '<div class="card" style="max-width:600px"><div style="font-weight:700;font-size:16px;margin-bottom:16px">Bedrijfsgegevens</div>';
-  h += '<div class="form-grid">';
-  h += fg('Bedrijfsnaam',    finp('bg-naam','text',    bg.naam||'Homa Pompen B.V.',''));
-  h += fg('Adres',           finp('bg-adres','text',   bg.adres||'',''));
-  h += fg('Postcode',        finp('bg-pc','text',      bg.postcode||'',''));
-  h += fg('Plaats',          finp('bg-pl','text',      bg.plaats||'',''));
-  h += fg('Telefoon',        finp('bg-tel','tel',      bg.telefoon||'',''));
-  h += fg('E-mail service',  finp('bg-email','email',  bg.email||'',''));
-  h += fg('Website',         finp('bg-web','url',      bg.website||'',''));
-  h += fg('KvK-nummer',      finp('bg-kvk','text',     bg.kvk||'',''));
-  h += fg('BTW-nummer',      finp('bg-btw','text',     bg.btw||'',''));
-  h += '<div style="grid-column:1/-1"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">'
-    + '<input type="checkbox" id="bg-kaart"'+(bg.toonOpKaart?' checked':'')+' style="width:15px;height:15px;accent-color:var(--accent)">'
-    + '<div><div style="font-size:13px;font-weight:600">Toon bedrijfslocatie op kaart</div>'
-    + '<div style="font-size:11px;color:var(--muted)">Toont een marker op het kaartoverzicht met het bedrijfsadres als vertrekpunt</div></div>'
-    + '</label></div>';
-  h += '</div>';
-  h += '<div style="margin-top:8px;font-size:12px;color:var(--muted)">Deze gegevens worden gebruikt in mailtemplate-variabelen: {bedrijfNaam} {bedrijfTel} {bedrijfEmail}</div>';
-
-  // Logo upload voor het kaartoverzicht
-  h += '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">';
-  h += '<div style="font-weight:700;font-size:14px;margin-bottom:12px">Bedrijfslogo</div>';
-  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Het logo wordt gebruikt in e-mails, op de werkbon-PDF en als marker op de kaart. Witruimte rondom wordt bij het uploaden automatisch weggesneden.</div>';
-  if(bg.logo) {
-    h += '<div style="margin-bottom:12px;display:flex;align-items:center;gap:12px">';
-    h += '<img src="'+bg.logo+'" style="height:52px;width:auto;border-radius:8px;border:1px solid var(--border);background:#fff;padding:4px;object-fit:contain" alt="Bedrijfslogo">';
-    h += '<button class="btn btn-ghost btn-sm" id="bg-logo-verwijder" style="color:var(--red)">'+ICO.trash+' Verwijderen</button>';
-    h += '</div>';
-  }
-  h += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">';
-  h += '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
-  h += bg.logo ? 'Ander logo uploaden' : 'Logo uploaden (PNG, SVG, JPG)';
-  h += '<input type="file" id="bg-logo-input" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none"></label>';
-  h += '</div>';
-
-  // Huisstijlkleur voor e-mails
   var _mk = (bg.mailKleur || '#1c3d5a');
   var _presets = ['#1c3d5a','#0f766e','#7c2d12','#4338ca','#b91c1c','#166534','#334155','#9a3412'];
-  h += '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">';
-  h += '<div style="font-weight:700;font-size:14px;margin-bottom:6px">Huisstijlkleur e-mails</div>';
-  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:12px">Deze kleur wordt gebruikt in de koptekst en accenten van uitgaande e-mails. De tekstkleur past zich automatisch aan voor leesbaarheid.</div>';
-  h += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">';
-  _presets.forEach(function(kl){
-    h += '<button type="button" class="bg-kleur-preset" data-kleur="'+kl+'" style="width:30px;height:30px;border-radius:8px;background:'+kl+';border:2px solid '+( _mk.toLowerCase()===kl.toLowerCase() ? 'var(--text)':'transparent')+';cursor:pointer;padding:0" title="'+kl+'"></button>';
-  });
-  h += '<label style="display:inline-flex;align-items:center;gap:6px;margin-left:4px;cursor:pointer;font-size:12px;color:var(--muted)">'
-     + '<input type="color" id="bg-mailkleur" value="'+_mk+'" style="width:34px;height:30px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;padding:2px">'
-     + 'Eigen kleur</label>';
-  h += '</div>';
-  // Live mini-preview van de headerbalk
-  h += '<div id="bg-kleur-preview" style="margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid var(--border);max-width:280px">'
-     + '<div id="bg-kleur-preview-balk" style="background:'+_mk+';padding:10px 14px;font-size:13px;font-weight:800;color:'+_leesbareTekstKleur(_mk)+'">'+esc(bg.naam||'Bedrijfsnaam')+'</div>'
-     + '<div style="background:#fff;padding:8px 14px;font-size:11px;color:#3a4453">Voorbeeld van de e-mailkop</div></div>';
-  h += '</div>';
-
-  h += '<div style="margin-top:16px"><button class="btn btn-primary" id="bg-save">Opslaan</button></div></div>';
-  el.innerHTML = h;
+  var b = '<div class="lf-groep">Gegevens</div><div class="ist-twee">'
+    + lfRij(ICO.gebouw, 'Bedrijfsnaam', _istTekst('bg-naam','text', bg.naam||'Homa Pompen B.V.'), {voor:'bg-naam'})
+    + lfRij(_LF_TEL, 'Telefoon', _istTekst('bg-tel','tel', bg.telefoon), {voor:'bg-tel'})
+    + lfRij(ICO.locatie, 'Adres', _istTekst('bg-adres','text', bg.adres), {voor:'bg-adres'})
+    + lfRij(_LF_MAIL, 'E-mail service', _istTekst('bg-email','email', bg.email), {voor:'bg-email'})
+    + lfRij('', 'Postcode', _istTekst('bg-pc','text', bg.postcode), {voor:'bg-pc'})
+    + lfRij(_ZP_WEB, 'Website', _istTekst('bg-web','url', bg.website), {voor:'bg-web'})
+    + lfRij('', 'Plaats', _istTekst('bg-pl','text', bg.plaats), {voor:'bg-pl'})
+    + lfRij(_ZP_DOC, 'KvK-nummer', _istTekst('bg-kvk','text', bg.kvk), {voor:'bg-kvk'})
+    + lfRij(_ZP_DOC, 'BTW-nummer', _istTekst('bg-btw','text', bg.btw), {voor:'bg-btw'})
+    + '</div>'
+    + lfRij(_ZP_PIN, 'Toon bedrijfslocatie op kaart', lfSchakel('bg-kaart', !!bg.toonOpKaart), {voor:'bg-kaart', sub:'Marker op het kaartoverzicht met het bedrijfsadres als vertrekpunt'});
+  // Logo: uploaden gaat direct, los van de knop Opslaan
+  b += '<div class="lf-groep">Bedrijfslogo</div>'
+    + lfRij(_ZP_UPLOAD, 'Logo',
+        (bg.logo ? '<img class="ist-logo" src="'+esc(bg.logo)+'" alt="Bedrijfslogo"><button type="button" class="btn btn-ghost btn-wis btn-icoon" id="bg-logo-verwijder" title="Logo verwijderen" aria-label="Logo verwijderen">'+ICO.trash+'</button>' : '')
+        + '<label class="lf-link ist-upload">'+(bg.logo ? 'Ander logo' : 'Logo kiezen')+'<input type="file" id="bg-logo-input" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden></label>',
+        {sub:'In e-mails, op de werkbon-pdf en op de kaart. Witruimte rondom wordt weggesneden.'});
+  // Huisstijlkleur voor e-mails
+  b += '<div class="lf-groep">Huisstijlkleur e-mails</div>'
+    + '<div class="lf-rij lf-blok">'+_lfIco(_LF_KLEUR)+'<span class="lf-l">Kleur van kop en accenten<small>De tekstkleur past zich vanzelf aan voor leesbaarheid</small></span>'
+    + '<div class="ist-kleuren">'+_presets.map(function(kl){
+        return '<button type="button" class="bg-kleur-preset ist-sw" data-kleur="'+kl+'" style="background:'+kl+';border-color:'+(_mk.toLowerCase()===kl.toLowerCase() ? 'var(--text)' : 'transparent')+'" title="'+kl+'" aria-label="Kleur '+kl+'"></button>';
+      }).join('')
+    + '<label class="ist-eigen"><input type="color" id="bg-mailkleur" value="'+_mk+'">Eigen kleur</label></div></div>'
+    + '<div id="bg-kleur-preview" class="ist-mailvb"><div id="bg-kleur-preview-balk" style="background:'+_mk+';color:'+_leesbareTekstKleur(_mk)+'">'+esc(bg.naam||'Bedrijfsnaam')+'</div><div>Voorbeeld van de e-mailkop</div></div>';
+  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Bedrijfsgegevens', 'Gebruikt in e-mails, op de werkbon-pdf en in mailtemplates ({bedrijfNaam} {bedrijfTel} {bedrijfEmail}).', b, 'bg-save', 'Opslaan')+'</div>';
+  lfBind(el.querySelector('.ist-wrap'), el.querySelector('#bg-save'));
 
   // Logo upload handler
   var logoInput = el.querySelector('#bg-logo-input');
@@ -34640,85 +34658,69 @@ function renderInstRegister(el) {
   var ri = getRegisterInst();
   var velden = ri.velden.slice(0, REGISTER_MAX_VELDEN);
 
-  // Zelfde opmaak als de kopjes elders in de instellingen. Niet hergebruikt uit
-  // renderInstPlanning: die versie staat lokaal binnen die functie.
-  function kop(titel, omschr) {
-    return '<div style="font-weight:700;font-size:15px;margin-bottom:'+(omschr?'6':'14')+'px">'+titel+'</div>'
-      + (omschr ? '<p style="font-size:13px;color:var(--muted);margin-bottom:12px">'+omschr+'</p>' : '');
-  }
-
-  var h = '<div class="card">';
-  h += kop('Naam van de registratie','Hoe de items in het register heten. Werk je niet met pompen maar met bijvoorbeeld ketels, toestellen of installaties, pas het hier aan — de term verschijnt overal in de app (bij de klant, in de werkbon en in de planning). Standaard is "Pomp".');
-  h += '<div class="form-grid">';
-  h += fg('Enkelvoud', '<input class="input" id="rg-item1" value="'+esc(ri.itemEnkel)+'" placeholder="Pomp" maxlength="30">');
-  h += fg('Meervoud',  '<input class="input" id="rg-item2" value="'+esc(ri.itemMeervoud)+'" placeholder="Pompen" maxlength="30">');
-  h += '</div>';
+  var h = '<div class="ist-wrap lf">';
   // Keuze welk variabel veld naast de twee vaste velden in de snelle weergave (bij een
   // klant of opdracht) verschijnt. "Geen" = alleen de vaste velden.
   var _snelOpties = '<option value="">Geen extra veld</option>';
   (ri.velden||[]).forEach(function(v){
     _snelOpties += '<option value="'+esc(v.key)+'"'+(ri.snelWeergaveVeld===v.key?' selected':'')+'>'+esc(v.label||v.key)+'</option>';
   });
-  h += '<div style="margin-top:12px">';
-  h += fg('Extra veld in snelle weergave', '<select class="input" id="rg-snelveld">'+_snelOpties+'</select>');
-  h += '<p style="font-size:12px;color:var(--muted);margin-top:4px">Dit veld verschijnt naast de twee vaste velden wanneer een '+esc((ri.itemEnkel||'pomp').toLowerCase())+' compact wordt getoond bij een klant of opdracht.</p>';
-  h += '</div>';
-  h += '<button class="btn btn-primary btn-sm" id="rg-item-save" style="margin-top:12px">Opslaan</button>';
-  h += '</div>';
+  h += _istKaart('Naam van de registratie', 'Hoe de items in het register heten. Werk je niet met pompen maar met bijvoorbeeld ketels, toestellen of installaties, pas het hier aan — de term verschijnt overal in de app (bij de klant, in de werkbon en in de planning). Standaard is "Pomp".',
+    '<div class="ist-twee">'
+    + lfRij(_ZP_LABEL, 'Enkelvoud', _istTekst('rg-item1','text', ri.itemEnkel, 'Pomp', 30), {voor:'rg-item1'})
+    + lfRij(_ZP_LABEL, 'Meervoud', _istTekst('rg-item2','text', ri.itemMeervoud, 'Pompen', 30), {voor:'rg-item2'})
+    + '</div>'
+    + lfKies(_ZP_OOG, 'Extra veld in snelle weergave', '<select class="input" id="rg-snelveld">'+_snelOpties+'</select>',
+        {titel:'Extra veld in snelle weergave', sub:'Naast de twee vaste velden wanneer een '+esc((ri.itemEnkel||'pomp').toLowerCase())+' compact wordt getoond bij een klant of opdracht'}),
+    'rg-item-save', 'Opslaan');
+  h += _istKaart('Vaste velden', 'Deze twee velden staan bovenaan bij elke registratie en zijn ook in te vullen bij een debiteur met servicecontract. Alleen de naam is aanpasbaar; de gegevens blijven bewaard als je hem hernoemt.',
+    '<div class="ist-twee">'
+    + lfRij(_ZP_LIJST, 'Eerste veld', _istTekst('rg-v1','text', ri.veld1Label, 'Pomptype', 40), {voor:'rg-v1'})
+    + lfRij(_ZP_LIJST, 'Tweede veld', _istTekst('rg-v2','text', ri.veld2Label, 'Besturingstype', 40), {voor:'rg-v2'})
+    + '</div>',
+    'rg-vast-save', 'Opslaan');
 
-  h += '<div class="card">';
-  h += kop('Vaste velden','Deze twee velden staan bovenaan bij elke registratie en zijn ook in te vullen bij een debiteur met servicecontract. Alleen de naam is aanpasbaar; de gegevens blijven bewaard als je hem hernoemt.');
-  h += '<div class="form-grid">';
-  h += fg('Naam eerste veld',  '<input class="input" id="rg-v1" value="'+esc(ri.veld1Label)+'" placeholder="Pomptype" maxlength="40">');
-  h += fg('Naam tweede veld',  '<input class="input" id="rg-v2" value="'+esc(ri.veld2Label)+'" placeholder="Besturingstype" maxlength="40">');
-  h += '</div>';
-  h += '<button class="btn btn-primary btn-sm" id="rg-vast-save">Opslaan</button>';
-  h += '</div>';
-
-  h += '<div class="card">';
-  h += kop('Extra velden','Maximaal '+REGISTER_MAX_VELDEN+' velden, die onder de vaste velden verschijnen in de volgorde die je hier bepaalt. Alleen wat hier staat wordt getoond. Verplichte velden krijgen een sterretje en moeten ingevuld zijn voordat er opgeslagen kan worden.');
-
+  // Extra velden: tabel met invulvakjes; wijzigingen worden direct opgeslagen
+  var b3 = '';
   if(!velden.length) {
-    h += '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">Nog geen extra velden. Voeg er hieronder een toe.</div>';
+    b3 += '<p class="lf-leeg">Nog geen extra velden. Voeg er hieronder een toe.</p>';
   } else {
-    h += '<div class="table-wrap"><table style="width:100%"><thead><tr>';
-    h += '<th class="rg-veld-kop" style="width:34px"></th><th class="rg-veld-kop">Naam</th><th class="rg-veld-kop" style="width:120px">Type</th><th class="rg-veld-kop" style="width:90px">Eenheid</th><th class="rg-veld-kop" style="width:80px;text-align:center">Verplicht</th><th class="rg-veld-kop" style="width:80px"></th>';
-    h += '</tr></thead><tbody id="rg-veld-body">';
+    b3 += '<div class="table-wrap ist-tabel"><table><thead><tr>';
+    b3 += '<th style="width:34px"></th><th>Naam</th><th style="width:130px">Type</th><th style="width:96px">Eenheid</th><th style="width:84px;text-align:center">Verplicht</th><th style="width:118px"></th>';
+    b3 += '</tr></thead><tbody id="rg-veld-body">';
     velden.forEach(function(v, i){
-      h += '<tr data-i="'+i+'">';
-      h += '<td style="color:var(--muted);font-size:11px;text-align:center">'+(i+1)+'</td>';
-      h += '<td><input class="input rg-f-label" data-i="'+i+'" value="'+esc(v.label||'')+'" maxlength="40" style="padding:5px 8px;font-size:12px"></td>';
-      h += '<td><select class="input rg-f-type" data-i="'+i+'" style="padding:5px 8px;font-size:12px">'
+      b3 += '<tr data-i="'+i+'">';
+      b3 += '<td class="ist-nr">'+(i+1)+'</td>';
+      b3 += '<td><input class="input ist-cel rg-f-label" data-i="'+i+'" value="'+esc(v.label||'')+'" maxlength="40" aria-label="Naam van veld '+(i+1)+'"></td>';
+      b3 += '<td><select class="input ist-cel rg-f-type" data-i="'+i+'" aria-label="Type van veld '+(i+1)+'">'
          + ['tekst','getal','datum','janee'].map(function(t){
              var lbl = {tekst:'Tekst',getal:'Getal',datum:'Datum',janee:'Ja/nee'}[t];
              return '<option value="'+t+'"'+((v.type||'tekst')===t?' selected':'')+'>'+lbl+'</option>';
            }).join('')
          + '</select></td>';
-      h += '<td><input class="input rg-f-eenheid" data-i="'+i+'" value="'+esc(v.eenheid||'')+'" maxlength="10" placeholder="mm" style="padding:5px 8px;font-size:12px"></td>';
-      h += '<td style="text-align:center"><label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="rg-f-verplicht" data-i="'+i+'" '+(v.verplicht?'checked':'')+' style="width:16px;height:16px;accent-color:var(--accent)"><span class="rg-verplicht-lbl" style="font-size:12px;color:var(--muted)">Verplicht</span></label></td>';
-      h += '<td style="white-space:nowrap;vertical-align:middle">';
-      h += '<span class="sleep-greep" title="Sleep om te verplaatsen"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>';
-      h += '<button class="btn btn-ghost btn-sm rg-up" data-i="'+i+'" title="Omhoog"'+(i===0?' disabled':'')+' style="padding:3px 6px">&#9650;</button>';
-      h += '<button class="btn btn-ghost btn-sm rg-down" data-i="'+i+'" title="Omlaag"'+(i===velden.length-1?' disabled':'')+' style="padding:3px 6px">&#9660;</button>';
-      h += '<button class="btn btn-ghost btn-sm rg-del btn-wis" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
-      h += '</td></tr>';
+      b3 += '<td><input class="input ist-cel rg-f-eenheid" data-i="'+i+'" value="'+esc(v.eenheid||'')+'" maxlength="10" placeholder="mm" aria-label="Eenheid van veld '+(i+1)+'"></td>';
+      b3 += '<td style="text-align:center"><label class="lf-sw ist-sw-in"><input type="checkbox" role="switch" class="rg-f-verplicht" data-i="'+i+'"'+(v.verplicht?' checked':'')+' aria-label="Veld '+(i+1)+' verplicht"><i></i></label></td>';
+      b3 += '<td class="ist-acties">';
+      b3 += '<span class="sleep-greep" title="Sleep om te verplaatsen"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>';
+      b3 += '<button type="button" class="btn btn-ghost btn-icoon rg-up" data-i="'+i+'" title="Omhoog" aria-label="Omhoog"'+(i===0?' disabled':'')+'>'+_IC_OP+'</button>';
+      b3 += '<button type="button" class="btn btn-ghost btn-icoon rg-down" data-i="'+i+'" title="Omlaag" aria-label="Omlaag"'+(i===velden.length-1?' disabled':'')+'>'+_IC_NEER+'</button>';
+      b3 += '<button type="button" class="btn btn-ghost btn-wis btn-icoon rg-del" data-i="'+i+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
+      b3 += '</td></tr>';
     });
-    h += '</tbody></table></div>';
+    b3 += '</tbody></table></div>';
   }
-
   if(velden.length < REGISTER_MAX_VELDEN) {
-    h += '<div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">';
-    h += '<input class="input" id="rg-nieuw-label" placeholder="Naam van het nieuwe veld" maxlength="40" style="flex:1;min-width:180px">';
-    h += '<button class="btn btn-primary btn-sm" id="rg-toevoegen">Veld toevoegen</button>';
-    h += '</div>';
+    b3 += '<div class="lf-rij ist-nieuw">'+_lfIco(_LF_PLUS)+'<span class="lf-l"><input class="lf-tekst ist-veldnaam" id="rg-nieuw-label" placeholder="Naam van het nieuwe veld" maxlength="40" aria-label="Naam van het nieuwe veld"></span>'
+      + '<span class="lf-w"><button type="button" class="btn btn-primary ist-knop" id="rg-toevoegen">Veld toevoegen</button></span></div>';
   } else {
-    h += '<p style="font-size:12px;color:var(--muted);margin-top:12px">Het maximum van '+REGISTER_MAX_VELDEN+' velden is bereikt. Verwijder er een om ruimte te maken.</p>';
+    b3 += '<p class="lf-uitleg">Het maximum van '+REGISTER_MAX_VELDEN+' velden is bereikt. Verwijder er een om ruimte te maken.</p>';
   }
-
-  h += '<p style="font-size:12px;color:var(--muted);margin-top:14px">Een veld verwijderen haalt het uit de formulieren, maar wist de al ingevulde gegevens niet. Zet je het later terug met dezelfde naam, dan is alles er weer.</p>';
+  b3 += '<p class="lf-uitleg">Een veld verwijderen haalt het uit de formulieren, maar wist de al ingevulde gegevens niet. Zet je het later terug met dezelfde naam, dan is alles er weer.</p>';
+  h += _istKaart('Extra velden · '+velden.length+' van '+REGISTER_MAX_VELDEN, 'Verschijnen onder de vaste velden, in de volgorde die je hier bepaalt. Verplichte velden krijgen een sterretje en moeten ingevuld zijn voordat er opgeslagen kan worden. Wijzigingen in deze tabel worden direct opgeslagen.', b3, null);
   h += '</div>';
 
   el.innerHTML = h;
+  lfBind(el.querySelector('.ist-wrap'), el.querySelector('#rg-item-save'));
 
   // ── Itemnaam (enkelvoud/meervoud) opslaan ──
   var _itemSaveBtn = el.querySelector('#rg-item-save');
@@ -35168,60 +35170,44 @@ function renderInstTeam(el) {
     return Math.max(0,Math.round((bruto-pauzMin)/60*10)/10);
   }
 
-  var h = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:20px;align-items:start">';
-
+  var _r1 = function(n){ return String(Math.round(n*10)/10).replace('.',','); };
+  var _stap = function(id, v, min, max, st, lbl){
+    return '<span class="lf-stap"><button type="button" data-lf-stap="-'+st+'" aria-label="'+lbl+' minder">'+_LF_MIN+'</button>'
+      + '<input type="number" inputmode="decimal" id="'+id+'" value="'+v+'" min="'+min+'" max="'+max+'" step="'+st+'">'
+      + '<button type="button" data-lf-stap="'+st+'" aria-label="'+lbl+' meer">'+_LF_PLUS+'</button></span>';
+  };
+  var h = '<div class="ist-wrap lf">';
   // Kaart 1: Verlofbasis & werkuren
-  h += '<div class="card">';
-  h += '<div style="font-weight:700;font-size:15px;margin-bottom:6px">Verlofbasis &amp; werkuren</div>';
-  h += '<p style="font-size:13px;color:var(--muted);margin-bottom:16px">Standaard vakantiedagen per jaar. De werkuren per dag worden gebruikt voor omrekening uren &#8596; dagen.</p>';
-  h += '<label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block">Vakantiedagen/jaar</label>';
-  h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">';
-  h += '<input type="number" class="input" id="ti-verlofbasis" value="'+verlofBasis+'" min="15" max="40" step="1" style="flex:1">';
-  h += '<span style="font-size:13px;color:var(--muted);white-space:nowrap">dagen</span></div>';
-  h += '<label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block">Werkuren per dag</label>';
-  h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">';
-  h += '<input type="number" class="input" id="ti-urenperdag" value="'+werkUrenPerDag+'" min="1" max="12" step="0.5" style="flex:1">';
-  h += '<span style="font-size:13px;color:var(--muted);white-space:nowrap">uur = 1 dag</span></div>';
-  h += '<div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--muted);margin-bottom:16px">';
-  h += '<div style="font-weight:600;margin-bottom:4px">Omrekening uren \u2192 dagen</div>';
-  h += '<div>4u \u00f7 '+werkUrenPerDag+'u = '+Math.round(4/werkUrenPerDag*10)/10+' dag</div>';
-  h += '<div>'+werkUrenPerDag+'u \u00f7 '+werkUrenPerDag+'u = 1 dag</div></div>';
-  h += '<button class="btn btn-primary btn-sm" id="ti-verlof-save">Opslaan</button></div>';
-
-  // Kaart 2: Werktijden per dag
-  h += '<div class="card">';
-  h += '<div style="font-weight:700;font-size:15px;margin-bottom:6px">Werktijden per dag</div>';
-  h += '<p style="font-size:13px;color:var(--muted);margin-bottom:16px">Stel per weekdag de werktijden in. Netto uren worden berekend na aftrek van pauzes.</p>';
-  h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px">';
+  h += _istKaart('Verlofbasis en werkuren', 'Standaard vakantiedagen per jaar. De werkuren per dag gebruikt de app om verlof om te rekenen tussen uren en dagen.',
+    lfRij(ICO.zon, 'Vakantiedagen per jaar', _stap('ti-verlofbasis', verlofBasis, 15, 40, 1, 'Vakantiedagen')+'<span class="zp-sub">dagen</span>', {voor:'ti-verlofbasis'})
+    + lfRij(ICO.clock, 'Werkuren per dag', _stap('ti-urenperdag', werkUrenPerDag, 1, 12, 0.5, 'Werkuren')+'<span class="zp-sub">uur</span>',
+        {voor:'ti-urenperdag', sub:'4 uur = '+_r1(4/werkUrenPerDag)+' dag · '+_r1(werkUrenPerDag)+' uur = 1 dag'}),
+    'ti-verlof-save', 'Opslaan');
+  // Kaart 2: Werktijden per dag + pauzes
+  var b2 = '';
   DAGEN.forEach(function(dag){
     var wt=stdWerktijden[dag.id]||{actief:false,van:'',tot:''};
     var uren=nettoUrenDag(dag.id);
-    h += '<div class="ti-dag-rij" data-dag="'+dag.id+'" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:8px">';
-    h += '<input type="checkbox" class="ti-dag-actief" '+(wt.actief?'checked':'')+' style="accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0">';
-    h += '<span style="font-size:13px;font-weight:500;width:72px;flex-shrink:0">'+dag.naam+'</span>';
-    h += '<input type="time" class="input ti-dag-van" value="'+(wt.van||'')+'" style="flex:1 1 0;min-width:0;'+(wt.actief?'':'opacity:.35;pointer-events:none')+'">';
-    h += '<span style="font-size:11px;color:var(--muted);flex-shrink:0">t/m</span>';
-    h += '<input type="time" class="input ti-dag-tot" value="'+(wt.tot||'')+'" style="flex:1 1 0;min-width:0;'+(wt.actief?'':'opacity:.35;pointer-events:none')+'">';
-    h += '<span style="font-size:11px;color:var(--muted);min-width:30px;text-align:right;white-space:nowrap;flex-shrink:0">'+(uren?uren+'u':'\u2014')+'</span>';
-    h += '</div>';
+    var uit = wt.actief ? '' : ' style="opacity:.35;pointer-events:none"';
+    b2 += '<div class="lf-rij ti-dag-rij ist-dag'+(wt.actief?'':' uit')+'" data-dag="'+dag.id+'">'
+      + '<label class="lf-sw"><input type="checkbox" role="switch" class="ti-dag-actief" aria-label="'+dag.naam+' is een werkdag"'+(wt.actief?' checked':'')+'><i></i></label>'
+      + '<span class="lf-l">'+dag.naam+'</span>'
+      + '<span class="lf-w"><input type="time" class="lf-veld ist-tijd ti-dag-van" value="'+(wt.van||'')+'" aria-label="'+dag.naam+' van"'+uit+'>'
+      + '<span class="zp-sub">–</span><input type="time" class="lf-veld ist-tijd ti-dag-tot" value="'+(wt.tot||'')+'" aria-label="'+dag.naam+' tot"'+uit+'>'
+      + '<span class="ist-uren">'+(uren ? _r1(uren)+' u' : '—')+'</span></span></div>';
   });
-  h += '</div>';
-  h += '<div style="font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Pauzes (gelden alle actieve dagen)</div>';
-  h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">';
+  b2 += '<div class="lf-groep">Pauzes · gelden voor alle werkdagen</div>';
   pauzes.forEach(function(p,i){
-    h += '<div style="display:flex;align-items:center;gap:8px">';
-    h += '<input type="time" class="input ti-pauze-van" data-idx="'+i+'" value="'+(p.van||'')+'" style="flex:1">';
-    h += '<span style="font-size:11px;color:var(--muted)">t/m</span>';
-    h += '<input type="time" class="input ti-pauze-tot" data-idx="'+i+'" value="'+(p.tot||'')+'" style="flex:1">';
-    h += '<button class="btn btn-ghost btn-sm ti-pauze-del" data-idx="'+i+'" style="color:var(--red);flex-shrink:0;font-size:16px;padding:0 8px">\u00d7</button>';
-    h += '</div>';
+    b2 += '<div class="lf-rij ist-pauze">'+_lfIco(_ZP_KOFFIE)+'<span class="lf-l">Pauze</span>'
+      + '<span class="lf-w"><input type="time" class="lf-veld ist-tijd ti-pauze-van" data-idx="'+i+'" value="'+(p.van||'')+'" aria-label="Pauze van">'
+      + '<span class="zp-sub">–</span><input type="time" class="lf-veld ist-tijd ti-pauze-tot" data-idx="'+i+'" value="'+(p.tot||'')+'" aria-label="Pauze tot">'
+      + '<button type="button" class="btn btn-ghost btn-wis btn-icoon ti-pauze-del" data-idx="'+i+'" title="Pauze verwijderen" aria-label="Pauze verwijderen">'+ICO.trash+'</button></span></div>';
   });
-  h += '</div>';
-  h += '<button class="btn btn-ghost btn-sm" id="ti-pauze-add" style="margin-bottom:16px">+ Pauze toevoegen</button>';
-  h += '<div style="border-top:1px solid var(--border);padding-top:14px"><button class="btn btn-primary btn-sm" id="ti-werktijd-save">Opslaan</button></div>';
-  h += '</div>';
+  b2 += _zpToevoeg('ti-pauze-add', 'Pauze toevoegen');
+  h += _istKaart('Werktijden per dag', 'Netto uren worden berekend na aftrek van de pauzes.', b2, 'ti-werktijd-save', 'Opslaan');
   h += '</div>';
   el.innerHTML = h;
+  lfBind(el.querySelector('.ist-wrap'), el.querySelector('#ti-verlof-save'));
 
   el.querySelector('#ti-verlof-save').addEventListener('click',function(){
     var vb=parseFloat(document.getElementById('ti-verlofbasis').value)||25;
@@ -35244,6 +35230,7 @@ function renderInstTeam(el) {
   el.querySelectorAll('.ti-dag-actief').forEach(function(cb){
     cb.addEventListener('change',function(){
       var rij=cb.closest('.ti-dag-rij');
+      rij.classList.toggle('uit', !cb.checked);
       rij.querySelectorAll('.ti-dag-van,.ti-dag-tot').forEach(function(inp){
         inp.style.opacity=cb.checked?'1':'.35'; inp.style.pointerEvents=cb.checked?'':'none';
       });
