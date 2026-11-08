@@ -172,6 +172,7 @@ altijd beide.
 ## Projectbestanden
 
 - `flow8-v2.html` — de app (canoniek).
+- `DESIGN.md` — huisstijl en UI-patronen van de app (tokens, componenten, vaste regels). Lees dit vóór UI-werk.
 - `sw.js` — service worker van de app.
 - `flow8-functions/` — Cloud Functions (mail + custom claims), zie hierboven.
 - `Flow8-website.html` — marketingsite; gebundelde export met een eigen, uitgesprokener stijl
