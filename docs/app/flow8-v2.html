@@ -688,6 +688,16 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .zp-voet .lf-knop{display:flex;align-items:center;justify-content:center;gap:8px}
 .zp-voet .lf-knop svg{width:18px;height:18px}
 .zp-knop-groen{background:var(--green-knop);border-color:var(--green-knop)}
+.zp-kop-getal{flex:none;text-align:right;align-self:flex-start;padding-top:2px;max-width:45%}
+.zp-kop-getal b{display:block;font:700 24px 'Space Mono',monospace;letter-spacing:-.02em;line-height:1.1;white-space:nowrap}
+.zp-kop-getal small{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+.zp-voet .zp-knop-af{display:flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;padding:0 20px;background:var(--surface2);border:1px solid rgba(239,68,68,.35);color:var(--red-t)}
+.zp-voet .zp-knop-af svg{width:18px;height:18px}
+.zp-bonnen{display:flex;gap:10px;flex-wrap:wrap}
+.zp-bon{width:88px;height:88px;padding:0;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;background:var(--surface2);cursor:pointer}
+.zp-bon img{width:100%;height:100%;object-fit:cover;display:block}
+.zp-rood{color:var(--red-t);font-weight:600}
+.zp-oranje-rij .lf-ic,.zp-oranje-rij .lf-l{color:var(--orange-t)}
 .lf .mono{font-family:'Space Mono',monospace;font-weight:700}
 .lf-alleen-lezen{cursor:default}
 .lf-alleen-lezen .lf-chev{display:none}
@@ -12201,9 +12211,20 @@ function _zpOpen(titel, body){
   }
   return pb;
 }
-function _zpKop(icoHtml, titel, sub, tags){
-  return '<div class="zp-kop">'+icoHtml+'<div class="zp-kop-t"><b>'+esc(titel||'—')+'</b>'+(sub ? '<small>'+sub+'</small>' : '')+(tags ? '<div class="zp-kop-tags">'+tags+'</div>' : '')+'</div></div>';
+// rechts (optioneel): het getal waar het om draait, zie _zpKopGetal.
+function _zpKop(icoHtml, titel, sub, tags, rechts){
+  return '<div class="zp-kop">'+icoHtml+'<div class="zp-kop-t"><b>'+esc(titel||'\u2014')+'</b>'+(sub ? '<small>'+sub+'</small>' : '')+(tags ? '<div class="zp-kop-tags">'+tags+'</div>' : '')+'</div>'+(rechts||'')+'</div>';
 }
+function _zpKopGetal(getal, onder, kleur){
+  return '<div class="zp-kop-getal"'+(kleur ? ' style="color:'+kleur+'"' : '')+'><b>'+esc(getal)+'</b>'+(onder ? '<small>'+onder+'</small>' : '')+'</div>';
+}
+// Grote avatar van een medewerker voor de kop (vraagteken als de medewerker niet meer bestaat).
+function _zpAv(m){
+  if(!m) return '<span class="lf-av zp-kop-av zp-av-weg" aria-hidden="true">?</span>';
+  var kl = medKleur(m);
+  return '<span class="lf-av zp-kop-av" aria-hidden="true" style="background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+esc(initials(m))+'</span>';
+}
+function _zpKnopAf(id){ return '<button type="button" class="btn lf-knop zp-knop-af" id="'+id+'"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>Afwijzen</button>'; }
 function _zpKopIc(svg, kleur){
   return '<span class="zp-kop-ic" aria-hidden="true" style="background:color-mix(in srgb,'+kleur+' 16%,transparent);color:'+_klTekst(kleur)+'">'+String(svg||'').replace(/width="\d+" height="\d+"/, 'width="26" height="26"')+'</span>';
 }
@@ -21816,81 +21837,54 @@ function _voerKeuringOveruren(id, status, reden) {
 function openOverurenPanel(id) {
   var o = APP.overuren.find(function(x){return String(x.id)===String(id);}); if(!o) return;
   var m = getMed(o.medId);
-  var kl = m ? (medKleur(m)) : '#6b7694';
   var ops = o.opdrachtId ? APP.opdrachten.find(function(x){return String(x.id)===String(o.opdrachtId);}) : null;
   var kanGoedkeuren = isAdmin() || magSchrijven('overuren');
 
-  function v(l,w){ return '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">'+l+'</div><div style="font-size:13px;font-weight:600;margin-top:3px">'+esc(w||'—')+'</div></div>'; }
-
   var statusTag = { aangevraagd:'<span class="tag tag-orange">Aangevraagd</span>', goedgekeurd:'<span class="tag tag-blue">Goedgekeurd</span>', afgewezen:'<span class="tag tag-red">Afgewezen</span>', gecompenseerd:'<span class="tag tag-green">Gecompenseerd</span>', uitbetaald:'<span class="tag tag-muted">Uitbetaald</span>' }[o.status]||'';
+  var h = _zpKop(_zpAv(m), m ? m.voornaam+' '+m.achternaam : '—', esc(fmtD(o.datum)), statusTag,
+    _zpKopGetal(String(o.uren||0).replace('.',','), 'uur', 'var(--accent-t)'));
 
-  var h = '';
-  // Header
-  h += '<div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:16px">';
-  if(m){ h+='<div class="avatar" style="width:42px;height:42px;font-size:14px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>'; }
-  h += '<div><div style="font-size:16px;font-weight:800">'+(m?esc(m.voornaam+' '+m.achternaam):'—')+'</div>';
-  h += '<div style="font-size:13px;color:var(--muted);margin-top:2px">'+fmtD(o.datum)+'</div>';
-  h += '<div style="margin-top:6px">'+statusTag+'</div></div>';
-  h += '<div style="margin-left:auto;text-align:right"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent)">'+(o.uren||0)+'</div><div style="font-size:12px;color:var(--muted)">uur</div></div>';
-  h += '</div>';
-
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
-  h += v('Type', o.type==='uitbetaling'?'Uitbetaling':'Compensatie');
-  h += v('Aangevraagd door', o.door);
-  h += v('Aangevraagd op', fmtD(o.aangemaaktOp));
-  if(o.beoordeeldDoor) h += v('Beoordeeld door', o.beoordeeldDoor+' · '+fmtD(o.beoordeeldOp));
-  h += '</div>';
-
-  if(ops) {
-    h += '<div style="background:rgba(74,108,247,.08);border:1px solid rgba(74,108,247,.2);border-radius:8px;padding:10px 12px;margin-bottom:12px">';
-    h += '<div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px">GEKOPPELDE OPDRACHT</div>';
-    h += '<div style="font-size:13px;font-weight:600">'+esc(ops.klantNaam||'—')+'</div>';
-    h += '<div style="font-size:12px;color:var(--muted)">'+fmtD(ops.datum)+(ops.tijdVan?' · '+ops.tijdVan:'')+'</div>';
-    h += '</div>';
-  }
-
-  if(o.omschrijving) { h += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;font-weight:600">Omschrijving</div><div style="font-size:13px">'+esc(o.omschrijving)+'</div></div>'; }
-  if(o.notitie)      { h += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;font-weight:600">Notitie</div><div style="font-size:13px">'+esc(o.notitie)+'</div></div>'; }
-  if(o.afwijsReden)  { h += '<div class="lf-afwijs"><div>Reden afwijzing</div><div>'+esc(o.afwijsReden)+'</div></div>'; }
-
-  // Acties
-  h += '<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px;margin-top:4px">';
+  if(o.afwijsReden) h += _zpMelding('waarschuwing', 'Reden afwijzing', esc(o.afwijsReden));
   // Tekenen is voorbehouden aan de ingestelde goedkeurder van deze medewerker (of admin).
   var magTekenen = magGoedkeuren('overuren', o.medId);
-  if(o.status==='aangevraagd'){
-    if(magTekenen){
-      h += '<button class="btn btn-primary" id="op-goed" style="justify-content:center">✓ Goedkeuren & compenseren</button>';
-      h += '<button class="btn btn-ghost" id="op-af" style="justify-content:center;color:var(--red)">✗ Afwijzen</button>';
-    } else {
-      var _gkO = getGoedkeurderVoor(o.medId, 'overuren');
-      h += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--muted)">'
-         + (_gkO ? 'Wacht op goedkeuring van <b>'+esc((_gkO.voornaam||'')+' '+(_gkO.achternaam||''))+'</b>.'
-                 : 'Er is geen goedkeurder ingesteld voor deze medewerker; alleen een beheerder kan tekenen.')
-         + '</div>';
-    }
+  if(o.status==='aangevraagd' && !magTekenen){
+    var _gkO = getGoedkeurderVoor(o.medId, 'overuren');
+    h += _zpMelding('info', 'Goedkeuring', _gkO ? 'Wacht op goedkeuring van <b>'+esc((_gkO.voornaam||'')+' '+(_gkO.achternaam||''))+'</b>.'
+                                               : 'Er is geen goedkeurder ingesteld voor deze medewerker; alleen een beheerder kan tekenen.');
   }
-  if(kanGoedkeuren && (o.status==='gecompenseerd'||o.status==='goedgekeurd')){
-    h += '<button class="btn btn-ghost" id="op-uitb" style="justify-content:center">'+ICO.euro+' Uitbetalen</button>';
-  }
+
+  var uitb = o.type==='uitbetaling';
+  h += _zpGroep('Aanvraag') + _zpKaart(
+    _zpRij(_ZP_TEKST, 'Soort', uitb ? 'Uitbetaling' : 'Compensatie', uitb ? '' : 'Bij goedkeuren bijgeschreven als verlof')
+    + _zpRij(ICO.user, 'Aangevraagd door', esc(o.door||''))
+    + _zpRij(ICO.kalender, 'Aangevraagd op', o.aangemaaktOp ? esc(fmtD(o.aangemaaktOp)) : '')
+    + (o.beoordeeldDoor ? _zpRij(ICO.check, 'Beoordeeld door', esc(o.beoordeeldDoor), o.beoordeeldOp ? esc(fmtD(o.beoordeeldOp)) : '') : ''));
+  if(ops) h += _zpGroep('Gekoppelde opdracht') + _zpKaart(_lfNavRij('ou-opdracht', ICO.wrench, esc(ops.klantNaam||'—'), fmtD(ops.datum)+(ops.tijdVan?' · '+ops.tijdVan:''), ''));
+  var tl = '';
+  if(o.omschrijving) tl += _zpTekst(_ZP_TEKST, 'Omschrijving', o.omschrijving);
+  if(o.notitie)      tl += _zpTekst(_ZP_NOTITIE, 'Notitie', o.notitie);
+  if(tl) h += _zpGroep('Toelichting') + _zpKaart(tl);
+
+  var acties = '';
+  if(kanGoedkeuren && (o.status==='gecompenseerd'||o.status==='goedgekeurd')) acties += _lfNavRij('op-uitb', ICO.euro, 'Uitbetalen', 'Kan niet ongedaan gemaakt worden', '');
   // Bewerken spiegelt de database-rule: eigen record mag alleen zolang 'aangevraagd';
   // goedkeurder/schrijver/admin altijd. Voorkomt een knop die stil door de rules wordt geweigerd.
   var _ouMagBewerken = kanGoedkeuren || magSchrijven('overuren') || isAdmin()
     || ( String(o.medId)===String(getMijnMedId()) && o.status==='aangevraagd' );
-  if(_ouMagBewerken){
-    h += '<button class="btn btn-ghost" id="op-edit" style="justify-content:center">'+ICO.edit+' Bewerken</button>';
-  }
+  if(_ouMagBewerken) acties += _lfNavRij('op-edit', ICO.edit, 'Bewerken', '', '');
+  if(acties) h += _zpGroep('Acties') + _zpKaart(acties);
   if(kanGoedkeuren && o.status!=='uitbetaald'){
-    h += '<button class="btn btn-ghost" id="op-del" style="justify-content:center;color:var(--red)">'+ICO.trash+' Verwijderen</button>';
+    h += _zpVerwijder('op-del', 'Overuren verwijderen');
   } else if(String(o.medId)===String(getMijnMedId()) && o.status==='aangevraagd'){
     // Eigen, nog niet getekende aanvraag terugtrekken — zelfde grens als bewerken hierboven.
-    h += '<button class="btn btn-ghost" id="op-intrek" style="justify-content:center;color:var(--red)">'+ICO.trash+' Intrekken</button>';
+    h += _zpVerwijder('op-intrek', 'Aanvraag intrekken');
   }
-  h += '</div>';
+  h += _zpVoet(o.status==='aangevraagd' && magTekenen ? _zpKnopAf('op-af') + _zpKnop('op-goed', _ZP_VINK, 'Goedkeuren') : '');
 
-  openPanel((o.uren||0)+' overuren — '+(m?m.voornaam:''), h);
-  var pb = document.getElementById('panel-body');
+  var pb = _zpOpen('Overuren', h);
   var gB=pb.querySelector('#op-goed'); if(gB) gB.addEventListener('click',function(){keurOveruren(id,'goedgekeurd');closePanel();});
   var aB=pb.querySelector('#op-af');   if(aB) aB.addEventListener('click',function(){closePanel();keurOveruren(id,'afgewezen');});
+  var opB=pb.querySelector('#ou-opdracht'); if(opB && ops) opB.addEventListener('click',function(){ openOpdrachtPanel(ops.id); });
   var uB=pb.querySelector('#op-uitb'); if(uB) uB.addEventListener('click',function(){
     var o2=APP.overuren.find(function(x){return String(x.id)===String(id);}); if(!o2) return;
     var m2=getMed(o2.medId); var naam2=m2?m2.voornaam+' '+m2.achternaam:'onbekend';
@@ -22300,49 +22294,47 @@ function _voerKeuringOnkosten(id, status, reden){
 function openOnkostenPanel(id){
   var o=APP.onkosten.find(function(x){return String(x.id)===String(id);}); if(!o) return;
   var m=getMed(o.medId);
-  var kl=m?(medKleur(m)):'#6b7694';
   var ops=o.opdrachtId?APP.opdrachten.find(function(x){return String(x.id)===String(o.opdrachtId);}):null;
   var kanGoedkeuren=isAdmin()||magGoedkeuren('onkosten')||magSchrijven('onkosten');
-  function v(l,w){return '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">'+l+'</div><div style="font-size:13px;font-weight:600;margin-top:3px">'+esc(w||'—')+'</div></div>';}
   var stTag={aangevraagd:'<span class="tag tag-orange">Aangevraagd</span>',goedgekeurd:'<span class="tag tag-blue">Goedgekeurd</span>',afgewezen:'<span class="tag tag-red">Afgewezen</span>',uitbetaald:'<span class="tag tag-green">Uitbetaald</span>'}[o.status]||'';
-  var h='<div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:16px">';
-  if(m)h+='<div class="avatar" style="width:40px;height:40px;font-size:13px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>';
-  h+='<div><div style="font-size:15px;font-weight:800">'+(m?esc(m.voornaam+' '+m.achternaam):'—')+'</div>';
-  h+='<div style="font-size:13px;color:var(--muted)">'+fmtD(o.datum)+'</div>';
-  h+='<div style="margin-top:6px">'+stTag+'</div></div>';
-  h+='<div style="margin-left:auto;text-align:right"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.5px;color:var(--accent)">'+_matEuro(o.bedrag||0)+'</div>';
-  h+='<div style="font-size:12px;color:var(--muted)">'+esc(o.categorie||'')+'</div></div></div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
-  h+=v('Aangevraagd door',o.door); h+=v('Op',fmtD(o.aangemaaktOp));
-  if(o.beoordeeldDoor)h+=v('Beoordeeld door',o.beoordeeldDoor+' · '+fmtD(o.beoordeeldOp));
-  h+='</div>';
-  if(ops){h+='<div style="background:rgba(74,108,247,.08);border:1px solid rgba(74,108,247,.2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px">GEKOPPELDE OPDRACHT</div><div style="font-size:13px;font-weight:600">'+esc(ops.klantNaam||'—')+'</div><div style="font-size:12px;color:var(--muted)">'+fmtD(ops.datum)+'</div></div>';}
-  if(o.omschrijving)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Omschrijving</div><div style="font-size:13px">'+esc(o.omschrijving)+'</div></div>';
-  if(o.notitie)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Notitie</div><div style="font-size:13px">'+esc(o.notitie)+'</div></div>';
-  if(o.afwijsReden)h+='<div class="lf-afwijs"><div>Reden afwijzing</div><div>'+esc(o.afwijsReden)+'</div></div>';
-  // Bonnen/foto's
+  var h = _zpKop(_zpAv(m), m ? m.voornaam+' '+m.achternaam : '—', esc(fmtD(o.datum))+(o.categorie ? ' · '+esc(o.categorie) : ''), stTag,
+    _zpKopGetal(_matEuro(o.bedrag||0), esc(o.categorie||''), 'var(--accent-t)'));
+  if(o.afwijsReden) h += _zpMelding('waarschuwing', 'Reden afwijzing', esc(o.afwijsReden));
+
+  h += _zpGroep('Declaratie') + _zpKaart(
+    _zpRij(ICO.user, 'Aangevraagd door', esc(o.door||''))
+    + _zpRij(ICO.kalender, 'Aangevraagd op', o.aangemaaktOp ? esc(fmtD(o.aangemaaktOp)) : '')
+    + _zpRij(ICO.euro, 'Categorie', esc(o.categorie||''))
+    + (o.beoordeeldDoor ? _zpRij(ICO.check, 'Beoordeeld door', esc(o.beoordeeldDoor), o.beoordeeldOp ? esc(fmtD(o.beoordeeldOp)) : '') : ''));
+  if(ops) h += _zpGroep('Gekoppelde opdracht') + _zpKaart(_lfNavRij('okp-opdracht', ICO.wrench, esc(ops.klantNaam||'—'), fmtD(ops.datum), ''));
+  // Bonnen/foto's: tik om groot te bekijken
   if(o.bonnen&&o.bonnen.length){
-    h+='<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:8px">Bonnen ('+o.bonnen.length+')</div>';
-    h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+    h += _zpGroep('Bonnen · '+o.bonnen.length) + '<div class="zp-bonnen">';
     o.bonnen.forEach(function(b64,i){
-      h+='<div onclick="openFotoLightbox(\''+b64.replace(/'/g,"\\'")+'\',' +'\'Bon '+(i+1)+'\')" style="display:block;width:90px;height:90px;border-radius:8px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;cursor:pointer">';
-      h+='<img src="'+b64+'" style="width:100%;height:100%;object-fit:cover" alt="Bon '+(i+1)+'"></div>';
+      h += '<button type="button" class="zp-bon" data-i="'+i+'" aria-label="Bon '+(i+1)+' bekijken"><img src="'+esc(b64)+'" alt=""></button>';
     });
-    h+='</div></div>';
+    h += '</div>';
   }
-  h+='<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px">';
-  if(kanGoedkeuren&&o.status==='aangevraagd'){h+='<button class="btn btn-primary" id="okp-goed" style="justify-content:center">✓ Goedkeuren</button><button class="btn btn-ghost" id="okp-af" style="justify-content:center;color:var(--red)">✗ Afwijzen</button>';}
-  if(kanGoedkeuren&&o.status==='goedgekeurd'){h+='<button class="btn btn-ghost" id="okp-uitb" style="justify-content:center">'+ICO.euro+' Markeer als uitbetaald</button>';}
+  var tl = '';
+  if(o.omschrijving) tl += _zpTekst(_ZP_TEKST, 'Omschrijving', o.omschrijving);
+  if(o.notitie)      tl += _zpTekst(_ZP_NOTITIE, 'Notitie', o.notitie);
+  if(tl) h += _zpGroep('Toelichting') + _zpKaart(tl);
+
+  var acties = '';
+  if(kanGoedkeuren&&o.status==='goedgekeurd') acties += _lfNavRij('okp-uitb', ICO.euro, 'Markeer als uitbetaald', 'Kan niet ongedaan gemaakt worden', '');
   // Zelfde slot-logica als overuren: eigen record alleen bewerken/verwijderen zolang 'aangevraagd'.
   var _okMagBewerken = kanGoedkeuren || magSchrijven('onkosten') || isAdmin()
     || ( String(o.medId)===String(getMijnMedId()) && o.status==='aangevraagd' );
-  if(_okMagBewerken){
-    h+='<button class="btn btn-ghost" id="okp-edit" style="justify-content:center">'+ICO.edit+' Bewerken</button>';
-    h+='<button class="btn btn-ghost" id="okp-del" style="justify-content:center;color:var(--red)">'+ICO.trash+' Verwijderen</button>';
-  }
-  h+='</div>';
-  openPanel(''+_matEuro(o.bedrag||0)+' — '+esc(o.categorie||'Onkosten'),h);
-  var pb=document.getElementById('panel-body');
+  if(_okMagBewerken) acties += _lfNavRij('okp-edit', ICO.edit, 'Bewerken', '', '');
+  if(acties) h += _zpGroep('Acties') + _zpKaart(acties);
+  if(_okMagBewerken) h += _zpVerwijder('okp-del', 'Declaratie verwijderen');
+  h += _zpVoet(kanGoedkeuren&&o.status==='aangevraagd' ? _zpKnopAf('okp-af') + _zpKnop('okp-goed', _ZP_VINK, 'Goedkeuren') : '');
+
+  var pb = _zpOpen('Onkosten', h);
+  pb.querySelectorAll('.zp-bon').forEach(function(b){
+    b.addEventListener('click', function(){ var i = +b.dataset.i; openFotoLightbox(o.bonnen[i], 'Bon '+(i+1)); });
+  });
+  var opB=pb.querySelector('#okp-opdracht'); if(opB && ops) opB.addEventListener('click',function(){ openOpdrachtPanel(ops.id); });
   var gB=pb.querySelector('#okp-goed');if(gB)gB.addEventListener('click',function(){keurOnkosten(id,'goedgekeurd');closePanel();});
   var aB=pb.querySelector('#okp-af');if(aB)aB.addEventListener('click',function(){keurOnkosten(id,'afgewezen');closePanel();});
   var uB=pb.querySelector('#okp-uitb');if(uB)uB.addEventListener('click',function(){
@@ -22776,46 +22768,40 @@ function zetLangdurig(id){
 function openVerzuimPanel(id){
   var v=APP.verzuim.find(function(x){return String(x.id)===String(id);}); if(!v) return;
   var m=getMed(v.medId);
-  var kl=m?(medKleur(m)):'#6b7694';
-  var vandaag=vandaagISO();
   var duren=telWerkdagen(v.van, v.tot||null);
   var kanBeheren=isAdmin()||magGoedkeuren('verzuim')||magSchrijven('verzuim');
   var stKleur={actief:'var(--red)',langdurig:'var(--orange)',hersteld:'var(--green)'}[v.status]||'var(--muted)';
-  function vv(l,w){return '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">'+l+'</div><div style="font-size:13px;font-weight:600;margin-top:3px">'+esc(w||'—')+'</div></div>';}
-  var h='<div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:16px">';
-  if(m)h+='<div class="avatar" style="width:40px;height:40px;font-size:13px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>';
-  h+='<div><div style="font-size:15px;font-weight:800">'+(m?esc(m.voornaam+' '+m.achternaam):'—')+'</div>';
-  var _vtypes={ziek:'Ziek',geoorloofd:'Geoorloofd',ongeoorloofd:'Ongeoorloofd',gedeeltelijk:'Gedeeltelijk'};
-  h+='<div style="font-size:13px;color:var(--muted)">'+(_vtypes[v.type]||esc(v.type||'—'))+'</div>';
-  if(v.type==='gedeeltelijk'&&(v.urenZiek||v.urenWerk)){
-    h+='<div style="display:flex;gap:10px;margin-top:6px">';
-    if(v.urenZiek) h+='<div style="background:rgba(239,68,68,.1);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--red)">'+ICO.thermo+' '+v.urenZiek+'u ziek/dag</div>';
-    if(v.urenWerk) h+='<div style="background:rgba(16,185,129,.1);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--green-t)">'+ICO.koffer+' '+v.urenWerk+'u werkt/dag</div>';
-    h+='</div>';
+  var stTag={actief:'<span class="tag tag-red">Actief</span>',langdurig:'<span class="tag tag-orange">Langdurig</span>',hersteld:'<span class="tag tag-green">Hersteld</span>'}[v.status]
+    || '<span class="tag tag-muted">'+esc(v.status||'—')+'</span>';
+  var _vtypes={ziek:'Ziek',geoorloofd:'Geoorloofd',ongeoorloofd:'Ongeoorloofd',gedeeltelijk:'Gedeeltelijk ziek'};
+  var h = _zpKop(_zpAv(m), m ? m.voornaam+' '+m.achternaam : '—', _vtypes[v.type]||esc(v.type||'—'), stTag,
+    _zpKopGetal(_nlAantal(verzuimUren(v)), 'uur · '+duren+' werkdag'+(duren===1?'':'en'), _klTekst(stKleur)));
+
+  var per = _zpRij(ICO.kalender, 'Eerste ziektedag', esc(fmtD(v.van)))
+    + _zpRij(ICO.kalender, 'Hersteld op', v.tot ? esc(fmtD(v.tot)) : '<span class="zp-rood">Nog ziek</span>');
+  if(v.type==='gedeeltelijk'){
+    if(v.urenZiek) per += _zpRij(ICO.thermo, 'Ziek per dag', esc(v.urenZiek+' uur'));
+    if(v.urenWerk) per += _zpRij(ICO.koffer, 'Werkt per dag', esc(v.urenWerk+' uur'));
   }
-  h+='<div style="margin-top:6px"><span class="tag" style="background:'+_kleurTint(stKleur,'22')+';color:'+_klTekst(stKleur)+'">'+esc(v.status)+'</span></div></div>';
-  h+='<div style="margin-left:auto;text-align:right"><div style="font-family:\'Instrument Sans\',sans-serif;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.5px;color:'+_klTekst(stKleur)+'">'+_nlAantal(verzuimUren(v))+' u</div><div style="font-size:12px;color:var(--muted)">'+duren+' werkdag'+(duren===1?'':'en')+(v.type==='gedeeltelijk'?' · gedeeltelijk':'')+'</div></div></div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
-  h+=vv('Eerste ziektedag',fmtD(v.van));
-  h+=vv('Hersteld op',v.tot?fmtD(v.tot):'Nog ziek');
-  h+=vv('Geregistreerd door',v.door);
-  h+=vv('Op',fmtD(v.aangemaaktOp));
-  h+='</div>';
-  var _pT = verzuimTekst(v);
-  if(_pT.omschrijving)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Omschrijving</div><div style="font-size:13px">'+esc(_pT.omschrijving)+'</div></div>';
-  if(_pT.notitie)h+='<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:12px"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;margin-bottom:4px">Notitie</div><div style="font-size:13px">'+esc(_pT.notitie)+'</div></div>';
-  h+='<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px">';
-  if(kanBeheren&&(v.status==='actief'||v.status==='langdurig'))h+='<button class="btn btn-primary" id="vzp-herstel" style="justify-content:center">✓ Markeer als hersteld</button>';
-  if(kanBeheren&&v.status==='actief'&&duren>42)h+='<button class="btn btn-ghost" id="vzp-lang" style="justify-content:center;color:var(--orange-t)">⚠ Markeer als langdurig</button>';
+  h += _zpGroep('Periode') + _zpKaart(per);
+  h += _zpGroep('Registratie') + _zpKaart(
+    _zpRij(ICO.user, 'Geregistreerd door', esc(v.door||''))
+    + _zpRij(ICO.kalender, 'Op', v.aangemaaktOp ? esc(fmtD(v.aangemaaktOp)) : ''));
+  var _pT = verzuimTekst(v), tl = '';
+  if(_pT.omschrijving) tl += _zpTekst(_ZP_TEKST, 'Omschrijving', _pT.omschrijving);
+  if(_pT.notitie)      tl += _zpTekst(_ZP_NOTITIE, 'Notitie', _pT.notitie);
+  if(tl) h += _zpGroep('Toelichting') + _zpKaart(tl);
+
   // Verzuim is inzien-only voor wie geen schrijfrecht heeft (monteurs). Bewerken/
   // verwijderen alleen voor beheerders — spiegelt de RTDB-rule (vzRecht=='s').
-  if(kanBeheren){
-    h+='<button class="btn btn-ghost" id="vzp-edit" style="justify-content:center">'+ICO.edit+' Bewerken</button>';
-    h+='<button class="btn btn-ghost" id="vzp-del" style="justify-content:center;color:var(--red)">'+ICO.trash+' Verwijderen</button>';
-  }
-  h+='</div>';
-  openPanel((m?m.voornaam+' — ':'')+'Verzuim',h);
-  var pb=document.getElementById('panel-body');
+  var acties = '';
+  if(kanBeheren&&v.status==='actief'&&duren>42) acties += _lfNavRij('vzp-lang', ICO.warn, 'Markeer als langdurig', 'Langer dan zes weken ziek', '').replace('class="lf-rij lf-kies"', 'class="lf-rij lf-kies zp-oranje-rij"');
+  if(kanBeheren) acties += _lfNavRij('vzp-edit', ICO.edit, 'Bewerken', '', '');
+  if(acties) h += _zpGroep('Acties') + _zpKaart(acties);
+  if(kanBeheren) h += _zpVerwijder('vzp-del', 'Verzuim verwijderen');
+  h += _zpVoet(kanBeheren&&(v.status==='actief'||v.status==='langdurig') ? _zpKnop('vzp-herstel', _ZP_VINK, 'Markeer als hersteld', 'zp-knop-groen') : '');
+
+  var pb = _zpOpen('Verzuim', h);
   var hB=pb.querySelector('#vzp-herstel');if(hB)hB.addEventListener('click',function(){
     var v=APP.verzuim.find(function(x){return String(x.id)===String(id);}); if(!v) return;
     var m=getMed(v.medId); var naam=m?m.voornaam+' '+m.achternaam:'onbekend';
@@ -23898,38 +23884,22 @@ function openAgendaPanel(id) {
     var m=getMed(mid); return m?m:null;
   }).filter(Boolean);
 
-  var h = '<div style="margin-bottom:16px"><span class="tag" style="background:'+_kleurTint(ti.kleur,'22')+';color:'+_klTekst(ti.kleur)+';display:inline-flex;align-items:center;gap:5px"><span style="font-size:13px">'+ti.icon+'</span>'+ti.l+'</span></div>';
-
-  function v(l,w){return '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px"><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase">'+l+'</div><div style="font-size:13px;font-weight:600;margin-top:3px">'+w+'</div></div>';}
-
-  h += v('Datum', a.tot&&a.tot!==a.van ? fmtD(a.van)+' t/m '+fmtD(a.tot) : fmtD(a.van));
-  if(!a.heelDag&&a.tijdVan) h += v('Tijd', a.tijdVan+(a.tijdTot?' – '+a.tijdTot:''));
-  else h += v('Duur','Hele dag');
-  if(a.locatie) h += v('Locatie', esc(a.locatie));
-  if(a.omschrijving) h += v('Omschrijving', esc(a.omschrijving));
-
-  // Deelnemers
-  if(deelnemers.length) {
-    h += '<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px">';
-    h += '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:8px">Deelnemers ('+deelnemers.length+')</div>';
-    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px">';
-    deelnemers.forEach(function(m){
-      var kl=medKleur(m);
-      h += '<div style="display:flex;align-items:center;gap:7px;min-width:0">';
-      h += '<div class="avatar" style="width:20px;height:20px;font-size:8px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
-      h += '<span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.voornaam+' '+m.achternaam)+'</span></div>';
-    });
-    h += '</div></div>';
+  var h = _zpKop(_zpKopIc(ti.icon, ti.kleur), a.titel||ti.l, '', '<span class="tag" style="background:'+_kleurTint(ti.kleur,'22')+';color:'+_klTekst(ti.kleur)+'">'+esc(ti.l)+'</span>');
+  h += _zpGroep('Wanneer') + _zpKaart(
+    _zpRij(ICO.kalender, 'Datum', esc(a.tot&&a.tot!==a.van ? fmtD(a.van)+' t/m '+fmtD(a.tot) : fmtD(a.van)))
+    + (!a.heelDag&&a.tijdVan ? _zpRij(ICO.clock, 'Tijd', esc(a.tijdVan+(a.tijdTot?' – '+a.tijdTot:''))) : _zpRij(ICO.clock, 'Duur', 'Hele dag'))
+    + (a.locatie ? _zpRij(ICO.locatie, 'Locatie', esc(a.locatie)) : ''));
+  if(a.omschrijving) h += _zpGroep('Toelichting') + _zpKaart(_zpTekst(_ZP_TEKST, 'Omschrijving', a.omschrijving));
+  if(deelnemers.length){
+    var dn = '';
+    deelnemers.forEach(function(m){ dn += _zpPersoonRij(initials(m), medKleur(m), m.voornaam+' '+m.achternaam, m.functie||''); });
+    h += _zpGroep('Deelnemers · '+deelnemers.length) + _zpKaart(dn);
   }
+  h += _zpGroep('Acties') + _zpKaart(_lfNavRij('agp-edit', ICO.edit, 'Bewerken', '', ''));
+  h += _zpVerwijder('agp-del', 'Afspraak verwijderen');
+  h += _zpVoet(_zpKnop('agp-ics', ICO.kalender, 'Uitnodiging versturen (ICS)'));
 
-  h += '<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px;margin-top:8px">';
-  h += '<button class="btn btn-primary" id="agp-ics" style="justify-content:center">'+ICO.kalender+' Stuur uitnodiging (ICS)</button>';
-  h += '<button class="btn btn-ghost" id="agp-edit" style="justify-content:center">'+ICO.edit+' Bewerken</button>';
-  h += '<button class="btn btn-ghost" id="agp-del" style="justify-content:center;color:var(--red-t)">'+ICO.trash+' Verwijderen</button>';
-  h += '</div>';
-
-  openPanel(a.titel||ti.l, h);
-  var pb = document.getElementById('panel-body');
+  var pb = _zpOpen('Afspraak', h);
   pb.querySelector('#agp-ics').addEventListener('click',function(){ downloadICS(a); });
   pb.querySelector('#agp-edit').addEventListener('click',function(){ closePanel(); openAgendaModal(id,null); });
   pb.querySelector('#agp-del').addEventListener('click',function(){
