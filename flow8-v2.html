@@ -11909,7 +11909,6 @@ function renderMedewerkers() {
     var _act = c.sort && _medSortKey===c.sort; var sortIco = c.sort ? sortArrow(_act,_medSortDir) : '';
     h += '<th data-col="'+c.k+'"'+(c.sort?' class="'+sortCls(_act)+'" style="cursor:pointer" data-sort="'+c.sort+'"':'')+'>'+c.l+sortIco+'</th>';
   });
-  if (magSchrijven('medewerkers')) h+='<th data-col="_acties" style="width:56px"></th>';
   h+='</tr></thead><tbody>';
 
   if (!slice.length) h+='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)">Geen medewerkers gevonden</td></tr>';
@@ -12001,7 +12000,6 @@ function renderMedewerkers() {
     // Status
     h+='<td data-col="status">'+tagMedStatus(m.status)+'</td>';
 
-    if (magSchrijven('medewerkers')) h+='<td data-col="_acties" onclick="event.stopPropagation()" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon med-del-btn btn-wis" data-id="'+m.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button></td>';
     h+='</tr>';
   });
   h+='</tbody></table></div>';
@@ -12021,7 +12019,6 @@ function renderMedewerkers() {
   el.querySelectorAll('th[data-sort]').forEach(function(th){th.addEventListener('click',function(){if(_medSortKey===th.dataset.sort)_medSortDir*=-1;else{_medSortKey=th.dataset.sort;_medSortDir=1;}_medPage=1;renderMedewerkers();});});
   el.querySelectorAll('.med-row').forEach(function(tr){tr.addEventListener('click',function(e){if(!e.target.closest('button'))openMedPanel(tr.dataset.id);});});
   el.querySelectorAll('.med-edit-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();openMedModal(b.dataset.id);});});
-  el.querySelectorAll('.med-del-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();verwijderMed(b.dataset.id);});});
   el.querySelectorAll('.pg-btn[data-pg]').forEach(function(b){b.addEventListener('click',function(){_medPage=parseInt(b.dataset.pg);renderMedewerkers();});});
   var addBtn=el.querySelector('#med-add-btn'); if(addBtn) addBtn.addEventListener('click',function(){openMedModal(null);});
   var impBtnMed=el.querySelector('#med-import-btn'); if(impBtnMed) impBtnMed.addEventListener('click',_openMedewerkerImport);
@@ -12803,6 +12800,15 @@ function _zpPersoonRij(ini, kleur, naam, sub){
 function _zpKnop(id, ico, tekst, cls){ return '<button type="button" class="btn btn-primary lf-knop'+(cls ? ' '+cls : '')+'" id="'+id+'">'+(ico||'')+esc(tekst)+'</button>'; }
 function _zpVoet(knop){ return knop ? '<div class="zp-voet">'+knop+'</div>' : ''; }
 function _zpVerwijder(id, tekst){ return '<button type="button" class="lf-verwijder" id="'+id+'">'+ICO.trash+' '+esc(tekst)+'</button>'; }
+// Verwijderen hoort in het bewerkvenster, niet als prullenbak in de lijstrij: een rij openen en iets
+// weghalen zijn twee verschillende handelingen. Zet onderaan het open venster een "… verwijderen".
+function _lfVerwijderInVenster(tekst, titel, vraag, doe){
+  var lf = document.querySelector('#modal-body > .lf'); if(!lf) return;
+  lf.insertAdjacentHTML('beforeend', _zpVerwijder('lf-venster-del', tekst));
+  lf.querySelector('#lf-venster-del').addEventListener('click', function(){
+    bevestigActie(titel, vraag, function(){ closeModal(); doe(); });
+  });
+}
 // Knop "+ toevoegen" onderaan een uitgeklapte lijst.
 function _zpToevoeg(id, tekst){ return '<button type="button" class="zp-toevoeg" id="'+id+'">'+_LF_PLUS+esc(tekst)+'</button>'; }
 function _klKaart(cls, id, titel, sub, onder){
@@ -12949,7 +12955,6 @@ function renderServiceklanten() {
       // die hem aanriep — een klant kon dus wel op passief, maar niet meer terug.
       if(k.status==='passief') h+='<button class="btn btn-ghost btn-sm sk-act-btn" data-id="'+k.id+'" title="Weer activeren" style="color:var(--green-t);font-size:11px;padding:4px 9px">Activeren</button>';
       h+='<button class="btn btn-ghost btn-sm btn-icon sk-edit-btn btn-icoon" data-id="'+k.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button>';
-      h+='<button class="btn btn-ghost btn-sm btn-icon sk-del-btn btn-wis" data-id="'+k.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
       h+='</td>';
     }
     h+='<td></td>';
@@ -12987,7 +12992,6 @@ function renderServiceklanten() {
   if(jaarplanBtn) jaarplanBtn.addEventListener('click', openJaarplanner);
   var snelinvoerBtn = el.querySelector('#sk-snelinvoer-btn');
   if(snelinvoerBtn) snelinvoerBtn.addEventListener('click', openSnelinvoerDatums);
-  el.querySelectorAll('.sk-del-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();verwijderSk(b.dataset.id);});});
   el.querySelectorAll('.sk-act-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();reactiverenSk(b.dataset.id);});});
   el.querySelectorAll('.pg-btn[data-pg]').forEach(function(b){b.addEventListener('click',function(){_skPage=parseInt(b.dataset.pg);renderServiceklanten();});});
 
@@ -13590,7 +13594,7 @@ function renderDebiteuren(){
       h += '<th class="deb-sort-th '+sortCls(_act)+'" data-col="'+c.k+'" data-sort="'+sk+'" style="cursor:pointer;user-select:none;white-space:nowrap">'+c.l+ico+'</th>';
     } else { h += '<th data-col="'+c.k+'">'+c.l+'</th>'; }
   });
-  if(magSchrijven('debiteuren')) h+='<th data-col="_acties" style="width:90px"></th>';
+  if(magSchrijven('debiteuren')) h+='<th data-col="_acties" style="width:52px"></th>';
   h+='</tr></thead><tbody>';
   if(!slice.length) h+='<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted)">Geen debiteuren gevonden</td></tr>';
   slice.forEach(function(d){
@@ -13627,7 +13631,7 @@ function renderDebiteuren(){
         }
       }
     });
-    if(magSchrijven('debiteuren')) h+='<td data-col="_acties" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon deb-edit-btn btn-icoon" data-id="'+d.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button><button class="btn btn-ghost btn-sm btn-icon deb-del-btn btn-wis" data-id="'+d.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
+    if(magSchrijven('debiteuren')) h+='<td data-col="_acties" style="white-space:nowrap"><button class="btn btn-ghost btn-sm btn-icon deb-edit-btn btn-icoon" data-id="'+d.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button></td>';
     h+='<td></td>';
     h+='</tr>';
   });
@@ -13650,7 +13654,6 @@ function renderDebiteuren(){
   });});
   el.querySelectorAll('.deb-row').forEach(function(tr){tr.addEventListener('click',function(e){if(!e.target.closest('button'))openDebPanel(tr.dataset.id);});});
   el.querySelectorAll('.deb-edit-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();openDebModal(b.dataset.id);});});
-  el.querySelectorAll('.deb-del-btn').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();verwijderDeb(b.dataset.id);});});
   el.querySelectorAll('.pg-btn[data-pg]').forEach(function(b){b.addEventListener('click',function(){_debPage=parseInt(b.dataset.pg);renderDebiteuren();});});
   var addBtn=el.querySelector('#deb-add-btn'); if(addBtn) addBtn.addEventListener('click',function(){openDebModal(null);});
   el.querySelector('#deb-import-btn').addEventListener('click',_openDebImport);
@@ -15553,7 +15556,8 @@ function _vlKaartHtml(v, metWie){
     else if(!beheer && String(v.medId) === String(mijnId)) acties += _hrKnop('vl-eigen-edit', v.id, ICO.edit+' Wijzigen') + _hrKnop('vl-eigen-intrek', v.id, ICO.undo+' Intrekken', 'af');
     else acties += _hrWacht(v.medId, 'verlof');
   }
-  if(beheer) acties += _hrPrullenbak('vl-del', v.id);
+  // Open aanvraag: eerst beoordelen; de prullenbak staat dan niet naast Goedkeuren (mis-tik).
+  if(beheer && v.status !== 'aangevraagd') acties += _hrPrullenbak('vl-del', v.id);
   return _hrKaart({ datum:v.van, titel:esc(_hrHoofd(v.type || 'vakantie')), sub:sub, status:status,
     meta:_hrGetal(u)+' uur · '+_nlDagen(verlofUrenNaarDagen(u, m)), med:metWie ? m : null, acties:acties });
 }
@@ -15565,7 +15569,6 @@ function _ouKaartHtml(o, metWie){
   if(kan){
     if(o.status === 'aangevraagd') acties += magGoedkeuren('overuren', o.medId) ? _hrKnop('ou-af-btn', o.id, ICO.cross+' Afwijzen', 'af') + _hrKnop('ou-goed-btn', o.id, ICO.check+' Goedkeuren', 'goed') : _hrWacht(o.medId, 'overuren');
     else if(o.status === 'gecompenseerd' || o.status === 'goedgekeurd') acties += _hrKnop('ou-uitb-btn', o.id, ICO.euro+' Uitbetalen');
-    acties += _hrPrullenbak('ou-del-btn', o.id);
   } else if(o.status === 'aangevraagd' && String(o.medId) === String(mijnId)){
     acties += _hrKnop('ou-wijzig', o.id, ICO.edit+' Wijzigen') + _hrKnop('ou-del-btn', o.id, ICO.undo+' Intrekken', 'af');
   }
@@ -15879,7 +15882,7 @@ function renderVerlof(){
               h += '<span style="font-size:11px;color:var(--muted)">Wacht op '+esc(_gkV?(_gkV.voornaam||''):'beheerder')+'</span> ';
             }
           }
-          if(_vlBeheer){
+          if(_vlBeheer && v.status!=='aangevraagd'){
             h += '<button class="btn btn-ghost btn-sm btn-icon vl-del btn-wis" data-id="'+v.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
           } else if(String(v.medId)===String(mijnId) && v.status==='aangevraagd'){
             // Eigen, nog niet getekende aanvraag: wijzigen of terugtrekken.
@@ -19074,9 +19077,6 @@ function bindPlanningEvents() {
   el.querySelectorAll('.opdracht-edit-btn').forEach(function(b){
     b.addEventListener('click', function(e){ e.stopPropagation(); openOpdrachtModal(b.dataset.id); });
   });
-  el.querySelectorAll('.opdracht-del-btn').forEach(function(b){
-    b.addEventListener('click', function(e){ e.stopPropagation(); verwijderOpdracht(b.dataset.id); });
-  });
   // Status alleen via paneel wijzigen (niet direct klikbaar in tabel)
   var kolBtn = el.querySelector('#plan-kolom-btn');
   if (kolBtn) kolBtn.addEventListener('click', openPlanKolomKiezer);
@@ -19670,7 +19670,7 @@ function renderPlanLijst(monteurs) {
     else w = 'width:auto';
     h += '<col data-col="'+col.k+'" style="'+w+'">';
   });
-  if (magSchrijven('planning')) h += '<col data-col="_acties" style="width:70px">';
+  if (magSchrijven('planning')) h += '<col data-col="_acties" style="width:48px">';
   h += '</colgroup>';
 
   h += '<tbody>';
@@ -20076,7 +20076,6 @@ function renderPlanLijst(monteurs) {
         if (magSchrijven('planning')) {
           h += '<td data-col="_acties" onclick="event.stopPropagation()" style="padding:4px 6px;white-space:nowrap;text-align:right">';
           h += '<button class="btn btn-ghost btn-sm btn-icon opdracht-edit-btn btn-icoon" data-id="'+o.id+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button>';
-          h += '<button class="btn btn-ghost btn-sm btn-icon opdracht-del-btn btn-wis" data-id="'+o.id+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>';
           h += '</td>';
         }
         h += '</tr>';
@@ -22036,12 +22035,9 @@ function renderOveruren() {
               var _gk = getGoedkeurderVoor(mid, 'overuren');
               h += '<span style="font-size:11px;color:var(--muted)" title="Alleen de ingestelde goedkeurder kan tekenen">Wacht op '+esc(_gk?(_gk.voornaam||'')+' '+(_gk.achternaam||''):'beheerder')+'</span> ';
             }
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn btn-wis" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
           } else if(o.status==='gecompenseerd'||o.status==='goedgekeurd') {
             h += '<button class="btn btn-ghost btn-sm ou-uitb-btn" data-id="'+o.id+'">'+ICO.euro+' Uitbetalen</button>';
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn btn-wis" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
           } else if(o.status==='afgewezen') {
-            h += '<button class="btn btn-ghost btn-sm ou-del-btn btn-wis" data-id="'+o.id+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
           }
           h += '</td>';
         }
@@ -22319,7 +22315,7 @@ function openOverurenPanel(id) {
     || ( String(o.medId)===String(getMijnMedId()) && o.status==='aangevraagd' );
   if(_ouMagBewerken) acties += _lfNavRij('op-edit', ICO.edit, 'Bewerken', '', '');
   if(acties) h += _zpGroep('Acties') + _zpKaart(acties);
-  if(kanGoedkeuren && o.status!=='uitbetaald'){
+  if((kanGoedkeuren || magSchrijven('overuren') || isAdmin()) && o.status!=='uitbetaald'){
     h += _zpVerwijder('op-del', 'Overuren verwijderen');
   } else if(String(o.medId)===String(getMijnMedId()) && o.status==='aangevraagd'){
     // Eigen, nog niet getekende aanvraag terugtrekken — zelfde grens als bewerken hierboven.
@@ -25942,7 +25938,6 @@ function renderMaterialen() {
       h += _sortKop('eenheid','Eenheid','hide-mobile');
       h += _sortKop('stuksprijs','Stuksprijs',null,'right');
       h += _sortKop('btw','BTW','hide-mobile','right');
-      h += '<th class="hide-mobile" style="width:40px"></th>';
       h += '</tr></thead><tbody id="mat-tbody">';
       h += _matRijenHtml(gesorteerd, kanSchrijven);
       h += '</tbody></table></div></div>';
@@ -26035,7 +26030,6 @@ function _matRijHtml(a, kanSchrijven){
   h += '<td class="hide-mobile">'+esc(a.eenheid||'stuk')+'</td>';
   h += '<td style="text-align:right">'+_matEuro(a.stuksprijs)+'</td>';
   h += '<td class="hide-mobile" style="text-align:right;color:var(--muted)">'+(a.btw!=null?a.btw+'%':'—')+'</td>';
-  h += '<td class="hide-mobile">'+(kanSchrijven?'<button class="mat-verwijder btn btn-ghost btn-wis" data-id="'+esc(a.id)+'" data-naam="'+esc(a.code||'')+'" aria-label="Verwijderen" title="Verwijderen">'+ICO.trash+'</button>':'')+'</td>';
   h += '</tr>';
   return h;
 }
@@ -26138,20 +26132,6 @@ function _matBindRijen(artikelen, kanSchrijven){
     if(img){
       e.stopPropagation();
       if(typeof openFotoViewer==='function') openFotoViewer([img.dataset.url], 0);
-      return;
-    }
-    // Artikel verwijderen
-    var del = e.target.closest('.mat-verwijder');
-    if(del){
-      e.stopPropagation();
-      var dNaam = del.dataset.naam||'', dId = del.dataset.id;
-      bevestigActie('Artikel verwijderen', 'Weet je zeker dat je artikel "'+dNaam+'" wilt verwijderen?', function(){
-        fsArtikelVerwijderen(dId).then(function(){
-          APP.artikelenCache = (APP.artikelenCache||[]).filter(function(x){ return x.id!==dId; });
-          renderMaterialen();
-          toast('Artikel verwijderd','success');
-        }).catch(function(err){ toast('Mislukt: '+(err.message||err),'error'); });
-      });
       return;
     }
     // Documenten bekijken (ook zonder schrijfrechten)
@@ -26578,7 +26558,6 @@ function renderPompObjecten() {
       h += '<td><span class="tag" style="background:rgba(79,110,245,.13);color:var(--accent-t)">'+pompen.length+' pomp'+(pompen.length!==1?'en':'')+'</span></td>';
       h += '<td style="white-space:nowrap">';
       h += '<button class="btn btn-ghost btn-sm pr-obj-edit btn-icoon" data-id="'+esc(obj.id)+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button>';
-      if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-obj-del btn-wis" data-id="'+esc(obj.id)+'" data-naam="'+esc(obj.naam||'')+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
       h += '</td>';
       h += '</tr>';
     });
@@ -26594,17 +26573,6 @@ function renderPompObjecten() {
   if(emptyObjBtn) emptyObjBtn.addEventListener('click', function(){ openPompObjectModal(null); });
   el.querySelectorAll('.pr-obj-edit').forEach(function(btn){
     btn.addEventListener('click', function(e){ e.stopPropagation(); openPompObjectModal(btn.dataset.id); });
-  });
-  el.querySelectorAll('.pr-obj-del').forEach(function(btn){
-    btn.addEventListener('click', function(e){
-      e.stopPropagation();
-      bevestigActie('Object verwijderen', 'Weet je zeker dat je "'+esc(btn.dataset.naam)+'" wilt verwijderen? De pompen blijven behouden in het register.', function(){
-        APP.pr_objecten = (APP.pr_objecten||[]).filter(function(o){ return o.id !== btn.dataset.id; });
-        FB.ref(dbPath('pr_objecten', btn.dataset.id)).remove();
-        toast('Object verwijderd','success');
-        renderPompObjecten();
-      }, 'danger');
-    });
   });
   el.querySelectorAll('.pr-obj-rij').forEach(function(rij){
     rij.addEventListener('click', function(e){
@@ -27274,7 +27242,6 @@ function renderPompLijst() {
       });
       h += '<td data-col="_acties" style="text-align:right;white-space:nowrap">';
       if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-edit-btn btn-icoon" data-id="'+esc(p.id)+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button> ';
-      if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm pr-del-btn btn-wis" data-id="'+esc(p.id)+'" data-type="'+esc(p.type||'')+'" data-sn="'+esc(p.serienummer||'')+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
       h += '</td></tr>';
     });
     h += '</tbody></table></div></div>';
@@ -27351,19 +27318,6 @@ function renderPompLijst() {
   });
   el.querySelectorAll('.pr-edit-btn').forEach(function(btn){
     btn.addEventListener('click',function(e){ e.stopPropagation(); openPompModal(btn.dataset.id); });
-  });
-  el.querySelectorAll('.pr-del-btn').forEach(function(btn){
-    btn.addEventListener('click',function(e){
-      e.stopPropagation();
-      var _snTxt = btn.dataset.sn ? (' (SN: '+esc(btn.dataset.sn)+')') : '';
-      bevestigActie(registerItemEnkel(true)+' verwijderen','Weet je zeker dat je "'+esc(btn.dataset.type)+'"'+_snTxt+' wilt verwijderen? Dit verwijdert ook alle documenten en onderdelen.', async function(){
-        await FB.ref(dbPath('wp_pompen', btn.dataset.id)).remove();
-        var idx=(APP.wp_pompen||[]).findIndex(function(p){return String(p.id)===String(btn.dataset.id);});
-        if(idx>=0) APP.wp_pompen.splice(idx,1);
-        toast(registerItemEnkel(true)+' verwijderd','success');
-        renderPompLijst();
-      },'danger');
-    });
   });
   el.querySelectorAll('.pr-page-btn').forEach(function(btn){
     btn.addEventListener('click',function(){ _prPage=parseInt(btn.dataset.pg); renderPompLijst(); });
@@ -31784,7 +31738,7 @@ function _renderMailTemplatesTab() {
     var isStandaard = STANDAARD_TPL_IDS.indexOf(tpl.id) >= 0;
     return _istNavRij('tpl-edit', 'data-id="'+esc(tpl.id)+'"', _lfIco(_LF_MAIL),
       esc(tpl.naam)+(isStandaard ? ' <span class="zp-tag zp-tag-grijs">Standaard</span>' : ''), esc(tpl.onderwerp||''),
-      isStandaard ? '' : '<button type="button" class="btn btn-ghost btn-wis btn-icoon tpl-del" data-id="'+esc(tpl.id)+'" aria-label="Template verwijderen" title="Verwijderen">'+ICO.trash+'</button>');
+      '');
   }).join('');
   if(!tplArr.length) b = '<p class="lf-leeg">Nog geen templates.</p>';
   b += _zpToevoeg('tpl-add', 'Template toevoegen');
@@ -31797,17 +31751,6 @@ function _bindMailTemplatesTab(el) {
   if(addBtn) addBtn.addEventListener('click',function(){ openMailTemplateNieuw(); });
   el.querySelectorAll('.tpl-edit').forEach(function(btn){
     btn.addEventListener('click',function(){ openMailTemplateEditor(btn.dataset.id); });
-  });
-  el.querySelectorAll('.tpl-del').forEach(function(btn){
-    btn.addEventListener('click',function(e){ e.stopPropagation();
-      bevestigActie('Template verwijderen','Weet je zeker dat je "'+btn.dataset.id+'" wilt verwijderen?',function(){
-        var tpl = getMailTemplates();
-        delete tpl[btn.dataset.id];
-        APP.mailTemplates = tpl;
-        FB.ref(dbPath('mailTemplates')).set(tpl);
-        toast('Template verwijderd','success'); renderKlantmails();
-      },'danger');
-    });
   });
 }
 
@@ -31917,6 +31860,13 @@ function openMailTemplateEditor(tplId) {
   // Twee kolommen op een breed scherm, onder elkaar op een smal scherm.
   var b = '<div class="lf-kolommen tpl"><div>'+links+'</div><div class="tpl-preview-kol">'+rechts+'</div></div>';
   lfOpen('Template bewerken', b, 'Opslaan', 'tpl-save', {groot:true});
+  if(STANDAARD_TPL_IDS.indexOf(tplId) < 0) _lfVerwijderInVenster('Template verwijderen', 'Template verwijderen', 'Weet je zeker dat je "'+tplId+'" wilt verwijderen?', function(){
+    var tpls = getMailTemplates();
+    delete tpls[tplId];
+    APP.mailTemplates = tpls;
+    FB.ref(dbPath('mailTemplates')).set(tpls);
+    toast('Template verwijderd','success'); renderKlantmails();
+  });
 
   // ── Preview bijwerken ──
   // Ruim debouncen: elke verversing is een aanroep van de Cloud Function, en tijdens het
@@ -34370,7 +34320,7 @@ function renderInstContracten(el) {
     var sub = (ct.intervalMaanden ? 'Elke '+ct.intervalMaanden+' mnd' : 'Op aanvraag')+' · '+(ct.aantalMonteurs||1)+' man';
     return _istNavRij('ct-edit', 'data-id="'+esc(ct.id)+'"', _istKleurTegel(esc(ct.code), ct.kleur),
       esc(ct.naam)+(contractIsAanvulling(ct) ? ' <span class="zp-tag ist-tag-aanv">Aanvulling</span>' : ''), sub,
-      _istWisKnop('ct-del', ct.id, 'Contracttype'));
+      '');
   }).join('');
   if(!contracten.length) b = '<p class="lf-leeg">Nog geen contracttypes.</p>';
   b += _zpToevoeg('ct-add', 'Contracttype toevoegen');
@@ -34380,13 +34330,6 @@ function renderInstContracten(el) {
   });
   el.querySelector('#ct-add').addEventListener('click', function(){ openContractModal(null); });
   el.querySelectorAll('.ct-edit').forEach(function(b){ b.addEventListener('click',function(){ openContractModal(b.dataset.id); }); });
-  el.querySelectorAll('.ct-del').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation();
-    bevestigActie('Contracttype verwijderen','Weet je zeker dat je dit contracttype wilt verwijderen?',function(){
-      APP.contracten = APP.contracten.filter(function(c){return c.id!==b.dataset.id;});
-      _instBevestig(FB.ref(dbPath('contracten')).set(APP.contracten));
-      renderInstellingen();
-    });
-  }); });
 }
 
 function openContractModal(id) {
@@ -34409,6 +34352,11 @@ function openContractModal(id) {
   b += lfRij(_LF_KLEUR, 'Kleur', '<input type="color" class="lf-kleur" id="ct-kleur" value="'+esc(ct.kleur||'#4f6ef5')+'" aria-label="Kleur">', {voor:'ct-kleur'});
   b += lfRij(ICO.edit, 'Standaard werkomschrijving', '<textarea class="lf-notitie" id="ct-werk" rows="3" placeholder="Komt in nieuwe opdrachten met dit contract">'+esc(ct.werkomschrijving||'')+'</textarea>', {blok:true, voor:'ct-werk'});
   lfOpen(id?'Contracttype bewerken':'Nieuw contracttype', b, 'Opslaan', 'ct-save');
+  if(id) _lfVerwijderInVenster('Contracttype verwijderen', 'Contracttype verwijderen', 'Weet je zeker dat je dit contracttype wilt verwijderen?', function(){
+    APP.contracten = APP.contracten.filter(function(c){return c.id!==id;});
+    _instBevestig(FB.ref(dbPath('contracten')).set(APP.contracten));
+    renderInstellingen();
+  });
 
   // Live interval toelichting bij frequentie invoer
   var freqEl = document.getElementById('ct-freq');
@@ -34487,7 +34435,7 @@ function renderInstOpdrachten(el) {
   var b = types.map(function(ot){
     var tpl = ot.mailTemplate && _tplNaam[ot.mailTemplate];
     return _istNavRij('ot-edit', 'data-id="'+esc(ot.id)+'"', _istKleurTegel(getOtSvg(ot.icon), ot.kleur), esc(ot.label),
-      tpl ? 'Mailtemplate: '+esc(tpl) : 'Geen mailtemplate', _istWisKnop('ot-del', ot.id, 'Opdrachttype'));
+      tpl ? 'Mailtemplate: '+esc(tpl) : 'Geen mailtemplate', '');
   }).join('');
   if(!types.length) b = '<p class="lf-leeg">Nog geen opdrachttypes.</p>';
   b += _zpToevoeg('ot-add', 'Opdrachttype toevoegen');
@@ -34504,13 +34452,6 @@ function renderInstOpdrachten(el) {
   });
   var _otAddBtn=el.querySelector('#ot-add'); if(_otAddBtn) _otAddBtn.addEventListener('click',function(){ openOpdrachtTypeModal(); });
   el.querySelectorAll('.ot-edit').forEach(function(b){ b.addEventListener('click',function(){ openOpdrachtTypeModal(b.dataset.id); }); });
-  el.querySelectorAll('.ot-del').forEach(function(b){ b.addEventListener('click',function(e){ e.stopPropagation();
-    bevestigActie('Opdrachttype verwijderen','Weet je zeker dat je dit type wilt verwijderen?',function(){
-      APP.opdrachttypes = APP.opdrachttypes.filter(function(o){return o.id!==b.dataset.id;});
-      _instBevestig(FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes));
-      renderInstellingen();
-    });
-  }); });
 }
 
 function openOpdrachtTypeModal(id) {
@@ -34546,6 +34487,11 @@ function openOpdrachtTypeModal(id) {
     +'</select>', {sub:'Voorgesteld bij het mailen van de klant'});
 
   lfOpen(id?'Opdrachttype bewerken':'Nieuw opdrachttype', b, 'Opslaan', 'ot-save');
+  if(id) _lfVerwijderInVenster('Opdrachttype verwijderen', 'Opdrachttype verwijderen', 'Weet je zeker dat je dit type wilt verwijderen?', function(){
+    APP.opdrachttypes = APP.opdrachttypes.filter(function(o){return o.id!==id;});
+    _instBevestig(FB.ref(dbPath('opdrachttypes')).set(APP.opdrachttypes));
+    renderInstellingen();
+  });
   // Icon picker events — BUITEN save handler
   document.querySelectorAll('.ot-icon-opt').forEach(function(btn){
     btn.addEventListener('click',function(){
@@ -34619,7 +34565,7 @@ function renderInstRollen(el) {
       return;
     }
     _rb += _istNavRij('rol-bewerk', 'data-rol="'+esc(r)+'"', _istKleurIc(kl), esc(rol.naam||r), (rol.naam && rol.naam!==r) ? esc(r) : '',
-      '<button type="button" class="btn btn-ghost btn-wis btn-icoon rol-verwijder" data-rol="'+esc(r)+'" aria-label="Rol '+esc(r)+' verwijderen" title="Verwijderen">'+ICO.trash+'</button>');
+      '');
   });
   _rb += _zpToevoeg('rol-nieuw', 'Rol toevoegen');
   h += _istKaart('Rollen · '+rolNamen.length, 'Kies een rol om de naam of kleur te wijzigen. Welke rol iemand heeft, stel je in bij Gebruikers.', _rb, null);
@@ -34721,17 +34667,6 @@ function renderInstRollen(el) {
   el.querySelectorAll('.rol-bewerk').forEach(function(b){
     b.addEventListener('click',function(){ openRolModal(b.dataset.rol, rollen); });
   });
-  el.querySelectorAll('.rol-verwijder').forEach(function(b){
-    b.addEventListener('click',function(e){ e.stopPropagation();
-      bevestigActie('Rol verwijderen','Weet je zeker dat je de rol "'+b.dataset.rol+'" wilt verwijderen? Medewerkers met deze rol verliezen hun rechten.',function(){
-        var nieuweRollen = JSON.parse(JSON.stringify(APP.rollen||{}));
-        delete nieuweRollen[b.dataset.rol];
-        APP.rollen = nieuweRollen;
-        _instBevestig(FB.ref(dbPath('rollen')).set(nieuweRollen), 'Rol verwijderd');
-        renderInstellingen();
-      });
-    });
-  });
 
   // Rechten opslaan
   el.querySelector('#rol-save').addEventListener('click', function(){
@@ -34783,6 +34718,13 @@ function openRolModal(rolId, rollen) {
   b += lfRij(ICO.flag, 'Rolnaam', '<input class="lf-tekst" type="text" id="rm-naam" value="'+esc(rolId||'')+'"'+(rolId?' readonly':' required')+' placeholder="Bijv. teamleider" autocapitalize="off">', {verplicht:!rolId, voor:'rm-naam', sub:rolId ? 'Vast na aanmaken' : 'Intern, zonder spaties'});
   b += lfRij(_LF_KLEUR, 'Kleur', '<input type="color" class="lf-kleur" id="rm-kleur" value="'+esc(bestaand.kleur||'#6b7694')+'" aria-label="Kleur">', {voor:'rm-kleur'});
   lfOpen(rolId?'Rol bewerken':'Nieuwe rol', b, 'Opslaan', 'rm-save');
+  if(rolId && rolId !== 'admin') _lfVerwijderInVenster('Rol verwijderen', 'Rol verwijderen', 'Weet je zeker dat je de rol "'+rolId+'" wilt verwijderen? Medewerkers met deze rol verliezen hun rechten.', function(){
+    var nieuweRollen = JSON.parse(JSON.stringify(APP.rollen||{}));
+    delete nieuweRollen[rolId];
+    APP.rollen = nieuweRollen;
+    _instBevestig(FB.ref(dbPath('rollen')).set(nieuweRollen), 'Rol verwijderd');
+    renderInstellingen();
+  });
   document.getElementById('rm-save').addEventListener('click', function(){
     var naam = document.getElementById('rm-naam').value.trim().toLowerCase().replace(/\s+/g,'_');
     if(!naam){toast('Rolnaam is verplicht','error');return;}
@@ -37018,7 +36960,7 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
           h += '<button type="button" class="btn btn-ghost btn-sm btn-icoon wo-rij-prio" data-id="'+esc(w.id)+'" title="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'" aria-label="Hoge prioriteit '+(isHoog?'uitzetten':'markeren')+'"'+(isHoog?' style="color:var(--red-t);border-color:rgba(239,68,68,.4)"':'')+'>'+ICO.flag+'</button>';
         }
         h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-edit btn-icoon" data-id="'+esc(w.id)+'" title="Bewerken" aria-label="Bewerken">'+ICO.edit+'</button>';
-        h += '<button type="button" class="btn btn-ghost btn-sm wo-rij-del btn-wis" data-id="'+esc(w.id)+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button></td>';
+        h += '</td>';
       }
       h += '</tr>';
 
@@ -37074,13 +37016,6 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
   if(_woNieuw) _woNieuw.addEventListener('click', _woKiesTypeEnMaak);
   wrap.querySelectorAll('.wo-rij').forEach(function(r){
     r.addEventListener('click', function(){ _woOpenDetail(r.dataset.id); });
-  });
-  wrap.querySelectorAll('.wo-rij-del').forEach(function(bt){
-    bt.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      var w = alle.find(function(x){ return String(x.id)===String(bt.dataset.id); }) || {};
-      _woVerwijder(bt.dataset.id, w);
-    });
   });
   wrap.querySelectorAll('.wo-rij-edit').forEach(function(bt){
     bt.addEventListener('click', function(ev){
