@@ -201,6 +201,8 @@ Neutrale werkvlakken met één blauw voor handelingen en vier statuskleuren die 
 ### Named Rules
 **The Signaal Rule.** Signaalblauw betekent "hier kun je iets doen" of "dit is gekozen". Gebruik het niet voor sfeer, achtergronden of decoratie.
 
+**The Spoed Rule.** Spoed is een vlag, geen type en geen status. Overal hetzelfde teken: een gevuld rood label "Spoed" (`_spoedLabel()`, wit op `--red-knop`) en op kaarten een rode rand (`.spoed-kaart`). Een type houdt zijn eigen kleur, ook als die rood is, zodat een gewone Storing nooit op spoed lijkt.
+
 **The -t Rule.** Een statuskleur als tekstkleur is altijd de `-t`-variant (`--accent-t`, `--red-t`, `--orange-t`, `--green-t`, `--purple-t`). De gewone kleur is voor vlakken, randen en stippen.
 
 **The Witte-tekst Rule.** Witte tekst staat alleen op een `-knop`-vlak (`--accent-knop`, `--green-knop`, `--red-knop`). Wit op `--accent`, `--green`, `--red` of `--orange` haalt de contrastnorm niet.
@@ -244,7 +246,9 @@ Breekpunt 768px: daaronder is het de telefoonweergave, met een onderbalk voor na
 
 **Weken** tonen de werkdagen uit Instellingen › Planning (standaard ma–vr), plus elke dag waarop werk staat (`_planWeekDagen`). Werk in het weekend is dus nooit onzichtbaar. Voor capaciteit tellen alleen de werkdagen mee (`_planIsWerkdag`): een weekenddag met werk telt als gepland, niet als extra beschikbare uren.
 
-**Zeldzame acties** (kolommen kiezen, exporteren, importeren) staan in het "…"-menu (`_meerMenu`), zodat de werkbalk op één regel past. Een keuze die bij de periode hoort, zoals Maand/Kwartaal, staat naast de periodekiezer, niet als tweede kiezer in de werkbalk.
+**Planning-lijst:** bij het openen, bij een andere periode en bij de knop Vandaag staat vandaag bovenaan in beeld (`_planNaarVandaag`). Bij hertekenen na een wijziging springt de lijst niet. Een reeks van twee of meer lege dagen wordt één regel (`.leeg-reeks`) met per dag een knopje "+ ma 2". Vandaag, dagen met werk, geblokkeerde dagen en een losse lege dag houden hun eigen dagblok.
+
+**Zeldzame acties** (kolommen kiezen, exporteren, importeren) staan in het "…"-menu (`_meerMenu`), zodat de werkbalk op één regel past. Een keuze die bij de periode hoort, zoals Maand/Kwartaal of Kwartaal/Jaar, staat rechts naast de periodekiezer en "Vandaag" (`.ag-switcher`), niet als tweede kiezer in de werkbalk.
 
 **Tabellen** die breder zijn dan het scherm vervagen aan de kant waar nog kolommen staan (`kan-links` en `kan-rechts`, automatisch op elke `.table-wrap`). Geef kolommen een bewuste breedte. Een kolom zonder breedte slokt alle ruimte op.
 
@@ -287,6 +291,8 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 - **Ghost:** transparant met een naad en `--muted`-tekst. Bij hover wordt de tekst `--text`. Voor Export, Route, Kolommen en Annuleren.
 - **Danger / Groen:** `--red-knop` of `--green-knop` met witte tekst. Alleen voor weghalen, of voor goedkeuren en afronden.
 - **Focus:** `outline:2px solid var(--accent)` met 2px afstand, alleen bij toetsenbordfocus.
+- **Uitgeschakeld:** elke uitgeschakelde knop is gedempt (`--surface2`-vlak, `--muted`-tekst), ook een primaire. Nooit volledig blauw en nooit doorzichtig.
+- **Beoordelen:** **Afwijzen** links, **Goedkeuren** rechts, op de computer en de telefoon, net als bij een bevestiging (de actie rechts).
 
 ### Chips
 - **Filterchip / segment:** pil met een naad. Gekozen heeft een `--accent-knop`-vlak met witte tekst, of in een segmentkiezer een werkvlak met `--accent-t`-tekst en de segmentschaduw.
@@ -309,7 +315,7 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 - **Error:** een rode rand met de melding direct onder het veld.
 
 ### Navigation
-- **Zijbalk (desktop):** items van 14px in `--muted` met icoon, radius 12px. Het actieve item heeft een blauwe tint en is 600. In het lichte thema is de tekst `--accent-t`.
+- **Zijbalk (desktop):** items van 14px in `--muted` met icoon, radius 12px, 8px 12px binnenruimte (44px hoog op aanraakschermen). Het actieve item heeft een blauwe tint en is 600, en `aria-current="page"`. In het lichte thema is de tekst `--accent-t`. De items zijn met Tab en Enter te bedienen (`role="link"`). Staat er onder de vouw nog meer, dan vervaagt de onderkant (`kan-onder`).
 - **Onderbalk (telefoon):** vier vaste bestemmingen en "Meer" voor de rest.
 - **Tabs:** tekst met een onderstreping in Signaalblauw. Op de telefoon schuifbare pillen.
 
@@ -338,6 +344,8 @@ Drie vaste manieren, elk met een eigen reden:
 ### Panelen
 - **Knoppenrij** (Bellen · Navigeren · Mailen, `_klActies`) alleen in contactpanelen: Debiteur, Serviceklant en Medewerker. Panelen voor kantoorwerk, zoals het opdrachtpaneel, hebben die rij niet. Telefoon en e-mail zijn daar aanklikbare regels, het adres opent de route en "Mail versturen" (met templates en maillog) staat onder Acties.
 - Onderaan staat de hoofdactie in de voet, met "… verwijderen" erboven.
+- **Dialoog:** het zijpaneel gedraagt zich als een venster. Het heeft `role="dialog"`, de focus gaat erin, Tab blijft binnen, Esc sluit en de focus keert terug naar de rij. Ligt er een bevestiging boven het paneel, dan sluit Esc eerst alleen die.
+- **Inklappen:** een lange lijst die zelden nodig is (bijv. Pompen uit register) staat als inklapbaar blok (`.zp-klap` met `_dpSectieKop`), standaard dicht, met het aantal en een samenvatting in de kop.
 
 ### Meldingen en lege staat
 - **Melding in de pagina** (`_zpMelding`): een vlak met icoon, een kop als label en één of twee zinnen. Rood is een fout, oranje een actie, blauw informatie en groen opgelost.
@@ -357,6 +365,7 @@ Drie vaste manieren, elk met een eigen reden:
 - **Do** begin chips, tags en rolnamen met een hoofdletter; toon rollen met de naam uit Rollen & rechten (`_rolNaam`).
 - **Do** zet verwijderen in het paneel of bewerkvenster, en laat een uitgeschakelde knop zeggen wat er nog ontbreekt.
 - **Do** schrijf datums als dag-maand-jaar ("2 november 2026", "02-11-2026").
+- **Do** maak alles wat klikbaar is ook met het toetsenbord bereikbaar (`role` en tabindex, of een echte knop of link), en geef panelen en vensters dialooggedrag.
 
 ### Don't:
 - **Don't** zet `opacity` op tekst of knoppen om iets te dempen.
@@ -369,3 +378,4 @@ Drie vaste manieren, elk met een eigen reden:
 - **Don't** toon ruwe Firebase- of foutcodes aan de gebruiker; laat de technische tekst in het logboek.
 - **Don't** zet een rode prullenbak in een lijstrij naast een veelgebruikte actie zoals Goedkeuren.
 - **Don't** verberg werk: een week toont altijd de dagen waarop iets gepland staat.
+- **Don't** markeer spoed met de typekleur of een los icoontje: gebruik altijd het label "Spoed" en de rode rand.
