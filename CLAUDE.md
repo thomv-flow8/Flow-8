@@ -106,8 +106,12 @@ altijd beide.
 - Status: `--green --orange --red --purple`; leesbare tekstvariant op vlakken: `--green-t` etc.
   (licht thema heeft donkere `-t`-varianten — al ingesteld)
 - Tekst: `--text --muted --muted2`
-- Radii: **drie rollen** — `--radius`(12px, velden) · `--radius-lg`(14px, kaarten) ·
-  `--radius-pill`(100px, knoppen/tags/tegels). Modals houden 18px.
+- Radii: **vier rollen** — `--radius-sm`(8px, kleine elementen: mini-tegels, balkjes, kleurvakjes) ·
+  `--radius`(12px, velden) · `--radius-lg`(14px, kaarten) · `--radius-pill`(100px, knoppen/tags/tegels).
+  Modals houden 18px, schuifbladen op de telefoon 20px; mini-labels en agendablokjes met een gekleurde
+  linkerrand houden 4–5px. Geen losse px-waarden voor nieuwe code.
+- Koppen en cijfers: gewicht 600–700 (geen 800 meer, behalve het Syne-woordmerk).
+- Periodekeuze: altijd `_periodeNav()` (de pil ‹ 2026 ›), met eventueel een knop "Vandaag" ernaast.
 - Fonts: **Instrument Sans** (UI) + **Space Mono** (cijfers, kleinkapitaal-labels). **Syne** alleen
   voor het FLOW 8-woordmerk (weights 300/800).
 - **SVG-icoon-lijndikte: 1.8** voor content-iconen (12–24px). Mini-iconen (<12px) en grote
