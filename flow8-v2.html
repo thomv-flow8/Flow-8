@@ -661,6 +661,7 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .zp-sk-kop .wbx-cnt-badge{flex:none}
 .zp-klap-chev{display:inline-flex;color:var(--muted2);transition:transform .2s;flex:none}
 .zp-klap-chev.open{transform:rotate(90deg)}
+.lf-kaart + .op-reg-klap{margin-top:16px}
 .zp-klap{background:var(--surface2);border-radius:var(--radius-lg);overflow:hidden}
 .zp-klap + .zp-klap{margin-top:8px}
 .zp-klap > .zp-sk-kop{background:none;border-radius:0;margin:0}
@@ -20581,7 +20582,12 @@ function openOpdrachtPanel(id) {
         if (_locNm) _rgRegel.push(esc(_locNm));
         _pr += lfRij(_ZP_POMP, esc(p.type||'Onbekend'), _ctIds.indexOf(String(p.id))>=0 ? _zpTagContract() : '', {sub:_rgRegel.join(' · ')});
       });
-      h += _zpGroep(esc(registerItemMeervoud(true))+' uit register · '+_regPompen.length) + _zpKaart(_pr);
+      // Inklapbaar en standaard dicht: de planner ziet het aantal en hoeveel er in contract staan,
+      // en klapt de lijst alleen open als hij hem nodig heeft.
+      var _inCt = _regPompen.filter(function(p){ return _ctIds.indexOf(String(p.id))>=0; }).length;
+      h += '<div class="zp-klap op-reg-klap">'+_dpSectieKop('opreg', _ZP_POMP, registerItemMeervoud(true)+' uit register', _regPompen.length,
+        _inCt ? (_inCt === _regPompen.length ? 'Alle in contract' : _inCt+' in contract') : 'Niet in contract', false, 'op-reg-kop')
+        + '<div class="zp-klap-b" hidden>'+_pr+'</div></div>';
     }
   }
 
@@ -20617,6 +20623,14 @@ function openOpdrachtPanel(id) {
   h += _zpVoet(_voet);
 
   var pb = _zpOpen('Opdracht', h);
+  var regKop = pb.querySelector('.op-reg-kop');
+  if (regKop) regKop.addEventListener('click', function(){
+    var b = regKop.nextElementSibling, open = b.hidden;
+    b.hidden = !open;
+    regKop.setAttribute('aria-expanded', open ? 'true' : 'false');
+    var ch = regKop.querySelector('.zp-klap-chev'); if (ch) ch.classList.toggle('open', open);
+    regKop.parentNode.classList.toggle('open', open);
+  });
   var stSel = pb.querySelector('#op-status-sel');
   if (stSel) stSel.addEventListener('change', function(){
     var nw = stSel.value;
