@@ -163,7 +163,9 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 .modal-lf .modal-body{padding:4px 20px 16px}
 .modal-lf .modal-footer{padding:12px 20px 16px}
 .lf-knop{flex:1;height:52px;font-size:16px;font-weight:600}
-.lf-knop:disabled{opacity:.4;cursor:default;filter:none}
+.lf-knop:disabled{background:var(--surface2);border-color:var(--border);color:var(--muted);cursor:default;filter:none}
+.lf-knop-hint{flex-basis:100%;font-size:12.5px;line-height:1.4;color:var(--muted);text-align:center;margin-bottom:2px}
+.modal-footer:has(> .lf-knop-hint),.ist-voet:has(> .lf-knop-hint){flex-wrap:wrap}
 .lf{color-scheme:dark}
 body.light .lf{color-scheme:light}
 .lf-rij{width:100%;display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;column-gap:12px;min-height:58px;padding:9px 0;border-bottom:1px solid var(--border);color:var(--text);text-align:left;position:relative}
@@ -186,6 +188,11 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
 .lf .lf-veld{font:500 14px 'Instrument Sans',sans-serif;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:7px 14px;min-height:38px;min-width:120px;-webkit-appearance:none;appearance:none;outline:none}
 .lf .lf-veld.lf-kort{min-width:0;width:76px;text-align:center}
 .lf .lf-tekst{font:15px 'Instrument Sans',sans-serif;color:var(--text);background:none;border:0;text-align:right;width:100%;max-width:200px;padding:6px 0;outline:none}
+.lf .lf-tekst::placeholder{color:var(--muted2)}
+/* Instellingen: een veld laat zien dat het een veld is (vlak bij aanwijzen, rand bij bewerken) */
+.ist-wrap .lf-tekst{border-radius:var(--radius-sm);padding:6px 8px;transition:background .15s,box-shadow .15s}
+.ist-wrap .lf-tekst:hover{background:var(--surface2)}
+.ist-wrap .lf-tekst:focus{background:var(--surface2);box-shadow:0 0 0 2px var(--accent)}
 .lf .lf-tekst::placeholder,.lf .lf-notitie::placeholder{color:var(--muted2)}
 .lf-blok{grid-template-columns:36px minmax(0,1fr)}
 .lf-blok > :nth-child(n+3){grid-column:1/-1;margin-top:10px}
@@ -876,6 +883,7 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .ist-legenda{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:12.5px;color:var(--muted)}
 .ist-legenda b{font:700 12px 'Space Mono',monospace;color:var(--text);margin-right:4px}
 .ist-legenda b.ist-rm-ster{color:var(--accent-t)}
+.ist-legenda-boven{margin:0 0 12px}
 .ist-uitleg-t{font-size:13px;color:var(--muted);line-height:1.6}
 .ist-uitleg-twee{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}
 .ist-uitleg-voet{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:12px}
@@ -10740,6 +10748,12 @@ function lfBovenOpen(titel, body, knopTekst, knopId){
   lfBind(md ? md.querySelector('.modal-body > .lf') : null, md ? md.querySelector('.lf-knop') : null);
   return v;
 }
+// Naam van een verplicht veld voor de hint bij de knop: het label van de lijstrij, anders aria-label of placeholder.
+function _lfVeldNaam(el){
+  var rij = el.closest('.lf-rij'), l = rij && rij.querySelector('.lf-l');
+  var t = (el.labels && el.labels[0] && el.labels[0].textContent) || ((l && l.firstChild && l.firstChild.nodeType === 3) ? l.firstChild.textContent : '') || el.getAttribute('aria-label') || el.placeholder || '';
+  return t.replace(/[*.…]+/g, '').trim();
+}
 function lfBind(root, knopEl){
   if(!root) return;
   _lfBindKies(root);
@@ -10768,7 +10782,15 @@ function lfBind(root, knopEl){
   var knop = knopEl || document.querySelector('#modal-footer .lf-knop');
   var check = function(){
     if(!knop) return;
-    knop.disabled = [].some.call(root.querySelectorAll('[required]'), function(el){ return !String(el.value||'').trim(); });
+    var mist = [].filter.call(root.querySelectorAll('[required]'), function(el){ return !String(el.value||'').trim(); });
+    knop.disabled = mist.length > 0;
+    // Zeg wat er nog ontbreekt, in plaats van alleen een grijze knop te tonen
+    var vak = knop.parentNode, hint = vak && vak.querySelector('.lf-knop-hint');
+    if(mist.length && vak){
+      if(!hint){ hint = document.createElement('div'); hint.className = 'lf-knop-hint'; hint.setAttribute('aria-live', 'polite'); vak.insertBefore(hint, vak.firstChild); }
+      var namen = mist.map(_lfVeldNaam).filter(function(v, i, a){ return v && a.indexOf(v) === i; });
+      hint.textContent = namen.length ? 'Nog invullen: ' + namen.join(', ') : 'Vul eerst de verplichte velden in';
+    } else if(hint) hint.remove();
   };
   root.addEventListener('input', check);
   root.addEventListener('change', check);
@@ -30747,7 +30769,9 @@ function _updateRoutePaneel() {
 // in de sleutelbeperking staat. Zonder melding blijven kaart en reistijden stil leeg.
 window.gm_authFailure = function() {
   console.warn('Google Maps: sleutel geweigerd op ' + location.host);
-  toast('De kaart en reistijden konden niet laden. Meld dit bij de beheerder.', 'warning');
+  toast((typeof isAdmin === 'function' && isAdmin())
+    ? 'De kaart en reistijden konden niet laden: Google Maps weigert de sleutel op dit adres. Controleer de sleutelbeperking in Google Cloud.'
+    : 'De kaart en reistijden konden niet laden. Meld dit bij de beheerder.', 'warning');
 };
 
 // Neutrale callback als Maps geladen wordt via reistijden (geen kaart nodig)
@@ -33910,7 +33934,7 @@ function _istKaart(titel, uitleg, inhoud, knopId, knopTekst){
 }
 // Tekstveld rechts in een regel (lijststijl)
 function _istTekst(id, type, waarde, ph, max){
-  return '<input class="lf-tekst" type="'+(type||'text')+'" id="'+id+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'')+'"'+(max ? ' maxlength="'+max+'"' : '')+'>';
+  return '<input class="lf-tekst" type="'+(type||'text')+'" id="'+id+'" value="'+esc(waarde||'')+'" placeholder="'+esc(ph||'Niet ingevuld')+'"'+(max ? ' maxlength="'+max+'"' : '')+'>';
 }
 // Regel met een schakelaar; de hele regel is aanklikbaar
 function _istSchakelRij(ico, label, sub, inputAttr, aan){
@@ -34634,7 +34658,7 @@ function renderInstRollen(el) {
     _rm += '</div></div>';
   });
   _rm += '</div>';
-  _rm += '<div class="ist-legenda"><span><b>L</b> lezen</span><span><b>E</b> alleen eigen gegevens</span><span><b>S</b> schrijven en bewerken</span><span><b>B</b> beheren (werkorders)</span><span><b>I</b> inzage alle verzuimdossiers</span><span><b class="ist-rm-ster">★</b> admin heeft altijd alles</span></div>';
+  _rm = '<div class="ist-legenda ist-legenda-boven"><span><b>L</b> lezen</span><span><b>E</b> alleen eigen gegevens</span><span><b>S</b> schrijven en bewerken</span><span><b>B</b> beheren (werkorders)</span><span><b>I</b> inzage alle verzuimdossiers</span><span><b class="ist-rm-ster">★</b> admin heeft altijd alles</span></div>' + _rm;
   h += _istKaart('Rechten per module', 'Zet per rol en module aan wat iemand mag. Een gekleurde letter staat aan. Wijzigingen bewaar je met de balk onderin.', _rm, null);
   // Opslagbalk: verschijnt bij een wijziging en blijft onderin in beeld tijdens het scrollen
   h += '<div class="rol-balk" id="rol-balk" role="status"><span class="rol-balk-n" id="rol-balk-n"></span><button type="button" class="btn btn-ghost" id="rol-terug">Ongedaan maken</button><button class="btn btn-primary" id="rol-save">Rechten opslaan</button></div>';
