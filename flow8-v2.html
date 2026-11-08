@@ -106,7 +106,7 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 .tag-blue{background:rgba(79,110,245,.14);color:var(--accent-t);border-color:rgba(79,110,245,.3)}.tag-green{background:rgba(16,185,129,.14);color:var(--green-t);border-color:rgba(16,185,129,.32)}
 .tag-orange{background:rgba(245,158,11,.13);color:var(--orange-t);border-color:rgba(245,158,11,.3)}.tag-red{background:rgba(239,68,68,.14);color:var(--red-t);border-color:rgba(239,68,68,.3)}
 .tag-purple{background:rgba(139,92,246,.14);color:var(--purple-t);border-color:rgba(139,92,246,.3)}.tag-muted{background:rgba(120,130,150,.16);color:var(--muted);border-color:rgba(120,130,150,.3)}
-.tag-slate{background:rgba(13,148,136,.14);color:#3fb8ad;border-color:rgba(13,148,136,.3)}
+.tag-slate{background:rgba(107,118,148,.14);color:var(--muted);border-color:rgba(107,118,148,.3)}
 .tag-gereserveerd{color:var(--purple-t);background:rgba(139,92,246,.1);border:1px dashed rgba(139,92,246,.45)}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;transition:border-color .2s}.card[data-nav]:hover,.card[onclick]:hover,a.card:hover,button.card:hover{border-color:rgba(79,110,245,.4)}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -2925,7 +2925,7 @@ button.sd-m-dag{cursor:pointer}
             <span id="theme-knob" style="position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .3s,background .3s"></span>
           </span>
         </label>
-        <button id="log-btn" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:4px 10px;font-size:11px;cursor:pointer"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:-1px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Log</button>
+        <button id="log-btn" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:4px 10px;font-size:11px;cursor:pointer"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:-1px"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Log</button>
       </div>
     </div>
     <div class="content" id="content"></div>
@@ -4153,7 +4153,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
     wBody += '<div class="wbx-field" style="white-space:pre-wrap">'+esc(wb.omschrijving)+'</div>';
   }
   wBody += '<div class="wbx-field-lbl">Bevindingen monteur</div>';
-  wBody += '<textarea id="wb-bevindingen" class="wbx-field area"'+(bewerkbaar?'':' disabled')+' placeholder="Tik om je bevindingen in te vullen\u2026">'+esc(wb.bevindingen||'')+'</textarea>';
+  wBody += '<textarea id="wb-bevindingen" class="wbx-field area"'+(bewerkbaar?'':' disabled')+' placeholder="Vul je bevindingen in\u2026">'+esc(wb.bevindingen||'')+'</textarea>';
   wBody += '<div id="wb-save-status" class="wbx-save-status"></div>';
   h += _sec('werk', ICO_WERK, 'Werk details', '', wBody, true);
 
@@ -4236,7 +4236,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   var magOppakken = !isAdmin() && magSchrijven('werkbonnen') && wb.status === 'klaargezet';
   if(magOppakken){
     // Bon nog niet opgepakt: toon een duidelijke hint + oppak-knop. Invullen kan pas erna.
-    h += '<div style="background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.3);border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:12px;color:var(--muted)">Pak de bon op om te starten \u2014 de planning ziet dan dat je onderweg/bezig bent. Daarna kun je invullen.</div>';
+    h += '<div style="background:rgba(79,110,245,.08);border:1px solid rgba(79,110,245,.3);border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:12px;color:var(--muted)">Pak de bon op om te starten \u2014 de planning ziet dan dat je onderweg/bezig bent. Daarna kun je invullen.</div>';
     h += '<div class="wbx-actiebar"><button class="btn btn-primary" id="wb-oppakken">Bon oppakken</button></div>';
   } else if(bewerkbaar && ['afgehandeld','verwerkt'].indexOf(wb.status) < 0){
     // Bewerkbare, nog niet afgeronde bon → altijd kunnen opslaan + ondertekenen/versturen.
@@ -8544,7 +8544,7 @@ function bouwBottomNav() {
     var btn = document.createElement('button');
     btn.className = 'bn-item';
     btn.dataset.page = id;
-    btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">'+(SVGS[m.icon]||'').replace(/<svg[^>]*>/,'').replace('</svg>','')+'</svg>'+esc(m.label);
+    btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">'+(SVGS[m.icon]||'').replace(/<svg[^>]*>/,'').replace('</svg>','')+'</svg>'+esc(m.label);
     nav.appendChild(btn);
   });
 
@@ -9952,7 +9952,7 @@ function getMijnMedId() {
 }
 function rolKleur(rolId) { var r=APP.rollen[rolId]; return r?r.kleur:'#6b7694'; }
 // Weergavenaam van een rol (zoals in Rollen & rechten), anders de sleutel met een hoofdletter.
-function _rolNaam(rolId) { var r = APP.rollen && APP.rollen[rolId]; return r && r.naam ? r.naam : _hrHoofd(rolId||''); }
+function _rolNaam(rolId) { var r = APP.rollen && APP.rollen[rolId]; return _hrHoofd(r && r.naam ? r.naam : (rolId||'')); }
 // medKleur: altijd persoonlijke kleur van medewerker, nooit de rol-kleur
 // Doorzichtige tint van een kleur, voor "kleur + alfa-achtervoegsel". Een hexkleur krijgt
 // het achtervoegsel erachter, zoals voorheen (#4f6ef5 + '22' = #4f6ef522). Een var(--…) of
@@ -11340,7 +11340,7 @@ var DASH_RENDER = {
       + pil('verlof', String(p.verlofUren).replace('.', ',')+' u', 'verlof · ≈'+String(p.verlofDagen).replace('.', ',')+' dagen')
       + pil('overuren', String(p.ouSaldo).replace('.', ',')+' u', 'overuren '+p.jaar)
       + pil('onkosten', '€ '+p.onkosten.toFixed(0), 'onkosten goedgekeurd')
-      + pil('verzuim', p.verzuimDagen ? p.verzuimDagen+' d' : '0', p.verzuimDagen ? (p.verzuimLang ? 'langdurig verzuim' : 'verzuim, lopend') : 'dagen verzuim')
+      + pil('verzuim', p.verzuimDagen ? _nlDagen(p.verzuimDagen) : '0', p.verzuimDagen ? (p.verzuimLang ? 'langdurig verzuim' : 'verzuim, lopend') : 'dagen verzuim')
       + '</div>';
   }
 };
@@ -11746,7 +11746,7 @@ function _medKaart(m){
   h += '<div class="mob-kop"><div class="avatar" style="width:36px;height:36px;font-size:12px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
   h += '<div style="min-width:0"><span class="mob-titel">'+esc(m.voornaam+' '+m.achternaam)+'</span><span class="mob-sub">'+(sub||'—')+(m.status==='inactief'?' · inactief':'')+'</span></div>'+_MOB_CHEV+'</div>';
   h += '<div class="mob-g"><div><small>Contract</small><b>'+(parseInt(m.contractUren)||40)+' u/wk</b></div>';
-  h += '<div><small>Verlof over</small><b style="color:'+vo.tk+'">'+_nlAantal(vo.dagen)+' d</b> <small style="display:inline">van '+_nlAantal(vo.tegoed)+'</small>'+_mobBalk(vo.pct, vo.kl)+'</div></div>';
+  h += '<div><small>Verlof over</small><b style="color:'+vo.tk+'">'+_nlDagen(vo.dagen)+'</b> <small style="display:inline">van '+_nlAantal(vo.tegoed)+'</small>'+_mobBalk(vo.pct, vo.kl)+'</div></div>';
   var tel = m.telefoon || m.mobiel || '';
   if(tel || m.email){
     h += '<div class="mob-acties">';
@@ -11875,8 +11875,8 @@ function renderMedewerkers() {
   h+='<div class="stats-grid" style="margin-bottom:16px">';
   h+=statCard('Actief', String(actieveMed.length), '#10b981', SVGS.users);
   h+=statCard('Inactief', String(inactieveMed.length), '#6b7694', SVGS.users);
-  h+=statCard('Verjaardagen deze maand', String(verjaardenMaand), '#4f6ef5', SVGS.alert);
-  h+=statCard('Jubilea dit jaar', String(jubileaJaar), '#8b5cf6', SVGS.alert);
+  h+=statCard('Verjaardagen deze maand', String(verjaardenMaand), '#4f6ef5', SVGS.cal);
+  h+=statCard('Jubilea dit jaar', String(jubileaJaar), '#8b5cf6', ICO.ster);
   h+='</div>';
 
 
@@ -11933,7 +11933,7 @@ function renderMedewerkers() {
     var pctRest    = jaarTegoed > 0 ? Math.min(100, Math.max(0, Math.round(resterend / jaarTegoed * 100))) : 0;
     var balkKleur  = pctRest <= 20 ? 'var(--red)' : pctRest <= 50 ? 'var(--orange)' : 'var(--green)';
 
-    function pijl(v) { return v > 0 ? '<span style="color:var(--red-t)">'+_IC_NEER+v+'d</span>' : '<span style="color:var(--muted)">—</span>'; }
+    function pijl(v) { return v > 0 ? '<span style="color:var(--red-t)">'+_IC_NEER+_nlDagen(v)+'</span>' : '<span style="color:var(--muted)">—</span>'; }
 
     h+='<tr data-id="'+m.id+'" class="med-row" style="cursor:pointer">';
 
@@ -11950,7 +11950,7 @@ function renderMedewerkers() {
     if (_medKol.functie !== false || true) {
       var r = APP.rollen[m.rol];
       h+='<td data-col="functie"><div style="font-size:13px">'+esc(m.functie||'—')+'</div>';
-      h+='<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';margin-top:3px;display:inline-flex">'+esc(r?r.naam:m.rol||'—')+'</span></td>';
+      h+='<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';margin-top:3px;display:inline-flex">'+esc(m.rol ? _rolNaam(m.rol) : '—')+'</span></td>';
     }
 
     // Contract
@@ -11963,7 +11963,7 @@ function renderMedewerkers() {
     // Verlof opgenomen
     if (_medKol.verlofOp !== false) {
       h+='<td data-col="verlofOp">';
-      h+='<div style="font-weight:600">'+_nlAantal(verlofUrenNaarDagen(opgenomen, m))+' d</div>';
+      h+='<div style="font-weight:600">'+_nlDagen(verlofUrenNaarDagen(opgenomen, m))+'</div>';
       h+='<div style="font-size:12px;color:var(--muted)">'+_nlAantal(opgenomen)+' uur</div>';
       h+='</td>';
     }
@@ -11971,7 +11971,7 @@ function renderMedewerkers() {
     // Verlof gepland
     if (_medKol.verlofGp !== false) {
       h+='<td data-col="verlofGp">';
-      h+='<div style="font-weight:600">'+_nlAantal(verlofUrenNaarDagen(gepland, m))+' d</div>';
+      h+='<div style="font-weight:600">'+_nlDagen(verlofUrenNaarDagen(gepland, m))+'</div>';
       h+='<div style="font-size:12px;color:var(--muted)">'+_nlAantal(gepland)+' uur</div>';
       h+='</td>';
     }
@@ -11982,7 +11982,7 @@ function renderMedewerkers() {
       // negatief saldo (stond rood bij alles onder 3 dagen, ook bij 0 aan het begin van het jaar).
       var _vo = _medVerlofOver(m);
       h+='<td data-col="resterend">';
-      h+='<div style="font-weight:700;color:'+_vo.tk+'">'+_nlAantal(_vo.dagen)+' d <span style="font-size:12px;font-weight:400;color:var(--muted)">van '+_nlAantal(_vo.tegoed)+'</span></div>';
+      h+='<div style="font-weight:700;color:'+_vo.tk+'">'+_nlDagen(_vo.dagen)+' <span style="font-size:12px;font-weight:400;color:var(--muted)">van '+_nlAantal(_vo.tegoed)+'</span></div>';
       h+='<div style="font-size:12px;color:var(--muted)">'+_nlAantal(_vo.uren)+' uur</div>';
       h+='<div class="progress" style="width:90px;margin-top:4px"><div class="progress-fill" style="width:'+_vo.pct+'%;background:'+_vo.kl+'"></div></div>';
       h+='</td>';
@@ -12044,7 +12044,7 @@ function openMedPanel(id) {
   var magMed = magSchrijven('medewerkers');
   var h = _zpKop('<span class="lf-av zp-kop-av" aria-hidden="true" style="background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+esc(initials(m))+'</span>',
     m.voornaam+' '+m.achternaam, esc(m.functie||''),
-    '<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+'">'+esc(r?r.naam:m.rol||'—')+'</span>');
+    '<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+'">'+esc(m.rol ? _rolNaam(m.rol) : '—')+'</span>');
   h += _klActies('', m.telefoon, m.email);
 
   // Verlof: saldo, jaartegoed en de volgende bijschrijving
@@ -12054,7 +12054,12 @@ function openMedPanel(id) {
   var _basis      = (function(){var _b=parseFloat(m.verlofBasis);return isNaN(_b)?_stdB2:_b;})();
   var _uren       = parseInt(m.contractUren)   || 40;
   var _jaarTegoed = Math.round((_basis * _uren / 40) * 10) / 10;
-  var _opgenomen  = Math.max(0, Math.round((_jaarTegoed - _saldo) * 10) / 10);
+  // Echt opgenomen dit jaar (goedgekeurde aanvragen t/m vandaag), zoals de kolom in Medewerkers telt.
+  // Niet "tegoed min saldo": zonder bijschrijving leek dan het hele jaar al opgenomen.
+  var _vandaag = vandaagISO(), _jrNu = _vandaag.slice(0, 4);
+  var _opgenomen  = Math.round(verlofUrenNaarDagen(verlofOpgenomenUren((APP.verlof||[]).filter(function(v){
+    return String(v.medId)===String(m.id) && v.status==='goedgekeurd' && (v.tot||v.van) <= _vandaag && String(v.van||'').slice(0, 4) === _jrNu;
+  }), m), m) * 10) / 10;
   var _pct        = _jaarTegoed > 0 ? Math.min(100, Math.round(_opgenomen / _jaarTegoed * 100)) : 0;
   var _nu         = new Date();
   var _volgJr     = new Date(_nu.getFullYear() + 1, 0, 1);
@@ -12099,7 +12104,7 @@ function openMedPanel(id) {
 
 function openMedModal(id) {
   var isNew=!id; var m=id?getMed(id)||{}:{};
-  var rolOpts=Object.keys(APP.rollen).map(function(k){return [k,APP.rollen[k].naam];});
+  var rolOpts=Object.keys(APP.rollen).map(function(k){return [k,_rolNaam(k)];});
   var conOpts=[['vast','Vast'],['tijdelijk','Tijdelijk'],['zzp','ZZP/Extern']];
   var gelOpts=[['man','Man'],['vrouw','Vrouw'],['overig','Overig']];
 
@@ -12863,7 +12868,7 @@ function renderServiceklanten() {
   var bContract=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&klantAanvulling(k);}).length;
   h+='<div class="stats-grid" style="margin-bottom:16px">';
   h+=statCard('Actief',actief,'#10b981',SVGS.file);
-  h+=statCard('Passief',passief,'#6b7694',SVGS.alert);
+  h+=statCard('Passief',passief,'#6b7694',ICO.archief);
   h+=statCard('Vervallen',vervallen,'#ef4444',SVGS.alert);
   if(heeftAanvullingen()) h+=statCard(esc(aanvullingTitel()),bContract,'#f59e0b',SVGS.bell);
   h+='</div>';
@@ -13820,7 +13825,7 @@ function openDebPanel(id, opties){
   h += _zpGroep('Servicecontract');
   if(sk){
     h += _zpKaart(_lfNavRij('dp-sk', _ZP_CONTRACT, 'Contract '+esc(sk.contractType||''), 'Volgende beurt: '+fmtD(sk.volgendeDatum), '')
-      + (_klantPompen.length ? _zpRij(_ZP_POMP, 'In contract', esc(_aantalContract+' van '+_klantPompen.length+' '+registerItemMeervoud(false))) : '')
+      + (_klantPompen.length ? _zpRij(_ZP_POMP, 'In contract', esc(_aantalContract+' van '+registerAantal(_klantPompen.length))) : '')
       + (klantAanvulling(sk) ? _zpRij(_ZP_CONTRACT, 'Aanvulling', bContractBadge(false, klantAanvulling(sk))) : ''));
   } else {
     h += _zpKaart(_zpRij(_ZP_CONTRACT, 'Servicecontract', '<span class="zp-sub">Niet gekoppeld</span>'));
@@ -14726,7 +14731,7 @@ function verwijderDeb(id){
   if(_klantPompen.length){
     _pompCheckHtml = '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:left">'
       + '<input type="checkbox" id="bev-extra-check" style="width:16px;height:16px;margin-top:1px;accent-color:var(--red)">'
-      + '<span style="font-size:12px;color:var(--text)"><b>Ook de '+_klantPompen.length+' gekoppelde '+registerItemMeervoud(false)+' uit het register verwijderen</b><br>'
+      + '<span style="font-size:12px;color:var(--text)"><b>Ook '+(_klantPompen.length === 1 ? 'de gekoppelde '+registerItemEnkel(false) : 'de '+_klantPompen.length+' gekoppelde '+registerItemMeervoud(false))+' uit het register verwijderen</b><br>'
       + '<span style="color:var(--muted)">Laat uit om ze te bewaren (bijv. voor historie of documenten). Aanvinken verwijdert ze definitief.</span></span></label>';
   }
   bevestigActie('Debiteur verwijderen', '"'+d.naam+'" definitief verwijderen?'+extraTekst, function(ookPompen){
@@ -14746,7 +14751,7 @@ function verwijderDeb(id){
       backupPompen.forEach(function(p){ dbRemove('wp_pompen',p.id); });
       dbRemove('debiteuren',id);
     },6000);
-    var _msg = 'Debiteur'+(heeftSk?' en serviceklant':'')+(backupPompen.length?(' en '+backupPompen.length+' '+registerItemMeervoud(false)):'')+' verwijderd';
+    var _msg = 'Debiteur'+(heeftSk?' en serviceklant':'')+(backupPompen.length?(' en '+registerAantal(backupPompen.length)):'')+' verwijderd';
     toast(_msg,'success',function(){
       clearTimeout(timer);
       if(!verwijderd){
@@ -15634,7 +15639,7 @@ function renderVerlof(){
   h+='</div>';
 
   h+='<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
-  h+=statCard('Open aanvragen', String(openAanvragen), '#f59e0b', SVGS.alert);
+  h+=statCard('Open aanvragen', String(openAanvragen), '#f59e0b', SVGS.clock);
   h+=statCard('Goedgekeurd '+jaarStr, String(goedgekeurdJaar), '#10b981', SVGS.check);
   if(zietAlleenEigen('verlof')){
     // Een monteur ziet zijn eigen saldo, niet de teamcijfers (gemiddelde, aantal negatief).
@@ -16739,7 +16744,7 @@ function _renderDagplanning() {
 
         var h = '<div style="display:flex;gap:0;margin-bottom:10px;background:var(--surface2);border-radius:var(--radius-sm);padding:3px">';
         h += '<div class="dp-pick-tab" data-tab="vrij" style="flex:1;text-align:center;padding:5px 8px;border-radius:var(--radius-sm);font-size:12px;font-weight:'+(type==='vrij'?'700':'600')+';color:'+(type==='vrij'?'#fff':'var(--muted)')+';background:'+(type==='vrij'?'var(--accent-knop)':'none')+';cursor:pointer">Vrij</div>';
-        h += '<div class="dp-pick-tab" data-tab="blok" style="flex:1;text-align:center;padding:5px 8px;border-radius:var(--radius-sm);font-size:12px;font-weight:'+(type==='blok'?'700':'600')+';color:'+(type==='blok'?'#fff':'var(--muted)')+';background:'+(type==='blok'?'#2563eb':'none')+';cursor:pointer">Tijdblok</div>';
+        h += '<div class="dp-pick-tab" data-tab="blok" style="flex:1;text-align:center;padding:5px 8px;border-radius:var(--radius-sm);font-size:12px;font-weight:'+(type==='blok'?'700':'600')+';color:'+(type==='blok'?'#fff':'var(--muted)')+';background:'+(type==='blok'?'var(--accent-t)':'none')+';cursor:pointer">Tijdblok</div>';
         h += '<div class="dp-pick-tab" data-tab="vast" style="flex:1;text-align:center;padding:5px 8px;border-radius:var(--radius-sm);font-size:12px;font-weight:'+(type==='vast'?'700':'600')+';color:'+(type==='vast'?'#000':'var(--muted)')+';background:'+(type==='vast'?'#f59e0b':'none')+';cursor:pointer">Vast</div>';
         h += '</div>';
         if(type === 'blok') {
@@ -16748,7 +16753,7 @@ function _renderDagplanning() {
           h += tijdSelHtml('dp-pick-van', o._dpBlokVan || huidigeTijd);
           h += '<span style="font-size:12px;font-weight:600;color:var(--blok-t)">en</span>';
           h += tijdSelHtml('dp-pick-tot', o._dpBlokTot || minToTijd(parseInt(huidigeTijd.split(':')[0])*60+parseInt(huidigeTijd.split(':')[1]||0)+120));
-          h += '<button id="dp-pick-ok" style="background:#2563eb;color:#fff;border:none;padding:5px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer">OK</button>';
+          h += '<button id="dp-pick-ok" style="background:var(--accent-knop);color:#fff;border:none;padding:5px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:700;cursor:pointer">OK</button>';
           h += '<button id="dp-pick-cancel" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:5px">Annuleren</button>';
           h += '</div>';
         } else if(type === 'vast') {
@@ -20119,7 +20124,7 @@ function renderPlanLijst(monteurs) {
 function _planMonteurLabel(id){
   var m = getMed(id);
   if(!m){ var an = medArchiefNaam(id); return an ? an+' · verwijderd' : 'Verwijderde medewerker'; }
-  var rol = (APP.rollen && APP.rollen[m.rol] && APP.rollen[m.rol].naam) || m.rol || '';
+  var rol = m.rol ? _rolNaam(m.rol) : '';
   return ((m.voornaam||'')+' '+(m.achternaam||'')).trim() + (m.status === 'inactief' ? ' · inactief' : (rol ? ' · '+rol : ''));
 }
 
@@ -20787,7 +20792,7 @@ function openOpdrachtModal(id, prefill) {
       + '<span class="lf-mt-n"><span>'+esc(m.voornaam+' '+m.achternaam)+'</span><span class="mont-warn"'+(waarschuwing?'':' style="display:none"')+'>'+(waarschuwing||'')+'</span></span>'
       + '<input type="hidden" class="op-mont-cb" data-id="'+m.id+'" data-checked="'+(isChecked?'1':'0')+'" value="'+(isChecked?m.id:'')+'"></button>';
   });
-  monteurGrid += '</div><div id="op-monteur-hint" class="lf-hint" style="margin-top:8px">Tik om te kiezen, maximaal 2 monteurs</div>';
+  monteurGrid += '</div><div id="op-monteur-hint" class="lf-hint" style="margin-top:8px">Kies maximaal 2 monteurs</div>';
   var _tsType = o.pinTijd ? 'vast' : (o.blokVan && o.blokTot) ? 'blok' : 'vrij';
   var _tsRadio = function(w, t, id2){ return '<label><input type="radio" name="op-ts" value="'+w+'" id="'+id2+'"'+(_tsType===w?' checked':'')+'><span>'+t+'</span></label>'; };
   var duurOpts = '<option value="">Kies duur</option>' + [0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,7,8].map(function(u){
@@ -21903,10 +21908,10 @@ function renderOveruren() {
 
   // ── Stats ──
   h += '<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
-  h += statCard('Open (alle jaren)',           _nlUren(openUren)+'u',    '#f59e0b', SVGS.alert);
+  h += statCard('Open (alle jaren)',           _nlUren(openUren)+'u',    '#f59e0b', SVGS.clock);
   h += statCard('Gecompenseerd '+jaarStr,      _nlUren(compUren)+'u',    '#4f6ef5', SVGS.file);
   h += statCard('Uitbetaald '+jaarStr,         _nlUren(uitbUren)+'u',    '#10b981', SVGS.file);
-  h += statCard('Saldo '+jaarStr,              _nlUren(saldoUren)+'u',   saldoUren>0?'#4f6ef5':'#6b7694', SVGS.alert);
+  h += statCard('Saldo '+jaarStr,              _nlUren(saldoUren)+'u',   saldoUren>0?'#4f6ef5':'#6b7694', SVGS.chart);
   h += '</div>';
 
   // ── Filter chips ──
@@ -22400,7 +22405,7 @@ function renderOnkosten() {
 
   // Stats
   h+='<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
-  h+=statCard('Open (alle jaren)',     ''+_matEuro(openBedrag), '#f59e0b', SVGS.alert);
+  h+=statCard('Open (alle jaren)',     ''+_matEuro(openBedrag), '#f59e0b', SVGS.clock);
   h+=statCard('Goedgekeurd '+jaarStr,  ''+_matEuro(goedBedrag), '#4f6ef5', SVGS.file);
   h+=statCard('Uitbetaald '+jaarStr,   ''+_matEuro(uitbBedrag), '#10b981', SVGS.file);
   h+=statCard('Totaal '+jaarStr,       ''+_matEuro(totBedrag),  '#6b7694', SVGS.file);
@@ -22847,7 +22852,7 @@ function renderVerzuim() {
   h+='</div>';
 
   h+='<div class="stats-grid" style="margin-bottom:16px">';
-  h+=statCard('Actief '+jaarStr,      actief+'',   '#ef4444', SVGS.alert);
+  h+=statCard('Actief '+jaarStr,      actief+'',   '#ef4444', ICO.thermo);
   h+=statCard('Langdurig '+jaarStr,   langdurig+'','#f59e0b', SVGS.alert);
   h+=statCard('Hersteld '+jaarStr,    hersteld+'', '#10b981', SVGS.file);
   h+=statCard('Verzuimuren '+jaarStr,_nlAantal(totUren)+' u', '#6b7694', SVGS.file);
@@ -31842,7 +31847,7 @@ function openMailTemplateEditor(tplId) {
     + '<button type="button" class="tpl-fmt" data-fmt="lijst" title="Opsomming">Lijst</button>'
     + '<button type="button" class="tpl-fmt" data-fmt="link" title="Link invoegen">Link</button></div>';
   links += '<textarea class="lf-notitie lf-mono" id="tpl-body" rows="14" aria-label="Tekst van de mail">'+esc(tpl.body)+'</textarea>';
-  links += '<div class="lf-sub-kaart"><div class="lf-sub-kt">Plaatshouders</div><p>Tik om in te voegen op de plek van de cursor.</p><div class="lf-vars">';
+  links += '<div class="lf-sub-kaart"><div class="lf-sub-kt">Plaatshouders</div><p>Klik of tik om in te voegen op de plek van de cursor.</p><div class="lf-vars">';
   varsStr.split(' ').forEach(function(v){
     links += '<button type="button" class="tpl-var-chip lf-var" data-var="'+esc(v)+'">'+esc(v)+'</button>';
   });
@@ -32155,6 +32160,14 @@ function donutSVG(segmenten, midden) {
 
 function legendaHTML(segmenten,totaal) {
   var h='<div style="display:flex;flex-direction:column;gap:5px">';
+  // Eén categorie: het percentage (100%) zegt niets; zeg dat alles in deze categorie valt.
+  var _gevuld = segmenten.filter(function(s){ return s.waarde > 0; });
+  if(_gevuld.length === 1 && segmenten.length === 1){
+    var s1 = _gevuld[0];
+    return h + '<div style="display:flex;align-items:center;gap:7px"><div style="width:10px;height:10px;border-radius:3px;background:'+s1.kleur+';flex-shrink:0"></div>'
+      + '<div style="flex:1;font-size:12px">'+esc(s1.label)+'</div><div style="font-size:12px;font-weight:700">'+(s1.weergave!=null?esc(String(s1.weergave)):_nlAantal(s1.waarde))+'</div></div>'
+      + '<div style="font-size:12px;color:var(--muted);margin-top:4px">Alles valt in deze ene categorie.</div></div>';
+  }
   segmenten.forEach(function(s){
     var pct=totaal?Math.round(s.waarde/totaal*100):0;
     h+='<div style="display:flex;align-items:center;gap:7px">';
@@ -32423,8 +32436,8 @@ function renderRapOpdrachten(el) {
   var h = '<div class="stats-grid" style="margin-bottom:20px">';
   h += statCard('Totaal opdrachten', totaal, '#4f6ef5', SVGS.file);
   h += statCard('Afgehandeld', afgehandeld, '#10b981', SVGS.file);
-  h += statCard('Gepland/open', gepland, '#f59e0b', SVGS.alert);
-  h += statCard('Spoed', spoed, '#ef4444', SVGS.alert);
+  h += statCard('Gepland/open', gepland, '#f59e0b', SVGS.cal);
+  h += statCard('Spoed', spoed, '#ef4444', ICO.zap);
   h += '</div>';
 
   // ── Grafieken rij 1: Monteurs + Type opdrachten ──
@@ -32592,7 +32605,7 @@ function renderRapServiceklanten(el) {
 
   var h = '<div class="stats-grid" style="margin-bottom:20px">';
   h += statCard('Actief', actief.length, '#10b981', SVGS.file);
-  h += statCard('Passief', passief.length, '#6b7694', SVGS.alert);
+  h += statCard('Passief', passief.length, '#6b7694', ICO.archief);
   h += statCard('Vervallen', vervallen.length, '#ef4444', SVGS.alert);
   if(heeftAanvullingen()) h += statCard(esc(aanvullingTitel()), bcontract.length, '#f59e0b', SVGS.bell);
   h += '</div>';
@@ -32840,7 +32853,7 @@ function renderRapWerkorders(el) {
     var h = '<div class="stats-grid" style="margin-bottom:20px">';
     h += statCard('Totaal werkorders', totaal, '#4f6ef5', SVGS.file);
     h += statCard('Afgehandeld', afgehandeld, '#10b981', SVGS.file);
-    h += statCard('Open', open, '#f59e0b', SVGS.alert);
+    h += statCard('Open', open, '#f59e0b', SVGS.clock);
     h += statCard('Gem. doorlooptijd', gemDltStr, '#8b5cf6', SVGS.file);
     h += '</div>';
 
@@ -33052,7 +33065,7 @@ function _rapMedewerkersGrafieken(actieve, metRollen){
       rollen[rol].n++;
       rollen[rol].uren += x.mnd.reduce(function(s2, d){ return s2 + d.gewerkt + d.over; }, 0);
     });
-    var rolNaam = function(r){ return (APP.rollen && APP.rollen[r] && APP.rollen[r].naam) || r; };
+    var rolNaam = function(r){ return _rolNaam(r); };
     var segMed = Object.keys(rollen).map(function(r){ return { label: rolNaam(r), waarde: rollen[r].n, kleur: rolKleur(r) }; })
       .sort(function(a, b){ return b.waarde - a.waarde; });
     var segUren = Object.keys(rollen).map(function(r){ var u = Math.round(rollen[r].uren); return { label: rolNaam(r), waarde: u, weergave: fmt(u)+' u', kleur: rolKleur(r) }; })
@@ -33134,9 +33147,9 @@ function renderRapPersoonlijk(el) {
 
   var h='<div class="stats-grid" style="margin-bottom:16px">';
   h+=statCard('Verlof opgenomen '+jaarStr, _nlAantal(totVlOp)+'u', '#4f6ef5', SVGS.file);
-  h+=statCard('Overuren '+jaarStr, _nlAantal(totOu)+'u', '#f59e0b', SVGS.alert);
+  h+=statCard('Overuren '+jaarStr, _nlAantal(totOu)+'u', '#f59e0b', SVGS.clock);
   h+=statCard('Onkosten '+jaarStr, _nlEuro(totOk,0), '#10b981', SVGS.file);
-  h+=statCard('Verzuim '+jaarStr, _nlAantal(totVz)+'u', totVz>160?'#ef4444':'#6b7694', SVGS.alert);
+  h+=statCard('Verzuim '+jaarStr, _nlAantal(totVz)+'u', totVz>160?'#ef4444':'#6b7694', ICO.thermo);
   h+='</div>';
 
   // ── Grafieken: rolverdeling (alleen bij inzage in het hele team) + uren per maand ──
@@ -33203,7 +33216,7 @@ function openRapMedPersoonlijkPanel(medId) {
   Object.keys(sd).forEach(function(k){ if(k.startsWith(jaarStr) && sd[k] && String(sd[k].medId)===String(medId)){ if(k.match(/W\d\d$/)) sdW++; else sdD++; } });
   var meerv = function(n, een, veel){ return n+' '+(n===1 ? een : veel); };
 
-  var rolNaam = (APP.rollen && APP.rollen[m.rol]) ? APP.rollen[m.rol].naam : (m.rol||'');
+  var rolNaam = _rolNaam(m.rol);
   var h = _zpKop(_zpAv(m), m.voornaam+' '+m.achternaam, esc((rolNaam ? rolNaam+' · ' : '')+'overzicht '+jaarStr));
   var tegel = function(l, v, kl){ return '<div class="rp-tegel"><span>'+esc(l)+'</span><b style="color:'+kl+'">'+esc(v)+'</b></div>'; };
   h += '<div class="rp-tegels">'
@@ -33958,7 +33971,7 @@ function _istRolSchakels(cls, gekozen){
   if(!alle.length) alle = ['admin','planner','monteur','extern','verkoop','administratie','magazijn'];
   return alle.map(function(r){
     var rol = (APP.rollen||{})[r] || {};
-    return _istSchakelRij(_istKleurIc(rol.kleur||'#6b7694'), esc(rol.naam||r), '', 'class="'+cls+'" data-rol="'+esc(r)+'" aria-label="'+esc(rol.naam||r)+'"', (gekozen||[]).indexOf(r)>=0);
+    return _istSchakelRij(_istKleurIc(rol.kleur||'#6b7694'), esc(_rolNaam(r)), '', 'class="'+cls+'" data-rol="'+esc(r)+'" aria-label="'+esc(_rolNaam(r))+'"', (gekozen||[]).indexOf(r)>=0);
   }).join('');
 }
 // Mailtemplate (werkbon of werkorder): onderwerp, bericht en afsluiting
@@ -34561,10 +34574,10 @@ function renderInstRollen(el) {
   rolNamen.forEach(function(r){
     var rol = rollen[r]||{}, kl = rol.kleur||'#6b7694';
     if(r==='admin'){
-      _rb += '<div class="lf-rij">'+_istKleurIc(kl)+'<span class="lf-l">'+esc(rol.naam||r)+'<small>Altijd volledige toegang; niet te wijzigen</small></span><span class="lf-w"><span class="zp-tag zp-tag-grijs">Vast</span></span></div>';
+      _rb += '<div class="lf-rij">'+_istKleurIc(kl)+'<span class="lf-l">'+esc(_rolNaam(r))+'<small>Altijd volledige toegang; niet te wijzigen</small></span><span class="lf-w"><span class="zp-tag zp-tag-grijs">Vast</span></span></div>';
       return;
     }
-    _rb += _istNavRij('rol-bewerk', 'data-rol="'+esc(r)+'"', _istKleurIc(kl), esc(rol.naam||r), (rol.naam && rol.naam!==r) ? esc(r) : '',
+    _rb += _istNavRij('rol-bewerk', 'data-rol="'+esc(r)+'"', _istKleurIc(kl), esc(_rolNaam(r)), (rol.naam && rol.naam!==r) ? esc(r) : '',
       '');
   });
   _rb += _zpToevoeg('rol-nieuw', 'Rol toevoegen');
@@ -34575,7 +34588,7 @@ function renderInstRollen(el) {
   _rm += '<th class="ist-rm-mod">Module</th>';
   rolNamen.forEach(function(r){
     var rol = rollen[r]||{}; var kl = rol.kleur||'#6b7694';
-    _rm += '<th class="ist-rm-rol"><span class="ist-rm-stip" style="background:'+kl+'"></span>'+esc(rol.naam||r)+'</th>';
+    _rm += '<th class="ist-rm-rol"><span class="ist-rm-stip" style="background:'+kl+'"></span>'+esc(_rolNaam(r))+'</th>';
   });
   _rm += '</tr></thead><tbody>';
   modules.forEach(function(mod){
@@ -34598,8 +34611,8 @@ function renderInstRollen(el) {
   _rm += '<div class="rol-mob">';
   rolNamen.forEach(function(r){
     var kl = (rollen[r]||{}).kleur||'#6b7694', rechten = (rollen[r]||{}).rechten||{};
-    if(r==='admin'){ _rm += '<div class="rol-mk"><div class="rol-mk-kop"><i style="background:'+kl+'"></i><b>'+esc(r)+'</b><small>alle rechten</small></div></div>'; return; }
-    _rm += '<div class="rol-mk"><button type="button" class="rol-mk-kop" aria-expanded="false"><i style="background:'+kl+'"></i><b>'+esc(r)+'</b>'+_chev+'</button><div class="rol-mk-body" hidden>';
+    if(r==='admin'){ _rm += '<div class="rol-mk"><div class="rol-mk-kop"><i style="background:'+kl+'"></i><b>'+esc(_rolNaam(r))+'</b><small>alle rechten</small></div></div>'; return; }
+    _rm += '<div class="rol-mk"><button type="button" class="rol-mk-kop" aria-expanded="false"><i style="background:'+kl+'"></i><b>'+esc(_rolNaam(r))+'</b>'+_chev+'</button><div class="rol-mk-body" hidden>';
     modules.forEach(function(mod){ _rm += '<div class="rol-mk-mod"><span>'+mod.l+'</span><span class="rol-cel">'+_rolLetters(r, mod, rechten, true)+'</span></div>'; });
     _rm += '</div></div>';
   });
@@ -34885,6 +34898,8 @@ function getRegisterInst() {
 // Korte helpers voor de itemnaam (met hoofdletter of klein), zodat de UI-teksten overal
 // dezelfde instelbare term gebruiken.
 function registerItemEnkel(cap){ var s=getRegisterInst().itemEnkel||'Pomp'; return cap ? (s.charAt(0).toUpperCase()+s.slice(1)) : s.toLowerCase(); }
+// "1 pomp", "3 pompen": aantal met het juiste woord uit de registerinstellingen.
+function registerAantal(n){ return n + ' ' + (n === 1 ? registerItemEnkel(false) : registerItemMeervoud(false)); }
 function registerItemMeervoud(cap){ var s=getRegisterInst().itemMeervoud||'Pompen'; return cap ? (s.charAt(0).toUpperCase()+s.slice(1)) : s.toLowerCase(); }
 
 // Levert de tekst voor het gekozen "extra veld in snelle weergave", of '' als er niets is
@@ -35134,7 +35149,7 @@ function renderInstPlanning(el) {
   var _rolRijen = function(cls, lijst){
     return alleRollen.map(function(r){
       var rol = (APP.rollen||{})[r] || {};
-      return _istSchakelRij(_istKleurIc(rol.kleur||'#6b7694'), esc(rol.naam||r), '', 'class="'+cls+'" data-rol="'+esc(r)+'" aria-label="'+esc(rol.naam||r)+'"', lijst.indexOf(r)>=0);
+      return _istSchakelRij(_istKleurIc(rol.kleur||'#6b7694'), esc(_rolNaam(r)), '', 'class="'+cls+'" data-rol="'+esc(r)+'" aria-label="'+esc(_rolNaam(r))+'"', lijst.indexOf(r)>=0);
     }).join('');
   };
   var h = '<div class="ist-wrap ist-breed lf">';
@@ -35485,7 +35500,7 @@ function renderInstGebruikers(el) {
     + lfRij(_LF_MAIL, 'E-mailadres', '<input class="lf-tekst" type="email" id="gb-email" placeholder="naam@bedrijf.nl" autocomplete="off">', {voor:'gb-email'})
     + lfKies(_ZP_SCHILD, 'Rol', '<select class="input" id="gb-rol-nieuw">'+_alleRollen.map(function(r){
         var rr=(APP.rollen||{})[r]||{};
-        return '<option value="'+esc(r)+'"'+(r==='monteur'?' selected':'')+'>'+esc(rr.naam||r)+'</option>';
+        return '<option value="'+esc(r)+'"'+(r==='monteur'?' selected':'')+'>'+esc(_rolNaam(r))+'</option>';
       }).join('')+'</select>', {titel:'Rol (rechten in de app)', sub:'Rechten in de app'})
     + lfRij(_ZP_SLOT, 'Tijdelijk wachtwoord', '<input class="lf-tekst" type="password" id="gb-pw" placeholder="Min. 6 tekens" autocomplete="new-password">', {voor:'gb-pw'})
     + '<p class="lf-uitleg">De medewerker kan dit wachtwoord zelf wijzigen. Wil je liever geen wachtwoord doorgeven, stuur dan hieronder een resetmail.</p>',
@@ -35526,7 +35541,7 @@ function renderInstGebruikers(el) {
       html+='<td><select class="input ist-cel gb-rol" data-key="'+esc(gb._key)+'" aria-label="Rol">';
       html+=alleRolIds.map(function(r){
         var rr=(APP.rollen||{})[r]||{};
-        return '<option value="'+esc(r)+'"'+(gb.rol===r?' selected':'')+'>'+esc(rr.naam||r)+'</option>';
+        return '<option value="'+esc(r)+'"'+(gb.rol===r?' selected':'')+'>'+esc(_rolNaam(r))+'</option>';
       }).join('');
       html+='</select></td>';
       html+='<td><label class="lf-sw ist-sw-in" title="'+(isActief?'Toegang actief':'Toegang geblokkeerd')+'"><input type="checkbox" role="switch" class="gb-actief" data-key="'+esc(gb._key)+'" data-nu="'+(isActief?'1':'0')+'" aria-label="Toegang"'+(isActief?' checked':'')+'><i></i></label></td>';
