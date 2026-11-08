@@ -698,6 +698,30 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .zp-bon img{width:100%;height:100%;object-fit:cover;display:block}
 .zp-rood{color:var(--red-t);font-weight:600}
 .zp-oranje-rij .lf-ic,.zp-oranje-rij .lf-l{color:var(--orange-t)}
+.lf-kaart .lf-ic:empty{background:none}
+/* Objectdetail (register) */
+.obj-pagina{max-width:1100px}
+.obj-kop{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.obj-terug{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px 0 10px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);color:var(--text);font:600 14px 'Instrument Sans',sans-serif;cursor:pointer}
+.obj-bew{margin-left:auto;height:38px;border-radius:var(--radius-pill);display:inline-flex;align-items:center;gap:6px}
+.obj-pagina .zp-kop{padding-bottom:6px}
+.obj-twee{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;align-items:start}
+.obj-twee > .zp-klap + .zp-klap{margin-top:0}
+.obj-pagina .lf .lf-veld.obj-geo,.obj-pagina .lf-veld.obj-geo{width:140px;min-width:0}
+.obj-uitleg{padding:10px 2px 6px}
+.obj-knoppen{display:flex;gap:8px;padding:0 0 12px}
+.obj-notitie{display:block}
+.obj-memo-lees{padding:12px 0;margin:0}
+@media(max-width:768px){.obj-twee > .zp-klap + .zp-klap{margin-top:8px}}
+/* Checklists in de werkbon */
+.cl-kaart + .cl-kaart{margin-top:8px}
+.cl-voortgang{font:700 12px 'Space Mono',monospace;color:var(--orange-t);background:rgba(245,158,11,.12);border-radius:var(--radius-pill);padding:3px 9px;flex:none}
+.cl-voortgang.klaar{color:var(--green-t);background:rgba(16,185,129,.14)}
+.cl-acties{display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:4px;margin-top:4px}
+.cl-acties .lf-link{display:inline-flex;align-items:center;gap:6px}
+.cl-acties .wbx-cl-verwijder{color:var(--red-t)}
+.cl-lees-ic{background:var(--surface2);color:var(--muted)}
+.wbcl-item[hidden]{display:none}
 .lf .mono{font-family:'Space Mono',monospace;font-weight:700}
 .lf-alleen-lezen{cursor:default}
 .lf-alleen-lezen .lf-chev{display:none}
@@ -3204,21 +3228,20 @@ function _objChecklistAccordion(containerId, bonnen, objId){
       items.length ? (items[0].datum ? 'laatste: '+esc(fmtD(items[0].datum)) : '') : 'nog geen gekoppelde checklists',
       open, 'objcl-acc-hdr');
     if(open && !items.length){
-      h+='<div style="font-size:12px;color:var(--muted);padding:10px 0">Er zijn nog geen checklists aan dit object gekoppeld.</div>';
+      h+='<div class="zp-klap-b"><p class="lf-leeg">Er zijn nog geen checklists aan dit object gekoppeld.</p></div>';
     }
     if(open && items.length){
-      h+='<div>';
+      h+='<div class="zp-klap-b">';
       items.forEach(function(it, idx){
-        h+='<div class="objcl-item" data-idx="'+idx+'" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;cursor:pointer">';
-        h+='<svg width="15" height="15" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24" style="flex-shrink:0"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>';
-        h+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(it.cl.naam||'Checklist')+'</div>';
-        h+='<div style="font-size:11px;color:var(--muted)">'+esc(it.datum?fmtD(it.datum):'—')+'</div></div>';
-        h+='<svg width="16" height="16" fill="none" stroke="var(--muted)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
-        h+='</div>';
+        h+='<button type="button" class="lf-rij lf-kies objcl-item" data-idx="'+idx+'">'+_lfIco(_ZP_CHECK)
+          +'<span class="lf-l">'+esc(it.cl.naam||'Checklist')+'<small>'+esc([it.datum?fmtD(it.datum):'\u2014', it.bon && it.bon.bonnummer].filter(Boolean).join(' \u00b7 '))+'</small></span>'
+          +'<span class="lf-w">'+_LF_CHEV+'</span></button>';
       });
       h+='</div>';
     }
     wrap.innerHTML = h;
+    // Kop en lijst samen in één kaart
+    wrap.classList.add('zp-klap'); wrap.classList.toggle('open', open);
     wrap.querySelector('.objcl-acc-hdr').addEventListener('click', function(){ open=!open; teken(); });
     wrap.querySelectorAll('.objcl-item').forEach(function(el){
       el.addEventListener('click', function(){ _toonChecklistReadonly(+el.dataset.idx); });
@@ -3231,37 +3254,34 @@ function _objChecklistAccordion(containerId, bonnen, objId){
 function _toonChecklistReadonly(idx){
   var it = (window._objChecklistCache||[])[idx]; if(!it) return;
   var cl = it.cl, bon = it.bon;
-  var h = '';
-  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:14px">';
-  h += (it.datum?fmtD(it.datum):'—') + (bon.klantNaam?(' \u00b7 '+esc(bon.klantNaam)):'');
-  h += '</div>';
+  // Bovenaan: datum, klant en bon; daarna de antwoorden als regels (label links, antwoord rechts).
+  var b = '<div class="lf-persoon"><span class="lf-av cl-lees-ic" aria-hidden="true">'+_ZP_CHECK+'</span><span class="lf-pt"><b>'+esc(it.datum?fmtD(it.datum):'—')+'</b><small>'
+    + esc([bon.klantNaam, bon.bonnummer].filter(Boolean).join(' · '))+'</small></span></div>';
+  var rijen = '';
+  var sluit = function(){ if(rijen){ b += _zpKaart(rijen); rijen = ''; } };
   (cl.velden||[]).forEach(function(v){
-    if(v.type==='header'){ h += '<div style="font-weight:700;font-size:13px;margin:14px 0 8px">'+esc(v.label||'')+'</div>'; return; }
-    if(v.type==='paragraaf'){ h += '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;white-space:pre-wrap">'+esc(v.label||'')+'</div>'; return; }
+    if(v.type==='header'){ sluit(); b += _zpGroep(esc(v.label||'')); return; }
+    if(v.type==='paragraaf'){ sluit(); b += '<p class="lf-uitleg">'+esc(v.label||'')+'</p>'; return; }
     if(v.type==='paginaeinde'){ return; }
     var waarde = (cl.antwoorden||{})[v.id];
-    h += '<div style="margin-bottom:12px">';
-    h += '<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:3px">'+esc(v.label||'')+'</div>';
-    var wStr = '';
-    if(v.type==='checkbox' || v.type==='ja_nee'){ wStr = (waarde===true||waarde==='ja')?'Ja':((waarde===false||waarde==='nee')?'Nee':'—'); }
-    else if(v.type==='foto'){ 
-      if(Array.isArray(waarde) && waarde.length){
-        wStr = '<div style="display:flex;gap:6px;flex-wrap:wrap">'+waarde.map(function(u){ return '<img src="'+esc(u)+'" class="objcl-foto" data-url="'+esc(u)+'" style="width:60px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer">'; }).join('')+'</div>';
-      } else { wStr = '—'; }
+    if(v.type==='foto'){
+      sluit();
+      b += _zpGroep(esc(v.label||'Foto\'s'));
+      b += (Array.isArray(waarde) && waarde.length)
+        ? '<div class="zp-bonnen">'+waarde.map(function(u){ return '<button type="button" class="zp-bon objcl-foto" data-url="'+esc(u)+'" aria-label="Foto bekijken"><img src="'+esc(u)+'" alt=""></button>'; }).join('')+'</div>'
+        : '<p class="lf-leeg">Geen foto\'s.</p>';
+      return;
     }
-    else if(Array.isArray(waarde)){ wStr = waarde.length ? esc(waarde.join(', ')) : '—'; }
-    else { wStr = (waarde!=null && waarde!=='') ? esc(String(waarde)) : '—'; }
-    h += '<div style="font-size:14px;color:var(--text)">'+wStr+'</div>';
-    h += '</div>';
+    var wStr;
+    if(v.type==='checkbox' || v.type==='ja_nee'){ wStr = (waarde===true||waarde==='ja')?'Ja':((waarde===false||waarde==='nee')?'Nee':''); }
+    else if(Array.isArray(waarde)){ wStr = waarde.join(', '); }
+    else { wStr = (waarde!=null && waarde!=='') ? String(waarde) : ''; }
+    if(v.type==='tekst_lang' && wStr) rijen += '<div class="lf-rij lf-blok">'+_lfIco('')+'<span class="lf-l">'+esc(v.label||'')+'</span><p class="zp-tekst">'+esc(wStr)+'</p></div>';
+    else rijen += lfRij('', esc(v.label||''), wStr ? esc(wStr)+(v.eenheid && v.type==='numeriek' ? ' '+esc(v.eenheid) : '') : '<span class="zp-sub">—</span>');
   });
-  // Optioneel: link naar de volledige werkbon
-  h += '<div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">';
-  h += '<button class="btn btn-ghost btn-sm" id="objcl-open-wb">Volledige werkbon openen</button>';
-  h += '</div>';
-
-  openModal('Checklist — '+(cl.naam||''), h);
-  var openWbBtn = document.getElementById('objcl-open-wb');
-  if(openWbBtn) openWbBtn.addEventListener('click', function(){ closeModal(); openWerkbonVanuitPlanning(it.bonId, true); });
+  sluit();
+  lfOpen(cl.naam||'Checklist', b, 'Volledige werkbon openen', 'objcl-open-wb');
+  document.getElementById('objcl-open-wb').addEventListener('click', function(){ closeModal(); openWerkbonVanuitPlanning(it.bonId, true); });
   document.querySelectorAll('#modal .objcl-foto').forEach(function(img){
     img.addEventListener('click', function(){ if(typeof openFotoViewer==='function') openFotoViewer([img.dataset.url], 0); });
   });
@@ -5223,34 +5243,51 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
   return h;
 }
 
+// Hoeveel vragen van een checklist zijn ingevuld? [ingevuld, totaal]; koppen en tekstblokken tellen niet mee.
+function _clVoortgang(cl){
+  var vragen = (cl.velden||[]).filter(function(v){ return ['header','paragraaf','paginaeinde'].indexOf(v.type) < 0; });
+  var a = cl.antwoorden || {};
+  var klaar = vragen.filter(function(v){ var w = a[v.id]; return !(w == null || w === '' || (Array.isArray(w) && !w.length)); }).length;
+  return [klaar, vragen.length];
+}
+function _clVoortgangHtml(cl){
+  var vg = _clVoortgang(cl);
+  if(!vg[1]) return '';
+  return '<span class="cl-voortgang'+(vg[0]===vg[1] ? ' klaar' : '')+'" title="'+vg[0]+' van '+vg[1]+' vragen ingevuld">'+vg[0]+'/'+vg[1]+'</span>';
+}
+
 function _wbRenderChecklists(state){
   var wrap = document.getElementById('wb-checklists-body'); if(!wrap) return;
   var lijst = state.wb.checklists || [];
-  if(!lijst.length){ wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">Nog geen checklists gekoppeld.</div>'; return; }
+  if(!lijst.length){ wrap.innerHTML = '<p class="lf-leeg">Nog geen checklists gekoppeld.</p>'; return; }
+  var _objNaam = function(id){ if(!id) return ''; var o = (_wbChecklistObjecten()||[]).find(function(x){ return String(x.id)===String(id); }); return o ? (o.naam||o.omschrijving||'') : ''; };
   var h = '';
   lijst.forEach(function(cl, ci){
     var open = state.clOpenIndex === ci;
-    h += '<div class="wbx-cl-item" style="border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden">';
-    h += '<div class="wbx-cl-hdr" data-ci="'+ci+'" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);cursor:pointer">';
-    h += '<span style="flex:1;font-size:14px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis">'+esc(cl.naam||'Checklist')+'</span>';
-    // Met meerdere formulieren op één bon staat er drie keer dezelfde sjabloonnaam;
-    // een eigen omschrijving maakt duidelijk om welke installatie het gaat.
-    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-hernoem btn btn-ghost btn-icoon" data-ci="'+ci+'" title="Naam aanpassen" aria-label="Naam aanpassen">'+ICO.edit+'</button>';
-    if(state.bewerkbaar) h += '<button type="button" class="wbx-cl-verwijder btn btn-ghost btn-wis" data-ci="'+ci+'" title="Checklist verwijderen" aria-label="Checklist verwijderen">'+ICO.trash+'</button>';
-    h += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="transform:rotate('+(open?'180':'0')+'deg)"><path d="M6 9l6 6 6-6"/></svg>';
-    h += '</div>';
-    h += '<div class="wbx-cl-body" style="display:'+(open?'':'none')+';padding:12px">';
+    h += '<div class="zp-klap cl-kaart wbx-cl-item'+(open?' open':'')+'" data-ci="'+ci+'">';
+    h += '<div class="lf-klap-kop zp-sk-kop wbx-cl-hdr" data-ci="'+ci+'" role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'">'
+      + _lfIco(_ZP_CHECK)
+      + '<span class="lf-klap-t">'+esc(cl.naam||'Checklist')+(_objNaam(cl.objectId) ? '<small>'+esc(_objNaam(cl.objectId))+'</small>' : '')+'</span>'
+      + _clVoortgangHtml(cl)
+      + '<span class="zp-klap-chev'+(open?' open':'')+'" aria-hidden="true">'+_LF_CHEV+'</span></div>';
+    h += '<div class="zp-klap-b wbx-cl-body"'+(open?'':' hidden')+'>';
     h += _wbChecklistVeldenHtml(cl, ci, state.bewerkbaar);
+    // Met meerdere formulieren op één bon staat er drie keer dezelfde sjabloonnaam;
+    // een eigen naam maakt duidelijk om welke installatie het gaat.
+    if(state.bewerkbaar) h += '<div class="cl-acties"><button type="button" class="lf-link wbx-cl-hernoem" data-ci="'+ci+'">'+ICO.edit+' Naam aanpassen</button>'
+      + '<button type="button" class="lf-link wbx-cl-verwijder" data-ci="'+ci+'">'+ICO.trash+' Verwijderen</button></div>';
     h += '</div></div>';
   });
   wrap.innerHTML = h;
 
   wrap.querySelectorAll('.wbx-cl-hdr').forEach(function(hdr){
-    hdr.addEventListener('click', function(){
+    var wissel = function(){
       var ci = +hdr.dataset.ci;
       state.clOpenIndex = (state.clOpenIndex === ci) ? null : ci;
       _wbRenderChecklists(state);
-    });
+    };
+    hdr.addEventListener('click', wissel);
+    hdr.addEventListener('keydown', function(e){ if(e.target===hdr && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); wissel(); } });
   });
   wrap.querySelectorAll('.wbx-cl-hernoem').forEach(function(b){
     b.addEventListener('click', function(e){
@@ -5258,18 +5295,12 @@ function _wbRenderChecklists(state){
       var ci = +b.dataset.ci;
       var cl = state.wb.checklists[ci];
       if(!cl) return;
-      var mb = '<div class="form-group"><label>Naam van dit formulier</label>'
-        + '<input class="input" id="cl-hernoem-veld" value="'+esc(cl.naam||'')+'" maxlength="80" placeholder="Bijv. Onderhoud opvoerinstallatie \u2014 unit keuken">'
-        + '<p style="font-size:12px;color:var(--muted);margin-top:8px">Alleen voor deze werkbon. Het sjabloon zelf verandert niet.</p></div>';
-      openModal('Formulier hernoemen', mb,
-        '<button class="btn btn-ghost" id="cl-hernoem-annuleer" style="flex:1">Annuleren</button>'
-        + '<button class="btn btn-primary" id="cl-hernoem-ok" style="flex:1">Opslaan</button>');
+      var mb = lfRij(ICO.edit, 'Naam', '<input class="lf-tekst" type="text" id="cl-hernoem-veld" value="'+esc(cl.naam||'')+'" maxlength="80" placeholder="Bijv. Onderhoud — unit keuken" required>', {voor:'cl-hernoem-veld', verplicht:true})
+        + '<p class="lf-uitleg">Alleen voor deze werkbon. Het sjabloon zelf verandert niet.</p>';
+      lfOpen('Naam aanpassen', mb, 'Opslaan', 'cl-hernoem-ok');
       var veld = document.getElementById('cl-hernoem-veld');
       if(veld) { veld.focus(); veld.select(); }
-      var an = document.getElementById('cl-hernoem-annuleer');
-      if(an) an.addEventListener('click', closeModal);
-      var ok = document.getElementById('cl-hernoem-ok');
-      if(ok) ok.addEventListener('click', function(){
+      document.getElementById('cl-hernoem-ok').addEventListener('click', function(){
         var nieuw = (document.getElementById('cl-hernoem-veld').value||'').trim();
         if(!nieuw) { toast('Vul een naam in','error'); return; }
         cl.naam = nieuw;
@@ -5298,6 +5329,21 @@ function _wbRenderChecklists(state){
       });
     });
   });
+  // Teller bijwerken terwijl er wordt ingevuld (één luisteraar per lijst-element)
+  if(!wrap._clTeller){
+    wrap._clTeller = true;
+    var bij = function(e){
+      var kaart = e.target.closest && e.target.closest('.cl-kaart'); if(!kaart) return;
+      var cl = (state.wb.checklists||[])[+kaart.dataset.ci]; if(!cl) return;
+      setTimeout(function(){
+        var oud = kaart.querySelector('.cl-voortgang'); if(!oud) return;
+        var t = document.createElement('span'); t.innerHTML = _clVoortgangHtml(cl);
+        if(t.firstChild) oud.replaceWith(t.firstChild);
+      }, 0);
+    };
+    wrap.addEventListener('input', bij);
+    wrap.addEventListener('change', bij);
+  }
   _lfBindKies(wrap);
   _wbBindChecklistVelden(state);
 }
@@ -5479,37 +5525,39 @@ function _wbBindChecklistVelden(state){
 
 // Dialoog: extra checklist(s) uit de bibliotheek aan deze werkbon toevoegen.
 function _wbChecklistToevoegenDialoog(state){
-  var huidigeIds = (state.wb.checklists||[]).map(function(c){return String(c.templateId);});
-  openModal('Checklist toevoegen', '<div style="font-size:12px;color:var(--muted)">Laden\u2026</div>');
+  lfOpen('Checklist toevoegen', '<p class="lf-leeg">Laden…</p>');
   laadChecklistTemplatesCache().then(function(templates){
+    // Venster intussen gesloten? Dan niet opnieuw openen.
+    if(!document.getElementById('modal-overlay').classList.contains('open')) return;
     var beschikbaar = templates.slice(); // alle sjablonen — dezelfde checklist mag meerdere keren
-    var body, footer;
     if(!beschikbaar.length){
-      body = '<div style="font-size:13px;color:var(--muted)">Er zijn nog geen checklist-sjablonen. Maak ze aan bij Instellingen → Werkbonnen.</div>';
-      footer = '<button class="btn btn-primary" id="wbcl-sluiten">Sluiten</button>';
-    } else {
-      body = '<input type="text" class="input" id="wbcl-zoek" placeholder="Zoek sjabloon\u2026" style="margin-bottom:8px">';
-      body += '<div style="max-height:280px;overflow-y:auto" id="wbcl-lijst">';
-      beschikbaar.forEach(function(t){
-        body += '<label class="wbcl-item" data-naam="'+esc((t.naam||'').toLowerCase())+'" style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;cursor:pointer">';
-        body += '<input type="checkbox" class="wbcl-cb" value="'+esc(t.id)+'" style="width:15px;height:15px;accent-color:var(--accent)">';
-        body += '<span style="font-size:13px">'+esc(t.naam||'')+'</span></label>';
-      });
-      body += '</div>';
-      footer = '<button class="btn btn-ghost" id="wbcl-annuleer">Annuleren</button><button class="btn btn-primary" id="wbcl-toevoegen">Toevoegen</button>';
+      lfOpen('Checklist toevoegen', '<p class="lf-leeg">Er zijn nog geen checklist-sjablonen. Maak ze aan bij Instellingen → Werkbonnen.</p>', 'Sluiten', 'wbcl-sluiten');
+      document.getElementById('wbcl-sluiten').addEventListener('click', closeModal);
+      return;
     }
-    document.getElementById('modal-body').innerHTML = body;
-    document.getElementById('modal-footer').innerHTML = footer;
-
+    var body = _lfZoek('wbcl-zoek', 'Zoek sjabloon…')
+      + '<p class="lf-uitleg obj-uitleg">Dezelfde checklist mag vaker op één werkbon, bijvoorbeeld per installatie.</p>';
+    beschikbaar.forEach(function(t){
+      var n = (t.velden||[]).filter(function(v){ return ['header','paragraaf','paginaeinde'].indexOf(v.type) < 0; }).length;
+      body += '<label class="lf-rij wbcl-item" data-naam="'+esc((t.naam||'').toLowerCase())+'">'+_lfIco(_ZP_CHECK)
+        + '<span class="lf-l">'+esc(t.naam||'')+'<small>'+n+' vra'+(n===1?'ag':'gen')+'</small></span>'
+        + '<span class="lf-w"><span class="lf-sw"><input type="checkbox" class="wbcl-cb" value="'+esc(t.id)+'" aria-label="'+esc(t.naam||'')+'"><i></i></span></span></label>';
+    });
+    lfOpen('Checklist toevoegen', body, 'Toevoegen', 'wbcl-toevoegen');
+    var knop = document.getElementById('wbcl-toevoegen');
+    var tel = function(){
+      var n = document.querySelectorAll('.wbcl-cb:checked').length;
+      knop.textContent = n ? 'Toevoegen ('+n+')' : 'Toevoegen';
+      knop.disabled = !n;
+    };
+    tel();
+    document.querySelectorAll('.wbcl-cb').forEach(function(cb){ cb.addEventListener('change', tel); });
     var zoek = document.getElementById('wbcl-zoek');
     if(zoek) zoek.addEventListener('input', function(){
       var q = zoek.value.trim().toLowerCase();
-      document.querySelectorAll('.wbcl-item').forEach(function(el){ el.style.display = (!q||el.dataset.naam.indexOf(q)>=0) ? '' : 'none'; });
+      document.querySelectorAll('.wbcl-item').forEach(function(el){ el.hidden = !!q && el.dataset.naam.indexOf(q) < 0; });
     });
-    var sluitBtn = document.getElementById('wbcl-sluiten'); if(sluitBtn) sluitBtn.addEventListener('click', closeModal);
-    var annuleerBtn = document.getElementById('wbcl-annuleer'); if(annuleerBtn) annuleerBtn.addEventListener('click', closeModal);
-    var toevoegBtn = document.getElementById('wbcl-toevoegen');
-    if(toevoegBtn) toevoegBtn.addEventListener('click', function(){
+    knop.addEventListener('click', function(){
       var gekozen = Array.from(document.querySelectorAll('.wbcl-cb:checked')).map(function(cb){return cb.value;});
       if(!gekozen.length){ toast('Kies minstens 1 sjabloon','warning'); return; }
       gekozen.forEach(function(tid){
@@ -5526,7 +5574,7 @@ function _wbChecklistToevoegenDialoog(state){
       }).catch(function(e){ toast('Mislukt: '+(e.message||e),'error'); });
     });
   }).catch(function(e){
-    document.getElementById('modal-body').innerHTML = '<div style="font-size:12px;color:var(--red)">Laden mislukt: '+esc(e.message||e)+'</div>';
+    lfOpen('Checklist toevoegen', '<p class="lf-leeg zp-fout">Laden mislukt: '+esc(e.message||e)+'</p>');
   });
 }
 
@@ -12193,6 +12241,9 @@ var _ZP_CONTRACT = '<svg width="18" height="18" fill="none" stroke="currentColor
 var _ZP_WEB      = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>';
 var _ZP_TAART    = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-8a2 2 0 00-2-2H6a2 2 0 00-2 2v8M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1M2 21h20M7 8v3M12 8v3M17 8v3"/></svg>';
 var _ZP_HERPLAN  = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4-4.64 4.36A9 9 0 013.51 15"/></svg>';
+var _ZP_OBJECT   = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>';
+var _ZP_DOEL     = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>';
+var _ZP_CHECK    = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>';
 var _ZP_VINK     = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 function _zpOpen(titel, body){
   openPanel(titel, '<div class="lf zp-body">'+body+'</div>');
@@ -26209,125 +26260,110 @@ function renderPompObjectDetail(objId) {
     return (APP.wp_pompen||[]).find(function(p){ return String(p.id)===String(pid); });
   }).filter(Boolean);
 
-  var h = '';
+  var h = '<div class="lf obj-pagina">';
 
-  // Header
-  h += '<div style="margin-bottom:16px">';
-  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
-  h += '<button class="btn btn-ghost btn-sm" id="pr-objdet-terug" style="flex-shrink:0">\u2190 Objecten</button>';
-  h += '<div style="flex:1"></div>';
-  if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm" id="pr-objdet-edit" style="display:inline-flex;align-items:center;gap:4px">'+ICO.edit+' Bewerken</button>';
+  // Kop: terug, bewerken, naam en klant. Het label telt de pompen die in het servicecontract zitten.
+  var _sk = deb ? (APP.serviceklanten||[]).find(function(k){ return (deb.nr && k.debNr===deb.nr) || String(k.debId)===String(deb.id); }) : null;
+  var _ctIds = (_sk && Array.isArray(_sk.pompIds)) ? _sk.pompIds.map(String) : [];
+  var _inCt = pompen.filter(function(p){ return _ctIds.indexOf(String(p.id))>=0; }).length;
+  h += '<div class="obj-kop"><button type="button" class="obj-terug" id="pr-objdet-terug"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Objecten</button>';
+  if(kanSchrijven) h += '<button type="button" class="btn btn-ghost obj-bew" id="pr-objdet-edit">'+ICO.edit+' Bewerken</button>';
   h += '</div>';
-  h += '<div style="font-family:\'Instrument Sans\',sans-serif;font-weight:800;font-size:20px;line-height:1.2">'+esc(obj.naam||'Naamloos object')+'</div>';
-  if(deb) h += '<div style="font-size:13px;color:var(--muted);margin-top:2px">'+esc((deb.nr||deb.nummer||'')+( (deb.nr||deb.nummer)?' \u2013 ':'')+( deb.naam||deb.bedrijfsnaam||''))+'</div>';
-  h += '</div>';
+  var _debNr = deb ? (deb.nr||deb.nummer||'') : '';
+  h += _zpKop(_zpKopIc(_ZP_OBJECT, '#4f6ef5'), obj.naam||'Naamloos object',
+    deb ? (_debNr ? '<span class="zp-nr">'+esc(_debNr)+'</span> · ' : '')+esc(deb.naam||deb.bedrijfsnaam||'') : '',
+    _inCt ? '<span class="zp-tag zp-tag-groen">'+_ZP_VINK+_inCt+' '+(_inCt===1 ? registerItemEnkel(false) : registerItemMeervoud(false))+' in contract</span>' : '');
 
-  // Grid: klantinfo + pompen + locatie + coördinaten (2×2 op desktop, 1 kolom op mobiel)
+  // Grid: links klant, object en pompen; rechts locatie, coördinaten en notitie (1 kolom op mobiel)
   var geoLat = obj.geoLat||''; var geoLng = obj.geoLng||'';
   var locaties = [];
   if(deb && deb.locaties) locaties = Object.values(deb.locaties);
   if(!locaties.length && deb && deb.adres) locaties = [{naam:'Hoofdadres', adres:deb.adres, postcode:deb.postcode||'', plaats:deb.plaats||''}];
-  h += '<div class="obj-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:stretch">';
-
-  // Klantgegevens
-  if(deb) {
-    h += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:10px">Klantgegevens</div>';
-    h += '<div style="font-size:13px;font-weight:600;margin-bottom:4px">'+esc(deb.naam||deb.bedrijfsnaam||'\u2014')+'</div>';
-    if(deb.adres) h += '<div style="font-size:12px;color:var(--muted)">'+esc(deb.adres)+'</div>';
-    if(deb.postcode||deb.plaats) h += '<div style="font-size:12px;color:var(--muted)">'+esc((deb.postcode||'')+' '+(deb.plaats||''))+'</div>';
-    if(deb.telefoon) h += '<div style="font-size:12px;color:var(--muted)">'+esc(deb.telefoon)+'</div>';
-    if(obj.omschrijving) h += '<div style="font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">'+esc(obj.omschrijving)+'</div>';
-    if(obj.besturing) h += '<div style="font-size:12px;color:var(--muted);margin-top:4px"><span style="font-weight:600">Besturing:</span> '+esc(obj.besturing)+'</div>';
-    h += '</div>';
-  }
-
-  // Gekoppelde pompen
-  h += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:10px">Pompen in dit object ('+pompen.length+')</div>';
-  if(pompen.length) {
-    h += '<div style="display:flex;flex-direction:column;gap:6px">';
-    pompen.forEach(function(p){
-      h += '<div class="pr-objdet-pomp" data-pid="'+esc(p.id)+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:8px;cursor:pointer">';
-      h += '<svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4 3 9 3s9-1.34 9-3v-6"/></svg>';
-      h += '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+esc(p.type||'\u2014')+'</div>';
-      h += '<div style="font-size:11px;color:var(--muted)">SN: '+esc(p.serienummer||'\u2014')+'</div></div>';
-      h += '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
-      h += '</div>';
-    });
-    h += '</div>';
-  } else {
-    h += '<div style="font-size:13px;color:var(--muted);font-style:italic">Geen pompen gekoppeld</div>';
-  }
-  h += '</div>';
-
-  // Locatie kaart
-  h += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:10px">Locatie installatie</div>';
-  if(locaties.length > 1) {
-    h += '<select class="input" id="obj-loc-sel" style="margin-bottom:8px">';
-    locaties.forEach(function(l){
-      var v = l.id||l.naam||'';
-      h += '<option value="'+esc(v)+'"'+(String(obj.locatieId)===String(v)?' selected':'')+'>'+esc(l.naam||l.adres||'\u2014')+'</option>';
-    });
-    h += '</select>';
-  }
   var actieveLoc = obj.locatieId ? locaties.find(function(l){return String(l.id||l.naam)===String(obj.locatieId);}) : locaties[0];
-  if(actieveLoc) {
-    h += '<div style="font-size:13px;font-weight:600">'+esc(actieveLoc.naam||'\u2014')+'</div>';
-    h += '<div style="font-size:12px;color:var(--muted)">'+esc(actieveLoc.adres||'')+'</div>';
-    h += '<div style="font-size:12px;color:var(--muted)">'+esc((actieveLoc.postcode||'')+' '+(actieveLoc.plaats||''))+'</div>';
+  h += '<div class="obj-twee obj-info-grid"><div>';
+  if(deb){
+    h += _zpGroep('Klant') + _zpKaart(
+      _lfNavRij('pr-objdet-deb', ICO.gebouw, esc(deb.naam||deb.bedrijfsnaam||'—'), _debNr, '')
+      + _zpRij(ICO.locatie, 'Adres', _zpAdres(deb.adres, deb.postcode, deb.plaats))
+      + (deb.telefoon ? _zpRij(_LF_TEL, 'Telefoon', _zpLink(deb.telefoon, _klTel(deb.telefoon))) : ''));
+  }
+  if(obj.omschrijving || obj.besturing){
+    h += _zpGroep('Object') + _zpKaart(
+      (obj.omschrijving ? _zpTekst(_ZP_TEKST, 'Omschrijving', obj.omschrijving) : '')
+      + (obj.besturing ? _zpRij(ICO.settings, 'Besturing', esc(obj.besturing)) : ''));
+  }
+  h += _zpGroep(esc(registerItemMeervoud(true))+' in dit object · '+pompen.length);
+  if(pompen.length){
+    var _pr = '';
+    pompen.forEach(function(p){
+      _pr += '<button type="button" class="lf-rij lf-kies pr-objdet-pomp" data-pid="'+esc(p.id)+'">'+_lfIco(_ZP_POMP)
+        + '<span class="lf-l">'+esc(p.type||'—')+'<small>SN '+esc(p.serienummer||'—')+'</small></span>'
+        + '<span class="lf-w">'+(_ctIds.indexOf(String(p.id))>=0 ? _zpTagContract() : '')+_LF_CHEV+'</span></button>';
+    });
+    h += _zpKaart(_pr);
   } else {
-    h += '<div style="font-size:13px;color:var(--muted)">Geen locatie gekoppeld</div>';
+    h += _zpKaart('<p class="lf-leeg">Geen '+esc(registerItemMeervoud(false))+' gekoppeld.</p>');
   }
-  if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm" id="pr-objdet-loc-save" style="margin-top:10px">Opslaan</button>';
-  h += '</div>';
+  h += '</div><div>';
 
-  // Coördinaten kaart
-  h += '<div class="card"><div style="font-weight:700;font-size:14px;margin-bottom:6px">Co\u00f6rdinaten</div>';
-  h += '<p style="font-size:12px;color:var(--muted);margin-bottom:10px">Co\u00f6rdinaten hebben voorrang boven locatieadres. Klik op de kaart om een punt te prikken.</p>';
-  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">';
-  h += '<div>'+fg('Breedtegraad (lat)','<input class="input" type="number" id="obj-geo-lat" value="'+esc(geoLat)+'" step="0.000001" placeholder="bijv. 51.9">')+'</div>';
-  h += '<div>'+fg('Lengtegraad (lng)','<input class="input" type="number" id="obj-geo-lng" value="'+esc(geoLng)+'" step="0.000001" placeholder="bijv. 4.3">')+'</div>';
-  h += '</div>';
-  if(kanSchrijven) {
-    h += '<div style="display:flex;gap:8px">';
-    h += '<button class="btn btn-primary btn-sm" id="pr-objdet-geo-save">Opslaan &amp; kaart bijwerken</button>';
-    if(geoLat&&geoLng) h += '<button class="btn btn-ghost btn-sm" id="pr-objdet-geo-wis" style="color:var(--red)">Wissen</button>';
-    h += '</div>';
+  // Locatie: kiezen slaat direct op
+  var loc = '';
+  if(locaties.length > 1 && kanSchrijven){
+    var _ls = '<select class="input" id="obj-loc-sel">'+locaties.map(function(l){
+      var v = l.id||l.naam||'';
+      return '<option value="'+esc(v)+'"'+(actieveLoc && String(actieveLoc.id||actieveLoc.naam)===String(v)?' selected':'')+'>'+esc(l.naam||l.adres||'—')+'</option>';
+    }).join('')+'</select>';
+    loc += lfKies(ICO.locatie, 'Locatie', _ls, {titel:'Locatie installatie', sub:'Wordt direct opgeslagen'});
+  } else {
+    loc += _zpRij(ICO.locatie, 'Locatie', actieveLoc ? esc(actieveLoc.naam||'—') : '<span class="zp-sub">Geen locatie gekoppeld</span>');
   }
-  h += '</div>';
-  h += '</div>'; // einde locatie grid
+  if(actieveLoc) loc += _zpRij('', 'Adres', _zpAdres(actieveLoc.adres, actieveLoc.postcode, actieveLoc.plaats));
+  h += _zpGroep('Locatie installatie') + _zpKaart(loc);
 
-  // Notitie (simpel vrij tekstveld per object)
-  h += '<div class="card" style="margin-bottom:16px">';
-  h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
-  h += '<div style="font-weight:700;font-size:14px">Notitie</div>';
-  if(kanSchrijven) h += '<button class="btn btn-ghost btn-sm" id="pr-obj-memo-save" style="font-size:11px">Opslaan</button>';
-  h += '</div>';
+  // Coördinaten hebben voorrang boven het locatieadres
+  var geo;
   if(kanSchrijven){
-    h += '<textarea class="input" id="pr-obj-memo" rows="3" placeholder="Bijv. bereikbaarheid, sleutelkastje, bijzonderheden op locatie...">'+esc(obj.memo||'')+'</textarea>';
+    geo = _zpRij(_ZP_DOEL, 'Breedtegraad', '<input class="lf-veld obj-geo" type="number" id="obj-geo-lat" value="'+esc(geoLat)+'" step="0.000001" placeholder="bijv. 51.9" aria-label="Breedtegraad">')
+      + _zpRij('', 'Lengtegraad', '<input class="lf-veld obj-geo" type="number" id="obj-geo-lng" value="'+esc(geoLng)+'" step="0.000001" placeholder="bijv. 4.3" aria-label="Lengtegraad">')
+      + '<p class="lf-uitleg obj-uitleg">Gaan voor op het adres. Tik op de kaart om een punt te prikken.</p>'
+      + '<div class="obj-knoppen"><button type="button" class="btn btn-primary btn-sm" id="pr-objdet-geo-save">Opslaan en kaart bijwerken</button>'
+      + (geoLat&&geoLng ? '<button type="button" class="btn btn-ghost btn-sm" id="pr-objdet-geo-wis" style="color:var(--red-t)">Wissen</button>' : '')+'</div>';
   } else {
-    h += obj.memo ? '<div style="font-size:13px;color:var(--text);white-space:pre-wrap">'+esc(obj.memo)+'</div>' : '<div style="font-size:13px;color:var(--muted)">Geen notitie</div>';
+    geo = _zpRij(_ZP_DOEL, 'Breedtegraad', esc(geoLat)) + _zpRij('', 'Lengtegraad', esc(geoLng));
   }
+  h += _zpGroep('Coördinaten') + _zpKaart(geo);
+
+  // Notitie (vrij tekstveld per object): slaat vanzelf op
+  h += _zpGroep('Notitie');
+  if(kanSchrijven){
+    h += '<textarea class="lf-notitie obj-notitie" id="pr-obj-memo" rows="2" placeholder="Bijv. bereikbaarheid, sleutelkastje, bijzonderheden op locatie…">'+esc(obj.memo||'')+'</textarea>'
+      + '<div class="wbx-save-status" id="pr-obj-memo-status"></div>';
+  } else {
+    h += obj.memo ? _zpKaart('<p class="zp-tekst obj-memo-lees">'+esc(obj.memo)+'</p>') : '<p class="lf-leeg">Geen notitie.</p>';
+  }
+  h += '</div></div>';
+
+  // Historie: werkbonnen en checklists naast elkaar (onder elkaar op mobiel)
+  h += _zpGroep('Historie');
+  h += '<div class="obj-twee obj-info-grid">';
+  h += '<div id="pr-obj-werkbonnen" class="zp-klap"><p class="lf-leeg">Werkbonnen laden…</p></div>';
+  h += '<div id="pr-obj-checklists" class="zp-klap"><p class="lf-leeg">Checklists laden…</p></div>';
   h += '</div>';
 
-  // ── Historie-accordions BOVEN de kaart: Werkbonnen + Checklists ──
-  // Naast elkaar op desktop, onder elkaar op mobiel (zelfde raster als de kaarten hierboven)
-  h += '<div class="obj-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:start">';
-  h += '<div style="min-width:0"><div id="pr-obj-werkbonnen"><div style="font-size:12px;color:var(--muted);padding:6px 0">Werkbonnen laden…</div></div></div>';
-  h += '<div style="min-width:0"><div id="pr-obj-checklists"><div style="font-size:12px;color:var(--muted);padding:6px 0">Checklists laden…</div></div></div>';
-  h += '</div>';
-
-  // Foto's sectie (boven de kaart)
+  // Foto's: tik om te bekijken; toevoegen en verwijderen via het bestaande venster
   var fotos = obj.fotoUrls||[];
-  // Foto's (compacte bestanden-sectie → thumbnails klikbaar naar viewer, '+' opent upload-modal)
-  var _objFotoRij = fotos.length
-    ? '<div style="display:flex;gap:8px;flex-wrap:wrap">' + fotos.map(function(url, i){
-        return '<img class="cb-objfoto-thumb" data-idx="'+i+'" src="'+esc(url)+'" style="width:64px;height:64px;object-fit:cover;border-radius:7px;border:1px solid var(--border);cursor:pointer" title="Bekijken" loading="lazy">';
-      }).join('') + '</div>'
-    : '';
-  h += compacteBestanden('pr-obj-foto', 'Foto\'s', fotos.length, _objFotoRij);
+  h += '<div class="lf-groep lf-groep-knop"><span>Foto\'s · '+fotos.length+'</span>'
+    + (kanSchrijven ? '<button type="button" class="lf-link cb-add" data-cbid="pr-obj-foto">+ Foto toevoegen</button>' : '')+'</div>';
+  h += fotos.length
+    ? '<div class="zp-bonnen">'+fotos.map(function(url, i){
+        return '<button type="button" class="zp-bon cb-objfoto-thumb" data-idx="'+i+'" aria-label="Foto '+(i+1)+' bekijken"><img src="'+esc(url)+'" alt="" loading="lazy"></button>';
+      }).join('')+'</div>'
+    : '<p class="lf-leeg">Nog geen foto\'s.</p>';
 
   // Kaart (volle breedte), onder de foto's
-  h += '<div class="obj-kaart-wrap" style="border-radius:var(--radius);overflow:hidden;height:520px;margin-bottom:16px;background:var(--surface2)" id="pr-obj-kaart-wrap"></div>';
+  h += _zpGroep('Kaart');
+  h += '<div class="obj-kaart-wrap" style="border-radius:var(--radius-lg);overflow:hidden;height:520px;margin-bottom:16px;background:var(--surface2)" id="pr-obj-kaart-wrap"></div>';
+  h += '</div>';
 
   el.innerHTML = h;
 
@@ -26343,6 +26379,8 @@ function renderPompObjectDetail(objId) {
 
   // ── Handlers ──
   el.querySelector('#pr-objdet-terug').addEventListener('click', function(){ _prObjDetId=null; renderPompObjecten(); });
+  var debRij = el.querySelector('#pr-objdet-deb'); if(debRij && deb) debRij.addEventListener('click', function(){ openDebPanel(deb.id); });
+  _lfBindKies(el);
   if(kanSchrijven && el.querySelector('#pr-objdet-edit')) {
     el.querySelector('#pr-objdet-edit').addEventListener('click', function(){ openPompObjectModal(objId); });
   }
@@ -26357,16 +26395,14 @@ function renderPompObjectDetail(objId) {
     });
   });
 
-  // Locatie opslaan
-  if(kanSchrijven && el.querySelector('#pr-objdet-loc-save')) {
-    el.querySelector('#pr-objdet-loc-save').addEventListener('click', function(){
-      var locSel = el.querySelector('#obj-loc-sel');
-      var locId = locSel ? locSel.value : (locaties[0]?locaties[0].id||locaties[0].naam||'':'');
-      obj.locatieId = locId;
-      dbSaveItem('pr_objecten', obj.id, obj);
-      toast('Locatie opgeslagen','success');
-    });
-  }
+  // Locatie: kiezen slaat direct op (en tekent adres en kaart opnieuw)
+  var locSel = el.querySelector('#obj-loc-sel');
+  if(kanSchrijven && locSel) locSel.addEventListener('change', function(){
+    obj.locatieId = locSel.value;
+    dbSaveItem('pr_objecten', obj.id, obj);
+    toast('Locatie opgeslagen','success');
+    renderPompObjectDetail(objId);
+  });
 
   // Coördinaten opslaan
   if(kanSchrijven && el.querySelector('#pr-objdet-geo-save')) {
@@ -26456,14 +26492,21 @@ function renderPompObjectDetail(objId) {
   };
   bindCompacteBestanden(el);
 
-  // Notitie opslaan
-  var memoSaveBtn = el.querySelector('#pr-obj-memo-save');
-  if(memoSaveBtn) memoSaveBtn.addEventListener('click', function(){
-    var ta = el.querySelector('#pr-obj-memo');
-    obj.memo = ta ? ta.value.trim() : '';
-    dbSaveItem('pr_objecten', obj.id, obj);
-    toast('Notitie opgeslagen','success');
-  });
+  // Notitie: slaat vanzelf op (eigen vertraging), zoals de interne memo
+  var memoEl = el.querySelector('#pr-obj-memo');
+  if(memoEl){
+    _memoMeegroeien(memoEl);
+    var _memoTimer = null;
+    memoEl.addEventListener('input', function(){
+      var ms = el.querySelector('#pr-obj-memo-status'); if(ms) ms.textContent = 'Opslaan\u2026';
+      if(_memoTimer) clearTimeout(_memoTimer);
+      _memoTimer = setTimeout(function(){
+        obj.memo = memoEl.value.trim();
+        dbSaveItem('pr_objecten', obj.id, obj);
+        var m2 = el.querySelector('#pr-obj-memo-status'); if(m2){ m2.textContent = 'Opgeslagen'; setTimeout(function(){ m2.textContent = ''; }, 1500); }
+      }, 800);
+    });
+  }
 
   // Google Maps kaart
   // Google Maps kaart — gebruik document.getElementById om stale closure te vermijden
