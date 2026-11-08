@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Flow8">
@@ -1807,6 +1807,8 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 #notif-badge.heeft-notifs{display:flex!important}
 #notif-btn{width:34px;height:34px;padding:0!important;justify-content:center;border-radius:var(--radius-sm)!important}
 #notif-btn #notif-badge{min-width:18px!important;width:auto!important;height:18px!important;padding:0 5px;border-radius:var(--radius)!important;font-size:11px!important;top:-6px!important;right:-6px!important;border:2px solid var(--surface)}
+/* Aanraakscherm (ook iPad): velden op 16px, anders zoomt Safari in zodra je in een veld tikt */
+@media (pointer:coarse){.input,input,select,textarea{font-size:16px!important}}
 @media (pointer:coarse){#notif-btn{width:44px;height:44px;border-radius:var(--radius)!important}}
 .notif-kop{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--border)}
 .notif-kop h3{font-size:16px;font-weight:700;margin-right:auto}
@@ -2306,6 +2308,7 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 /* Medewerker zonder registraties dit jaar: rustiger, maar leesbaar (geen doorzichtigheid op tekst en knoppen) */
 .hr-leeg{color:var(--muted)}
 .hr-leeg .avatar{filter:saturate(.35)}
+.modal:focus{outline:none}
 /* Keuzelijsten in de werkbalk en bij de filters: eigen pijltje, zelfde vorm in elke browser */
 .werkbalk select.input,select.chip-sel{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%237a8499' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;padding-right:36px}
 select.chip-sel{max-width:220px;height:30px;border:1px solid var(--border);border-radius:var(--radius-pill);background-color:var(--surface);color:var(--text);font:600 12px 'Instrument Sans',sans-serif;padding-left:14px;cursor:pointer}
@@ -2941,7 +2944,7 @@ button.sd-m-dag{cursor:pointer}
 
 <!-- Modal -->
 <div class="modal-overlay" id="modal-overlay">
-  <div class="modal" id="modal" onclick="event.stopPropagation()">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" onclick="event.stopPropagation()">
     <div class="modal-header">
       <div class="modal-title" id="modal-title">—</div>
       <button class="modal-close" id="modal-close" aria-label="Sluiten" title="Sluiten"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
@@ -9384,8 +9387,27 @@ function legeStaat(icoonSvg, titel, uitleg, knopTekst, knopId) {
 var _undoT  = null;
 var _undoFn = null;
 
+// Vertaalt technische Firebase-meldingen naar gewone taal. De rest van de melding blijft staan,
+// dus "Opslaan mislukt: permission_denied …" wordt "Opslaan mislukt: je hebt hier geen rechten voor".
+var _FOUT_NL = [
+  [/(?:Error:\s*)?permission_denied(?: at [^\s:]+)?(?::\s*Client doesn't have permission to access the desired data\.?)?/gi, 'je hebt hier geen rechten voor'],
+  [/(?:FirebaseError:\s*)?(?:\[code=permission-denied\]:\s*)?Missing or insufficient permissions\.?/gi, 'je hebt hier geen rechten voor'],
+  [/Firebase Storage: User does not have permission to access '[^']*'\.?(?:\s*\(storage\/unauthorized\))?/gi, 'je hebt hier geen rechten voor'],
+  [/\bpermission-denied\b/gi, 'je hebt hier geen rechten voor'],
+  [/(?:FirebaseError:\s*)?Failed to get document because the client is offline\.?/gi, 'geen verbinding met de server'],
+  [/(?:Firebase:\s*[^():]*)?\(auth\/network-request-failed\)\.?|Failed to fetch|NetworkError when attempting to fetch resource\.?/gi, 'geen verbinding met de server'],
+  [/(?:Firebase:\s*[^():]*)?\(auth\/requires-recent-login\)\.?/gi, 'log opnieuw in en probeer het nog eens'],
+  [/(?:Firebase:\s*[^():]*)?\(auth\/too-many-requests\)\.?/gi, 'te veel pogingen, probeer het over een paar minuten opnieuw'],
+  [/(?:Firebase Storage:\s*[^():]*)?\(storage\/quota-exceeded\)\.?/gi, 'de opslaglimiet is bereikt'],
+];
+function _foutNL(m){
+  var s = String(m == null ? '' : m), oud = s;
+  _FOUT_NL.forEach(function(r){ s = s.replace(r[0], r[1]); });
+  return s === oud ? s : s.charAt(0).toUpperCase() + s.slice(1);
+}
 function toast(msg, type, undoCallback) {
   var el = document.getElementById('toast');
+  if(type === 'error' || type === 'warning') msg = _foutNL(msg);
   if (_toastT) clearTimeout(_toastT);
   if (_undoT)  clearTimeout(_undoT);
   _undoFn = null;
@@ -9438,12 +9460,79 @@ function _modalHeeftInvoer() {
   return false;
 }
 
+// Vensters als echte dialoog: de focus gaat bij openen het venster in, Tab blijft binnen het
+// bovenste venster, Esc sluit het bovenste venster (met dezelfde vraag als een klik ernaast),
+// en na het sluiten gaat de focus terug naar de knop waarmee het venster werd geopend.
+var _modalTerugFocus = null;
+function _dlgOnthoud(){
+  var a = document.activeElement;
+  if(a && a !== document.body && !a.closest('.modal-overlay')) _modalTerugFocus = a;
+}
+function _dlgTerug(el){
+  if(el && el.isConnected && typeof el.focus === 'function'){ try { el.focus({ preventScroll:true }); } catch(e){} }
+}
+// Na het opbouwen: focus naar startEl (bijv. Annuleren) of het venster zelf. Op de telefoon
+// opent dat geen toetsenbord. Een aanroeper die zelf al een veld focust, gaat voor.
+function _dlgFocusIn(md, startEl){
+  if(!md) return;
+  setTimeout(function(){
+    if(!md.isConnected || md.contains(document.activeElement)) return;
+    try { (startEl && startEl.isConnected ? startEl : md).focus({ preventScroll:true }); } catch(e){}
+  }, 0);
+}
+function _dlgFocusbaar(root){
+  return [].filter.call(root.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'), function(x){
+    return !x.disabled && x.type !== 'hidden' && x.offsetParent !== null;
+  });
+}
+// Bovenste open venster: een extra laag (bevestiging, venster erboven) gaat voor het basisvenster.
+function _dlgBovenste(){
+  var lagen = [].filter.call(document.querySelectorAll('.modal-overlay.open'), function(o){ return o.id !== 'modal-overlay'; });
+  if(lagen.length) return lagen[lagen.length - 1];
+  var b = document.getElementById('modal-overlay');
+  return b && b.classList.contains('open') ? b : null;
+}
+// Sluiten van het basisvenster via een klik ernaast of Esc. Bij een formulier met ingevulde
+// velden niet meteen sluiten: een misklik kostte anders al het typewerk.
+function _modalProbeerSluiten(){
+  if(_modalHeeftInvoer()){
+    bevestigActie('Wijzigingen verwerpen?',
+      'Je hebt gegevens ingevuld die nog niet zijn opgeslagen. Wil je dit venster sluiten en de wijzigingen weggooien?',
+      function(){ closeModal(); });
+    return;
+  }
+  closeModal();
+}
+document.addEventListener('keydown', function(e){
+  if(e.defaultPrevented || (e.key !== 'Escape' && e.key !== 'Tab')) return;
+  var ov = _dlgBovenste(); if(!ov) return;
+  // Ligt er iets anders bovenop (keuzelijst, foto, zoeken)? Dan regelt dat zijn eigen toetsen.
+  var top = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+  if(top && !ov.contains(top)) return;
+  var md = ov.querySelector('.modal') || ov;
+  if(e.key === 'Escape'){
+    e.preventDefault();
+    if(ov._sluit){ ov._sluit(); return; }
+    var bc = md.querySelector('#bev-cancel');
+    if(bc) bc.click(); else _modalProbeerSluiten();
+    return;
+  }
+  var f = _dlgFocusbaar(md);
+  if(!f.length){ e.preventDefault(); md.focus(); return; }
+  var eerste = f[0], laatste = f[f.length - 1], a = document.activeElement;
+  if(!md.contains(a) || a === md){ e.preventDefault(); (e.shiftKey ? laatste : eerste).focus(); }
+  else if(e.shiftKey && a === eerste){ e.preventDefault(); laatste.focus(); }
+  else if(!e.shiftKey && a === laatste){ e.preventDefault(); eerste.focus(); }
+});
+
 function openModal(title, bodyHtml, footerHtml, breed, xl) {
   // Annuleer een eventueel nog lopende sluit-animatie (modal-op-modal race)
   if(_modalCloseTm){ clearTimeout(_modalCloseTm); _modalCloseTm = null; }
   var _ov = document.getElementById('modal-overlay');
   var _md = _ov ? _ov.querySelector('.modal') : null;
   if(_md) _md.classList.remove('closing');
+  _dlgOnthoud();
+  if(_md){ _md.setAttribute('role','dialog'); _md.setAttribute('aria-labelledby','modal-title'); _md.removeAttribute('aria-describedby'); }
   // Een terugknop (lfTerug) geldt maar voor één venster.
   var _mc = document.getElementById('modal-close');
   if(_mc && _mc._lfTerug){ _mc.removeEventListener('click', _mc._lfTerug, true); _mc._lfTerug = null; _mc.innerHTML = _mc._lfOrig; _mc.setAttribute('aria-label', 'Sluiten'); _mc.title = 'Sluiten'; }
@@ -9462,6 +9551,7 @@ function openModal(title, bodyHtml, footerHtml, breed, xl) {
   // Verberg bottom-nav op mobiel zodat footer zichtbaar is
   var bn = document.getElementById('bottom-nav');
   if(bn) bn.style.display = 'none';
+  _dlgFocusIn(_md);
 }
 function closeModal() {
   var overlay = document.getElementById('modal-overlay');
@@ -9475,12 +9565,14 @@ function closeModal() {
       // Herstel bottom-nav
       var bn = document.getElementById('bottom-nav');
       if(bn) bn.style.display = '';
+      var t = _modalTerugFocus; _modalTerugFocus = null; _dlgTerug(t);
     }, 180);
   } else {
     overlay.classList.remove('open');
     // Herstel bottom-nav
     var bn = document.getElementById('bottom-nav');
     if(bn) bn.style.display = '';
+    var t = _modalTerugFocus; _modalTerugFocus = null; _dlgTerug(t);
   }
 }
 
@@ -9670,7 +9762,12 @@ function openBovenModal(titel, bodyHtml, footerHtml) {
     + '<div class="modal-body">' + bodyHtml + '</div>'
     + '<div class="modal-footer">' + (footerHtml || '') + '</div></div>';
   document.body.appendChild(ov);
-  var sluit = function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+  var terug = document.activeElement;
+  var sluit = function(){ if(ov.parentNode){ ov.parentNode.removeChild(ov); _dlgTerug(terug); } };
+  ov._sluit = sluit;
+  var bmd = ov.querySelector('.modal');
+  bmd.setAttribute('role','dialog'); bmd.setAttribute('aria-modal','true'); bmd.setAttribute('aria-label', titel); bmd.tabIndex = -1;
+  _dlgFocusIn(bmd);
   ov.querySelector('.modal-close').addEventListener('click', sluit);
   ov.addEventListener('click', function(e){ if(e.target === ov) sluit(); });
   return { el: ov, sluit: sluit };
@@ -9690,21 +9787,36 @@ function medArchiefNaam(id){
 function _medBestaat(medId) { return !!getMed(medId); }
 function _medInDienst(medId) { var m = getMed(medId); return !!m && m.status !== 'inactief'; }
 
+// Knoptekst bij een bevestiging: het werkwoord uit de titel ("Opdracht verwijderen" → "Verwijderen"),
+// zodat de knop zegt wat er gebeurt. Titels die niet op een werkwoord eindigen staan in de lijst.
+var _BEV_KNOP = { 'Klant op passief zetten':'Op passief zetten', 'Terughalen uit archief':'Terughalen', 'Terug naar standaard':'Terugzetten',
+  'Afronden zonder versturen':'Afronden', 'Hersteld melden':'Hersteld melden', 'Bon oppakken':'Bon oppakken' };
+function _bevKnopTekst(titel){
+  var t = String(titel || '').replace(/\?$/, '').trim();
+  if(_BEV_KNOP[t]) return _BEV_KNOP[t];
+  var w = t.split(/\s+/).pop() || '';
+  return /^[A-Za-zë]+en$/.test(w) ? w.charAt(0).toUpperCase() + w.slice(1) : 'Bevestigen';
+}
 function bevestigActie(titel, tekst, onBevestig, type, extraHtml) {
-  var isWarn   = type === 'warn';
-  var kleur    = isWarn ? 'var(--orange)' : 'var(--red)';
+  var knopTekst = _bevKnopTekst(titel);
+  // Rood alleen voor wat iets weghaalt; andere bevestigingen krijgen de gewone knop.
+  var wegActie = /^(Verwijderen|Wissen|Verwerpen|Intrekken|Ontkoppelen)$/.test(knopTekst);
+  var isWarn   = !wegActie && type === 'warn';
+  var knopKleur = wegActie ? 'var(--red-knop)' : 'var(--accent-knop)';
+  var kleur    = wegActie ? 'var(--red)' : (isWarn ? 'var(--orange)' : 'var(--accent)');
   var icon     = isWarn
     ? '<svg width="22" height="22" fill="none" stroke="var(--orange)" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+    : !wegActie ? '<svg width="22" height="22" fill="none" stroke="var(--accent-t)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
     : '<svg width="22" height="22" fill="none" stroke="var(--red)" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>';
   var b = '<div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0 4px">';
-  b += '<div style="width:52px;height:52px;border-radius:50%;background:'+kleur+'18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+icon+'</div>';
-  b += '<div style="text-align:center"><div style="font-size:16px;font-weight:700;margin-bottom:8px;color:var(--text)">'+esc(titel)+'</div>';
-  b += '<div style="font-size:13px;color:var(--muted);line-height:1.6">'+esc(tekst)+'</div></div>';
+  b += '<div style="width:52px;height:52px;border-radius:50%;background:'+_kleurTint(kleur,'18')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'+icon+'</div>';
+  b += '<div style="text-align:center"><div id="bev-titel" style="font-size:16px;font-weight:700;margin-bottom:8px;color:var(--text)">'+esc(titel)+'</div>';
+  b += '<div id="bev-tekst" style="font-size:13px;color:var(--muted);line-height:1.6">'+esc(tekst)+'</div></div>';
   // Optionele extra HTML (bijv. een checkbox). Bewust NIET ge-escaped; alleen intern gebruikt.
   if(extraHtml) b += '<div style="width:100%">'+extraHtml+'</div>';
   b += '</div>';
   var f = '<button class="btn btn-ghost" id="bev-cancel" style="flex:1">Annuleren</button>';
-  f += '<button class="btn btn-primary" id="bev-ok" style="flex:1;background:'+kleur+';border-color:'+kleur+'">Bevestigen</button>';
+  f += '<button class="btn btn-primary" id="bev-ok" style="flex:1;background:'+knopKleur+';border-color:'+knopKleur+'">'+esc(knopTekst)+'</button>';
 
   // Staat er al een modal open? Dan een EIGEN overlay erboven, zodat het onderliggende
   // formulier in de DOM blijft. Anders zou modal-body worden overschreven en kan de
@@ -9714,11 +9826,13 @@ function bevestigActie(titel, tekst, onBevestig, type, extraHtml) {
     var ov = document.createElement('div');
     ov.className = 'modal-overlay open';
     ov.style.zIndex = '560';   // boven de basismodal (550)
-    ov.innerHTML = '<div class="modal" style="width:min(440px,95vw)">'
+    ov.innerHTML = '<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="bev-titel" aria-describedby="bev-tekst" tabindex="-1" style="width:min(440px,95vw)">'
                  + '<div class="modal-body" style="min-height:0">' + b + '</div>'
                  + '<div class="modal-footer">' + f + '</div></div>';
     document.body.appendChild(ov);
-    var _sluitTop = function(){ if(ov.parentNode) ov.parentNode.removeChild(ov); };
+    var _terug = document.activeElement;
+    var _sluitTop = function(){ if(ov.parentNode){ ov.parentNode.removeChild(ov); _dlgTerug(_terug); } };
+    ov._sluit = _sluitTop;
     ov.querySelector('#bev-cancel').addEventListener('click', _sluitTop);
     ov.querySelector('#bev-ok').addEventListener('click', function(){
       var _chk = ov.querySelector('#bev-extra-check');
@@ -9726,6 +9840,7 @@ function bevestigActie(titel, tekst, onBevestig, type, extraHtml) {
       _sluitTop(); onBevestig(_checked);
     });
     ov.addEventListener('click', function(e){ if(e.target === ov) _sluitTop(); });
+    _dlgFocusIn(ov.querySelector('.modal'), ov.querySelector('#bev-cancel'));
     return;
   }
 
@@ -9738,6 +9853,10 @@ function bevestigActie(titel, tekst, onBevestig, type, extraHtml) {
   document.getElementById('modal-overlay').classList.add('open');
   var bn = document.getElementById('bottom-nav');
   if(bn) bn.style.display = 'none';
+  _dlgOnthoud();
+  var _bmd = document.getElementById('modal');
+  _bmd.setAttribute('role','alertdialog'); _bmd.setAttribute('aria-labelledby','bev-titel'); _bmd.setAttribute('aria-describedby','bev-tekst');
+  _dlgFocusIn(_bmd, document.getElementById('bev-cancel'));
   function _sluit(){ closeModal(); if(header) header.style.display = ''; }
   document.getElementById('bev-cancel').addEventListener('click', _sluit);
   document.getElementById('bev-ok').addEventListener('click', function(){
@@ -24505,11 +24624,7 @@ function openMailVerzendModal(opts) {
   // Verzenden — met bevestiging (voorkomt per ongeluk versturen)
   function _bevestigEnVerzend(doeVerzend){
     var ontv = aanAdressen.join(', ') || '—';
-    if(typeof bevestigActie==='function'){
-      bevestigActie('Mail verzenden', 'Verzenden naar: '+ontv+'?', doeVerzend);
-    } else {
-      if(confirm('Verzenden naar: '+ontv+'?')) doeVerzend();
-    }
+    bevestigActie('Mail verzenden', 'Verzenden naar: '+ontv+'?', doeVerzend);
   }
 
   // Methode 1 (terugval): openen in mailprogramma (mailto) — alleen als direct verzenden uit staat
@@ -35495,8 +35610,19 @@ function renderInstGebruikers(el) {
       renderZonderLogin(gecombineerd);
     });
   }, function(err){
+    var ruw = String(err && (err.message || err.code) || err);
+    log('WARN','GEBRUIKER','Gebruikers laden mislukt: '+ruw);
+    var uitleg = /rechten/.test(_foutNL(ruw))
+      ? 'Je account mag de gebruikerslijst niet lezen. Vraag een beheerder om je rol te controleren.'
+      : 'De lijst kon niet worden opgehaald. Controleer de verbinding en probeer het opnieuw.';
     var wrap = el.querySelector('#gb-tabel-wrap');
-    if(wrap) wrap.innerHTML = _zpMelding('waarschuwing', 'Gebruikers laden mislukt', esc(String(err)));
+    if(wrap){
+      wrap.innerHTML = _zpMelding('waarschuwing', 'Gebruikers laden mislukt', esc(uitleg))
+        + '<button type="button" class="btn btn-ghost" id="gb-opnieuw" style="margin-top:10px">Opnieuw proberen</button>';
+      wrap.querySelector('#gb-opnieuw').addEventListener('click', function(){ renderInstGebruikers(el); });
+    }
+    var zw = el.querySelector('#gb-zonder-wrap');
+    if(zw) zw.innerHTML = '<p class="lf-leeg">Niet beschikbaar zolang de gebruikerslijst niet geladen is.</p>';
   });
 
   el.querySelector('#gb-aanmaken').addEventListener('click',function(){
@@ -36130,15 +36256,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Modal/Panel
   document.getElementById('modal-overlay').addEventListener('click',function(e){
   if(e.target !== this) return;
-  // Bij een formulier met ingevulde velden niet meteen sluiten: een misklik naast de
-  // modal kostte anders al het typewerk. Lees-schermen sluiten wel direct.
-  if(_modalHeeftInvoer()){
-    bevestigActie('Wijzigingen verwerpen?',
-      'Je hebt gegevens ingevuld die nog niet zijn opgeslagen. Wil je dit venster sluiten en de wijzigingen weggooien?',
-      function(){ closeModal(); });
-    return;
-  }
-  closeModal();
+  _modalProbeerSluiten();
 });
   document.getElementById('modal-close').addEventListener('click', closeModal);
   document.getElementById('panel-overlay').addEventListener('click', closePanel);
