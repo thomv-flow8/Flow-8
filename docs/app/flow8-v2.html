@@ -113,6 +113,7 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 .form-group label{font-family:'Space Mono',monospace;font-size:11px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form-full{grid-column:1/-1}
+.avatar[style*="color:#fff"]{background-image:linear-gradient(rgba(0,0,0,.14),rgba(0,0,0,.14))!important}
 .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:550;backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center}
@@ -1385,6 +1386,16 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .wk-naam{font-size:12px;font-weight:600;line-height:1.3;color:var(--text);overflow-wrap:break-word}
 .wk-type{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-top:1px}
 .wk-type-ico{display:inline-flex;flex-shrink:0}
+.wk-status{display:inline-flex;flex-shrink:0;align-items:center;gap:4px;font-size:11px;font-weight:600;line-height:1.4;padding:1px 7px 1px 6px;border-radius:var(--radius-sm);background:var(--surface);color:var(--text);box-shadow:inset 0 0 0 1px var(--border)}
+.wk-status i{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+/* Legenda boven Week en Dag */
+.plan-legenda{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin:0 0 10px;font-size:12px;color:var(--muted)}
+.plan-legenda b{font:700 11px 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.plan-legenda span{display:inline-flex;align-items:center;gap:6px}
+.plan-legenda .lg-type{width:12px;height:12px;border-radius:3px;border-left:3px solid var(--k);background:color-mix(in srgb, var(--k) 20%, var(--surface))}
+.plan-legenda .lg-stip{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.plan-legenda .lg-spoed{width:12px;height:12px;border-radius:3px;box-shadow:inset 0 0 0 2px var(--red-knop)}
+.plan-legenda .lg-sep{width:1px;height:14px;background:var(--border)}
 /* Planning › Dag: tijdlijn met vaste hoogte per uur (uurlijnen als achtergrond) */
 .dag-tijdlijn > td{padding:0;vertical-align:top;border-bottom:1px solid var(--border)}
 .dag-as{position:relative;width:60px}
@@ -11013,8 +11024,23 @@ function _statusNamen(){ var r = {}; Object.keys(STATUS_DEF).forEach(function(k)
 
 // Kaart in Week en Dag: vlak en linkerrand in de typekleur (--wk-bg, --wk-kl), zoals altijd.
 // Bovenaan tijd en status op één regel, daaronder de klantnaam over de volle breedte.
+// Eén betekenis per kleur: het kleurvlak is het type, de status is een neutraal pilletje met een
+// gekleurde stip (de typekleuren vallen anders samen met de statuskleuren).
+function _planLegenda(ops){
+  var gezien = {}, types = [];
+  ops.forEach(function(o){ var ot = getOpdrachttype(o.type), lbl = ot.label || 'Zonder type'; if(!gezien[lbl]){ gezien[lbl] = 1; types.push({ label:lbl, kleur:ot.kleur }); } });
+  if(!types.length) return '';
+  var h = '<div class="plan-legenda" aria-label="Legenda"><b>Type</b>';
+  types.forEach(function(ot){ h += '<span><i class="lg-type" style="--k:'+ot.kleur+'"></i>'+esc(ot.label)+'</span>'; });
+  h += '<i class="lg-sep"></i><span><i class="lg-stip"></i>Stip = status</span><span><i class="lg-spoed"></i>Rode rand = spoed</span><span>Licht = afgehandeld</span></div>';
+  return h;
+}
+function _wkStatusPil(s){
+  var c = STATUS_DEF[s]; if(!c) return '';
+  return '<span class="wk-status" title="Status: '+c.lbl+'"><i style="background:'+c.kl+'"></i>'+c.lbl+'</span>';
+}
 function _wkKaartKop(tijd, status, kl){
-  var st = wkStatusBadge(status);
+  var st = _wkStatusPil(status);
   if(!tijd && !st) return '';
   return '<div class="wk-kop"><span class="wk-tijd"'+(kl ? ' style="color:'+_klTekst(kl)+'"' : '')+'>'+esc(tijd || '')+'</span>'+st+'</div>';
 }
@@ -20364,7 +20390,8 @@ function renderPlanWeek(monteurs) {
   // grenzen als de lijst: het reistijdvenster, de statussen en de bewaarde cache.
   _planVraagReistijdenAan(APP.opdrachten.filter(function(o){ return dagen.indexOf(o.datum) >= 0 && _planZoekMatch(o); }));
 
-  var h = '<div style="overflow-x:auto"><table style="min-width:700px;border-collapse:collapse;table-layout:fixed;width:100%">';
+  var h = _planLegenda(APP.opdrachten.filter(function(o){ return dagen.indexOf(o.datum) >= 0 && _planZoekMatch(o); }));
+  h += '<div style="overflow-x:auto"><table style="min-width:700px;border-collapse:collapse;table-layout:fixed;width:100%">';
   h += '<colgroup><col style="width:130px">';
   dagen.forEach(function(){ h += '<col style="width:'+(Math.floor(85/dagen.length))+'%">'; });
   h += '</colgroup>';
@@ -20626,7 +20653,8 @@ function renderPlanDag(monteurs) {
     return k;
   }
 
-  var h = '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">'+aantalGetoond+(aantalGetoond === 1 ? ' opdracht' : ' opdrachten');
+  var h = _planLegenda(dagAlle);
+  h += '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">'+aantalGetoond+(aantalGetoond === 1 ? ' opdracht' : ' opdrachten');
   h += '</div>';
   h += '<div style="overflow-x:auto"><table style="min-width:600px;border-collapse:collapse">';
   h += '<thead><tr>';
