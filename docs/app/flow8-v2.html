@@ -1115,6 +1115,7 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 /* ── Dashboard: instelbare blokken, zie renderDashboard ── */
 :root{--dash-g1:#4f6ef5;--dash-g2:#d97706}
 body.light{--dash-g2:#f59e0b}
+#plan-content .afwezig-melding{margin-bottom:12px}
 .dash-melding{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-lg);background:color-mix(in srgb,var(--orange) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--orange) 30%,var(--border));margin-bottom:16px}
 .dash-melding.info{background:color-mix(in srgb,var(--accent) 8%,var(--surface));border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
 .dash-melding-ico{display:flex;color:var(--orange-t);flex-shrink:0}
@@ -11342,18 +11343,21 @@ var DASH_RENDER = {
     monteurs.forEach(function(m){
       var gepland = APP.opdrachten.filter(function(o){ return dagen.indexOf(o.datum) >= 0 && _dashIdsVan(o).indexOf(String(m.id)) >= 0; })
         .reduce(function(s, o){ return s + _dashUren(o); }, 0);
-      var perDag = _verlofUrenPerDagVan(m), beschikbaar = 0;
+      var perDag = _verlofUrenPerDagVan(m), beschikbaar = 0, ziekD = 0, verlofD = 0;
       dagen.forEach(function(dag){
-        if(!_planIsWerkdag(dag) || verzuimOpDag(m.id, dag)) return;
+        if(!_planIsWerkdag(dag)) return;
+        if(verzuimOpDag(m.id, dag)){ ziekD++; return; }
         var vl = APP.verlof.find(function(v){ return String(v.medId) === String(m.id) && v.status === 'goedgekeurd' && dag >= v.van && dag <= (v.tot || v.van); });
+        if(vl && !vl.gedeeltelijk) verlofD++;
         beschikbaar += vl ? (vl.gedeeltelijk ? perDag/2 : 0) : perDag;
       });
+      var _afwLbl = !beschikbaar && (ziekD || verlofD) ? (ziekD >= verlofD ? 'ziek' : 'verlof') : '';
       var r1 = function(x){ return String(Math.round(x*10)/10).replace('.', ','); };
       var vol = gepland > beschikbaar, pct = beschikbaar ? Math.min(100, gepland/beschikbaar*100) : (gepland ? 100 : 0);
       h += '<div class="dash-bez-rij" data-tip="'+esc(m.voornaam+' '+m.achternaam)+': <b>'+r1(gepland)+'</b> van '+r1(beschikbaar)+' uur gepland'+(vol ? ' (overboekt)' : '')+'">'
         + '<span class="dash-bez-naam">'+_dashAvatar(m, 26)+'<span>'+esc(m.voornaam)+'</span></span>'
         + '<span class="dash-spoor"><span class="dash-vul'+(vol ? ' vol' : '')+'" style="width:'+pct+'%"></span></span>'
-        + '<span class="dash-bez-w"><b>'+r1(gepland)+'</b>/'+r1(beschikbaar)+' u</span></div>';
+        + '<span class="dash-bez-w">'+(_afwLbl ? '<b>'+r1(gepland)+'</b> u · '+_afwLbl : '<b>'+r1(gepland)+'</b>/'+r1(beschikbaar)+' u')+'</span></div>';
     });
     var zonder = APP.opdrachten.filter(function(o){ return !o.datum && o.status !== 'afgehandeld' && o.status !== 'verwerkt'; }).length;
     h += '</div><div class="dash-voet"><span><b>'+zonder+'</b> opdracht'+(zonder === 1 ? '' : 'en')+' nog zonder datum</span>'
@@ -11516,6 +11520,12 @@ function renderDashboard() {
     h += '<div class="dash-melding">'+'<span class="dash-melding-ico">'+_DASH_ICO.alarm+'</span><div class="dash-melding-t"><b>'+_openTotaal+' '+(_openTotaal===1?'aanvraag wacht':'aanvragen wachten')+' op jouw goedkeuring</b><span>'+_delen.join(' · ')+'</span></div>'
       + '<button type="button" class="btn btn-ghost btn-sm" data-nav="'+(_openOnkosten?'onkosten':_openOveruren?'overuren':'verlof')+'">Bekijken</button></div>';
   }
+  // Melding: iemand is vandaag ziek of met verlof terwijl er nog werk bij hem staat
+  if(_dashMagPlanning() && _planIsWerkdag(vandaag)){
+    h += _afwezigMeldingHtml(_planAfwezigMetWerk([vandaag]), 'vandaag', function(){
+      return '<button type="button" class="btn btn-ghost btn-sm" data-herplan>Herplannen</button>';
+    });
+  }
   // Melding: verlof bijschrijven voor het nieuwe jaar (beheerder)
   if (isAdmin() || magBeheren('verlof')) {
     var _jaarKey = 'verlofJaar_' + now.getFullYear();
@@ -11588,6 +11598,8 @@ function _dashVelHtml(indeling){
 function _dashBind(el){
   el.querySelectorAll('[data-nav]').forEach(function(b){ b.addEventListener('click', function(){ _dashBewerk = false; navigateTo(b.dataset.nav); }); });
   var vb = el.querySelector('#dash-verlof-btn'); if(vb) vb.addEventListener('click', function(){ openVerlofBijschrijfModal(); });
+  // Herplannen: de weekplanning van vandaag, met alle monteurs (sleep de opdracht naar een andere monteur)
+  el.querySelectorAll('[data-herplan]').forEach(function(b){ b.addEventListener('click', function(){ _dashBewerk = false; _planView = 'week'; _planDatum = vandaagISO(); _planFilter = 'alle'; navigateTo('planning'); }); });
   el.querySelectorAll('[data-opdracht]').forEach(function(item){ item.addEventListener('click', function(){ openOpdrachtPanel(item.dataset.opdracht); }); });
   el.querySelectorAll('.dash-meer').forEach(function(b){ b.addEventListener('click', function(){ _dashOpen[b.dataset.groep] = !_dashOpen[b.dataset.groep]; _dashHertekenNu(); }); });
   // Indeling aanpassen
@@ -18871,6 +18883,34 @@ function _planZoekMatch(o){
 // naar die dag en opent de opdracht, zodat je niet hoeft te bladeren om een oude of verre
 // opdracht te vinden. Monteurfilter telt mee, statusfilters niet.
 var _planBuitenAlles = false, _planBuitenTerm = '';
+// Monteurs die ziek zijn of (hele dag) verlof hebben terwijl er nog open opdrachten bij hen staan, op de
+// gegeven dagen. Voor de melding "Joris is ziek · 4 opdrachten · Herplannen" (Dashboard en Planning).
+function _planAfwezigMetWerk(dagen){
+  var rollen = APP.planningRollen || ['monteur','extern'], uit = [];
+  APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0; }).forEach(function(m){
+    var ziek = 0, verlof = 0, ops = [];
+    dagen.forEach(function(d){
+      var z = verzuimOpDag(m.id, d);
+      var v = !z && APP.verlof.find(function(x){ return String(x.medId) === String(m.id) && x.status === 'goedgekeurd' && !x.gedeeltelijk && d >= x.van && d <= (x.tot || x.van); });
+      if(!z && !v) return;
+      var o = APP.opdrachten.filter(function(o){ return o.datum === d && o.status !== 'afgehandeld' && o.status !== 'verwerkt' && _planHeeftMonteur(o, m.id); });
+      if(!o.length) return;
+      if(z) ziek++; else verlof++;
+      ops = ops.concat(o);
+    });
+    if(ops.length) uit.push({ m:m, reden:(ziek >= verlof ? 'ziek' : 'met verlof'), ops:ops });
+  });
+  return uit;
+}
+function _afwezigMeldingHtml(lijst, wanneer, knop, tip){
+  return lijst.map(function(a){
+    var n = a.ops.length;
+    return '<div class="dash-melding afwezig-melding" role="status"><span class="dash-melding-ico">'+_DASH_ICO.alarm+'</span><div class="dash-melding-t">'
+      + '<b>'+esc(a.m.voornaam+' '+a.m.achternaam)+' is '+a.reden+'</b>'
+      + '<span>'+n+' opdracht'+(n === 1 ? '' : 'en')+' '+wanneer+' '+(n === 1 ? 'staat' : 'staan')+' nog bij '+esc(a.m.voornaam)+' ingepland'+(tip ? '. '+tip+'.' : '')+'</span></div>'
+      + knop(a)+'</div>';
+  }).join('');
+}
 function _planBuitenHtml(){
   if(!_planZoek || !String(_planZoek).trim()) return '';
   if(_planBuitenTerm !== _planZoek){ _planBuitenTerm = _planZoek; _planBuitenAlles = false; }
@@ -18919,8 +18959,31 @@ document.addEventListener('click', function(e){
 // laatste letters bleven staan. De toolbar blijft nu staan, dus dat kan niet meer.
 // De statistieken en filterchips zitten ín renderPlanLijst en lopen dus gewoon mee.
 // De gekozen weergave, op een telefoon in de eigen indeling.
+function _planAfwezigBind(pc){
+  pc.querySelectorAll('[data-herplan-lijst]').forEach(function(b){ b.addEventListener('click', function(){ _planFilter = b.dataset.herplanLijst; _planView = 'lijst'; _planPage = 1; renderPlanning(); }); });
+  pc.querySelectorAll('[data-herplan-terug]').forEach(function(b){ b.addEventListener('click', function(){ _planFilter = 'alle'; renderPlanning(); }); });
+}
+function _planAfwezigHtml(){
+  var nu = vandaagISO(), dagen;
+  if(_planView === 'dag') dagen = [_planDatum];
+  else if(_planView === 'week') dagen = _planWeekDagen(_planDatum);
+  else { var br = getPeriodeBereik(_planDatum, _planPeriode), d = new Date(br.van+'T00:00:00'); dagen = [];
+    while(dagen.length < 100){ var ds = d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); if(ds > br.tot) break; dagen.push(ds); d.setDate(d.getDate()+1); } }
+  dagen = dagen.filter(function(d){ return d >= nu; });
+  if(!dagen.length) return '';
+  var wanneer = _planView === 'dag' ? (_planDatum === nu ? 'vandaag' : 'deze dag') : (_planView === 'week' ? 'deze week' : 'in deze periode');
+  // Knop: alleen de opdrachten van deze monteur, in de lijst; nog eens klikken (filter staat al) zet hem terug
+  return _afwezigMeldingHtml(_planAfwezigMetWerk(dagen), wanneer, function(a){
+    var al = String(_planFilter) === String(a.m.id) && _planView === 'lijst';
+    return al ? '<button type="button" class="btn btn-ghost btn-sm" data-herplan-terug>Alle monteurs</button>'
+              : '<button type="button" class="btn btn-ghost btn-sm" data-herplan-lijst="'+esc(a.m.id)+'">Toon '+(a.ops.length === 1 ? 'opdracht' : 'opdrachten')+'</button>';
+  }, (_planView === 'week' && !_planIsMobiel() && magSchrijven('planning')) ? 'Sleep ze naar een andere monteur' : '');
+}
+// Melding over afwezige monteurs met werk (als die er is) boven de weergave
 function _planInhoudHtml(monteurs){
-  var mob = _planIsMobiel();
+  return _planAfwezigHtml() + _planInhoudHtmlBasis(monteurs, _planIsMobiel());
+}
+function _planInhoudHtmlBasis(monteurs, mob){
   if (_planView === 'week') return (mob ? renderPlanWeekMobiel(monteurs) : renderPlanWeek(monteurs)) + _planBuitenHtml();
   if (_planView === 'dag')  return (mob ? renderPlanDagMobiel(monteurs) : renderPlanDag(monteurs)) + _planBuitenHtml();
   return (mob ? renderPlanLijstMobiel(monteurs) : renderPlanLijst(monteurs)) + _planBuitenHtml();
@@ -18934,6 +18997,7 @@ function _planHertekenInhoud(){
   });
   pc.innerHTML = _planInhoudHtml(monteurs);
   bindPlanningEvents();
+  _planAfwezigBind(pc);
   _planKopRand();
   _planNaarVandaag(pc);
 }
@@ -19046,6 +19110,7 @@ function renderPlanning() {
 
   // Post-render events
   bindPlanningEvents();
+  _planAfwezigBind(pc);
   _planKopRand();
   _planNaarVandaag(pc);
   // Alleen de eerste tien en daarna uitschieters loggen: bij een renderlus verdringen
