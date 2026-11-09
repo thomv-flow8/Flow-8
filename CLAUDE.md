@@ -160,6 +160,8 @@ altijd beide.
   ongeldig. Twee URL's naar één bestand zijn dus niet tekenreeks-gelijk; vergelijk op het pad
   vóór de `?` (`_fqZelfdeBestand`).
 - Multi-tenant AVG: adres-lookups geven `null` voor onbekende tenants, nooit een default.
+  Hetzelfde voor bedrijfsnaam en -adres in formulieren, mailvariabelen en voorbeelden: geen "Homa Pompen" als
+  terugvalwaarde (in ronde 6 op vier plekken weggehaald); leeg laten of een neutrale tekst tonen.
 
 ---
 

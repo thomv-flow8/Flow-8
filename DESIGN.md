@@ -238,13 +238,15 @@ Neutrale werkvlakken met één blauw voor handelingen en vier statuskleuren die 
 
 ## Layout
 
-Elke pagina heeft dezelfde opbouw. Bovenaan staat de **werkbalk** (`.werkbalk`): links een zoekveld van maximaal 300px breed en eventueel filters, rechts de knoppen, met de primaire knop helemaal rechts. Daaronder staat, op een eigen rij, de **periodekiezer** (`_periodeNav()`, de pil ‹ label ›) met eventueel de knop "Vandaag", nooit naast het zoekveld in de werkbalk. Een pagina zonder zoekveld (Storingsdienst, Rapportage, Klantmails) mag hem vooraan in de werkbalk zetten. Dan volgen de **statchips** en daarna de inhoud: een tabel, lijstrijen of inklapbare blokken. Tussenruimte in de werkbalk is 8px, tussen kaarten 16px. De paginarand is 24px op desktop en 12px op de telefoon.
+Elke pagina heeft dezelfde opbouw. Bovenaan staat de **werkbalk** (`.werkbalk`): links een zoekveld van maximaal 300px breed en eventueel filters, rechts de knoppen, met de primaire knop helemaal rechts. Een weergavekiezer (Dag · Week · Lijst) hoort bij de knoppen, rechts, nooit naast het zoekveld (Planning en Agenda gelijk). Daaronder staat, op een eigen rij, de **periodekiezer** (`_periodeNav()`, de pil ‹ label ›) met eventueel de knop "Vandaag", nooit naast het zoekveld in de werkbalk. Een pagina zonder zoekveld (Storingsdienst, Rapportage, Klantmails) mag hem vooraan in de werkbalk zetten. Dan volgen de **statchips** en daarna de inhoud: een tabel, lijstrijen of inklapbare blokken. Tussenruimte in de werkbalk is 8px, tussen kaarten 16px. De paginarand is 24px op desktop en 12px op de telefoon.
 
 Breekpunt 768px: daaronder is het de telefoonweergave, met een onderbalk voor navigatie, schuifbladen in plaats van zijpanelen en een eigen werkbalk voor Planning. Boven 768px staat de zijbalk links. Gebruik `(pointer:coarse)` voor tikvlakken van 44px, los van de breedte.
 
 **Eén filterlaag per soort.** Statchips filteren op de stand van de zaak (Actief, Vervallen, Hoge prioriteit) en nog eens klikken zet het filter uit; pillen filteren alleen op een andere eigenschap (type, uitvoerder). Een filter staat nooit zowel als statchip als als pil.
 
 **Statchips** staan op de computer als rij met omloop. Op de telefoon worden ze één smalle schuifrij, zodat de lijst zelf snel in beeld komt. Alleen Rapportage toont cijfers als tegels van 2 × 2, want daar zijn de cijfers de inhoud.
+
+**Afwezig met werk:** is een monteur ziek of een hele dag met verlof terwijl er nog open opdrachten bij hem staan, dan zeggen Dashboard (vandaag) en Planning (de dagen in beeld) dat met een melding en een route: "Joris Bakker is ziek · 2 opdrachten vandaag staan nog bij Joris ingepland · Herplannen" (`_planAfwezigMetWerk`, `_afwezigMeldingHtml`). De bezettingsbalk zegt "9,5 u · ziek" in plaats van "/0 u".
 
 **Plandagen en werktijden** zijn twee instellingen: Plandagen (Instellingen › Planning) zeggen wanneer het bedrijf inplant, Standaard werktijden (Team & Verlof) de werkweek van een medewerker voor verlof. Verschillen ze, dan zegt de app dat op beide plekken (`_werkdagVerschil`). Dashboard en Planning rekenen met de plandagen (`_planIsWerkdag`).
 
@@ -256,7 +258,7 @@ Breekpunt 768px: daaronder is het de telefoonweergave, met een onderbalk voor na
 
 **Dag als tijdlijn** (`.dag-tijdlijn`): elk uur is even hoog (72px) en een kaart is zo hoog als de opdracht duurt, zodat bezette tijd er bezet uitziet. Overlappende opdrachten staan naast elkaar in banen. Korte opdrachten tonen minder regels in plaats van een half afgeknipte (onder 80 minuten zonder adres, onder 45 minuten alleen tijd en naam); bij aanwijzen zie je alles. Het rooster rekt mee met de vroegste start en het laatste einde. Een blauwe lijn markeert nu; ziek of verlof is een band over het tijdvak.
 
-**Kaart in Week en Dag** (`.wk-kaart`): bovenaan tijd en status op één regel (`_wkKaartKop`), daaronder de klantnaam over de volle breedte, dan het type (`_wkType`) en het adres. De status zweeft niet: een zwevende badge knijpt de naam af. Vlak en linkerrand in de typekleur. Afgehandeld en verwerkt zijn gedempt (`.wk-klaar`: geen vlak, dun kader, `--muted`-tekst), zodat open werk eruit springt. "+ opdracht" in een weekcel verschijnt bij aanwijzen of toetsenbordfocus, op een aanraakscherm altijd.
+**Kaart in Week en Dag** (`.wk-kaart`): bovenaan tijd en status op één regel (`_wkKaartKop`), daaronder de klantnaam over de volle breedte, dan het type (`_wkType`) en het adres. De status zweeft niet: een zwevende badge knijpt de naam af. Vlak en linkerrand in de typekleur. **Eén betekenis per kleur:** de standaard typekleuren vallen samen met de statuskleuren, dus op de kaart is de status een neutraal pilletje met alleen een gekleurde stip (`_wkStatusPil`); een kleurvlak is altijd het type. Boven Week en Dag staat een legenda met de types in beeld (`_planLegenda`). Op de telefoonkaart (geen typevlak, alleen een typestip) blijft het statuslabel gekleurd. Afgehandeld en verwerkt zijn gedempt (`.wk-klaar`: geen vlak, dun kader, `--muted`-tekst), zodat open werk eruit springt. "+ opdracht" in een weekcel verschijnt bij aanwijzen of toetsenbordfocus, op een aanraakscherm altijd.
 
 **Zeldzame acties** (kolommen kiezen, exporteren, importeren) staan in het "…"-menu (`_meerMenu`), zodat de werkbalk op één regel past. Ook een losse "Export" gaat in het menu, ook in Rapportage ("Exporteren als CSV"). De volgorde is vast: eerst de eigen acties van de pagina (Jaarplanning, Jaar bijschrijven), dan Kolommen kiezen, Exporteren en Importeren ("Debiteuren importeren"). Een keuze die bij de periode hoort, zoals Maand/Kwartaal of Kwartaal/Jaar, staat rechts naast de periodekiezer en "Vandaag" (`.ag-switcher`), niet als tweede kiezer in de werkbalk.
 
@@ -319,6 +321,8 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 
 ### Inputs / Fields
 - **Style:** `--surface2`-vlak, naad, 12px radius, 12px 14px binnenruimte, 14px tekst. In de werkbalk 38px hoog met een `--surface`-vlak. Keuzelijsten hebben een eigen chevron.
+- **Keuze als veld** (grote vensters op de computer): een keuzerij (`lfKies`: Type, Begintijd, Duur, Contracttype, Uitvoerder) heeft hetzelfde vak als een tekstveld ernaast, met de keuze en een pijltje erin ("Kies type ›"). Zo is een verplichte keuze net zo zichtbaar als een veld. Op de telefoon blijft het een compacte rij.
+- **Schakelaar** (`lfSchakel`) staat in een groot venster direct achter zijn label, niet aan de rechterrand van een brede rij.
 - **Focus:** naad wordt Signaalblauw, met focusgloed.
 - **Placeholder:** `--muted2`. Een placeholder is geen label: zet het label ernaast of erboven.
 - **Leeg veld in een lijstrij** (Instellingen): toont "Niet ingevuld" in `--muted2`, krijgt een `--surface2`-vlak bij aanwijzen en een blauwe rand bij bewerken. Een veld moet er altijd uitzien als iets wat je kunt invullen.
@@ -330,7 +334,9 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 - **Paginaopbouw voor schermlezers:** de paginatitel is een `<h1>`, de inhoud `<main id="content">`, het menu `<nav aria-label="Hoofdmenu">`. De eerste Tab geeft de skiplink "Naar de inhoud".
 - **"…"-menu met het toetsenbord:** Enter opent en zet de focus op het eerste item; pijltjes, Home en End lopen door de items (rondgaand); Esc sluit en zet de focus terug op "…" (in de opvangfase, zodat een venster eronder open blijft). Een gekozen item heeft een blauwe rand.
 - **Zoeken** toont de sneltoets op de knop (⌘K op een Mac, Ctrl K elders; niet op de telefoon).
-- **Onderbalk (telefoon):** vier vaste bestemmingen en "Meer" voor de rest.
+- **Onderbalk (telefoon):** vier vaste bestemmingen en "Meer" voor de rest. Het Meer-menu volgt de zijbalk: dezelfde volgorde en kopjes (Operationeel, Klanten, Team, Systeem).
+- **Instellingen** staan in vier groepen met een kopje: Bedrijf · Planning en werk · Werkbonnen en werkorders · Mensen en rechten. Een nieuw tabblad krijgt een plek in een groep.
+- **Aan de slag** (Dashboard, beheerder): bedrijfsgegevens, monteurs, plandagen en de eerste opdracht, elk met "Openen"; verdwijnt vanzelf als alles klaar is, of met "Verbergen".
 - **Tabs:** tekst met een onderstreping in Signaalblauw. Op de telefoon schuifbare pillen.
 
 ### Lijstrij (signature)
@@ -381,6 +387,8 @@ Drie vaste manieren, elk met een eigen reden:
 - **Do** zet verwijderen in het paneel of bewerkvenster, en laat een uitgeschakelde knop zeggen wat er nog ontbreekt.
 - **Do** schrijf datums als dag-maand-jaar ("2 november 2026", "02-11-2026").
 - **Do** demp afgehandeld werk in de planning (`.wk-klaar`), zodat open werk opvalt.
+- **Do** geef een teller alleen een signaalkleur als er echt iets moet gebeuren; gewoon werk (opgehaald, te verwerken) is neutraal. Een waarschuwing over instellingen ("niet ingesteld") is alleen oranje voor wie het kan instellen.
+- **Do** laat meldingen voorlezen (`#toast` heeft `role="status"` en `aria-live="polite"`).
 - **Do** maak alles wat klikbaar is ook met het toetsenbord bereikbaar (`role` en tabindex, of een echte knop of link), en geef panelen en vensters dialooggedrag.
 
 ### Don't:
@@ -401,3 +409,5 @@ Drie vaste manieren, elk met een eigen reden:
 - **Don't** schrijf een eigen statuswoord of -kleur: lees uit `STATUS_DEF`.
 - **Don't** zet de periodekiezer in de werkbalk naast het zoekveld.
 - **Don't** laat een kaart in Planning › Dag even hoog zijn bij elke duur: de hoogte is de tijd.
+- **Don't** geef het statuslabel op een getypte kaart een eigen kleurvlak: de status is een stip.
+- **Don't** zet gegevens van één bedrijf (naam, adres, plaats) als terugvalwaarde in code: een ander bedrijf ziet ze dan. Laat het veld leeg of toon een neutrale tekst ("Bedrijfsnaam").
