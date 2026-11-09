@@ -2408,6 +2408,9 @@ select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
 .meer-item:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
 .meer-item:disabled{color:var(--muted);cursor:default;background:none}
 .meer-item svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}
+/* Kopjes in het Meer-menu (telefoon), zoals de kopjes in de zijbalk */
+.meer-sectie{grid-column:1/-1;padding:10px 4px 2px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
+.meer-sectie:first-child{padding-top:2px}
 .btn.btn-rij{min-height:32px;padding:0 12px;font-size:12.5px;gap:6px}
 @media (pointer:coarse){.btn.btn-rij.plan-add-dag{min-height:44px}}
 .btn-rij svg{width:14px;height:14px}
@@ -8641,36 +8644,24 @@ function bouwMeerMenu() {
   if(!grid) return;
   grid.innerHTML = '';
 
-  // Gewenste volgorde meer menu
-  var MEER_VOLGORDE = [
-    'werkbonnen','planning',
-    'verlof','overuren','onkosten',
-    'verzuim','storingsdienst','serviceklanten',
-    'klantmails','medewerkers','locatie',
-    'rapportage','instellingen'
-  ];
+  // Zelfde volgorde en kopjes als de zijbalk, zodat je op de telefoon niet opnieuw hoeft te zoeken
 
   var bottomIds = getBottomNavVoorkeur().filter(function(id){
     return id === 'dashboard' || isAdmin() || magLezen(id);
   }).slice(0, 4);
 
-  // Sorteer NAV items op gewenste volgorde, overige achteraan
-  var navMap = {};
-  NAV.forEach(function(m){ navMap[m.id] = m; });
-
-  var geordend = [];
-  MEER_VOLGORDE.forEach(function(id){
-    if(navMap[id]) geordend.push(navMap[id]);
-  });
-  // Eventuele overige items die niet in de lijst staan, achteraan toevoegen
-  NAV.forEach(function(m){
-    if(MEER_VOLGORDE.indexOf(m.id) < 0 && m.id !== 'dashboard') geordend.push(m);
-  });
-
-  geordend.forEach(function(m) {
+  var _sectie = '';
+  NAV.forEach(function(m) {
     if (m.id === 'dashboard') return;
     if (bottomIds.indexOf(m.id) >= 0) return;
     if (!isAdmin() && !magLezen(m.id)) return;
+    if (m.sectie && m.sectie !== _sectie) {
+      _sectie = m.sectie;
+      var kop = document.createElement('div');
+      kop.className = 'meer-sectie';
+      kop.textContent = m.sectie;
+      grid.appendChild(kop);
+    }
 
     var btn = document.createElement('button');
     btn.className = 'meer-item';
@@ -19020,16 +19011,15 @@ function renderPlanning() {
   var _planMob = window.innerWidth <= 768;
   h += '<input class="input" id="plan-zoek" placeholder="Zoek klant, adres of nummer..." value="'+esc(safeZoek(_planZoek))+'" style="flex:1;min-width:0;max-width:300px">';
 
-  // View switcher
+  h += '<div style="flex:1"></div>';
+
+  // Weergavekiezer rechts bij de knoppen, zoals in Agenda (zoeken links, knoppen rechts)
   h += '<div class="ag-switcher">';
   var _icoLijst = '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="vertical-align:-2px"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>';
   [['dag','Dag'],['week','Week'],['lijst','Lijst']].forEach(function(v){
     h += '<button class="plan-view-btn'+(_planView===v[0]?' active':'')+'" data-view="'+v[0]+'">'+v[1]+'</button>';
   });
   h += '</div>';
-
-
-  h += '<div style="flex:1"></div>';
   h += '<button class="btn btn-ghost btn-sm" id="plan-dagplan-btn" style="display:inline-flex;align-items:center;gap:5px">'+_routeIcoon(14)+' Route</button>';
   if (_planView === 'lijst') h += _meerMenu([{id:'plan-kolom-toolbar-btn', label:'Kolommen kiezen', icon:ICO.settings}, {id:'plan-export-btn', label:'Exporteren', icon:ICO.download}]);
   if (magSchrijven('planning') && !_planMob) h += '<button class="btn btn-primary btn-sm" id="plan-add-btn">'+_LF_PLUS+'Opdracht</button>';
