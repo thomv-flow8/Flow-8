@@ -600,7 +600,7 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .lf-chips button{padding:9px 13px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;font-weight:600;cursor:pointer}
 .lf-chips button.aan{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.45);color:var(--red-t)}
 .lf .lf-reden{margin-top:10px}
-.lf-knop.lf-knop-rood{background:var(--red);border-color:var(--red)}
+.lf-knop.lf-knop-rood{background:var(--red-knop);border-color:var(--red-knop);color:#fff}
 .lf-som{display:flex;align-items:baseline;justify-content:center;gap:6px;flex-wrap:wrap;padding:16px 0 4px}
 .lf-som span{font:700 24px 'Space Mono',monospace;color:var(--muted)}
 .lf-som b{font:700 38px 'Space Mono',monospace;color:var(--text)}
@@ -744,6 +744,7 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .wbcl-item[hidden]{display:none}
 /* Tweede knop naast de hoofdknop onderin een lijststijl-venster */
 .modal-lf .modal-footer .lf-knop-tweede{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.modal-lf .modal-footer .lf-knop-tweede.lf-knop-wis{color:var(--red-t);margin-right:auto}
 .modal-lf .modal-footer .lf-knop-tweede.zp-rood{color:var(--red-t);border-color:rgba(239,68,68,.35)}
 .bh-kop-ic{background:rgba(79,110,245,.14);color:var(--accent-t)}
 .iv-ic{background:rgba(245,158,11,.14);color:var(--orange-t)}
@@ -917,7 +918,6 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .imp-tussen{height:12px}
 .modal-lf .modal-footer .lf-knop-tweede svg{width:16px;height:16px}
 .modal-lf .modal-footer .lf-knop-tweede{display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.lf-knop.imp-knop-oranje{background:var(--orange);border-color:var(--orange);color:#1a1200}
 .mi-bericht{background:var(--surface2);border-radius:var(--radius-lg);padding:14px;font-size:14px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow-y:auto}
 .lf .mono{font-family:'Space Mono',monospace;font-weight:700}
 .lf-alleen-lezen{cursor:default}
@@ -1561,7 +1561,7 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 #wb-fullscreen #wb-timer-slot{margin-top:14px}
 #wb-fullscreen #wb-timer-card{margin:0}
 /* Detail-kolom: titel + scrollbare body */
-#wb-fullscreen .wbx-md-detail{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;background:var(--bg);border-radius:0 16px 16px 0}
+#wb-fullscreen .wbx-md-detail{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;background:var(--bg);border-radius:0 var(--radius-lg) var(--radius-lg) 0}
 #wb-fullscreen .wbx-md-titel{font-family:'Instrument Sans',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.02em;padding:22px 32px 0;margin:0;display:flex;align-items:center;gap:10px;flex-shrink:0}
 #wb-fullscreen .wbx-md-titelico{display:flex;color:var(--accent-t)}
 #wb-fullscreen .wbx-md-detailbody{flex:1;overflow-y:auto;padding:18px 32px 28px}
@@ -2417,6 +2417,8 @@ select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
 .gz-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:60px 16px 16px}
 .gz-paneel{max-width:620px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column;max-height:calc(100dvh - 90px)}
 .gz-kop{display:flex;align-items:center;gap:12px;padding:0 16px;min-height:56px;border-bottom:1px solid var(--border);color:var(--muted)}
+.zoek-kbd{font:inherit;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:0 5px;line-height:18px;margin-left:2px}
+@media (max-width:768px){.zoek-kbd{display:none}}
 #global-zoek-input{flex:1;min-width:0;background:none;border:none;outline:none;font:inherit;font-size:16px;color:var(--text);-webkit-appearance:none;appearance:none}
 .gz-kop kbd,.gz-voet kbd{font:600 11px 'Space Mono',monospace;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 6px}
 .gz-annuleer,.gz-filters{display:none}
@@ -2918,7 +2920,7 @@ button.sd-m-dag{cursor:pointer}
         <!-- Globale zoek -->
         <button id="global-zoek-btn" title="Zoeken (Ctrl+K)" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
-          <span>Zoeken</span>
+          <span>Zoeken</span><kbd class="zoek-kbd" id="zoek-kbd">Ctrl K</kbd>
         </button>
         <!-- Notificatie bel -->
         <div style="position:relative" id="notif-wrapper">
@@ -12948,10 +12950,11 @@ function renderServiceklanten() {
   var vervallen=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&isSkVervallen(k);}).length;
   var bContract=APP.serviceklanten.filter(function(k){return k.status!=='passief'&&klantAanvulling(k);}).length;
   h+='<div class="stats-grid" style="margin-bottom:16px">';
-  h+=statCard('Actief',actief,'#10b981',SVGS.file);
-  h+=statCard('Passief',passief,'#6b7694',ICO.archief);
-  h+=statCard('Vervallen',vervallen,'#ef4444',SVGS.alert);
-  if(heeftAanvullingen()) h+=statCard(esc(aanvullingTitel()),bContract,'#f59e0b',SVGS.bell);
+  var _skSc = function(f, lbl, n, kl, ico){ var act = _skFilter === f; return '<div class="wo-sc sk-sc'+(act?' actief':'')+'" data-skf="'+f+'" style="border-radius:var(--radius-pill);color:'+kl+'" aria-pressed="'+act+'">'+statCard(lbl,n,kl,ico)+'</div>'; };
+  h+=_skSc('alle','Actief',actief,'#10b981',SVGS.file);
+  h+=_skSc('passief','Passief',passief,'#6b7694',ICO.archief);
+  h+=_skSc('vervallen','Vervallen',vervallen,'#ef4444',SVGS.alert);
+  if(heeftAanvullingen()) h+=_skSc('bcontract',esc(aanvullingTitel()),bContract,'#f59e0b',SVGS.bell);
   h+='</div>';
 
   h+='<div class="filter-row sk-chips">';
@@ -12959,13 +12962,8 @@ function renderServiceklanten() {
   h+='<select class="chip-sel'+(_skCt?' aan':'')+'" id="sk-contract-filter" aria-label="Filter op contract"><option value="">Alle contracten</option>'
     + getContracten().map(function(ct){ return '<option value="'+esc(ct.id)+'"'+(_skFilter===ct.id?' selected':'')+'>'+esc(ct.code)+(ct.naam?' \u2014 '+esc(ct.naam):'')+'</option>'; }).join('')
     + '</select>';
-  h+='<button class="chip'+(_skFilter==='alle'?' active':'')+'" data-filter="alle">Alle</button>';
-  h+='<button class="chip'+(_skFilter==='vervallen'?' active':'')+'" data-filter="vervallen">Vervallen</button>';
-  if(heeftAanvullingen()) h+='<button class="chip'+(_skFilter==='bcontract'?' active':'')+'" data-filter="bcontract" style="background:rgba(245,158,11,.12);color:var(--orange-t);border-color:rgba(245,158,11,.3)'+(_skFilter==='bcontract'?';font-weight:700':'')+'">'+esc(aanvullingTitel())+'</button>';
   h+='<button class="chip'+(_skFilter==='extern'?' active':'')+'" data-filter="extern" style="background:rgba(245,158,11,.08);color:var(--orange-t)'+(_skFilter==='extern'?';font-weight:700':'')+'">Extern/ZZP</button>';
   h+='<button class="chip'+(_skFilter==='intern'?' active':'')+'" data-filter="intern"'+(_skFilter==='intern'?' style="font-weight:700"':'')+'>Intern</button>';
-  var passiefAantal=APP.serviceklanten.filter(function(k){return k.status==='passief';}).length;
-  h+='<button class="chip'+(_skFilter==='passief'?' active':'')+' chip-muted" data-filter="passief" style="'+(passiefAantal?'':'color:var(--muted2)')+'">Passief ('+passiefAantal+')</button>';
   h+='</div>';
 
   var _skSortKeys = { debNr:'debNr', naam:'naam', adres:'adres', postcode:'postcode', plaats:'plaats', contact:'contactpersoon', contract:'contractType', duur:'duurUren', laatste:'laatsteDatum', volgende:'volgendeDatum', status:null };
@@ -13061,7 +13059,8 @@ function renderServiceklanten() {
     _skPage=1;
     debounceRender('sk', renderServiceklanten, 'sk-zoek');
   });
-  el.querySelectorAll('.chip[data-filter]').forEach(function(b){b.addEventListener('click',function(){_skFilter=b.dataset.filter;_skPage=1;renderServiceklanten();});});
+  el.querySelectorAll('.chip[data-filter]').forEach(function(b){b.addEventListener('click',function(){_skFilter=(_skFilter===b.dataset.filter?'alle':b.dataset.filter);_skPage=1;renderServiceklanten();});});
+  el.querySelectorAll('.sk-sc').forEach(function(b){b.addEventListener('click',function(){var f=b.dataset.skf;_skFilter=(_skFilter===f&&f!=='alle'?'alle':f);_skPage=1;renderServiceklanten();});});
   var _skCtSel = el.querySelector('#sk-contract-filter');
   if(_skCtSel) _skCtSel.addEventListener('change', function(){ _skFilter = _skCtSel.value || 'alle'; _skPage=1; renderServiceklanten(); });
   el.querySelectorAll('.sk-sort-th').forEach(function(th){th.addEventListener('click',function(){
@@ -15576,6 +15575,10 @@ document.addEventListener('click', function(e){
   var a = e.target.closest && e.target.closest('a[data-skip]'); if(!a) return;
   e.preventDefault(); var c = document.getElementById('content'); if(c){ c.focus(); c.scrollTop = 0; }
 });
+(function(){ var k = document.getElementById('zoek-kbd'), b = document.getElementById('global-zoek-btn');
+  var mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+  if(k && mac) k.textContent = '\u2318K';
+  if(b) b.title = 'Zoeken ('+(mac ? '\u2318K' : 'Ctrl+K')+')'; })();
 function _meerItems(menu){ return [].slice.call(menu.querySelectorAll('.meer-item')).filter(function(x){ return x.offsetParent; }); }
 // Toetsen in een open menu. In de opvangfase, zodat Esc eerst het menu sluit en niet het venster of paneel eronder.
 document.addEventListener('keydown', function(e){
@@ -15751,9 +15754,9 @@ function renderVerlof(){
   if(zietAlleenEigen('verlof')){
     // Een monteur ziet zijn eigen saldo, niet de teamcijfers (gemiddelde, aantal negatief).
     var _vlMijn = getMed(getMijnMedId()), _vlSaldo = _vlMijn ? getVerlofSaldoUren(_vlMijn) : 0;
-    h+=statCard('Mijn saldo', String(Math.round(_vlSaldo*10)/10).replace('.', ',')+'u', '#4f6ef5', SVGS.clock);
+    h+=statCard('Mijn saldo', String(Math.round(_vlSaldo*10)/10).replace('.', ',')+' u', '#4f6ef5', SVGS.clock);
   } else {
-    h+=statCard('Gem. saldo', gemSaldo.toFixed(1).replace('.', ',')+'u', '#4f6ef5', SVGS.clock);
+    h+=statCard('Gem. saldo', gemSaldo.toFixed(1).replace('.', ',')+' u', '#4f6ef5', SVGS.clock);
     h+=statCard('Negatief saldo', String(negSaldo), '#ef4444', SVGS.alert);
   }
   h+='</div>';
@@ -22154,10 +22157,10 @@ function renderOveruren() {
 
   // ── Stats ──
   h += '<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
-  h += statCard('Open (alle jaren)',           _nlUren(openUren)+'u',    '#f59e0b', SVGS.clock);
-  h += statCard('Gecompenseerd '+jaarStr,      _nlUren(compUren)+'u',    '#4f6ef5', SVGS.file);
-  h += statCard('Uitbetaald '+jaarStr,         _nlUren(uitbUren)+'u',    '#10b981', SVGS.file);
-  h += statCard('Saldo '+jaarStr,              _nlUren(saldoUren)+'u',   saldoUren>0?'#4f6ef5':'#6b7694', SVGS.chart);
+  h += statCard('Open (alle jaren)',           _nlUren(openUren)+' u',    '#f59e0b', SVGS.clock);
+  h += statCard('Gecompenseerd '+jaarStr,      _nlUren(compUren)+' u',    '#4f6ef5', SVGS.file);
+  h += statCard('Uitbetaald '+jaarStr,         _nlUren(uitbUren)+' u',    '#10b981', SVGS.file);
+  h += statCard('Saldo '+jaarStr,              _nlUren(saldoUren)+' u',   saldoUren>0?'#4f6ef5':'#6b7694', SVGS.chart);
   h += '</div>';
 
   // ── Filter chips ──
@@ -26742,7 +26745,7 @@ function renderPompObjecten() {
   h += '<button type="button" class="obj-terug" id="pr-obj-terug" style="flex-shrink:0">'+_IC_TERUG+'Register</button>';
   h += '<span style="font-weight:700;font-size:16px">Objecten</span>';
   h += '<div style="flex:1"></div>';
-  if(kanSchrijven) h += '<button class="btn btn-primary" id="pr-obj-add">'+_LF_PLUS+'Object aanmaken</button>';
+  if(kanSchrijven) h += '<button class="btn btn-primary" id="pr-obj-add">'+_LF_PLUS+'Object</button>';
   h += '</div>';
 
   var aantalPompen = objecten.reduce(function(s,o){ return s+(o.pompIds?o.pompIds.length:0); },0);
@@ -26756,7 +26759,7 @@ function renderPompObjecten() {
       '<svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
       'Nog geen objecten aangemaakt',
       'Groepeer '+registerItemMeervoud(false)+' in objecten zoals pompputten, machinekamers of installaties.',
-      kanSchrijven ? '+ Object aanmaken' : null, kanSchrijven ? 'pr-obj-add-empty' : null
+      kanSchrijven ? '+ Object' : null, kanSchrijven ? 'pr-obj-add-empty' : null
     );
   } else {
     h += '<div class="card" style="padding:0;overflow:hidden">';
@@ -29059,7 +29062,7 @@ function openPdfImportModal(pompId) {
       var kb = '<p class="lf-uitleg imp-uitleg">Er is al een onderdelenlijst ('+Object.keys(pomp.onderdelen).length+' onderdelen). Wat wil je doen met de '+_geextraheerdeOnderdelen.length+' nieuw herkende onderdelen?</p>'
         + _zpKaart(lfRij(_ZP_NIEUW, 'Toevoegen', '', {sub:'De bestaande onderdelen blijven staan'}) + lfRij(_ZP_BIJ, 'Vervangen', '', {sub:'De bestaande lijst wordt gewist'}));
       lfOpen('Onderdelen opslaan', kb, 'Vervangen', 'pr-ond-vervang');
-      document.getElementById('pr-ond-vervang').classList.add('imp-knop-oranje');
+      document.getElementById('pr-ond-vervang').classList.add('lf-knop-rood');
       _lfTweedeKnop('pr-ond-voegtoe', 'Toevoegen');
       document.getElementById('pr-ond-voegtoe').addEventListener('click', function(){ _prOnderdelenOpslaan(pompId, _geextraheerdeOnderdelen, 'voegtoe'); });
       document.getElementById('pr-ond-vervang').addEventListener('click', function(){ _prOnderdelenOpslaan(pompId, _geextraheerdeOnderdelen, 'vervang'); });
@@ -31765,7 +31768,7 @@ function renderKlantmails() {
       // Mail knop
       h += '<td style="padding:6px 10px">';
       if (!email) {
-        h += '<span style="font-size:11px;color:var(--muted)">Geen e-mail</span>';
+        h += '<span style="color:var(--muted)" aria-label="Geen e-mailadres">\u2014</span>';
       } else if (verzonden) {
         h += '<div style="font-size:11px;color:var(--green-t);margin-bottom:3px">'+_IC_VINK+fmtD(laasteMail.datum)+'</div>';
         h += '<button class="btn btn-ghost btn-sm mail-bulk-btn" data-id="'+o.id+'" style="font-size:11px;padding:3px 8px;display:inline-flex;align-items:center">'+_IC_VERVERS+'Opnieuw</button>';
@@ -32234,7 +32237,7 @@ function renderRapportage() {
     { k:'persoonlijk',    l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Medewerkers</span></span>' },
     { k:'opdrachten',     l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Opdrachten</span></span>' },
     { k:'serviceklanten', l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg><span>Serviceklanten</span></span>' },
-    { k:'werkorders',     l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg><span>Werkorders</span></span>' },
+    { k:'werkorders',     l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 13h5M7 16.5h8"/></svg><span>Werkorders</span></span>' },
     { k:'overuren',       l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Overuren</span></span>' },
     { k:'onkosten',       l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18.5 5.5A8 8 0 007 8m11.5 10.5A8 8 0 017 16"/><line x1="3" y1="10" x2="13" y2="10"/><line x1="3" y1="14" x2="13" y2="14"/></svg><span>Onkosten</span></span>' },
     { k:'verlof',         l:'<span style="display:inline-flex;align-items:center;gap:5px;vertical-align:middle"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Verlof</span></span>' },
@@ -32671,14 +32674,14 @@ function renderRapOpdrachten(el) {
 
   // Stats
   var totaal     = opJaar.length;
-  var afgehandeld= opJaar.filter(function(o){ return o.status==='gereed'||o.status==='afgehandeld'; }).length;
-  var gepland    = opJaar.filter(function(o){ return o.status==='ingepland'||o.status==='klaargezet'; }).length;
+  var afgehandeld= opJaar.filter(function(o){ return o.status==='gereed'||o.status==='afgehandeld'||o.status==='verwerkt'; }).length;
+  var gepland    = totaal - afgehandeld;   // alles wat nog niet af is, zodat de twee samen het totaal geven
   var spoed      = opJaar.filter(function(o){ return _isSpoed(o); }).length;
 
   var h = '<div class="stats-grid" style="margin-bottom:20px">';
   h += statCard('Totaal opdrachten', totaal, '#4f6ef5', SVGS.file);
   h += statCard('Afgehandeld', afgehandeld, '#10b981', SVGS.file);
-  h += statCard('Gepland/open', gepland, '#f59e0b', SVGS.cal);
+  h += statCard('Open', gepland, '#f59e0b', SVGS.cal);
   h += statCard('Spoed', spoed, '#ef4444', ICO.zap);
   h += '</div>';
 
@@ -33388,10 +33391,10 @@ function renderRapPersoonlijk(el) {
   });
 
   var h='<div class="stats-grid" style="margin-bottom:16px">';
-  h+=statCard('Verlof opgenomen '+jaarStr, _nlAantal(totVlOp)+'u', '#4f6ef5', SVGS.file);
-  h+=statCard('Overuren '+jaarStr, _nlAantal(totOu)+'u', '#f59e0b', SVGS.clock);
+  h+=statCard('Verlof opgenomen '+jaarStr, _nlAantal(totVlOp)+' u', '#4f6ef5', SVGS.file);
+  h+=statCard('Overuren '+jaarStr, _nlAantal(totOu)+' u', '#f59e0b', SVGS.clock);
   h+=statCard('Onkosten '+jaarStr, _nlEuro(totOk,0), '#10b981', SVGS.file);
-  h+=statCard('Verzuim '+jaarStr, _nlAantal(totVz)+'u', totVz>160?'#ef4444':'#6b7694', ICO.thermo);
+  h+=statCard('Verzuim '+jaarStr, _nlAantal(totVz)+' u', totVz>160?'#ef4444':'#6b7694', ICO.thermo);
   h+='</div>';
 
   // ── Grafieken: rolverdeling (alleen bij inzage in het hele team) + uren per maand ──
@@ -34277,7 +34280,7 @@ function renderInstBedrijf(el) {
       }).join('')
     + '<label class="ist-eigen"><input type="color" id="bg-mailkleur" value="'+_mk+'">Eigen kleur</label></div></div>'
     + '<div id="bg-kleur-preview" class="ist-mailvb"><div id="bg-kleur-preview-balk" style="background:'+_mk+';color:'+_leesbareTekstKleur(_mk)+'">'+esc(bg.naam||'Bedrijfsnaam')+'</div><div>Voorbeeld van de e-mailkop</div></div>';
-  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Bedrijfsgegevens', 'Gebruikt in e-mails, op de werkbon-pdf en in mailtemplates ({bedrijfNaam} {bedrijfTel} {bedrijfEmail}).', b, 'bg-save', 'Opslaan')+'</div>';
+  el.innerHTML = '<div class="ist-wrap lf">'+_istKaart('Bedrijfsgegevens', 'Deze gegevens staan in e-mails, op de werkbon-pdf en in de mailteksten die je bij Klantmails maakt.', b, 'bg-save', 'Opslaan')+'</div>';
   lfBind(el.querySelector('.ist-wrap'), el.querySelector('#bg-save'));
 
   // Logo upload handler
@@ -36832,8 +36835,7 @@ function _woRenderWerkdocs(wrap, kanSchrijven){
         if(d.grootte) h += '<div style="font-size:11px;color:var(--muted)">'+esc(typeof _wbFormatBytes==='function'?_wbFormatBytes(d.grootte):(Math.round(d.grootte/1024)+' KB'))+'</div>';
         h += '</div>';
         if(kanSchrijven){
-          h += '<button type="button" class="wo-wd-edit btn btn-ghost btn-icoon" data-id="'+esc(d.id)+'" title="Naam wijzigen" aria-label="Bewerken">'+ICO.edit+'</button>';
-          h += '<button type="button" class="wo-wd-del btn btn-ghost btn-wis" data-id="'+esc(d.id)+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
+          h += '<button type="button" class="wo-wd-edit btn btn-ghost btn-icoon" data-id="'+esc(d.id)+'" title="Bewerken" aria-label="Document bewerken">'+ICO.edit+'</button>';
         }
         h += '</div>';
       });
@@ -36859,10 +36861,12 @@ function _woRenderWerkdocs(wrap, kanSchrijven){
         var oud=String(d.naam||'bestand');
         var m=oud.match(/(\.[a-zA-Z0-9]{1,6})$/), ext=m?m[1]:'', basis=ext?oud.slice(0,-ext.length):oud;
         // De extensie staat er vast achter, zodat het bestand goed blijft openen.
-        lfOpen('Document hernoemen',
+        lfOpen('Document bewerken',
           lfRij(ICO.edit, 'Naam', '<input class="lf-tekst" type="text" id="wo-wd-naam" value="'+esc(basis)+'" required>'+(ext?'<span class="zp-sub">'+esc(ext)+'</span>':''), {voor:'wo-wd-naam', verplicht:true})
           + (ext ? '<p class="lf-uitleg">De extensie blijft staan, zodat het bestand goed blijft openen.</p>' : ''),
           'Opslaan', 'wo-wd-naam-ok');
+        _lfTweedeKnop('wo-wd-weg', 'Verwijderen', 'lf-knop-wis');
+        document.getElementById('wo-wd-weg').addEventListener('click', function(){ _woWdVerwijder(d); });
         var inp=document.getElementById('wo-wd-naam'); if(inp){ inp.focus(); inp.select(); }
         var ok=document.getElementById('wo-wd-naam-ok');
         if(ok) ok.addEventListener('click', function(){
@@ -36873,18 +36877,15 @@ function _woRenderWerkdocs(wrap, kanSchrijven){
         });
       });
     });
-    wrap.querySelectorAll('.wo-wd-del').forEach(function(bt){
-      bt.addEventListener('click', function(){
-        var d=(APP.werkdocCache||[]).find(function(x){ return x.id===bt.dataset.id; }); if(!d) return;
+    function _woWdVerwijder(d){
         bevestigActie('Document verwijderen','Weet je zeker dat je "'+esc(d.naam||'dit bestand')+'" wilt verwijderen? Het is dan vanuit geen enkele werkorder meer te raadplegen.', function(){
           if(d.url && typeof storageVerwijder==='function') storageVerwijder(d.url);
           fsWerkdocVerwijderen(d.id).then(function(){
             APP.werkdocCache=(APP.werkdocCache||[]).filter(function(x){ return x.id!==d.id; });
-            _woRenderWerkdocs(wrap, kanSchrijven); toast('Document verwijderd','success');
+            closeModal(); _woRenderWerkdocs(wrap, kanSchrijven); toast('Document verwijderd','success');
           }).catch(function(e){ toast('Mislukt: '+(e.message||e),'error'); });
         }, 'gevaar');
-      });
-    });
+    }
 
     // Upload: klik of drag & drop (zelfde patroon als op de werkorders)
     function _upload(files){
@@ -37114,18 +37115,14 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
     return true;
   });
 
-  // ── Chips: 'Alle' + per type, plus 'Afgehandeld' als tweede ingang naar het archief.
-  // 'Alle' zet ook de weergave terug op actief; type-chips filteren binnen de huidige
-  // weergave, zodat je ook afgehandelde werkorders per type kunt bekijken.
-  var aantalArchief = alle.filter(function(w){ return _woIsAfgehandeld(w, _typeVan(w)); }).length;
+  // ── Pillen: alleen het type ('Alle typen' + per type), binnen de weergave van de statchips,
+  // zodat je ook afgehandelde werkorders per type kunt bekijken.
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">';
-  h += '<button class="chip'+((_woLijstFilter.typeId===''&&!inArchief)?' active':'')+' wo-filter-chip" data-type="">Open ('+basis.length+')</button>';
+  h += '<button class="chip'+(_woLijstFilter.typeId===''?' active':'')+' wo-filter-chip" data-type="">Alle typen ('+basis.length+')</button>';
   actieveTypen.forEach(function(t){
     var n = basis.filter(function(w){ return String(w.typeId)===String(t.id); }).length;
     h += '<button class="chip'+(_woLijstFilter.typeId===t.id?' active':'')+' wo-filter-chip" data-type="'+esc(t.id)+'">'+esc(t.naam)+' ('+n+')</button>';
   });
-  h += '<span style="width:1px;height:18px;background:var(--border);margin:0 2px"></span>';
-  h += '<button class="chip'+(inArchief?' active':'')+' wo-archief-chip">Afgehandeld ('+aantalArchief+')</button>';
   h += '</div>';
 
   // ── Type-filter + zoekfilter ──
@@ -37256,15 +37253,7 @@ function _woRenderLijst(typen, werkorders, kanSchrijven) {
   // binnen de huidige weergave (dus ook binnen het archief).
   wrap.querySelectorAll('.wo-filter-chip').forEach(function(c){
     c.addEventListener('click', function(){
-      _woLijstFilter.typeId = c.dataset.type;
-      if(c.dataset.type === '') _woLijstFilter.weergave = 'actief';
-      _woRenderLijst(typen, werkorders, kanSchrijven);
-    });
-  });
-  // Afgehandeld-chip: schakelt tussen archief en de actieve lijst.
-  wrap.querySelectorAll('.wo-archief-chip').forEach(function(c){
-    c.addEventListener('click', function(){
-      _woLijstFilter.weergave = (_woLijstFilter.weergave==='archief') ? 'actief' : 'archief';
+      _woLijstFilter.typeId = c.dataset.type;   // alleen het type; de weergave kies je met de statchips
       _woRenderLijst(typen, werkorders, kanSchrijven);
     });
   });
