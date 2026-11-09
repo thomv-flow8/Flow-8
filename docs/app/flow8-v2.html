@@ -1082,7 +1082,7 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 .sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
 .sidebar-logo-text{font-family:'Instrument Sans',sans-serif;font-size:18px;font-weight:600;letter-spacing:-.02em}
 .sidebar-logo-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.nav-section{padding:10px 18px 4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:400;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
+.nav-section{padding:10px 18px 4px;font-family:'Space Mono',monospace;font-size:11px;font-weight:400;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
 .nav-item{display:flex;align-items:center;gap:11px;padding:6px 12px;color:var(--muted);cursor:pointer;font-size:14px;font-weight:400;border-radius:var(--radius);margin:1px 8px;position:relative;transition:background .15s ease,color .15s ease}
 .wb-acc-hdr:hover { background: rgba(79,110,245,.06) !important; }
 @media(max-width:768px){
@@ -1473,12 +1473,14 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 .nav-systeem{border-top:1px solid var(--border);margin-top:10px;padding:4px 0 2px}
 .nav-systeem .nav-item{font-size:13px;opacity:.78}
 .nav-systeem .nav-item:hover,.nav-systeem .nav-item.active{opacity:1}
-.nav-systeem .nav-section{opacity:.75}
 .sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);margin-top:auto;padding-bottom:max(12px,env(safe-area-inset-bottom))}
 /* Main */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
-.topbar-title{font-size:17px;font-weight:600;letter-spacing:-.02em;flex:1}
+.skiplink{position:fixed;left:12px;top:-60px;z-index:1000;padding:10px 16px;border-radius:var(--radius-pill);background:var(--accent-knop);color:#fff;font-weight:600;text-decoration:none;transition:top .15s}
+.skiplink:focus{top:12px;outline:2px solid #fff;outline-offset:2px}
+#content:focus{outline:none}
+.topbar-title{font-size:17px;font-weight:600;letter-spacing:-.02em;flex:1;margin:0;line-height:inherit}
 .content{flex:1;overflow-y:auto;padding:24px;background:var(--bg-gradient);color:var(--text);min-height:0}
 .page{display:none}.page.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -2392,6 +2394,7 @@ select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
 .meer-menu[hidden]{display:none}
 .meer-item{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 10px;border:none;border-radius:var(--radius-sm);background:none;font:inherit;font-size:13.5px;color:var(--text);text-align:left;cursor:pointer;white-space:nowrap}
 .meer-item:hover,.meer-item:focus-visible{background:var(--surface2);outline:none}
+.meer-item:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
 .meer-item svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}
 .btn.btn-rij{min-height:32px;padding:0 12px;font-size:12.5px;gap:6px}
 @media (pointer:coarse){.btn.btn-rij.plan-add-dag{min-height:44px}}
@@ -2842,7 +2845,8 @@ button.sd-m-dag{cursor:pointer}
 
 <div id="app" class="hidden">
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
-  <nav id="sidebar">
+  <a class="skiplink" href="#content" data-skip>Naar de inhoud</a>
+  <nav id="sidebar" aria-label="Hoofdmenu">
     <div class="sidebar-logo" id="logo-home" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" title="Naar Dashboard">
       <div id="sb-logo-tekst">
         <div id="sb-logo-svg" style="display:block">
@@ -2905,7 +2909,7 @@ button.sd-m-dag{cursor:pointer}
       <button id="hamburger" aria-label="Menu">
         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <h1 class="topbar-title" id="topbar-title">Dashboard</h1>
       <div id="topbar-actions" style="display:flex;align-items:center;gap:8px">
         <!-- Globale zoek -->
         <button id="global-zoek-btn" title="Zoeken (Ctrl+K)" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:4px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px">
@@ -2976,7 +2980,7 @@ button.sd-m-dag{cursor:pointer}
         <button id="log-btn" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:4px 10px;font-size:11px;cursor:pointer"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:-1px"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Log</button>
       </div>
     </div>
-    <div class="content" id="content"></div>
+    <main class="content" id="content" tabindex="-1"></main>
   </div>
 </div>
 
@@ -15558,9 +15562,38 @@ document.addEventListener('click', function(e){
   var knop = e.target.closest('.meer-knop');
   var menu = knop ? knop.nextElementSibling : null;
   _meerSluit(menu);
-  if(menu){ menu.hidden = !menu.hidden; knop.setAttribute('aria-expanded', menu.hidden ? 'false' : 'true'); }
+  if(menu){
+    menu.hidden = !menu.hidden; knop.setAttribute('aria-expanded', menu.hidden ? 'false' : 'true');
+    // Met het toetsenbord geopend (Enter/spatie geeft een klik zonder muis): focus op het eerste item
+    if(!menu.hidden && e.detail === 0){ var _eerste = _meerItems(menu)[0]; if(_eerste) _eerste.focus(); }
+  }
 });
-document.addEventListener('keydown', function(e){ if(e.key === 'Escape') _meerSluit(null); });
+document.addEventListener('click', function(e){
+  var a = e.target.closest && e.target.closest('a[data-skip]'); if(!a) return;
+  e.preventDefault(); var c = document.getElementById('content'); if(c){ c.focus(); c.scrollTop = 0; }
+});
+function _meerItems(menu){ return [].slice.call(menu.querySelectorAll('.meer-item')).filter(function(x){ return x.offsetParent; }); }
+// Toetsen in een open menu. In de opvangfase, zodat Esc eerst het menu sluit en niet het venster of paneel eronder.
+document.addEventListener('keydown', function(e){
+  var open = document.querySelector('.meer-menu:not([hidden])');
+  if(!open) return;
+  var knop = open.previousElementSibling, act = document.activeElement;
+  if(e.key === 'Escape'){
+    var binnen = open.contains(act) || act === knop;
+    _meerSluit(null); if(binnen && knop) knop.focus();
+    e.preventDefault(); e.stopPropagation(); return;
+  }
+  if(e.key === 'Tab'){ _meerSluit(null); return; }
+  var items = _meerItems(open); if(!items.length) return;
+  var i = items.indexOf(act), n;
+  if(e.key === 'ArrowDown') n = i < 0 ? 0 : i + 1;
+  else if(e.key === 'ArrowUp') n = i < 0 ? items.length - 1 : i - 1;
+  else if(e.key === 'Home') n = 0;
+  else if(e.key === 'End') n = items.length - 1;
+  else return;
+  e.preventDefault();
+  items[(n + items.length) % items.length].focus();
+}, true);
 
 function _hrMobiel(){ return window.innerWidth <= 768; }
 // Open aanvragen die jij mag goedkeuren maar die niet in de getoonde lijst staan (ander jaar,
