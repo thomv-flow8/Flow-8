@@ -1349,6 +1349,8 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .plan-kop{--pk:24px;position:sticky;top:calc(var(--pk) * -1);z-index:6;display:flow-root;margin:calc(var(--pk) * -1) calc(var(--pk) * -1) 0;padding:var(--pk) var(--pk) 0;background:var(--bg)}
 @media (max-width:768px){.plan-kop{position:static;margin:0;padding:0;background:none}}
 .plan-kop.vast{box-shadow:0 1px 0 var(--border)}
+/* Kop van Week en Dag schuift mee onder de werkbalk (_planTabelKop) */
+#plan-content thead.plakt th{position:relative;z-index:4;box-shadow:0 1px 0 var(--border)}
 .plm-dagkop{position:sticky;top:0;z-index:3;background:var(--bg);display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px 2px 8px}
 .plm-dagkop b{font-size:15px}
 .plm-dagkop .tag{font-size:12px}
@@ -2392,6 +2394,7 @@ select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
 .meer-item:hover,.meer-item:focus-visible{background:var(--surface2);outline:none}
 .meer-item svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}
 .btn.btn-rij{min-height:32px;padding:0 12px;font-size:12.5px;gap:6px}
+@media (pointer:coarse){.btn.btn-rij.plan-add-dag{min-height:44px}}
 .btn-rij svg{width:14px;height:14px}
 @media (min-width:769px){
   .werkbalk>input.input{height:38px;padding-top:0;padding-bottom:0;flex:0 1 300px!important;width:300px;max-width:300px!important;min-width:0!important}
@@ -18863,6 +18866,7 @@ function _planHertekenInhoud(){
   });
   pc.innerHTML = _planInhoudHtml(monteurs);
   bindPlanningEvents();
+  _planKopRand();
   _planNaarVandaag(pc);
 }
 
@@ -19393,11 +19397,25 @@ function _planKopHoogte(){
 function _planKopRand(){
   var k = document.querySelector('#content > .plan-kop'), sc = document.getElementById('content');
   if(k && sc) k.classList.toggle('vast', sc.scrollTop > 4);
+  _planTabelKop();
+}
+function _planTabelKop(){
+  if(_planView !== 'week' && _planView !== 'dag') return;
+  var sc = document.getElementById('content'), tabel = document.querySelector('#plan-content table');
+  var kop = tabel && tabel.querySelector(':scope > thead');
+  if(!sc || !kop) return;
+  var ondergrens = _planKopHoogte() ? document.querySelector('#content > .plan-kop').getBoundingClientRect().bottom : sc.getBoundingClientRect().top;
+  var t = tabel.getBoundingClientRect(), kh = kop.getBoundingClientRect().height;
+  // Niet verder dan de onderkant van de tabel (min. één rij in beeld)
+  var dy = Math.max(0, Math.min(ondergrens - t.top, t.height - kh - 60));
+  kop.classList.toggle('plakt', dy > 0);
+  kop.querySelectorAll('th').forEach(function(th){ th.style.transform = dy > 0 ? 'translateY('+Math.round(dy)+'px)' : ''; });
 }
 document.addEventListener('scroll', function(e){ if(e.target && e.target.id === 'content') _planKopRand(); }, true);
 function _planNaarVandaag(pc){
-  if(_planView !== 'lijst'){ _planVandaagSleutel = ''; return; }
-  var sl = _planPeriode+'|'+_planDatum.slice(0, 7)+'|'+(window.innerWidth <= 768 ? 'm' : 'd');
+  var _mob = window.innerWidth <= 768;
+  if(_planView !== 'lijst' && !(_planView === 'week' && _mob)){ _planVandaagSleutel = ''; return; }
+  var sl = _planView+'|'+_planPeriode+'|'+(_planView === 'week' ? _planWeekDagen(_planDatum)[0] : _planDatum.slice(0, 7))+'|'+(_mob ? 'm' : 'd');
   // Zelfde periode: niets doen, behalve vlak na het scrollen (dan tekent de telefoonversie soms nog na)
   if(sl === _planVandaagSleutel && !_planVandaagTimer && Date.now() > _planVandaagTot) return;
   _planVandaagSleutel = sl;
@@ -19407,7 +19425,7 @@ function _planNaarVandaag(pc){
   _planVandaagTimer = setTimeout(function(){
     _planVandaagTimer = null;
     var pcNu = document.getElementById('plan-content'), sc = document.getElementById('content');
-    var doelEl = pcNu && pcNu.querySelector('[data-vandaag], #plm-vandaag');
+    var doelEl = pcNu && (pcNu.querySelector('[data-vandaag], #plm-vandaag') || document.getElementById('plm-dag-'+vandaagISO()));
     if(!doelEl || !sc) return;                                   // vandaag valt niet in deze periode
     if(!sc.clientHeight || !doelEl.getClientRects().length){ _planVandaagSleutel = ''; return; }   // nog niet zichtbaar
     // Eerst naar boven: een plakkende dagkop (telefoon) geeft tijdens het scrollen zijn plakpositie door
@@ -20298,7 +20316,7 @@ function renderPlanWeek(monteurs) {
   dagen.forEach(function(dag, i) {
     var isVandaag = dag === nu;
     var blokkade = APP.blokkadeDagen && APP.blokkadeDagen[dag];
-    h += '<th style="background:'+(blokkade?'rgba(239,68,68,.08)':isVandaag?'rgba(79,110,245,.12)':'var(--surface2)')+';padding:10px 12px;text-align:center;min-width:160px" data-dag="'+dag+'">';
+    h += '<th style="background:'+(blokkade?'color-mix(in srgb, var(--red) 8%, var(--surface2))':isVandaag?'color-mix(in srgb, var(--accent) 12%, var(--surface2))':'var(--surface2)')+';padding:10px 12px;text-align:center;min-width:160px" data-dag="'+dag+'">';
     h += '<div style="font-weight:700;color:'+(blokkade?'var(--red-t)':isVandaag?'var(--accent-t)':'var(--text)')+'">'+dagKort[i]+'</div>';
     h += '<div style="font-size:11px;color:var(--muted)">'+fmtD(dag)+'</div>';
     if(blokkade) h += '<div style="font-size:11px;color:var(--red-t);font-weight:600;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>'+esc(blokkade.label||'Geblokkeerd')+'</div>';
