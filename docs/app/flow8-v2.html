@@ -1387,6 +1387,21 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .wk-naam{font-size:12px;font-weight:600;line-height:1.3;color:var(--text);overflow-wrap:break-word}
 .wk-type{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-top:1px}
 .wk-type-ico{display:inline-flex;flex-shrink:0}
+/* Planning › Dag: tijdlijn met vaste hoogte per uur (uurlijnen als achtergrond) */
+.dag-tijdlijn > td{padding:0;vertical-align:top;border-bottom:1px solid var(--border)}
+.dag-as{position:relative;width:60px}
+.dag-as span{position:absolute;left:8px;margin-top:5px;font-size:11px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.dag-kolom{border-left:1px solid var(--border)}
+.dag-vak{position:relative;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--uur-h) - 1px),var(--border) calc(var(--uur-h) - 1px),var(--border) var(--uur-h))}
+.dag-band{position:absolute;left:0;right:0;padding:4px;z-index:0}
+.dag-band.ziek{background:rgba(239,68,68,.07)}
+.dag-band.verlof{background:rgba(245,158,11,.07)}
+.dag-plek{position:absolute;padding:2px 3px;box-sizing:border-box;z-index:1}
+.dag-plek > .wk-kaart{height:100%;margin:0;box-sizing:border-box;overflow:hidden}
+.dag-plek .wk-kop{flex-wrap:wrap;row-gap:2px}
+.dag-plek > .wk-kaart:hover{overflow:visible;height:auto;min-height:100%;z-index:3;box-shadow:0 6px 18px rgba(20,24,36,.16)}
+.dag-nu{position:absolute;left:0;right:0;height:2px;background:var(--accent);z-index:2;pointer-events:none}
+.dag-nu::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
 /* Klaar (afgehandeld/verwerkt): geen vlak en gedempte tekst; de status blijft leesbaar */
 .wk-kaart.wk-klaar{background:transparent;box-shadow:inset 0 0 0 1px var(--border)}
 .wk-kaart.wk-klaar .wk-naam,.wk-kaart.wk-klaar .wk-tijd{color:var(--muted)!important}
@@ -20495,20 +20510,30 @@ function renderPlanDag(monteurs) {
   kolommen.forEach(function(k){ k.ops.forEach(function(o){ getoond[o.id] = true; }); });
   var aantalGetoond = Object.keys(getoond).length;
 
-  // Rooster 07:00-17:00; rekt mee als er eerder of later een opdracht start
-  var eersteUur = 7, laatsteUur = 17;
+  // Starttijd in minuten ("08:30" -> 510); null als er geen geldige tijd is
+  function _startMin(o){
+    var t = /^(\d{1,2}):(\d{2})/.exec(String(o.tijdVan || '').trim());
+    if(!t) return null;
+    var u = parseInt(t[1], 10);
+    return (u >= 0 && u <= 23) ? u*60 + parseInt(t[2], 10) : null;
+  }
+  function _tijdMin(t){ var x = /^(\d{1,2}):(\d{2})/.exec(String(t || '').trim()); return x ? parseInt(x[1], 10)*60 + parseInt(x[2], 10) : null; }
+  // Rooster 07:00-18:00; rekt mee als er eerder een opdracht start of later een eindigt
+  var eersteUur = 7, laatsteUur = 17;   // laatsteUur = het laatste uur dat in beeld staat
   dagAlle.forEach(function(o){
-    var u = _startUur(o);
-    if(u === null) return;
-    if(u < eersteUur) eersteUur = u;
-    if(u > laatsteUur) laatsteUur = u;
+    var st = _startMin(o);
+    if(st === null) return;
+    var eind = st + Math.round(_dashUren(o) * 60);
+    if(Math.floor(st / 60) < eersteUur) eersteUur = Math.floor(st / 60);
+    if(Math.ceil(eind / 60) - 1 > laatsteUur) laatsteUur = Math.min(23, Math.ceil(eind / 60) - 1);
   });
   var uren = [];
   for(var u = eersteUur; u <= laatsteUur; u++) uren.push(u);
   var heeftZonderTijd = kolommen.some(function(k){ return k.ops.some(function(o){ return _startUur(o) === null; }); });
 
   // metMonteur: toon bij wie de opdracht hoort (kolom "Niet in planning")
-  function kaart(o, metMonteur){
+  // kort: 1 = zonder adres, 2 = alleen tijd en naam (korte opdracht op de tijdlijn)
+  function kaart(o, metMonteur, kort){
     var ot = getOpdrachttype(o.type);
     var _sp = _isSpoed(o);
     var k = '<div class="plan-event wk-kaart'+_wkKlaar(o)+(_sp?' spoed-kaart':'')+'" data-id="'+o.id+'" style="--wk-kl:'+ot.kleur+';--wk-bg:'+_kleurTint(ot.kleur,'22')+';cursor:pointer">';
@@ -20517,9 +20542,9 @@ function renderPlanDag(monteurs) {
     k += '<div class="wk-naam" style="display:flex;align-items:center;gap:3px">';
     if(o.notitie) k += '<svg width="9" height="9" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" title="'+esc(o.notitie)+'"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
     k += esc(o.klantNaam||'—')+'</div>';
-    k += _wkType(ot);
+    if((kort || 0) < 2) k += _wkType(ot);
     var _dgAdres = (o.adres||'') + (o.plaats ? (o.adres?', ':'')+o.plaats : '');
-    if(_dgAdres) k += '<div style="font-size:11px;color:var(--muted);line-height:1.35;word-break:break-word">'+esc(_dgAdres)+'</div>';
+    if(_dgAdres && !kort) k += '<div style="font-size:11px;color:var(--muted);line-height:1.35;word-break:break-word">'+esc(_dgAdres)+'</div>';
     if(metMonteur) k += '<div style="font-size:11px;color:var(--orange-t)">'+esc(_monteurIdsVan(o).map(_planMonteurLabel).join(', '))+'</div>';
     k += '</div>';
     return k;
@@ -20564,53 +20589,56 @@ function renderPlanDag(monteurs) {
     h += '</tr>';
   }
 
-  uren.forEach(function(uur) {
-    var tijdStr = (uur < 10 ? '0' : '') + uur + ':00';
-    var huidigUur = isVandaag && new Date().getHours() === uur;
-    h += '<tr style="'+(huidigUur?'background:rgba(79,110,245,.05)':'')+'">';
-    h += '<td style="padding:6px 8px;font-size:11px;font-weight:600;color:var(--muted);vertical-align:top;border-bottom:1px solid var(--border)">'+tijdStr+'</td>';
-
-    kolommen.forEach(function(k){
-      var m = k.m;
-      var dagOps = k.ops.filter(function(o){ return _startUur(o) === uur; });
-
-      // Verlof/ziek voor deze monteur op deze dag — tonen in het tijdsblok
-      var _vDag = m && APP.verlof.find(function(v){ return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&_planDatum>=(v.van||'')&&_planDatum<=(v.tot||v.van||''); });
-      var _zDag = m && verzuimOpDag(m.id, _planDatum);
-      // Bepaal of dit uur binnen een (gedeeltelijk) verlof/ziek-tijdvak valt
-      function _uurInVak(item){
-        if(!item) return false;
-        if(!(item.gedeeltelijk && item.tijdVan)) return true; // hele dag
-        var vanU = parseInt(item.tijdVan.split(':')[0]);
-        var totU = item.tijdTot ? parseInt(item.tijdTot.split(':')[0]) : vanU+1;
-        return uur>=vanU && uur<totU;
+  // Tijdlijn: elk uur even hoog en een kaart zo hoog als de opdracht duurt, zodat bezette tijd
+  // er ook bezet uitziet. Overlappende opdrachten in één kolom staan naast elkaar.
+  var UUR_H = 72, roosterStart = eersteUur * 60, roosterEind = (laatsteUur + 1) * 60, roosterH = uren.length * UUR_H;
+  var _px = function(min){ return Math.round((Math.max(roosterStart, Math.min(roosterEind, min)) - roosterStart) / 60 * UUR_H); };
+  var _nuD = new Date(), _nuMin = isVandaag ? _nuD.getHours()*60 + _nuD.getMinutes() : -1;
+  h += '<tr class="dag-tijdlijn">';
+  h += '<td class="dag-as" style="height:'+roosterH+'px">';
+  uren.forEach(function(uur, i){ h += '<span style="top:'+(i * UUR_H)+'px">'+(uur < 10 ? '0' : '')+uur+':00</span>'; });
+  h += '</td>';
+  kolommen.forEach(function(k){
+    var m = k.m;
+    h += '<td class="dag-kolom"><div class="dag-vak" style="height:'+roosterH+'px;--uur-h:'+UUR_H+'px">';
+    // Verlof of ziek: een band over het tijdvak, of over de hele dag
+    var _vDag = m && APP.verlof.find(function(v){ return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&_planDatum>=(v.van||'')&&_planDatum<=(v.tot||v.van||''); });
+    var _zDag = m && verzuimOpDag(m.id, _planDatum);
+    var _afw = _zDag || _vDag;
+    if(_afw){
+      var _deel = !!(_afw.gedeeltelijk && _afw.tijdVan && _tijdMin(_afw.tijdVan) !== null);
+      var _van = _deel ? _tijdMin(_afw.tijdVan) : roosterStart;
+      var _tot = _deel ? (_tijdMin(_afw.tijdTot) || _van + 60) : roosterEind;
+      h += '<div class="dag-band '+(_zDag ? 'ziek' : 'verlof')+'" style="top:'+_px(_van)+'px;height:'+Math.max(UUR_H / 2, _px(_tot) - _px(_van))+'px">';
+      if(_zDag){
+        var zLbl2 = _zDag.type==='gedeeltelijk'?'Gedeeltelijk ziek':_zDag.status==='langdurig'?'Langdurig ziek':'Ziek';
+        h += '<div style="background:var(--red-knop);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>'+esc(zLbl2)+'</div>';
+      } else {
+        var tijdTxt2 = _deel ? _vDag.tijdVan+(_vDag.tijdTot?'–'+_vDag.tijdTot:'') : 'Hele dag';
+        h += '<div style="background:var(--orange);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#1a1200;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof '+esc(tijdTxt2)+'</div>';
       }
-      var toonZiek = _zDag && _uurInVak(_zDag);
-      var toonVerlof = _vDag && _uurInVak(_vDag);
-      var celBg = toonZiek?'rgba(239,68,68,.07)':toonVerlof?'rgba(245,158,11,.07)':'';
-
-      h += '<td style="padding:4px;vertical-align:top;border-left:1px solid var(--border);border-bottom:1px solid var(--border);min-height:50px'+(celBg?';background:'+celBg:'')+'">';
-      // Verlof/ziek-blok alleen bij het startuur van het vak (of eerste uur bij hele dag), zodat het niet in elke rij herhaalt
-      var _isStartUur = (uur===uren[0]);
-      if(toonZiek || toonVerlof){
-        var startVak = uren[0];
-        if(_zDag && _zDag.gedeeltelijk && _zDag.tijdVan) startVak = parseInt(_zDag.tijdVan.split(':')[0]);
-        else if(_vDag && _vDag.gedeeltelijk && _vDag.tijdVan) startVak = parseInt(_vDag.tijdVan.split(':')[0]);
-        if(uur===startVak || (_isStartUur && startVak<uren[0])){
-          if(toonZiek){
-            var zLbl2 = _zDag.type==='gedeeltelijk'?'Gedeeltelijk ziek':_zDag.status==='langdurig'?'Langdurig ziek':'Ziek';
-            h += '<div style="background:var(--red-knop);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg>'+esc(zLbl2)+'</div>';
-          } else if(toonVerlof){
-            var tijdTxt2 = (_vDag.gedeeltelijk && _vDag.tijdVan) ? _vDag.tijdVan+(_vDag.tijdTot?'–'+_vDag.tijdTot:'') : 'Hele dag';
-            h += '<div style="background:var(--orange);border-radius:5px;padding:5px 8px;font-size:11px;font-weight:700;color:#1a1200;margin-bottom:3px;display:flex;align-items:center;gap:5px"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof '+esc(tijdTxt2)+'</div>';
-          }
-        }
-      }
-      dagOps.forEach(function(o){ h += kaart(o, k.nietInPlanning); });
-      h += '</td>';
+      h += '</div>';
+    }
+    // Kaarten met een tijd; overlap in groepen, binnen een groep elk een eigen baan
+    var _ops = k.ops.map(function(o){ var st = _startMin(o); return st === null ? null : { o:o, s:st, e:st + Math.max(30, Math.round(_dashUren(o) * 60)) }; })
+      .filter(Boolean).sort(function(a, b){ return a.s - b.s || b.e - a.e; });
+    var _groepen = [], _g = null;
+    _ops.forEach(function(x){ if(!_g || x.s >= _g.eind){ _g = { items:[], eind:0 }; _groepen.push(_g); } _g.items.push(x); _g.eind = Math.max(_g.eind, x.e); });
+    _groepen.forEach(function(gr){
+      var banen = [];
+      gr.items.forEach(function(x){ var b = 0; while(banen[b] !== undefined && banen[b] > x.s) b++; banen[b] = x.e; x.baan = b; });
+      gr.items.forEach(function(x){ x.n = banen.length; });
     });
-    h += '</tr>';
+    _ops.forEach(function(x){
+      var top = _px(x.s), hoog = Math.max(40, _px(x.e) - top);
+      var duur = x.e - x.s, kort = duur < 45 ? 2 : duur < 80 ? 1 : 0;   // < 45 min: alleen tijd en naam; < 80 min: zonder adres
+      if(x.n > 1 && !kort) kort = 1;   // smalle baan naast een andere opdracht: ook zonder adres
+      h += '<div class="dag-plek" style="top:'+top+'px;height:'+hoog+'px;left:calc('+x.baan+' * 100% / '+x.n+');width:calc(100% / '+x.n+')">'+kaart(x.o, k.nietInPlanning, kort)+'</div>';
+    });
+    if(_nuMin >= roosterStart && _nuMin <= roosterEind) h += '<div class="dag-nu" style="top:'+_px(_nuMin)+'px" title="Nu"></div>';
+    h += '</div></td>';
   });
+  h += '</tr>';
 
   h += '</tbody></table></div>';
   return h;
