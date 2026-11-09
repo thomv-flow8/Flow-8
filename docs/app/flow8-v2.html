@@ -16584,7 +16584,7 @@ var _dpOpdrachten = [];       // Lokale kopie van opdrachten in volgorde
 var _dpMonteurId = '';
 var _dpDatum = '';
 var _dpBerekend = false;      // Of tijden al berekend zijn
-var _dpStarttijd = '08:00';
+var _dpStarttijd = '08:00', _dpStartTimer = null;
 // ── Kaart (Fase 2) ──
 var _dpRouteResult = null;    // Laatste DirectionsResult — hergebruikt om de route te tekenen (geen extra call)
 var _dpKaart = null;          // google.maps.Map instantie in de rechterkolom
@@ -16684,15 +16684,8 @@ function _renderDagplanning() {
   // Datum
   var datumInp = '<input type="date" class="input" id="dp-datum" value="'+esc(_dpDatum)+'" style="width:160px">';
 
-  // Starttijd
-  var startSel = '<select class="input" id="dp-starttijd" style="width:100px">';
-  for(var u=6;u<=10;u++){
-    ['00','30'].forEach(function(m){
-      var v = (u<10?'0':'')+u+':'+m;
-      startSel += '<option value="'+v+'"'+(_dpStarttijd===v?' selected':'')+'>'+v+'</option>';
-    });
-  }
-  startSel += '</select>';
+  // Starttijd: elke tijd, getypt of gekozen (per vijf minuten)
+  var startSel = '<input type="time" class="input" id="dp-starttijd" step="300" value="'+esc(_dpStarttijd)+'" style="width:130px">';
 
   var b = '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:20px">';
   b += fg('Monteur', montSel);
@@ -16920,7 +16913,22 @@ function _renderDagplanning() {
   var dpDatumInp = document.getElementById('dp-datum');
   if(dpDatumInp) dpDatumInp.addEventListener('change', function(){ _dpDatum = this.value; _dpResetBerekening(); _dpOpdrachten = []; _dpLaadOpdrachten(); _renderDagplanning(); _dpAutoBereken(); });
   var dpStartSel = document.getElementById('dp-starttijd');
-  if(dpStartSel) dpStartSel.addEventListener('change', function(){ _dpStarttijd = this.value; if(_dpBerekend) _dpBerekenTijdenLokaal(); _renderDagplanning(); });
+  // De tijden rekenen meteen mee (Tijden overnemen gebruikt dus altijd de nieuwe starttijd); opnieuw tekenen
+  // pas als je even niets typt, en daarna staat de focus weer in het veld
+  if(dpStartSel) dpStartSel.addEventListener('change', function(){
+    if(!/^\d{2}:\d{2}$/.test(this.value)) return;
+    _dpStarttijd = this.value;
+    if(_dpBerekend) _dpBerekenTijdenLokaal();
+    clearTimeout(_dpStartTimer);
+    _dpStartTimer = setTimeout(function(){
+      var veld = document.getElementById('dp-starttijd');
+      if(!veld) return;                                   // venster is al dicht
+      var hadFocus = document.activeElement === veld;
+      _renderDagplanning();
+      var nieuw = document.getElementById('dp-starttijd');
+      if(hadFocus && nieuw){ try { nieuw.focus({ preventScroll:true }); } catch(e){} }
+    }, 700);
+  });
 
   // Bereken knop
   var berekenBtn = document.getElementById('dp-bereken-btn');
