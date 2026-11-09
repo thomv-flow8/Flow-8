@@ -201,7 +201,7 @@ Neutrale werkvlakken met één blauw voor handelingen en vier statuskleuren die 
 ### Named Rules
 **The Signaal Rule.** Signaalblauw betekent "hier kun je iets doen" of "dit is gekozen". Gebruik het niet voor sfeer, achtergronden of decoratie.
 
-**The Spoed Rule.** Spoed is een vlag, geen type en geen status. Overal hetzelfde teken: een gevuld rood label "Spoed" (`_spoedLabel()`, wit op `--red-knop`) en op kaarten een rode rand (`.spoed-kaart`). Een type houdt zijn eigen kleur, ook als die rood is, zodat een gewone Storing nooit op spoed lijkt.
+**The Spoed Rule.** Spoed is een vlag, geen type en geen status. De bliksem hoort alleen bij Spoed; het type Storing heeft een waarschuwingsdriehoek (`ICO.storing`), ook als een bedrijf hem ooit met de bliksem opsloeg. Overal hetzelfde teken: een gevuld rood label "Spoed" (`_spoedLabel()`, wit op `--red-knop`) en op kaarten een rode rand (`.spoed-kaart`). Een type houdt zijn eigen kleur, ook als die rood is, zodat een gewone Storing nooit op spoed lijkt.
 
 **The -t Rule.** Een statuskleur als tekstkleur is altijd de `-t`-variant (`--accent-t`, `--red-t`, `--orange-t`, `--green-t`, `--purple-t`). De gewone kleur is voor vlakken, randen en stippen.
 
@@ -238,21 +238,27 @@ Neutrale werkvlakken met één blauw voor handelingen en vier statuskleuren die 
 
 ## Layout
 
-Elke pagina heeft dezelfde opbouw. Bovenaan staat de **werkbalk** (`.werkbalk`): links een zoekveld van maximaal 300px breed en eventueel filters, rechts de knoppen, met de primaire knop helemaal rechts. Daaronder staat de **periodekiezer** (`_periodeNav()`, de pil ‹ label ›) met eventueel de knop "Vandaag". Dan volgen de **statchips** en daarna de inhoud: een tabel, lijstrijen of inklapbare blokken. Tussenruimte in de werkbalk is 8px, tussen kaarten 16px. De paginarand is 24px op desktop en 12px op de telefoon.
+Elke pagina heeft dezelfde opbouw. Bovenaan staat de **werkbalk** (`.werkbalk`): links een zoekveld van maximaal 300px breed en eventueel filters, rechts de knoppen, met de primaire knop helemaal rechts. Daaronder staat, op een eigen rij, de **periodekiezer** (`_periodeNav()`, de pil ‹ label ›) met eventueel de knop "Vandaag", nooit naast het zoekveld in de werkbalk. Een pagina zonder zoekveld (Storingsdienst, Rapportage, Klantmails) mag hem vooraan in de werkbalk zetten. Dan volgen de **statchips** en daarna de inhoud: een tabel, lijstrijen of inklapbare blokken. Tussenruimte in de werkbalk is 8px, tussen kaarten 16px. De paginarand is 24px op desktop en 12px op de telefoon.
 
 Breekpunt 768px: daaronder is het de telefoonweergave, met een onderbalk voor navigatie, schuifbladen in plaats van zijpanelen en een eigen werkbalk voor Planning. Boven 768px staat de zijbalk links. Gebruik `(pointer:coarse)` voor tikvlakken van 44px, los van de breedte.
 
+**Eén filterlaag per soort.** Statchips filteren op de stand van de zaak (Actief, Vervallen, Hoge prioriteit) en nog eens klikken zet het filter uit; pillen filteren alleen op een andere eigenschap (type, uitvoerder). Een filter staat nooit zowel als statchip als als pil.
+
 **Statchips** staan op de computer als rij met omloop. Op de telefoon worden ze één smalle schuifrij, zodat de lijst zelf snel in beeld komt. Alleen Rapportage toont cijfers als tegels van 2 × 2, want daar zijn de cijfers de inhoud.
 
-**Weken** tonen de werkdagen uit Instellingen › Planning (standaard ma–vr), plus elke dag waarop werk staat (`_planWeekDagen`). Werk in het weekend is dus nooit onzichtbaar. Voor capaciteit tellen alleen de werkdagen mee (`_planIsWerkdag`): een weekenddag met werk telt als gepland, niet als extra beschikbare uren.
+**Plandagen en werktijden** zijn twee instellingen: Plandagen (Instellingen › Planning) zeggen wanneer het bedrijf inplant, Standaard werktijden (Team & Verlof) de werkweek van een medewerker voor verlof. Verschillen ze, dan zegt de app dat op beide plekken (`_werkdagVerschil`). Dashboard en Planning rekenen met de plandagen (`_planIsWerkdag`).
+
+**Weken** tonen de plandagen uit Instellingen › Planning (standaard ma–vr), plus elke dag waarop werk staat (`_planWeekDagen`). Werk in het weekend is dus nooit onzichtbaar. Voor capaciteit tellen alleen de werkdagen mee (`_planIsWerkdag`): een weekenddag met werk telt als gepland, niet als extra beschikbare uren.
 
 **Planning-lijst:** bij het openen, bij een andere periode en bij de knop Vandaag staat vandaag bovenaan in beeld (`_planNaarVandaag`). Bij hertekenen na een wijziging springt de lijst niet. Een reeks van twee of meer lege dagen wordt één regel (`.leeg-reeks`) met per dag een knopje "+ ma 2". Vandaag, dagen met werk, geblokkeerde dagen en een losse lege dag houden hun eigen dagblok.
 
-**Werkbalk van Planning:** op desktop blijft de werkbalk bovenaan staan terwijl lijst, week of dag eronder scrolt (`.plan-kop`), met een dun randje zodra er iets onder schuift. Naar vandaag scrollen stopt net onder de werkbalk. Op de telefoon scrolt hij mee: vast zou hij ruim een kwart van het scherm innemen, en "+ Opdracht" zweeft daar al.
+**Werkbalk van Planning:** op desktop blijft de werkbalk bovenaan staan terwijl lijst, week of dag eronder scrolt (`.plan-kop`), met een dun randje zodra er iets onder schuift. Naar vandaag scrollen stopt net onder de werkbalk. Op de telefoon scrolt hij mee: vast zou hij ruim een kwart van het scherm innemen, en "+ Opdracht" zweeft daar al. De kop van de tabel in Week (dagen) en Dag (monteurs) schuift mee onder de werkbalk (`_planTabelKop`); een getinte kolomkop (vandaag, blokkade) is daarom ondoorzichtig (`color-mix` met `--surface2`). Week op de telefoon springt net als de lijst naar vandaag.
+
+**Dag als tijdlijn** (`.dag-tijdlijn`): elk uur is even hoog (72px) en een kaart is zo hoog als de opdracht duurt, zodat bezette tijd er bezet uitziet. Overlappende opdrachten staan naast elkaar in banen. Korte opdrachten tonen minder regels in plaats van een half afgeknipte (onder 80 minuten zonder adres, onder 45 minuten alleen tijd en naam); bij aanwijzen zie je alles. Het rooster rekt mee met de vroegste start en het laatste einde. Een blauwe lijn markeert nu; ziek of verlof is een band over het tijdvak.
 
 **Kaart in Week en Dag** (`.wk-kaart`): bovenaan tijd en status op één regel (`_wkKaartKop`), daaronder de klantnaam over de volle breedte, dan het type (`_wkType`) en het adres. De status zweeft niet: een zwevende badge knijpt de naam af. Vlak en linkerrand in de typekleur. Afgehandeld en verwerkt zijn gedempt (`.wk-klaar`: geen vlak, dun kader, `--muted`-tekst), zodat open werk eruit springt. "+ opdracht" in een weekcel verschijnt bij aanwijzen of toetsenbordfocus, op een aanraakscherm altijd.
 
-**Zeldzame acties** (kolommen kiezen, exporteren, importeren) staan in het "…"-menu (`_meerMenu`), zodat de werkbalk op één regel past. Ook een losse "Export" gaat in het menu. De volgorde is vast: eerst de eigen acties van de pagina (Jaarplanning, Jaar bijschrijven), dan Kolommen kiezen, Exporteren en Importeren ("Debiteuren importeren"). Een keuze die bij de periode hoort, zoals Maand/Kwartaal of Kwartaal/Jaar, staat rechts naast de periodekiezer en "Vandaag" (`.ag-switcher`), niet als tweede kiezer in de werkbalk.
+**Zeldzame acties** (kolommen kiezen, exporteren, importeren) staan in het "…"-menu (`_meerMenu`), zodat de werkbalk op één regel past. Ook een losse "Export" gaat in het menu, ook in Rapportage ("Exporteren als CSV"). De volgorde is vast: eerst de eigen acties van de pagina (Jaarplanning, Jaar bijschrijven), dan Kolommen kiezen, Exporteren en Importeren ("Debiteuren importeren"). Een keuze die bij de periode hoort, zoals Maand/Kwartaal of Kwartaal/Jaar, staat rechts naast de periodekiezer en "Vandaag" (`.ag-switcher`), niet als tweede kiezer in de werkbalk.
 
 **Tabellen** die breder zijn dan het scherm vervagen aan de kant waar nog kolommen staan (`kan-links` en `kan-rechts`, automatisch op elke `.table-wrap`). Geef kolommen een bewuste breedte. Een kolom zonder breedte slokt alle ruimte op.
 
@@ -301,7 +307,7 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 ### Chips
 - **Filterchip / segment:** pil met een naad. Gekozen heeft een `--accent-knop`-vlak met witte tekst, of in een segmentkiezer een werkvlak met `--accent-t`-tekst en de segmentschaduw.
 - **Statustag** (`.tag`, `.zp-tag`): pil met een tint van de statuskleur en tekst in de `-t`-variant, met een hoofdletter ("Aangevraagd", "Vakantie").
-- **Status van een opdracht** (`tagStatus`, op kaarten `wkStatusBadge`): Ingepland blauw, Gereserveerd paars gestippeld, Klaargezet grijs, Opgehaald cyaan (`.tag-opgehaald`), Actie vereist oranje, Afgehandeld groen, Verwerkt leisteen. Overal dezelfde naam en kleur, ook in het Kaartoverzicht en de statustellers. Spoed is geen status (zie The Spoed Rule).
+- **Status van een opdracht** (één bron: `STATUS_DEF` met `statusNaam()`; `tagStatus`, op kaarten `wkStatusBadge`, dashboard `_dashStatus`). Altijd de volle woorden: Afgehandeld (niet "Afgerond"), Actie vereist (niet "Actie"), Opgehaald (niet "Bezig"), Gereserveerd (niet "Gereserv."). Kleuren: Ingepland blauw, Gereserveerd paars gestippeld, Klaargezet grijs, Opgehaald cyaan (`.tag-opgehaald`), Actie vereist oranje, Afgehandeld groen, Verwerkt leisteen. Overal dezelfde naam en kleur, ook in het Kaartoverzicht en de statustellers. Spoed is geen status (zie The Spoed Rule).
 - **Statchip:** pil met icoontegel, cijfer (600, tabelcijfers) en label in `--muted`. Klikbare statchips filteren de lijst.
 
 ### Cards / Containers
@@ -320,7 +326,10 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 - **Error:** een rode rand met de melding direct onder het veld.
 
 ### Navigation
-- **Zijbalk (desktop):** items van 14px in `--muted` met icoon, radius 12px, 6px 12px binnenruimte (44px hoog op aanraakschermen), zodat Team op een laptop van 860px hoog in beeld staat. Rapportage en Instellingen staan onderaan in hetzelfde scrollende menu, in een rustiger blok (`.nav-systeem`), niet vast onderin. Het actieve item heeft een blauwe tint en is 600, en `aria-current="page"`. In het lichte thema is de tekst `--accent-t`. De items zijn met Tab en Enter te bedienen (`role="link"`). Staat er onder de vouw nog meer, dan vervaagt de onderkant (`kan-onder`).
+- **Zijbalk (desktop):** items van 14px in `--muted` met icoon, radius 12px, 6px 12px binnenruimte (44px hoog op aanraakschermen), zodat Team op een laptop van 860px hoog in beeld staat. Rapportage en Instellingen staan onderaan in hetzelfde scrollende menu, in een rustiger blok (`.nav-systeem`), niet vast onderin. Het actieve item heeft een blauwe tint en is 600, en `aria-current="page"`. In het lichte thema is de tekst `--accent-t`. De items zijn met Tab en Enter te bedienen (`role="link"`). Staat er onder de vouw nog meer, dan vervaagt de onderkant (`kan-onder`). De kopjes (Overzicht, Team, Systeem) zijn 11px in `--muted2`, zonder doorzichtigheid.
+- **Paginaopbouw voor schermlezers:** de paginatitel is een `<h1>`, de inhoud `<main id="content">`, het menu `<nav aria-label="Hoofdmenu">`. De eerste Tab geeft de skiplink "Naar de inhoud".
+- **"…"-menu met het toetsenbord:** Enter opent en zet de focus op het eerste item; pijltjes, Home en End lopen door de items (rondgaand); Esc sluit en zet de focus terug op "…" (in de opvangfase, zodat een venster eronder open blijft). Een gekozen item heeft een blauwe rand.
+- **Zoeken** toont de sneltoets op de knop (⌘K op een Mac, Ctrl K elders; niet op de telefoon).
 - **Onderbalk (telefoon):** vier vaste bestemmingen en "Meer" voor de rest.
 - **Tabs:** tekst met een onderstreping in Signaalblauw. Op de telefoon schuifbare pillen.
 
@@ -342,7 +351,8 @@ Drie vaste manieren, elk met een eigen reden:
 - **Opslagbalk:** alleen voor een groot raster waarin je veel vakjes tegelijk wijzigt (de rechtenmatrix). De balk verschijnt pas bij een wijziging, met "Ongedaan maken".
 
 ### Verwijderen
-- **Niet in de lijstrij.** Een rij openen en iets weghalen zijn twee handelingen. "… verwijderen" staat onderaan het paneel (`_zpVerwijder`) of het bewerkvenster (`_lfVerwijderInVenster`), met een bevestiging.
+- **Niet in de lijstrij.** Een rij openen en iets weghalen zijn twee handelingen. Heeft een rij alleen een bewerkknop (zoals Werkdocumenten), dan staat "Verwijderen" in dat bewerkvenster, links in de voet (`lf-knop-wis`).
+- **Rood, nooit oranje.** Een knop die iets wist of vervangt is rood: wit op `--red-knop` (`.lf-knop-rood`). Er bestaat geen oranje knop. "… verwijderen" staat onderaan het paneel (`_zpVerwijder`) of het bewerkvenster (`_lfVerwijderInVenster`), met een bevestiging.
 - **Uitzonderingen:** lijstjes binnen een formulier dat je bewerkt (uurregels, materiaal, documenten, pauzes, blokkadedagen) houden hun prullenbak. Tabellen zonder paneel of venster (Gebruikers) ook. Verlof heeft geen paneel: bij een open aanvraag staan alleen Goedkeuren en Afwijzen, en pas na beoordelen verschijnt de prullenbak.
 - Selectie met een bulkactie ("Verwijder selectie") is een goed alternatief voor lange lijsten (Materialen).
 
@@ -366,7 +376,7 @@ Drie vaste manieren, elk met een eigen reden:
 - **Do** demp minder belangrijke rijen met `--muted`, een `--surface2`-vlak of `filter:saturate(...)`.
 - **Do** zet het werkwoord op een bevestigknop, en maak hem alleen rood als er iets verdwijnt.
 - **Do** schrijf uitleg neutraal voor muis en vinger: "Kies een type om het te wijzigen", niet "Tik op…".
-- **Do** schrijf eenheden uit ("8 uur", "1 dag") en getallen met een komma.
+- **Do** schrijf eenheden uit ("8 uur", "1 dag") en getallen met een komma. In compacte tellers mag "u", altijd met een spatie: "2,5 u", nooit "2,5u".
 - **Do** begin chips, tags en rolnamen met een hoofdletter; toon rollen met de naam uit Rollen & rechten (`_rolNaam`).
 - **Do** zet verwijderen in het paneel of bewerkvenster, en laat een uitgeschakelde knop zeggen wat er nog ontbreekt.
 - **Do** schrijf datums als dag-maand-jaar ("2 november 2026", "02-11-2026").
@@ -388,3 +398,6 @@ Drie vaste manieren, elk met een eigen reden:
 - **Don't** zet Kolommen, Export of Importeren als losse knop in de werkbalk: die horen in het "…"-menu.
 - **Don't** laat een badge naast de klantnaam zweven; zet status en tijd samen op een eigen regel.
 - **Don't** gebruik een dollaricoon voor geld: Flow8 rekent in euro (`ICO.euro`).
+- **Don't** schrijf een eigen statuswoord of -kleur: lees uit `STATUS_DEF`.
+- **Don't** zet de periodekiezer in de werkbalk naast het zoekveld.
+- **Don't** laat een kaart in Planning › Dag even hoog zijn bij elke duur: de hoogte is de tijd.

@@ -144,6 +144,8 @@ altijd beide.
 ## Gotchas (hard geleerd)
 
 - Meet vóór je optimaliseert — lazy-loading bleek onnodig (456 opdrachten, 107ms).
+- **Firebase-scripts staan onderaan**, vlak vóór het hoofdscript (in de `<head>` alleen een `preconnect`). Niet
+  terugzetten in de head en geen `defer`/`async`: het hoofdscript roept direct `firebase.initializeApp` aan.
 - `undefined` vs `null`: Firebase accepteert geen `undefined` — converteer naar `null` vóór opslaan.
 - Guard `===`-vergelijkingen van identifiers tegen lege strings.
 - Tabel-layout: een kolom zonder breedte absorbeert alle ruimte — geef bewuste breedtes + `max-width`.
