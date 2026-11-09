@@ -10967,6 +10967,20 @@ function _lfVolgMedewerker(medSelId, opSelId){
 
 // Status tags
 // Compacte status-indicator (bolletje + kort label) voor week-blokjes
+// Eén bron voor de status van een opdracht: naam, kleur en tagklasse. tagStatus, wkStatusBadge,
+// _dashStatus en de statusfilters lezen hieruit, zodat een status overal hetzelfde heet.
+var STATUS_DEF = {
+  klaargezet:   { lbl:'Klaargezet',    kl:'#6b7694', tag:'tag-muted' },
+  gereserveerd: { lbl:'Gereserveerd',  kl:'#8b5cf6', tag:'tag-gereserveerd' },
+  ingepland:    { lbl:'Ingepland',     kl:'#4f6ef5', tag:'tag-blue' },
+  opgehaald:    { lbl:'Opgehaald',     kl:'#06b6d4', tag:'tag-opgehaald' },
+  actie:        { lbl:'Actie vereist', kl:'#f59e0b', tag:'tag-orange', tekst:'var(--orange-t)' },
+  afgehandeld:  { lbl:'Afgehandeld',   kl:'#10b981', tag:'tag-green',  tekst:'var(--green-t)' },
+  verwerkt:     { lbl:'Verwerkt',      kl:'#64748b', tag:'tag-slate' }
+};
+function statusNaam(s){ return (STATUS_DEF[s] && STATUS_DEF[s].lbl) || s || '\u2014'; }
+function _statusNamen(){ var r = {}; Object.keys(STATUS_DEF).forEach(function(k){ r[k] = STATUS_DEF[k].lbl; }); return r; }
+
 // Kaart in Week en Dag: vlak en linkerrand in de typekleur (--wk-bg, --wk-kl), zoals altijd.
 // Bovenaan tijd en status op één regel, daaronder de klantnaam over de volle breedte.
 function _wkKaartKop(tijd, status, kl){
@@ -10979,16 +10993,7 @@ function _wkType(ot){
   return '<div class="wk-type"><span class="wk-type-ico" style="color:'+_klTekst(ot.kleur)+'">'+getOtSvg(ot.icon)+'</span>'+esc(ot.label)+'</div>';
 }
 function wkStatusBadge(s) {
-  var cfg = {
-    klaargezet:  { kl:'#6b7694', lbl:'Klaargezet' },
-    gereserveerd:{ kl:'#8b5cf6', lbl:'Gereserv.' },
-    ingepland:   { kl:'#4f6ef5', lbl:'Ingepland' },
-    opgehaald:   { kl:'#06b6d4', lbl:'Opgehaald' },
-    actie:       { kl:'#f59e0b', tekst:'var(--orange-t)', lbl:'Actie' },
-    afgehandeld: { kl:'#10b981', tekst:'var(--green-t)', lbl:'Afgerond' },
-    verwerkt:    { kl:'#64748b', lbl:'Verwerkt' },
-  };
-  var c = cfg[s]; if(!c) return '';
+  var c = STATUS_DEF[s]; if(!c) return '';
   return '<span title="'+c.lbl+'" style="display:inline-flex;flex-shrink:0;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:1px 6px 1px 5px;border-radius:var(--radius-sm);background:'+_kleurTint(c.kl,'26')+';color:'+(c.tekst||_klTekst(c.kl))+';line-height:1.4">'
     + '<span style="width:5px;height:5px;border-radius:50%;background:'+c.kl+';flex-shrink:0"></span>'+c.lbl+'</span>';
 }
@@ -10998,16 +11003,9 @@ function wkStatusBadge(s) {
 function _isSpoed(o){ return !!(o && (o.spoed === true || o.status === 'spoed')); }
 
 function tagStatus(s) {
-  var cfg = {
-    klaargezet: { cls:'tag-muted',   label:'Klaargezet' },
-    gereserveerd:{ cls:'tag-gereserveerd', label:ICO.pin+' Gereserveerd', extra:'font-weight:700' },
-    ingepland:  { cls:'tag-blue',    label:'Ingepland' },
-    opgehaald:  { cls:'tag-opgehaald', label:'Opgehaald' },
-    actie:      { cls:'tag-orange',  label:'Actie vereist' },
-    afgehandeld:{ cls:'tag-green',   label:'Afgehandeld' },
-    verwerkt:   { cls:'tag-slate',   label:'Verwerkt' },
-  };
-  var c = cfg[s] || { cls:'tag-muted', label: s||'—' };
+  var d = STATUS_DEF[s];
+  var c = d ? { cls:d.tag, label:(s === 'gereserveerd' ? ICO.pin+' ' : '')+d.lbl, extra:(s === 'gereserveerd' ? 'font-weight:700' : '') }
+            : { cls:'tag-muted', label: s||'—' };
   return '<span class="tag '+c.cls+'"'+(c.extra?' style="'+c.extra+'"':'')+'>'+c.label+'</span>';
 }
 
@@ -11078,6 +11076,7 @@ var ICO = {
   user:     '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   kalender: '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
   zap:      '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  storing:  '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
   pin:      '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
   users:    '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
   hamer:    '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 4l6 6-2 2-6-6z"/><path d="M12 6L4 14a2.1 2.1 0 003 3l8-8"/></svg>',
@@ -11148,7 +11147,7 @@ var DASH_BLOKKEN = {
   planning:     { n:'Planning deze week',   u:'Bezetting per monteur, nog in te plannen',      mag:_dashMagPlanning },
   vandaaglijst: { n:'Opdrachten vandaag',   u:'Per monteur, met status',                       mag:function(){ return true; } },
   werkorders:   { n:'Werkorders',           u:'Per status en type, verlopen deadlines',        mag:_dashMagWO },
-  trend:        { n:'Afgeronde opdrachten', u:'Grafiek per week, laatste 8 weken',             mag:_dashMagPlanning },
+  trend:        { n:'Afgehandelde opdrachten', u:'Grafiek per week, laatste 8 weken',             mag:_dashMagPlanning },
   dringend:     { n:'Dringende werkorders', u:'Te laat, hoge prioriteit of binnenkort',        mag:_dashMagWO },
   mijndag:      { n:'Mijn dag',             u:'Jouw opdrachten van vandaag',                   mag:_dashHeeftMed },
   mijnbonnen:   { n:'Mijn werkbonnen',      u:'Wat jij nog moet afronden',                     mag:_dashHeeftMed },
@@ -11231,12 +11230,7 @@ function _dashUren(o){
   return parseFloat(o.duurUren) || 1.5;
 }
 function _dashStatus(o){
-  return ({
-    gereserveerd:{ kl:'#8b5cf6', lbl:'Gereserveerd' }, ingepland:{ kl:'#4f6ef5', lbl:'Ingepland' },
-    klaargezet:{ kl:'#6b7694', lbl:'Klaargezet' }, opgehaald:{ kl:'#06b6d4', lbl:'Bezig' },
-    actie:{ kl:'#f59e0b', tekst:'var(--orange-t)', lbl:'Actie' }, afgehandeld:{ kl:'#10b981', tekst:'var(--green-t)', lbl:'Afgerond' },
-    verwerkt:{ kl:'#64748b', lbl:'Verwerkt' }
-  })[o.status] || { kl:'#6b7694', lbl:(o.status || '—') };
+  return STATUS_DEF[o.status] || { kl:'#6b7694', lbl:(o.status || '—') };
 }
 function _dashAvatar(m, maat){
   maat = maat || 28;
@@ -11264,7 +11258,7 @@ var DASH_RENDER = {
     return _dashKop(_DASH_ICO.dag, 'Vandaag', 'planning', 'Planning')
       + '<div class="dash-kpis">'
       + _dashKpi(ops.length, 'opdracht'+(ops.length === 1 ? '' : 'en'), '', 'planning')
-      + _dashKpi(klaar+'/'+ops.length, 'afgerond', klaar && klaar === ops.length ? 'goed' : '', 'planning')
+      + _dashKpi(klaar+'/'+ops.length, 'afgehandeld', klaar && klaar === ops.length ? 'goed' : '', 'planning')
       + _dashKpi(Object.keys(opPad).length, 'monteur'+(Object.keys(opPad).length === 1 ? '' : 's')+' op pad', '', 'planning')
       + _dashKpi(c.afwezig.length, 'afwezig', c.afwezig.length ? 'let' : '', null)
       + '</div>';
@@ -11277,7 +11271,7 @@ var DASH_RENDER = {
     return _dashKop(_DASH_ICO.bon, 'Werkbonnen', 'werkbonnen', 'Alle werkbonnen')
       + '<div class="dash-kpis">'
       + _dashKpi(tel('klaargezet'), 'klaargezet', '', 'werkbonnen')
-      + _dashKpi(tel('opgehaald'), 'bezig', tel('opgehaald') ? 'let' : '', 'werkbonnen')
+      + _dashKpi(tel('opgehaald'), 'opgehaald', tel('opgehaald') ? 'let' : '', 'werkbonnen')
       + _dashKpi(tel('afgehandeld'), 'te verwerken', tel('afgehandeld') ? 'mis' : '', 'werkbonnen')
       + _dashKpi(verwerktNu, 'verwerkt deze week', 'goed', 'werkbonnen')
       + '</div>' + _dashBalken(perWeek, wk.map(function(w){ return w.label; }), 'verwerkt', 'Verwerkt per week');
@@ -11345,12 +11339,12 @@ var DASH_RENDER = {
     var deze = APP.opdrachten.filter(function(o){ return afg(o) && (o.datum || '').slice(0,7) === mnd; }).length;
     var toen = APP.opdrachten.filter(function(o){ return afg(o) && (o.datum || '').slice(0,7) === vorig; }).length;
     var verschil = toen ? Math.round((deze - toen) / toen * 100) : null;
-    return _dashKop(_DASH_ICO.grafiek, 'Afgeronde opdrachten', (isAdmin() || magLezen('rapportage')) ? 'rapportage' : '', 'Rapportage')
+    return _dashKop(_DASH_ICO.grafiek, 'Afgehandelde opdrachten', (isAdmin() || magLezen('rapportage')) ? 'rapportage' : '', 'Rapportage')
       + '<div class="dash-kpis drie">'
       + _dashKpi(deze, 'deze maand', '', null)
       + _dashKpi(toen, 'vorige maand', '', null)
       + _dashKpi(verschil === null ? '—' : (verschil > 0 ? '+' : '')+verschil+'%', 'verschil', verschil > 0 ? 'goed' : '', null)
-      + '</div>' + _dashBalken(data, wk.map(function(w){ return w.label; }), 'afgerond', 'Afgerond per week');
+      + '</div>' + _dashBalken(data, wk.map(function(w){ return w.label; }), 'afgehandeld', 'Afgehandeld per week');
   },
   dringend: function(){
     return '<div id="dash-wo-dringend"><div class="dash-leeg">Dringende werkorders laden…</div></div>';
@@ -11370,7 +11364,7 @@ var DASH_RENDER = {
     var af = n(function(o){ return (o.status === 'afgehandeld' || o.status === 'verwerkt') && o.datum && o.datum >= wk.van && o.datum <= wk.tot; });
     var doel = (isAdmin() || magLezen('werkbonnen')) ? 'werkbonnen' : null;
     return _dashKop(_DASH_ICO.bon, 'Mijn werkbonnen', doel || '', 'Werkbonnen')
-      + '<div class="dash-kpis drie">'+_dashKpi(klaargezet, 'klaargezet voor jou', '', doel)+_dashKpi(bezig, 'bezig', bezig ? 'let' : '', doel)+_dashKpi(af, 'afgerond deze week', 'goed', doel)+'</div>';
+      + '<div class="dash-kpis drie">'+_dashKpi(klaargezet, 'klaargezet voor jou', '', doel)+_dashKpi(bezig, 'opgehaald', bezig ? 'let' : '', doel)+_dashKpi(af, 'afgehandeld deze week', 'goed', doel)+'</div>';
   },
   agenda: function(c){
     var h = _dashKop(_DASH_ICO.agenda, 'Agenda', magLezen('agenda') || isAdmin() ? 'agenda' : '', 'Agenda');
@@ -16356,7 +16350,7 @@ function planKolAan(k) { var c=_planKolom.find(function(x){return x.k===k;}); re
 // Opdrachttypes — uitbreidbaar via Instellingen
 var STANDAARD_OPDRACHTTYPES = [
   { id:'servicebeurt', label:'Servicebeurt', kleur:'#4f6ef5', icon:ICO.wrench },
-  { id:'storing',      label:'Storing',      kleur:'#ef4444', icon:ICO.zap },
+  { id:'storing',      label:'Storing',      kleur:'#ef4444', icon:ICO.storing },
   { id:'installatie',  label:'Installatie',  kleur:'#10b981', icon:ICO.settings },
   { id:'werkopname',   label:'Werkopname',   kleur:'#8b5cf6', icon:ICO.clipboard },
   { id:'reparatie',    label:'Reparatie',    kleur:'#f59e0b', icon:ICO.hamer },
@@ -16373,7 +16367,12 @@ function _opdIcoonNaarSvg(icon){
 function getOpdrachttypes() {
   var list = (APP.opdrachttypes === null || APP.opdrachttypes === undefined)
     ? STANDAARD_OPDRACHTTYPES
-    : (APP.opdrachttypes||[]).map(function(t){ var k=Object.assign({},t); k.icon=_opdIcoonNaarSvg(k.icon); return k; });
+    : (APP.opdrachttypes||[]).map(function(t){
+        var k=Object.assign({},t); k.icon=_opdIcoonNaarSvg(k.icon);
+        // Opgeslagen Storing met de bliksem van vroeger: toon de driehoek (de bliksem is van Spoed)
+        if(k.id === 'storing' && typeof k.icon === 'string' && k.icon.indexOf('13 2 3 14 12 14 11 22') >= 0) k.icon = ICO.storing;
+        return k;
+      });
   // Dedupliceer op id (case-insensitive) — voorkomt dubbele types in dropdown
   var seen = {};
   return list.filter(function(t){
@@ -16386,7 +16385,7 @@ function getOpdrachttypes() {
 // SVG icons voor opdrachttypes (gebruikt als string in tabel/planning)
 var OT_SVGS = {
   servicebeurt: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
-  storing:      '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  storing:      '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
   installatie:  '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
   werkopname:   '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>',
   reparatie:    '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
@@ -19525,7 +19524,7 @@ function renderPlanLijstMobiel(monteurs){
   if(planKolAan('adres')) _planVraagReistijdenAan(ops);
   var h = '';
   if(_planStatusFilter || _planActieFilter){
-    var lbl = _planActieFilter || ({klaargezet:'Klaargezet',gereserveerd:'Gereserveerd',ingepland:'Ingepland',opgehaald:'Opgehaald',actie:'Actie vereist',afgehandeld:'Afgehandeld',verwerkt:'Verwerkt',spoed:'Spoed'})[_planStatusFilter] || _planStatusFilter;
+    var lbl = _planActieFilter || (_planStatusFilter === 'spoed' ? 'Spoed' : statusNaam(_planStatusFilter));
     h += '<div class="plm-filterregel">Filter: <b>'+esc(lbl)+'</b><button type="button" class="btn btn-ghost btn-sm" id="plan-wis-filter-empty">Wissen</button></div>';
   }
   // Alle werkdagen in de periode, ook lege: zo zie je waar nog ruimte is (zelfde als desktop).
@@ -19716,7 +19715,7 @@ function renderPlanLijst(monteurs) {
   var h = '';
 
   // Periode statistieken balk
-  var _STAT_LABELS = { klaargezet:'Klaargezet', gereserveerd:'Gereserveerd', ingepland:'Ingepland', opgehaald:'Opgehaald', actie:'Actie vereist', afgehandeld:'Afgehandeld', verwerkt:'Verwerkt', spoed:'Spoed' };
+  var _STAT_LABELS = Object.assign(_statusNamen(), { spoed:'Spoed' });
   function _statBadge(status, cls, label, extra) {
     var actief = _planStatusFilter === status;
     var stijl  = 'padding:5px 12px;cursor:pointer;'+(actief?'outline:2px solid currentColor;outline-offset:2px;':'')+(extra||'');
@@ -21793,7 +21792,7 @@ function _zetOpdrachtStatusDoor(o, status, forceerHeropen, naKlaar) {
   // Servicehistorie bijwerken (alleen servicetypes). Ook bij 'verwerkt', voor wie direct
   // administratief afsluit; dubbel aanroepen kan geen kwaad (alleen vooruit).
   if (status === 'afgehandeld' || status === 'verwerkt') _skNaServicebeurt(o, false);
-  var _statusLabels = { klaargezet:'Klaargezet', gereserveerd:'Gereserveerd', ingepland:'Ingepland', opgehaald:'Opgehaald', actie:'Actie vereist', afgehandeld:'Afgehandeld', verwerkt:'Verwerkt' };
+  var _statusLabels = _statusNamen();
   toast('Status bijgewerkt: '+(_statusLabels[status]||status), 'success');
   if (APP.activePage === 'planning') renderPlanning();
   if (typeof naKlaar === 'function') naKlaar();
@@ -28336,7 +28335,7 @@ function renderPompWerkhistorie(pomp) {
   if(gepland.length){
     gepland.sort(function(a,b){ return (a.datum||'') > (b.datum||'') ? 1 : -1; });
     var statusKlOp  = {klaargezet:'#6b7694',gereserveerd:'#8b5cf6',ingepland:'#4f6ef5',actie:'#f59e0b',actie_vereist:'#f59e0b'};
-    var statusLblOp = {klaargezet:'Klaargezet',gereserveerd:'Gereserveerd',ingepland:'Ingepland',actie:'Actie vereist',actie_vereist:'Actie vereist'};
+    var statusLblOp = Object.assign(_statusNamen(), { actie_vereist:'Actie vereist' });
     h += '<div style="border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:18px;background:var(--surface2)">';
     h += '<div style="font-weight:700;font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.5px">';
     h += '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
@@ -28393,7 +28392,7 @@ function _pompWbHistorieVul(pomp, afgerondeOpdrachten, skIds){
       zonderBon.sort(function(a,b){ return (b.datum||'') > (a.datum||'') ? 1 : -1; });
       h += '<div style="font-weight:700;font-size:13px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px">';
       h += '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-      h += 'Afgeronde opdrachten zonder werkbon ('+zonderBon.length+')</div>';
+      h += 'Afgehandelde opdrachten zonder werkbon ('+zonderBon.length+')</div>';
       h += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">';
       zonderBon.forEach(function(o){
         var kl = o.status==='verwerkt' ? '#64748b' : '#10b981';
