@@ -2382,6 +2382,9 @@ select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
 .plan-kolom-naam{font:600 13px 'Instrument Sans',sans-serif;text-transform:none;letter-spacing:0}
 .periode-rij{display:flex;margin-bottom:12px}
 .periode-rij .periode-nav{flex:1;justify-content:space-between}
+/* Desktop: de periodekiezer op een eigen rij onder de werkbalk, zoals bij Planning */
+.periode-rij-d{margin-bottom:16px}
+.periode-rij-d .periode-nav{flex:0 0 auto;justify-content:flex-start}
 @media (max-width:768px){
   .ag-nav .periode-nav{flex:1;min-width:0;justify-content:space-between}
   .ag-nav .periode-nav b{overflow:hidden;text-overflow:ellipsis}
@@ -2395,6 +2398,7 @@ select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
 .meer-item{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 10px;border:none;border-radius:var(--radius-sm);background:none;font:inherit;font-size:13.5px;color:var(--text);text-align:left;cursor:pointer;white-space:nowrap}
 .meer-item:hover,.meer-item:focus-visible{background:var(--surface2);outline:none}
 .meer-item:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+.meer-item:disabled{color:var(--muted);cursor:default;background:none}
 .meer-item svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}
 .btn.btn-rij{min-height:32px;padding:0 12px;font-size:12.5px;gap:6px}
 @media (pointer:coarse){.btn.btn-rij.plan-add-dag{min-height:44px}}
@@ -11449,8 +11453,8 @@ function renderDashboard() {
     verzuimLang: mijnVerzuim.length && mijnVerzuim[0].status === 'langdurig'
   };
 
-  // Afwezig vandaag (verlof of ziek, alleen op werkdagen en alleen medewerkers in dienst)
-  var _dagNr = new Date(vandaag+'T00:00:00').getDay(), _isWerkdag = _dagNr > 0 && _dagNr < 6;
+  // Afwezig vandaag (verlof of ziek, alleen op plandagen en alleen medewerkers in dienst)
+  var _isWerkdag = _planIsWerkdag(vandaag);
   var afwezig = !_isWerkdag ? [] : APP.verlof.filter(function(v){ return v.status==='goedgekeurd' && v.van<=vandaag && (v.tot||v.van)>=vandaag && _medInDienst(v.medId); })
     .map(function(v){ return { med:getMed(v.medId), reden:verlofRedenLabel(v) }; })
     .concat(APP.verzuim.filter(function(v){ return _medInDienst(v.medId) && verzuimOpDag(v.medId, vandaag) === v; })
@@ -15735,11 +15739,11 @@ function renderVerlof(){
   // Toolbar in dezelfde opzet als verzuim, onkosten en overuren.
   h+='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('verlof')) h+='<input class="input" id="vl-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_vlZoek))+'" style="max-width:260px">';
-  if(!_hrMobiel()) h+=_periodeNav('vl-prev-jaar', 'vl-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar');
   h+='<div style="flex:1"></div>';
   h+=_meerMenu([(isAdmin() || magSchrijven('verlof')) ? {id:'vl-bijschrijf-btn', label:'Jaar bijschrijven', icon:ICO.clock} : null, {id:'vl-export-btn', label:'Exporteren', icon:ICO.download}], true);
   h+='<button class="btn btn-primary btn-sm" id="vl-add-btn">'+_LF_PLUS+'Verlof</button>';
   h+='</div>';
+  if(!_hrMobiel()) h+='<div class="periode-rij periode-rij-d">'+_periodeNav('vl-prev-jaar', 'vl-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar')+'</div>';
 
   h+='<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
   h+=statCard('Open aanvragen', String(openAanvragen), '#f59e0b', SVGS.clock);
@@ -19693,6 +19697,22 @@ function renderPlanDagMobiel(monteurs){
 
 // Dagen die Planning in een week toont: de werkdagen uit Instellingen, plus elke dag waarop een
 // opdracht staat. Zo verdwijnt een storing op zaterdag of zondag nooit uit het planscherm.
+// Plandagen (Instellingen › Planning) en standaard werktijden (Team & Verlof) zijn twee dingen: wanneer
+// het bedrijf inplant, en de werkweek van een medewerker voor verlof. Verschillen ze, dan zeggen we dat.
+function _werkdagVerschil(){
+  var volg = ['ma','di','wo','do','vr','za','zo'], nm = {ma:'maandag',di:'dinsdag',wo:'woensdag',do:'donderdag',vr:'vrijdag',za:'zaterdag',zo:'zondag'};
+  var plan = (APP.planningInst && APP.planningInst.werkdagen) || ['ma','di','wo','do','vr'];
+  var wt = APP.teamInstellingen && APP.teamInstellingen.werktijdenPerDag;
+  var team = wt ? volg.filter(function(d){ return wt[d] && wt[d].actief; }) : ['ma','di','wo','do','vr'];
+  var lijst = function(a){ a = a.map(function(d){ return nm[d]; }); return a.length > 1 ? a.slice(0, -1).join(', ')+' en '+a[a.length-1] : a[0]; };
+  var p = volg.filter(function(d){ return plan.indexOf(d) >= 0 && team.indexOf(d) < 0; });
+  var t = volg.filter(function(d){ return team.indexOf(d) >= 0 && plan.indexOf(d) < 0; });
+  if(!p.length && !t.length) return '';
+  var z = [];
+  if(p.length) z.push('Op '+lijst(p)+' wordt gepland, maar '+(p.length > 1 ? 'dat zijn' : 'dat is')+' geen standaard werkdag'+(p.length > 1 ? 'en' : '')+' van medewerkers.');
+  if(t.length) z.push(lijst(t).charAt(0).toUpperCase()+lijst(t).slice(1)+' '+(t.length > 1 ? 'zijn' : 'is')+' een standaard werkdag, maar daar wordt niet gepland.');
+  return _zpMelding('info', 'Plandagen en werktijden verschillen', '<p>'+esc(z.join(' '))+' Klopt dat niet, pas dan een van beide aan.</p>');
+}
 function _planIsWerkdag(ds){
   var werk = (APP.planningInst && APP.planningInst.werkdagen) || ['ma','di','wo','do','vr'];
   return werk.indexOf(['zo','ma','di','wo','do','vr','za'][new Date(ds+'T00:00:00').getDay()]) >= 0;
@@ -22126,11 +22146,11 @@ function renderOveruren() {
   // ── Toolbar ──
   h += '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('overuren')) h += '<input class="input" id="ou-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_ouZoek))+'" style="max-width:260px">';
-  if(!_hrMobiel()) h += _periodeNav('ou-prev-jaar', 'ou-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar');
   h += '<div style="flex:1"></div>';
   h += _meerMenu([{id:'ou-export-btn', label:'Exporteren', icon:ICO.download}], true);
   h += '<button class="btn btn-primary btn-sm" id="ou-add-btn">'+_LF_PLUS+'Overuren</button>';
   h += '</div>';
+  if(!_hrMobiel()) h += '<div class="periode-rij periode-rij-d">'+_periodeNav('ou-prev-jaar', 'ou-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar')+'</div>';
 
   // ── Stats ──
   h += '<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
@@ -22623,11 +22643,11 @@ function renderOnkosten() {
   if(_hrMobiel()) h+='<div class="periode-rij">'+_periodeNav('ok-prev-jaar', 'ok-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar')+'</div>';
   h+='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('onkosten')) h+='<input class="input" id="ok-zoek" placeholder="Zoek medewerker, categorie..." value="'+esc(safeZoek(_okZoek))+'" style="max-width:280px">';
-  if(!_hrMobiel()) h+=_periodeNav('ok-prev-jaar', 'ok-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar');
   h+='<div style="flex:1"></div>';
   h+=_meerMenu([{id:'ok-export-btn', label:'Exporteren', icon:ICO.download}], true);
   h+='<button class="btn btn-primary btn-sm" id="ok-add-btn">'+_LF_PLUS+'Declaratie</button>';
   h+='</div>';
+  if(!_hrMobiel()) h+='<div class="periode-rij periode-rij-d">'+_periodeNav('ok-prev-jaar', 'ok-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar')+'</div>';
 
   // Stats
   h+='<div class="stats-grid hr-tegels" style="margin-bottom:16px">';
@@ -23071,11 +23091,11 @@ function renderVerzuim() {
   if(_hrMobiel()) h+='<div class="periode-rij">'+_periodeNav('vz-prev-jaar', 'vz-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar')+'</div>';
   h+='<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
   if(!zietAlleenEigen('verzuim')) h+='<input class="input" id="vz-zoek" placeholder="Zoek medewerker..." value="'+esc(safeZoek(_vzZoek))+'" style="max-width:260px">';
-  if(!_hrMobiel()) h+=_periodeNav('vz-prev-jaar', 'vz-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar');
   h+='<div style="flex:1"></div>';
   h+=_meerMenu([{id:'vz-export-btn', label:'Exporteren', icon:ICO.download}], true);
   if(kanBeheren) h+='<button class="btn btn-primary btn-sm" id="vz-add-btn">'+_LF_PLUS+'Verzuim</button>';
   h+='</div>';
+  if(!_hrMobiel()) h+='<div class="periode-rij periode-rij-d">'+_periodeNav('vz-prev-jaar', 'vz-next-jaar', jaarStr, 'Vorig jaar', 'Volgend jaar')+'</div>';
 
   h+='<div class="stats-grid" style="margin-bottom:16px">';
   h+=statCard('Actief '+jaarStr,      actief+'',   '#ef4444', ICO.thermo);
@@ -32231,7 +32251,7 @@ function renderRapportage() {
     });
     h += '</select>';
   }
-  h += '<button type="button" class="btn btn-ghost btn-sm" id="rap-export" style="margin-left:auto" disabled title="Exporteer dit tabblad als CSV">'+ICO.download+' Export</button>';
+  h += '<span style="margin-left:auto">'+_meerMenu([{id:'rap-export', label:'Exporteren als CSV', icon:ICO.download}])+'</span>';
   h += '</div>';
   h += '<div class="tabs rap-tabs" style="margin-bottom:18px;border-bottom:2px solid var(--border);flex-wrap:wrap">';
   tabs.forEach(function(t){
@@ -35394,9 +35414,9 @@ function renderInstPlanning(el) {
     + '<div class="ist-toevoegrij"><input type="date" class="lf-veld" id="blok-datum" aria-label="Datum">'
     + '<input type="text" class="lf-veld" id="blok-label" placeholder="Omschrijving, bijv. Kerst" aria-label="Omschrijving">'
     + '<button type="button" class="btn btn-primary ist-knop" id="blok-add">Toevoegen</button></div>';
-  h += _istAccRaster(_ZP_KAL, 'Wanneer werken', 'Werkdagen en blokkadedagen',
-    _istKaart('Werkdagen', 'Op welke dagen servicebeurten ingepland mogen worden. De voorstelberekening schuift door naar de eerstvolgende werkdag.',
-      '<div class="ist-dagkeuze">'+_dagNamen.map(function(d){
+  h += _istAccRaster(_ZP_KAL, 'Wanneer werken', 'Plandagen en blokkadedagen',
+    _istKaart('Plandagen', 'Op welke dagen opdrachten en servicebeurten ingepland worden; de voorstelberekening schuift door naar de eerstvolgende plandag. Dit staat los van de standaard werktijden van medewerkers (Team & Verlof), die gelden voor verlof.',
+      _werkdagVerschil()+'<div class="ist-dagkeuze">'+_dagNamen.map(function(d){
         return '<label class="ist-dagchip" title="'+d[2]+'"><input type="checkbox" class="werkdag-cb" data-dag="'+d[0]+'" aria-label="'+d[2]+'"'+(werkdagenInst.indexOf(d[0])>=0?' checked':'')+'>'+d[1]+'</label>';
       }).join('')+'</div>', 'werkdag-save')
     + _istKaart('Blokkadedagen', 'Dagen waarop niet ingepland mag worden, zoals feestdagen of een bedrijfssluiting. Toevoegen en verwijderen wordt direct opgeslagen.', blok, null));
@@ -35619,7 +35639,7 @@ function renderInstTeam(el) {
       + '<button type="button" class="btn btn-ghost btn-wis btn-icoon ti-pauze-del" data-idx="'+i+'" title="Pauze verwijderen" aria-label="Pauze verwijderen">'+ICO.trash+'</button></span></div>';
   });
   b2 += _zpToevoeg('ti-pauze-add', 'Pauze toevoegen');
-  h += _istKaart('Werktijden per dag', 'Netto uren worden berekend na aftrek van de pauzes.', b2, 'ti-werktijd-save', 'Opslaan');
+  h += _istKaart('Standaard werktijden', 'De werkweek van een medewerker zonder eigen rooster; telt voor verlof en beschikbaarheid. Netto uren zijn na aftrek van de pauzes. Op welke dagen er gepland wordt, stel je in bij Planning › Plandagen.', _werkdagVerschil()+b2, 'ti-werktijd-save', 'Opslaan');
   h += '</div>';
   el.innerHTML = h;
   lfBind(el.querySelector('.ist-wrap'), el.querySelector('#ti-verlof-save'));
