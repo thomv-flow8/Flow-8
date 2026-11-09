@@ -12,12 +12,8 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMwYTBiMTAiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSI2IiB5MT0iMTAiIHgyPSI4NCIgeTI9IjU0IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjN2ZlMGY1Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjNmQ4Y2ZmIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMS42NCAxMC40MSkgc2NhbGUoLjY3NDYpIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iNy41IiBzdHJva2UtbGluZWNhcD0icm91bmQiPjxwYXRoIGQ9Ik04IDMyQzggNDQgMTUgNTEgMjQgNTEgMzMgNTEgMzggNDEgNDUgMzIgNTIgMjMgNTcgMTMgNjYgMTMgNzUgMTMgODIgMjAgODIgMzIiIG9wYWNpdHk9Ii41NSIvPjxwYXRoIGQ9Ik04IDMyQzggMjAgMTUgMTMgMjQgMTMgMzMgMTMgMzggMjMgNDUgMzIgNTIgNDEgNTcgNTEgNjYgNTEgNzUgNTEgODIgNDQgODIgMzIiLz48L2c+PC9zdmc+">
 <title>Flow8 — Field Service Management</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Syne:wght@300;800&family=Space+Mono:wght@400;700&family=Inter+Tight:wght@500;600&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
+<link rel="preconnect" href="https://www.gstatic.com">
+<!-- Firebase staat onderaan, vlak voor het hoofdscript: zo blokkeert het de eerste weergave niet -->
 <script src="https://www.google.com/recaptcha/api.js?render=6LcdLcosAAAAAMmJBuLo1c8UclVTqT6hhYYbNN5I" async defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -3041,6 +3037,12 @@ button.sd-m-dag{cursor:pointer}
   <div id="log-body"></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
 <script>
 'use strict';
 
