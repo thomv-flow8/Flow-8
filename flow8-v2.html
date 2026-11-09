@@ -1116,6 +1116,19 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 :root{--dash-g1:#4f6ef5;--dash-g2:#d97706}
 body.light{--dash-g2:#f59e0b}
 #plan-content .afwezig-melding{margin-bottom:12px}
+.dash-start{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);padding:14px 16px;margin-bottom:16px}
+.dash-start-kop{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dash-start-kop b{font-size:15px}
+.dash-start-kop span{font-size:13px;color:var(--muted);flex:1}
+.dash-start ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.dash-start li{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--border)}
+.dash-start-nr{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--surface2);color:var(--muted)}
+.dash-start li.klaar .dash-start-nr{background:color-mix(in srgb,var(--green) 16%,var(--surface));color:var(--green-t)}
+.dash-start-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.dash-start-t b{font-size:14px;font-weight:600}
+.dash-start li.klaar .dash-start-t b{color:var(--muted);font-weight:500}
+.dash-start-t small{font-size:12px;color:var(--muted)}
+.dash-start-ok{font-size:12px;color:var(--green-t);font-weight:600}
 .dash-melding{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-lg);background:color-mix(in srgb,var(--orange) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--orange) 30%,var(--border));margin-bottom:16px}
 .dash-melding.info{background:color-mix(in srgb,var(--accent) 8%,var(--surface));border-color:color-mix(in srgb,var(--accent) 30%,var(--border))}
 .dash-melding-ico{display:flex;color:var(--orange-t);flex-shrink:0}
@@ -1667,6 +1680,8 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 /* Instellingen: menu links op desktop, tabbladen bovenaan op mobiel */
 .inst-wrap{display:flex;gap:24px;align-items:flex-start}
 .inst-menu{flex:0 0 220px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0}
+.inst-menu-groep{padding:12px 12px 4px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
+.inst-menu-groep:first-child{padding-top:2px}
 .inst-menu-item{display:flex;align-items:center;width:100%;padding:10px 12px;border:none;border-radius:var(--radius);background:transparent;font:inherit;font-size:13.5px;font-weight:600;color:var(--muted);text-align:left;cursor:pointer;transition:all .12s;white-space:nowrap}
 .inst-menu-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .inst-menu-item:hover{background:rgba(79,110,245,.06);color:var(--text)}
@@ -7975,6 +7990,7 @@ async function laadData() {
     if (instData.beschikbaarheidRollen) APP.beschikbaarheidRollen = instData.beschikbaarheidRollen;
     if (instData.planningInst) {
       APP.planningInst = Object.assign({ reistijdStatussen:['klaargezet','ingepland'], werkdagen:['ma','di','wo','do','vr'] }, instData.planningInst);
+      APP._plandagenOpgeslagen = !!(instData.planningInst && instData.planningInst.werkdagen);
       // Als reistijden bewust zijn ingesteld maar Firebase de lege array niet bewaarde,
       // herstel dan de lege selectie (default niet toepassen).
       if (instData.planningInst.reistijdStatussenIngesteld && !instData.planningInst.reistijdStatussen) {
@@ -11529,6 +11545,9 @@ function renderDashboard() {
       + '<button type="button" class="btn btn-primary btn-sm" id="dash-verlof-btn">Bekijken</button></div>';
   }
 
+  // Aan de slag: de eerste stappen voor een nieuw bedrijf (beheerder), tot alles klaar is of verborgen
+  h += _dashAanDeSlag();
+
   // Begroeting, storingsdienst en de knop om de indeling aan te passen
   h += '<div class="dash-groet"><div class="dash-groet-t"><h2>'+gr+(naam ? ', '+esc(naam) : '')+'</h2><p>'+now.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</p></div>';
   h += '<div class="dash-groet-r">';
@@ -11586,7 +11605,30 @@ function _dashVelHtml(indeling){
   return h;
 }
 
+function _aanDeSlagSleutel(){ return 'flow8_aandeslag_weg_'+(APP.bedrijfId || ''); }
+function _dashAanDeSlag(){
+  if(!isAdmin()) return '';
+  try { if(localStorage.getItem(_aanDeSlagSleutel()) === '1') return ''; } catch(e) {}
+  var bg = APP.bedrijfGegevens || {}, rollen = APP.planningRollen || ['monteur','extern'];
+  var stappen = [
+    { ok: !!(bg.naam && bg.adres), t:'Bedrijfsgegevens invullen', u:'Naam en adres; de planner rekent routes vanaf je adres.', nav:'instellingen', tab:'bedrijf' },
+    { ok: APP.medewerkers.some(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0; }), t:'Monteurs toevoegen', u:'Wie in de planning komt.', nav:'medewerkers' },
+    { ok: !!APP._plandagenOpgeslagen, t:'Plandagen kiezen', u:'Op welke dagen je inplant.', nav:'instellingen', tab:'planning' },
+    { ok: APP.opdrachten.length > 0, t:'Eerste opdracht inplannen', u:'Daarna ziet de monteur zijn werkbon.', nav:'planning' }
+  ];
+  var klaar = stappen.filter(function(x){ return x.ok; }).length;
+  if(klaar === stappen.length) return '';
+  var h = '<div class="dash-start" role="region" aria-label="Aan de slag"><div class="dash-start-kop"><b>Aan de slag</b><span>'+klaar+' van '+stappen.length+' gedaan</span>'
+    + '<button type="button" class="btn btn-ghost btn-sm" id="dash-start-weg">Verbergen</button></div><ol>';
+  stappen.forEach(function(x, i){
+    h += '<li class="'+(x.ok ? 'klaar' : '')+'"><span class="dash-start-nr" aria-hidden="true">'+(x.ok ? _IC_VINK : (i+1))+'</span><span class="dash-start-t"><b>'+x.t+'</b><small>'+x.u+'</small></span>'
+      + (x.ok ? '<span class="dash-start-ok">Gedaan</span>' : '<button type="button" class="btn btn-ghost btn-sm" data-start-nav="'+x.nav+'"'+(x.tab ? ' data-start-tab="'+x.tab+'"' : '')+'>Openen</button>')+'</li>';
+  });
+  return h + '</ol></div>';
+}
 function _dashBind(el){
+  el.querySelectorAll('[data-start-nav]').forEach(function(b){ b.addEventListener('click', function(){ if(b.dataset.startTab) _instTab = b.dataset.startTab; _dashBewerk = false; navigateTo(b.dataset.startNav); }); });
+  var sw = el.querySelector('#dash-start-weg'); if(sw) sw.addEventListener('click', function(){ try { localStorage.setItem(_aanDeSlagSleutel(), '1'); } catch(e) {} var k = el.querySelector('.dash-start'); if(k) k.remove(); });
   el.querySelectorAll('[data-nav]').forEach(function(b){ b.addEventListener('click', function(){ _dashBewerk = false; navigateTo(b.dataset.nav); }); });
   var vb = el.querySelector('#dash-verlof-btn'); if(vb) vb.addEventListener('click', function(){ openVerlofBijschrijfModal(); });
   // Herplannen: de weekplanning van vandaag, met alle monteurs (sleep de opdracht naar een andere monteur)
@@ -18306,6 +18348,7 @@ function _jpRenderStap2(){
 // wordt nu vanuit _jpRenderStap3 gevoed.
 
 function _apStartBerekening(){
+  if(!_dpBedrijfsAdres()){ toast('Geen bedrijfsadres ingesteld — vul dit in bij Instellingen › Bedrijf; de planner rekent vanaf daar','error'); return; }
   // Zorg dat Google Maps API geladen is
   if(!window.google || !window.google.maps || !window.google.maps.Geocoder) {
     if(!document.getElementById('gmap-script')) {
@@ -18353,7 +18396,7 @@ function _apStartBerekening(){
     });
   });
   var bedrijfGeg=APP.bedrijfGegevens||{};
-  var bedrijfsAdres=(bedrijfGeg.adres&&bedrijfGeg.postcode)?bedrijfGeg.adres+' '+bedrijfGeg.postcode+' Nederland':'Gorinchem Nederland';
+  var bedrijfsAdres=_dpBedrijfsAdres();
   var bedrijfLat=51.8356,bedrijfLng=4.9739;
   geocodeTaken.push(new Promise(function(resolve){
     geocodeMetCache(bedrijfsAdres,function(coord){
@@ -31474,7 +31517,7 @@ function vulMailIn(template, opdracht) {
   var monteurIds = Array.isArray(opdracht.monteurIds) ? opdracht.monteurIds : (opdracht.monteurId ? [opdracht.monteurId] : []);
   var monteurNamen = monteurIds.map(function(id){var m=getMed(id);return m?m.voornaam+' '+m.achternaam:'';}).filter(Boolean).join(', ') || 'Wordt nog toegewezen';
   var vars = {
-    bedrijfNaam:      (APP.bedrijfGegevens&&APP.bedrijfGegevens.naam)||'Homa Pompen B.V.',
+    bedrijfNaam:      (APP.bedrijfGegevens&&APP.bedrijfGegevens.naam)||'',
     bedrijfTel:       (APP.bedrijfGegevens&&APP.bedrijfGegevens.telefoon)||'',
     bedrijfEmail:     (APP.bedrijfGegevens&&APP.bedrijfGegevens.email)||'',
     klantNaam:        opdracht.klantNaam||(klant?klant.naam:''),
@@ -34152,9 +34195,22 @@ function renderInstellingen() {
   h += '<div class="inst-menu-scherm"></div>';
   // Menu (desktop = verticaal links, telefoon = lijst van onderen)
   h += '<nav class="inst-menu" aria-label="Instellingen">';
-  tabs.forEach(function(t){
-    h += '<button type="button" class="inst-menu-item'+(_instTab===t.k?' active':'')+'" data-inst-tab="'+t.k+'"'+(_instTab===t.k?' aria-current="page"':'')+'>'+t.l+'</button>';
+  // Vier groepen in plaats van dertien losse tabbladen; een tabblad zonder groep komt achteraan
+  var _instGroepen = [
+    ['Bedrijf', ['bedrijf','administraties','notificaties']],
+    ['Planning en werk', ['planning','opdrachten','contracten','register']],
+    ['Werkbonnen en werkorders', ['werkbonnen','werkorders']],
+    ['Mensen en rechten', ['team','gebruikers','rollen','goedkeuring']]
+  ];
+  var _tabKnop = function(t){ return '<button type="button" class="inst-menu-item'+(_instTab===t.k?' active':'')+'" data-inst-tab="'+t.k+'"'+(_instTab===t.k?' aria-current="page"':'')+'>'+t.l+'</button>'; };
+  var _gehad = {};
+  _instGroepen.forEach(function(g){
+    var inGroep = g[1].map(function(k){ return tabs.filter(function(t){ return t.k === k; })[0]; }).filter(Boolean);
+    if(!inGroep.length) return;
+    h += '<div class="inst-menu-groep">'+g[0]+'</div>';
+    inGroep.forEach(function(t){ _gehad[t.k] = 1; h += _tabKnop(t); });
   });
+  tabs.forEach(function(t){ if(!_gehad[t.k]) h += _tabKnop(t); });
   h += '</nav>';
   h += '<div class="inst-paneel"><div id="inst-content"></div></div>';
   h += '</div>';
@@ -34340,7 +34396,7 @@ function renderInstBedrijf(el) {
   var _mk = (bg.mailKleur || '#1c3d5a');
   var _presets = ['#1c3d5a','#0f766e','#7c2d12','#4338ca','#b91c1c','#166534','#334155','#9a3412'];
   var b = '<div class="lf-groep">Gegevens</div><div class="ist-twee">'
-    + lfRij(ICO.gebouw, 'Bedrijfsnaam', _istTekst('bg-naam','text', bg.naam||'Homa Pompen B.V.'), {voor:'bg-naam'})
+    + lfRij(ICO.gebouw, 'Bedrijfsnaam', _istTekst('bg-naam','text', bg.naam||''), {voor:'bg-naam'})
     + lfRij(_LF_TEL, 'Telefoon', _istTekst('bg-tel','tel', bg.telefoon), {voor:'bg-tel'})
     + lfRij(ICO.locatie, 'Adres', _istTekst('bg-adres','text', bg.adres), {voor:'bg-adres'})
     + lfRij(_LF_MAIL, 'E-mail service', _istTekst('bg-email','email', bg.email), {voor:'bg-email'})
@@ -35563,6 +35619,7 @@ function renderInstPlanning(el) {
 
   // Werkdagen opslaan
   el.querySelector('#werkdag-save').addEventListener('click', function(){
+    APP._plandagenOpgeslagen = true;
     var d = Array.from(el.querySelectorAll('.werkdag-cb:checked')).map(function(cb){return cb.dataset.dag;});
     if(!APP.planningInst) APP.planningInst = {};
     APP.planningInst.werkdagen = d;
@@ -41151,7 +41208,7 @@ function _bindPdfTemplateWerkorder(el){
     function kv(l,v){ return '<div style="display:flex;padding:1px 0"><div style="width:34%;color:'+label+';font-weight:700;font-size:6px;text-transform:uppercase">'+l+'</div><div style="flex:1;font-size:7px;color:'+tekst+'">'+v+'</div></div>'; }
     var logo = (cfg.logoTonen!==false) ? (cfg.logoData||bg.logo) : null;
     var hdrLogo = logo ? '<img src="'+esc(logo)+'" alt="Logo" style="max-height:16px;max-width:60px;object-fit:contain">' : '';
-    var adr = '<div style="text-align:right;font-size:6px;color:'+tekst+';line-height:1.5">'+esc(bg.naam||'Homa Pompen BV')+'<br>'+esc(bg.adres||'Techniekweg 16-18')+'<br>'+esc([(bg.postcode||'4207 HD'),(bg.plaats||'Gorinchem')].join(' '))+'</div>';
+    var adr = '<div style="text-align:right;font-size:6px;color:'+tekst+';line-height:1.5">'+esc(bg.naam||'Bedrijfsnaam')+'<br>'+esc(bg.adres||'Adres')+'<br>'+esc([(bg.postcode||'Postcode'),(bg.plaats||'Plaats')].join(' '))+'</div>';
     var body='';
     body += '<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid '+tekst+';padding-bottom:3px;margin-bottom:4px">';
     body += '<div><div style="color:'+accent+';font-weight:700;font-size:11px">'+esc(titel)+'</div>'+hdrLogo+'</div>'+adr+'</div>';
@@ -41160,7 +41217,7 @@ function _bindPdfTemplateWerkorder(el){
     body += kop('UREN') + '<div style="font-size:6.5px;color:'+label+';display:flex;gap:8px;font-weight:700"><span style="flex:1">DATUM</span><span style="flex:1">MEDEWERKER</span><span>UREN</span></div>';
     body += '<div style="font-size:7px;color:'+tekst+';display:flex;gap:8px"><span style="flex:1">21-07</span><span style="flex:1">T. Vink</span><span>2,5u</span></div>';
     body += kop('MATERIALEN') + '<div style="font-size:7px;color:'+tekst+'">1x Mechanical seal \u00b7 1x Lagerset</div>';
-    body += '<div style="border-top:1px solid '+lijn+';margin-top:8px;padding-top:3px;font-size:6px;color:'+label+';text-align:center">'+esc(cfg.voettekst||((bg.naam||'Homa Pompen BV')+' \u00b7 '+(bg.plaats||'Gorinchem')))+'</div>';
+    body += '<div style="border-top:1px solid '+lijn+';margin-top:8px;padding-top:3px;font-size:6px;color:'+label+';text-align:center">'+esc(cfg.voettekst||((bg.naam||'Bedrijfsnaam')+' \u00b7 '+(bg.plaats||'Gorinchem')))+'</div>';
     el.querySelector('#pto-preview').innerHTML = '<div style="padding:10px">'+body+'</div>';
   }
 
@@ -41246,7 +41303,7 @@ function _bindPdfTemplateWerkbon(el){
     function kv(l,v){ return '<div style="display:flex;padding:1px 0"><div style="width:34%;color:'+label+';font-weight:700;font-size:6px;text-transform:uppercase">'+l+'</div><div style="flex:1;font-size:7px;color:'+tekst+'">'+v+'</div></div>'; }
     var logo = (cfg.logoTonen!==false) ? (cfg.logoData||bg.logo) : null;
     var hdrLogo = logo ? '<img src="'+esc(logo)+'" alt="Logo" style="max-height:16px;max-width:60px;object-fit:contain">' : '';
-    var adr = '<div style="text-align:right;font-size:6px;color:'+tekst+';line-height:1.5">'+esc(bg.naam||'Homa Pompen BV')+'<br>'+esc(bg.adres||'Techniekweg 16-18')+'<br>'+esc([(bg.postcode||'4207 HD'),(bg.plaats||'Gorinchem')].join(' '))+'</div>';
+    var adr = '<div style="text-align:right;font-size:6px;color:'+tekst+';line-height:1.5">'+esc(bg.naam||'Bedrijfsnaam')+'<br>'+esc(bg.adres||'Adres')+'<br>'+esc([(bg.postcode||'Postcode'),(bg.plaats||'Plaats')].join(' '))+'</div>';
 
     var body='';
     body += '<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid '+tekst+';padding-bottom:3px;margin-bottom:4px">';
