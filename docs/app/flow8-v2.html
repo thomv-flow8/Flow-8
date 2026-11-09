@@ -394,6 +394,17 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-sub-kaart .lf-drie > *{border-top:0}
   .modal-lf-groot .lf-tekst{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:8px 13px;text-align:left;font-size:14px;max-width:240px}
   .modal-lf-groot .lf-tekst:focus{border-color:var(--accent)}
+  /* Keuzerij (lfKies) als veld: zelfde vak als een tekstveld, met de keuze en het pijltje erin */
+  .modal-lf-groot .lf-rij.lf-kies[data-lf-titel]{grid-template-columns:36px 132px minmax(0,1fr)}
+  .modal-lf-groot .lf-rij.lf-kies[data-lf-titel] > .lf-w{justify-self:stretch;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:7px 10px 7px 13px;min-height:38px;box-sizing:border-box;transition:border-color .15s}
+  .modal-lf-groot .lf-rij.lf-kies[data-lf-titel] .lf-kw{font-size:14px}
+  .modal-lf-groot .lf-rij.lf-kies[data-lf-titel]:hover > .lf-w{border-color:var(--muted2)}
+  .modal-lf-groot .lf-rij.lf-kies[data-lf-titel]:active{background:none}
+  .modal-lf-groot .lf-rij.lf-kies[data-lf-titel]:focus-visible{outline:none}
+  .modal-lf-groot .lf-rij.lf-kies[data-lf-titel]:focus-visible > .lf-w{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,110,245,.2)}
+  /* Schakelaar direct achter zijn label (in een breed venster stond hij ver weg aan de rechterrand) */
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-sw){grid-template-columns:36px max-content auto;justify-content:start;column-gap:12px}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-sw) > .lf-w{justify-self:start;margin-left:20px}
   .modal-lf-groot .lf-knop{flex:0 0 auto;min-width:180px;margin-left:auto}
 }
 .lf-groep-knop{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
