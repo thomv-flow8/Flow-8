@@ -213,6 +213,13 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
 .lf-sw input:checked + i::after{transform:translateX(20px)}
 .lf-sw input:focus-visible + i{outline:2px solid var(--accent);outline-offset:2px}
 .lf-stap{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:3px}
+@media (pointer:coarse){
+  .lf .lf-tekst{min-height:44px}
+  .lf-stap button{width:44px!important;height:44px!important}
+  .lf .lf-stap input{min-height:44px}
+  .lf-sw{padding:7px 0;box-sizing:content-box;margin:-7px 0}
+  .pg-btn{min-width:44px}
+}
 .lf-stap button{width:32px;height:32px;border-radius:50%;border:0;background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer}
 .lf .lf-stap input{width:52px;text-align:center;background:none;border:0;font:700 15px 'Space Mono',monospace;color:var(--text);outline:none;-moz-appearance:textfield;padding:0}
 .lf :is(.lf-stap,.lf-bedrag) input::-webkit-inner-spin-button,.lf :is(.lf-stap,.lf-bedrag) input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -1380,6 +1387,7 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .plm-lijf{flex:1;min-width:0}
 .plm-klant{font-weight:600;font-size:15px;line-height:1.25;overflow-wrap:anywhere}
 .plm-adres{font-size:13px;color:var(--muted);margin-top:2px}
+.plm-rij-st{display:block;margin-top:4px}
 .plm-onder{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;margin-top:7px}
 .plm-onder>span[title]{float:none;margin:0}
 .plm-typ{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
@@ -2738,7 +2746,7 @@ button.sd-m-dag{cursor:pointer}
     }
   })();
 </script>
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <!-- LOGIN -->
 <div id="login-screen">
@@ -10325,7 +10333,7 @@ function openCorrectieModal(medId) {
     m.verlofSaldoUren = nieuwUren;
     m.verlofSaldo = verlofUrenNaarDagen(nieuwUren, m); // legacy (afgeleid)
     dbSaveItem('medewerkers', m.id, m);
-    slaVerlofMutatie(m.id, 'correctie', dagen, omschr+(eenheid==='uren'?' ('+waarde+'u)':''), m.verlofSaldo,
+    slaVerlofMutatie(m.id, 'correctie', dagen, omschr+(eenheid==='uren'?' ('+waarde+' u)':''), m.verlofSaldo,
       { uren: corUren, saldoNaUren: nieuwUren });
     closeModal();
     if (document.getElementById('panel').classList.contains('open')) openMedPanel(medId);
@@ -11197,7 +11205,7 @@ var _DASH_ICO = {
   agenda:  '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg>',
   mens:    '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',
   alarm:   '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>',
-  storing: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 2L3 14h8l-1 8 10-12h-8z"/></svg>',
+  storing: '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>',
   indeling:'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></svg>',
   vink:    '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
 };
@@ -11335,8 +11343,8 @@ var DASH_RENDER = {
     return _dashKop(_DASH_ICO.bon, 'Werkbonnen', 'werkbonnen', 'Alle werkbonnen')
       + '<div class="dash-kpis">'
       + _dashKpi(tel('klaargezet'), 'klaargezet', '', 'werkbonnen')
-      + _dashKpi(tel('opgehaald'), 'opgehaald', tel('opgehaald') ? 'let' : '', 'werkbonnen')
-      + _dashKpi(tel('afgehandeld'), 'te verwerken', tel('afgehandeld') ? 'mis' : '', 'werkbonnen')
+      + _dashKpi(tel('opgehaald'), 'opgehaald', '', 'werkbonnen')
+      + _dashKpi(tel('afgehandeld'), 'te verwerken', '', 'werkbonnen')
       + _dashKpi(verwerktNu, 'verwerkt deze week', 'goed', 'werkbonnen')
       + '</div>' + _dashBalken(perWeek, wk.map(function(w){ return w.label; }), 'verwerkt', 'Verwerkt per week');
   },
@@ -11431,7 +11439,7 @@ var DASH_RENDER = {
     var af = n(function(o){ return (o.status === 'afgehandeld' || o.status === 'verwerkt') && o.datum && o.datum >= wk.van && o.datum <= wk.tot; });
     var doel = (isAdmin() || magLezen('werkbonnen')) ? 'werkbonnen' : null;
     return _dashKop(_DASH_ICO.bon, 'Mijn werkbonnen', doel || '', 'Werkbonnen')
-      + '<div class="dash-kpis drie">'+_dashKpi(klaargezet, 'klaargezet voor jou', '', doel)+_dashKpi(bezig, 'opgehaald', bezig ? 'let' : '', doel)+_dashKpi(af, 'afgehandeld deze week', 'goed', doel)+'</div>';
+      + '<div class="dash-kpis drie">'+_dashKpi(klaargezet, 'klaargezet voor jou', '', doel)+_dashKpi(bezig, 'opgehaald', '', doel)+_dashKpi(af, 'afgehandeld deze week', 'goed', doel)+'</div>';
   },
   agenda: function(c){
     var h = _dashKop(_DASH_ICO.agenda, 'Agenda', magLezen('agenda') || isAdmin() ? 'agenda' : '', 'Agenda');
@@ -11521,8 +11529,8 @@ function renderDashboard() {
   var _openTotaal = _openOnkosten + _openOveruren + _openVerlof;
   if (_openTotaal > 0) {
     var _delen = [];
-    if(_openVerlof)   _delen.push(_openVerlof+' verlof');
-    if(_openOveruren) _delen.push(_openOveruren+' overuren');
+    if(_openVerlof)   _delen.push(_openVerlof+' verlofaanvra'+(_openVerlof!==1?'gen':'ag'));
+    if(_openOveruren) _delen.push(_openOveruren+' overurenaanvra'+(_openOveruren!==1?'gen':'ag'));
     if(_openOnkosten) _delen.push(_openOnkosten+' onkostendeclaratie'+(_openOnkosten!==1?'s':''));
     h += '<div class="dash-melding">'+'<span class="dash-melding-ico">'+_DASH_ICO.alarm+'</span><div class="dash-melding-t"><b>'+_openTotaal+' '+(_openTotaal===1?'aanvraag wacht':'aanvragen wachten')+' op jouw goedkeuring</b><span>'+_delen.join(' · ')+'</span></div>'
       + '<button type="button" class="btn btn-ghost btn-sm" data-nav="'+(_openOnkosten?'onkosten':_openOveruren?'overuren':'verlof')+'">Bekijken</button></div>';
@@ -11551,8 +11559,9 @@ function renderDashboard() {
   // Begroeting, storingsdienst en de knop om de indeling aan te passen
   h += '<div class="dash-groet"><div class="dash-groet-t"><h2>'+gr+(naam ? ', '+esc(naam) : '')+'</h2><p>'+now.toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'</p></div>';
   h += '<div class="dash-groet-r">';
-  h += '<button type="button" class="dash-dienst'+(sdIk ? ' ik' : !sdMed ? ' leeg' : '')+'" data-nav="storingsdienst"><span class="dash-dienst-ico">'+_DASH_ICO.storing+'</span><span>'
-    + (sdIk ? '<b>Jij hebt deze week storingsdienst</b>' : sdMed ? 'Storingsdienst week '+getISOWeek(vandaag)+': <b>'+esc(sdMed.voornaam+' '+sdMed.achternaam)+'</b>'+(sdMed.telefoon ? ' · '+esc(sdMed.telefoon) : '') : 'Storingsdienst week '+getISOWeek(vandaag)+': <b>niet ingesteld</b>')
+  var _sdBeheer = isAdmin() || magBeheren('storingsdienst');
+  h += '<button type="button" class="dash-dienst'+(sdIk ? ' ik' : (!sdMed && _sdBeheer) ? ' leeg' : '')+'" data-nav="storingsdienst"><span class="dash-dienst-ico">'+_DASH_ICO.storing+'</span><span>'
+    + (sdIk ? '<b>Jij hebt deze week storingsdienst</b>' : sdMed ? 'Storingsdienst week '+getISOWeek(vandaag)+': <b>'+esc(sdMed.voornaam+' '+sdMed.achternaam)+'</b>'+(sdMed.telefoon ? ' · '+esc(sdMed.telefoon) : '') : 'Storingsdienst week '+getISOWeek(vandaag)+': <b>'+(_sdBeheer ? 'niet ingesteld' : 'nog niet bekend')+'</b>')
     + '</span></button>';
   h += '<button type="button" class="btn btn-ghost btn-sm dash-aanpassen" id="dash-aanpassen" aria-label="Indeling aanpassen" title="Indeling aanpassen" aria-pressed="'+_dashBewerk+'">'+_DASH_ICO.indeling+'<span>Indeling aanpassen</span></button>';
   h += '</div></div>';
@@ -12321,7 +12330,7 @@ function openMedModal(id) {
     : verlofDagenNaarUren(m.verlofTegoed != null ? m.verlofTegoed : _stdVerlofBasis, m);
   var _isZzp = (m.contractType === 'zzp');
   var _ctLabel = m.contractType ? (m.contractType==='zzp'?'ZZP/Extern':m.contractType==='tijdelijk'?'Tijdelijk':'Vast') : '';
-  var _accContractSub = [_ctLabel, (!_isZzp&&m.contractUren)?m.contractUren+'u/week':''].filter(Boolean).join(' · ');
+  var _accContractSub = [_ctLabel, (!_isZzp&&m.contractUren)?m.contractUren+' u/week':''].filter(Boolean).join(' · ');
 
   var _mfStap = function(id2, waarde, stap, min, max, eenheid){ return '<span class="lf-stap"><button type="button" data-lf-stap="-'+stap+'" aria-label="Minder">'+_LF_MIN+'</button><input type="number" inputmode="decimal" id="'+id2+'" value="'+waarde+'" min="'+min+'" max="'+max+'" step="'+stap+'"><button type="button" data-lf-stap="'+stap+'" aria-label="Meer">'+_LF_PLUS+'</button></span>'+(eenheid?'<span class="lf-hint">'+eenheid+'</span>':''); };
   var contractHtml = '<div class="lf-twee">';
@@ -12530,17 +12539,17 @@ function openMedModal(id) {
     }
     var t1 = telWeek(1);
     var el1 = document.getElementById('wr-totaal1');
-    if(el1) el1.textContent = 'Totaal week 1: '+t1+'u';
+    if(el1) el1.textContent = 'Totaal week 1: '+t1+' u';
     var isTwee = document.getElementById('wr-tweeweken') && document.getElementById('wr-tweeweken').checked;
     var gem = t1;
     if(isTwee) {
       var t2 = telWeek(2);
       var el2 = document.getElementById('wr-totaal2');
-      if(el2) el2.textContent = 'Totaal week 2: '+t2+'u';
+      if(el2) el2.textContent = 'Totaal week 2: '+t2+' u';
       gem = Math.round((t1+t2)/2*10)/10;
     }
     var elG = document.getElementById('wr-gemiddeld');
-    if(elG) elG.innerHTML = 'Gemiddeld <strong>'+gem+'u/week</strong> · <strong>'+Math.round(gem/5*10)/10+'u per dag</strong>';
+    if(elG) elG.innerHTML = 'Gemiddeld <strong>'+gem+' u/week</strong> · <strong>'+Math.round(gem/5*10)/10+' u per dag</strong>';
     // Ander rooster = andere werkdag: de verlofregel rekent mee
     updateVerlofCalc(); updateSaldoUren();
   }
@@ -12688,7 +12697,7 @@ function saveMed(id) {
         data.id,
         'correctie',
         verlofUrenNaarDagen(verschilUren, _medVoorOmrek),
-        'Handmatige aanpassing via medewerker bewerken (oud: '+oudUren+'u → nieuw: '+verlofSaldoUren+'u)',
+        'Handmatige aanpassing via medewerker bewerken (oud: '+oudUren+'u → nieuw: '+verlofSaldoUren+' u)',
         verlofSaldo,
         { uren: verschilUren, saldoNaUren: verlofSaldoUren }
       );
@@ -13097,7 +13106,7 @@ function renderServiceklanten() {
           break;
         }
         case 'pomptype': h+='<td data-col="pomptype" style="font-size:12px;color:var(--muted)">'+esc(k.pomptype||'—')+'</td>'; break;
-        case 'duur':    h+='<td data-col="duur" style="font-size:12px;font-weight:600">'+(k.duurUren ? k.duurUren+'u' : '—')+'</td>'; break;
+        case 'duur':    h+='<td data-col="duur" style="font-size:12px;font-weight:600">'+(k.duurUren ? k.duurUren+' u' : '—')+'</td>'; break;
         case 'laatste': h+='<td data-col="laatste" style="font-size:12px;color:var(--muted);white-space:nowrap">'+fmtD(k.laatsteDatum)+'</td>'; break;
         case 'volgende': h+='<td data-col="volgende" style="font-size:12px;font-weight:600;white-space:nowrap;color:'+(verv?'var(--red-t)':binnk?'var(--orange-t)':'var(--text)')+'">'+fmtD(k.volgendeDatum)+'</td>'; break;
         case 'status':
@@ -15862,9 +15871,9 @@ function renderVerlof(){
           _afw.forEach(function(r){
             h2 += '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;flex-wrap:wrap">';
             h2 += '<span style="font-weight:600;font-size:12.5px;flex:1;min-width:140px">'+esc(r.med.voornaam+' '+r.med.achternaam)+'</span>';
-            h2 += '<span style="font-size:11.5px;color:var(--muted)">opgeslagen <strong style="color:var(--text)">'+String(r.huidig).replace('.',',')+'u</strong></span>';
-            h2 += '<span style="font-size:11.5px;color:var(--muted)">volgens historie <strong style="color:var(--text)">'+String(r.volgensHistorie).replace('.',',')+'u</strong></span>';
-            h2 += '<span style="font-size:12px;font-weight:700;color:'+(r.verschil>0?'var(--green-t)':'var(--red-t)')+'">'+(r.verschil>0?'+':'')+String(r.verschil).replace('.',',')+'u</span>';
+            h2 += '<span style="font-size:11.5px;color:var(--muted)">opgeslagen <strong style="color:var(--text)">'+String(r.huidig).replace('.',',')+' u</strong></span>';
+            h2 += '<span style="font-size:11.5px;color:var(--muted)">volgens historie <strong style="color:var(--text)">'+String(r.volgensHistorie).replace('.',',')+' u</strong></span>';
+            h2 += '<span style="font-size:12px;font-weight:700;color:'+(r.verschil>0?'var(--green-t)':'var(--red-t)')+'">'+(r.verschil>0?'+':'')+String(r.verschil).replace('.',',')+' u</span>';
             h2 += '<button class="btn btn-primary btn-sm" data-saldo-herstel="'+esc(r.med.id)+'" style="font-size:11px;padding:4px 10px">Herstellen</button>';
             h2 += '</div>';
           });
@@ -15885,7 +15894,7 @@ function renderVerlof(){
           h2 += '<svg class="vl-chevron" style="width:16px;height:16px;flex-shrink:0;transition:transform .2s;transform:rotate('+(_open?'90':'0')+'deg);color:var(--muted)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18l6-6-6-6"/></svg>';
           h2 += '<div class="avatar" style="width:32px;height:32px;font-size:11px;background:'+kl+';color:'+_tekstOpKleur(kl)+';flex-shrink:0">'+initials(m)+'</div>';
           h2 += '<div style="font-weight:700">'+esc(m.voornaam+' '+m.achternaam)+'</div>';
-          h2 += '<span style="font-size:12px;color:var(--muted);margin-left:4px">saldo: <strong>'+_hrGetal(getVerlofSaldoUren(m))+'u</strong> ('+_hrGetal(verlofUrenNaarDagen(getVerlofSaldoUren(m), m))+'d)</span>';
+          h2 += '<span style="font-size:12px;color:var(--muted);margin-left:4px">saldo: <strong>'+_hrGetal(getVerlofSaldoUren(m))+' u</strong> ('+_hrGetal(verlofUrenNaarDagen(getVerlofSaldoUren(m), m))+'d)</span>';
           h2 += '<span style="font-size:11px;color:var(--muted)">· '+_mutCount+' mutatie'+(_mutCount!==1?'s':'')+'</span>';
           if(isAdmin()) h2 += '<button class="btn btn-ghost btn-sm" data-correctie="'+m.id+'" style="margin-left:auto;font-size:11px">+ Correctie</button>';
           h2 += '</div>';
@@ -16366,7 +16375,7 @@ function keurVerlof(id,goed){
       m.verlofSaldo = verlofUrenNaarDagen(nieuwUren, m); // legacy dagen-veld bijhouden (afgeleid)
       dbSaveItem('medewerkers',m.id,m);
       slaVerlofMutatie(m.id, 'opname', -verlofUrenNaarDagen(afUren, m),
-        'Verlof goedgekeurd: ' + fmtD(v.van) + ' t/m ' + fmtD(v.tot) + ' (' + (v.type||'Vakantie') + ', ' + (v.uren!=null?v.uren+'u':v.dagen+' dgn') + ')',
+        'Verlof goedgekeurd: ' + fmtD(v.van) + ' t/m ' + fmtD(v.tot) + ' (' + (v.type||'Vakantie') + ', ' + (v.uren!=null?v.uren+' u':v.dagen+' dgn') + ')',
         m.verlofSaldo, { uren: -afUren, saldoNaUren: nieuwUren });
     }
   }
@@ -18714,7 +18723,7 @@ function _apRenderStap3(){
   b+='<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
   b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+totKlanten+'</span> opdrachten</div>';
   b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+uniekeDagen.length+'</span> dagen</div>';
-  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+Math.round(totWerk)+'u</span> werktijd</div>';
+  b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+Math.round(totWerk)+' u</span> werktijd</div>';
   b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+Math.floor(totReis/60)+'u '+Math.round(totReis%60)+'m</span> reistijd</div>';
   b+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:13px;font-weight:600"><span style="color:var(--accent-t);font-weight:700">'+totKm+'</span> km</div>';
   b+='</div>';
@@ -18734,13 +18743,13 @@ function _apRenderStap3(){
     b+='<span class="tag" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:11px;font-weight:700">Baan '+r.baanIndex+(banenDezeDag>1?' van '+banenDezeDag:'')+'</span>';
     b+='<span style="font-size:11px;color:var(--muted);font-style:italic">geen vaste monteur</span></div>';
     b+='<div style="font-size:11px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap">';
-    b+='<span>'+r.klanten.length+' kl.</span><span>·</span><span>'+werkUren.toFixed(1)+'u werk</span>';
+    b+='<span>'+r.klanten.length+' kl.</span><span>·</span><span>'+werkUren.toFixed(1)+' u werk</span>';
     if(r._apTotReisMin) b+='<span>·</span><span>'+r._apTotReisMin+' min reis</span>';
     if(r._apTotKm) b+='<span>·</span><span>'+r._apTotKm+' km</span>';
     b+='</div>';
     // Waarschuwing als dag te lang is (werk + reistijd boven limiet, met kleine tolerantie)
     var dagTotaalUren=werkUren+((r._apTotReisMin||0)/60);
-    if(dagTotaalUren>_apMaxUren+0.25) b+='<div style="color:var(--red-t);font-size:10px;font-weight:700" title="Dag overschrijdt limiet ('+dagTotaalUren.toFixed(1)+'u)" class="ic-los">'+_IC_WAARSCH+'</div>';
+    if(dagTotaalUren>_apMaxUren+0.25) b+='<div style="color:var(--red-t);font-size:10px;font-weight:700" title="Dag overschrijdt limiet ('+dagTotaalUren.toFixed(1)+' u)" class="ic-los">'+_IC_WAARSCH+'</div>';
     b+='<div class="ap-chev" style="color:var(--muted);flex-shrink:0;transition:transform .2s;transform:rotate(0deg)">'
       +'<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>';
     b+='</div>';
@@ -18774,7 +18783,7 @@ function _apRenderStap3(){
         b+='<div style="font-size:10px;color:var(--muted)">→ '+k._apTot+'</div>';
         b+='</div>';
       } else {
-        b+='<div style="font-size:12px;font-weight:700;color:var(--accent-t);flex-shrink:0">'+(k.duurUren||1.5)+'u</div>';
+        b+='<div style="font-size:12px;font-weight:700;color:var(--accent-t);flex-shrink:0">'+(k.duurUren||1.5)+' u</div>';
       }
       if(k.voorkeurDag||k.voorkeurWeek){
         b+='<div style="font-size:10px;color:var(--orange-t);flex-shrink:0" title="'+(k.voorkeurDag?'Voorkeurdag: '+k.voorkeurDag:'Voorkeurweek: '+k.voorkeurWeek)+'">'+ICO.ster+'</div>';
@@ -18794,7 +18803,7 @@ function _apRenderStap3(){
   if(_apNietIngepland.length){
     b+='<div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">';
     b+='<div style="font-size:13px;font-weight:700;color:var(--orange-t);margin-bottom:8px">'+_IC_WAARSCH+_apNietIngepland.length+' niet ingepland</div>';
-    _apNietIngepland.forEach(function(k){ b+='<div style="font-size:12px;color:var(--muted);padding:3px 0">'+esc(k.naam)+' — '+(k.duurUren||1.5)+'u'+(k._apNietReden?' <span style="color:var(--orange-t)">('+esc(k._apNietReden)+')</span>':'')+'</div>'; });
+    _apNietIngepland.forEach(function(k){ b+='<div style="font-size:12px;color:var(--muted);padding:3px 0">'+esc(k.naam)+' — '+(k.duurUren||1.5)+' u'+(k._apNietReden?' <span style="color:var(--orange-t)">('+esc(k._apNietReden)+')</span>':'')+'</div>'; });
     b+='</div>';
   } else {
     b+='<div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">';
@@ -19515,7 +19524,7 @@ function _plmKaart(o, metMonteur){
   if(spoed) h += _spoedLabel();
   h += '<span class="plm-typ"><i style="background:'+ot.kleur+'"></i>'+esc(ot.label || '')+'</span>';
   h += wkStatusBadge(o.status);
-  if(o.status === 'actie') h += '<span class="plm-actie">→ '+esc(o.actietype || 'Actie vereist')+'</span>';
+  if(o.status === 'actie' && o.actietype) h += '<span class="plm-actie">→ '+esc(o.actietype)+'</span>';
   h += '</div></div>';
   if(metMonteur) h += _plmAvatars(o);
   return h + '</div>';
@@ -19525,7 +19534,8 @@ function _plmRij(o){
   var adres = [o.adres, o.plaats].filter(Boolean).join(', ');
   var h = '<div class="plm-rij plan-event'+(spoed ? ' spoed' : '')+'" data-id="'+esc(o.id)+'" role="button" tabindex="0">';
   h += '<span class="plm-t'+(o.pinTijd ? ' vast' : (o.blokVan && o.blokTot) ? ' blok' : '')+'">'+esc(o.tijdVan || o.blokVan || '—')+'</span>';
-  h += '<span class="plm-k">'+(spoed ? _spoedLabel()+' ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+'</span>';
+  var st = wkStatusBadge(o.status);
+  h += '<span class="plm-k">'+(spoed ? _spoedLabel()+' ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+(st ? '<span class="plm-rij-st">'+st+'</span>' : '')+'</span>';
   return h + _plmAvatars(o) + '</div>';
 }
 // Reeksen van twee of meer lege dagen achter elkaar (niet vandaag, geen blokkadedag) worden één
@@ -20568,7 +20578,7 @@ function renderPlanWeek(monteurs) {
         h += _wkType(ot);
         var _wkAdres = (o.adres||'') + (o.plaats ? (o.adres?', ':'')+o.plaats : '');
         if(_wkAdres) h += '<div style="font-size:11px;color:var(--muted);line-height:1.35;word-break:break-word">'+esc(_wkAdres)+'</div>';
-        if(o.status==='actie') h += '<div style="font-size:11px;color:var(--orange-t)">→ '+(o.actietype||'Actie vereist')+'</div>';
+        if(o.status==='actie' && o.actietype) h += '<div style="font-size:11px;color:var(--orange-t)">→ '+esc(o.actietype)+'</div>';
         h += '</div>';
       });
 
@@ -20833,7 +20843,7 @@ function renderPlanDag(monteurs) {
     });
     _ops.forEach(function(x){
       var top = _px(x.s), hoog = Math.max(40, _px(x.e) - top);
-      var duur = x.e - x.s, kort = duur < 45 ? 2 : duur < 80 ? 1 : 0;   // < 45 min: alleen tijd en naam; < 80 min: zonder adres
+      var duur = x.e - x.s, kort = duur <= 50 ? 2 : duur < 80 ? 1 : 0;   // t/m 50 min: alleen tijd en naam; < 80 min: zonder adres
       if(x.n > 1 && !kort) kort = 1;   // smalle baan naast een andere opdracht: ook zonder adres
       h += '<div class="dag-plek" style="top:'+top+'px;height:'+hoog+'px;left:calc('+x.baan+' * 100% / '+x.n+');width:calc(100% / '+x.n+')">'+kaart(x.o, k.nietInPlanning, kort)+'</div>';
     });
@@ -22364,7 +22374,7 @@ function renderOveruren() {
     h += '<div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px">';
     if(heeftItems) {
       h += '<span>'+items.length+' registratie'+(items.length===1?'':'s')+'</span>';
-      h += '<span>·</span><span>'+_nlUren(totUren)+'u totaal</span>';
+      h += '<span>·</span><span>'+_nlUren(totUren)+' u totaal</span>';
     } else {
       h += '<span>Geen overuren in '+jaarStr+'</span>';
     }
@@ -22400,7 +22410,7 @@ function renderOveruren() {
         }[o.status] || '<span class="tag tag-muted">'+esc(o.status)+'</span>';
         h += '<tr class="ou-rij" data-id="'+o.id+'" style="cursor:pointer">';
         h += '<td style="white-space:nowrap">'+fmtD(o.datum)+'</td>';
-        h += '<td style="font-weight:700;color:var(--accent-t)">'+_nlUren(o.uren)+'u</td>';
+        h += '<td style="font-weight:700;color:var(--accent-t)">'+_nlUren(o.uren)+' u</td>';
         h += '<td><span class="tag '+(o.type==='uitbetaling'?'tag-muted':'tag-blue')+'">'+(o.type==='uitbetaling'?ICO.euro+' Uitbetaling':ICO.refresh+' Compensatie')+'</span></td>';
         h += '<td style="font-size:12px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.omschrijving||'—')+'</td>';
         h += '<td>'+statusTag+'</td>';
@@ -22480,7 +22490,7 @@ function renderOveruren() {
     var waarschuwing = o.status==='gecompenseerd'
       ? '\n\nLet op: de gecompenseerde verlofdagen worden van het saldo afgetrokken.'
       : '';
-    bevestigActie('Overuren verwijderen','Weet je zeker dat je de overuren registratie van '+esc(naam)+' ('+_nlUren(o.uren)+'u) wilt verwijderen?'+waarschuwing,function(){
+    bevestigActie('Overuren verwijderen','Weet je zeker dat je de overuren registratie van '+esc(naam)+' ('+_nlUren(o.uren)+' u) wilt verwijderen?'+waarschuwing,function(){
       _verwijderOveruren(b.dataset.id);
     });
   });});
@@ -22502,7 +22512,7 @@ function _verwijderOveruren(id) {
       med.verlofSaldo     = nieuwDagen;
       dbSaveItem('medewerkers', med.id, med);
       slaVerlofMutatie(med.id, 'correctie', -verlofUrenNaarDagen(compUren, med),
-        'Terugboeking compensatie \u2014 verwijderde overuren '+fmtD(o.datum)+' ('+compUren+'u)', nieuwDagen,
+        'Terugboeking compensatie \u2014 verwijderde overuren '+fmtD(o.datum)+' ('+compUren+' u)', nieuwDagen,
         { uren: -compUren, saldoNaUren: nieuwUren });
     }
   }
@@ -22638,7 +22648,7 @@ function _voerKeuringOveruren(id, status, reden) {
       med.verlofSaldo     = nieuwDagen;
       dbSaveItem('medewerkers', med.id, med);
       slaVerlofMutatie(med.id, 'bijschrijving', verlofUrenNaarDagen(compUren, med),
-        'Compensatie overuren '+fmtD(o.datum)+' ('+compUren+'u)', nieuwDagen,
+        'Compensatie overuren '+fmtD(o.datum)+' ('+compUren+' u)', nieuwDagen,
         { uren: compUren, saldoNaUren: nieuwUren });
       toast(compUren+' uur bijgeschreven aan het verlofsaldo van '+med.voornaam, 'success');
     }
@@ -22654,7 +22664,7 @@ function _voerKeuringOveruren(id, status, reden) {
   if(typeof stuurNotificatie==='function' && magNotificatie('overuren', status)) {
     var ouTitels = {gecompenseerd:'Overuren goedgekeurd & gecompenseerd', afgewezen:'Overuren afgewezen', uitbetaald:'Overuren uitbetaald'};
     stuurNotificatie(o.medId,'overuren',ouTitels[status]||status,
-      'Jouw overuren registratie ('+_nlUren(o.uren)+'u) is '+(status==='gecompenseerd'?'goedgekeurd en gecompenseerd':status)+(reden?' — '+reden:'')+'.','overuren');
+      'Jouw overuren registratie ('+_nlUren(o.uren)+' u) is '+(status==='gecompenseerd'?'goedgekeurd en gecompenseerd':status)+(reden?' — '+reden:'')+'.','overuren');
   }
 }
 
@@ -23337,7 +23347,7 @@ function renderVerzuim() {
         var stKleur={actief:'var(--red)',langdurig:'var(--orange)',hersteld:'var(--green)'}[v.status]||'var(--muted)';
         var stTag='<span class="tag" style="background:'+_kleurTint(stKleur,'22')+';color:'+_klTekst(stKleur)+'">'+esc(_hrHoofd(v.status))+'</span>';
         var _vtmap={ziek:'Ziek',geoorloofd:'Geoorloofd',ongeoorloofd:'Ongeoorloofd',gedeeltelijk:'Gedeeltelijk'};
-        var typeTag=(_vtmap[v.type]||esc(v.type||'—'))+(v.type==='gedeeltelijk'&&v.urenZiek?' <span style="font-size:11px;color:var(--muted)">('+v.urenZiek+'u ziek'+(v.urenWerk?'/'+v.urenWerk+'u werk':'')+')</span>':'');
+        var typeTag=(_vtmap[v.type]||esc(v.type||'—'))+(v.type==='gedeeltelijk'&&v.urenZiek?' <span style="font-size:11px;color:var(--muted)">('+v.urenZiek+' u ziek'+(v.urenWerk?'/'+v.urenWerk+' u werk':'')+')</span>':'');
         h += '<tr class="vz-rij" data-id="'+v.id+'" style="cursor:pointer">';
         h += '<td style="white-space:nowrap">'+fmtD(v.van)+'</td>';
         h += '<td>'+typeTag;
@@ -33546,11 +33556,11 @@ function renderRapPersoonlijk(el) {
     var m=r.med, kl=medKleur(m), saldo=r.saldo, vlOp=r.opgenomen, ouTot=r.overuren, okTot=r.onkosten, vzDagen=r.verzuim;
     h+='<tr style="cursor:pointer" class="rap-med-rij" data-id="'+m.id+'">';
     h+='<td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div><div><div style="font-size:13px;font-weight:600">'+esc(r.naam)+'</div><div style="font-size:11px;color:var(--muted)">'+esc(_rolNaam(m.rol))+'</div></div></div></td>';
-    h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)')+'">'+_nlAantal(saldo)+'u</td>';
-    h+='<td style="padding:10px 14px;color:var(--muted)">'+_nlAantal(vlOp)+'u</td>';
-    h+='<td style="padding:10px 14px;font-weight:'+(ouTot?'700':'400')+';color:'+(ouTot?'var(--accent-t)':'var(--muted)')+'">'+_nlAantal(ouTot)+'u</td>';
+    h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)')+'">'+_nlAantal(saldo)+' u</td>';
+    h+='<td style="padding:10px 14px;color:var(--muted)">'+_nlAantal(vlOp)+' u</td>';
+    h+='<td style="padding:10px 14px;font-weight:'+(ouTot?'700':'400')+';color:'+(ouTot?'var(--accent-t)':'var(--muted)')+'">'+_nlAantal(ouTot)+' u</td>';
     h+='<td style="padding:10px 14px;font-weight:'+(okTot?'700':'400')+';color:'+(okTot?'var(--green-t)':'var(--muted)')+'">'+_nlEuro(okTot,0)+'</td>';
-    h+='<td style="padding:10px 14px;color:'+(vzDagen>80?'var(--red-t)':vzDagen>0?'var(--orange-t)':'var(--muted)')+'">'+_nlAantal(vzDagen)+'u</td>';
+    h+='<td style="padding:10px 14px;color:'+(vzDagen>80?'var(--red-t)':vzDagen>0?'var(--orange-t)':'var(--muted)')+'">'+_nlAantal(vzDagen)+' u</td>';
     h+='</tr>';
   });
   h+='</tbody></table></div></div>';
@@ -33645,14 +33655,14 @@ function renderRapOveruren(el) {
   var BAR_H=130;
 
   h+=staafDiagram('Overuren per maand — '+jaarStr, mndData, maxMnd,
-    function(d){ var t=d.comp+d.uitb+d.open; return t?_nlAantal(t)+'u':''; },
+    function(d){ var t=d.comp+d.uitb+d.open; return t?_nlAantal(t)+' u':''; },
     function(d){ var t=d.comp+d.uitb+d.open; if(!t) return [];
       var bH=Math.max(4,Math.round(t/maxMnd*BAR_H));
       var cH=Math.round(d.comp/t*bH), uH=Math.round(d.uitb/t*bH), oH=bH-cH-uH;
       var r=[];
-      if(oH>0)r.push({h:oH,kl:'#f59e0b',tip:d.mn+' — Aangevraagd: '+_nlAantal(d.open)+'u'});
-      if(uH>0)r.push({h:uH,kl:'#6b7694',tip:d.mn+' — Uitbetaald: '+_nlAantal(d.uitb)+'u'});
-      if(cH>0)r.push({h:cH,kl:'#10b981',tip:d.mn+' — Gecompenseerd: '+_nlAantal(d.comp)+'u'});
+      if(oH>0)r.push({h:oH,kl:'#f59e0b',tip:d.mn+' — Aangevraagd: '+_nlAantal(d.open)+' u'});
+      if(uH>0)r.push({h:uH,kl:'#6b7694',tip:d.mn+' — Uitbetaald: '+_nlAantal(d.uitb)+' u'});
+      if(cH>0)r.push({h:cH,kl:'#10b981',tip:d.mn+' — Gecompenseerd: '+_nlAantal(d.comp)+' u'});
       return r;},
     [{kl:'#10b981',l:'Gecompenseerd'},{kl:'#6b7694',l:'Uitbetaald'},{kl:'#f59e0b',l:'Aangevraagd'}]);
 
@@ -33668,7 +33678,7 @@ function renderRapOveruren(el) {
   ouRijen.forEach(function(r){
     var m=r.med, kl=m?(medKleur(m)):'#6b7694';
     h+='<tr class="rap-med-rij" data-id="'+r.mid+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px">'+(m?'<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>':'')+'<span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
-    h+='<td style="padding:10px 14px;font-weight:700">'+_nlAantal(r.totaal)+'u</td><td style="padding:10px 14px">'+_nlAantal(r.goedgekeurd)+'u</td><td style="padding:10px 14px;color:var(--green-t)">'+_nlAantal(r.gecompenseerd)+'u</td><td style="padding:10px 14px;color:var(--muted)">'+_nlAantal(r.uitbetaald)+'u</td></tr>';
+    h+='<td style="padding:10px 14px;font-weight:700">'+_nlAantal(r.totaal)+' u</td><td style="padding:10px 14px">'+_nlAantal(r.goedgekeurd)+' u</td><td style="padding:10px 14px;color:var(--green-t)">'+_nlAantal(r.gecompenseerd)+' u</td><td style="padding:10px 14px;color:var(--muted)">'+_nlAantal(r.uitbetaald)+' u</td></tr>';
   });
   if(!ouRijen.length)h+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--muted)">Geen data</td></tr>';
   h+='</tbody></table></div></div>';
@@ -33756,7 +33766,7 @@ function renderRapVerlof(el) {
   verlofJaar.forEach(function(v){var t=v.type||'overig';typeSegs[t]=(typeSegs[t]||0)+verlofOpgenomenUren([v], getMed(v.medId));});
   // Totaal pas berekenen nadat typeSegs gevuld is (stond eerst erboven -> crash).
   var totDagen=Object.keys(typeSegs).reduce(function(s,t){return s+typeSegs[t];},0);
-  var verlofTypeSeg=Object.keys(typeSegs).map(function(t){return{label:_hrHoofd(t),waarde:Math.round(typeSegs[t]*10)/10,weergave:_nlAantal(typeSegs[t])+'u',kleur:_vlTypeKleur(t)};});
+  var verlofTypeSeg=Object.keys(typeSegs).map(function(t){return{label:_hrHoofd(t),waarde:Math.round(typeSegs[t]*10)/10,weergave:_nlAantal(typeSegs[t])+' u',kleur:_vlTypeKleur(t)};});
 
   var h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">';
   h+=grafiekKaart('Saldo verdeling',donutSVG(saldoSegs,actieve.length+'|medewerkers'),legendaHTML(saldoSegs,actieve.length));
@@ -33774,7 +33784,7 @@ function renderRapVerlof(el) {
   var VL_BAR_H=130;
 
   h+=staafDiagram('Opgenomen verlof per maand — '+jaarStr, mndVlData, maxVlMnd,
-    function(d){ return d.dagen?_nlAantal(d.dagen)+'u':''; },
+    function(d){ return d.dagen?_nlAantal(d.dagen)+' u':''; },
     function(d){ if(!d.dagen) return [];
       return [{h:Math.max(4,Math.round(d.dagen/maxVlMnd*VL_BAR_H)),kl:'var(--accent)'}]; },
     null);
@@ -33791,7 +33801,7 @@ function renderRapVerlof(el) {
     h+='<div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+medKleur(m)+';color:'+_tekstOpKleur(medKleur(m))+';flex-shrink:0">'+initials(m)+'</div>';
     h+='<div style="font-size:12px;width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.voornaam)+'</div>';
     h+='<div style="flex:1;background:var(--surface2);border-radius:4px;height:8px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+kl+';border-radius:4px"></div></div>';
-    h+='<div style="font-size:12px;font-weight:700;color:'+_klTekst(kl)+';width:52px;text-align:right">'+_nlAantal(saldo)+'u</div>';
+    h+='<div style="font-size:12px;font-weight:700;color:'+_klTekst(kl)+';width:52px;text-align:right">'+_nlAantal(saldo)+' u</div>';
     h+='</div>';
   });
   h+='</div>';
@@ -33804,7 +33814,7 @@ function renderRapVerlof(el) {
   vlRijen.forEach(function(r){
     var m=r.med, kl=medKleur(m), saldo=r.saldo, op=r.opgenomen;
     h+='<tr class="rap-med-rij" data-id="'+m.id+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div><span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
-    h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)')+'">'+_nlAantal(saldo)+'u</td><td style="padding:10px 14px">'+_nlAantal(op)+'u</td><td style="padding:10px 14px;color:var(--muted)">'+r.aanvragen+'</td></tr>';
+    h+='<td style="padding:10px 14px;font-weight:700;color:'+(saldo<0?'var(--red-t)':saldo>0?'var(--green-t)':'var(--muted)')+'">'+_nlAantal(saldo)+' u</td><td style="padding:10px 14px">'+_nlAantal(op)+' u</td><td style="padding:10px 14px;color:var(--muted)">'+r.aanvragen+'</td></tr>';
   });
   h+='</tbody></table></div></div>';
   el.innerHTML=h; initGrafiekInteractie(el);
@@ -34005,7 +34015,7 @@ function renderRapVerzuim(el) {
   vzRijen.forEach(function(r){
     var m=r.med, kl=medKleur(m), dagen=r.werkdagen, pct=r.pct, langd=r.langdurig;
     h+='<tr class="rap-med-rij" data-id="'+m.id+'" style="cursor:pointer"><td style="padding:10px 14px"><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:28px;height:28px;font-size:10px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div><span style="font-weight:600">'+esc(r.naam)+'</span></div></td>';
-    h+='<td style="padding:10px 14px">'+r.meldingen+'</td><td style="padding:10px 14px;font-weight:700;color:'+(dagen>160?'var(--red-t)':dagen>40?'var(--orange-t)':'var(--text)')+'">'+_nlAantal(dagen)+'u</td><td style="padding:10px 14px;color:'+(pct>5?'var(--red-t)':'var(--muted)')+'">'+_nlAantal(pct)+'%</td>';
+    h+='<td style="padding:10px 14px">'+r.meldingen+'</td><td style="padding:10px 14px;font-weight:700;color:'+(dagen>160?'var(--red-t)':dagen>40?'var(--orange-t)':'var(--text)')+'">'+_nlAantal(dagen)+' u</td><td style="padding:10px 14px;color:'+(pct>5?'var(--red-t)':'var(--muted)')+'">'+_nlAantal(pct)+'%</td>';
     h+='<td style="padding:10px 14px">'+(langd?'<span class="tag tag-orange">'+langd+'</span>':'<span style="color:var(--muted)">—</span>')+'</td></tr>';
   });
   h+='</tbody></table></div></div>';
