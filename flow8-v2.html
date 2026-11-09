@@ -1133,6 +1133,20 @@ body.light #sb-logo-svg path[opacity]{opacity:.75}
 /* ── Dashboard: instelbare blokken, zie renderDashboard ── */
 :root{--dash-g1:#4f6ef5;--dash-g2:#d97706}
 body.light{--dash-g2:#f59e0b}
+/* Herplanvenster en bezetting in de rijkop van Week */
+.hp-intro{margin:0 0 12px;color:var(--muted);font-size:14px}
+.hp-kop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;font-size:13px;color:var(--muted)}
+.hp-rij{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,270px);gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--border)}
+.hp-op{display:flex;flex-direction:column;min-width:0}
+.hp-op b{font-size:14px;font-weight:600}
+.hp-op small{font-size:12px;color:var(--muted)}
+.hp-rij select{width:100%}
+@media (max-width:768px){.hp-rij{grid-template-columns:1fr;gap:8px}.hp-rij select{min-height:44px}}
+.wk-bez{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.wk-bez .dash-spoor{flex:1;height:6px;min-width:40px;background:var(--surface)}
+.wk-bez-w{white-space:nowrap}
+/* De knop Ongedaan in de melding onderin moet klikbaar zijn (de melding zelf laat klikken door) */
+#toast #toast-undo-btn{pointer-events:auto}
 /* Afwezig met werk: in de vaste kop van Planning (blijft in beeld bij het scrollen naar vandaag) */
 #plan-afwezig{display:grid;gap:6px;padding:0 0 12px}
 #plan-afwezig:empty{display:none}
@@ -11374,19 +11388,8 @@ var DASH_RENDER = {
     if(!monteurs.length) return h + '<div class="dash-leeg">Geen monteurs in de planning.</div>';
     h += '<div class="dash-bez">';
     monteurs.forEach(function(m){
-      var gepland = APP.opdrachten.filter(function(o){ return dagen.indexOf(o.datum) >= 0 && _dashIdsVan(o).indexOf(String(m.id)) >= 0; })
-        .reduce(function(s, o){ return s + _dashUren(o); }, 0);
-      var perDag = _verlofUrenPerDagVan(m), beschikbaar = 0, ziekD = 0, verlofD = 0;
-      dagen.forEach(function(dag){
-        if(!_planIsWerkdag(dag)) return;
-        if(verzuimOpDag(m.id, dag)){ ziekD++; return; }
-        var vl = APP.verlof.find(function(v){ return String(v.medId) === String(m.id) && v.status === 'goedgekeurd' && dag >= v.van && dag <= (v.tot || v.van); });
-        if(vl && !vl.gedeeltelijk) verlofD++;
-        beschikbaar += vl ? (vl.gedeeltelijk ? perDag/2 : 0) : perDag;
-      });
-      var _afwLbl = !beschikbaar && (ziekD || verlofD) ? (ziekD >= verlofD ? 'ziek' : 'verlof') : '';
-      var r1 = function(x){ return String(Math.round(x*10)/10).replace('.', ','); };
-      var vol = gepland > beschikbaar, pct = beschikbaar ? Math.min(100, gepland/beschikbaar*100) : (gepland ? 100 : 0);
+      var bz = _medBezetting(m, dagen), gepland = bz.gepland, beschikbaar = bz.beschikbaar, _afwLbl = bz.afwezig;
+      var r1 = _urenKort, vol = bz.vol, pct = bz.pct;
       h += '<div class="dash-bez-rij" data-tip="'+esc(m.voornaam+' '+m.achternaam)+': <b>'+r1(gepland)+'</b> van '+r1(beschikbaar)+' uur gepland'+(vol ? ' (overboekt)' : '')+'">'
         + '<span class="dash-bez-naam">'+_dashAvatar(m, 26)+'<span>'+esc(m.voornaam)+'</span></span>'
         + '<span class="dash-spoor"><span class="dash-vul'+(vol ? ' vol' : '')+'" style="width:'+pct+'%"></span></span>'
@@ -11555,8 +11558,8 @@ function renderDashboard() {
   }
   // Melding: iemand is vandaag ziek of met verlof terwijl er nog werk bij hem staat
   if(_dashMagPlanning() && _planIsWerkdag(vandaag)){
-    h += _afwezigMeldingHtml(_planAfwezigMetWerk([vandaag]), 'vandaag', function(){
-      return '<button type="button" class="btn btn-ghost btn-sm" data-herplan>Herplannen</button>';
+    h += _afwezigMeldingHtml(_planAfwezigMetWerk([vandaag]), 'vandaag', function(a){
+      return magSchrijven('planning') ? _herplanKnop(a) : '<button type="button" class="btn btn-ghost btn-sm" data-herplan>Bekijken</button>';
     });
   }
   // Melding: verlof bijschrijven voor het nieuwe jaar (beheerder)
@@ -18963,8 +18966,105 @@ function _planAfwezigMetWerk(dagen){
   });
   return uit;
 }
+// Uren van een monteur op een dag: gepland en beschikbaar (werkdag, min ziekte en verlof). Dashboard, Week en
+// het herplanvenster rekenen zo allemaal hetzelfde.
+function _medDagUren(m, dag){
+  var u = { gepland:0, beschikbaar:0, afwezig:'' };
+  APP.opdrachten.forEach(function(o){ if(o.datum === dag && _plmMonteurIds(o).indexOf(String(m.id)) >= 0) u.gepland += _dashUren(o); });
+  if(!_planIsWerkdag(dag)) return u;
+  if(verzuimOpDag(m.id, dag)){ u.afwezig = 'ziek'; return u; }
+  var vl = APP.verlof.find(function(v){ return String(v.medId) === String(m.id) && v.status === 'goedgekeurd' && dag >= v.van && dag <= (v.tot || v.van); });
+  if(vl && !vl.gedeeltelijk) u.afwezig = 'verlof';
+  var perDag = _verlofUrenPerDagVan(m);
+  u.beschikbaar = vl ? (vl.gedeeltelijk ? perDag/2 : 0) : perDag;
+  return u;
+}
+function _medBezetting(m, dagen){
+  var g = 0, b = 0, ziek = 0, verlof = 0;
+  dagen.forEach(function(d){ var u = _medDagUren(m, d); g += u.gepland; b += u.beschikbaar; if(u.afwezig === 'ziek') ziek++; else if(u.afwezig === 'verlof') verlof++; });
+  return { gepland:g, beschikbaar:b, vol:g > b, pct:b ? Math.min(100, g/b*100) : (g ? 100 : 0),
+    afwezig:(!b && (ziek || verlof)) ? (ziek >= verlof ? 'ziek' : 'verlof') : '' };
+}
+function _urenKort(x){ return String(Math.round(x*10)/10).replace('.', ','); }
+// Eén monteur van een opdracht vervangen door een ander (of weghalen: naarId leeg). De overige monteurs blijven
+// staan; monteurId is altijd de eerste van monteurIds.
+function _monteurVervangen(o, vanId, naarId){
+  var van = String(vanId || ''), ids = _plmMonteurIds(o);
+  if(naarId){ naarId = String(naarId); ids = ids.indexOf(van) >= 0 ? ids.map(function(x){ return x === van ? naarId : x; }) : [naarId].concat(ids); }
+  else ids = ids.filter(function(x){ return x !== van; });
+  ids = ids.filter(function(x, i, a){ return x && a.indexOf(x) === i; });
+  o.monteurIds = ids; o.monteurId = ids[0] || null;
+}
+// Herplannen: de open opdrachten van een afwezige monteur in één venster naar een ander of naar Niet toegewezen.
+// Achter elke naam staan de uren die die monteur op die dag nog vrij heeft; die lopen mee met de keuzes hier.
+var _herplanLijst = {};
+var _HP_DAG = ['zo','ma','di','wo','do','vr','za'];
+function openHerplannen(a){
+  var m = a.m, ops = a.ops.slice().sort(function(x, y){ return (x.datum+(x.tijdVan||'')).localeCompare(y.datum+(y.tijdVan||'')); });
+  var rollen = APP.planningRollen || ['monteur','extern'];
+  var anderen = APP.medewerkers.filter(function(x){ return x.status !== 'inactief' && rollen.indexOf(x.rol) >= 0 && String(x.id) !== String(m.id); });
+  var vrij0 = {}, keuze = ops.map(function(){ return ''; });
+  ops.forEach(function(o){ anderen.forEach(function(x){ var k = x.id+'|'+o.datum; if(!(k in vrij0)){ var u = _medDagUren(x, o.datum); vrij0[k] = u.afwezig ? null : u.beschikbaar - u.gepland; } }); });
+  var n = ops.length;
+  var h = '<p class="hp-intro">'+esc(m.voornaam)+' is '+a.reden+'. Kies per opdracht wie hem overneemt. Achter elke naam staat hoeveel uur die monteur die dag nog vrij heeft.</p>';
+  h += '<div class="hp-kop"><span>'+n+' opdracht'+(n === 1 ? '' : 'en')+'</span><button type="button" class="btn btn-ghost btn-sm" id="hp-alles-geen">Alles naar Niet toegewezen</button></div><div class="hp-lijst">';
+  ops.forEach(function(o, i){
+    var d = new Date(o.datum+'T00:00:00'), tijd = o.tijdVan ? o.tijdVan+(o.tijdTot ? '–'+o.tijdTot : '') : 'geen tijd';
+    h += '<div class="hp-rij"><div class="hp-op"><b>'+esc(o.klantNaam || 'Opdracht')+'</b><small>'+_HP_DAG[d.getDay()]+' '+fmtD(o.datum)+' · '+tijd+' · '+_urenKort(_dashUren(o))+' u'+(o.plaats ? ' · '+esc(o.plaats) : '')+'</small></div>'
+      + '<select class="input" data-hp="'+i+'" aria-label="Naar wie: '+esc(o.klantNaam || 'opdracht')+'"></select></div>';
+  });
+  h += '</div>';
+  openModal('Herplannen · '+m.voornaam+' '+m.achternaam, h, '<button type="button" class="btn btn-ghost" id="hp-annuleer">Annuleren</button><button type="button" class="btn btn-primary" id="hp-ok" disabled>Herplannen</button>');
+  var body = document.getElementById('modal-body'), ok = document.getElementById('hp-ok');
+  // Keuzelijsten (opnieuw) vullen: vrije uren min wat in dit venster al naar die monteur op die dag gaat
+  var vul = function(){
+    body.querySelectorAll('select[data-hp]').forEach(function(sel){
+      var i = +sel.dataset.hp, o = ops[i], al = _plmMonteurIds(o);
+      var opts = '<option value="">Laten staan bij '+esc(m.voornaam)+'</option>';
+      anderen.filter(function(x){ return vrij0[x.id+'|'+o.datum] !== null && al.indexOf(String(x.id)) < 0; })
+        .sort(function(x, y){ return vrij0[y.id+'|'+o.datum] - vrij0[x.id+'|'+o.datum]; })
+        .forEach(function(x){
+          var vrij = vrij0[x.id+'|'+o.datum];
+          ops.forEach(function(p, j){ if(j !== i && keuze[j] === String(x.id) && p.datum === o.datum) vrij -= _dashUren(p); });
+          opts += '<option value="'+esc(x.id)+'"'+(keuze[i] === String(x.id) ? ' selected' : '')+'>'+esc(x.voornaam+' '+x.achternaam)+' · '+(vrij > 0.05 ? _urenKort(vrij)+' u vrij' : 'vol')+'</option>';
+        });
+      opts += '<option value="_geen"'+(keuze[i] === '_geen' ? ' selected' : '')+'>Niet toegewezen</option>';
+      sel.innerHTML = opts;
+    });
+    var k = keuze.filter(Boolean).length;
+    ok.disabled = !k; ok.textContent = k ? 'Herplan '+k+' opdracht'+(k === 1 ? '' : 'en') : 'Herplannen';
+  };
+  vul();
+  // Per keuzelijst binden (het venster zelf wordt hergebruikt; een binding daarop zou bij elke opening bijkomen)
+  body.querySelectorAll('select[data-hp]').forEach(function(sel){ sel.addEventListener('change', function(){ keuze[+sel.dataset.hp] = sel.value; vul(); }); });
+  document.getElementById('hp-alles-geen').addEventListener('click', function(){ keuze = ops.map(function(){ return '_geen'; }); vul(); });
+  document.getElementById('hp-annuleer').addEventListener('click', closeModal);
+  ok.addEventListener('click', function(){
+    var oud = [], k = 0;
+    ops.forEach(function(o, i){
+      if(!keuze[i]) return;
+      oud.push({ o:o, id:o.monteurId == null ? null : o.monteurId, ids:Array.isArray(o.monteurIds) ? o.monteurIds.slice() : [] });
+      _monteurVervangen(o, m.id, keuze[i] === '_geen' ? '' : keuze[i]);
+      dbSaveItem('opdrachten', o.id, o); k++;
+    });
+    var herteken = function(){ if(APP.activePage === 'planning') renderPlanning(); else if(APP.activePage === 'dashboard') renderDashboard(); };
+    closeModal(); herteken();
+    toast(k+' opdracht'+(k === 1 ? '' : 'en')+' van '+m.voornaam+' herplant', 'success', function(){
+      oud.forEach(function(x){ x.o.monteurId = x.id; x.o.monteurIds = x.ids; dbSaveItem('opdrachten', x.o.id, x.o); });
+      herteken();
+    });
+  });
+}
+document.addEventListener('click', function(e){
+  var b = e.target.closest && e.target.closest('[data-herplan-med]'); if(!b) return;
+  var a = _herplanLijst[b.dataset.herplanMed]; if(a) openHerplannen(a);
+});
+function _herplanKnop(a){
+  return '<button type="button" class="btn btn-ghost btn-sm" data-herplan-med="'+esc(a.m.id)+'">Herplannen</button>';
+}
 function _afwezigMeldingHtml(lijst, wanneer, knop, tip){
   return lijst.map(function(a){
+    _herplanLijst[a.m.id] = a;
     var n = a.ops.length;
     return '<div class="dash-melding afwezig-melding" role="status"><span class="dash-melding-ico">'+_DASH_ICO.alarm+'</span><div class="dash-melding-t">'
       + '<b>'+esc(a.m.voornaam+' '+a.m.achternaam)+' is '+a.reden+'</b>'
@@ -19035,10 +19135,11 @@ function _planAfwezigHtml(){
   var wanneer = _planView === 'dag' ? (_planDatum === nu ? 'vandaag' : 'deze dag') : (_planView === 'week' ? 'deze week' : 'in deze periode');
   // Knop: alleen de opdrachten van deze monteur, in de lijst; nog eens klikken (filter staat al) zet hem terug
   return _afwezigMeldingHtml(_planAfwezigMetWerk(dagen), wanneer, function(a){
+    if(magSchrijven('planning')) return _herplanKnop(a);
     var al = String(_planFilter) === String(a.m.id) && _planView === 'lijst';
     return al ? '<button type="button" class="btn btn-ghost btn-sm" data-herplan-terug>Alle monteurs</button>'
               : '<button type="button" class="btn btn-ghost btn-sm" data-herplan-lijst="'+esc(a.m.id)+'">Toon '+(a.ops.length === 1 ? 'opdracht' : 'opdrachten')+'</button>';
-  }, (_planView === 'week' && !_planIsMobiel() && magSchrijven('planning')) ? 'Sleep ze naar een andere monteur' : '');
+  });
 }
 // Melding over afwezige monteurs met werk (als die er is), in de vaste kop onder de werkbalk
 function _planAfwezigVul(){
@@ -19253,7 +19354,7 @@ function getMaandagVan(datum) {
   return d;
 }
 
-var _dragOpId = null;
+var _dragOpId = null, _dragVanMonteur = '';
 
 function bindPlanningEvents() {
   var el = document.getElementById('content');
@@ -19313,6 +19414,7 @@ function bindPlanningEvents() {
   el.querySelectorAll('.week-opdracht[draggable]').forEach(function(drag){
     drag.addEventListener('dragstart', function(e){
       _dragOpId = drag.dataset.id;
+      var _cel = drag.closest('.week-drop-cell'); _dragVanMonteur = _cel ? (_cel.dataset.monteur || '') : '';
       _planSleeptNu = true;
       drag.style.opacity = '0.4';
       e.dataTransfer.effectAllowed = 'move';
@@ -19349,9 +19451,10 @@ function bindPlanningEvents() {
       if (!o) return;
       var oudDag     = o.datum;
       var oudMonteur = o.monteurId;
-      if (nieuwDag === oudDag && String(nieuwMonteur||'') === String(oudMonteur||'')) return; // geen wijziging
+      var vanMonteur = _dragVanMonteur || oudMonteur || '';
+      if (nieuwDag === oudDag && String(nieuwMonteur||'') === String(vanMonteur)) return; // geen wijziging
       o.datum      = nieuwDag;
-      o.monteurId  = nieuwMonteur || null;
+      _monteurVervangen(o, vanMonteur, nieuwMonteur);
       dbSaveItem('opdrachten', o.id, o);
       var monteurNaam = nieuwMonteur ? (function(){ var m=getMed(nieuwMonteur); return m?m.voornaam+' '+m.achternaam:'?'; })() : 'Niet toegewezen';
       toast('Verplaatst naar '+fmtD(nieuwDag)+' · '+monteurNaam, 'success');
@@ -20555,6 +20658,11 @@ function renderPlanWeek(monteurs) {
     h += '<div style="display:flex;align-items:center;gap:6px">';
     h += '<div class="avatar" style="width:30px;height:30px;font-size:11px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>';
     h += '<div style="font-size:12px;font-weight:600">'+esc(m.voornaam+' '+m.achternaam)+'</div></div>';
+    // Bezetting deze week: geplande uren tegen beschikbare uren (min ziekte en verlof)
+    var _bz = _medBezetting(m, dagen);
+    h += '<div class="wk-bez" title="'+esc(m.voornaam+' '+m.achternaam)+': '+_urenKort(_bz.gepland)+' van '+_urenKort(_bz.beschikbaar)+' uur gepland deze week'+(_bz.vol ? ' (overboekt)' : '')+'">'
+      + '<span class="dash-spoor"><span class="dash-vul'+(_bz.vol ? ' vol' : '')+'" style="width:'+_bz.pct+'%"></span></span>'
+      + '<span class="wk-bez-w">'+(_bz.afwezig ? _urenKort(_bz.gepland)+' u · '+_bz.afwezig : _urenKort(_bz.gepland)+'/'+_urenKort(_bz.beschikbaar)+' u')+'</span></div>';
     // Verlof indicatie
     var opVerlof = APP.verlof.some(function(v){return String(v.medId)===String(m.id)&&v.status==='goedgekeurd'&&_planDatum>=v.van&&_planDatum<=v.tot;});
     if(opVerlof) h += '<div style="font-size:11px;color:var(--orange-t);margin-top:4px;display:flex;align-items:center;gap:3px"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 00-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><polyline points="8 6 12 2 16 6"/></svg>Verlof</div>';
