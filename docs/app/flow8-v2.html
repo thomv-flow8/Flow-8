@@ -113,7 +113,7 @@ body.app-active{display:flex;height:100vh;height:100dvh;overflow:hidden;width:10
 .form-group label{font-family:'Space Mono',monospace;font-size:11px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form-full{grid-column:1/-1}
-.avatar[style*="color:#fff"]{background-image:linear-gradient(rgba(0,0,0,.14),rgba(0,0,0,.14))!important}
+.avatar[style*="color:#fff"],.lf-av[style*="color:#fff"],.lf-av[style*="background:"]:not([style*="color:"]),.lf-mt-av[style*="color:#fff"]{background-image:linear-gradient(rgba(0,0,0,.14),rgba(0,0,0,.14))!important}
 .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:550;backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center}
@@ -291,9 +291,9 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
 .lf-mt .mont-warn{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--orange-t)}
 .lf-mt .mont-warn svg{width:11px;height:11px}
 .lf-mt.let{border-color:rgba(245,158,11,.55);background:rgba(245,158,11,.07)}
-.lf-mt.aan{border-color:var(--k);background:color-mix(in srgb,var(--k) 13%,var(--surface))}
+.lf-mt.aan{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
 .lf-mt.aan .lf-mt-n{font-weight:600}
-.lf-mt.aan .lf-mt-av{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--k)}
+.lf-mt.aan .lf-mt-av{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
 .lf-mt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .lf-op-plan{display:grid;grid-template-columns:minmax(0,1fr)}
 .lf-op-mont{padding-bottom:12px}
@@ -381,7 +381,8 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) > .lf-ic{grid-row:1/3;align-self:center}
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) > .lf-l{font-size:12.5px;color:var(--muted)}
   .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) > .lf-w{grid-column:2}
-  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) .lf-tekst{text-align:left;padding:2px 0}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) .lf-tekst{text-align:left;padding:8px 14px;margin-top:4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);font-size:16px;box-sizing:border-box}
+  .modal-lf-groot .lf-rij:has(> .lf-w > .lf-tekst) .lf-tekst:focus{border-color:var(--accent)}
 }
 @media(max-width:768px){
   .lf .lf-nr + .lf-hint{display:none}
@@ -394,6 +395,9 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-sub-kaart .lf-drie > *{border-top:0}
   .modal-lf-groot .lf-tekst{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:8px 13px;text-align:left;font-size:14px;max-width:240px}
   .modal-lf-groot .lf-tekst:focus{border-color:var(--accent)}
+  .modal-lf-groot .lf-rij:has(> .lf-w > input.lf-veld[type="date"]){grid-template-columns:36px 132px minmax(0,1fr)}
+  .modal-lf-groot .lf-rij:has(> .lf-w > input.lf-veld[type="date"]) > .lf-w{justify-self:stretch}
+  .modal-lf-groot .lf-rij > .lf-w > input.lf-veld[type="date"]{width:100%!important;text-align:left}
   /* Keuzerij (lfKies) als veld: zelfde vak als een tekstveld, met de keuze en het pijltje erin */
   .modal-lf-groot .lf-rij.lf-kies[data-lf-titel]{grid-template-columns:36px 132px minmax(0,1fr)}
   .modal-lf-groot .lf-rij.lf-kies[data-lf-titel] > .lf-w{justify-self:stretch;justify-content:space-between;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:7px 10px 7px 13px;min-height:38px;box-sizing:border-box;transition:border-color .15s}
@@ -2616,6 +2620,10 @@ button.sd-m-dag{cursor:pointer}
 .loc-m-mont small{font-weight:400;color:var(--muted)}
 .loc-m-uitleg{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:12px;color:var(--muted)}
 .loc-m-uitleg span{display:inline-flex;align-items:center;gap:5px}
+.loc-lg-kop{font:700 11px 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);align-self:center}
+/* Klantmails: geen e-mailadres = oranje stip, geen gekleurde rij */
+.km-zonder{display:inline-flex;align-items:center;gap:6px}
+.km-zonder i{width:7px;height:7px;border-radius:50%;background:var(--orange)}
 .loc-m-uitleg i{width:10px;height:10px;border-radius:50%}
 .loc-m-gps{width:100%;min-height:44px;margin-top:12px;justify-content:center;border-radius:var(--radius-pill)}
 .loc-m-blad #loc-route-paneel{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
@@ -12137,7 +12145,7 @@ function renderMedewerkers() {
     if (_medKol.functie !== false || true) {
       var r = APP.rollen[m.rol];
       h+='<td data-col="functie"><div style="font-size:13px">'+esc(m.functie||'—')+'</div>';
-      h+='<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+';margin-top:3px;display:inline-flex">'+esc(m.rol ? _rolNaam(m.rol) : '—')+'</span></td>';
+      h+='<span class="tag tag-slate" style="margin-top:3px">'+esc(m.rol ? _rolNaam(m.rol) : '—')+'</span></td>';
     }
 
     // Contract
@@ -12231,7 +12239,7 @@ function openMedPanel(id) {
   var magMed = magSchrijven('medewerkers');
   var h = _zpKop('<span class="lf-av zp-kop-av" aria-hidden="true" style="background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+esc(initials(m))+'</span>',
     m.voornaam+' '+m.achternaam, esc(m.functie||''),
-    '<span class="tag" style="background:'+_kleurTint(kl,'22')+';color:'+_klTekst(kl)+'">'+esc(m.rol ? _rolNaam(m.rol) : '—')+'</span>');
+    '<span class="tag tag-slate">'+esc(m.rol ? _rolNaam(m.rol) : '—')+'</span>');
   h += _klActies('', m.telefoon, m.email);
 
   // Verlof: saldo, jaartegoed en de volgende bijschrijving
@@ -20371,7 +20379,7 @@ function renderPlanLijst(monteurs) {
         _mhAvatar = '<span class="avatar" style="width:24px;height:24px;font-size:11px;font-weight:700;background:var(--border);color:var(--muted);display:inline-flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0">?</span>';
       }
       h += '<tr><td colspan="99" style="padding:2px 6px;background:transparent">';
-      h += '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:rgba(255,255,255,0.025);border-left:3px solid '+kl+';border-radius:var(--radius-sm)">';
+      h += '<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;background:rgba(255,255,255,0.025);border-left:3px solid var(--muted2);border-radius:var(--radius-sm)">';
       // Route voor DEZE monteur op DEZE dag: het dagplanning-venster krijgt beide meteen mee,
       // zodat je niet eerst bovenin op een monteur hoeft te filteren. Bij een duo-cluster is dat
       // de cluster-monteur (med) — dezelfde die de reistijd-kolom hierboven al aanhoudt.
@@ -20419,7 +20427,7 @@ function renderPlanLijst(monteurs) {
         if (!_debNr && o.debId) { var _deb=APP.debiteuren.find(function(x){return String(x.id)===String(o.debId);}); if(_deb) _debNr=_deb.nr||''; }
 
         var rijCls = spoed ? ' rij-spoed' : '';
-        var borderL = isEerste ? '3px solid '+kl : '3px solid transparent';
+        var borderL = isEerste ? '3px solid var(--muted2)' : '3px solid transparent';
 
         h += '<tr class="opdracht-rij'+rijCls+'" data-id="'+o.id+'" style="cursor:pointer;border-left:'+borderL+'">';
 
@@ -24039,13 +24047,13 @@ function _agDagKaartjes(datum, filter) {
         var _agEersteMed = getMed(_agDeelIds[0]);
         if(_agEersteMed) {
           var _agAvKl = medKleur(_agEersteMed);
-          _agAvatarHtml = '<div style="width:32px;height:32px;border-radius:50%;background:'+_agAvKl+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+_tekstOpKleur(_agAvKl)+';flex-shrink:0">'+initials(_agEersteMed)+'</div>';
+          _agAvatarHtml = '<div class="avatar" style="width:32px;height:32px;border-radius:50%;background:'+_agAvKl+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+_tekstOpKleur(_agAvKl)+';flex-shrink:0">'+initials(_agEersteMed)+'</div>';
           if(_agDeelIds.length > 1) {
             _agAvatarHtml = '<div style="position:relative;width:32px;height:32px;flex-shrink:0">'+_agAvatarHtml;
             var _agTweedeMed = getMed(_agDeelIds[1]);
             if(_agTweedeMed) {
               var _agAv2Kl = medKleur(_agTweedeMed);
-              _agAvatarHtml += '<div style="position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:'+_agAv2Kl+';border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:'+_tekstOpKleur(_agAv2Kl)+'">'+initials(_agTweedeMed)+'</div>';
+              _agAvatarHtml += '<div class="avatar" style="position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:'+_agAv2Kl+';border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:'+_tekstOpKleur(_agAv2Kl)+'">'+initials(_agTweedeMed)+'</div>';
             }
             _agAvatarHtml += '</div>';
           }
@@ -31331,7 +31339,7 @@ function _locMobielHtml(isTracking, actieveMonteurs){
     metWerk.forEach(function(m){ h+='<span><i style="background:'+medKleur(m)+'"></i>'+esc(_locKortNaam(m))+' <small>'+perM[String(m.id)]+'</small></span>'; });
     h+='</div>';
   }
-  h+='<div class="loc-m-uitleg">';
+  h+='<div class="loc-m-uitleg"><b class="loc-lg-kop">Opdracht</b>';
   [['#6b7694','Klaargezet'],['#06b6d4','Opgehaald'],['#f59e0b','Actie vereist'],['#10b981','Afgehandeld']].forEach(function(st){ h+='<span><i style="background:'+st[0]+'"></i>'+st[1]+'</span>'; });
   h+='</div>';
   if(APP.profiel&&(APP.profiel.rol==='monteur'||APP.profiel.rol==='extern')){
@@ -31382,7 +31390,7 @@ function renderLocatie() {
     else h+='<button class="btn btn-primary btn-sm" id="loc-start-gps">'+ICO.locatie+' Deel mijn locatie</button>';
   }
   // Dynamische route-legende per monteur
-  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b class="loc-lg-kop">Route</b>';
   actieveMonteurs.forEach(function(m){
     if(_locFilter!=='alle'&&String(m.id)!==_locFilter) return;
     var strokeKl = medKleur(m);
@@ -31392,7 +31400,7 @@ function renderLocatie() {
   });
   h+='</div>';
   // Voortgang-legende: de rand en het bolletje op een opdracht-marker
-  h+='<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-left:4px;border-left:1px solid var(--border);margin-left:4px">';
+  h+='<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-left:8px;border-left:1px solid var(--border);margin-left:4px"><b class="loc-lg-kop">Opdracht</b>';
   [['#6b7694','Klaargezet'],['#06b6d4','Opgehaald'],['#f59e0b','Actie vereist'],['#10b981','Afgehandeld']].forEach(function(s){
     h+='<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)">';
     h+='<span style="width:11px;height:11px;border-radius:50%;background:'+s[0]+';flex-shrink:0;border:2px solid var(--surface);box-shadow:0 0 0 1px '+s[0]+'"></span>';
@@ -32012,7 +32020,7 @@ function renderKlantmails() {
       var verzonden   = o.mailVerzonden && o.mailVerzonden.length > 0;
       var laasteMail  = verzonden ? o.mailVerzonden[o.mailVerzonden.length-1] : null;
 
-      h += '<tr class="mail-rij" data-id="'+o.id+'" style="'+(verzonden?'opacity:.65':'')+(email?'':'background:rgba(239,68,68,.04)')+'">';
+      h += '<tr class="mail-rij" data-id="'+o.id+'" style="'+(verzonden?'opacity:.65':'')+'">';
 
       // Checkbox
       h += '<td class="mail-check-cel" style="padding:8px 10px"><input type="checkbox" class="mail-check" data-id="'+o.id+'"'+(email?'':' disabled')+' style="width:15px;height:15px"></td>';
@@ -32024,14 +32032,14 @@ function renderKlantmails() {
 
       // Email
       if (email) {
-        h += '<td data-col="klantEmail" style="font-size:12px;color:var(--accent-t)">'+esc(email)+'</td>';
+        h += '<td data-col="klantEmail" style="font-size:12px">'+esc(email)+'</td>';
       } else {
-        h += '<td data-col="klantEmail" style="font-size:12px;color:var(--red-t)">Geen e-mail</td>';
+        h += '<td data-col="klantEmail" style="font-size:12px;color:var(--muted)"><span class="km-zonder"><i aria-hidden="true"></i>Geen e-mail</span></td>';
       }
 
       // Datum + tijd
       h += '<td data-col="datum" style="font-size:12px;font-weight:600;white-space:nowrap">'+fmtD(o.datum)+'</td>';
-      h += '<td data-col="tijdVan" style="font-size:12px;color:var(--accent-t);white-space:nowrap">'+esc(o.tijdVan||'—')+(o.tijdTot?' – '+esc(o.tijdTot):'')+'</td>';
+      h += '<td data-col="tijdVan" style="font-size:12px;white-space:nowrap">'+esc(o.tijdVan||'—')+(o.tijdTot?' – '+esc(o.tijdTot):'')+'</td>';
 
       // Monteur
       h += '<td data-col="monteurNaam" style="font-size:12px">'+(monteur?esc(monteur.voornaam+' '+monteur.achternaam):'<span style="color:var(--muted)">—</span>')+'</td>';
