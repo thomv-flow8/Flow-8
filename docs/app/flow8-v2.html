@@ -1170,6 +1170,8 @@ body.light{--dash-g2:#f59e0b}
 .hp-let{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;color:var(--orange-t)}
 .hp-let[hidden]{display:none}
 .hp-niemand{font-size:12px;color:var(--muted)}
+.zp-dubbel-knoppen{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:4px}
+.wk-dubbel span{min-width:0}
 td[data-col="status"] .wk-dubbel{margin:4px 0 0 2px}
 .plm-kaart .wk-dubbel{margin-top:4px}
 .hp-let svg,.wk-dubbel svg{width:12px;height:12px;flex:none}
@@ -19098,21 +19100,44 @@ function _medOverlap(medId, datum, vak, behalveId){
   });
 }
 // Overlapt deze opdracht met ander open werk van een van zijn monteurs? (afgehandeld tegen afgehandeld telt niet)
+// Index van open werk met een tijdvak, per dag en monteur. Eén keer per tekenronde opgebouwd (daarna weer leeg),
+// zodat een lijst van honderden kaarten niet per kaart alle opdrachten hoeft te doorzoeken.
+var _dubbelIdx = null;
+function _dubbelIndex(){
+  if(_dubbelIdx) return _dubbelIdx;
+  var idx = {};
+  APP.opdrachten.forEach(function(x){
+    if(!x.datum || x.status === 'afgehandeld' || x.status === 'verwerkt') return;
+    var v = _opVak(x); if(!v) return;
+    var d = idx[x.datum] || (idx[x.datum] = {});
+    _plmMonteurIds(x).forEach(function(id){ (d[id] = d[id] || []).push({ o:x, v:v }); });
+  });
+  _dubbelIdx = idx; setTimeout(function(){ _dubbelIdx = null; }, 0);
+  return idx;
+}
+// Overlapt deze open opdracht met ander open werk van een van zijn monteurs? Afgehandeld werk is geschiedenis.
 function _opDubbel(o){
-  var vak = _opVak(o); if(!vak || !o.datum) return null;
-  var klaar = function(x){ return x.status === 'afgehandeld' || x.status === 'verwerkt'; };
-  if(klaar(o)) return null;   // afgehandeld werk is geschiedenis, geen conflict meer
+  if(!o || !o.datum || o.status === 'afgehandeld' || o.status === 'verwerkt') return null;
+  var vak = _opVak(o); if(!vak) return null;
+  var d = _dubbelIndex()[o.datum]; if(!d) return null;
   var ids = _plmMonteurIds(o);
   for(var i = 0; i < ids.length; i++){
-    var l = _medOverlap(ids[i], o.datum, vak, o.id).filter(function(x){ return !(klaar(x) && klaar(o)); });
-    if(l.length) return l[0];
+    var l = d[ids[i]] || [];
+    for(var j = 0; j < l.length; j++){ if(String(l[j].o.id) !== String(o.id) && _vakOverlapt(l[j].v, vak)) return l[j].o; }
   }
   return null;
 }
-function _wkDubbel(o){
-  var d = _opDubbel(o);
-  return d ? '<div class="wk-dubbel" title="Overlapt met '+esc(d.klantNaam || 'een andere opdracht')+' ('+_vakTekst(_opVak(d))+')">'+ICO.clock+'Dubbel geboekt</div>' : '';
+// lang: ook waarmee ("· met Strandtent 14 (08:00–10:00)"), voor Lijst en telefoon; Week/Dag houden het kort
+function _wkDubbel(o, lang){
+  var d = _opDubbel(o); if(!d) return '';
+  var met = (d.klantNaam || 'een andere opdracht')+' ('+_vakTekst(_opVak(d))+')';
+  return '<div class="wk-dubbel" title="Overlapt met '+esc(met)+'">'+ICO.clock+'<span>Dubbel geboekt'+(lang ? ' · met '+esc(met) : '')+'</span></div>';
 }
+document.addEventListener('click', function(e){
+  if(!e.target.closest) return;
+  var b = e.target.closest('[data-dubbel-bewerk]'); if(b){ openOpdrachtModal(b.dataset.dubbelBewerk); return; }
+  var a = e.target.closest('[data-dubbel-open]'); if(a){ openOpdrachtPanel(a.dataset.dubbelOpen); }
+});
 // Eén monteur van een opdracht vervangen door een ander (of weghalen: naarId leeg). De overige monteurs blijven
 // staan; monteurId is altijd de eerste van monteurIds.
 function _monteurVervangen(o, vanId, naarId){
@@ -19831,7 +19856,7 @@ function _plmKaart(o, metMonteur){
   if(ot.label) h += '<span class="plm-typ"><i style="background:'+ot.kleur+'"></i>'+esc(ot.label)+'</span>';
   h += wkStatusBadge(o.status);
   if(o.status === 'actie' && o.actietype) h += '<span class="plm-actie">→ '+esc(o.actietype)+'</span>';
-  h += _wkDubbel(o);
+  h += _wkDubbel(o, true);
   h += '</div></div>';
   if(metMonteur) h += _plmAvatars(o);
   return h + '</div>';
@@ -19842,7 +19867,7 @@ function _plmRij(o){
   var h = '<div class="plm-rij plan-event'+(spoed ? ' spoed' : '')+'" data-id="'+esc(o.id)+'" role="button" tabindex="0">';
   h += '<span class="plm-t'+(o.pinTijd ? ' vast' : (o.blokVan && o.blokTot) ? ' blok' : '')+'">'+esc(o.tijdVan || o.blokVan || '—')+'</span>';
   var st = wkStatusBadge(o.status);
-  h += '<span class="plm-k">'+(spoed ? _spoedLabel()+' ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+(st ? '<span class="plm-rij-st">'+st+'</span>' : '')+_wkDubbel(o)+'</span>';
+  h += '<span class="plm-k">'+(spoed ? _spoedLabel()+' ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+(st ? '<span class="plm-rij-st">'+st+'</span>' : '')+_wkDubbel(o, true)+'</span>';
   return h + _plmAvatars(o) + '</div>';
 }
 // Reeksen van twee of meer lege dagen achter elkaar (niet vandaag, geen blokkadedag) worden één
@@ -20708,7 +20733,7 @@ function renderPlanLijst(monteurs) {
               h += '<td data-col="pomptype" style="padding:10px;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.pomptype||'—')+'</td>';
               break;
             case 'status':
-              h += '<td data-col="status" style="padding:6px 10px">'+tagStatus(o.status)+_wkDubbel(o);
+              h += '<td data-col="status" style="padding:6px 10px">'+tagStatus(o.status)+_wkDubbel(o, true);
               if(o.status==='actie'&&o.actietype) h += '<div style="font-size:11px;color:var(--orange-t);padding:0 0 2px 2px">→ '+esc(o.actietype)+'</div>';
               h += '</td>';
               break;
@@ -21218,6 +21243,15 @@ function openOpdrachtPanel(id) {
     var _at = (o.actietype ? '<b>'+esc(o.actietype)+'</b>' : '') + (o.actietekst ? '<div>'+esc(o.actietekst)+'</div>' : '');
     if (o.actietype === 'Opnieuw inplannen') _at += '<button type="button" class="lf-link" onclick="openBeschikbaarheid(\''+o.id+'\')">Toon eerstvolgende mogelijkheden</button>';
     h += _zpMelding('actie', 'Actie vereist', _at);
+  }
+  // Dubbel geboekt: met welke opdracht, op welk tijdstip, bij wie, en meteen iets doen
+  var _db = _opDubbel(o);
+  if(_db){
+    var _dbWie = _plmMonteurIds(o).filter(function(id){ return _plmMonteurIds(_db).indexOf(id) >= 0; })
+      .map(function(id){ var mm = getMed(id); return mm ? mm.voornaam : ''; }).filter(Boolean).join(' en ');
+    h += _zpMelding('actie', 'Dubbel geboekt', '<b>'+esc(_db.klantNaam || 'Andere opdracht')+'</b> · '+_vakTekst(_opVak(_db))+(_dbWie ? ' · '+esc(_dbWie) : '')
+      + '<div class="zp-dubbel-knoppen">'+(kanPlannen ? '<button type="button" class="lf-link" data-dubbel-bewerk="'+esc(o.id)+'">Tijd of monteur wijzigen</button>' : '')
+      + '<button type="button" class="lf-link" data-dubbel-open="'+esc(_db.id)+'">Bekijk '+esc(_db.klantNaam || 'die opdracht')+'</button></div>');
   }
 
   // Geen knoppenrij Bellen/Navigeren/Mailen: dit paneel is voor planners. Telefoon en e-mail zijn
