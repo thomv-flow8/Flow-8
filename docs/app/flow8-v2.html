@@ -1167,6 +1167,16 @@ body.light{--dash-g2:#f59e0b}
 /* Afwezig met werk: in de vaste kop van Planning (blijft in beeld bij het scrollen naar vandaag) */
 #plan-afwezig{display:grid;gap:6px;padding:0 0 12px}
 #plan-afwezig:empty{display:none}
+#plan-legenda-slot:empty{display:none}
+#plan-legenda-slot .plan-legenda{margin:0 0 10px}
+.afw-kort{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:var(--radius);background:color-mix(in srgb,var(--orange) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--orange) 30%,var(--border));font-size:13px;color:var(--muted)}
+.afw-kort > svg{width:15px;height:15px;flex:none;color:var(--orange-t)}
+.afw-kort > span{flex:1;min-width:0}
+.afw-kort b{color:var(--orange-t);font-weight:600}
+.afw-kort .btn{min-height:44px;flex:none}
+.plm-dagkop + .afw-kort{margin:0 0 10px}
+#plan-afwezig .afw-kort + .afw-kort{margin-top:6px}
+#plan-afwezig > .afw-kort:last-child{margin-bottom:12px}
 #plan-afwezig .afwezig-melding{margin:0;padding:6px 6px 6px 12px;gap:10px}
 #plan-afwezig .dash-melding-t{flex-direction:row;flex-wrap:wrap;align-items:baseline;column-gap:8px}
 #plan-afwezig .dash-melding-t b{font-size:13.5px}
@@ -1437,6 +1447,7 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 .plm-klant{font-weight:600;font-size:15px;line-height:1.25;overflow-wrap:anywhere}
 .plm-adres{font-size:13px;color:var(--muted);margin-top:2px}
 .plm-rij-st{display:block;margin-top:4px}
+.plm-k .wk-dubbel{margin-top:4px}
 .plm-onder{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;margin-top:7px}
 .plm-onder>span[title]{float:none;margin:0}
 .plm-typ{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
@@ -2176,6 +2187,8 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 @media(max-width:768px){
   #hamburger{display:flex}
   #bottom-nav{display:flex}
+  /* Melding onderin boven de onderbalk; over meer regels met kaarthoeken in plaats van een stadionvorm */
+  #toast{bottom:calc(72px + var(--safe-bottom, 0px));border-radius:var(--radius-lg)}
 }
 /* ─── Werkbon invulbon (accordion-stijl, preview-werkbon-uitgebreid) ─── */
 .wbx-sec{margin:0 0 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
@@ -19216,7 +19229,7 @@ function _planAfwezigBind(pc){
   pc.querySelectorAll('[data-herplan-lijst]').forEach(function(b){ b.addEventListener('click', function(){ _planFilter = b.dataset.herplanLijst; _planView = 'lijst'; _planPage = 1; renderPlanning(); }); });
   pc.querySelectorAll('[data-herplan-terug]').forEach(function(b){ b.addEventListener('click', function(){ _planFilter = 'alle'; renderPlanning(); }); });
 }
-function _planAfwezigHtml(){
+function _planAfwezigHtml(kort){
   var nu = vandaagISO(), dagen;
   if(_planView === 'dag') dagen = [_planDatum];
   else if(_planView === 'week') dagen = _planWeekDagen(_planDatum);
@@ -19225,6 +19238,16 @@ function _planAfwezigHtml(){
   dagen = dagen.filter(function(d){ return d >= nu; });
   if(!dagen.length) return '';
   var wanneer = _planView === 'dag' ? (_planDatum === nu ? 'vandaag' : 'deze dag') : (_planView === 'week' ? 'deze week' : 'in deze periode');
+  // Telefoon: één compacte regel ("Joris ziek · 3 opdrachten deze week · Herplannen")
+  if(kort || _planIsMobiel()){
+    var mag = magSchrijven('planning');
+    return _planAfwezigMetWerk(dagen).map(function(a){
+      _herplanLijst[a.m.id] = a;
+      var n = a.ops.length;
+      return '<div class="afw-kort" role="status">'+ICO.storing+'<span><b>'+esc(a.m.voornaam)+' '+a.reden+'</b> · '+n+' opdracht'+(n === 1 ? '' : 'en')+' '+wanneer+'</span>'
+        + (mag ? _herplanKnop(a) : '')+'</div>';
+    }).join('');
+  }
   // Knop: alleen de opdrachten van deze monteur, in de lijst; nog eens klikken (filter staat al) zet hem terug
   return _afwezigMeldingHtml(_planAfwezigMetWerk(dagen), wanneer, function(a){
     if(magSchrijven('planning')) return _herplanKnop(a);
@@ -19237,6 +19260,9 @@ function _planAfwezigHtml(){
 function _planAfwezigVul(){
   var v = document.getElementById('plan-afwezig'); if(!v) return;
   v.innerHTML = _planAfwezigHtml();
+  // De legenda van Week en Dag naar de vaste kop, zodat hij bij het scrollen in beeld blijft (telefoon: kop plakt niet)
+  var slot = document.getElementById('plan-legenda-slot'), pc = document.getElementById('plan-content');
+  if(slot){ slot.innerHTML = ''; var lg = !_planIsMobiel() && pc ? pc.querySelector('.plan-legenda') : null; if(lg) slot.appendChild(lg); }
   _planAfwezigBind(v);
 }
 function _planInhoudHtml(monteurs){
@@ -19325,17 +19351,17 @@ function renderPlanning() {
 
   // Telefoon: eigen werkbalk (twee rijen, monteurs als chips, filters in een vel).
   if (_planMob) h = _plmToolbarHtml(monteurs);
-  el.innerHTML = '<div class="plan-kop">'+h+'<div id="plan-afwezig"></div></div><div id="plan-content"'+(_planMob?' class="plm-inhoud"':'')+'>Laden...</div>';
+  el.innerHTML = '<div class="plan-kop">'+h+'<div id="plan-afwezig"></div><div id="plan-legenda-slot"></div></div><div id="plan-content"'+(_planMob?' class="plm-inhoud"':'')+'>Laden...</div>';
 
   // Events
   el.querySelectorAll('.plan-view-btn[data-view]').forEach(function(b){
-    b.addEventListener('click', function(){ _planView = b.dataset.view; _planPage=1; renderPlanning(); });
+    b.addEventListener('click', function(){ _planView = b.dataset.view; _planPage=1; var _sc = document.getElementById('content'); if(_sc) _sc.scrollTop = 0; renderPlanning(); });
   });
   el.querySelectorAll('.plan-view-btn[data-periode]').forEach(function(b){
-    b.addEventListener('click', function(){ _planPeriode = b.dataset.periode; _planPage=1; renderPlanning(); });
+    b.addEventListener('click', function(){ _planPeriode = b.dataset.periode; _planPage=1; var _sc = document.getElementById('content'); if(_sc) _sc.scrollTop = 0; renderPlanning(); });
   });
-  el.querySelector('#plan-prev').addEventListener('click', function(){ _planDatum = verschuifDatum(_planDatum, _planView, -1); _planPage=1; renderPlanning(); });
-  el.querySelector('#plan-next').addEventListener('click', function(){ _planDatum = verschuifDatum(_planDatum, _planView, 1); _planPage=1; renderPlanning(); });
+  el.querySelector('#plan-prev').addEventListener('click', function(){ _planDatum = verschuifDatum(_planDatum, _planView, -1); _planPage=1; var _sc = document.getElementById('content'); if(_sc) _sc.scrollTop = 0; renderPlanning(); });
+  el.querySelector('#plan-next').addEventListener('click', function(){ _planDatum = verschuifDatum(_planDatum, _planView, 1); _planPage=1; var _sc = document.getElementById('content'); if(_sc) _sc.scrollTop = 0; renderPlanning(); });
   el.querySelector('#plan-today').addEventListener('click', function(){ _planDatum = vandaagISO(); _planPage=1; _planVandaagSleutel = ''; _planVandaagKnop = true; renderPlanning(); });
   var montFilter = el.querySelector('#plan-mont-filter');
   if (montFilter) montFilter.addEventListener('change', function(e){ _planFilter = e.target.value; _planPage=1; renderPlanning(); });
@@ -19753,7 +19779,7 @@ function _plmRij(o){
   var h = '<div class="plm-rij plan-event'+(spoed ? ' spoed' : '')+'" data-id="'+esc(o.id)+'" role="button" tabindex="0">';
   h += '<span class="plm-t'+(o.pinTijd ? ' vast' : (o.blokVan && o.blokTot) ? ' blok' : '')+'">'+esc(o.tijdVan || o.blokVan || '—')+'</span>';
   var st = wkStatusBadge(o.status);
-  h += '<span class="plm-k">'+(spoed ? _spoedLabel()+' ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+(st ? '<span class="plm-rij-st">'+st+'</span>' : '')+'</span>';
+  h += '<span class="plm-k">'+(spoed ? _spoedLabel()+' ' : '')+esc(o.klantNaam || '—')+(adres ? '<small>'+esc(adres)+'</small>' : '')+(st ? '<span class="plm-rij-st">'+st+'</span>' : '')+_wkDubbel(o)+'</span>';
   return h + _plmAvatars(o) + '</div>';
 }
 // Reeksen van twee of meer lege dagen achter elkaar (niet vandaag, geen blokkadedag) worden één
@@ -19813,11 +19839,6 @@ function _planNaarVandaag(pc){
   // Zelfde periode: niets doen, behalve vlak na het scrollen (dan tekent de telefoonversie soms nog na)
   if(sl === _planVandaagSleutel && !_planVandaagTimer && Date.now() > _planVandaagTot) return;
   _planVandaagSleutel = sl;
-  // Telefoon: de kop plakt hier niet. Staat er een melding over een afwezige monteur, dan blijft die bovenaan
-  // in beeld; alleen de knop Vandaag scrolt dan door
-  var _afw = document.getElementById('plan-afwezig');
-  if(_mob && !_planVandaagKnop && !_planVandaagTimer && _afw && _afw.children.length) return;
-  _planVandaagKnop = false;
   // Pas scrollen als het tekenen klaar is: bij het openen tekent de planning soms twee keer, en een
   // tweede tekenronde zet de scrollpositie terug. Elke aanroep schuift het moment dus op.
   clearTimeout(_planVandaagTimer);
@@ -19981,6 +20002,7 @@ function renderPlanLijstMobiel(monteurs){
     if(_leegReeks[datum]){ h += _planLeegReeksHtml(_leegReeks[datum], _planFilter !== 'alle' ? _planFilter : ''); return; }
     var dagOps = groepen[datum] || [];
     h += _plmDagkop(datum, dagOps.length, datum === vandaagISO() ? 'plm-vandaag' : '');
+    if(datum === vandaagISO()) h += _planAfwezigHtml(true);
     if(!dagOps.length){ h += _plmLeeg(datum, _planFilter !== 'alle' ? _planFilter : ''); return; }
     // Per monteur (of vaste combinatie van monteurs), net als de desktoplijst.
     var clusters = {};
@@ -20104,6 +20126,7 @@ function renderPlanWeekMobiel(monteurs){
   dagen.forEach(function(dag){
     var dagOps = weekOps.filter(function(o){ return o.datum === dag; }).sort(_planSorteerOpTijd);
     h += _plmDagkop(dag, dagOps.length, 'plm-dag-'+dag);
+    if(dag === vandaagISO()) h += _planAfwezigHtml(true);
     if(!dagOps.length){ h += _plmLeeg(dag, _planFilter !== 'alle' ? _planFilter : ''); return; }
     dagOps.forEach(function(o){ h += _plmRij(o); });
   });
