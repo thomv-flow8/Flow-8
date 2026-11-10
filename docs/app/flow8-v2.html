@@ -1183,6 +1183,15 @@ body.light{--dash-g2:#f59e0b}
 .modal:has(.uitleg) .modal-footer:empty{display:none}
 @media (max-width:768px){.uitleg-lijst > div{grid-template-columns:1fr;gap:4px}}
 .zp-dubbel-knoppen{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:4px}
+.zp-memo-dubbel{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.3)}
+.zp-memo-dubbel :is(.zp-memo-ic,.zp-memo-l){color:var(--orange-t)}
+.zp-dubbel-rij{font-size:13.5px;line-height:1.5}
+.zp-dubbel-rij .lf-link{display:inline;padding:0;min-height:0;font-weight:600}
+@media (pointer:coarse){
+  .lf-seg-radio span{min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:center}
+  body .pg-btn{min-width:44px;min-height:44px}
+  .werkbalk .meer-knop{width:44px}
+}
 .wk-dubbel span{min-width:0}
 td[data-col="status"] .wk-dubbel{margin:4px 0 0 2px}
 .plm-kaart .wk-dubbel{margin-top:4px}
@@ -2866,6 +2875,10 @@ label:has(> .wbx-chip-add:not(.wox-doc-drop)){pointer-events:none}
     } catch(e) {
       document.body.classList.add('light');
     }
+    // Browserbalk en statusbalk (theme-color) in de kleur van de bovenbalk, ook na het wisselen van thema
+    var meta = document.querySelector('meta[name="theme-color"]');
+    var zet = function(){ if(meta) meta.setAttribute('content', document.body.classList.contains('light') ? '#ffffff' : '#101320'); };
+    zet(); try { new MutationObserver(zet).observe(document.body, { attributes:true, attributeFilter:['class'] }); } catch(e) {}
   })();
 </script>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -9440,7 +9453,7 @@ var _GZ_TYPEN = [
   {t:'pomp', l:'Register'}, {t:'serviceklant', l:'Serviceklanten'}, {t:'debiteur', l:'Debiteuren'}, {t:'medewerker', l:'Medewerkers'},
   {t:'pagina', l:'Pagina’s'}, {t:'actie', l:'Acties'}, {t:'instelling', l:'Instellingen'}, {t:'uitleg', l:'Uitleg'}
 ];
-var _GZ_WB_STATUS = { klaargezet:['Klaargezet','tag-muted'], opgehaald:['Opgehaald','tag-blue'], afgehandeld:['Afgehandeld','tag-green'], verwerkt:['Verwerkt','tag-slate'] };
+var _GZ_WB_STATUS = { klaargezet:['Klaargezet','tag-muted'], opgehaald:['Opgehaald','tag-opgehaald'], afgehandeld:['Afgehandeld','tag-green'], verwerkt:['Verwerkt','tag-slate'] };
 var _gzFilter = '';            // telefoon: alleen deze soort tonen
 var _gzOpen = {};              // groepen waarvan "Toon alle" is aangeklikt
 var _gzLaatste = '';
@@ -11259,7 +11272,7 @@ var STATUS_DEF = {
   klaargezet:   { lbl:'Klaargezet',    kl:'#6b7694', tag:'tag-muted' },
   gereserveerd: { lbl:'Gereserveerd',  kl:'#8b5cf6', tag:'tag-gereserveerd' },
   ingepland:    { lbl:'Ingepland',     kl:'#4f6ef5', tag:'tag-blue' },
-  opgehaald:    { lbl:'Opgehaald',     kl:'#06b6d4', tag:'tag-opgehaald' },
+  opgehaald:    { lbl:'Opgehaald',     kl:'#35c4e3', tag:'tag-opgehaald' },   // = --accent2, zoals de tag
   actie:        { lbl:'Actie vereist', kl:'#f59e0b', tag:'tag-orange', tekst:'var(--orange-t)' },
   afgehandeld:  { lbl:'Afgehandeld',   kl:'#10b981', tag:'tag-green',  tekst:'var(--green-t)' },
   verwerkt:     { lbl:'Verwerkt',      kl:'#64748b', tag:'tag-slate' }
@@ -11753,6 +11766,16 @@ function renderDashboard() {
       return magSchrijven('planning') ? _herplanKnop(a) : '<button type="button" class="btn btn-ghost btn-sm" data-herplan>Bekijken</button>';
     });
   }
+  // Melding: dubbele boekingen vandaag (open werk dat bij dezelfde monteur in tijd overlapt)
+  if(isAdmin() || magLezen('planning')){
+    var _dbVd = APP.opdrachten.filter(function(o){ return o.datum === vandaag && _opDubbel(o); });
+    if(_dbVd.length){
+      var _dbMeds = []; _dbVd.forEach(function(o){ _plmMonteurIds(o).forEach(function(id){ var mm = getMed(id); if(mm && _dbMeds.indexOf(mm.voornaam) < 0) _dbMeds.push(mm.voornaam); }); });
+      h += '<div class="dash-melding dash-dubbel" role="status"><span class="dash-melding-ico">'+ICO.clock.replace(/width="\d+" height="\d+"/, 'width="18" height="18"')+'</span><div class="dash-melding-t">'
+        + '<b>'+_dbVd.length+' opdrachten vandaag zijn dubbel geboekt</b><span>Bij '+esc(_dbMeds.join(', ').replace(/, ([^,]*)$/, ' en $1'))+'; ze overlappen in tijd.</span></div>'
+        + '<button type="button" class="btn btn-ghost btn-sm" data-dubbel-dash>Bekijken</button></div>';
+    }
+  }
   // Melding: aanvragen die ík mag goedkeuren (niet: die ik zelf mag indienen)
   var _teKeuren = function(lijst, mod){ return lijst.filter(function(o){ return o.status === 'aangevraagd' && _medBestaat(o.medId) && magGoedkeuren(mod, o.medId); }).length; };
   var _openOnkosten = _teKeuren(APP.onkosten, 'onkosten'), _openOveruren = _teKeuren(APP.overuren, 'overuren'), _openVerlof = _teKeuren(APP.verlof, 'verlof');
@@ -11866,6 +11889,7 @@ function _dashBind(el){
   var sw = el.querySelector('#dash-start-weg'); if(sw) sw.addEventListener('click', function(){ try { localStorage.setItem(_aanDeSlagSleutel(), '1'); } catch(e) {}
     if(APP.profiel){ APP.profiel.aanDeSlagWeg = true; if(APP.profiel.uid && typeof FB !== 'undefined') FB.ref('flow8/gebruikers/'+APP.profiel.uid+'/aanDeSlagWeg').set(true).catch(function(){}); } var k = el.querySelector('.dash-start'); if(k) k.remove(); });
   el.querySelectorAll('[data-nav]').forEach(function(b){ b.addEventListener('click', function(){ _dashBewerk = false; navigateTo(b.dataset.nav); }); });
+  el.querySelectorAll('[data-dubbel-dash]').forEach(function(b){ b.addEventListener('click', function(){ _dashBewerk = false; _planView = 'lijst'; _planPeriode = 'maand'; _planDatum = vandaagISO(); _planFilter = 'alle'; navigateTo('planning'); }); });
   var vb = el.querySelector('#dash-verlof-btn'); if(vb) vb.addEventListener('click', function(){ openVerlofBijschrijfModal(); });
   // Herplannen: de weekplanning van vandaag, met alle monteurs (sleep de opdracht naar een andere monteur)
   el.querySelectorAll('[data-herplan]').forEach(function(b){ b.addEventListener('click', function(){ _dashBewerk = false; _planView = 'week'; _planDatum = vandaagISO(); _planFilter = 'alle'; navigateTo('planning'); }); });
@@ -13201,7 +13225,7 @@ function _zpTekst(ico, label, tekst){
 }
 // Melding bovenaan: waarschuwing (rood), info (blauw), actie (oranje), opgelost (groen).
 function _zpMelding(soort, label, tekstHtml, onder, extra){
-  var ico = soort==='info' ? ICO.info : (soort==='opgelost' ? ICO.check : ICO.warn);
+  var ico = soort==='info' ? ICO.info : (soort==='opgelost' ? ICO.check : (soort==='dubbel' ? ICO.clock : ICO.warn));
   return '<div class="zp-memo zp-memo-'+soort+'"><span class="zp-memo-ic" aria-hidden="true">'+ico+'</span><div class="zp-memo-in"><div class="zp-memo-l">'+esc(label)+'</div>'+tekstHtml+(onder ? '<small>'+onder+'</small>' : '')+'</div>'+(extra||'')+'</div>';
 }
 function _zpTagContract(){ return '<span class="zp-tag zp-tag-groen">'+_ZP_VINK+'In contract</span>'; }
@@ -19269,6 +19293,16 @@ function _opDubbel(o){
   }
   return null;
 }
+// Alle open opdrachten die met deze overlappen (voor het paneel; de kaarten noemen alleen de eerste)
+function _opDubbelAlle(o){
+  if(!o || !o.datum || o.status === 'afgehandeld' || o.status === 'verwerkt') return [];
+  var vak = _opVak(o); if(!vak) return [];
+  var d = _dubbelIndex()[o.datum]; if(!d) return [];
+  var gezien = {}, uit = [];
+  _plmMonteurIds(o).forEach(function(id){ (d[id] || []).forEach(function(x){
+    if(String(x.o.id) !== String(o.id) && !gezien[x.o.id] && _vakOverlapt(x.v, vak)){ gezien[x.o.id] = 1; uit.push(x.o); } }); });
+  return uit.sort(function(a, b){ return (a.tijdVan||'').localeCompare(b.tijdVan||''); });
+}
 // lang: ook waarmee ("· met Strandtent 14 (08:00–10:00)"), voor Lijst en telefoon; Week/Dag houden het kort
 function _wkDubbel(o, lang){
   var d = _opDubbel(o); if(!d) return '';
@@ -20628,7 +20662,7 @@ function renderPlanLijst(monteurs) {
       if(totBeschikb > 0) {
         var aantalBeschikb = _besch.aantal;
         var pctBeschikb = aantalBeschikb / totBeschikb;
-        var dotKl = pctBeschikb > 0.5 ? '#1D9E75' : pctBeschikb > 0.25 ? '#EF9F27' : '#E24B4A';
+        var dotKl = pctBeschikb > 0.5 ? 'var(--green)' : pctBeschikb > 0.25 ? 'var(--orange)' : 'var(--red)';
         var namenStr = _besch.beschikbaar.join(', ');
         var onbeschikbStr = _besch.onbeschikbaar.map(function(x){ return x.naam+': '+x.reden; }).join(' · ');
         h += '<span style="display:inline-flex;align-items:center;gap:6px;margin-left:16px;font-size:11px">';
@@ -21405,13 +21439,15 @@ function openOpdrachtPanel(id) {
     h += _zpMelding('actie', 'Actie vereist', _at);
   }
   // Dubbel geboekt: met welke opdracht, op welk tijdstip, bij wie, en meteen iets doen
-  var _db = _opDubbel(o);
-  if(_db){
-    var _dbWie = _plmMonteurIds(o).filter(function(id){ return _plmMonteurIds(_db).indexOf(id) >= 0; })
-      .map(function(id){ var mm = getMed(id); return mm ? mm.voornaam : ''; }).filter(Boolean).join(' en ');
-    h += _zpMelding('actie', 'Dubbel geboekt', '<b>'+esc(_db.klantNaam || 'Andere opdracht')+'</b> · '+_vakTekst(_opVak(_db))+(_dbWie ? ' · '+esc(_dbWie) : '')
+  var _dbAlle = _opDubbelAlle(o);
+  if(_dbAlle.length){
+    var _dbRijen = _dbAlle.map(function(_db){
+      var _dbWie = _plmMonteurIds(o).filter(function(id){ return _plmMonteurIds(_db).indexOf(id) >= 0; })
+        .map(function(id){ var mm = getMed(id); return mm ? mm.voornaam : ''; }).filter(Boolean).join(' en ');
+      return '<div class="zp-dubbel-rij"><button type="button" class="lf-link" data-dubbel-open="'+esc(_db.id)+'">'+esc(_db.klantNaam || 'Andere opdracht')+'</button> · '+_vakTekst(_opVak(_db))+(_dbWie ? ' · '+esc(_dbWie) : '')+'</div>';
+    }).join('');
+    h += _zpMelding('dubbel', _dbAlle.length > 1 ? 'Dubbel geboekt met '+_dbAlle.length+' opdrachten' : 'Dubbel geboekt', _dbRijen
       + '<div class="zp-dubbel-knoppen">'+(kanPlannen ? '<button type="button" class="lf-link" data-dubbel-bewerk="'+esc(o.id)+'">Tijd of monteur wijzigen</button>' : '')
-      + '<button type="button" class="lf-link" data-dubbel-open="'+esc(_db.id)+'">Bekijk '+esc(_db.klantNaam || 'die opdracht')+'</button>'
       + '<button type="button" class="lf-link" data-uitleg="dubbel">Wat betekent dit?</button></div>');
   }
 
