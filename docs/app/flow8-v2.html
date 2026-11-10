@@ -1485,6 +1485,9 @@ html.dash-sleept,html.dash-sleept *{cursor:grabbing!important;-webkit-user-selec
 /* In de brede planningtabel blijft de regel binnen het zichtbare deel (de tabel kan breder zijn dan het scherm) */
 .plan-leeg-reeks .leeg-reeks{position:sticky;left:0;max-width:calc(100vw - 300px);border:0;border-radius:0;background:none;padding:10px 8px 10px 16px}
 .plan-leeg-reeks > td{border-bottom:1px solid var(--border)}
+#plan-content tr.plan-dagkop > td{position:relative;z-index:4}
+#plan-content tr.plan-dagkop.plakt > td > div{box-shadow:0 6px 12px -8px rgba(15,23,42,.35)}
+.plan-tabel td[data-col="naam"] .wk-dubbel{white-space:nowrap;margin-top:3px;font-weight:500}
 .login-recaptcha{margin:14px 0 0;max-width:380px;text-align:center;font-size:11px;line-height:1.5;color:#868da3}
 .login-recaptcha a{color:#aab2c8;text-decoration:underline;text-underline-offset:2px}
 .plm-inhoud .leeg-reeks{margin:10px 0}
@@ -12936,7 +12939,22 @@ function verwijderMed(id) {
 // MODULE: SERVICEKLANTEN
 // ═══════════════════════════════════════════════
 var _skFilter='alle', _skZoek='', _skPage=1, _skPS=25, _skSortKey='naam', _skSortDir=1;
-var _skKolom = [
+// Gekozen kolommen per lijst onthouden op dit apparaat: alleen volgorde en aan/uit. Labels en getters blijven
+// uit de code komen; een kolom die er later bij komt, staat achteraan met zijn standaardwaarde.
+function _kolomLaad(naam, standaard){
+  try {
+    var b = JSON.parse(localStorage.getItem('flow8_kol_'+naam) || 'null'); if(!Array.isArray(b)) return standaard;
+    var per = {}; standaard.forEach(function(c){ per[c.k] = c; });
+    var uit = [];
+    b.forEach(function(x){ var c = per[x[0]]; if(c){ c.aan = c.always ? true : !!x[1]; uit.push(c); delete per[x[0]]; } });
+    standaard.forEach(function(c){ if(per[c.k]) uit.push(c); });
+    return uit;
+  } catch(e){ return standaard; }
+}
+function _kolomBewaar(naam, lijst){
+  try { localStorage.setItem('flow8_kol_'+naam, JSON.stringify(lijst.map(function(c){ return [c.k, !!c.aan]; }))); } catch(e){}
+}
+var _skKolom = _kolomLaad('serviceklanten', [
   { k:'debNr',   l:'Deb.nr',          aan:true  },
   { k:'naam',    l:'Naam',            aan:true,  always:true },
   { k:'adres',   l:'Adres',           aan:true  },
@@ -12949,9 +12967,9 @@ var _skKolom = [
   { k:'contact', l:'Contactpersoon',  aan:false },
   { k:'pomptype', get l(){ return getRegisterInst().veld1Label; }, aan:false },
   { k:'status',  l:'Status',          aan:false },
-];
+]);
 
-var _debKolom = [
+var _debKolom = _kolomLaad('debiteuren', [
   { k:'nr',              l:'Deb.nr',         aan:true,  always:true },
   { k:'naam',            l:'Naam',           aan:true,  always:true },
   { k:'adres',           l:'Adres',          aan:true  },
@@ -12961,7 +12979,7 @@ var _debKolom = [
   { k:'email',           l:'Email',          aan:true  },
   { k:'servicecontract', l:'Contract',       aan:true  },
   { k:'website',         l:'Website',        aan:false },
-];
+]);
 
 
 // ── Serviceklant duplicaatcheck ──────────────────────────────
@@ -16614,14 +16632,14 @@ function verwijderVerlof(id){
 // Kolomkiezer voor serviceklanten
 function openSkKolomKiezer() {
   openKolomKiezer('Serviceklanten — kolommen & volgorde', _skKolom, function(nieuw) {
-    _skKolom = nieuw; renderServiceklanten();
+    _skKolom = nieuw; _kolomBewaar('serviceklanten', nieuw); renderServiceklanten();
   });
 }
 
 // Kolomkiezer voor debiteuren
 function openDebKolomKiezer() {
   openKolomKiezer('Debiteuren — kolommen & volgorde', _debKolom, function(nieuw) {
-    _debKolom = nieuw; renderDebiteuren();
+    _debKolom = nieuw; _kolomBewaar('debiteuren', nieuw); renderDebiteuren();
   });
 }
 
@@ -16657,21 +16675,21 @@ var _planFilter  = 'alle';
 var _planPage    = 1;
 var _planPS      = 50;
 // Kolommen als geordende array: { k, l, aan, always }
-var _planKolom = [
+var _planKolom = _kolomLaad('planning', [
   { k:'tijd',            l:'Tijd',            aan:true  },
   { k:'debNr',           l:'Deb.nr',          aan:false },
   { k:'naam',            l:'Naam',            aan:true,  always:true },
-  { k:'contract',        l:'Contract',        aan:true  },
+  { k:'contract',        l:'Contract',        aan:false },
   { k:'adres',           l:'Adres',           aan:true  },
-  { k:'postcode',        l:'Postcode',        aan:true  },
+  { k:'postcode',        l:'Postcode',        aan:false },
   { k:'plaats',          l:'Plaats',          aan:true  },
   { k:'type',            l:'Type',            aan:true  },
   { k:'status',          l:'Status',          aan:true  },
-  { k:'werkomschrijving',l:'Werkomschrijving',aan:true  },
+  { k:'werkomschrijving',l:'Werkomschrijving',aan:false },
   { k:'notitie',         l:'Notitie',         aan:false },
   { k:'pomptype', get l(){ return getRegisterInst().veld1Label; }, aan:false },
   { k:'monteurs',        l:'Monteurs',        aan:false },
-];
+]);
 // Helper: geef waarde van kolom
 function planKolAan(k) { var c=_planKolom.find(function(x){return x.k===k;}); return c&&c.aan; }
 
@@ -19996,6 +20014,24 @@ function _planKopRand(){
   var k = document.querySelector('#content > .plan-kop'), sc = document.getElementById('content');
   if(k && sc) k.classList.toggle('vast', sc.scrollTop > 4);
   _planTabelKop();
+  _planLijstDagKop();
+}
+// Lijst (desktop): de dagkop schuift mee tot het einde van zijn dag, zodat je bij het scrollen weet welke dag je ziet.
+// De tabel staat in een zijwaarts scrollend vak, dus position:sticky werkt daar niet; zelfde aanpak als de kop van Week.
+function _planLijstDagKop(){
+  if(_planView !== 'lijst' || window.innerWidth <= 768) return;
+  var k = document.querySelector('#content > .plan-kop'); if(!k) return;
+  var grens = _planKopHoogte() ? k.getBoundingClientRect().bottom : document.getElementById('content').getBoundingClientRect().top;
+  document.querySelectorAll('#plan-content tr.plan-dagkop').forEach(function(tr){
+    var td = tr.firstElementChild; if(!td) return;
+    var r = tr.getBoundingClientRect();
+    if(r.top >= grens){ if(td.style.transform){ td.style.transform = ''; tr.classList.remove('plakt'); } return; }
+    var eind = tr.nextElementSibling; while(eind && !eind.classList.contains('dag-spacer')) eind = eind.nextElementSibling;
+    var bodem = eind ? eind.getBoundingClientRect().top : tr.closest('table').getBoundingClientRect().bottom;
+    var dy = Math.max(0, Math.min(grens - r.top, bodem - r.top - r.height));
+    td.style.transform = dy > 0 ? 'translateY('+Math.round(dy)+'px)' : '';
+    tr.classList.toggle('plakt', dy > 0);
+  });
 }
 function _planTabelKop(){
   if(_planView !== 'week' && _planView !== 'dag') return;
@@ -20523,7 +20559,7 @@ function renderPlanLijst(monteurs) {
     // Datum rij
     var blokkadeLijst = APP.blokkadeDagen && APP.blokkadeDagen[datum];
     var _dhAccent = blokkadeLijst?'var(--red)':isVandaag?'var(--accent)':isVerleden?'var(--muted)':'#5b6b8c';
-    h += '<tr'+(isVandaag ? ' data-vandaag="1"' : '')+'>';
+    h += '<tr class="plan-dagkop"'+(isVandaag ? ' data-vandaag="1"' : '')+'>';
     h += '<td colspan="99" style="padding:0">';
     // Dagkop met een eigen datumvak: het dagnummer groot links, de rest ernaast.
     // Vandaag krijgt een gevuld blauw vak, een blokkadedag rood, het verleden vervaagt.
@@ -20737,7 +20773,7 @@ function renderPlanLijst(monteurs) {
               }
               break;
             case 'naam':
-              h += '<td data-col="naam" style="padding:10px;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">'+(spoed?_spoedLabel()+' ':'')+(_skOpgezegd?'<span title="Contract opgezegd — controleer of deze opdracht nog nodig is" style="display:inline-flex;align-items:center;gap:2px;background:rgba(239,68,68,.15);color:var(--red-t);font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin-right:5px;vertical-align:middle">'+_IC_WAARSCH+'OPGEZEGD</span>':'')+esc(o.klantNaam||'—')+(function(){var _toegew=(o.monteurIds&&o.monteurIds.length)?o.monteurIds.length:(o.monteurId?1:0);var _n=Math.max(o.aantalMonteurs||0,_toegew);return _n>=2?'<span title="'+_n+' monteurs" style="display:inline-flex;align-items:center;gap:2px;background:rgba(79,110,245,.15);color:var(--accent-t);font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin-left:5px;vertical-align:middle">'+ICO.users+' '+_n+'</span>':'';})()+(o.notitie?'<span title="'+esc(o.notitie)+'" style="margin-left:5px;opacity:.7"><svg width="11" height="11" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:middle"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>':'')+'</td>';
+              h += '<td data-col="naam" style="padding:10px;font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">'+(spoed?_spoedLabel()+' ':'')+(_skOpgezegd?'<span title="Contract opgezegd — controleer of deze opdracht nog nodig is" style="display:inline-flex;align-items:center;gap:2px;background:rgba(239,68,68,.15);color:var(--red-t);font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin-right:5px;vertical-align:middle">'+_IC_WAARSCH+'OPGEZEGD</span>':'')+esc(o.klantNaam||'—')+(function(){var _toegew=(o.monteurIds&&o.monteurIds.length)?o.monteurIds.length:(o.monteurId?1:0);var _n=Math.max(o.aantalMonteurs||0,_toegew);return _n>=2?'<span title="'+_n+' monteurs" style="display:inline-flex;align-items:center;gap:2px;background:rgba(79,110,245,.15);color:var(--accent-t);font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;margin-left:5px;vertical-align:middle">'+ICO.users+' '+_n+'</span>':'';})()+(o.notitie?'<span title="'+esc(o.notitie)+'" style="margin-left:5px;opacity:.7"><svg width="11" height="11" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:middle"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>':'')+_wkDubbel(o, true)+'</td>';
               break;
             case 'tijd':
               var _tijdKl = o.pinTijd ? 'var(--vast-t)' : (o.blokVan && o.blokTot) ? 'var(--blok-t)' : 'var(--text)';
@@ -20823,7 +20859,7 @@ function renderPlanLijst(monteurs) {
               h += '<td data-col="pomptype" style="padding:10px;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.pomptype||'—')+'</td>';
               break;
             case 'status':
-              h += '<td data-col="status" style="padding:6px 10px">'+tagStatus(o.status)+_wkDubbel(o, true);
+              h += '<td data-col="status" style="padding:6px 10px">'+tagStatus(o.status);
               if(o.status==='actie'&&o.actietype) h += '<div style="font-size:11px;color:var(--orange-t);padding:0 0 2px 2px">→ '+esc(o.actietype)+'</div>';
               h += '</td>';
               break;
@@ -22571,7 +22607,7 @@ function openActieModal(opId) {
 
 function openPlanKolomKiezer() {
   // Dezelfde kiezer als bij de andere lijsten; 'Naam' blijft altijd zichtbaar.
-  openKolomKiezer('Kolommen', _planKolom, function(nieuw){ _planKolom = nieuw; renderPlanning(); });
+  openKolomKiezer('Kolommen', _planKolom, function(nieuw){ _planKolom = nieuw; _kolomBewaar('planning', nieuw); renderPlanning(); });
 }
 function openBatchInplanModal(skIds) {
   var klanten = skIds.map(function(id){ return APP.serviceklanten.find(function(k){return String(k.id)===String(id);}); }).filter(Boolean);
