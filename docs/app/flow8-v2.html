@@ -362,7 +362,7 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   /* Rechterkolom: korte labels (naam, plaats, telefoon), dus een smallere labelkolom en meer ruimte voor het veld. */
   .modal-lf-groot .lf-twee > .lf-rij:nth-child(2):has(> .lf-w > .lf-tekst){grid-template-columns:36px 112px minmax(0,1fr)}
   /* Artikel: smaller venster; de eenheid staat compact achter de omschrijving. */
-  .modal.modal-lf-groot.modal-lf-middel{width:min(980px,95vw)}
+  .modal.modal-lf-groot.modal-lf-middel{width:min(960px,95vw)}
   .modal-lf-groot .lf-art-oms{grid-template-columns:minmax(0,1fr) 160px;column-gap:16px}
   .modal-lf-groot .lf-art-oms > .lf-rij:last-child:has(> .lf-w > .lf-tekst){grid-template-columns:auto minmax(0,1fr)}
   .modal-lf-groot .lf-art-oms > .lf-rij:last-child > .lf-ic:empty{display:none}
@@ -389,7 +389,8 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .lf .lf-veld.lf-pc{width:108px!important}
 }
 @media(min-width:769px){
-  .modal.modal-lf-groot{width:min(1200px,95vw)}
+  .modal.modal-lf-groot{width:min(960px,95vw)}
+  .modal.modal-lf-groot.modal-lf-breed{width:min(1200px,95vw)}
   .modal-lf-groot .lf-twee{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
   .modal-lf-groot .lf-drie{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:16px}
   .modal-lf-groot .lf-sub-kaart .lf-drie > *{border-top:0}
@@ -9709,6 +9710,7 @@ function openModal(title, bodyHtml, footerHtml, breed, xl) {
   if(_md) _md.classList.remove('modal-lf');
   if(_md) _md.classList.remove('modal-lf-groot');
   if(_md) _md.classList.remove('modal-lf-middel');
+  if(_md) _md.classList.remove('modal-lf-breed');
   document.getElementById('modal-overlay').classList.add('open');
   // Wis eventuele oude validatiestijlen
   wisValidatieStijlen();
@@ -10892,6 +10894,7 @@ function lfOpen(titel, body, knopTekst, knopId, opts){
   var md = document.getElementById('modal');
   if(md) md.classList.add('modal-lf');
   if(md && opts && opts.groot) md.classList.add('modal-lf-groot');
+  if(md && opts && opts.breed) md.classList.add('modal-lf-breed');   // tabel of voorbeeldkolom: 1200px
   // Aan de inhoud koppelen, niet aan #modal-body: die blijft bestaan en zou de
   // luisteraars meenemen naar het volgende venster.
   lfBind(document.querySelector('#modal-body > .lf'));
@@ -18228,7 +18231,7 @@ function _jpRenderStap3(voorkeurMaand){
   rechts += '<p class="lf-uitleg">Opdrachten krijgen nog geen vaste monteur; die wijs je in de planning toe.</p></div>';
 
   var b = _jpStappen(3) + '<div class="lf-kolommen"><div>'+links+'</div><div>'+rechts+'</div></div>';
-  lfOpen('Jaarplanning \u00b7 dagen', b, 'Dagen berekenen', 'jp3-start', {groot:true});
+  lfOpen('Jaarplanning \u00b7 dagen', b, 'Dagen berekenen', 'jp3-start', {groot:true, breed:true});
   lfTerug(function(){ if(_jpResultaat) _jpRenderStap2(); else _jpRenderStap1(); });
 
   function infoBijwerken(){
@@ -18303,7 +18306,7 @@ function _jpRenderStap1(){
   if(alGepland) rechts += '<div class="lf-blok-kaart" style="margin-top:12px">'+_lfNavRij('jp-naar-dagen', ICO.kalender, 'Dagen inplannen', 'Met de verdeling die al is vastgelegd', '')+'</div>';
 
   var b = _jpStappen(1) + '<div class="lf-kolommen"><div>'+links+'</div><div>'+rechts+'</div></div>';
-  lfOpen('Jaarplanning', b, 'Berekenen', 'jp-bereken', {groot:true});
+  lfOpen('Jaarplanning', b, 'Berekenen', 'jp-bereken', {groot:true, breed:true});
   var naarDagen = document.getElementById('jp-naar-dagen');
   if(naarDagen) naarDagen.addEventListener('click', function(){ _jpRenderStap3(null); });
   document.querySelectorAll('.jp-snel').forEach(function(btn){
@@ -18396,7 +18399,7 @@ function _jpRenderStap2(){
   b += '<div style="font-size:12px;color:var(--muted);margin-top:14px">Dit is een voorstel. Met <strong>Verdeling vastleggen</strong> krijgt elke klant zijn geplande maand; de contractdatums blijven staan en er worden nog geen opdrachten aangemaakt.</div>';
 
   if(Object.keys(_jpMaandenMetPlan()).length) b += '<div class="lf-blok-kaart" style="margin-top:14px">'+_lfNavRij('jp-dagen', ICO.kalender, 'Dagen inplannen', 'Met de verdeling die al is vastgelegd', '')+'</div>';
-  lfOpen('Jaarplanning \u00b7 voorstel', b, 'Verdeling vastleggen', 'jp-vastleggen', {groot:true});
+  lfOpen('Jaarplanning \u00b7 voorstel', b, 'Verdeling vastleggen', 'jp-vastleggen', {groot:true, breed:true});
   lfTerug(_jpRenderStap1);
   document.getElementById('jp-vastleggen').addEventListener('click', _jpVastleggen);
   var jpDagenBtn = document.getElementById('jp-dagen');
@@ -32484,7 +32487,7 @@ function openMailTemplateEditor(tplId) {
 
   // Twee kolommen op een breed scherm, onder elkaar op een smal scherm.
   var b = '<div class="lf-kolommen tpl"><div>'+links+'</div><div class="tpl-preview-kol">'+rechts+'</div></div>';
-  lfOpen('Template bewerken', b, 'Opslaan', 'tpl-save', {groot:true});
+  lfOpen('Template bewerken', b, 'Opslaan', 'tpl-save', {groot:true, breed:true});
   if(STANDAARD_TPL_IDS.indexOf(tplId) < 0) _lfVerwijderInVenster('Template verwijderen', 'Template verwijderen', 'Weet je zeker dat je "'+tplId+'" wilt verwijderen?', function(){
     var tpls = getMailTemplates();
     delete tpls[tplId];
