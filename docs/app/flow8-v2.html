@@ -2249,6 +2249,19 @@ tr.sleept td{background:rgba(79,110,245,.16)!important}
 .leeg-staat p{margin:0;font-size:13px;line-height:1.5;max-width:340px}
 .wbl-balk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .wbl-balk #wb-zoek{flex:1 1 160px;min-width:0}
+.wbl-sync{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;color:var(--muted);min-height:20px}
+.wbl-sync:empty{display:none}
+.wbl-sync svg{width:15px;height:15px;flex:none}
+.wbl-sync.ok svg{color:var(--green-t)}
+.wbl-sync.let,.wbl-sync.let svg{color:var(--orange-t)}
+.wbl-sync.fout,.wbl-sync.fout svg{color:var(--red-t)}
+.wbl-sync > span:not(.wbl-sync-draai){flex:1;min-width:0}
+.wbl-sync .btn{flex:none;min-height:36px}
+.wbl-sync-draai{width:13px;height:13px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent);animation:wbsync .8s linear infinite;flex:none}
+@keyframes wbsync{to{transform:rotate(360deg)}}
+@media (pointer:coarse){.wbl-sync .btn{min-height:44px}}
+/* Op Werkbonnen zegt de regel bovenaan het al; de zwevende fototeller is daar dubbel */
+body:has(#wb-sync) #fq-teller{display:none!important}
 /* Zoek- en keuzevelden in de werkbalk staan op de pagina-achtergrond: wit, zoals de kaarten op de pagina */
 .werkbalk .input,.wbl-balk #wb-zoek{background:var(--surface)}
 .wbl-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
@@ -7065,6 +7078,7 @@ function _fqChecklistFoto(item){
 // klemzit. Een tik daarop probeert de vastgelopen items opnieuw; zonder die uitweg zou een
 // foto onzichtbaar blijven hangen.
 function _updateFqBanner(){
+  if(typeof _wbSyncTeken === 'function') _wbSyncTeken();
   _fqLijst().then(function(items){
     var el = document.getElementById('fq-teller');
     if(!el) return;
@@ -7118,6 +7132,7 @@ var _fbVerbonden = true;
 // tegenspreken.
 function zetOfflineBanner(verbonden) {
   _fbVerbonden = !!verbonden;
+  if(typeof _wbSyncTeken === 'function') setTimeout(_wbSyncTeken, 0);
   // Ook de offline-banner op de inlogpagina meesturen (zelfde bron van waarheid).
   if (typeof _loginZetOffline === 'function') _loginZetOffline(!verbonden);
   var banner = document.getElementById('offline-banner');
@@ -8766,6 +8781,7 @@ function bouwMeerMenu() {
 
 function navigateTo(id) { toonPagina(id); }
 function toonPagina(id) {
+  if(id !== 'werkbonnen') _wbStopLive();
   // Instellingen met niet-opgeslagen wijzigingen: eerst vragen of het opgeslagen moet worden
   if(APP.activePage==='instellingen' && id!=='instellingen' && !toonPagina._doorgaan && _instIsVuil()){
     return _instVerlaat(function(){ toonPagina._doorgaan = true; try{ toonPagina(id); } finally { toonPagina._doorgaan = false; } });
@@ -29728,6 +29744,54 @@ function _wbFilterToepassen(){
   sluit();
   var leeg = document.getElementById('wb-geen'); if(leeg) leeg.hidden = totaal > 0;
 }
+// Werkbonnen live volgen. teken(bonnen) tekent de lijst; verse() geeft de lijst een schone plek (de lijst bindt
+// zijn eigen klik- en veegluisteraars, die mogen bij een tweede tekenronde niet dubbel komen). Zelfde inhoud:
+// niet opnieuw tekenen. Lukt volgen niet, dan één keer ophalen zoals voorheen.
+var _wbLive = null, _wbLiveSig = '', _wbBijgewerkt = null, _wbWacht = false;
+function _wbStopLive(){ if(_wbLive){ try { _wbLive(); } catch(e){} _wbLive = null; } _wbLiveSig = ''; }
+function _wbVolg(eigenId, verse, teken, fout){
+  _wbStopLive();
+  var eerste = true;
+  var verwerk = function(bonnen, wacht){
+    _wbBijgewerkt = new Date(); _wbWacht = !!wacht;
+    var sig = bonnen.map(function(b){ var t = b.gewijzigdOp; return b.id+'|'+b.status+'|'+(b.datum||'')+'|'+(t && t.seconds ? t.seconds : ''); }).sort().join(',');
+    if(!eerste && sig === _wbLiveSig){ _wbSyncTeken(); return; }
+    if(!eerste) verse();
+    eerste = false; _wbLiveSig = sig;
+    teken(bonnen);
+    _wbSyncTeken();
+  };
+  try {
+    var q = fsWerkbonnenCol();
+    if(eigenId) q = q.where('monteurIds', 'array-contains', String(eigenId));
+    _wbLive = q.onSnapshot(function(snap){
+      if(!document.getElementById('wb-lijst')){ _wbStopLive(); return; }   // pagina is weg
+      var bonnen = [];
+      snap.forEach(function(d){ bonnen.push(Object.assign({ id: d.id }, d.data())); });
+      verwerk(bonnen, snap.metadata && snap.metadata.hasPendingWrites);
+    }, function(e){
+      _wbStopLive();
+      fsWerkbonnenLijst(null, eigenId).then(function(b){ verwerk(b, false); }).catch(fout);
+    });
+  } catch(e){ fsWerkbonnenLijst(null, eigenId).then(function(b){ verwerk(b, false); }).catch(fout); }
+}
+// Eén regel over het versturen: verbinding, wachtende foto's en wijzigingen die nog onderweg zijn
+function _wbSyncTeken(){
+  var el = document.getElementById('wb-sync'); if(!el) return;
+  _fqLijst().then(function(items){
+    var n = items.length, vast = items.filter(function(i){ return (i.pogingen || 0) >= _FQ_MAX_POGINGEN; }).length;
+    var fotos = function(x){ return x === 1 ? '1 foto' : x+' foto\'s'; };
+    var kl, h;
+    if(!_fbVerbonden){ kl = 'let'; h = ICO.storing+'<span>Geen verbinding · wat je invult wordt bewaard en straks verstuurd'+(n ? ' ('+fotos(n)+')' : '')+'</span>'; }
+    else if(vast){ kl = 'fout'; h = ICO.storing+'<span>'+fotos(vast)+' '+(vast === 1 ? 'komt' : 'komen')+' niet weg</span><button type="button" class="btn btn-ghost btn-sm" data-wb-sync>Opnieuw proberen</button>'; }
+    else if(n || _wbWacht){ kl = 'bezig'; h = '<span class="wbl-sync-draai" aria-hidden="true"></span><span>'+(n ? fotos(n)+' '+(n === 1 ? 'wordt' : 'worden') : 'Wijzigingen worden')+' verstuurd…</span>'; }
+    else {
+      var t = _wbBijgewerkt ? ('0'+_wbBijgewerkt.getHours()).slice(-2)+':'+('0'+_wbBijgewerkt.getMinutes()).slice(-2) : '';
+      kl = 'ok'; h = _IC_VINK+'<span>Alles verstuurd'+(t ? ' · bijgewerkt '+t : '')+'</span>';
+    }
+    el.className = 'wbl-sync '+kl; el.innerHTML = h;
+  }).catch(function(){});
+}
 function renderWerkbonnen() {
   var el = document.getElementById('content');
   var statusLbl = { klaargezet:'Klaargezet', opgehaald:'Opgehaald', afgehandeld:'Afgehandeld', verwerkt:'Verwerkt' };
@@ -29768,6 +29832,7 @@ function renderWerkbonnen() {
     '<input type="search" class="input" id="wb-zoek" placeholder="Zoek bon, klant of adres…" value="'+esc(safeZoek(window._wbZoek||''))+'" autocomplete="off" aria-label="Werkbonnen zoeken">'+
     '<div class="wbl-vul" style="flex:1"></div>'+_knoppen+
     '</div>'+
+    '<div id="wb-sync" class="wbl-sync" role="status" aria-live="polite"></div>'+
     '<div id="wb-filters" class="wbl-filters"></div>'+
     '<div id="wb-lijst"><div style="text-align:center;padding:40px;color:var(--muted)">Werkbonnen laden…</div></div>'+
     '</div>';
@@ -29790,9 +29855,14 @@ function renderWerkbonnen() {
   if(nieuwBtn) nieuwBtn.addEventListener('click', function(){ _wbNieuweBonDialoog(); });
 
   var lijst = document.getElementById('wb-lijst');
+  var _wbSyncEl = document.getElementById('wb-sync');
+  if(_wbSyncEl) _wbSyncEl.addEventListener('click', function(e){ if(e.target.closest('[data-wb-sync]') && typeof flushFotoQueue === 'function') flushFotoQueue(true); });
   // Ziet deze gebruiker alleen eigen bonnen? Dan meteen server-side filteren.
   var _eigenId = zietAlleenEigen('werkbonnen') ? (getMijnMedId()||null) : null;
-  fsWerkbonnenLijst(null, _eigenId).then(function(bonnen){
+  _wbVolg(_eigenId, function(){
+    // Schone lijst voor een nieuwe tekenronde (zie _wbVolg)
+    var n = lijst.cloneNode(false); lijst.parentNode.replaceChild(n, lijst); lijst = n;
+  }, function(bonnen){
     var zichtbaar;
     if(isHist){
       // Afgehandeld/verwerkt van de laatste X dagen (op afrond-/gewijzigd-datum)
@@ -30041,7 +30111,7 @@ function renderWerkbonnen() {
     }
     lijst.addEventListener('pointerup', _slEind);
     lijst.addEventListener('pointercancel', _slEind);
-  }).catch(function(e){
+  }, function(e){
     lijst.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red-t)">Laden mislukt: '+esc(e.message||String(e))+'</div>';
   });
 }
