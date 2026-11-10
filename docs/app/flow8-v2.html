@@ -26769,6 +26769,16 @@ function _openArtikelEditor(artikel){
 
   lfOpen(isNew?'Artikel toevoegen':'Artikel bewerken', b, 'Opslaan', 'art-save', {groot:true});
   var _artMd = document.getElementById('modal'); if(_artMd) _artMd.classList.add('modal-lf-middel');
+  // Verwijderen onderaan het venster (de selectievakjes in de lijst staan niet op de telefoon)
+  if(!isNew && a.id && (isAdmin() || magSchrijven('materialen'))){
+    _lfVerwijderInVenster('Artikel verwijderen', 'Artikel verwijderen', 'Weet je zeker dat je artikel "'+esc(a.code || a.omschrijving || '')+'" wilt verwijderen?', function(){
+      fsArtikelVerwijderen(a.id).then(function(){
+        APP.artikelenCache = (APP.artikelenCache || []).filter(function(x){ return x.id !== a.id; });
+        renderMaterialen();
+        toast('Artikel verwijderd', 'success');
+      }).catch(function(err){ toast('Verwijderen mislukt: '+(err.message || err), 'error'); });
+    });
+  }
 
   // Accordion-toggles (Foto, Documenten) — standaard dicht
   document.querySelectorAll('#modal .art-acc .art-acc-hdr').forEach(function(hdr){
