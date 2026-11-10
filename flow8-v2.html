@@ -2744,6 +2744,12 @@ button.sd-m-dag{cursor:pointer}
 .wbx-chip-add{display:flex;width:100%;gap:12px;background:none;border:0;border-top:1px solid var(--border);border-radius:0;padding:8px 0;min-height:54px;font-size:15px;font-weight:600;color:var(--accent-t);box-sizing:border-box}
 .wbx-chip-add svg{width:36px;height:36px;padding:10px;border-radius:var(--radius);background:rgba(79,110,245,.14);box-sizing:border-box;flex-shrink:0}
 .wbx-body label:has(> .wbx-chip-add){display:block!important}
+.wbx-chip-add:not(#wo-nieuw-doc-drop):not(.wox-doc-drop){pointer-events:none}
+label:has(> .wbx-chip-add:not(.wox-doc-drop)){pointer-events:none}
+.zp-toevoeg{pointer-events:none}
+.wbx-chip-add > *,.zp-toevoeg > *{pointer-events:auto;cursor:pointer}
+.zp-toevoeg:has(> :hover) > span{text-decoration:underline;text-underline-offset:3px}
+.wbx-chip-add:not(#wo-nieuw-doc-drop):not(.wox-doc-drop):has(> :hover) > span{text-decoration:underline;text-underline-offset:3px}
 .wbx-snel{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;padding-top:12px;border-top:1px solid var(--border)}
 .wbx-snel a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;text-decoration:none}
 .wbx-snel a:active{background:var(--border)}
@@ -4381,7 +4387,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   // ── Sectie: Checklists (gekoppelde formulieren, dynamisch per sjabloon) ──
   var clBadge = (wb.checklists&&wb.checklists.length) ? '<span class="wbx-cnt-badge">'+wb.checklists.length+'</span>' : '';
   var clBody = '<div id="wb-checklists-body" class="lf"></div>';
-  if(bewerkbaar) clBody += '<button type="button" class="wbx-chip-add" id="wb-checklist-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Checklist toevoegen</button>';
+  if(bewerkbaar) clBody += '<button type="button" class="wbx-chip-add" id="wb-checklist-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Checklist toevoegen</span></button>';
   h += _sec('checklists', ICO_CHECKLIST, 'Checklists', clBadge, clBody, false);
 
   // ── Sectie: Register / Objecten (pompen onder contract bij deze klant) ──
@@ -4396,21 +4402,21 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   // ── Sectie: Uren ──
   var uBadge = (uren&&uren.length) ? '<span class="wbx-cnt-badge">'+uren.length+'</span>' : '';
   var uBody = '<div id="wb-uren-lijst"></div>';
-  if(bewerkbaar) uBody += '<span class="wbx-chip-add" id="wb-uur-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Uren toevoegen</span>';
+  if(bewerkbaar) uBody += '<span class="wbx-chip-add" id="wb-uur-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Uren toevoegen</span></span>';
   h += _sec('uren', ICO_UREN, 'Uren', uBadge, uBody, false);
 
   // ── Sectie: Materialen ──
   var ICO_MAT = '<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>';
   var matBadge = (wb.materialen&&wb.materialen.length) ? '<span class="wbx-cnt-badge">'+wb.materialen.length+'</span>' : '';
   var matBody = '<div id="wb-materialen-body"></div>';
-  if(bewerkbaar) matBody += '<span class="wbx-chip-add" id="wb-materiaal-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Materiaal toevoegen</span>';
+  if(bewerkbaar) matBody += '<span class="wbx-chip-add" id="wb-materiaal-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Materiaal toevoegen</span></span>';
   h += _sec('materialen', ICO_MAT, 'Materialen', matBadge, matBody, false);
 
   // ── Sectie: Foto's ──
   var fBadge = (fotos&&fotos.length) ? '<span class="wbx-cnt-badge">'+fotos.length+'</span>' : '';
   var fBody = '<div id="wb-fotos-grid" class="wbx-foto-grid"></div>';
   fBody += '<div id="wb-foto-progress" style="font-size:11px;color:var(--muted);margin-top:6px"></div>';
-  if(bewerkbaar) fBody += '<label style="display:inline-block"><span class="wbx-chip-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Foto toevoegen</span><input type="file" id="wb-foto-input" accept="image/*" capture="environment" multiple style="display:none"></label>';
+  if(bewerkbaar) fBody += '<label style="display:inline-block"><span class="wbx-chip-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Foto toevoegen</span></span><input type="file" id="wb-foto-input" accept="image/*" capture="environment" multiple style="display:none"></label>';
   h += _sec('foto', ICO_FOTO, "Foto's", fBadge, fBody, false);
 
   // ── Sectie: Documenten (bestanden: PDF, Word, Excel, afbeeldingen — puur intern) ──
@@ -5668,7 +5674,7 @@ function _wbChecklistVeldenHtml(cl, ci, bewerkbaar){
         h += '</div>';
       });
       h += '</div>';
-      if(bewerkbaar) h += '<label style="display:block"><span class="wbx-chip-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Foto toevoegen</span><input type="file" accept="image/*" multiple class="cl-foto-input" data-ci="'+ci+'" data-vi="'+vi+'" style="display:none"></label>';
+      if(bewerkbaar) h += '<label style="display:block"><span class="wbx-chip-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Foto toevoegen</span></span><input type="file" accept="image/*" multiple class="cl-foto-input" data-ci="'+ci+'" data-vi="'+vi+'" style="display:none"></label>';
     } else if(v.type==='tabel'){
       var rijen = Array.isArray(waarde) ? waarde : [];
       h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
@@ -13188,7 +13194,7 @@ function _lfVerwijderInVenster(tekst, titel, vraag, doe){
   });
 }
 // Knop "+ toevoegen" onderaan een uitgeklapte lijst.
-function _zpToevoeg(id, tekst){ return '<button type="button" class="zp-toevoeg" id="'+id+'">'+_LF_PLUS+esc(tekst)+'</button>'; }
+function _zpToevoeg(id, tekst){ return '<button type="button" class="zp-toevoeg" id="'+id+'">'+_LF_PLUS+'<span>'+esc(tekst)+'</span></button>'; }
 function _klKaart(cls, id, titel, sub, onder){
   return '<div class="kl-kaart '+cls+'" data-id="'+esc(id)+'" role="button" tabindex="0"><div class="kl-kaart-t">'+titel+'</div>'
     + (sub ? '<div class="kl-kaart-s">'+sub+'</div>' : '') + (onder ? '<div class="kl-kaart-o">'+onder+'</div>' : '') + '</div>';
@@ -14658,7 +14664,7 @@ function openDebModal(id){
       b += '<button type="button" class="btn btn-ghost btn-sm df-loc-edit btn-icoon" data-locid="'+esc(loc.id)+'" aria-label="Bewerken" title="Bewerken">'+ICO.edit+'</button></span></div>';
     });
     if(!debLocatiesModal.length) b += '<p class="lf-uitleg" style="margin:0 0 4px">Geen extra locaties, alleen het hoofdadres.</p>';
-    b += '<button type="button" class="wbx-chip-add" id="df-add-loc"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Locatie toevoegen</button>';
+    b += '<button type="button" class="wbx-chip-add" id="df-add-loc"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Locatie toevoegen</span></button>';
     b += '</div>';
     var _mCts = debContacten(d), _mStd = debStandaardContact(d);
     b += '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">';
@@ -14718,7 +14724,7 @@ function openDebModal(id){
   b += lfRij(_regIco, 'Invullen', '<span class="lf-seg lf-seg-radio" role="radiogroup" aria-label="'+esc(registerItemMeervoud(true))+' invullen">'
     + '<label><input type="radio" name="df-pomp-keuze" value="handmatig" id="df-pomp-handmatig"'+(skPompKeuze==='handmatig'?' checked':'')+'><span>Handmatig</span></label>'
     + '<label><input type="radio" name="df-pomp-keuze" value="register" id="df-pomp-register"'+(skPompKeuze==='register'?' checked':'')+'><span>Uit register</span></label></span>');
-  b += '<button type="button" id="df-pomp-aanmaken" class="wbx-chip-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Aanmaken in register</button>';
+  b += '<button type="button" id="df-pomp-aanmaken" class="wbx-chip-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Aanmaken in register</span></button>';
   b += '</div>';
   // Handmatig velden
   var _rgD = getRegisterInst();
@@ -21652,7 +21658,7 @@ function openOpdrachtModal(id, prefill) {
   b += '<div class="lf-twee lf-twee-nr">'+lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="op-pc" value="'+esc(o.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="op-huisnr" placeholder="Nr." aria-label="Huisnummer" title="Huisnummer voor adres-aanvulling">')
     + lfRij('', 'Plaats', _opT('op-pl', o.plaats, ''), {voor:'op-pl'})+'</div>';
   b += lfRij('', 'Adres', _opT('op-adres', o.adres, 'Wordt automatisch ingevuld via postcode en nummer'), {voor:'op-adres'});
-  b += '<button type="button" class="wbx-chip-add" id="op-add-locatie"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Extra locatie</button>';
+  b += '<button type="button" class="wbx-chip-add" id="op-add-locatie"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Extra locatie</span></button>';
   b += '</div>';
 
   // ── Planning: monteurs links, het tijdstip rechts ──
@@ -27079,7 +27085,7 @@ function _openArtikelEditor(artikel){
   b += '<div class="art-acc lf-klap" id="art-acc-foto">'+_artKlapKop(ICO.foto, 'Foto', '<span class="art-acc-tel lf-tel" id="art-acc-foto-tel">'+(_heeftFoto?_IC_VINK:'')+'</span>');
   b += '<div class="art-acc-body lf-klap-b" style="display:none">';
   b += '<div id="art-foto-preview" style="margin-bottom:8px">'+(_fotoData?'<img src="'+esc(_fotoData)+'" alt="Artikelfoto" class="art-editor-foto" data-url="'+esc(_fotoData)+'" style="max-width:120px;max-height:120px;border-radius:var(--radius-sm);object-fit:cover;cursor:pointer">':'<div style="font-size:12px;color:var(--muted)">Geen foto</div>')+'</div>';
-  b += '<label class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Foto kiezen<input type="file" id="art-foto-input" accept="image/*" hidden></label>';
+  b += '<label class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Foto kiezen</span><input type="file" id="art-foto-input" accept="image/*" hidden></label>';
   if(_fotoData) b += '<button type="button" class="lf-verwijder" id="art-foto-wis">'+ICO.trash+' Foto verwijderen</button>';
   b += '</div></div>';
 
@@ -27096,7 +27102,7 @@ function _openArtikelEditor(artikel){
     {v:'certificaat',l:'Certificaat'},
     {v:'overig',l:'Overig'},
   ],'handleiding'), {titel:'Soort document'});
-  b += '<label class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Bestand kiezen<input type="file" id="art-doc-file" accept=".pdf,.jpg,.jpeg,.png,.webp" hidden></label>';
+  b += '<label class="wbx-chip-add"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Bestand kiezen</span><input type="file" id="art-doc-file" accept=".pdf,.jpg,.jpeg,.png,.webp" hidden></label>';
   b += '<span id="art-doc-status" class="lf-hint"></span>';
   b += '</div></div>';
   b += '</div>';
@@ -38156,7 +38162,7 @@ function _woBewerkModal(id, wo){
     function kiesDeb(){
       var debiteuren = (APP.debiteuren||[]).slice().sort(function(a,b){ return (a.naam||'').localeCompare(b.naam||''); });
       var b = _lfZoek('wobe-deb-zoek', 'Zoek op naam of plaats');
-      if(klantInst.voorraad) b += '<button type="button" class="wbx-chip-add" id="wobe-deb-voorraad"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/></svg> T.b.v. voorraad (geen klant)</button>';
+      if(klantInst.voorraad) b += '<button type="button" class="wbx-chip-add" id="wobe-deb-voorraad"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/></svg><span>T.b.v. voorraad (geen klant)</span></button>';
       b += '<div id="wobe-deb-res"></div>';
       lfOpen('Klant kiezen', b);
       document.getElementById('modal-footer').innerHTML = '<button type="button" class="btn btn-ghost lf-knop" id="wobe-deb-terug">Terug</button>';
@@ -38258,7 +38264,7 @@ function _woKiesDebiteur(){
   var debiteuren = (APP.debiteuren||[]).slice().sort(function(a,b){ return (a.naam||'').localeCompare(b.naam||''); });
   var b = _lfZoek('wo-deb-zoek', 'Zoek op naam of plaats');
   if(klantInst.voorraad){
-    b += '<button type="button" class="wbx-chip-add" id="wo-deb-voorraad"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/></svg> T.b.v. voorraad (geen klant)</button>';
+    b += '<button type="button" class="wbx-chip-add" id="wo-deb-voorraad"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/></svg><span>T.b.v. voorraad (geen klant)</span></button>';
   }
   b += '<div id="wo-deb-resultaten"></div>';
   lfOpen('Klant kiezen', b);
@@ -39021,7 +39027,7 @@ function _woRenderDetail(){
       + '<div class="wbx-field-lbl">Details</div><textarea class="wbx-field area wox-details" placeholder="Omschrijving van de werkzaamheden"'+dis+'>'+esc(wo.details||'')+'</textarea>';
     if(kanBeheren){
       var _isHoog = wo.prioriteit==='hoog';
-      _beheerHtml = '<div class="wo-beheer"><button type="button" class="wbx-chip-add wox-prio'+(_isHoog?' hoog':'')+'">'+ICO.flag+(_isHoog?'Hoge prioriteit uitzetten':'Markeren als hoge prioriteit')+'</button>'+'</div>';
+      _beheerHtml = '<div class="wo-beheer"><button type="button" class="wbx-chip-add wox-prio'+(_isHoog?' hoog':'')+'">'+ICO.flag+'<span>'+(_isHoog?'Hoge prioriteit uitzetten':'Markeren als hoge prioriteit')+'</span></button>'+'</div>';
     }
     _ovzInfo = info;
   }
@@ -39437,7 +39443,7 @@ function _woUrenSectieHtml(scope, data){
       + '</div>';
   });
   if(!uren.length) h += '<p class="lf-leeg">Nog geen uren toegevoegd.</p>';
-  if(bew) h += '<button type="button" class="wbx-chip-add wox-uur-add" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' Uren toevoegen</button>';
+  if(bew) h += '<button type="button" class="wbx-chip-add wox-uur-add" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+'<span>Uren toevoegen</span></button>';
   return h + '</div>';
 }
 
@@ -39589,7 +39595,7 @@ function _woMatSectieHtml(scope, data){
       + (bew ? '<button type="button" '+a('wo-mat-stap', mi)+' data-d="1" aria-label="E\u00e9n meer">+</button>' : '')
       + '</span><span class="wbm-eenh">'+esc(m.eenheid||'stuk')+'</span></div></div>';
   });
-  if(bew) h += '<button type="button" class="wbx-chip-add wox-mat-kies" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' Materiaal uit catalogus</button>';
+  if(bew) h += '<button type="button" class="wbx-chip-add wox-mat-kies" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+'<span>Materiaal uit catalogus</span></button>';
   else if(!mats.length) h += '<p class="lf-leeg">Geen materialen.</p>';
   return h + '</div>';
 }
@@ -39660,7 +39666,7 @@ function _woDocSectieHtml(scope, data){
       + '<button type="button" class="wox-doc-del vt-wis" data-scope="'+esc(scope)+'" data-di="'+di+'" title="Verwijderen" aria-label="Verwijderen">'+ICO.trash+'</button>';
     h += '</span></div>';
   });
-  if(bew) h += '<label class="wox-doc-drop wbx-chip-add">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' Bestand toevoegen<input type="file" class="wox-doc-input" data-scope="'+esc(scope)+'" multiple hidden></label>';
+  if(bew) h += '<label class="wox-doc-drop wbx-chip-add">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+'<span>Bestand toevoegen</span><input type="file" class="wox-doc-input" data-scope="'+esc(scope)+'" multiple hidden></label>';
   else if(!docs.length) h += '<p class="lf-leeg">Geen documenten.</p>';
   return h + '</div>';
 }
@@ -39795,7 +39801,7 @@ function _woRegisterSectieHtml(scope, data){
       });
     }
   } else if(bew){
-    h += '<button type="button" class="wbx-chip-add wox-pomp-koppel" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+' '+esc(registerItemEnkel(true))+' koppelen uit het register</button>';
+    h += '<button type="button" class="wbx-chip-add wox-pomp-koppel" data-scope="'+esc(scope)+'">'+'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'+'<span>'+esc(registerItemEnkel(true))+' koppelen uit het register</span></button>';
   } else {
     h += '<p class="lf-leeg">Geen '+registerItemEnkel(false)+' gekoppeld.</p>';
   }
@@ -40997,7 +41003,7 @@ function _openWerkorderStatusEditor(type){
   function _heropenStatusLijst(){
     var b = '<p class="lf-uitleg" style="padding-top:0">De statussen van '+esc(type.naam||'dit type')+', in deze volgorde. Kies een status om naam, kleur en de volgende statussen in te stellen.</p>';
     b += '<div id="wo-status-lijst"></div>';
-    b += '<button type="button" class="wbx-chip-add" id="wo-status-nieuw">'+_LF_PLUS+'Status toevoegen</button>';
+    b += '<button type="button" class="wbx-chip-add" id="wo-status-nieuw">'+_LF_PLUS+'<span>Status toevoegen</span></button>';
     lfOpen('Statusflow \u00b7 '+(type.naam||''), b, 'Opslaan', 'wo-status-opslaan');
     lfTerug(function(){ closeModal(); _openWerkorderTypeEditor(type); });
     tekenLijst();
@@ -41186,7 +41192,7 @@ function _woHeropenBlokLijst(){
   var st = _woBlokState; var type = st.type;
   var b = '<p class="lf-uitleg" style="padding-top:0">Elk blok is een fase van '+esc(type.naam||'dit type')+' met eigen velden en een eigen afronding (handtekening of mail). Kies een blok om het te bewerken.</p>';
   b += '<div id="wo-blok-lijst"></div>';
-  b += '<button type="button" class="wbx-chip-add" id="wo-blok-nieuw">'+_LF_PLUS+'Blok toevoegen</button>';
+  b += '<button type="button" class="wbx-chip-add" id="wo-blok-nieuw">'+_LF_PLUS+'<span>Blok toevoegen</span></button>';
   lfOpen('Blokken \u00b7 '+(type.naam||''), b, 'Opslaan', 'wo-blok-opslaan');
   lfTerug(function(){ closeModal(); _openWerkorderTypeEditor(type); });
   _woTekenBlokLijst();
@@ -41476,7 +41482,7 @@ function _vtShell(o){
   h += '<div class="vt-kolommen"><div class="vt-achter"></div><div class="vt-links"><div class="vt-links-kop"><span>Toevoegen</span><button type="button" class="vt-links-dicht" aria-label="Sluiten">'+_LF_X+'</button></div>'+o.toevoegen+'</div>';
   h += '<div><div class="lf-groep lf-groep-knop"><span>Opbouw \u00b7 '+o.aantal+'</span><span class="lf-hint vt-alleen-breed">Kies een veld om het te bewerken</span></div>';
   h += '<div id="'+o.lijstId+'">'+o.lijst+'</div>';
-  h += '<button type="button" class="wbx-chip-add vt-toevoeg-knop">'+_LF_PLUS+'Veld of sectie toevoegen</button></div></div>';
+  h += '<button type="button" class="wbx-chip-add vt-toevoeg-knop">'+_LF_PLUS+'<span>Veld of sectie toevoegen</span></button></div></div>';
   h += '<div class="vt-voet"><button type="button" class="btn btn-primary lf-knop" id="'+o.knopId+'">'+o.knopTekst+'</button></div>';
   return h + '</div>';
 }
