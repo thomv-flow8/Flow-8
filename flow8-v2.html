@@ -3761,7 +3761,7 @@ function _wbHistorieAccordion(containerId, bonnen, bron, bronId, beginOpen){
     .sort(function(a,b){ return (b.datum||'').localeCompare(a.datum||''); });
   // Nieuwste datum voor de samenvatting in de kop
   var laatste = items.reduce(function(m, it){ return (it.datum||'') > m ? (it.datum||'') : m; }, '');
-  var bronTekst = (bron==='debiteur' || bron==='serviceklant') ? 'deze klant' : (bron==='pomp' ? 'deze pomp' : 'dit object');
+  var bronTekst = (bron==='debiteur' || bron==='serviceklant') ? 'deze klant' : (bron==='pomp' ? '' : 'dit object');
   function teken(){
     // Zelfde kop als contactpersonen, locaties, pompen en verzonden mails
     var h = _dpSectieKop('werkbonnen', '<span style="display:inline-flex;flex-shrink:0">'+(ICO.clipboard||'')+'</span>',
@@ -3770,7 +3770,7 @@ function _wbHistorieAccordion(containerId, bonnen, bron, bronId, beginOpen){
         + (zonderBon.length ? ((laatste?' · ':'')+zonderBon.length+' zonder werkbon') : ''),
       open, 'wbh-acc-hdr');
     if(open && !items.length){
-      h+='<div class="zp-klap-b"><p class="lf-leeg">Er is nog geen afgerond werk voor '+bronTekst+'.</p></div>';
+      h+='<div class="zp-klap-b"><p class="lf-leeg">Er is nog geen afgerond werk'+(bronTekst ? ' voor '+bronTekst : '')+'.</p></div>';
     }
     if(open && items.length){
       h+='<div class="zp-klap-b">';
@@ -5020,7 +5020,7 @@ function _wbPompKaart(p, deb){
   var loc = _wbObjectLocatie(p, deb);
   var h = '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:11px;margin-bottom:8px">';
   h += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">';
-  h += '<div style="font-weight:600;font-size:13px">'+esc(p.type||'Pomp')+'</div>';
+  h += '<div style="font-weight:600;font-size:13px">'+esc(p.type||registerItemEnkel(true))+'</div>';
   if(p.serienummer) h += '<span style="font-family:\'Space Mono\',monospace;font-size:11px;color:var(--muted);flex-shrink:0">'+esc(p.serienummer)+'</span>';
   h += '</div>';
   var regels = [];
@@ -9388,7 +9388,7 @@ function _gzVerzamel(woorden){
     (APP.wp_pompen||[]).filter(function(p){
       return _gzPast(woorden, [p.fabrikant, p.type, p.serienummer, p.klantnaam, p.adres, p.plaats, p.klantAdres, p.klantPlaats, p.debNr]);
     }).forEach(function(p){
-      r.push({ type:'pomp', icon:ICO.wrench, label:[[p.fabrikant, p.type].filter(Boolean).join(' ')||'Pomp', p.serienummer?'SN '+p.serienummer:''].filter(Boolean).join(' · '),
+      r.push({ type:'pomp', icon:ICO.wrench, label:[[p.fabrikant, p.type].filter(Boolean).join(' ')||registerItemEnkel(true), p.serienummer?'SN '+p.serienummer:''].filter(Boolean).join(' · '),
         sub:[p.klantnaam, p.plaats||p.klantPlaats].filter(Boolean).join(' · '), id:p.id });
     });
   }
@@ -14936,7 +14936,7 @@ function saveDeb(id, opties){
       if(!skData.pompIds) skData.pompIds = [];
       skData.pompIds.push(nieuwPompId);
       skData.pompKeuze = 'register';
-      toast('Pomp ook geregistreerd in het register','info');
+      toast(registerItemEnkel(true)+' ook geregistreerd in het register','info');
     }
     data.isServiceklant = true;
     // skContractType niet meer bewaren: het contract hoort uitsluitend op de
@@ -15407,8 +15407,8 @@ function _openInstallatieImport(){
   });
   var serieVeld = rv.find(function(v){ return v.bron === 'serienummer'; });
   _excelImport({
-    titel: 'Installaties importeren',
-    uitleg: 'Importeer installaties uit een Excel- of csv-bestand. Elke rij is één installatie; het debiteurnummer koppelt hem aan de klant. Staat het serienummer al in het register, dan wordt die installatie bijgewerkt.',
+    titel: registerItemMeervoud(true)+' importeren',
+    uitleg: 'Importeer '+registerItemMeervoud()+' uit een Excel- of csv-bestand. Elke rij is er één; het debiteurnummer koppelt hem aan de klant. Staat het serienummer al in het register, dan wordt die regel bijgewerkt.',
     velden: velden,
     analyseer: function(rijen){
       var a = { nieuw:[], bij:[], over:[] }, gezien = {};
@@ -21502,7 +21502,7 @@ function openOpdrachtModal(id, prefill) {
 
   // ── Werk ──
   b += '<div class="lf-groep">Werk</div><div class="lf-blok-kaart">';
-  b += '<div id="op-handmatig-wrap" style="display:none"><div class="lf-twee">'+lfRij('', 'Pomptype', _opT('op-pomptype', o.pomptype, ''), {voor:'op-pomptype'})+lfRij('', 'Besturing', _opT('op-besturing', o.besturing, ''), {voor:'op-besturing'})+'</div></div>';
+  b += '<div id="op-handmatig-wrap" style="display:none"><div class="lf-twee">'+lfRij('', esc(getRegisterInst().veld1Label), _opT('op-pomptype', o.pomptype, ''), {voor:'op-pomptype'})+lfRij('', esc(getRegisterInst().veld2Label), _opT('op-besturing', o.besturing, ''), {voor:'op-besturing'})+'</div></div>';
   b += '<div id="op-pomp-blok" style="display:none"><div class="lf-sub-l" style="border-top:0">'+esc(registerItemMeervoud(true))+' uit het register</div><div id="op-pomp-register-wrap"><div id="op-pomp-lijst">'
     + '<p class="lf-uitleg" style="margin:0 0 8px">Selecteer eerst een klant om '+esc(registerItemMeervoud(false))+' te zien</p></div></div></div>';
   var actieOpts = ['','Niet thuis','Opnieuw inplannen','Offerte maken','Werk afmaken','Contact opnemen','Wacht op klant'].map(function(a){
@@ -27868,8 +27868,8 @@ function renderPompLijst() {
   h += '<input class="input" id="pr-zoek" placeholder="Zoek op type, serienummer of klant" title="Zoekt ook op debiteurnummer en adres" value="'+esc(safeZoek(_prZoek))+'" style="flex:1;min-width:160px;max-width:320px">';
   h += '<div style="display:flex;align-items:center;gap:8px;margin-left:auto">';
   h += '<button class="btn btn-ghost btn-sm" id="pr-objecten-btn" style="display:inline-flex;align-items:center;gap:4px"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Objecten</button>';
-  h += _meerMenu([{id:'pr-kolom-btn', label:'Kolommen kiezen', icon:ICO.settings}, {id:'pr-export-btn', label:'Exporteren', icon:ICO.download}, kanSchrijven ? {id:'pr-import-btn', label:'Pompen importeren', icon:ICO.upload} : null], true);
-  if(kanSchrijven) h += '<button class="btn btn-primary btn-sm" id="pr-add-btn">'+_LF_PLUS+'Pomp</button>';
+  h += _meerMenu([{id:'pr-kolom-btn', label:'Kolommen kiezen', icon:ICO.settings}, {id:'pr-export-btn', label:'Exporteren', icon:ICO.download}, kanSchrijven ? {id:'pr-import-btn', label:registerItemMeervoud(true)+' importeren', icon:ICO.upload} : null], true);
+  if(kanSchrijven) h += '<button class="btn btn-primary btn-sm" id="pr-add-btn">'+_LF_PLUS+esc(registerItemEnkel(true))+'</button>';
   h += '</div></div>';
 
   // ── Statkaartjes ──
@@ -28289,10 +28289,10 @@ function renderPompDetail() {
   });
   var delBtn=el.querySelector('#pr-del-detail');
   if(delBtn) delBtn.addEventListener('click',function(){
-    bevestigActie('Pomp verwijderen','Weet je zeker dat je "'+esc(pomp.type)+'" wilt verwijderen? Dit verwijdert ook alle documenten en onderdelen.',async function(){
+    bevestigActie(registerItemEnkel(true)+' verwijderen','Weet je zeker dat je "'+esc(pomp.type)+'" wilt verwijderen? Dit verwijdert ook alle documenten en onderdelen.',async function(){
       await FB.ref(dbPath('wp_pompen',pomp.id)).remove();
       APP.wp_pompen=(APP.wp_pompen||[]).filter(function(p){return String(p.id)!==String(pomp.id);});
-      toast('Pomp verwijderd','success');
+      toast(registerItemEnkel(true)+' verwijderd','success');
       _prTab='lijst'; _prDetPompId=null; renderPompLijst();
     },'danger');
   });
@@ -28336,12 +28336,12 @@ function renderPompTechnisch(pomp, klantNm, kanSchrijven) {
     else _artLabel = 'koppeling verbroken';
   }
   var velden = [
-    ['Pomptype',    pomp.type],
+    [getRegisterInst().veld1Label, pomp.type],
     ['Serienummer', pomp.serienummer],
     ['Artikelnummer', _artLabel],
     ['Fabrikant',   pomp.fabrikant],
     ['Bouwjaar',    pomp.bouwjaar],
-    ['Besturing',   pomp.besturing],
+    [getRegisterInst().veld2Label, pomp.besturing],
   ];
   velden.forEach(function(v){
     h += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">';
@@ -28466,7 +28466,7 @@ function renderPompDocumenten(pomp, kanUpload) {
           artDocHtml += '<div style="font-size:11px;color:var(--muted)">'+esc(lbl)+' \u00b7 standaard bij artikel</div></div>';
           artDocHtml += '<div style="display:flex;gap:4px;flex-shrink:0">';
           if(doc.url) artDocHtml += '<button class="btn btn-ghost btn-sm pr-doc-open" data-url="'+esc(doc.url)+'" data-naam="'+esc(doc.naam||'Document')+'" data-bn="'+esc(doc.bestandsnaam||doc.url)+'" style="font-size:11px;padding:3px 8px">Openen</button>';
-          if(kanUpload) artDocHtml += '<button class="btn btn-ghost btn-sm pr-artdoc-verberg" data-url="'+esc(doc.url)+'" title="Verbergen voor deze pomp" style="font-size:11px;padding:3px 8px;color:var(--muted)">Verbergen</button>';
+          if(kanUpload) artDocHtml += '<button class="btn btn-ghost btn-sm pr-artdoc-verberg" data-url="'+esc(doc.url)+'" title="Alleen hier verbergen (het artikel houdt het document)" style="font-size:11px;padding:3px 8px;color:var(--muted)">Verbergen</button>';
           artDocHtml += '</div></div>';
         });
         artDocHtml += '</div>';
@@ -28474,7 +28474,7 @@ function renderPompDocumenten(pomp, kanUpload) {
       // Verborgen artikel-documenten terugzetten
       var verborgenDocs = artDocs.filter(function(d){ return d && d.url && verborgen.indexOf(d.url)>=0; });
       if(verborgenDocs.length && kanUpload){
-        artDocHtml += '<div style="margin-top:8px;font-size:11px;color:var(--muted)">'+verborgenDocs.length+' standaarddocument'+(verborgenDocs.length!==1?'en':'')+' verborgen voor deze pomp. ';
+        artDocHtml += '<div style="margin-top:8px;font-size:11px;color:var(--muted)">'+verborgenDocs.length+' standaarddocument'+(verborgenDocs.length!==1?'en':'')+' hier verborgen. ';
         artDocHtml += '<button class="pr-artdoc-herstel-all" style="background:none;border:none;color:var(--accent-t);cursor:pointer;font-size:11px;text-decoration:underline;padding:0">Alles herstellen</button></div>';
       }
       artDocHtml += '</div>';
@@ -28485,13 +28485,13 @@ function renderPompDocumenten(pomp, kanUpload) {
     h += legeStaat(
       '<svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
       'Nog geen documenten',
-      'Upload handleidingen, explosietekeningen of certificaten voor deze pomp, of koppel een artikel.',
+      'Upload handleidingen, explosietekeningen of certificaten, of koppel een artikel.',
       kanUpload ? '+ Document uploaden' : null, kanUpload ? 'pr-doc-upload-empty' : null
     );
   } else {
     h += artDocHtml;
     if(docs.length){
-      h += '<div style="font-weight:700;font-size:13px;margin-bottom:8px">Documenten van deze pomp</div>';
+      h += '<div style="font-weight:700;font-size:13px;margin-bottom:8px">Eigen documenten</div>';
       h += '<div class="pr-docs-grid" style="display:flex;flex-direction:column;gap:6px">';
       docs.sort(function(a,b){ return (a.naam||'') > (b.naam||'') ? 1:-1; }).forEach(function(doc){
         var kl = typeKleuren[doc.type] || '#6b7694';
@@ -28526,7 +28526,7 @@ function _bindDocumentenEvents(el, pomp, kanUpload) {
       if(lijst.indexOf(url)<0) lijst.push(url);
       pomp.verborgenArtikelDocs = lijst;
       FB.ref(dbPath('wp_pompen',pomp.id,'verborgenArtikelDocs')).set(lijst).then(function(){
-        toast('Document verborgen voor deze pomp','success');
+        toast('Document hier verborgen','success');
         renderPompDetail();
       }).catch(function(e){ toast('Mislukt: '+(e.message||e),'error'); });
     });
@@ -28917,7 +28917,7 @@ function renderPompWerkhistorie(pomp) {
     h += '<div id="pomp-hist-leeg">' + legeStaat(
       '<svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 13h5M7 16.5h8"/></svg>',
       'Nog geen werkhistorie',
-      'Werkbonnen, werkorders en opdrachten die aan deze pomp zijn gekoppeld verschijnen hier automatisch.',
+      'Werkbonnen, werkorders en opdrachten die hieraan zijn gekoppeld verschijnen hier automatisch.',
       null, null
     ) + '</div>';
   }
@@ -29075,7 +29075,7 @@ function openPompModal(id, opties) {
   b += '</div>';
   if(!isNieuw) b += '<button type="button" class="lf-verwijder" id="pr-m-del">'+ICO.trash+' '+esc(registerItemEnkel(true))+' verwijderen</button>';
 
-  lfOpen((isNieuw?'Pomp registreren':'Pomp bewerken'), b, isNieuw?'Registreren':'Opslaan', 'pr-m-save', {groot:true});
+  lfOpen((isNieuw?registerItemEnkel(true)+' registreren':registerItemEnkel(true)+' bewerken'), b, isNieuw?'Registreren':'Opslaan', 'pr-m-save', {groot:true});
 
   // ── Klantzoeker (identiek aan planning modal) ──
   var _prKlantPool = [];
@@ -29299,11 +29299,11 @@ function openPompModal(id, opties) {
   var delBtn = document.getElementById('pr-m-del');
   if(delBtn) delBtn.addEventListener('click', function(){
     closeModal();
-    bevestigActie('Pomp verwijderen', 'Weet je zeker dat je "'+esc(pomp.type)+'" (SN: '+esc(pomp.serienummer)+') wilt verwijderen? Alle documenten en onderdelen gaan verloren.', async function(){
+    bevestigActie(registerItemEnkel(true)+' verwijderen', 'Weet je zeker dat je "'+esc(pomp.type)+'" (SN: '+esc(pomp.serienummer)+') wilt verwijderen? Alle documenten en onderdelen gaan verloren.', async function(){
       await FB.ref(dbPath('wp_pompen', pomp.id)).remove();
       var idx=(APP.wp_pompen||[]).findIndex(function(p){return String(p.id)===String(pomp.id);});
       if(idx>=0) APP.wp_pompen.splice(idx,1);
-      toast('Pomp verwijderd','success');
+      toast(registerItemEnkel(true)+' verwijderd','success');
       _prTab='lijst'; _prDetPompId=null; renderPompLijst();
     }, 'danger');
   });
@@ -38313,7 +38313,7 @@ function _genereerWoPDFsync(opties, _woFotoCache){
       if(!pomp) return y;
       y = _ruimte(y, 8); y += 1;
       doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(grijs[0],grijs[1],grijs[2]);
-      doc.text('Pomp uit register', LM, y); y += 5;
+      doc.text(registerItemEnkel(true)+' uit register', LM, y); y += 5;
       y = _ruimte(y, 6);
       // Labelbreedte 26 = gelijk aan de tweekoloms-velden hieronder, zodat alle
       // waarden op dezelfde x beginnen. Volle breedte blijft, want een typenaam
@@ -38323,7 +38323,7 @@ function _genereerWoPDFsync(opties, _woFotoCache){
       var velden = [
         ['Fabrikant',   pomp.fabrikant],
         ['Merk',        pomp.merk],
-        ['Besturing',   pomp.besturing],
+        [getRegisterInst().veld2Label, pomp.besturing],
         ['Waaier \u00d8',   pomp.waaierD ? pomp.waaierD+' mm' : null],
         ['Vermogen',    pomp.vermogen ? pomp.vermogen+' kW' : null],
         ['I nominaal',  pomp.iNom ? pomp.iNom+' A' : null],
@@ -39590,7 +39590,7 @@ function _woRegisterSectieHtml(scope, data){
     var gegevens = [
       ['Fabrikant', pomp.fabrikant],
       ['Merk', pomp.merk],
-      ['Besturing', pomp.besturing],
+      [getRegisterInst().veld2Label, pomp.besturing],
       ['Waaier \u00d8', pomp.waaierD ? pomp.waaierD+' mm' : null],
       ['Vermogen', pomp.vermogen ? pomp.vermogen+' kW' : null],
       ['I nominaal', pomp.iNom ? pomp.iNom+' A' : null],
@@ -39637,7 +39637,7 @@ function _woOpenPompKiezer(scope){
       var deb = (APP.debiteuren||[]).find(function(d){ return String(d.id)===String(p.debId); });
       var sub = ['SN '+(p.serienummer||'—'), p.fabrikant, deb ? deb.naam : ''].filter(Boolean).map(esc).join(' · ');
       hh += '<button type="button" class="lf-rij lf-kies wox-pomp-optie" data-id="'+esc(p.id)+'">'+_lfIco(_ZP_POMP)
-        + '<span class="lf-l">'+esc(p.type||'Pomp')+'<small>'+sub+'</small></span><span class="lf-w">'+_LF_CHEV+'</span></button>';
+        + '<span class="lf-l">'+esc(p.type||registerItemEnkel(true))+'<small>'+sub+'</small></span><span class="lf-w">'+_LF_CHEV+'</span></button>';
     });
     res.innerHTML = _zpKaart(hh);
     res.querySelectorAll('.wox-pomp-optie').forEach(function(row){
