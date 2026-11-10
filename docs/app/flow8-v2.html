@@ -1170,6 +1170,17 @@ body.light{--dash-g2:#f59e0b}
 .hp-let{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;color:var(--orange-t)}
 .hp-let[hidden]{display:none}
 .hp-niemand{font-size:12px;color:var(--muted)}
+.plan-legenda .plan-legenda-uitleg{font-size:12px;margin-left:auto}
+.uitleg p{margin:0 0 10px;font-size:14px;line-height:1.55;color:var(--text)}
+.uitleg-lijst{display:grid;gap:10px;margin-bottom:12px}
+.uitleg-lijst > div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:baseline}
+.uitleg-lijst > div > b{font:700 14px 'Space Mono',monospace}
+.uitleg-lijst p{margin:0;font-size:13.5px;color:var(--muted)}
+.uitleg-voet{font-size:13px!important;color:var(--muted)!important}
+.uitleg-lijst .wk-status{justify-self:start}
+.uitleg-lijst.kort > div{grid-template-columns:24px minmax(0,1fr)!important;gap:10px!important}
+.modal:has(.uitleg) .modal-footer:empty{display:none}
+@media (max-width:768px){.uitleg-lijst > div{grid-template-columns:1fr;gap:4px}}
 .zp-dubbel-knoppen{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:4px}
 .wk-dubbel span{min-width:0}
 td[data-col="status"] .wk-dubbel{margin:4px 0 0 2px}
@@ -9286,6 +9297,7 @@ function openGlobaalZoek() {
   var input   = document.getElementById('global-zoek-input');
   if(!overlay) return;
   overlay.style.display = 'block';
+  if(input) input.placeholder = 'Zoek opdracht, werkbon, klant of '+registerItemEnkel()+'…';
   // Direct focussen, niet na een timeout: iOS opent het toetsenbord alleen binnen de tik zelf.
   if(input){ input.focus(); input.select(); if(!input.value) globaalZoeken(''); }
 }
@@ -9333,9 +9345,62 @@ function _gzMark(tekst, woorden){
   var re = new RegExp('('+w.map(function(x){ return x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }).join('|')+')', 'gi');
   return t.split(/(&[a-z#0-9]+;)/i).map(function(seg){ return /^&[a-z#0-9]+;$/i.test(seg) ? seg : seg.replace(re, '<mark>$1</mark>'); }).join('');
 }
+// Uitleg bij de kernbegrippen, in gewone taal. Opent als venster; bereikbaar via "Wat betekent dit?" en ⌘K.
+var _UITLEG = {
+  status: { t:'Statussen van een opdracht', w:'status statussen ingepland klaargezet opgehaald afgehandeld verwerkt actie vereist gereserveerd spoed', h:function(){
+    var r = [['ingepland','Staat in de planning. De monteur ziet nog geen werkbon.'],
+      ['klaargezet','Vrijgegeven: de werkbon staat klaar voor de monteur.'],
+      ['opgehaald','De monteur heeft de werkbon opgepakt en is ermee bezig.'],
+      ['actie','Er moet nog iets gebeuren, bijvoorbeeld opnieuw inplannen of een offerte maken. De reden staat erbij.'],
+      ['afgehandeld','Het werk is klaar en de werkbon is afgerond.'],
+      ['verwerkt','Kantoor heeft de bon verwerkt (bijvoorbeeld gefactureerd).'],
+      ['gereserveerd','Vastgezet (speldje): deze afspraak ligt vast en schuif je niet zomaar op.']];
+    return '<div class="uitleg-lijst">'+r.map(function(x){ var c = STATUS_DEF[x[0]]; return c ? '<div><span class="wk-status"><i style="background:'+c.kl+'"></i>'+c.lbl+'</span><p>'+x[1]+'</p></div>' : ''; }).join('')+'</div>'
+      + '<p class="uitleg-voet"><b>Spoed</b> is geen status maar een vlag: een opdracht kan tegelijk Ingepland en Spoed zijn. Inplannen verandert de status niet; Klaarzetten geeft de bon vrij.</p>'; } },
+  dubbel: { t:'Dubbel geboekt', w:'dubbel geboekt overlap conflict tegelijk bezet', h:function(){
+    return '<p>Een opdracht is <b>dubbel geboekt</b> als hij in tijd overlapt met ander open werk van dezelfde monteur. Afgehandeld werk telt niet mee.</p>'
+      + '<p>Je ziet het op de kaart (met waarmee in Lijst en op de telefoon), in het opdrachtpaneel met <b>Tijd of monteur wijzigen</b>, op de monteurtegel ("Bezet 08:00–10:00") en bij slepen. Het mag bewust (bijvoorbeeld twee klussen op één adres); de app waarschuwt alleen.</p>'; } },
+  rechten: { t:'Rechten: L, E, S, B en I', w:'rechten rollen lezen eigen schrijven beheren inzage toegang', h:function(){
+    return '<div class="uitleg-lijst kort"><div><b>L</b><p>Lezen: de module zien.</p></div><div><b>E</b><p>Alleen eigen gegevens: eigen werkbonnen, of eigen aanvragen zolang ze Aangevraagd zijn.</p></div><div><b>S</b><p>Schrijven en bewerken: alles in de module, ook van anderen.</p></div><div><b>B</b><p>Beheren (werkorders): aanmaken, verwijderen, status en klant wijzigen.</p></div><div><b>I</b><p>Inzage in alle verzuimdossiers (ziektegegevens, daarom apart).</p></div></div>'
+      + '<p class="uitleg-voet">Instellen doe je bij Instellingen › Rollen & rechten.</p>'; } },
+  plandagen: { t:'Plandagen en werktijden', w:'plandagen werktijden werkdagen rooster beschikbaarheid', h:function(){
+    return '<p><b>Plandagen</b> (Instellingen › Planning) zijn de dagen waarop je opdrachten en servicebeurten inplant; de voorstelberekening schuift door naar de eerstvolgende plandag.</p>'
+      + '<p><b>Werktijden</b> (Instellingen › Team & Verlof, of per medewerker) zijn de uren die iemand werkt. Die tellen voor verlofuren, beschikbaarheid en de bezettingsbalk.</p>'; } }
+};
+function toonUitleg(k){
+  var u = _UITLEG[k]; if(!u) return;
+  var open = document.getElementById('modal-overlay') && document.getElementById('modal-overlay').classList.contains('open');
+  (open ? openBovenModal : openModal)(u.t, '<div class="uitleg">'+u.h()+'</div>', '');
+}
+document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('[data-uitleg]'); if(b){ e.preventDefault(); toonUitleg(b.dataset.uitleg); } });
+// Acties en instellingen voor ⌘K: wat je kunt doen en waar iets staat
+var _GZ_ACTIES = [
+  { l:'Nieuwe opdracht', w:'nieuwe opdracht toevoegen inplannen maken', mod:'planning', doe:function(){ navigateTo('planning'); setTimeout(function(){ openOpdrachtModal(null); }, 150); } },
+  { l:'Nieuwe werkbon', w:'nieuwe werkbon maken toevoegen', mod:'werkbonnen', eigen:true, doe:function(){ navigateTo('werkbonnen'); setTimeout(function(){ _wbNieuweBonDialoog(); }, 150); } },
+  { l:'Nieuwe debiteur', w:'nieuwe debiteur klant toevoegen', mod:'debiteuren', doe:function(){ navigateTo('debiteuren'); setTimeout(function(){ openDebModal(null); }, 150); } },
+  { l:'Verlof aanvragen', w:'verlof aanvragen vakantie vrij vrije dag', mod:'verlof', eigen:true, doe:function(){ navigateTo('verlof'); setTimeout(function(){ openVerlofModal(); }, 150); } },
+  { l:'Overuren registreren', w:'overuren registreren indienen', mod:'overuren', eigen:true, doe:function(){ navigateTo('overuren'); setTimeout(function(){ openOverurenModal(); }, 150); } },
+  { l:'Afspraak toevoegen', w:'afspraak toevoegen agenda overleg', mod:'agenda', doe:function(){ navigateTo('agenda'); setTimeout(function(){ openAgendaModal(); }, 150); } }
+];
+var _GZ_INST = [
+  ['bedrijf', 'Bedrijf', 'bedrijf bedrijfsgegevens naam adres logo kvk btw huisstijl mailkleur'],
+  ['administraties', 'Administraties', 'administraties administratie boekhouding'],
+  ['notificaties', 'Notificaties', 'notificaties meldingen berichten'],
+  ['planning', 'Planning', 'planning plandagen werkdagen reistijd blokkade feestdagen'],
+  ['opdrachten', 'Opdrachttypes', 'opdrachttypes types soorten kleur icoon'],
+  ['contracten', 'Contracttypes', 'contracttypes contract servicecontract onderhoud interval'],
+  ['register', 'Register', 'register registernaam pomp machine ketel toestel velden serienummer'],
+  ['werkbonnen', 'Werkbonnen', 'werkbonnen werkbon extern nummer handtekening checklist pdf'],
+  ['werkorders', 'Werkorders', 'werkorders werkorder statussen typen'],
+  ['team', 'Team & Verlof', 'team verlof werktijden contracturen pauze verlofbasis rooster'],
+  ['gebruikers', 'Gebruikers', 'gebruikers accounts uitnodigen inloggen toegang'],
+  ['rollen', 'Rollen & rechten', 'rollen rechten rechtenmatrix toegang lezen schrijven beheren'],
+  ['goedkeuring', 'Goedkeuring', 'goedkeuring goedkeuren beoordelen verlof overuren onkosten']
+];
 var _GZ_TYPEN = [
   {t:'opdracht', l:'Opdrachten'}, {t:'werkbon', l:'Werkbonnen'}, {t:'werkorder', l:'Werkorders'},
-  {t:'pomp', l:'Register'}, {t:'serviceklant', l:'Serviceklanten'}, {t:'debiteur', l:'Debiteuren'}, {t:'medewerker', l:'Medewerkers'}
+  {t:'pomp', l:'Register'}, {t:'serviceklant', l:'Serviceklanten'}, {t:'debiteur', l:'Debiteuren'}, {t:'medewerker', l:'Medewerkers'},
+  {t:'actie', l:'Acties'}, {t:'instelling', l:'Instellingen'}, {t:'uitleg', l:'Uitleg'}
 ];
 var _GZ_WB_STATUS = { klaargezet:['Klaargezet','tag-muted'], opgehaald:['Opgehaald','tag-blue'], afgehandeld:['Afgehandeld','tag-green'], verwerkt:['Verwerkt','tag-slate'] };
 var _gzFilter = '';            // telefoon: alleen deze soort tonen
@@ -9416,6 +9481,17 @@ function _gzVerzamel(woorden){
     if(_gzPast(woorden, [naam, m.email, m.functie]))
       r.push({ type:'medewerker', icon:ICO.user, label:naam.trim(), sub:(m.functie||m.rol||''), id:m.id });
   });
+  // Acties, instellingen en uitleg: zoeken op naam en trefwoorden
+  _GZ_ACTIES.forEach(function(a, i){
+    if(!(isAdmin() || magSchrijven(a.mod) || (a.eigen && magEigen(a.mod)))) return;
+    if(_gzPast(woorden, [a.l, a.w])) r.push({ type:'actie', icon:_LF_PLUS, label:a.l, sub:'Actie', id:String(i) });
+  });
+  if(_gzMag('instellingen')) _GZ_INST.forEach(function(x){
+    if(_gzPast(woorden, [x[1], x[2]])) r.push({ type:'instelling', icon:ICO.settings, label:x[1], sub:'Instellingen', id:x[0] });
+  });
+  Object.keys(_UITLEG).forEach(function(k){
+    if(_gzPast(woorden, [_UITLEG[k].t, _UITLEG[k].w])) r.push({ type:'uitleg', icon:ICO.info, label:_UITLEG[k].t, sub:'Uitleg', id:k });
+  });
   return r;
 }
 function globaalZoeken(q) {
@@ -9424,7 +9500,7 @@ function globaalZoeken(q) {
   q = (q||'').trim();
   if(q !== _gzLaatste){ _gzOpen = {}; _gzLaatste = q; }
   if(!q){
-    res.innerHTML = '<div class="gz-leeg">Zoek op klant, adres, postcode, bonnummer, werkordernummer of serienummer.</div>';
+    res.innerHTML = '<div class="gz-leeg">Zoek op klant, adres, postcode, bonnummer, werkordernummer of serienummer.<br><small>Of op wat je wilt doen of instellen, zoals "nieuwe opdracht", "plandagen" of "rechten".</small></div>';
     if(filt) filt.innerHTML = '';
     return;
   }
@@ -9481,6 +9557,9 @@ function _gzOpenItem(btn){
     return;
   }
   if(type === 'werkbon'){ openWerkbonVanuitPlanning(id); return; }
+  if(type === 'actie'){ var _a = _GZ_ACTIES[+id]; if(_a) _a.doe(); return; }
+  if(type === 'instelling'){ _instTab = id; navigateTo('instellingen'); return; }
+  if(type === 'uitleg'){ toonUitleg(id); return; }
   if(type === 'werkorder'){ navigateTo('werkorders'); setTimeout(function(){ _woOpenDetail(id); }, 150); return; }
   if(type === 'pomp'){ navigateTo('pompregister'); _prTab = 'detail'; _prDetPompId = id; _prDetTab = 'overzicht'; renderPompregister(); return; }
   var nav = { serviceklant:'serviceklanten', debiteur:'debiteuren', medewerker:'medewerkers' }[type];
@@ -11154,7 +11233,7 @@ function _planLegenda(ops){
   types.sort(function(a, b){ var ia = _volg.indexOf(a.label), ib = _volg.indexOf(b.label); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib); });
   var h = '<div class="plan-legenda" aria-label="Legenda"><b>Type</b>';
   types.forEach(function(ot){ h += '<span><i class="lg-type" style="--k:'+ot.kleur+'"></i>'+esc(ot.label)+'</span>'; });
-  h += '<i class="lg-sep"></i><span><i class="lg-stip"></i>Stip = status</span><span><i class="lg-spoed"></i>Rode rand = spoed</span><span>Licht = afgehandeld</span></div>';
+  h += '<i class="lg-sep"></i><span><i class="lg-stip"></i>Stip = status</span><span><i class="lg-spoed"></i>Rode rand = spoed</span><span>Licht = afgehandeld</span><button type="button" class="lf-link plan-legenda-uitleg" data-uitleg="status">Wat betekenen de statussen?</button></div>';
   return h;
 }
 function _wkStatusPil(s){
@@ -11721,6 +11800,7 @@ function _dashAanDeSlag(){
   var stappen = [
     { ok: !!(bg.naam && bg.adres), t:'Bedrijfsgegevens invullen', u:'Naam en adres; de planner rekent routes vanaf je adres.', nav:'instellingen', tab:'bedrijf' },
     { ok: APP.medewerkers.some(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0; }), t:'Monteurs toevoegen', u:'Wie in de planning komt.', nav:'medewerkers' },
+    { ok: !!(APP.registerInst && APP.registerInst.itemEnkel) || (APP.wp_pompen || []).length > 0, t:'Registernaam kiezen', u:'Werk je met pompen, ketels of machines? Die naam verschijnt overal in de app.', nav:'instellingen', tab:'register' },
     { ok: APP.opdrachten.length > 0, t:'Eerste opdracht inplannen', u:'Daarna ziet de monteur zijn werkbon.', nav:'planning' }
   ];
   var klaar = stappen.filter(function(x){ return x.ok; }).length;
@@ -21251,7 +21331,8 @@ function openOpdrachtPanel(id) {
       .map(function(id){ var mm = getMed(id); return mm ? mm.voornaam : ''; }).filter(Boolean).join(' en ');
     h += _zpMelding('actie', 'Dubbel geboekt', '<b>'+esc(_db.klantNaam || 'Andere opdracht')+'</b> · '+_vakTekst(_opVak(_db))+(_dbWie ? ' · '+esc(_dbWie) : '')
       + '<div class="zp-dubbel-knoppen">'+(kanPlannen ? '<button type="button" class="lf-link" data-dubbel-bewerk="'+esc(o.id)+'">Tijd of monteur wijzigen</button>' : '')
-      + '<button type="button" class="lf-link" data-dubbel-open="'+esc(_db.id)+'">Bekijk '+esc(_db.klantNaam || 'die opdracht')+'</button></div>');
+      + '<button type="button" class="lf-link" data-dubbel-open="'+esc(_db.id)+'">Bekijk '+esc(_db.klantNaam || 'die opdracht')+'</button>'
+      + '<button type="button" class="lf-link" data-uitleg="dubbel">Wat betekent dit?</button></div>');
   }
 
   // Geen knoppenrij Bellen/Navigeren/Mailen: dit paneel is voor planners. Telefoon en e-mail zijn
