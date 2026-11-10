@@ -1171,6 +1171,7 @@ body.light{--dash-g2:#f59e0b}
 .hp-let[hidden]{display:none}
 .hp-niemand{font-size:12px;color:var(--muted)}
 .plan-legenda .plan-legenda-uitleg{font-size:12px;margin-left:auto}
+.plan-legenda .plan-legenda-uitleg ~ .plan-legenda-uitleg{margin-left:4px}
 .uitleg p{margin:0 0 10px;font-size:14px;line-height:1.55;color:var(--text)}
 .uitleg-lijst{display:grid;gap:10px;margin-bottom:12px}
 .uitleg-lijst > div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:baseline}
@@ -9366,7 +9367,7 @@ function _gzMark(tekst, woorden){
 }
 // Uitleg bij de kernbegrippen, in gewone taal. Opent als venster; bereikbaar via "Wat betekent dit?" en ⌘K.
 var _UITLEG = {
-  status: { t:'Statussen van een opdracht', w:'status statussen ingepland klaargezet opgehaald afgehandeld verwerkt actie vereist gereserveerd spoed', h:function(){
+  status: { t:'Statussen van een opdracht', w:'status statussen ingepland klaargezet klaarzetten vrijgeven vrijgegeven opgehaald afgehandeld verwerkt actie vereist gereserveerd spoed', h:function(){
     var r = [['ingepland','Staat in de planning. De monteur ziet nog geen werkbon.'],
       ['klaargezet','Vrijgegeven: de werkbon staat klaar voor de monteur.'],
       ['opgehaald','De monteur heeft de werkbon opgepakt en is ermee bezig.'],
@@ -9379,6 +9380,15 @@ var _UITLEG = {
   dubbel: { t:'Dubbel geboekt', w:'dubbel geboekt overlap conflict tegelijk bezet', h:function(){
     return '<p>Een opdracht is <b>dubbel geboekt</b> als hij in tijd overlapt met ander open werk van dezelfde monteur. Afgehandeld werk telt niet mee.</p>'
       + '<p>Je ziet het op de kaart (met waarmee in Lijst en op de telefoon), in het opdrachtpaneel met <b>Tijd of monteur wijzigen</b>, op de monteurtegel ("Bezet 08:00–10:00") en bij slepen. Het mag bewust (bijvoorbeeld twee klussen op één adres); de app waarschuwt alleen.</p>'; } },
+  bezetting: { t:'Bezettingsbalk', w:'bezetting bezettingsbalk balk capaciteit uren gepland beschikbaar overboekt vol druk', h:function(){
+    return '<p>De balk bij een monteur (in Week en op het Dashboard) zet de <b>geplande uren</b> tegen de uren die hij die week <b>beschikbaar</b> is: zijn werktijden, min verlof en ziekte.</p>'
+      + '<p>"12/40 u" is 12 uur gepland van 40 beschikbaar. Staat er meer gepland dan er beschikbaar is, dan wordt de balk <b>oranje</b>: overboekt.</p>'
+      + '<p>"4 dagen ziek" eronder betekent dat iemand een deel van de week afwezig is. Staat er "ziek" of "verlof" in plaats van uren, dan is hij de hele week afwezig.</p>'
+      + '<p class="uitleg-voet">Werktijden stel je in bij Instellingen › Team & Verlof of per medewerker.</p>'; } },
+  afwezig: { t:'Ziek of verlof: herplannen', w:'ziek ziekte ziekmelding ziekmelden afwezig verlof herplannen overnemen vervangen opvangen', h:function(){
+    return '<p>Is een monteur ziek of de hele dag met verlof terwijl er nog open opdrachten bij hem staan, dan zeggen het <b>Dashboard</b> en <b>Planning</b> dat met een melding en de knop <b>Herplannen</b>.</p>'
+      + '<p>In het venster kies je per opdracht wie hem overneemt. Achter elke naam staan de vrije uren die dag; wie op dat tijdstip al werk heeft, staat onderaan als bezet. Kies je niemand, dan blijft de opdracht staan. Met <b>Alles naar Niet toegewezen</b> gaan ze in één keer naar de wachtrij.</p>'
+      + '<p class="uitleg-voet">De ziekmelding zelf registreer je bij Verzuim; vanaf dan rekent de planning ermee.</p>'; } },
   rechten: { t:'Rechten: L, E, S, B en I', w:'rechten rollen lezen eigen schrijven beheren inzage toegang', h:function(){
     return '<div class="uitleg-lijst kort"><div><b>L</b><p>Lezen: de module zien.</p></div><div><b>E</b><p>Alleen eigen gegevens: eigen werkbonnen, of eigen aanvragen zolang ze Aangevraagd zijn.</p></div><div><b>S</b><p>Schrijven en bewerken: alles in de module, ook van anderen.</p></div><div><b>B</b><p>Beheren (werkorders): aanmaken, verwijderen, status en klant wijzigen.</p></div><div><b>I</b><p>Inzage in alle verzuimdossiers (ziektegegevens, daarom apart).</p></div></div>'
       + '<p class="uitleg-voet">Instellen doe je bij Instellingen › Rollen & rechten.</p>'; } },
@@ -9399,8 +9409,17 @@ var _GZ_ACTIES = [
   { l:'Nieuwe debiteur', w:'nieuwe debiteur klant toevoegen', mod:'debiteuren', doe:function(){ navigateTo('debiteuren'); setTimeout(function(){ openDebModal(null); }, 150); } },
   { l:'Verlof aanvragen', w:'verlof aanvragen vakantie vrij vrije dag', mod:'verlof', eigen:true, doe:function(){ navigateTo('verlof'); setTimeout(function(){ openVerlofModal(); }, 150); } },
   { l:'Overuren registreren', w:'overuren registreren indienen', mod:'overuren', eigen:true, doe:function(){ navigateTo('overuren'); setTimeout(function(){ openOverurenModal(); }, 150); } },
-  { l:'Afspraak toevoegen', w:'afspraak toevoegen agenda overleg', mod:'agenda', doe:function(){ navigateTo('agenda'); setTimeout(function(){ openAgendaModal(); }, 150); } }
+  { l:'Afspraak toevoegen', w:'afspraak toevoegen agenda overleg', mod:'agenda', doe:function(){ navigateTo('agenda'); setTimeout(function(){ openAgendaModal(); }, 150); } },
+  { l:'Ziekmelding registreren', w:'ziek ziekmelding ziekmelden verzuim melden registreren', mod:'verzuim', doe:function(){ navigateTo('verzuim'); setTimeout(function(){ openVerzuimModal(null); }, 150); } },
+  { l:'Onkosten declareren', w:'onkosten declareren declaratie kosten bonnetje terugbetalen', mod:'onkosten', eigen:true, doe:function(){ navigateTo('onkosten'); setTimeout(function(){ openOnkostenModal(); }, 150); } }
 ];
+// Pagina's in ⌘K: de naam uit het menu plus woorden waarmee je ernaar zoekt
+var _GZ_PAGINA_W = { dashboard:'start overzicht vandaag', planning:'inplannen rooster week dag lijst', werkbonnen:'bon bonnen werkbon',
+  klantmails:'mail mails email bevestiging herinnering', locatie:'kaart kaartoverzicht gps waar monteurs', agenda:'afspraken overleg',
+  storingsdienst:'storing storingen piket dienst bereikbaarheid', werkorders:'werkorder productie werkplaats', pompregister:'register installaties',
+  materialen:'artikelen artikel voorraad onderdelen', debiteuren:'klanten klant', serviceklanten:'servicecontract contracten onderhoud',
+  medewerkers:'team personeel monteurs', verlof:'vakantie vrij vrije dagen', overuren:'uren extra', onkosten:'declaratie declareren kosten',
+  verzuim:'ziek ziekte ziekmelding afwezig', rapportage:'rapport rapporten cijfers grafieken', instellingen:'inrichten instellen' };
 var _GZ_INST = [
   ['bedrijf', 'Bedrijf', 'bedrijf bedrijfsgegevens naam adres logo kvk btw huisstijl mailkleur'],
   ['administraties', 'Administraties', 'administraties administratie boekhouding'],
@@ -9419,13 +9438,13 @@ var _GZ_INST = [
 var _GZ_TYPEN = [
   {t:'opdracht', l:'Opdrachten'}, {t:'werkbon', l:'Werkbonnen'}, {t:'werkorder', l:'Werkorders'},
   {t:'pomp', l:'Register'}, {t:'serviceklant', l:'Serviceklanten'}, {t:'debiteur', l:'Debiteuren'}, {t:'medewerker', l:'Medewerkers'},
-  {t:'actie', l:'Acties'}, {t:'instelling', l:'Instellingen'}, {t:'uitleg', l:'Uitleg'}
+  {t:'pagina', l:'Pagina’s'}, {t:'actie', l:'Acties'}, {t:'instelling', l:'Instellingen'}, {t:'uitleg', l:'Uitleg'}
 ];
 var _GZ_WB_STATUS = { klaargezet:['Klaargezet','tag-muted'], opgehaald:['Opgehaald','tag-blue'], afgehandeld:['Afgehandeld','tag-green'], verwerkt:['Verwerkt','tag-slate'] };
 var _gzFilter = '';            // telefoon: alleen deze soort tonen
 var _gzOpen = {};              // groepen waarvan "Toon alle" is aangeklikt
 var _gzLaatste = '';
-var _gzWerkbonnen = null, _gzWbTijd = 0, _gzWbLaden = false;
+var _gzWerkbonnen = null, _gzWbTijd = 0, _gzWbLaden = false, _gzWoLaden = false;
 function _gzMag(mod){ return isAdmin() || magLezen(mod); }
 // Werkbonnen en werkorders staan in Firestore, niet in het geheugen. Pas bij de eerste
 // zoekactie ophalen; werkbonnen daarna hooguit eens per vijf minuten opnieuw.
@@ -9434,8 +9453,9 @@ function _gzLaadExtra(){
     var ov = document.getElementById('global-zoek-overlay'), inp = document.getElementById('global-zoek-input');
     if(ov && ov.style.display !== 'none' && inp && inp.value.trim()) globaalZoeken(inp.value.trim());
   }
-  if(_gzMag('werkorders') && !APP.werkordersCache && typeof laadWerkordersCache === 'function'){
-    try { laadWerkordersCache().then(opnieuw).catch(function(){}); } catch(e){}
+  if(_gzMag('werkorders') && !APP.werkordersCache && !_gzWoLaden && typeof laadWerkordersCache === 'function'){
+    _gzWoLaden = true;
+    try { laadWerkordersCache().then(function(){ _gzWoLaden = false; if(APP.werkordersCache) opnieuw(); }).catch(function(){ _gzWoLaden = false; }); } catch(e){ _gzWoLaden = false; }
   }
   if(_gzMag('werkbonnen') && !_gzWbLaden && (!_gzWerkbonnen || Date.now() - _gzWbTijd > 300000)){
     _gzWbLaden = true;
@@ -9500,7 +9520,13 @@ function _gzVerzamel(woorden){
     if(_gzPast(woorden, [naam, m.email, m.functie]))
       r.push({ type:'medewerker', icon:ICO.user, label:naam.trim(), sub:(m.functie||m.rol||''), id:m.id });
   });
-  // Acties, instellingen en uitleg: zoeken op naam en trefwoorden
+  // Pagina's, acties, instellingen en uitleg: zoeken op naam en trefwoorden
+  NAV.forEach(function(p){
+    if(!(isAdmin() || magLezen(p.id))) return;
+    var lbl = p.id === 'pompregister' ? registerItemMeervoud(true) : p.label;
+    if(_gzPast(woorden, [p.label, lbl, _GZ_PAGINA_W[p.id] || '', p.id === 'pompregister' ? registerItemEnkel() : '']))
+      r.push({ type:'pagina', icon:(SVGS[p.icon] || ICO.chevronRight || ''), label:p.label, sub:'Pagina · '+p.sectie, id:p.id });
+  });
   _GZ_ACTIES.forEach(function(a, i){
     if(!(isAdmin() || magSchrijven(a.mod) || (a.eigen && magEigen(a.mod)))) return;
     if(_gzPast(woorden, [a.l, a.w])) r.push({ type:'actie', icon:_LF_PLUS, label:a.l, sub:'Actie', id:String(i) });
@@ -9578,6 +9604,7 @@ function _gzOpenItem(btn){
   if(type === 'werkbon'){ openWerkbonVanuitPlanning(id); return; }
   if(type === 'actie'){ var _a = _GZ_ACTIES[+id]; if(_a) _a.doe(); return; }
   if(type === 'instelling'){ _instTab = id; navigateTo('instellingen'); return; }
+  if(type === 'pagina'){ navigateTo(id); return; }
   if(type === 'uitleg'){ toonUitleg(id); return; }
   if(type === 'werkorder'){ navigateTo('werkorders'); setTimeout(function(){ _woOpenDetail(id); }, 150); return; }
   if(type === 'pomp'){ navigateTo('pompregister'); _prTab = 'detail'; _prDetPompId = id; _prDetTab = 'overzicht'; renderPompregister(); return; }
@@ -11252,7 +11279,8 @@ function _planLegenda(ops){
   types.sort(function(a, b){ var ia = _volg.indexOf(a.label), ib = _volg.indexOf(b.label); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib); });
   var h = '<div class="plan-legenda" aria-label="Legenda"><b>Type</b>';
   types.forEach(function(ot){ h += '<span><i class="lg-type" style="--k:'+ot.kleur+'"></i>'+esc(ot.label)+'</span>'; });
-  h += '<i class="lg-sep"></i><span><i class="lg-stip"></i>Stip = status</span><span><i class="lg-spoed"></i>Rode rand = spoed</span><span>Licht = afgehandeld</span><button type="button" class="lf-link plan-legenda-uitleg" data-uitleg="status">Wat betekenen de statussen?</button></div>';
+  h += '<i class="lg-sep"></i><span><i class="lg-stip"></i>Stip = status</span><span><i class="lg-spoed"></i>Rode rand = spoed</span><span>Licht = afgehandeld</span><button type="button" class="lf-link plan-legenda-uitleg" data-uitleg="status">Wat betekenen de statussen?</button>'
+    + (_planView === 'week' ? '<button type="button" class="lf-link plan-legenda-uitleg" data-uitleg="bezetting">Wat zegt de bezettingsbalk?</button>' : '')+'</div>';
   return h;
 }
 function _wkStatusPil(s){
