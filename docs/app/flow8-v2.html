@@ -368,7 +368,7 @@ button.lf-rij{border:0;border-bottom:1px solid var(--border);background:none;fon
   .modal-lf-groot .lf-art-oms > .lf-rij:last-child > .lf-ic:empty{display:none}
   .modal-lf-groot .lf-kolommen{grid-template-columns:repeat(2,minmax(0,1fr))}
   /* Debiteur: het nummer is kort, de naam vaak lang. */
-  .modal-lf-groot .lf-twee.lf-twee-nr{grid-template-columns:330px minmax(0,1fr)}
+  .modal-lf-groot .lf-twee.lf-twee-nr{grid-template-columns:380px minmax(0,1fr)}
   .modal-lf-groot .lf-kolommen.tpl{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
   .modal-lf-groot .lf-kolommen .tpl-preview-kol{position:sticky;top:0}
   /* Waarde direct na de labelkolom in plaats van tegen de rechterrand (prijs + btw). */
@@ -11423,7 +11423,7 @@ function _dashOpdrachtItem(o, magOpenen){
   return '<div class="dash-item'+(spoed ? ' spoed' : '')+'"'+(magOpenen ? ' data-opdracht="'+esc(o.id)+'" role="button" tabindex="0"' : '')+'>'
     + '<span class="dash-item-t">'+esc(o.tijdVan || o.blokVan || '—')+'</span>'
     + '<span class="dash-item-k">'+esc(o.klantNaam || '—')+(sub ? '<small>'+esc(sub)+'</small>' : '')+'</span>'
-    + (spoed && !klaar ? '<span class="dash-st" style="background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red-t)">'+ICO.zap+' Spoed</span>' : '')
+    + (spoed && !klaar ? _spoedLabel() : '')
     + '<span class="dash-st" style="background:'+_kleurTint(st.kl,'22')+';color:'+(st.tekst || _klTekst(st.kl))+'">'+(klaar ? _DASH_ICO.vink : '')+esc(st.lbl)+'</span></div>';
 }
 
@@ -11432,7 +11432,8 @@ var DASH_RENDER = {
   vandaag: function(c){
     var ops = APP.opdrachten.filter(function(o){ return o.datum === c.vandaag; });
     var klaar = ops.filter(function(o){ return o.status === 'afgehandeld' || o.status === 'verwerkt'; }).length;
-    var opPad = {}; ops.forEach(function(o){ _dashIdsVan(o).forEach(function(id){ opPad[id] = 1; }); });
+    var _afw = {}; (c.afwezig || []).forEach(function(a){ if(a.med && !/gedeeltelijk/i.test(a.reden || '')) _afw[String(a.med.id)] = 1; });
+    var opPad = {}; ops.forEach(function(o){ _dashIdsVan(o).forEach(function(id){ if(!_afw[String(id)]) opPad[id] = 1; }); });
     return _dashKop(_DASH_ICO.dag, 'Vandaag', 'planning', 'Planning')
       + '<div class="dash-kpis">'
       + _dashKpi(ops.length, 'opdracht'+(ops.length === 1 ? '' : 'en'), '', 'planning')
@@ -11993,15 +11994,15 @@ var _medKol = { functie:true, contract:true, verlofOp:true, verlofGp:true, reste
 // mat-rij, pr-pomp-rij), zodat de bestaande klikafhandeling ongewijzigd werkt.
 var _MOB_CHEV = '<svg class="mob-chev" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
 function _mobBalk(pct, kl){ return '<div class="mob-balk"><i style="width:'+pct+'%;background:'+kl+'"></i></div>'; }
-// Verlof over: dagen van het jaartegoed, met uren. Rood alleen bij een negatief saldo, oranje onder 3 dagen.
+// Verlof over: dagen van het jaartegoed, met uren. Rood alleen bij een negatief saldo; weinig of nul is gewone informatie.
 function _medVerlofOver(m){
   var _stdB = (APP.teamInstellingen && APP.teamInstellingen.verlofBasis != null) ? APP.teamInstellingen.verlofBasis : 25;
   var b = parseFloat(m.verlofBasis), basis = isNaN(b) ? _stdB : b;
   var tegoed = Math.round(basis * (parseInt(m.contractUren) || 40) / 40 * 10) / 10;
   var su = getVerlofSaldoUren(m), sd = Math.round(verlofUrenNaarDagen(su, m) * 10) / 10;
   return { dagen:sd, tegoed:tegoed, uren:su,
-    kl: sd < 0 ? 'var(--red)' : sd < 3 ? 'var(--orange)' : 'var(--green)',
-    tk: sd < 0 ? 'var(--red-t)' : sd < 3 ? 'var(--orange-t)' : 'var(--text)',
+    kl: sd < 0 ? 'var(--red)' : 'var(--green)',
+    tk: sd < 0 ? 'var(--red-t)' : 'var(--text)',
     pct: tegoed > 0 ? Math.max(0, Math.min(100, Math.round(sd / tegoed * 100))) : 0 };
 }
 function _medKaart(m){
@@ -12854,7 +12855,7 @@ var _skKolom = [
   { k:'laatste', l:'Laatste beurt',   aan:true  },
   { k:'volgende',l:'Volgende beurt',  aan:true  },
   { k:'contact', l:'Contactpersoon',  aan:false },
-  { k:'pomptype',l:'Pomptype',        aan:false },
+  { k:'pomptype', get l(){ return getRegisterInst().veld1Label; }, aan:false },
   { k:'status',  l:'Status',          aan:false },
 ];
 
@@ -13289,7 +13290,7 @@ function renderServiceklanten() {
     var rows=lijst.map(function(k){
       return[k.debNr||'',k.naam||'',k.adres||'',k.postcode||'',k.plaats||'',k.contactpersoon||'',k.email||'',k.telefoon||'',k.contractType||'',klantAanvulling(k)?'Ja':'Nee',k.uitvoerder||'intern',fmtD(k.laatsteDatum),fmtD(k.volgendeDatum),k.duurUren||'',k.pomptype||'',k.besturing||'',k.status||'actief'];
     });
-    csvExport(['Deb.nr','Naam','Adres','Postcode','Plaats','Contactpersoon','Email','Telefoon','Contract',aanvullingTitel(),'Uitvoerder','Laatste beurt','Volgende beurt','Duur (u)','Pomptype','Besturing','Status'],rows,'serviceklanten');
+    csvExport(['Deb.nr','Naam','Adres','Postcode','Plaats','Contactpersoon','Email','Telefoon','Contract',aanvullingTitel(),'Uitvoerder','Laatste beurt','Volgende beurt','Duur (u)',getRegisterInst().veld1Label,getRegisterInst().veld2Label,'Status'],rows,'serviceklanten');
   });
 }
 
@@ -14520,7 +14521,7 @@ function openDebModal(id){
   b += lfRij(ICO.gebouw, 'Naam', _dfT('df-nm', d.naam, '', 'text', ' required'), {verplicht:true, voor:'df-nm'});
   b += '</div></div>';
   b += '<div class="lf-groep">Adres</div><div class="lf-blok-kaart">';
-  b += '<div class="lf-twee">'+lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="df-pc" value="'+esc(d.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="df-huisnr" placeholder="Nr." aria-label="Huisnummer">')
+  b += '<div class="lf-twee lf-twee-nr">'+lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="df-pc" value="'+esc(d.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="df-huisnr" placeholder="Nr." aria-label="Huisnummer">')
     + lfRij('', 'Plaats', _dfT('df-pl', d.plaats, ''), {voor:'df-pl'})+'</div>';
   b += lfRij('', 'Adres', _dfT('df-adr', d.adres, 'Wordt automatisch ingevuld via postcode en nummer'), {voor:'df-adr'});
   b += '</div>';
@@ -14604,7 +14605,7 @@ function openDebModal(id){
   var _regIco = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>';
   b += '<div class="lf-sub-l">'+esc(registerItemMeervoud(true))+'</div>';
   b += '<div class="lf-twee">';
-  b += lfRij(_regIco, 'Invullen', '<span class="lf-seg lf-seg-radio" role="radiogroup" aria-label="Pompen invullen">'
+  b += lfRij(_regIco, 'Invullen', '<span class="lf-seg lf-seg-radio" role="radiogroup" aria-label="'+esc(registerItemMeervoud(true))+' invullen">'
     + '<label><input type="radio" name="df-pomp-keuze" value="handmatig" id="df-pomp-handmatig"'+(skPompKeuze==='handmatig'?' checked':'')+'><span>Handmatig</span></label>'
     + '<label><input type="radio" name="df-pomp-keuze" value="register" id="df-pomp-register"'+(skPompKeuze==='register'?' checked':'')+'><span>Uit register</span></label></span>');
   b += '<button type="button" id="df-pomp-aanmaken" class="wbx-chip-add"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Aanmaken in register</button>';
@@ -15406,8 +15407,8 @@ function _openInstallatieImport(){
   var rv = getRegisterVelden();
   var velden = [
     { k:'debnr', l:'Debiteurnummer', verplicht:true, match:['debiteurnummer','debiteur','klantnummer','relatienummer','debnr'] },
-    { k:'type',  l:'Type',           verplicht:true, match:['type','model','pomp','installatie','omschrijving'] },
-    { k:'besturing', l:'Besturing',  match:['besturing','regeling'] }
+    { k:'type',  l:getRegisterInst().veld1Label, verplicht:true, match:['type','model','pomp','installatie','omschrijving'] },
+    { k:'besturing', l:getRegisterInst().veld2Label, match:['besturing','regeling'] }
   ];
   rv.forEach(function(v){
     if(v.bron === 'type') return;
@@ -16576,7 +16577,7 @@ var _planKolom = [
   { k:'status',          l:'Status',          aan:true  },
   { k:'werkomschrijving',l:'Werkomschrijving',aan:true  },
   { k:'notitie',         l:'Notitie',         aan:false },
-  { k:'pomptype',        l:'Pomptype',        aan:false },
+  { k:'pomptype', get l(){ return getRegisterInst().veld1Label; }, aan:false },
   { k:'monteurs',        l:'Monteurs',        aan:false },
 ];
 // Helper: geef waarde van kolom
@@ -16885,7 +16886,7 @@ function _renderDagplanning() {
       content += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
       content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--radius-sm);background:'+_kleurTint(typeObj.kleur,'22')+';color:'+_klTekst(typeObj.kleur)+'">'+esc(typeObj.label)+'</span>';
       if(_isSpoed(o)) {
-        content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--radius-sm);background:rgba(239,68,68,0.15);color:var(--red-t);display:inline-flex;align-items:center;gap:3px">'+ICO.zap+' Spoed</span>';
+        content += _spoedLabel();
       }
       if(o.status === 'actie' || o.status === 'actie_vereist') {
         content += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--radius-sm);background:rgba(245,158,11,0.15);color:var(--vast-t);display:inline-flex;align-items:center;gap:3px">'+_IC_WAARSCH+(o.actietype||'Actie vereist')+'</span>';
@@ -19073,6 +19074,11 @@ function _bezAfwTekst(bz){
   var d = function(n){ return n+' dag'+(n === 1 ? '' : 'en'); };
   return bz.ziekD ? d(bz.ziekD)+' ziek' : bz.verlofD ? d(bz.verlofD)+' verlof' : '';
 }
+// Volgorde van monteurs in Planning (Lijst, Week, Dag, telefoon): op naam, zonder op hoofdletters te letten
+function _medVolgorde(a, b){
+  var n = function(m){ return m ? ((m.voornaam||'')+' '+(m.achternaam||'')).trim() : ''; };
+  return n(a).localeCompare(n(b), 'nl', { sensitivity:'base' });
+}
 function _urenKort(x){ return String(Math.round(x*10)/10).replace('.', ','); }
 // Tijdvak van een opdracht in minuten ({van, tot}); null zonder begintijd (dan telt alleen de duur in uren)
 function _opVak(o){
@@ -19323,7 +19329,7 @@ function _planHertekenInhoud(){
   var planningRollen = APP.planningRollen || ['monteur','extern'];
   var monteurs = APP.medewerkers.filter(function(m){
     return m.status !== 'inactief' && planningRollen.indexOf(m.rol) >= 0;
-  });
+  }).sort(_medVolgorde);
   pc.innerHTML = _planInhoudHtml(monteurs);
   bindPlanningEvents();
   _planAfwezigVul();
@@ -19339,7 +19345,7 @@ function renderPlanning() {
   var planningRollen = APP.planningRollen || ['monteur','extern'];
   var monteurs = APP.medewerkers.filter(function(m){
     return m.status !== 'inactief' && planningRollen.indexOf(m.rol) >= 0;
-  });
+  }).sort(_medVolgorde);
 
   // ── Toolbar ──
   var h = '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
@@ -20066,7 +20072,7 @@ function renderPlanLijstMobiel(monteurs){
     dagOps.forEach(function(o){ var k = _plmMonteurIds(o).slice().sort().join('|') || '_geen'; (clusters[k] = clusters[k] || []).push(o); });
     Object.keys(clusters).sort(function(a, b){
       if(a === '_geen') return 1; if(b === '_geen') return -1;
-      return naamVan(a.split('|')[0]).localeCompare(naamVan(b.split('|')[0]));
+      return _medVolgorde(getMed(a.split('|')[0]), getMed(b.split('|')[0])) || a.length - b.length;
     }).forEach(function(k){
       var co = clusters[k].sort(_planSorteerOpTijd);
       var ids = k === '_geen' ? [] : k.split('|');
@@ -20484,12 +20490,11 @@ function renderPlanLijst(monteurs) {
     }
     var monteurIds = Object.keys(dagOpsData).sort(function(a,b){
       var aGeen=a.indexOf('_geen')===0, bGeen=b.indexOf('_geen')===0;
-      // Baan-/geen-monteur groepen vooraan, onderling op baan-sleutel
+      // Baan-/geen-monteur groepen achteraan (zoals op de telefoon), onderling op baan-sleutel
       if(aGeen && bGeen) return a<b?-1:a>b?1:0;
-      if(aGeen) return -1; if(bGeen) return 1;
-      var ma=_clusterEersteMonteur(a), mb=_clusterEersteMonteur(b);
-      var na=(ma?ma.achternaam:''), nb=(mb?mb.achternaam:'');
-      if(na!==nb) return na>nb ? 1 : -1;
+      if(aGeen) return 1; if(bGeen) return -1;
+      var _v = _medVolgorde(_clusterEersteMonteur(a), _clusterEersteMonteur(b));
+      if(_v) return _v;
       // Zelfde eerste monteur: solo-cluster vóór gedeelde cluster (kortere sleutel eerst)
       return a.length - b.length;
     });
@@ -20510,7 +20515,7 @@ function renderPlanLijst(monteurs) {
       var ops = dagOpsData[monteurId].slice().sort(_planRouteVolgorde);
 
       // ── Monteur-header (bandje boven de cluster): avatar + naam + aantal + werktijd ──
-      var _mhWerkMin = ops.reduce(function(s,o){ return s + (o.duurUren ? Math.round(o.duurUren*60) : 90); }, 0);
+      var _mhWerkMin = ops.reduce(function(s,o){ return s + Math.round(_dashUren(o)*60); }, 0);
       var _mhWerkU = (_mhWerkMin/60);
       var _mhWerkStr = (Math.round(_mhWerkU*10)/10).toString().replace('.',',')+' u werk';
       var _mhAantalStr = ops.length+' opdracht'+(ops.length===1?'':'en');
@@ -20565,6 +20570,12 @@ function renderPlanLijst(monteurs) {
       }
       h += _mhAvatar;
       h += '<span style="font-weight:700;font-size:13px;color:var(--text)">'+_mhNaam+'</span>';
+      if(med && datum && datum !== '_geen'){
+        var _mhZiek = verzuimOpDag(med.id, datum);
+        var _mhVl = !_mhZiek && APP.verlof.find(function(v){ return String(v.medId) === String(med.id) && v.status === 'goedgekeurd' && datum >= v.van && datum <= (v.tot || v.van); });
+        if(_mhZiek) h += '<span class="tag tag-red">'+(_mhZiek.type === 'gedeeltelijk' ? 'Gedeeltelijk ziek' : 'Ziek')+'</span>';
+        else if(_mhVl) h += '<span class="tag tag-orange">'+esc(verlofRedenLabel(_mhVl))+'</span>';
+      }
       h += '<span style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)">';
       h += '<span style="background:var(--surface);padding:1px 7px;border-radius:5px;font-weight:600">'+_mhAantalStr+'</span>';
       h += '<span style="background:var(--surface);padding:1px 7px;border-radius:5px;font-weight:600">'+_mhWerkStr+'</span>';
@@ -21247,8 +21258,8 @@ function openOpdrachtPanel(id) {
 
   // Technische gegevens (alleen bij handmatige invoer; serienummer/outsmart altijd als aanwezig)
   var tech = '';
-  if (_pompBron==='handmatig' && o.pomptype)  tech += _zpRij(_ZP_POMP, 'Pomptype', esc(o.pomptype));
-  if (_pompBron==='handmatig' && o.besturing) tech += _zpRij(ICO.settings, 'Besturing', esc(o.besturing));
+  if (_pompBron==='handmatig' && o.pomptype)  tech += _zpRij(_ZP_POMP, esc(getRegisterInst().veld1Label), esc(o.pomptype));
+  if (_pompBron==='handmatig' && o.besturing) tech += _zpRij(ICO.settings, esc(getRegisterInst().veld2Label), esc(o.besturing));
   if (o.serienummer) tech += _zpRij(_LF_EAN, 'Serienummer', esc(o.serienummer));
   if (o.outsmart)    tech += _zpRij(ICO.external, 'Outsmart ID', esc(o.outsmart));
   if (tech) h += _zpGroep('Techniek') + _zpKaart(tech);
@@ -21442,7 +21453,7 @@ function openOpdrachtModal(id, prefill) {
     + '<div id="op-klant-dropdown" class="lf-op-dropdown" style="display:none"></div></div>';
   // Type staat links (belangrijkste keuze), extern nummer rechts. Extern nummer is een
   // vrij ERP-veld: niet verplicht en niet uniek — één order kan meerdere bezoeken opleveren.
-  b += '<div class="lf-twee">'
+  b += '<div class="lf-twee lf-twee-nr">'
     + lfKies(ICO.flag, 'Type', '<select class="input" id="op-type" required><option value="">Kies type</option>'+typeOpts+'</select>', {verplicht:true, titel:'Soort opdracht'})
     + lfRij(ICO.clipboard, esc(externNrLabel()), _opT('op-externnr', o.externNummer, 'Optioneel'), {voor:'op-externnr'})
     + '</div></div>';
@@ -21477,7 +21488,7 @@ function openOpdrachtModal(id, prefill) {
   b += '</div>';
   b += '<input type="hidden" id="op-contact-tel" value="'+esc(o.contactTel||'')+'">';
   // Postcode en plaats naast elkaar (de postcode vult ze samen in), het adres over de volle breedte
-  b += '<div class="lf-twee">'+lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="op-pc" value="'+esc(o.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="op-huisnr" placeholder="Nr." aria-label="Huisnummer" title="Huisnummer voor adres-aanvulling">')
+  b += '<div class="lf-twee lf-twee-nr">'+lfRij(ICO.locatie, 'Postcode', '<input class="lf-veld lf-pc" id="op-pc" value="'+esc(o.postcode||'')+'" placeholder="1234 AB" aria-label="Postcode" autocapitalize="characters"><input class="lf-veld lf-nr" id="op-huisnr" placeholder="Nr." aria-label="Huisnummer" title="Huisnummer voor adres-aanvulling">')
     + lfRij('', 'Plaats', _opT('op-pl', o.plaats, ''), {voor:'op-pl'})+'</div>';
   b += lfRij('', 'Adres', _opT('op-adres', o.adres, 'Wordt automatisch ingevuld via postcode en nummer'), {voor:'op-adres'});
   b += '<button type="button" class="wbx-chip-add" id="op-add-locatie"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Extra locatie</button>';
@@ -22406,7 +22417,7 @@ function openKolomKiezer(titel, kolommen, onSave) {
   }
   teken();
   document.getElementById('gk-save').addEventListener('click', function() {
-    var nieuw = lijst.map(function(c){ return { k:c.k, l:c.l, aan: c.always ? true : c.aan, always:c.always }; });
+    var nieuw = lijst.map(function(c){ var n = { k:c.k, l:c.l, aan: c.always ? true : c.aan, always:c.always }; if(c.k === 'pomptype') Object.defineProperty(n, 'l', { get:function(){ return getRegisterInst().veld1Label; }, enumerable:true }); return n; });
     closeModal();
     if (onSave) onSave(nieuw);
   });
@@ -35657,7 +35668,7 @@ function reistijdAan() {
 function getRegisterInst() {
   var ri = APP.registerInst || {};
   return {
-    veld1Label: ri.veld1Label || 'Pomptype',
+    veld1Label: ri.veld1Label || ((ri.itemEnkel || 'Pomp')+'type'),   // "Pomptype", "Machinetype", …
     veld2Label: ri.veld2Label || 'Besturingstype',
     // Naam van de register-items, instelbaar per bedrijf zodat de app neutraal is voor
     // wie niet met pompen werkt (bijv. "Ketel/Ketels", "Toestel/Toestellen", of gewoon
@@ -35754,7 +35765,7 @@ function renderInstRegister(el) {
     'rg-item-save', 'Opslaan');
   h += _istKaart('Vaste velden', 'Deze twee velden staan bovenaan bij elke registratie en zijn ook in te vullen bij een debiteur met servicecontract. Alleen de naam is aanpasbaar; de gegevens blijven bewaard als je hem hernoemt.',
     '<div class="ist-twee">'
-    + lfRij(_ZP_LIJST, 'Eerste veld', _istTekst('rg-v1','text', ri.veld1Label, 'Pomptype', 40), {voor:'rg-v1'})
+    + lfRij(_ZP_LIJST, 'Eerste veld', _istTekst('rg-v1','text', ri.veld1Label, registerItemEnkel(true)+'type', 40), {voor:'rg-v1'})
     + lfRij(_ZP_LIJST, 'Tweede veld', _istTekst('rg-v2','text', ri.veld2Label, 'Besturingstype', 40), {voor:'rg-v2'})
     + '</div>',
     'rg-vast-save', 'Opslaan');
@@ -35814,8 +35825,8 @@ function renderInstRegister(el) {
 
   // ── Vaste veldnamen opslaan ──
   el.querySelector('#rg-vast-save').addEventListener('click', function(){
-    var v1 = (el.querySelector('#rg-v1').value||'').trim() || 'Pomptype';
-    var v2 = (el.querySelector('#rg-v2').value||'').trim() || 'Besturingstype';
+    var v1 = (el.querySelector('#rg-v1').value||'').trim();   // leeg: de standaardnaam volgt de registernaam
+    var v2 = (el.querySelector('#rg-v2').value||'').trim();
     _rgBewaar({ veld1Label:v1, veld2Label:v2 });
     toast('Namen opgeslagen','success');
     renderInstRegister(el);
