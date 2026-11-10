@@ -1162,6 +1162,9 @@ body.light{--dash-g2:#f59e0b}
 .hp-chip.aan{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface));color:var(--accent-t);font-weight:600}
 .hp-let{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;color:var(--orange-t)}
 .hp-let[hidden]{display:none}
+.hp-niemand{font-size:12px;color:var(--muted)}
+td[data-col="status"] .wk-dubbel{margin:4px 0 0 2px}
+.plm-kaart .wk-dubbel{margin-top:4px}
 .hp-let svg,.wk-dubbel svg{width:12px;height:12px;flex:none}
 .wk-dubbel{display:flex;align-items:center;gap:4px;margin:2px 0;font-size:11px;font-weight:600;color:var(--orange-t)}
 @media (pointer:coarse){.hp-chip{min-height:44px;padding:8px 14px}.loc-m-modus,.plan-view-btn{min-height:44px}#toast #toast-undo-btn{min-height:32px;padding:6px 12px!important;border-radius:var(--radius-pill)!important}}
@@ -19078,6 +19081,7 @@ function _medOverlap(medId, datum, vak, behalveId){
 function _opDubbel(o){
   var vak = _opVak(o); if(!vak || !o.datum) return null;
   var klaar = function(x){ return x.status === 'afgehandeld' || x.status === 'verwerkt'; };
+  if(klaar(o)) return null;   // afgehandeld werk is geschiedenis, geen conflict meer
   var ids = _plmMonteurIds(o);
   for(var i = 0; i < ids.length; i++){
     var l = _medOverlap(ids[i], o.datum, vak, o.id).filter(function(x){ return !(klaar(x) && klaar(o)); });
@@ -19087,7 +19091,7 @@ function _opDubbel(o){
 }
 function _wkDubbel(o){
   var d = _opDubbel(o);
-  return d ? '<div class="wk-dubbel" title="Overlapt met '+esc(d.klantNaam || 'een andere opdracht')+' ('+_vakTekst(_opVak(d))+')">'+ICO.storing+'Dubbel geboekt</div>' : '';
+  return d ? '<div class="wk-dubbel" title="Overlapt met '+esc(d.klantNaam || 'een andere opdracht')+' ('+_vakTekst(_opVak(d))+')">'+ICO.clock+'Dubbel geboekt</div>' : '';
 }
 // Eén monteur van een opdracht vervangen door een ander (of weghalen: naarId leeg). De overige monteurs blijven
 // staan; monteurId is altijd de eerste van monteurIds.
@@ -19146,13 +19150,15 @@ function openHerplannen(a){
       var chips = kl.filter(function(k){ return !k.bezet.length && k.vrij > 0.05; }).slice(0, 2);
       var gekozen = kl.filter(function(k){ return String(k.x.id) === keuze[i]; })[0];
       if(gekozen && chips.indexOf(gekozen) < 0 && !gekozen.bezet.length) chips = chips.slice(0, 1).concat([gekozen]);
-      body.querySelector('[data-hp-kies="'+i+'"]').innerHTML = chips.map(function(k){
+      var _vak = _opVak(ops[i]);
+      if(!chips.length && _vak && !gekozen){ body.querySelector('[data-hp-kies="'+i+'"]').innerHTML = '<span class="hp-niemand">Niemand vrij om '+_vakTekst(_vak)+'</span>'; }
+      else body.querySelector('[data-hp-kies="'+i+'"]').innerHTML = chips.map(function(k){
         var aan = keuze[i] === String(k.x.id);
         return '<button type="button" class="hp-chip'+(aan ? ' aan' : '')+'" data-i="'+i+'" data-id="'+esc(k.x.id)+'" aria-pressed="'+aan+'">'+esc(k.x.voornaam)+' · '+label(k)+'</button>';
       }).join('');
       var let_ = body.querySelector('[data-hp-let="'+i+'"]');
       if(gekozen && gekozen.bezet.length){
-        let_.innerHTML = ICO.storing+esc(gekozen.x.voornaam)+' heeft om '+_vakTekst(_opVak(gekozen.bezet[0]))+' al '+esc(gekozen.bezet[0].klantNaam || 'een opdracht')+'.';
+        let_.innerHTML = ICO.clock+esc(gekozen.x.voornaam)+' heeft om '+_vakTekst(_opVak(gekozen.bezet[0]))+' al '+esc(gekozen.bezet[0].klantNaam || 'een opdracht')+'.';
         let_.hidden = false;
       } else let_.hidden = true;
     });
@@ -19595,11 +19601,23 @@ function bindPlanningEvents() {
       var oudMonteur = o.monteurId;
       var vanMonteur = _dragVanMonteur || oudMonteur || '';
       if (nieuwDag === oudDag && String(nieuwMonteur||'') === String(vanMonteur)) return; // geen wijziging
+      var _terug = { datum:o.datum, id:o.monteurId == null ? null : o.monteurId, ids:Array.isArray(o.monteurIds) ? o.monteurIds.slice() : [] };
       o.datum      = nieuwDag;
       _monteurVervangen(o, vanMonteur, nieuwMonteur);
       dbSaveItem('opdrachten', o.id, o);
-      var monteurNaam = nieuwMonteur ? (function(){ var m=getMed(nieuwMonteur); return m?m.voornaam+' '+m.achternaam:'?'; })() : 'Niet toegewezen';
-      toast('Verplaatst naar '+fmtD(nieuwDag)+' · '+monteurNaam, 'success');
+      var _nm = nieuwMonteur ? getMed(nieuwMonteur) : null;
+      var monteurNaam = nieuwMonteur ? (_nm ? _nm.voornaam+' '+_nm.achternaam : '?') : 'Niet toegewezen';
+      // Is de monteur op de nieuwe plek afwezig of op dat tijdstip al bezet? Dan geen groene melding maar een waarschuwing
+      var _let = '';
+      if(_nm){
+        var _u = _medDagUren(_nm, nieuwDag);
+        if(_u.afwezig) _let = _nm.voornaam+' is '+(_u.afwezig === 'ziek' ? 'ziek' : 'met verlof')+' op '+fmtD(nieuwDag);
+        else { var _bz = _medOverlap(_nm.id, nieuwDag, _opVak(o), o.id); if(_bz.length) _let = 'dubbel geboekt met '+(_bz[0].klantNaam || 'een opdracht')+' ('+_vakTekst(_opVak(_bz[0]))+')'; }
+      }
+      toast(esc('Verplaatst naar '+fmtD(nieuwDag)+' · '+monteurNaam+(_let ? ' · let op: '+_let : '')), _let ? 'warning' : 'success', function(){
+        o.datum = _terug.datum; o.monteurId = _terug.id; o.monteurIds = _terug.ids;
+        dbSaveItem('opdrachten', o.id, o); renderPlanning();
+      });
       renderPlanning();
     });
   });
@@ -19793,6 +19811,7 @@ function _plmKaart(o, metMonteur){
   if(ot.label) h += '<span class="plm-typ"><i style="background:'+ot.kleur+'"></i>'+esc(ot.label)+'</span>';
   h += wkStatusBadge(o.status);
   if(o.status === 'actie' && o.actietype) h += '<span class="plm-actie">→ '+esc(o.actietype)+'</span>';
+  h += _wkDubbel(o);
   h += '</div></div>';
   if(metMonteur) h += _plmAvatars(o);
   return h + '</div>';
@@ -20664,7 +20683,7 @@ function renderPlanLijst(monteurs) {
               h += '<td data-col="pomptype" style="padding:10px;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(o.pomptype||'—')+'</td>';
               break;
             case 'status':
-              h += '<td data-col="status" style="padding:6px 10px">'+tagStatus(o.status);
+              h += '<td data-col="status" style="padding:6px 10px">'+tagStatus(o.status)+_wkDubbel(o);
               if(o.status==='actie'&&o.actietype) h += '<div style="font-size:11px;color:var(--orange-t);padding:0 0 2px 2px">→ '+esc(o.actietype)+'</div>';
               h += '</td>';
               break;
