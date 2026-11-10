@@ -1150,6 +1150,16 @@ body.light{--dash-g2:#f59e0b}
 .wk-bez{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .wk-bez .dash-spoor{flex:1;height:6px;min-width:40px;background:var(--surface)}
 .wk-bez-w{white-space:nowrap}
+.hp-kies{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.hp-kies:empty{display:none}
+.hp-chip{font:500 12.5px 'Instrument Sans',sans-serif;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-pill);padding:5px 11px;min-height:32px;cursor:pointer}
+.hp-chip:hover{border-color:var(--muted2)}
+.hp-chip.aan{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface));color:var(--accent-t);font-weight:600}
+.hp-let{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;color:var(--orange-t)}
+.hp-let[hidden]{display:none}
+.hp-let svg,.wk-dubbel svg{width:12px;height:12px;flex:none}
+.wk-dubbel{display:flex;align-items:center;gap:4px;margin:2px 0;font-size:11px;font-weight:600;color:var(--orange-t)}
+@media (pointer:coarse){.hp-chip{min-height:44px;padding:8px 14px}}
 .wk-th-n{font:500 11px 'Instrument Sans',sans-serif;letter-spacing:0;text-transform:none;color:var(--muted)}
 /* De knop Ongedaan in de melding onderin moet klikbaar zijn (de melding zelf laat klikken door) */
 #toast #toast-undo-btn{pointer-events:auto}
@@ -19007,6 +19017,38 @@ function _medBezetting(m, dagen){
     afwezig:(!b && (ziek || verlof)) ? (ziek >= verlof ? 'ziek' : 'verlof') : '' };
 }
 function _urenKort(x){ return String(Math.round(x*10)/10).replace('.', ','); }
+// Tijdvak van een opdracht in minuten ({van, tot}); null zonder begintijd (dan telt alleen de duur in uren)
+function _opVak(o){
+  var a = o && o.tijdVan ? tijdNaarMin(o.tijdVan) : NaN;
+  if(isNaN(a)) return null;
+  var e = o.tijdTot ? tijdNaarMin(o.tijdTot) : NaN;
+  if(isNaN(e) || e <= a) e = a + Math.round(_dashUren(o) * 60);
+  return { van:a, tot:e };
+}
+function _vakOverlapt(a, b){ return !!(a && b && a.van < b.tot && b.van < a.tot); }
+function _vakTekst(v){ var t = function(m){ return ('0'+Math.floor(m/60)).slice(-2)+':'+('0'+(m%60)).slice(-2); }; return v ? t(v.van)+'–'+t(v.tot) : ''; }
+// Ander werk van een monteur op die dag dat het tijdvak overlapt (de opdracht zelf telt niet mee)
+function _medOverlap(medId, datum, vak, behalveId){
+  if(!vak || !datum) return [];
+  return APP.opdrachten.filter(function(o){
+    return o.datum === datum && String(o.id) !== String(behalveId || '') && _plmMonteurIds(o).indexOf(String(medId)) >= 0 && _vakOverlapt(_opVak(o), vak);
+  });
+}
+// Overlapt deze opdracht met ander open werk van een van zijn monteurs? (afgehandeld tegen afgehandeld telt niet)
+function _opDubbel(o){
+  var vak = _opVak(o); if(!vak || !o.datum) return null;
+  var klaar = function(x){ return x.status === 'afgehandeld' || x.status === 'verwerkt'; };
+  var ids = _plmMonteurIds(o);
+  for(var i = 0; i < ids.length; i++){
+    var l = _medOverlap(ids[i], o.datum, vak, o.id).filter(function(x){ return !(klaar(x) && klaar(o)); });
+    if(l.length) return l[0];
+  }
+  return null;
+}
+function _wkDubbel(o){
+  var d = _opDubbel(o);
+  return d ? '<div class="wk-dubbel" title="Overlapt met '+esc(d.klantNaam || 'een andere opdracht')+' ('+_vakTekst(_opVak(d))+')">'+ICO.storing+'Dubbel geboekt</div>' : '';
+}
 // Eén monteur van een opdracht vervangen door een ander (of weghalen: naarId leeg). De overige monteurs blijven
 // staan; monteurId is altijd de eerste van monteurIds.
 function _monteurVervangen(o, vanId, naarId){
@@ -19027,37 +19069,63 @@ function openHerplannen(a){
   var vrij0 = {}, keuze = ops.map(function(){ return ''; });
   ops.forEach(function(o){ anderen.forEach(function(x){ var k = x.id+'|'+o.datum; if(!(k in vrij0)){ var u = _medDagUren(x, o.datum); vrij0[k] = u.afwezig ? null : u.beschikbaar - u.gepland; } }); });
   var n = ops.length;
-  var h = '<p class="hp-intro">'+esc(m.voornaam)+' is '+a.reden+'. Kies per opdracht wie hem overneemt. Achter elke naam staat hoeveel uur die monteur die dag nog vrij heeft.</p>';
+  var h = '<p class="hp-intro">'+esc(m.voornaam)+' is '+a.reden+'. Kies per opdracht wie hem overneemt. Achter elke naam staat hoeveel uur die monteur die dag nog vrij heeft; wie op dat tijdstip al werk heeft, staat onderaan als bezet.</p>';
   h += '<div class="hp-kop"><span>'+n+' opdracht'+(n === 1 ? '' : 'en')+'</span><button type="button" class="btn btn-ghost btn-sm" id="hp-alles-geen">Alles naar Niet toegewezen</button></div><div class="hp-lijst">';
   ops.forEach(function(o, i){
     var d = new Date(o.datum+'T00:00:00'), tijd = o.tijdVan ? o.tijdVan+(o.tijdTot ? '–'+o.tijdTot : '') : 'geen tijd';
-    h += '<div class="hp-rij"><div class="hp-op"><b>'+esc(o.klantNaam || 'Opdracht')+'</b><small>'+_HP_DAG[d.getDay()]+' '+fmtD(o.datum)+' · '+tijd+' · '+_urenKort(_dashUren(o))+' u'+(o.plaats ? ' · '+esc(o.plaats) : '')+'</small></div>'
+    h += '<div class="hp-rij"><div class="hp-op"><b>'+esc(o.klantNaam || 'Opdracht')+'</b><small>'+_HP_DAG[d.getDay()]+' '+fmtD(o.datum)+' · '+tijd+' · '+_urenKort(_dashUren(o))+' u'+(o.plaats ? ' · '+esc(o.plaats) : '')+'</small>'
+      + '<div class="hp-kies" data-hp-kies="'+i+'"></div><div class="hp-let" data-hp-let="'+i+'" hidden></div></div>'
       + '<select class="input" data-hp="'+i+'" aria-label="Naar wie: '+esc(o.klantNaam || 'opdracht')+'"></select></div>';
   });
   h += '</div>';
-  openModal('Herplannen · '+m.voornaam+' '+m.achternaam, h, '<button type="button" class="btn btn-ghost" id="hp-annuleer">Annuleren</button><button type="button" class="btn btn-primary" id="hp-ok" disabled>Herplannen</button>');
+  openModal('Herplannen · '+m.voornaam+' '+m.achternaam, h, '<button type="button" class="btn btn-ghost" id="hp-annuleer">Annuleren</button><button type="button" class="btn btn-primary" id="hp-ok" disabled>Kies per opdracht een monteur</button>');
   var body = document.getElementById('modal-body'), ok = document.getElementById('hp-ok');
-  // Keuzelijsten (opnieuw) vullen: vrije uren min wat in dit venster al naar die monteur op die dag gaat
+  // Kandidaten per opdracht: vrije uren min wat in dit venster al naar die monteur op die dag gaat, en het werk
+  // dat op hetzelfde tijdstip al bij hem staat (ook wat je hier net hebt gekozen). Vrij eerst, bezet onderaan.
+  var kandidaten = function(i){
+    var o = ops[i], al = _plmMonteurIds(o), vak = _opVak(o);
+    return anderen.filter(function(x){ return vrij0[x.id+'|'+o.datum] !== null && al.indexOf(String(x.id)) < 0; }).map(function(x){
+      var vrij = vrij0[x.id+'|'+o.datum], bezet = _medOverlap(x.id, o.datum, vak, o.id);
+      ops.forEach(function(p, j){
+        if(j === i || keuze[j] !== String(x.id) || p.datum !== o.datum) return;
+        vrij -= _dashUren(p);
+        if(_vakOverlapt(_opVak(p), vak)) bezet.push(p);
+      });
+      return { x:x, vrij:vrij, bezet:bezet };
+    }).sort(function(p, q){ return (p.bezet.length ? 1 : 0) - (q.bezet.length ? 1 : 0) || q.vrij - p.vrij; });
+  };
+  var label = function(k){ return k.bezet.length ? 'bezet '+_vakTekst(_opVak(k.bezet[0])) : (k.vrij > 0.05 ? _urenKort(k.vrij)+' u vrij' : 'vol'); };
   var vul = function(){
     body.querySelectorAll('select[data-hp]').forEach(function(sel){
-      var i = +sel.dataset.hp, o = ops[i], al = _plmMonteurIds(o);
+      var i = +sel.dataset.hp, kl = kandidaten(i);
       var opts = '<option value="">Laten staan bij '+esc(m.voornaam)+'</option>';
-      anderen.filter(function(x){ return vrij0[x.id+'|'+o.datum] !== null && al.indexOf(String(x.id)) < 0; })
-        .sort(function(x, y){ return vrij0[y.id+'|'+o.datum] - vrij0[x.id+'|'+o.datum]; })
-        .forEach(function(x){
-          var vrij = vrij0[x.id+'|'+o.datum];
-          ops.forEach(function(p, j){ if(j !== i && keuze[j] === String(x.id) && p.datum === o.datum) vrij -= _dashUren(p); });
-          opts += '<option value="'+esc(x.id)+'"'+(keuze[i] === String(x.id) ? ' selected' : '')+'>'+esc(x.voornaam+' '+x.achternaam)+' · '+(vrij > 0.05 ? _urenKort(vrij)+' u vrij' : 'vol')+'</option>';
-        });
+      kl.forEach(function(k){ opts += '<option value="'+esc(k.x.id)+'"'+(keuze[i] === String(k.x.id) ? ' selected' : '')+'>'+esc(k.x.voornaam+' '+k.x.achternaam)+' · '+label(k)+'</option>'; });
       opts += '<option value="_geen"'+(keuze[i] === '_geen' ? ' selected' : '')+'>Niet toegewezen</option>';
       sel.innerHTML = opts;
+      // De beste twee (vrij op dat tijdstip, met uren over) als knop, zodat je niet elke lijst hoeft te openen
+      var chips = kl.filter(function(k){ return !k.bezet.length && k.vrij > 0.05; }).slice(0, 2);
+      var gekozen = kl.filter(function(k){ return String(k.x.id) === keuze[i]; })[0];
+      if(gekozen && chips.indexOf(gekozen) < 0 && !gekozen.bezet.length) chips = chips.slice(0, 1).concat([gekozen]);
+      body.querySelector('[data-hp-kies="'+i+'"]').innerHTML = chips.map(function(k){
+        var aan = keuze[i] === String(k.x.id);
+        return '<button type="button" class="hp-chip'+(aan ? ' aan' : '')+'" data-i="'+i+'" data-id="'+esc(k.x.id)+'" aria-pressed="'+aan+'">'+esc(k.x.voornaam)+' · '+label(k)+'</button>';
+      }).join('');
+      var let_ = body.querySelector('[data-hp-let="'+i+'"]');
+      if(gekozen && gekozen.bezet.length){
+        let_.innerHTML = ICO.storing+esc(gekozen.x.voornaam)+' heeft om '+_vakTekst(_opVak(gekozen.bezet[0]))+' al '+esc(gekozen.bezet[0].klantNaam || 'een opdracht')+'.';
+        let_.hidden = false;
+      } else let_.hidden = true;
     });
     var k = keuze.filter(Boolean).length;
-    ok.disabled = !k; ok.textContent = k ? 'Herplan '+k+' opdracht'+(k === 1 ? '' : 'en') : 'Herplannen';
+    ok.disabled = !k; ok.textContent = k ? 'Herplan '+k+' opdracht'+(k === 1 ? '' : 'en') : 'Kies per opdracht een monteur';
   };
   vul();
   // Per keuzelijst binden (het venster zelf wordt hergebruikt; een binding daarop zou bij elke opening bijkomen)
   body.querySelectorAll('select[data-hp]').forEach(function(sel){ sel.addEventListener('change', function(){ keuze[+sel.dataset.hp] = sel.value; vul(); }); });
+  body.querySelectorAll('[data-hp-kies]').forEach(function(c){ c.addEventListener('click', function(e){
+    var b = e.target.closest('.hp-chip'); if(!b) return;
+    var i = +b.dataset.i; keuze[i] = keuze[i] === b.dataset.id ? '' : b.dataset.id; vul();
+  }); });
   document.getElementById('hp-alles-geen').addEventListener('click', function(){ keuze = ops.map(function(){ return '_geen'; }); vul(); });
   document.getElementById('hp-annuleer').addEventListener('click', closeModal);
   ok.addEventListener('click', function(){
@@ -20729,6 +20797,7 @@ function renderPlanWeek(monteurs) {
         h += ' style="--wk-kl:'+ot.kleur+';--wk-bg:'+_kleurTint(ot.kleur,'22')+';cursor:grab;user-select:none">';
         if(spoed) h += '<div style="margin-bottom:3px">'+_spoedLabel()+'</div>';
         h += _wkKaartKop(o.tijdVan, o.status, ot.kleur);
+        h += _wkDubbel(o);
         h += '<div class="wk-naam" style="display:flex;align-items:flex-start;gap:3px">';
         if(o.notitie) h += '<svg width="9" height="9" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" title="'+esc(o.notitie)+'"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
         h += esc(o.klantNaam||'—')+'</div>';
@@ -20907,6 +20976,7 @@ function renderPlanDag(monteurs) {
     var k = '<div class="plan-event wk-kaart'+_wkKlaar(o)+(_sp?' spoed-kaart':'')+'" data-id="'+o.id+'" style="--wk-kl:'+ot.kleur+';--wk-bg:'+_kleurTint(ot.kleur,'22')+';cursor:pointer">';
     if(_sp) k += '<div style="margin-bottom:3px">'+_spoedLabel()+'</div>';
     k += _wkKaartKop(o.tijdVan ? o.tijdVan+(o.tijdTot ? ' – '+o.tijdTot : '') : '', o.status, ot.kleur);
+    if((kort || 0) < 2) k += _wkDubbel(o);
     k += '<div class="wk-naam" style="display:flex;align-items:center;gap:3px">';
     if(o.notitie) k += '<svg width="9" height="9" fill="none" stroke="var(--accent2)" stroke-width="2.5" viewBox="0 0 24 24" title="'+esc(o.notitie)+'"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
     k += esc(o.klantNaam||'—')+'</div>';
@@ -21722,6 +21792,9 @@ function openOpdrachtModal(id, prefill) {
   if (vanSel)  vanSel.addEventListener('change',  berekenTot);
   if (duurSel) duurSel.addEventListener('change', berekenTot);
   berekenTot();
+  // Begintijd of duur gewijzigd: is de monteur op het nieuwe tijdstip vrij? (de functie staat verderop)
+  if (vanSel)  vanSel.addEventListener('change',  function(){ _opMontWaarschuw(); });
+  if (duurSel) duurSel.addEventListener('change', function(){ _opMontWaarschuw(); });
 
   // ── Postcode + huisnummer → adres auto-aanvullen ──
   function _opZoekAdres() {
@@ -21742,25 +21815,21 @@ function openOpdrachtModal(id, prefill) {
   if(huisnrEl) huisnrEl.addEventListener('blur', _opZoekAdres);
 
   // Datum wijziging → herbereken beschikbaarheid monteurs
-  var datumSel = document.getElementById('op-datum');
-  if(datumSel) datumSel.addEventListener('change', function(){
-    var nieuweDatum = this.value;
-    var opdrachtTijdVanNw = document.getElementById('op-van') ? document.getElementById('op-van').value : null;
+  // Datum, begintijd of duur gewijzigd → beschikbaarheid van de monteurs opnieuw: verlof, ziek, of al bezet
+  function _opMontWaarschuw(){
+    var datum = (document.getElementById('op-datum') || {}).value || '';
+    var van = (document.getElementById('op-van') || {}).value || null;
+    var vak = _opVak({ tijdVan:van, tijdTot:(document.getElementById('op-tot') || {}).value || '', duurUren:parseFloat((document.getElementById('op-duur') || {}).value) || null });
     document.querySelectorAll('.op-mont-btn').forEach(function(btn){
-      var hiddenInp = btn.querySelector('.op-mont-cb');
-      if(!hiddenInp) return;
       var medId = btn.dataset.id;
-      var verlofW = checkVerlofBeschikbaar(medId, nieuweDatum, opdrachtTijdVanNw);
-      var opVerzuim = !!verzuimOpDag(medId, nieuweDatum);
-      var waarschuwing = verlofW || (opVerzuim ? '<svg width=\"9\" height=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\" style=\"vertical-align:middle\"><path d=\"M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z\"/></svg> Ziek' : '');
-      var isSelected = hiddenInp.dataset.checked === '1';
-      btn.classList.toggle('let', !!waarschuwing);
-      // Update waarschuwing tekst
-      var warnDiv = btn.querySelector('.mont-warn');
-      if(warnDiv && waarschuwing) { warnDiv.innerHTML = waarschuwing; warnDiv.style.display=''; }
-      else if(warnDiv) warnDiv.style.display='none';
+      var w = checkVerlofBeschikbaar(medId, datum, van) || (verzuimOpDag(medId, datum) ? '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:middle"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/></svg> Ziek' : '');
+      if(!w && vak){ var bz = _medOverlap(medId, datum, vak, id); if(bz.length) w = ICO.clock+' Bezet '+_vakTekst(_opVak(bz[0])); }
+      btn.classList.toggle('let', !!w);
+      var wd = btn.querySelector('.mont-warn'); if(wd){ wd.innerHTML = w || ''; wd.style.display = w ? '' : 'none'; }
     });
-  });
+  }
+  var datumSel = document.getElementById('op-datum');
+  if(datumSel) datumSel.addEventListener('change', _opMontWaarschuw);
 
   // Monteur grid knoppen toggle
   document.querySelectorAll('.op-mont-btn').forEach(function(btn){
@@ -21776,6 +21845,7 @@ function openOpdrachtModal(id, prefill) {
       btn.setAttribute('aria-pressed', isSelected);
     });
   });
+  _opMontWaarschuw();
 
   // + Locatie knop: snel een nieuwe locatie aanmaken en selecteren
   var addLocBtn = document.getElementById('op-add-locatie');
