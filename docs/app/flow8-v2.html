@@ -37730,8 +37730,12 @@ function _woBewerkModal(id, wo){
       }
       b += lfRij(ICO.kalender, 'Deadline', '<input class="lf-veld" type="date" id="wobe-deadline" value="'+esc(_st.deadline||'')+'">', {voor:'wobe-deadline'});
       b += lfRij(ICO.edit, 'Details', '<textarea class="lf-notitie" id="wobe-details" rows="3" placeholder="Wat moet er gebeuren?">'+esc(_st.details||'')+'</textarea>', {blok:true, voor:'wobe-details', sub:'Omschrijving van de werkzaamheden'});
+      // Verwijderen staat onderaan het bewerkvenster, zoals bij de andere modules (alleen voor beheer)
+      if(isAdmin() || magBeheren('werkorders')) b += _zpVerwijder('wobe-del', 'Werkorder verwijderen');
       lfOpen('Werkorder bewerken'+(wo.nummer?(' '+_woNummerLabel(wo)):''), b, 'Opslaan', 'wobe-opslaan');
       bindAutoGrow(document.getElementById('wobe-details'));
+      var wd = document.getElementById('wobe-del');
+      if(wd) wd.addEventListener('click', function(){ closeModal(); setTimeout(function(){ _woVerwijder(id, wo); }, 220); });
 
       function bewaarVelden(){ var d=document.getElementById('wobe-deadline'); if(d)_st.deadline=d.value; var dt=document.getElementById('wobe-details'); if(dt)_st.details=dt.value; }
       var kk = document.getElementById('wobe-klant-kies'); if(kk) kk.addEventListener('click', function(){ bewaarVelden(); kiesDeb(); });
@@ -39782,10 +39786,6 @@ function _woBindDetail(fullscreen){
       toast('PDF genereren…','info');
       genereerWerkorderPDF({ uitvoer:'download' });
     });
-  });
-  // Werkorder verwijderen (vanuit detail)
-  root.querySelectorAll('.wox-verwijder').forEach(function(bt){
-    bt.addEventListener('click', function(){ _woVerwijder(st.id, st.wo); });
   });
   // Prioriteit wisselen (vanuit detail)
   root.querySelectorAll('.wox-prio').forEach(function(bt){
