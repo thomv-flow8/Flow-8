@@ -2557,6 +2557,19 @@ select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
 .meer-item:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
 .meer-item:disabled{color:var(--muted);cursor:default;background:none}
 .meer-item svg{width:15px;height:15px;color:var(--muted);flex-shrink:0}
+.op-menu{position:fixed;top:0;z-index:10050;min-width:230px;max-width:280px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 12px 30px rgba(0,0,0,.18);padding:6px;display:flex;flex-direction:column}
+.op-menu-kop{padding:6px 10px 8px;margin-bottom:4px;border-bottom:1px solid var(--border);min-width:0}
+.op-menu-kop b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-menu-kop small{display:block;font-size:12px;color:var(--muted)}
+.op-menu .meer-item{min-height:34px}
+.op-menu .meer-item > span{flex:1}
+.op-menu .meer-item.aan{font-weight:600}
+.op-menu .meer-item.aan > svg:last-child{color:var(--accent-t)}
+.op-menu-st i{width:8px;height:8px;border-radius:50%;flex:none;margin:0 3.5px}
+.op-menu-groep{font:400 11px 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 10px 2px}
+.op-menu-sep{height:1px;background:var(--border);margin:4px 2px}
+.op-menu .op-menu-rood,.op-menu .op-menu-rood svg{color:var(--red-t)}
+@media (pointer:coarse){.lg-rk{display:none}}
 /* Kopjes in het Meer-menu (telefoon), zoals de kopjes in de zijbalk */
 .meer-sectie{grid-column:1/-1;padding:10px 4px 2px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
 .meer-sectie:first-child{padding-top:2px}
@@ -11297,7 +11310,7 @@ function _planLegenda(ops){
   types.sort(function(a, b){ var ia = _volg.indexOf(a.label), ib = _volg.indexOf(b.label); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib); });
   var h = '<div class="plan-legenda" aria-label="Legenda"><b>Type</b>';
   types.forEach(function(ot){ h += '<span><i class="lg-type" style="--k:'+ot.kleur+'"></i>'+esc(ot.label)+'</span>'; });
-  h += '<i class="lg-sep"></i><span><i class="lg-stip"></i>Stip = status</span><span><i class="lg-spoed"></i>Rode rand = spoed</span><span>Licht = afgehandeld</span><button type="button" class="lf-link plan-legenda-uitleg" data-uitleg="status">Wat betekenen de statussen?</button>'
+  h += '<i class="lg-sep"></i><span><i class="lg-stip"></i>Stip = status</span><span><i class="lg-spoed"></i>Rode rand = spoed</span><span>Licht = afgehandeld</span><span class="lg-rk">Rechtsklik = snelle acties</span><button type="button" class="lf-link plan-legenda-uitleg" data-uitleg="status">Wat betekenen de statussen?</button>'
     + (_planView === 'week' ? '<button type="button" class="lf-link plan-legenda-uitleg" data-uitleg="bezetting">Wat zegt de bezettingsbalk?</button>' : '')+'</div>';
   return h;
 }
@@ -22609,6 +22622,108 @@ function _zetOpdrachtStatusDoor(o, status, forceerHeropen, naKlaar) {
   if (typeof naKlaar === 'function') naKlaar();
 }
 
+
+// ── Rechtsklikmenu op een opdracht in Planning (Week, Dag, Lijst) ──
+// Snelle acties zonder eerst het paneel te openen. Statussen staan als lijst in het menu (geen submenu):
+// één klik, ook met het toetsenbord bereikbaar.
+var _opMenuEl = null, _opMenuTerug = null, _opMenuTijd = 0;
+var _OP_MENU_ST = ['ingepland','klaargezet','gereserveerd','actie','afgehandeld','verwerkt'];
+function _opMenuSluit(terugFocus){
+  if(!_opMenuEl) return;
+  _opMenuEl.remove(); _opMenuEl = null;
+  document.removeEventListener('mousedown', _opMenuBuiten, true);
+  document.removeEventListener('keydown', _opMenuToets, true);
+  document.removeEventListener('scroll', _opMenuScroll, true);
+  window.removeEventListener('resize', _opMenuScroll);
+  if(terugFocus && _opMenuTerug && _opMenuTerug.focus){ try { _opMenuTerug.focus({ preventScroll:true }); } catch(e){} }
+  _opMenuTerug = null;
+}
+function _opMenuBuiten(e){ if(_opMenuEl && !_opMenuEl.contains(e.target)) _opMenuSluit(); }
+// Het scrollen dat bij het openen zelf hoort (kaart in beeld schuiven) sluit het menu niet
+function _opMenuScroll(){ if(Date.now() - _opMenuTijd > 300) _opMenuSluit(); }
+// Toetsen in de opvangfase: pijltjes door het menu, Esc sluit eerst het menu (niet het paneel eronder)
+function _opMenuToets(e){
+  if(!_opMenuEl) return;
+  var knoppen = [].slice.call(_opMenuEl.querySelectorAll('button')), i = knoppen.indexOf(document.activeElement), n = null;
+  if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); _opMenuSluit(true); return; }
+  if(e.key === 'Tab'){ _opMenuSluit(true); return; }
+  if(e.key === 'ArrowDown') n = i + 1; else if(e.key === 'ArrowUp') n = i < 0 ? knoppen.length - 1 : i - 1;
+  else if(e.key === 'Home') n = 0; else if(e.key === 'End') n = knoppen.length - 1; else return;
+  e.preventDefault(); e.stopPropagation(); knoppen[(n + knoppen.length) % knoppen.length].focus();
+}
+function _opMenuOpen(id, x, y, opener){
+  _opMenuSluit();
+  var o = APP.opdrachten.find(function(q){ return String(q.id) === String(id); }); if(!o) return;
+  var kan = isAdmin() || magSchrijven('planning');
+  var item = function(act, ico, tekst, cls){ return '<button type="button" role="menuitem" class="meer-item'+(cls ? ' '+cls : '')+'" data-act="'+act+'">'+ico+'<span>'+tekst+'</span></button>'; };
+  var tijd = o.tijdVan ? o.tijdVan+(o.tijdTot ? '–'+o.tijdTot : '') : '';
+  var h = '<div class="op-menu-kop"><b>'+esc(o.klantNaam || 'Opdracht')+'</b><small>'+esc([o.datum ? fmtD(o.datum) : '', tijd].filter(Boolean).join(' · '))+'</small></div>';
+  h += item('open', ICO.info, 'Openen');
+  if(kan) h += item('bewerk', ICO.edit, 'Bewerken');
+  if(o.werkbonId) h += item('werkbon', ICO.clipboard, 'Werkbon openen');
+  if(kan){
+    h += '<div class="op-menu-sep" role="separator"></div><div class="op-menu-groep" aria-hidden="true">Status</div>';
+    _OP_MENU_ST.forEach(function(st){
+      var d = STATUS_DEF[st]; if(!d) return; var aan = o.status === st;
+      h += '<button type="button" role="menuitemradio" aria-checked="'+aan+'" class="meer-item op-menu-st'+(aan ? ' aan' : '')+'" data-st="'+st+'"><i style="background:'+d.kl+'"></i><span>'+d.lbl+(st === 'actie' ? '…' : '')+'</span>'+(aan ? ICO.check : '')+'</button>';
+    });
+    h += '<div class="op-menu-sep" role="separator"></div>';
+    var sp = _isSpoed(o);
+    h += '<button type="button" role="menuitemcheckbox" aria-checked="'+sp+'" class="meer-item'+(sp ? ' aan' : '')+'" data-act="spoed">'+ICO.zap+'<span>Spoed</span>'+(sp ? ICO.check : '')+'</button>';
+    h += item('mail', ICO.mail, 'Mail naar klant…');
+    h += '<div class="op-menu-sep" role="separator"></div>';
+    h += item('del', ICO.trash, 'Verwijderen…', 'op-menu-rood');
+  }
+  var m = document.createElement('div');
+  m.className = 'op-menu'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', 'Acties voor '+(o.klantNaam || 'opdracht'));
+  m.innerHTML = h; document.body.appendChild(m);
+  var b = m.getBoundingClientRect();
+  m.style.left = Math.max(8, Math.min(x, window.innerWidth - b.width - 8))+'px';
+  m.style.top = Math.max(8, y + b.height > window.innerHeight - 8 ? window.innerHeight - b.height - 8 : y)+'px';
+  _opMenuEl = m; _opMenuTerug = opener || null; _opMenuTijd = Date.now();
+  document.addEventListener('mousedown', _opMenuBuiten, true);
+  document.addEventListener('keydown', _opMenuToets, true);
+  document.addEventListener('scroll', _opMenuScroll, true);
+  window.addEventListener('resize', _opMenuScroll);
+  var _eerste = m.querySelector('button'); if(_eerste) _eerste.focus({ preventScroll:true });
+  m.addEventListener('click', function(e){
+    var k = e.target.closest('button'); if(!k) return;
+    var act = k.dataset.act, st = k.dataset.st;
+    _opMenuSluit();
+    if(st){
+      if(st === o.status) return;
+      if(st === 'actie'){ openActieModal(id); return; }   // Actie vereist vraagt eerst een reden
+      var oud = o.status;
+      zetOpdrachtStatus(id, st, function(){
+        var na = APP.opdrachten.find(function(q){ return String(q.id) === String(id); });
+        if(!na || na.status !== st) return;   // geweigerd (bijv. klaarzetten zonder monteur)
+        // Afgehandeld of verwerkt werkt ook de servicehistorie bij; dat draai je niet met één klik terug
+        var klaar = function(x){ return x === 'afgehandeld' || x === 'verwerkt'; };
+        if(!klaar(st) && !klaar(oud)) toast('Status: '+statusNaam(st), 'success', function(){ zetOpdrachtStatus(id, oud); });
+      });
+      return;
+    }
+    if(act === 'open') openOpdrachtPanel(id);
+    else if(act === 'bewerk') openOpdrachtModal(id);
+    else if(act === 'werkbon') openWerkbonVanuitPlanning(o.werkbonId, true);
+    else if(act === 'mail') openMailModal(id);
+    else if(act === 'del') verwijderOpdracht(id);
+    else if(act === 'spoed'){
+      var zet = function(aan){ o.spoed = aan; if(o.status === 'spoed') o.status = 'ingepland'; dbSaveItem('opdrachten', o.id, o); if(APP.activePage === 'planning') renderPlanning(); };
+      var nu = !_isSpoed(o); zet(nu);
+      toast(nu ? 'Spoed aangezet' : 'Spoed uitgezet', 'success', function(){ zet(!nu); });
+    }
+  });
+}
+// Rechtsklik (of de menutoets / Shift+F10) op een opdracht in Planning opent het menu
+document.addEventListener('contextmenu', function(e){
+  if(APP.activePage !== 'planning' || !e.target.closest) return;
+  var k = e.target.closest('#plan-content .plan-event[data-id], #plan-content .opdracht-rij[data-id]');
+  if(!k) return;
+  e.preventDefault();
+  var r = k.getBoundingClientRect(), viaToets = !e.clientX && !e.clientY;
+  _opMenuOpen(k.dataset.id, viaToets ? r.left + 12 : e.clientX, viaToets ? r.bottom - 4 : e.clientY, k);
+});
 
 function verwijderOpdracht(id) {
   var o = APP.opdrachten.find(function(x){ return String(x.id)===String(id); });
