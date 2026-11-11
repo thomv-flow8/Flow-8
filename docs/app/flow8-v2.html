@@ -35283,7 +35283,7 @@ function _licLuister(){
       if(eerste){ eerste = false; klaar(); return; }
       // Niet hertekenen terwijl iemand in het beheerformulier typt
       var a = document.activeElement;
-      if(APP.activePage === 'instellingen' && _instTab === 'abonnement' && !(a && a.closest && a.closest('.ab-pb'))) renderInstellingen();
+      if(APP.activePage === 'instellingen' && _instTab === 'abonnement' && !(a && a.matches && a.matches('input, select, textarea') && a.closest('.ab-pb'))) renderInstellingen();
     }, function(){ APP.licentie = null; if(eerste){ eerste = false; klaar(); } });
   });
 }
@@ -35348,7 +35348,9 @@ function _licPlatformHtml(L){
     + '<div class="ab-acties"><button type="button" class="btn btn-primary" id="pb-opslaan">Abonnement opslaan</button>'
     + (a.proefTot ? '<button type="button" class="btn btn-ghost" id="pb-omzetten">Proef omzetten</button>' : '')
     + (L && L.status === 'gestopt' ? '<button type="button" class="btn btn-ghost" id="pb-herstart">Weer starten</button>' : '')+'</div>';
-  var regels = (L && L.regels) || [];
+  // Zonder abonnement toont het scherm geen regels: dan eerst het abonnement, anders lijken nieuwe regels niet te bestaan
+  if(!L) return h + '<p class="ab-hint ab-pb-uitleg"><b>Sla eerst het abonnement op.</b> Daarna voeg je hier de licentieregels toe.</p></div>';
+  var regels = L.regels || [];
   h += '<div class="ab-pm-kop"><b>Licentieregels</b><span>'+regels.length+(regels.length === 1 ? ' regel' : ' regels')+'</span></div>'
     + _zpKaart(regels.map(function(r){
         return '<div class="lf-rij">'+_lfIco(ICO.user)+'<span class="lf-l">'+r.aantal+' × '+esc((_LIC_SOORT[r.soort] || ['?'])[0].toLowerCase())+'<small>'+esc(fmtD(r.van))+(r.tot ? ' t/m '+esc(fmtD(r.tot)) : ', loopt door')+' · '+_licEuro(r.prijs)+' · '+({ actief:'actief', opzegging:'opzegging gepland', gepland:'gaat in' }[r.status] || 'actief')+'</small></span>'
