@@ -2573,6 +2573,26 @@ select.chip-sel.aan{border-color:var(--accent-knop);color:var(--accent-t)}
 .op-menu-sep{height:1px;background:var(--border);margin:4px 2px}
 .op-menu .op-menu-rood,.op-menu .op-menu-rood svg{color:var(--red-t)}
 @media (pointer:coarse){.lg-rk{display:none}}
+body.plan-sel #plan-content .plan-event,body.plan-sel #plan-content .opdracht-rij{cursor:pointer}
+body.plan-sel #plan-content .plan-event{position:relative}
+body.plan-sel #plan-content .plan-event::after{content:'';position:absolute;right:6px;bottom:6px;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);background:var(--surface);box-sizing:border-box}
+body.plan-sel #plan-content .plan-event.gekozen{outline:2px solid var(--accent);outline-offset:1px}
+body.plan-sel #plan-content .plan-event.gekozen::after{border-color:var(--accent);background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/10px no-repeat}
+body.plan-sel #plan-content .opdracht-rij.gekozen > td{background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.plan-bulk{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9000;width:max-content;display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 32px);padding:8px 8px 8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-pill);box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.pb-n{font-size:13.5px;color:var(--muted);margin-right:6px;white-space:nowrap}
+.pb-n b{color:var(--text);font-weight:700}
+.pb-knop{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface2);color:var(--text);font:600 13px 'Instrument Sans',sans-serif;cursor:pointer;white-space:nowrap}
+.pb-knop svg{width:14px;height:14px}
+.pb-knop:hover:not(:disabled){border-color:color-mix(in srgb,var(--accent) 45%,var(--border))}
+.pb-knop:disabled{opacity:.5;cursor:default}
+.pb-rood{color:var(--red-t)}
+.pb-klaar{background:var(--accent-knop);border-color:var(--accent-knop);color:#fff}
+.pb-sep{width:1px;height:22px;background:var(--border);margin:0 2px}
+body.plan-sel #toast{bottom:84px}
+.op-menu-av{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-weight:700;flex:none}
+.op-menu-datum{display:flex;flex-direction:column;gap:4px;padding:4px 10px 6px;font-size:12px;color:var(--muted)}
+.op-menu-datum .input{min-height:36px;padding:6px 10px}
 /* Kopjes in het Meer-menu (telefoon), zoals de kopjes in de zijbalk */
 .meer-sectie{grid-column:1/-1;padding:10px 4px 2px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2)}
 .meer-sectie:first-child{padding-top:2px}
@@ -8865,6 +8885,7 @@ function bouwMeerMenu() {
 
 function navigateTo(id) { toonPagina(id); }
 function toonPagina(id) {
+  if(id !== 'planning' && typeof _planSelUit === 'function') _planSelUit();
   if(id !== 'werkbonnen') _wbStopLive();
   // Instellingen met niet-opgeslagen wijzigingen: eerst vragen of het opgeslagen moet worden
   if(APP.activePage==='instellingen' && id!=='instellingen' && !toonPagina._doorgaan && _instIsVuil()){
@@ -19592,7 +19613,10 @@ function renderPlanning() {
   });
   h += '</div>';
   h += '<button class="btn btn-ghost btn-sm" id="plan-dagplan-btn" style="display:inline-flex;align-items:center;gap:5px">'+_routeIcoon(14)+' Route</button>';
-  if (_planView === 'lijst') h += _meerMenu([{id:'plan-kolom-toolbar-btn', label:'Kolommen kiezen', icon:ICO.settings}, {id:'plan-export-btn', label:'Exporteren', icon:ICO.download}]);
+  var _pmItems = [];
+  if (!_planMob && magSchrijven('planning')) _pmItems.push({id:'plan-sel-btn', label:'Selecteren', icon:ICO.check}, {id:'plan-klaar-alle-btn', label:'Alles in beeld klaarzetten…', icon:ICO.clipboard});
+  if (_planView === 'lijst') _pmItems.push({id:'plan-kolom-toolbar-btn', label:'Kolommen kiezen', icon:ICO.settings}, {id:'plan-export-btn', label:'Exporteren', icon:ICO.download});
+  if (_pmItems.length) h += _meerMenu(_pmItems);
   if (magSchrijven('planning') && !_planMob) h += '<button class="btn btn-primary btn-sm" id="plan-add-btn">'+_LF_PLUS+'Opdracht</button>';
   h += '</div>'; // sluit toolbar flex
 
@@ -19644,6 +19668,8 @@ function renderPlanning() {
   if (montFilter) montFilter.addEventListener('change', function(e){ _planFilter = e.target.value; _planPage=1; renderPlanning(); });
   var addBtn = el.querySelector('#plan-add-btn'); if(addBtn) addBtn.addEventListener('click', function(){ openOpdrachtModal(null); });
   var dagplanBtn = el.querySelector('#plan-dagplan-btn'); if(dagplanBtn) dagplanBtn.addEventListener('click', openDagplanning);
+  var _selBtn = el.querySelector('#plan-sel-btn'); if(_selBtn) _selBtn.addEventListener('click', function(){ if(_planSel) _planSelUit(); else _planSelAan(); });
+  var _kaBtn = el.querySelector('#plan-klaar-alle-btn'); if(_kaBtn) _kaBtn.addEventListener('click', _planAllesKlaarzetten);
   var planExpBtn = el.querySelector('#plan-export-btn'); if(planExpBtn) planExpBtn.addEventListener('click', function(){
     var bereik = getPeriodeBereik(_planDatum, _planPeriode);
     var ops = APP.opdrachten.filter(function(o){ return o.datum && o.datum >= bereik.van && o.datum <= bereik.tot; });
@@ -19784,6 +19810,7 @@ function bindPlanningEvents() {
   el.querySelectorAll('.opdracht-rij, .plan-event').forEach(function(r){
     r.addEventListener('click', function(e){
       if (e.defaultPrevented) return;
+      if (_planSel) { e.preventDefault(); _planSelWissel(r.dataset.id); return; }
       openOpdrachtPanel(r.dataset.id);
     });
   });
@@ -19898,6 +19925,7 @@ function bindPlanningEvents() {
   var wisFilter = el.querySelector('#plan-filter-wis');
   if(wisFilter) wisFilter.addEventListener('click', function(){ _planStatusFilter = ''; _planActieFilter = ''; renderPlanning(); });
   if(_planIsMobiel()) _plmBind(el);
+  if(_planSel) _planSelTekenen();
 }
 
 // ── LIJST WEERGAVE ─────────────────────────────────────────────────
@@ -22618,10 +22646,12 @@ function _zetOpdrachtStatusDoor(o, status, forceerHeropen, naKlaar) {
   }
   // Servicehistorie bijwerken (alleen servicetypes). Ook bij 'verwerkt', voor wie direct
   // administratief afsluit; dubbel aanroepen kan geen kwaad (alleen vooruit).
-  if (status === 'afgehandeld' || status === 'verwerkt') _skNaServicebeurt(o, false);
+  if (status === 'afgehandeld' || status === 'verwerkt') _skNaServicebeurt(o, _planBulkStil);
   var _statusLabels = _statusNamen();
-  toast('Status bijgewerkt: '+(_statusLabels[status]||status), 'success');
-  if (APP.activePage === 'planning') renderPlanning();
+  if (!_planBulkStil) {
+    toast('Status bijgewerkt: '+(_statusLabels[status]||status), 'success');
+    if (APP.activePage === 'planning') renderPlanning();
+  }
   if (typeof naKlaar === 'function') naKlaar();
 }
 
@@ -22726,6 +22756,166 @@ document.addEventListener('contextmenu', function(e){
   e.preventDefault();
   var r = k.getBoundingClientRect(), viaToets = !e.clientX && !e.clientY;
   _opMenuOpen(k.dataset.id, viaToets ? r.left + 12 : e.clientX, viaToets ? r.bottom - 4 : e.clientY, k);
+});
+
+// ── Meerdere opdrachten tegelijk (Selecteren in het "…"-menu van Planning) ──
+var _planSel = null;          // null = uit; anders { id:true }
+var _planBulkStil = false;    // statuswissel zonder eigen melding en tekenronde
+function _planSelAan(){ _planSel = {}; _planSelTekenen(); }
+function _planSelUit(){
+  _planSel = null; _opMenuSluit();
+  var b = document.getElementById('plan-bulk'); if(b) b.remove();
+  document.body.classList.remove('plan-sel');
+  document.querySelectorAll('#plan-content .gekozen').forEach(function(x){ x.classList.remove('gekozen'); x.removeAttribute('aria-pressed'); });
+}
+function _planSelWissel(id){ if(!_planSel) return; if(_planSel[id]) delete _planSel[id]; else _planSel[id] = true; _planSelTekenen(); }
+function _planSelIds(){ return _planSel ? Object.keys(_planSel).filter(function(id){ return APP.opdrachten.some(function(o){ return String(o.id) === id; }); }) : []; }
+function _planInBeeldIds(){
+  var gezien = {}, uit = [];
+  document.querySelectorAll('#plan-content .plan-event[data-id], #plan-content .opdracht-rij[data-id]').forEach(function(x){ var id = String(x.dataset.id); if(!gezien[id]){ gezien[id] = 1; uit.push(id); } });
+  return uit;
+}
+function _planSelTekenen(){
+  if(!_planSel || APP.activePage !== 'planning') return;
+  document.body.classList.add('plan-sel');
+  document.querySelectorAll('#plan-content .plan-event[data-id], #plan-content .opdracht-rij[data-id]').forEach(function(x){
+    var aan = !!_planSel[x.dataset.id]; x.classList.toggle('gekozen', aan); x.setAttribute('aria-pressed', aan ? 'true' : 'false');
+  });
+  var n = _planSelIds().length, uit = n ? '' : ' disabled';
+  var bar = document.getElementById('plan-bulk');
+  if(!bar){ bar = document.createElement('div'); bar.id = 'plan-bulk'; bar.className = 'plan-bulk'; bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', 'Selectie'); document.body.appendChild(bar); bar.addEventListener('click', _planBulkKlik); }
+  bar.innerHTML = '<span class="pb-n" aria-live="polite">'+(n ? '<b>'+n+'</b> geselecteerd' : 'Kies opdrachten')+'</span>'
+    + '<button type="button" class="pb-knop" data-pb="status"'+uit+'>Status <span aria-hidden="true">▾</span></button>'
+    + '<button type="button" class="pb-knop" data-pb="monteur"'+uit+'>Monteur <span aria-hidden="true">▾</span></button>'
+    + '<button type="button" class="pb-knop" data-pb="datum"'+uit+'>Datum <span aria-hidden="true">▾</span></button>'
+    + '<button type="button" class="pb-knop" data-pb="spoed"'+uit+'>'+ICO.zap+'Spoed</button>'
+    + '<button type="button" class="pb-knop pb-rood" data-pb="del"'+uit+'>'+ICO.trash+'Verwijderen</button>'
+    + '<span class="pb-sep" aria-hidden="true"></span>'
+    + '<button type="button" class="pb-knop" data-pb="alles">Alles in beeld</button>'
+    + (n ? '<button type="button" class="pb-knop" data-pb="geen">Niets</button>' : '')
+    + '<button type="button" class="pb-knop pb-klaar" data-pb="klaar">Klaar</button>';
+}
+// Klein keuzemenu boven de balk (zelfde uiterlijk als het rechtsklikmenu)
+function _pbMenu(knop, h, bind){
+  _opMenuSluit();
+  var m = document.createElement('div'); m.className = 'op-menu'; m.setAttribute('role', 'menu'); m.innerHTML = h; document.body.appendChild(m);
+  var r = knop.getBoundingClientRect(), b = m.getBoundingClientRect();
+  m.style.left = Math.max(8, Math.min(r.left, window.innerWidth - b.width - 8))+'px';
+  m.style.top = Math.max(8, r.top - b.height - 6)+'px';
+  _opMenuEl = m; _opMenuTerug = knop; _opMenuTijd = Date.now();
+  document.addEventListener('mousedown', _opMenuBuiten, true);
+  document.addEventListener('keydown', _opMenuToets, true);
+  document.addEventListener('scroll', _opMenuScroll, true);
+  window.addEventListener('resize', _opMenuScroll);
+  var eerste = m.querySelector('button, input'); if(eerste) eerste.focus({ preventScroll:true });
+  bind(m);
+}
+function _pbItem(attr, ico, tekst){ return '<button type="button" role="menuitem" class="meer-item" '+attr+'>'+(ico||'')+'<span>'+tekst+'</span></button>'; }
+function _planBulkKlik(e){
+  var k = e.target.closest && e.target.closest('[data-pb]'); if(!k || k.disabled) return;
+  var act = k.dataset.pb, ids = _planSelIds();
+  if(act === 'klaar') return _planSelUit();
+  if(act === 'alles'){ _planInBeeldIds().forEach(function(id){ _planSel[id] = true; }); return _planSelTekenen(); }
+  if(act === 'geen'){ _planSel = {}; return _planSelTekenen(); }
+  if(act === 'status'){
+    _pbMenu(k, ['ingepland','klaargezet','gereserveerd','afgehandeld','verwerkt'].map(function(st){ var d = STATUS_DEF[st];
+      return '<button type="button" role="menuitem" class="meer-item op-menu-st" data-st="'+st+'"><i style="background:'+d.kl+'"></i><span>'+d.lbl+'</span></button>'; }).join(''),
+      function(m){ m.addEventListener('click', function(ev){ var b = ev.target.closest('[data-st]'); if(!b) return; _opMenuSluit(); _planBulkStatus(ids, b.dataset.st); }); });
+  } else if(act === 'monteur'){
+    var rollen = APP.planningRollen || ['monteur','extern'];
+    var meds = APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0; });
+    _pbMenu(k, meds.map(function(m){ return _pbItem('data-m="'+esc(m.id)+'"', '<span class="op-menu-av" style="background:'+medKleur(m)+';color:'+_tekstOpKleur(medKleur(m))+'">'+esc(initials(m))+'</span>', esc(m.voornaam+' '+m.achternaam)); }).join('')
+      + '<div class="op-menu-sep" role="separator"></div>' + _pbItem('data-m=""', ICO.user, 'Niet toegewezen'),
+      function(m){ m.addEventListener('click', function(ev){ var b = ev.target.closest('[data-m]'); if(!b) return; _opMenuSluit(); _planBulkMonteur(ids, b.dataset.m); }); });
+  } else if(act === 'datum'){
+    _pbMenu(k, _pbItem('data-dg="1"', '', '1 dag later') + _pbItem('data-dg="-1"', '', '1 dag eerder') + _pbItem('data-dg="7"', '', '1 week later') + _pbItem('data-dg="-7"', '', '1 week eerder')
+      + '<div class="op-menu-sep" role="separator"></div><label class="op-menu-datum"><span>Naar datum</span><input type="date" class="input" aria-label="Naar datum"></label>'
+      + _pbItem('data-dg="naar"', ICO.kalender, 'Verplaatsen naar die datum'),
+      function(m){ m.addEventListener('click', function(ev){ var b = ev.target.closest('[data-dg]'); if(!b) return;
+        if(b.dataset.dg === 'naar'){ var v = m.querySelector('input[type=date]').value; if(!v){ m.querySelector('input[type=date]').focus(); return; } _opMenuSluit(); _planBulkDatum(ids, null, v); }
+        else { _opMenuSluit(); _planBulkDatum(ids, +b.dataset.dg, null); } }); });
+  } else if(act === 'spoed') _planBulkSpoed(ids);
+  else if(act === 'del') _planBulkVerwijder(ids);
+}
+function _planOp(id){ return APP.opdrachten.find(function(o){ return String(o.id) === String(id); }); }
+function _planAantal(n){ return n+' opdracht'+(n === 1 ? '' : 'en'); }
+function _planBulkStatus(ids, st){
+  var klaar = function(x){ return x === 'afgehandeld' || x === 'verwerkt'; };
+  var oud = {}, gedaan = [], zonderM = 0, afgerond = 0;
+  _planBulkStil = true;
+  try {
+    ids.forEach(function(id){
+      var o = _planOp(id); if(!o || o.status === st) return;
+      if(st === 'klaargezet' && !_opdHeeftMonteur(o)){ zonderM++; return; }
+      if(klaar(o.status) && !klaar(st)){ afgerond++; return; }   // heropenen gaat per opdracht, met bevestiging
+      oud[id] = o.status; _zetOpdrachtStatusDoor(o, st, false); gedaan.push(id);
+    });
+  } finally { _planBulkStil = false; }
+  if(APP.activePage === 'planning') renderPlanning();
+  var tekst = (gedaan.length ? _planAantal(gedaan.length)+' op '+statusNaam(st) : 'Niets gewijzigd')
+    + (zonderM ? ' · '+zonderM+' zonder monteur overgeslagen' : '') + (afgerond ? ' · '+afgerond+' al afgehandeld overgeslagen' : '');
+  if(!gedaan.length) return toast(tekst, 'warning');
+  if(klaar(st)) return toast(tekst, 'success');   // servicehistorie is bijgewerkt: niet met één klik terug
+  toast(tekst, zonderM || afgerond ? 'warning' : 'success', function(){
+    _planBulkStil = true;
+    try { gedaan.forEach(function(id){ var o = _planOp(id); if(o) _zetOpdrachtStatusDoor(o, oud[id], false); }); } finally { _planBulkStil = false; }
+    renderPlanning(); toast('Statuswijziging ongedaan gemaakt', 'success');
+  });
+}
+// Bewaart de oude waarden, voert de wijziging uit en geeft Ongedaan (monteur, datum, spoed)
+function _planBulkWijzig(ids, velden, wijzig, tekst){
+  var terug = [];
+  ids.forEach(function(id){ var o = _planOp(id); if(!o) return; var t = { o:o }; velden.forEach(function(v){ t[v] = Array.isArray(o[v]) ? o[v].slice() : (o[v] === undefined ? null : o[v]); }); terug.push(t); wijzig(o); dbSaveItem('opdrachten', o.id, o); });
+  renderPlanning();
+  toast(tekst(terug.length), 'success', function(){
+    terug.forEach(function(t){ velden.forEach(function(v){ t.o[v] = t[v]; }); dbSaveItem('opdrachten', t.o.id, t.o); });
+    renderPlanning(); toast('Ongedaan gemaakt', 'success');
+  });
+}
+function _planBulkMonteur(ids, medId){
+  var m = medId ? getMed(medId) : null;
+  _planBulkWijzig(ids, ['monteurId','monteurIds'], function(o){ o.monteurIds = medId ? [String(medId)] : []; o.monteurId = medId ? String(medId) : null; },
+    function(n){ return _planAantal(n)+' naar '+(m ? m.voornaam+' '+m.achternaam : 'Niet toegewezen'); });
+}
+function _planBulkDatum(ids, dagen, naar){
+  _planBulkWijzig(ids, ['datum'], function(o){
+    if(naar){ o.datum = naar; return; }
+    if(!o.datum) return; var d = new Date(o.datum+'T00:00:00'); d.setDate(d.getDate() + dagen); o.datum = dateToStr(d);
+  }, function(n){ return _planAantal(n)+' verplaatst '+(naar ? 'naar '+fmtD(naar) : (Math.abs(dagen) === 7 ? '1 week ' : Math.abs(dagen)+' dag ')+(dagen > 0 ? 'later' : 'eerder')); });
+}
+function _planBulkSpoed(ids){
+  var aan = ids.some(function(id){ var o = _planOp(id); return o && !_isSpoed(o); });
+  _planBulkWijzig(ids, ['spoed','status'], function(o){ o.spoed = aan; if(o.status === 'spoed') o.status = 'ingepland'; },
+    function(n){ return 'Spoed '+(aan ? 'aangezet' : 'uitgezet')+' bij '+_planAantal(n); });
+}
+function _planBulkVerwijder(ids){
+  var ops = ids.map(_planOp).filter(Boolean); if(!ops.length) return;
+  bevestigActie(_planAantal(ops.length)+' verwijderen', 'De gekozen '+_planAantal(ops.length)+' definitief verwijderen? Werkbonnen die erbij horen worden gearchiveerd. Je kunt het direct daarna nog ongedaan maken.', function(){
+    var backup = ops.map(function(o){ return JSON.parse(JSON.stringify(o)); }), weg = {};
+    ops.forEach(function(o){ weg[String(o.id)] = 1; });
+    APP.opdrachten = APP.opdrachten.filter(function(x){ return !weg[String(x.id)]; });
+    _planSel = {}; renderPlanning();
+    var verwijderd = false;
+    var timer = setTimeout(function(){ verwijderd = true; backup.forEach(function(o){ dbRemove('opdrachten', o.id); if(o.werkbonId) fsWerkbonArchiveren(o.werkbonId); }); }, 6000);
+    toast(_planAantal(backup.length)+' verwijderd', 'success', function(){
+      clearTimeout(timer);
+      if(!verwijderd){ backup.forEach(function(o){ APP.opdrachten.push(o); dbSaveItem('opdrachten', o.id, o); }); renderPlanning(); toast('Verwijderen ongedaan gemaakt', 'success'); }
+      else backup.forEach(function(o){ if(o.werkbonId) fsWerkbonDearchiveren(o.werkbonId); });
+    });
+  });
+}
+// "…" › Alles in beeld klaarzetten: alle ingeplande opdrachten met een monteur in de huidige weergave (periode en filter)
+function _planAllesKlaarzetten(){
+  var ids = _planInBeeldIds(), kan = [], zonderM = 0;
+  ids.forEach(function(id){ var o = _planOp(id); if(!o || (o.status !== 'ingepland' && o.status !== 'gereserveerd')) return; if(_opdHeeftMonteur(o)) kan.push(id); else zonderM++; });
+  if(!kan.length) return toast('Er staan geen ingeplande opdrachten met een monteur in beeld'+(zonderM ? ' ('+zonderM+' zonder monteur)' : ''), 'info');
+  bevestigActie(_planAantal(kan.length)+' klaarzetten', 'Alle ingeplande opdrachten in beeld ('+_planAantal(kan.length)+') worden vrijgegeven: de monteurs zien de werkbon dan in de app.'+(zonderM ? ' '+_planAantal(zonderM)+' zonder monteur blijven staan.' : ''), function(){ _planBulkStatus(kan, 'klaargezet'); }, 'info');
+}
+// Esc stopt het selecteren (als er geen menu of venster open staat)
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Escape' || !_planSel || _opMenuEl) return;
+  var ov = document.getElementById('modal-overlay'); if(ov && ov.classList.contains('open')) return;
+  _planSelUit();
 });
 
 function verwijderOpdracht(id) {
