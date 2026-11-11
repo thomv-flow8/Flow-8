@@ -262,7 +262,19 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
 - [ ] **Meerdere aanvullingen per klant** — nu kan er één. Als een bedrijf er ooit twee tegelijk
       nodig heeft, wordt `aanvulling` een lijst. Dat is een migratie plus alle leesplekken; bewust
       niet vooruitgelopen, want met vinkjes in plaats van een keuzelijst nodig je uit tot rommel.
-- [ ] **H12** — credits/licenties, server-side (het grote licentie-traject).
+- [x] **H12 fase 1** — licenties tellen en tonen (11 november 2026, commits 9f7558b en b64eb81). Instellingen ›
+      Abonnement; gegevens in `flow8/licenties/{bedrijfId}` (lezen: beheerder of platformbeheer; schrijven: platformbeheer,
+      de beheerder alleen opzeggingen per de einddatum). Cloud Functions `licentieGebruik` en `licentieAbonnement` tellen
+      actieve accounts per soort, `licentieDagelijks` (02:30) zet opgezegde accounts na de einddatum op inactief en een
+      opgezegd abonnement op gestopt (90 dagen alleen bekijken). Soort per account: veld `licentie`, anders monteur =
+      werkbon, overige rollen = kantoor; de beheerder kiest zelf. Zes tests in de Rules Playground geslaagd.
+      Let op bij een eerste database-trigger in een project: Eventarc heeft een paar minuten nodig, de eerste deploy faalt dan.
+- [ ] **H12 fase 2** — aanpassen en afdwingen: de beheerder past zelf het aantal licenties aan (wizard); een account
+      zonder vrije licentie kan niet inloggen; een kantoorlicentie kan geen werkbonnen invullen; een gestopt abonnement is
+      alleen-lezen. Vraagt claims (`lic`), rules en app samen. Daarmee ook dicht: nu kan een beheerder een monteur op
+      kantoor zetten (goedkoper) terwijl die gewoon werkbonnen blijft invullen.
+- [ ] **H12 fase 3** — betalen: Mollie of automatische incasso (zie Incasso instellen), facturen downloaden in de app,
+      mail 14 dagen voordat de gegevens van een gestopt abonnement worden verwijderd.
 
 ## Klein / security-hardening
 - [x] **Werkbon list-query blijft bewust open** — besloten 22 september 2026. Het pompregister toont

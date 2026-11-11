@@ -346,7 +346,7 @@ Stevig en rustig: een pil met duidelijke tekst, groot genoeg voor een vinger.
 - **Zoeken** toont de sneltoets op de knop (⌘K op een Mac, Ctrl K elders; niet op de telefoon). Het vindt gegevens (opdrachten, werkbonnen, werkorders, register, klanten, medewerkers) én daaronder **acties** (`_GZ_ACTIES`: Nieuwe opdracht, Verlof aanvragen, …; alleen met het recht ervoor), **instellingen** (`_GZ_INST`, op trefwoord: "plandagen" vindt Instellingen › Planning) en **uitleg** (`_UITLEG`). Ook **pagina's** uit het menu zijn een resultaat, met de woorden waarmee planners zoeken (`_GZ_PAGINA_W`: "ziek" → Verzuim, "kaart" → Kaartoverzicht, "declaratie" → Onkosten). Zoek je op wat je wilt doen ("ziek"), dan staan pagina, actie en uitleg samen. De zoekbalk en het lege venster noemen voorbeelden ("nieuwe opdracht", "plandagen", "rechten"). Gegevens uit Firestore laadt het zoeken één keer tegelijk (`_gzWoLaden`), anders kan laden → opnieuw zoeken → laden eindeloos doorgaan.
 - **Uitleg** ("Wat betekent dit?", `toonUitleg(k)` of `data-uitleg="k"` op een `.lf-link`): een venster met gewone taal bij een kernbegrip (statussen, Dubbel geboekt, rechtenletters, plandagen en werktijden). Eén bron (`_UITLEG`), bereikbaar vanuit de legenda van Planning, het opdrachtpaneel en ⌘K. Boven een open venster opent het als bovenvenster. Statussen tonen de echte pil uit `STATUS_DEF`.
 - **Onderbalk (telefoon):** vier vaste bestemmingen en "Meer" voor de rest. Het Meer-menu volgt de zijbalk: dezelfde volgorde en kopjes (Operationeel, Klanten, Team, Systeem), en gedraagt zich als venster: de focus gaat naar het eerste item, Tab blijft erin, Esc sluit en de focus keert terug naar Meer.
-- **Instellingen** staan in vier groepen met een kopje: Bedrijf · Planning en werk · Werkbonnen en werkorders · Mensen en rechten. Een nieuw tabblad krijgt een plek in een groep.
+- **Instellingen** openen op **Overzicht** (`renderInstOverzicht`): Meest gebruikt, daarna alle onderdelen per groep met één zin uitleg (`_INST_UITLEG`), een zoekveld op trefwoord en onderaan Hulp met de uitlegvensters. In het menu staan Overzicht en Abonnement los bovenaan, de rest in vier groepen met een kopje: Bedrijf · Planning en werk · Werkbonnen en werkorders · Mensen en rechten. Een nieuw tabblad krijgt een plek in een groep (`_INST_GROEPEN`), een zin in `_INST_UITLEG` en een trefwoordregel in `_GZ_INST`.
 - **Aan de slag** (Dashboard, beheerder): bedrijfsgegevens, monteurs, de registernaam (pompen, ketels of machines) en de eerste opdracht. Alleen de stappen die nog open staan, met "Openen"; wat al gedaan is telt mee in de kop ("2 van 4 gedaan"). Verdwijnt vanzelf als alles klaar is, of met "Verbergen" (per gebruiker, niet per apparaat). Plandagen is geen stap: de standaard ma–vr werkt al.
 - **Tabs:** tekst met een onderstreping in Signaalblauw. Op de telefoon schuifbare pillen.
 
@@ -377,9 +377,17 @@ Drie vaste manieren, elk met een eigen reden:
 
 ### Panelen
 - **Knoppenrij** (Bellen · Navigeren · Mailen, `_klActies`) alleen in contactpanelen: Debiteur, Serviceklant en Medewerker. Panelen voor kantoorwerk, zoals het opdrachtpaneel, hebben die rij niet. Telefoon en e-mail zijn daar aanklikbare regels, het adres opent de route en "Mail versturen" (met templates en maillog) staat onder Acties.
-- Onderaan staat de hoofdactie in de voet, met "… verwijderen" erboven.
+- Onderaan staat de hoofdactie in de voet, met "… verwijderen" erboven. **Bewerken** staat altijd in die voet: naast de hoofdknop (Werkbon openen, Inplannen, Markeer als hersteld, Uitnodigen) of als enige knop. Bij een aanvraag met Afwijzen en Goedkeuren blijft het één rij. Houd knoplabels kort ("Uitnodigen", niet "Uitnodiging versturen"); een te lang label kapt af met een beletselteken en het icoon krimpt niet mee.
 - **Dialoog:** het zijpaneel gedraagt zich als een venster. Het heeft `role="dialog"`, de focus gaat erin, Tab blijft binnen, Esc sluit en de focus keert terug naar de rij. Ligt er een bevestiging boven het paneel, dan sluit Esc eerst alleen die. Dicht is het paneel `inert`: niet bereikbaar met Tab of een schermlezer.
 - **Inklappen:** een lange lijst die zelden nodig is (bijv. Pompen uit register) staat als inklapbaar blok (`.zp-klap` met `_dpSectieKop`), standaard dicht, met het aantal en een samenvatting in de kop.
+
+### Snelle acties en selectie (Planning)
+- **Rechtsklikmenu** (`_opMenuOpen`, klasse `.op-menu`) op een opdracht in Week, Dag en Lijst: Openen, Bewerken, Werkbon openen, Status (met Ongedaan), Spoed, Mail naar klant, Verwijderen. Ook met de menutoets, pijltjes en Esc; het menu heeft een eigen toetsafhandeling in de opvangfase en niet de klasse `meer-menu`, anders vangt het "…"-menu dezelfde toetsen. De legenda zegt "Rechtsklik = snelle acties". Alleen acties waarvoor je het recht hebt.
+- **Selecteren** ("…" › Selecteren, alleen op desktop): vinkjes op de kaarten en een zwevende balk (`#plan-bulk`, `width:max-content`) met Status, Monteur, Datum, Spoed, Verwijderen en Alles in beeld. Elke bulkactie heeft Ongedaan. "Alles in beeld klaarzetten…" zet alle ingeplande opdrachten met een monteur in één keer klaar, met eerst een telling.
+
+### Abonnement en licenties
+- **Instellingen › Abonnement** (`renderInstAbonnement`, alleen beheerder en platformbeheer): Abonnement, In gebruik (balk per soort, oranje als er geen licentie vrij is), Licentieregels (status als tag), Licenties per medewerker (per persoon de soort Op rol / Werkbon / Kantoor, Opzeggen of Intrekken), Facturen. De gegevens staan in `flow8/licenties/{bedrijfId}`, naast de bedrijven; het gebruik telt alleen de server.
+- **Actie voor het hele bedrijf** (Hele abonnement opzeggen): een eigen rood omlijnd blok onderaan (`.ab-stop`), met de gevolgen vooraf in gewone taal en echte aantallen, en een verwijzing naar de kleinere actie per persoon. Bevestigen met de bedrijfsnaam intypen voordat de rode knop werkt. Daarna een balk bovenaan met Intrekken, en een melding aan alle beheerders.
 
 ### Meldingen en lege staat
 - **Melding in de pagina** (`_zpMelding`): een vlak met icoon, een kop als label en één of twee zinnen. Rood is een fout, oranje een actie, blauw informatie en groen opgelost.
@@ -410,6 +418,7 @@ Drie vaste manieren, elk met een eigen reden:
 - **Do** maak initialen met `initials()`: eerste letter van de voornaam en van het laatste deel van de achternaam ("Fatima El Amrani" → FA, "Jan van der Berg" → JB), overal hetzelfde.
 - **Do** geef een saldo alleen een signaalkleur bij een tekort (rood); nul of weinig is gewone informatie.
 - **Do** maak alles wat klikbaar is ook met het toetsenbord bereikbaar (`role` en tabindex, of een echte knop of link), en geef panelen en vensters dialooggedrag.
+- **Do** geef een actie die het hele bedrijf raakt een eigen blok met de gevolgen vooraf en een bevestiging waarbij je iets intypt; een gewone bevestiging is voor één record.
 
 ### Don't:
 - **Don't** zet `opacity` op tekst of knoppen om iets te dempen.
