@@ -912,7 +912,8 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .inst-abon .ab-pm-rij .lf-w{display:flex;align-items:center;gap:8px}
 .inst-abon .ab-pm-rij .tag{white-space:nowrap}
 .inst-abon .ab-rol{font-weight:600;color:var(--text)}
-.inst-abon .ab-pb-proef{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.inst-abon .ab-pb-proef .lf-link{font-size:inherit;padding:0 2px}
+@media (max-width:768px){.inst-abon .ab-pb .lf-rij > .lf-w{grid-column:2 / -1;justify-self:stretch;margin:6px 0 0}.inst-abon .ab-pb .lf-tekst,.inst-abon .ab-pb .ab-pb-sel{width:100%!important;max-width:none!important}}
 #nieuw-ab-samen:empty{display:none}
 .inst-abon .ab-rol::after{content:' · ';font-weight:400;color:var(--muted)}
 .inst-abon .ab-pm-rij .lf-w{max-width:none}
@@ -35340,8 +35341,8 @@ function _licPlatformHtml(L){
       + lfRij(ICO.kalender, 'Looptijd van', inp('pb-van', 'date', a.periodeVan), { voor:'pb-van' })
       + lfRij(ICO.kalender, 'Looptijd tot', inp('pb-tot', 'date', a.periodeTot), { voor:'pb-tot', sub:'ook de datum waarop opzeggingen ingaan' })
       + lfRij(ICO.kalender, 'Volgende factuur', inp('pb-fact', 'date', a.volgendeFactuur), { voor:'pb-fact' })
-      + lfRij(ICO.kalender, 'Proef tot', inp('pb-proef', 'date', a.proefTot), { voor:'pb-proef', sub:'leeg = geen proef' })
-      + lfRij(ICO.kalender, 'Proef vanaf vandaag', '<span class="ab-pb-proef">'+[30, 60, 90].map(function(n){ return '<button type="button" class="btn btn-ghost btn-sm" data-pb-proef="'+n+'">'+n+' dagen</button>'; }).join('')+'</span>', { sub:'vult Proef tot in; daarna Opslaan' })
+      + lfRij(ICO.kalender, 'Gratis proef tot en met', inp('pb-proef', 'date', a.proefTot), { voor:'pb-proef',
+          sub:'leeg = geen proef · of <span class="ab-pb-proef">'+[30, 60, 90].map(function(n){ return '<button type="button" class="lf-link" data-pb-proef="'+n+'">'+n+'</button>'; }).join(' · ')+'</span> dagen vanaf vandaag' })
       + lfRij(ICO.euro, 'Jaarkorting', inp('pb-korting', 'number', a.jaarKorting == null ? 2 : a.jaarKorting, ' min="0" max="11" step="1"'), { voor:'pb-korting', sub:'maanden' })
       + lfRij(ICO.euro, 'Prijs kantoorgebruiker', inp('pb-pk', 'number', pr.kantoor == null ? 9 : pr.kantoor, ' min="0" step="0.01"'), { voor:'pb-pk', sub:'per maand, excl. btw' })
       + lfRij(ICO.euro, 'Prijs werkbongebruiker', inp('pb-pw', 'number', pr.werkbon == null ? 24 : pr.werkbon, ' min="0" step="0.01"'), { voor:'pb-pw', sub:'per maand, excl. btw' }))
@@ -35421,7 +35422,17 @@ function _licPlatformBind(el, L){
       proefTot:w('pb-proef') || null, jaarKorting:w('pb-korting') === '' ? 0 : Number(w('pb-korting')), prijzen:{ kantoor:Number(w('pb-pk')) || 0, werkbon:Number(w('pb-pw')) || 0 } };
     if(!ab.periodeVan || !ab.periodeTot) return toast('Vul de looptijd in: van en tot', 'error');
     if(ab.periodeTot < ab.periodeVan) return toast('De einddatum ligt vóór de begindatum', 'error');
-    _licRef('abonnement').set(ab).then(function(){ toast('Abonnement opgeslagen', 'success'); }).catch(fout);
+    // Jaarkorting: hele maanden, 0 tot en met 11 (12 zou een gratis jaar zijn, meer een negatief bedrag)
+    if(!(ab.jaarKorting >= 0 && ab.jaarKorting <= 11) || Math.round(ab.jaarKorting) !== ab.jaarKorting) return toast('Jaarkorting moet een heel aantal maanden zijn, van 0 tot en met 11', 'error');
+    var bewaar = function(x){ _licRef('abonnement').set(x).then(function(){ toast('Abonnement opgeslagen', 'success'); }).catch(fout); };
+    // Proef en looptijd mogen niet overlappen: anders valt (een deel van) het betaalde jaar in de gratis proef
+    if(ab.proefTot && ab.proefTot >= ab.periodeVan){
+      var van = _licPlusDagen(ab.proefTot, 1), tot = _licPlusMaanden(van, ab.cyclus === 'maand' ? 1 : 12);
+      return bevestigActie('Looptijd aanpassen', 'De gratis proef loopt tot en met '+fmtD(ab.proefTot)+', maar de betaalde looptijd begint al op '+fmtD(ab.periodeVan)+'. De looptijd laten beginnen op de dag na de proef: '+fmtD(van)+' t/m '+fmtD(tot)+', volgende factuur '+fmtD(van)+'?', function(){
+        bewaar(Object.assign({}, ab, { periodeVan:van, periodeTot:tot, volgendeFactuur:van }));
+      });
+    }
+    bewaar(ab);
   });
   var plus = el.querySelector('#pb-regel-plus'); if(plus) plus.addEventListener('click', function(){
     var r = { soort:w('pb-r-soort'), aantal:parseInt(w('pb-r-aantal'), 10) || 0, van:w('pb-r-van') || null, tot:w('pb-r-tot') || null, status:w('pb-r-status') || 'actief', prijs:Number(w('pb-r-prijs')) || 0 };
