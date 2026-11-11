@@ -910,6 +910,9 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .inst-abon .ab-pm-kop span{font-size:12.5px;color:var(--muted)}
 .inst-abon .ab-pm-rij .lf-w{display:flex;align-items:center;gap:8px}
 .inst-abon .ab-pm-rij .tag{white-space:nowrap}
+.inst-abon .ab-pm-rij .lf-w{max-width:none}
+.inst-abon .ab-soort{width:auto;max-width:150px;min-height:34px;padding:6px 10px;font-size:13.5px;cursor:pointer}
+@media (max-width:768px){.inst-abon .ab-pm-rij .lf-w{grid-column:2 / -1;flex-wrap:wrap;margin-top:8px}.inst-abon .ab-soort{min-height:40px;flex:1 1 100%;width:100%;max-width:100%}}
 .inst-abon .ab-vrij .lf-l{color:var(--muted)}
 .inst-abon .ab-vrij .lf-ic{opacity:.5}
 .inst-abon .ab-pm-hint{margin:10px 2px 0}
@@ -35191,7 +35194,16 @@ function _licAantal(L, soort, op){ return (L.regels || []).filter(function(r){ r
 // Soort licentie van een account: vastgelegd op het account, anders afgeleid uit de rol (werkbonnen invullen = werkbon)
 function _licSoortVan(gb){
   if(gb.licentie === 'werkbon' || gb.licentie === 'kantoor') return gb.licentie;
-  return (gb.rol === 'monteur' || gb.rol === 'extern') ? 'werkbon' : 'kantoor';   // zelfde regel als licSoort() op de server
+  return _licSoortOpRol(gb);
+}
+// Zonder eigen keuze volgt de soort de rol: zelfde regel als licSoort() op de server
+function _licSoortOpRol(gb){ return (gb.rol === 'monteur' || gb.rol === 'extern') ? 'werkbon' : 'kantoor'; }
+// Keuzelijst per account: Op rol (met wat dat nu betekent), Werkbon of Kantoor
+function _licSoortKeuze(g, naam){
+  var w = g.licentie === 'werkbon' || g.licentie === 'kantoor' ? g.licentie : '';
+  var opt = function(val, tekst){ return '<option value="'+val+'"'+(val === w ? ' selected' : '')+'>'+tekst+'</option>'; };
+  return '<select class="input ab-soort" data-uid="'+esc(g._key)+'" data-naam="'+esc(naam)+'" aria-label="Licentie van '+esc(naam)+'">'
+    + opt('', 'Op rol: '+_licSoortOpRol(g)) + opt('werkbon', 'Werkbon') + opt('kantoor', 'Kantoor') + '</select>';
 }
 // Accounts zoals Instellingen › Gebruikers ze toont: de bedrijfslijst, aangevuld met het algemene profiel per account
 // (daar staat 'actief', het veld dat bepaalt of iemand kan inloggen)
@@ -35312,13 +35324,14 @@ function _licPerMedewerker(box, L, opnieuw){
         var status = o ? '<span class="tag tag-orange">Stopt '+esc(fmtD(o.per))+'</span>' : '<span class="tag tag-green">Actief</span>';
         var knop = L.status === 'gestopt' ? '' : o ? '<button type="button" class="btn btn-ghost btn-sm ab-intrek" data-uid="'+esc(g._key)+'" data-naam="'+esc(naam)+'">Intrekken</button>'
                      : '<button type="button" class="btn btn-ghost btn-sm ab-opzeg" data-uid="'+esc(g._key)+'" data-naam="'+esc(naam)+'">Opzeggen</button>';
-        return '<div class="lf-rij ab-pm-rij">'+av+'<span class="lf-l">'+esc(naam)+'<small>'+(med ? esc(g.email || '') : 'niet gekoppeld aan een medewerker')+'</small></span><span class="lf-w">'+status+knop+'</span></div>';
+        var keuze = L.status === 'gestopt' ? '' : _licSoortKeuze(g, naam);
+        return '<div class="lf-rij ab-pm-rij">'+av+'<span class="lf-l">'+esc(naam)+'<small>'+(med ? esc(g.email || '') : 'niet gekoppeld aan een medewerker')+'</small></span><span class="lf-w">'+keuze+status+knop+'</span></div>';
       }).join('');
       for(var i = 0; i < vrij; i++) rijen += '<div class="lf-rij ab-vrij">'+_lfIco(ICO.user)+'<span class="lf-l">Vrije licentie<small>nog aan niemand gekoppeld</small></span></div>';
       h += '<div class="ab-pm-kop"><b>'+_LIC_SOORT[soort][1]+'</b><span>'+lijst.length+' van '+n+' in gebruik</span></div>' + _zpKaart(rijen || '<p class="lf-leeg">Geen accounts.</p>');
       if(lijst.length > n) h += _zpMelding('actie', 'Meer accounts dan licenties', (lijst.length - n)+' '+(lijst.length - n === 1 ? 'account heeft' : 'accounts hebben')+' geen licentie. Zeg een licentie op bij iemand die hem niet meer nodig heeft, of laat er een bijkomen.');
     });
-    h += '<p class="ab-hint ab-pm-hint">Opzeggen gaat in aan het eind van de looptijd ('+esc(fmtD(L.periodeTot))+'). Tot die dag blijft het account werken; daarna zet Flow8 het op inactief en telt de licentie niet meer mee.</p>';
+    h += '<p class="ab-hint ab-pm-hint">Per persoon kies je welke licentie die gebruikt. <b>Op rol</b> volgt de rol: een monteur is werkbongebruiker, de andere rollen zijn kantoorgebruiker. Opzeggen gaat in aan het eind van de looptijd ('+esc(fmtD(L.periodeTot))+'). Tot die dag blijft het account werken; daarna zet Flow8 het op inactief en telt de licentie niet meer mee.</p>';
     box.innerHTML = h;
     box.querySelectorAll('.ab-opzeg').forEach(function(b){ b.addEventListener('click', function(){
       var uid = b.dataset.uid, naam = b.dataset.naam;
@@ -35329,6 +35342,17 @@ function _licPerMedewerker(box, L, opnieuw){
           toast('Licentie van '+naam+' stopt op '+fmtD(L.periodeTot), 'success', function(){ _licSchrijf(['opzeggingen', uid], null).then(function(){ delete L.opzeggingen[uid]; opnieuw(); }); });
         }).catch(function(e){ toast('Opzeggen lukte niet: '+((e && e.message) || e), 'error'); });
       });
+    }); });
+    box.querySelectorAll('.ab-soort').forEach(function(sel){ sel.addEventListener('change', function(){
+      var uid = sel.dataset.uid, naam = sel.dataset.naam, oud = data[uid] && (data[uid].licentie === 'werkbon' || data[uid].licentie === 'kantoor') ? data[uid].licentie : null, nieuw = sel.value || null;
+      var zet = function(w){ return FB.ref('flow8/gebruikers/'+uid+'/licentie').set(w); };
+      sel.disabled = true;
+      zet(nieuw).then(function(){
+        if(data[uid]) data[uid].licentie = nieuw;
+        var wordt = _LIC_SOORT[_licSoortVan(Object.assign({}, data[uid] || {}, { licentie:nieuw }))][0].toLowerCase();
+        opnieuw();
+        toast(naam+' is nu '+wordt+(nieuw ? '' : ' (op rol)'), 'success', function(){ zet(oud).then(function(){ if(data[uid]) data[uid].licentie = oud; opnieuw(); }); });
+      }).catch(function(e){ sel.disabled = false; toast('Wijzigen lukte niet: '+((e && e.message) || e), 'error'); opnieuw(); });
     }); });
     box.querySelectorAll('.ab-intrek').forEach(function(b){ b.addEventListener('click', function(){
       var uid = b.dataset.uid, naam = b.dataset.naam;
