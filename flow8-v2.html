@@ -912,6 +912,8 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .inst-abon .ab-pm-rij .lf-w{display:flex;align-items:center;gap:8px}
 .inst-abon .ab-pm-rij .tag{white-space:nowrap}
 .inst-abon .ab-rol{font-weight:600;color:var(--text)}
+.inst-abon .ab-pb-proef{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+#nieuw-ab-samen:empty{display:none}
 .inst-abon .ab-rol::after{content:' · ';font-weight:400;color:var(--muted)}
 .inst-abon .ab-pm-rij .lf-w{max-width:none}
 .inst-abon .ab-soort{width:auto;max-width:150px;min-height:34px;padding:6px 10px;font-size:13.5px;cursor:pointer}
@@ -35249,7 +35251,7 @@ function _licVanDb(v){
   return Object.assign({}, v.abonnement, {
     regels: Object.keys(v.regels || {}).map(function(k){ return Object.assign({ id:k }, v.regels[k]); }),
     gebruik: v.gebruik || {}, opzeggingen: v.opzeggingen || {}, opzegging: v.opzegging || null,
-    status: v.status || null, gestoptOp: v.gestoptOp || null, alleenLezenTot: v.alleenLezenTot || null
+    status: v.status || null, gestoptOp: v.gestoptOp || null, gestoptReden: v.gestoptReden || null, alleenLezenTot: v.alleenLezenTot || null
   });
 }
 // Alleen voor de beheerder en platformbeheer (de rules geven anderen geen leesrecht); blijft bij wijzigingen bij
@@ -35285,6 +35287,47 @@ function _licLuister(){
     }, function(){ APP.licentie = null; if(eerste){ eerste = false; klaar(); } });
   });
 }
+function _licPlusDagen(iso, n){ var d = new Date(iso+'T12:00:00'); d.setDate(d.getDate() + n); return dateToStr(d); }
+function _licPlusMaanden(iso, m){ var d = new Date(iso+'T12:00:00'); d.setMonth(d.getMonth() + m); d.setDate(d.getDate() - 1); return dateToStr(d); }
+// Velden voor het abonnement bij Nieuwe administratie aanmaken (platformbeheer). Licenties en proef: altijd zelf invullen.
+function _licNieuwVelden(){
+  var vandaag = vandaagISO();
+  return _zpGroep('Abonnement (verplicht)')
+    + lfKies(ICO.refresh, 'Factuurcyclus', '<select class="input" id="nieuw-ab-cyclus"><option value="jaar">Per jaar</option><option value="maand">Per maand</option></select>')
+    + lfRij(ICO.kalender, 'Startdatum', '<input class="lf-tekst" type="date" id="nieuw-ab-start" value="'+vandaag+'">', { voor:'nieuw-ab-start' })
+    + lfKies(ICO.kalender, 'Gratis proef', '<select class="input" id="nieuw-ab-proef"><option value="" disabled selected>Kies</option><option value="0">Geen proef</option><option value="30">30 dagen</option><option value="60">60 dagen</option><option value="90">90 dagen</option></select>', { verplicht:true })
+    + lfRij(ICO.user, 'Werkbonlicenties', '<input class="lf-tekst" type="number" min="0" step="1" inputmode="numeric" id="nieuw-ab-wb" placeholder="aantal">', { voor:'nieuw-ab-wb', verplicht:true, sub:_LIC_SOORT.werkbon[2] })
+    + lfRij(ICO.user, 'Kantoorlicenties', '<input class="lf-tekst" type="number" min="0" step="1" inputmode="numeric" id="nieuw-ab-kt" placeholder="aantal">', { voor:'nieuw-ab-kt', verplicht:true, sub:_LIC_SOORT.kantoor[2] })
+    + lfRij(ICO.euro, 'Prijs werkbongebruiker', '<input class="lf-tekst" type="number" min="0" step="0.01" id="nieuw-ab-pw" value="24">', { voor:'nieuw-ab-pw', sub:'per maand, excl. btw' })
+    + lfRij(ICO.euro, 'Prijs kantoorgebruiker', '<input class="lf-tekst" type="number" min="0" step="0.01" id="nieuw-ab-pk" value="9">', { voor:'nieuw-ab-pk', sub:'per maand, excl. btw' })
+    + lfRij(ICO.euro, 'Jaarkorting', '<input class="lf-tekst" type="number" min="0" max="11" step="1" id="nieuw-ab-korting" value="2">', { voor:'nieuw-ab-korting', sub:'maanden, alleen bij per jaar' })
+    + '<p class="lf-uitleg" id="nieuw-ab-samen" aria-live="polite"></p>'
+    + '<p class="lf-uitleg">Dit is het startpakket. Later aanpassen doe je bij Instellingen › Abonnement, in het bedrijf zelf.</p>';
+}
+// Lees en controleer de velden; geeft { fout } of { abonnement, regels, samen }
+function _licNieuwLees(root){
+  var w = function(id){ var x = root.querySelector('#'+id); return x ? String(x.value).trim() : ''; };
+  var cyclus = w('nieuw-ab-cyclus') || 'jaar', start = w('nieuw-ab-start'), proef = w('nieuw-ab-proef');
+  var wb = w('nieuw-ab-wb'), kt = w('nieuw-ab-kt');
+  if(!start) return { fout:'Vul de startdatum in' };
+  if(proef === '') return { fout:'Kies of er een gratis proef is, en hoe lang' };
+  if(wb === '' || kt === '') return { fout:'Vul het aantal werkbon- en kantoorlicenties in (0 mag)' };
+  var nw = parseInt(wb, 10), nk = parseInt(kt, 10);
+  if(!(nw >= 0) || !(nk >= 0) || String(nw) !== wb || String(nk) !== kt) return { fout:'Het aantal licenties moet een heel getal zijn' };
+  if(nw + nk < 1) return { fout:'Geef minstens één licentie' };
+  var dagen = parseInt(proef, 10) || 0, pw = Number(w('nieuw-ab-pw')) || 0, pk = Number(w('nieuw-ab-pk')) || 0, korting = parseInt(w('nieuw-ab-korting'), 10) || 0;
+  var proefTot = dagen ? _licPlusDagen(start, dagen - 1) : null, van = dagen ? _licPlusDagen(start, dagen) : start;
+  var tot = _licPlusMaanden(van, cyclus === 'maand' ? 1 : 12);
+  var abonnement = { cyclus:cyclus, periodeVan:van, periodeTot:tot, volgendeFactuur:van, proefTot:proefTot, jaarKorting:cyclus === 'maand' ? 0 : korting, prijzen:{ werkbon:pw, kantoor:pk } };
+  var regels = [];
+  if(nw) regels.push({ soort:'werkbon', aantal:nw, van:start, tot:null, status:'actief', prijs:pw });
+  if(nk) regels.push({ soort:'kantoor', aantal:nk, van:start, tot:null, status:'actief', prijs:pk });
+  var perMaand = nw * pw + nk * pk;
+  var samen = (dagen ? 'Gratis proef van '+dagen+' dagen, van '+fmtD(start)+' t/m '+fmtD(proefTot)+'. Daarna ' : 'Zonder proef. ')
+    + (cyclus === 'maand' ? 'per maand' : 'per jaar')+' vanaf '+fmtD(van)+': '+nw+' werkbon en '+nk+' kantoor, '+_licEuro(perMaand)+' per maand excl. btw.'
+    + (dagen ? ' Zonder omzetten stopt Flow8 na de proef.' : '');
+  return { abonnement:abonnement, regels:regels, samen:samen };
+}
 // Beheerscherm voor Flow8 (platformbeheer): het abonnement en de licentieregels van het gekozen bedrijf vastleggen
 function _licPlatformHtml(L){
   var a = L || {}, pr = a.prijzen || {};
@@ -35298,15 +35341,18 @@ function _licPlatformHtml(L){
       + lfRij(ICO.kalender, 'Looptijd tot', inp('pb-tot', 'date', a.periodeTot), { voor:'pb-tot', sub:'ook de datum waarop opzeggingen ingaan' })
       + lfRij(ICO.kalender, 'Volgende factuur', inp('pb-fact', 'date', a.volgendeFactuur), { voor:'pb-fact' })
       + lfRij(ICO.kalender, 'Proef tot', inp('pb-proef', 'date', a.proefTot), { voor:'pb-proef', sub:'leeg = geen proef' })
+      + lfRij(ICO.kalender, 'Proef vanaf vandaag', '<span class="ab-pb-proef">'+[30, 60, 90].map(function(n){ return '<button type="button" class="btn btn-ghost btn-sm" data-pb-proef="'+n+'">'+n+' dagen</button>'; }).join('')+'</span>', { sub:'vult Proef tot in; daarna Opslaan' })
       + lfRij(ICO.euro, 'Jaarkorting', inp('pb-korting', 'number', a.jaarKorting == null ? 2 : a.jaarKorting, ' min="0" max="11" step="1"'), { voor:'pb-korting', sub:'maanden' })
       + lfRij(ICO.euro, 'Prijs kantoorgebruiker', inp('pb-pk', 'number', pr.kantoor == null ? 9 : pr.kantoor, ' min="0" step="0.01"'), { voor:'pb-pk', sub:'per maand, excl. btw' })
       + lfRij(ICO.euro, 'Prijs werkbongebruiker', inp('pb-pw', 'number', pr.werkbon == null ? 24 : pr.werkbon, ' min="0" step="0.01"'), { voor:'pb-pw', sub:'per maand, excl. btw' }))
-    + '<div class="ab-acties"><button type="button" class="btn btn-primary" id="pb-opslaan">Abonnement opslaan</button></div>';
+    + '<div class="ab-acties"><button type="button" class="btn btn-primary" id="pb-opslaan">Abonnement opslaan</button>'
+    + (a.proefTot ? '<button type="button" class="btn btn-ghost" id="pb-omzetten">Proef omzetten</button>' : '')
+    + (L && L.status === 'gestopt' ? '<button type="button" class="btn btn-ghost" id="pb-herstart">Weer starten</button>' : '')+'</div>';
   var regels = (L && L.regels) || [];
   h += '<div class="ab-pm-kop"><b>Licentieregels</b><span>'+regels.length+(regels.length === 1 ? ' regel' : ' regels')+'</span></div>'
     + _zpKaart(regels.map(function(r){
         return '<div class="lf-rij">'+_lfIco(ICO.user)+'<span class="lf-l">'+r.aantal+' × '+esc((_LIC_SOORT[r.soort] || ['?'])[0].toLowerCase())+'<small>'+esc(fmtD(r.van))+(r.tot ? ' t/m '+esc(fmtD(r.tot)) : ', loopt door')+' · '+_licEuro(r.prijs)+' · '+({ actief:'actief', opzegging:'opzegging gepland', gepland:'gaat in' }[r.status] || 'actief')+'</small></span>'
-          + '<span class="lf-w"><button type="button" class="btn btn-ghost btn-sm pb-regel-weg" data-id="'+esc(r.id)+'">Verwijderen</button></span></div>';
+          + '<span class="lf-w"><button type="button" class="btn btn-ghost btn-sm pb-regel-bew" data-id="'+esc(r.id)+'">Bewerken</button></span></div>';
       }).join('') || '<p class="lf-leeg">Nog geen regels.</p>')
     + '<div class="ab-pm-kop"><b>Regel toevoegen</b></div>'
     + _zpKaart(
@@ -35319,12 +35365,55 @@ function _licPlatformHtml(L){
     + '<div class="ab-acties"><button type="button" class="btn btn-ghost" id="pb-regel-plus">'+_LF_PLUS+'Regel toevoegen</button></div>';
   return h + '</div>';
 }
+// Venster om één licentieregel aan te passen: aantal, datums, status, prijs. Onderaan Regel verwijderen.
+function _licRegelBewerken(r, fout){
+  var inp = function(id, type, val, extra){ return '<input class="lf-tekst" type="'+type+'" id="'+id+'" value="'+esc(val == null ? '' : val)+'"'+(extra || '')+'>'; };
+  var st = r.status || 'actief';
+  var body = lfRij(ICO.user, 'Soort', esc(_LIC_SOORT[r.soort] ? _LIC_SOORT[r.soort][0] : r.soort))
+    + lfRij(ICO.user, 'Aantal', inp('pbr-aantal', 'number', r.aantal, ' min="1" step="1" inputmode="numeric"'), { voor:'pbr-aantal', verplicht:true })
+    + lfRij(ICO.kalender, 'Vanaf', inp('pbr-van', 'date', r.van), { voor:'pbr-van', verplicht:true })
+    + lfRij(ICO.kalender, 'Tot en met', inp('pbr-tot', 'date', r.tot), { voor:'pbr-tot', sub:'leeg = loopt door' })
+    + lfKies(ICO.refresh, 'Status', '<select class="input" id="pbr-status">'+[['actief','Actief'],['opzegging','Opzegging gepland'],['gepland','Gaat in']].map(function(o){ return '<option value="'+o[0]+'"'+(o[0] === st ? ' selected' : '')+'>'+o[1]+'</option>'; }).join('')+'</select>')
+    + lfRij(ICO.euro, 'Prijs per gebruiker', inp('pbr-prijs', 'number', r.prijs, ' min="0" step="0.01"'), { voor:'pbr-prijs', sub:'per maand, excl. btw' });
+  lfOpen('Licentieregel bewerken', body, 'Opslaan', 'pbr-ok');
+  var w = function(id){ var x = document.getElementById(id); return x ? String(x.value).trim() : ''; };
+  document.getElementById('pbr-ok').addEventListener('click', function(){
+    var aantal = parseInt(w('pbr-aantal'), 10), van = w('pbr-van'), tot = w('pbr-tot') || null;
+    if(!(aantal >= 1) || String(aantal) !== w('pbr-aantal')) return toast('Aantal moet een heel getal van minstens 1 zijn', 'error');
+    if(!van) return toast('Vul in vanaf wanneer de regel geldt', 'error');
+    if(tot && tot < van) return toast('De einddatum ligt vóór de begindatum', 'error');
+    var upd = { aantal:aantal, van:van, tot:tot, status:w('pbr-status') || 'actief', prijs:Number(w('pbr-prijs')) || 0 };
+    _licRef('regels/'+r.id).update(upd).then(function(){ closeModal(); toast('Regel bijgewerkt', 'success'); }).catch(fout);
+  });
+  _lfVerwijderInVenster('Regel verwijderen', 'Regel verwijderen', 'Deze licentieregel verwijderen? Het aantal licenties van dit bedrijf gaat dan direct omlaag.', function(){
+    _licRef('regels/'+r.id).remove().then(function(){ toast('Regel verwijderd', 'success'); }).catch(fout);
+  });
+}
 function _licPlatformBind(el, L){
   if(!isPlatformBeheer()) return;
   var w = function(id){ var x = el.querySelector('#'+id); return x ? String(x.value).trim() : ''; };
   var fout = function(e){ toast('Opslaan lukte niet: '+((e && e.message) || e), 'error'); };
   // Prijs van een nieuwe regel volgt de gekozen soort
   var rs = el.querySelector('#pb-r-soort'); if(rs) rs.addEventListener('change', function(){ var p = el.querySelector('#pb-r-prijs'); if(p) p.value = rs.value === 'kantoor' ? w('pb-pk') : w('pb-pw'); });
+  el.querySelectorAll('[data-pb-proef]').forEach(function(b){ b.addEventListener('click', function(){
+    var p = el.querySelector('#pb-proef'); if(p) p.value = _licPlusDagen(vandaagISO(), +b.dataset.pbProef - 1);
+  }); });
+  var om = el.querySelector('#pb-omzetten'); if(om) om.addEventListener('click', function(){
+    bevestigActie('Proef omzetten', 'De proef stopt en het abonnement loopt door als betaald abonnement, met de licenties die er nu staan. De beheerders krijgen geen melding meer over het einde van de proef.', function(){
+      _licRef('abonnement/proefTot').remove()
+        .then(function(){ return _licRef('log').push({ ts:Date.now(), wat:'proef omgezet', door:(APP.profiel && APP.profiel.uid) || null }); })
+        .then(function(){ toast('Proef omgezet: het abonnement loopt door', 'success'); }).catch(fout);
+    });
+  });
+  var hs = el.querySelector('#pb-herstart'); if(hs) hs.addEventListener('click', function(){
+    bevestigActie('Weer starten', 'Het abonnement loopt weer: iedereen kan weer alles wijzigen. Een afgelopen proef en een opzegging worden weggehaald.', function(){
+      var upd = { status:null, gestoptOp:null, gestoptReden:null, alleenLezenTot:null, opzegging:null };
+      if(L && L.proefTot && L.proefTot < vandaagISO()) upd['abonnement/proefTot'] = null;
+      _licRef().update(upd)
+        .then(function(){ return _licRef('log').push({ ts:Date.now(), wat:'weer gestart', door:(APP.profiel && APP.profiel.uid) || null }); })
+        .then(function(){ toast('Abonnement weer gestart', 'success'); }).catch(fout);
+    });
+  });
   var ok = el.querySelector('#pb-opslaan'); if(ok) ok.addEventListener('click', function(){
     var ab = { cyclus:w('pb-cyclus') || 'jaar', periodeVan:w('pb-van') || null, periodeTot:w('pb-tot') || null, volgendeFactuur:w('pb-fact') || null,
       proefTot:w('pb-proef') || null, jaarKorting:w('pb-korting') === '' ? 0 : Number(w('pb-korting')), prijzen:{ kantoor:Number(w('pb-pk')) || 0, werkbon:Number(w('pb-pw')) || 0 } };
@@ -35339,10 +35428,9 @@ function _licPlatformBind(el, L){
     if(r.tot && r.tot < r.van) return toast('De einddatum ligt vóór de begindatum', 'error');
     _licRef('regels').push(r).then(function(){ toast('Regel toegevoegd', 'success'); }).catch(fout);
   });
-  el.querySelectorAll('.pb-regel-weg').forEach(function(b){ b.addEventListener('click', function(){
-    bevestigActie('Regel verwijderen', 'Deze licentieregel verwijderen? Het aantal licenties van dit bedrijf gaat dan direct omlaag.', function(){
-      _licRef('regels/'+b.dataset.id).remove().then(function(){ toast('Regel verwijderd', 'success'); }).catch(fout);
-    });
+  el.querySelectorAll('.pb-regel-bew').forEach(function(b){ b.addEventListener('click', function(){
+    var r = ((L && L.regels) || []).filter(function(x){ return x.id === b.dataset.id; })[0]; if(!r) return;
+    _licRegelBewerken(r, fout);
   }); });
 }
 // Licenties per medewerker: wie welke licentie gebruikt, vrije licenties, en per persoon opzeggen of intrekken
@@ -35410,10 +35498,10 @@ function renderInstAbonnement(el){
   var vandaag = vandaagISO(), soorten = ['werkbon','kantoor'];
   var perMaand = soorten.reduce(function(t, k){ return t + _licAantal(L, k, vandaag) * ((L.prijzen || {})[k] || 0); }, 0);
   var perJaar = perMaand * (12 - (L.jaarKorting || 0));
-  if(L.proefTot && L.proefTot >= vandaag) h += _zpMelding('info', 'Proefperiode', 'Je probeert Flow8 tot en met <b>'+fmtD(L.proefTot)+'</b>. Daarna kies je hoeveel gebruikers je nodig hebt; je gegevens blijven bewaard.');
+  if(L.proefTot && L.proefTot >= vandaag) h += _zpMelding('info', 'Proefperiode', 'Je probeert Flow8 gratis tot en met <b>'+fmtD(L.proefTot)+'</b>. Wil je daarna verder, spreek dat dan af met Flow8. Doe je niets, dan stopt Flow8 na die dag; je kunt dan nog 90 dagen alles bekijken en exporteren.');
   // Gestopt (na de einddatum, door de nachtelijke controle): alleen nog bekijken en exporteren
   var gestopt = L.status === 'gestopt';
-  if(gestopt) h += _zpMelding('actie', 'Abonnement gestopt', 'Flow8 is voor dit bedrijf gestopt'+(L.opzegging ? ' per <b>'+esc(fmtD(L.opzegging.per))+'</b>' : '')+'. Tot en met <b>'+esc(fmtD(L.alleenLezenTot))+'</b> kun je alles nog bekijken en exporteren; daarna verwijdert Flow8 de gegevens. Wil je toch verder, neem dan contact op met Flow8.');
+  if(gestopt) h += _zpMelding('actie', 'Abonnement gestopt', (L.gestoptReden === 'proef' ? 'De gratis proef is afgelopen op <b>'+esc(fmtD(L.proefTot))+'</b> en Flow8 is gestopt.' : 'Flow8 is voor dit bedrijf gestopt'+(L.opzegging ? ' per <b>'+esc(fmtD(L.opzegging.per))+'</b>' : '')+'.')+' Tot en met <b>'+esc(fmtD(L.alleenLezenTot))+'</b> kun je alles nog bekijken en exporteren; daarna verwijdert Flow8 de gegevens. Wil je toch verder, neem dan contact op met Flow8.');
   // Opgezegd: bovenaan, onmiskenbaar, met intrekken
   if(L.opzegging && !gestopt) h += _zpMelding('actie', 'Abonnement opgezegd', 'Flow8 stopt voor het hele bedrijf op <b>'+esc(fmtD(L.opzegging.per))+'</b>. Daarna kan niemand meer iets wijzigen; tot en met '+esc(fmtD(_licBewaarTot(L.opzegging.per)))+' kun je alles nog bekijken en exporteren.'
     + '<div class="zp-dubbel-knoppen"><button type="button" class="lf-link" id="ab-opz-intrek">Opzegging intrekken</button></div>');
@@ -35975,7 +36063,8 @@ function renderInstAdministraties(el) {
   if(isPlatformBeheer()) {
     var aNieuw = lfRij(_ZP_DATABASE, 'Administratie-ID', '<input class="lf-tekst ist-mono" id="nieuw-admin-id" placeholder="bijv. voorbeeldbv">', {voor:'nieuw-admin-id'})
       + lfRij(ICO.gebouw, 'Bedrijfsnaam', '<input class="lf-tekst" id="nieuw-admin-naam" placeholder="bijv. Voorbeeld B.V.">', {voor:'nieuw-admin-naam'})
-      + '<p class="lf-uitleg">Maakt een lege administratie aan. Daarna kun je gegevens importeren via Importeren hierboven.</p>'
+      + '<p class="lf-uitleg">Maakt een lege administratie aan, met het abonnement hieronder. Daarna kun je gegevens importeren via Importeren hierboven.</p>'
+      + _licNieuwVelden()
       + '<div class="ist-voet"><button type="button" class="btn btn-primary ist-knop" id="nieuw-admin-btn">Aanmaken</button></div>';
     h += _istAcc(_LF_PLUS, 'Nieuwe administratie aanmaken', 'Alleen voor platformbeheer', aNieuw);
   }
@@ -36055,6 +36144,15 @@ function renderInstAdministraties(el) {
     reader.readAsText(file);
   });
 
+  // Abonnement bij een nieuwe administratie: keuzelijsten en een samenvatting die meeloopt
+  var _nieuwAb = el.querySelector('#nieuw-ab-samen');
+  if(_nieuwAb){
+    _lfBindKies(_nieuwAb.parentNode);
+    var _nabToon = function(){ var r = _licNieuwLees(el); _nieuwAb.textContent = r.fout ? '' : r.samen; };
+    ['nieuw-ab-cyclus','nieuw-ab-start','nieuw-ab-proef','nieuw-ab-wb','nieuw-ab-kt','nieuw-ab-pw','nieuw-ab-pk','nieuw-ab-korting'].forEach(function(i){
+      var x = el.querySelector('#'+i); if(x){ x.addEventListener('input', _nabToon); x.addEventListener('change', _nabToon); }
+    });
+  }
   // Nieuwe administratie
   var _nieuwAdminBtn = el.querySelector('#nieuw-admin-btn');
   if(_nieuwAdminBtn) _nieuwAdminBtn.addEventListener('click',async function(){
@@ -36063,14 +36161,22 @@ function renderInstAdministraties(el) {
     if(!adminId){ toast('Vul een administratie ID in','error'); return; }
     if(!adminNaam){ toast('Vul een bedrijfsnaam in','error'); return; }
     if(adminId===APP.bedrijfId){ toast('Dit is al de huidige administratie','error'); return; }
-    bevestigActie('Nieuwe administratie aanmaken','Maak een lege administratie "'+adminId+'" aan voor "'+adminNaam+'"?',async function(){
+    var nab = _licNieuwLees(el);
+    if(nab.fout){ toast(nab.fout,'error'); return; }
+    var bestaat = await FB.ref('flow8/bedrijvenIndex/'+adminId).once('value').then(function(s){ return s.exists(); }, function(){ return false; });
+    if(bestaat){ toast('Er bestaat al een administratie met ID "'+adminId+'"','error'); return; }
+    bevestigActie('Nieuwe administratie aanmaken','Maak een lege administratie "'+adminId+'" aan voor "'+adminNaam+'"? '+nab.samen,async function(){
       try{
+        // Eerst het abonnement: een bedrijf bestaat nooit zonder (besluit Thomas 11-11-2026)
+        await FB.ref('flow8/licenties/'+adminId+'/abonnement').set(nab.abonnement);
+        for(var ri = 0; ri < nab.regels.length; ri++) await FB.ref('flow8/licenties/'+adminId+'/regels').push(nab.regels[ri]);
         await FB.ref('flow8/bedrijven/'+adminId+'/instellingen/bedrijf').set({naam:adminNaam,adres:'',postcode:'',plaats:'',telefoon:'',email:''});
         // Index meteen vullen, anders verschijnt de nieuwe administratie niet in de wisselaar.
         await FB.ref('flow8/bedrijvenIndex/'+adminId).set({ naam: adminNaam });
         toast('Administratie "'+adminId+'" aangemaakt','success');
         document.getElementById('nieuw-admin-id').value='';
         document.getElementById('nieuw-admin-naam').value='';
+        ['nieuw-ab-wb','nieuw-ab-kt'].forEach(function(i){ var x = document.getElementById(i); if(x) x.value = ''; });
       }catch(err){ toast('Fout: '+err.message,'error'); }
     });
   });

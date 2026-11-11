@@ -823,7 +823,7 @@ async function licMeldBeheerders(bedrijfId, titel, tekst) {
     const p = prof[uid] || {};
     if (p.rol !== 'admin' || p.actief !== true || p.platformBeheer === true) continue;
     const sleutel = medVan(p.email) || uid;
-    await db.ref('flow8/bedrijven/' + bedrijfId + '/notificaties/' + sleutel + '/n_' + ts + '_' + uid.slice(0, 4))
+    await db.ref('flow8/bedrijven/' + bedrijfId + '/notificaties/' + sleutel + '/n_' + ts + '_' + Math.random().toString(36).slice(2, 6))
       .set({ type: 'abonnement', titel, tekst, nav: 'instellingen', ts, gelezen: false });
   }
 }
@@ -839,10 +839,19 @@ async function licStopAccount(bedrijfId, uid, o) {
   await licLog(bedrijfId, { wat: 'licentie gestopt', uid, email: (p && p.email) || null, per: o.per });
 }
 // Hele abonnement voorbij de einddatum: status gestopt, 90 dagen alleen bekijken en exporteren
-async function licStopAbonnement(bedrijfId, o) {
+async function licStopAbonnement(bedrijfId, o, reden) {
   const tot = licPlusDagen(o.per, 90);
-  await admin.database().ref('flow8/licenties/' + bedrijfId).update({ status: 'gestopt', gestoptOp: licVandaag(), alleenLezenTot: tot });
-  await licLog(bedrijfId, { wat: 'abonnement gestopt', per: o.per, alleenLezenTot: tot });
+  await admin.database().ref('flow8/licenties/' + bedrijfId).update({ status: 'gestopt', gestoptOp: licVandaag(), gestoptReden: reden || 'opzegging', alleenLezenTot: tot });
+  await licLog(bedrijfId, { wat: reden === 'proef' ? 'proef afgelopen' : 'abonnement gestopt', per: o.per, alleenLezenTot: tot });
+}
+function licNL(iso) { return String(iso || '').split('-').reverse().join('-'); }   // dd-mm-jjjj
+function licDagenTot(iso, vandaag) { return Math.round((Date.parse(iso + 'T12:00:00Z') - Date.parse(vandaag + 'T12:00:00Z')) / 864e5); }
+// Melding over het einde van de proef, één keer per drempel en per proefdatum (verlengen = opnieuw melden)
+async function licProefMelding(bedrijfId, proefTot, drempel, dagen) {
+  await admin.database().ref('flow8/licenties/' + bedrijfId + '/proefGemeld/d' + drempel).set(proefTot);
+  await licMeldBeheerders(bedrijfId, dagen === 0 ? 'Proef eindigt vandaag' : 'Proef eindigt over ' + dagen + (dagen === 1 ? ' dag' : ' dagen'),
+    'De gratis proef van Flow8 loopt tot en met ' + licNL(proefTot) + '. Wil je daarna verder, spreek dat dan af met Flow8. Doe je niets, dan stopt Flow8 en kun je nog 90 dagen alles bekijken en exporteren.');
+  await licLog(bedrijfId, { wat: 'proef melding', drempel, proefTot });
 }
 
 exports.licentieDagelijks = onSchedule({ schedule: 'every day 02:30', timeZone: 'Europe/Amsterdam', region: LIC_REGIO }, async () => {
@@ -850,7 +859,14 @@ exports.licentieDagelijks = onSchedule({ schedule: 'every day 02:30', timeZone: 
   (await admin.database().ref('flow8/licenties').get()).forEach((b) => {
     const bid = b.key, v = b.val() || {};
     Object.entries(v.opzeggingen || {}).forEach(([uid, o]) => { if (o && o.per && o.per < vandaag) taken.push(licStopAccount(bid, uid, o)); });
+    const a = v.abonnement || {};
     if (v.opzegging && v.opzegging.per && v.opzegging.per < vandaag && v.status !== 'gestopt') taken.push(licStopAbonnement(bid, v.opzegging));
+    else if (a.proefTot && v.status !== 'gestopt') {
+      const d = licDagenTot(a.proefTot, vandaag), gemeld = v.proefGemeld || {};
+      if (d < 0) taken.push(licStopAbonnement(bid, { per: a.proefTot }, 'proef'));
+      else if (d <= 3) { if (gemeld.d3 !== a.proefTot) taken.push(licProefMelding(bid, a.proefTot, 3, d)); }
+      else if (d <= 14) { if (gemeld.d14 !== a.proefTot) taken.push(licProefMelding(bid, a.proefTot, 14, d)); }
+    }
   });
   const uit = await Promise.allSettled(taken);
   uit.filter((x) => x.status === 'rejected').forEach((x) => console.error('licentieDagelijks:', x.reason));
