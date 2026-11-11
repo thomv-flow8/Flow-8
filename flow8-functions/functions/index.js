@@ -777,6 +777,12 @@ exports.licentieGebruik = onValueWritten({ ref: 'flow8/gebruikers/{uid}', instan
   const voor = event.data.before.val() || {}, na = event.data.after.val() || {};
   if (voor.actief === na.actief && voor.rol === na.rol && voor.bedrijfId === na.bedrijfId && voor.licentie === na.licentie) return;
   for (const bid of new Set([voor.bedrijfId, na.bedrijfId].filter(Boolean))) await licTel(bid);
+  // Vangnet: telde dit account eerder niet mee in deze soort bij dit bedrijf, dan moet er een licentie vrij zijn
+  if (na.actief === true && na.platformBeheer !== true && na.bedrijfId) {
+    const soort = licSoort(na);
+    const teldeAl = voor.actief === true && voor.platformBeheer !== true && voor.bedrijfId === na.bedrijfId && licSoort(voor) === soort;
+    if (!teldeAl) await licVangnet(na.bedrijfId, event.params.uid, soort, na);
+  }
   if (event.data.after.exists()) await licZetClaims(event.params.uid);
 });
 // Een abonnement wordt vastgelegd of gewijzigd: meteen tellen. Komt het erbij of verdwijnt het, dan verandert de
@@ -787,6 +793,40 @@ exports.licentieAbonnement = onValueWritten({ ref: 'flow8/licenties/{bedrijfId}/
   if (event.data.before.exists() !== event.data.after.exists()) await licZetClaimsBedrijf(bid);
 });
 
+// Licenties van een soort op een datum: de regels die dan lopen (zelfde regel als _licAantal in de app)
+function licAantal(regels, soort, op) {
+  return Object.values(regels || {}).filter((r) => r && r.soort === soort && r.van && r.van <= op && (!r.tot || r.tot >= op))
+    .reduce((t, r) => t + (Number(r.aantal) || 0), 0);
+}
+async function licVangnet(bedrijfId, uid, soort, p) {
+  const db = admin.database();
+  const v = (await db.ref('flow8/licenties/' + bedrijfId).get()).val() || {};
+  if (!v.abonnement) return;
+  const aantal = licAantal(v.regels, soort, licVandaag()), gebruik = (v.gebruik || {})[soort] || 0;
+  if (gebruik <= aantal) return;
+  await db.ref('flow8/gebruikers/' + uid + '/actief').set(false);   // telt daarna vanzelf opnieuw
+  const woord = soort === 'werkbon' ? 'werkbonlicentie' : 'kantoorlicentie';
+  await licLog(bedrijfId, { wat: 'geen licentie vrij', uid, email: p.email || null, soort });
+  await licMeldBeheerders(bedrijfId, 'Geen ' + woord + ' vrij',
+    (p.naam || p.email || 'Een account') + ' staat weer op inactief: alle ' + aantal + ' ' + woord + 's zijn in gebruik. Zeg bij Instellingen › Abonnement een licentie op bij iemand die stopt, of neem er een bij.');
+}
+// Melding bij het belletje van elke beheerder (zelfde plek als stuurNotificatie in de app: per medewerker, anders per uid)
+async function licMeldBeheerders(bedrijfId, titel, tekst) {
+  const db = admin.database();
+  const prof = (await db.ref('flow8/gebruikers').orderByChild('bedrijfId').equalTo(bedrijfId).get()).val() || {};
+  const meds = (await db.ref('flow8/bedrijven/' + bedrijfId + '/medewerkers').get()).val() || {};
+  const medVan = (email) => { email = String(email || '').toLowerCase(); if (!email) return null;
+    const k = Object.keys(meds).find((x) => String((meds[x] || {}).email || '').toLowerCase() === email);
+    return k ? String(meds[k].id != null ? meds[k].id : k) : null; };
+  const ts = Date.now();
+  for (const uid of Object.keys(prof)) {
+    const p = prof[uid] || {};
+    if (p.rol !== 'admin' || p.actief !== true || p.platformBeheer === true) continue;
+    const sleutel = medVan(p.email) || uid;
+    await db.ref('flow8/bedrijven/' + bedrijfId + '/notificaties/' + sleutel + '/n_' + ts + '_' + uid.slice(0, 4))
+      .set({ type: 'abonnement', titel, tekst, nav: 'instellingen', ts, gelezen: false });
+  }
+}
 async function licLog(bedrijfId, regel) {
   await admin.database().ref('flow8/licenties/' + bedrijfId + '/log').push(Object.assign({ ts: Date.now() }, regel));
 }
