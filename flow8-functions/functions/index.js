@@ -7,6 +7,8 @@
 // elke verzending wordt gelogd naar flow8/bedrijven/{bedrijfId}/mailLog.
 
 const { onRequest } = require('firebase-functions/v2/https');
+const { onValueWritten } = require('firebase-functions/v2/database');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { defineSecret, defineString } = require('firebase-functions/params');
 const admin = require('firebase-admin');
 
@@ -711,3 +713,70 @@ exports.demoAanvraag = onRequest(
     }
   }
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Licentiemanager, fase 1 (concept 11-11-2026): tellen en de einddatum bewaken.
+// flow8/licenties/{bedrijfId}: abonnement + regels (Thomas, platformbeheer), gebruik/status/log (alleen deze functies),
+// opzeggingen/{uid} en opzegging (de beheerder van het bedrijf, per de einddatum).
+// ─────────────────────────────────────────────────────────────────────────────
+const LIC_DB = 'flow8-715de-default-rtdb';
+const LIC_REGIO = 'europe-west1';
+
+// Soort licentie van een account: vastgelegd op het profiel, anders uit de rol (wie werkbonnen uitvoert = werkbon)
+function licSoort(p) {
+  if (p.licentie === 'werkbon' || p.licentie === 'kantoor') return p.licentie;
+  return (p.rol === 'monteur' || p.rol === 'extern') ? 'werkbon' : 'kantoor';
+}
+// Datum als jjjj-mm-dd in Nederlandse tijd (de einddatum in de rules en de app is ook zo geschreven)
+function licVandaag() { return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Amsterdam' }); }
+function licPlusDagen(iso, n) { const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+
+async function licTel(bedrijfId) {
+  if (!bedrijfId) return;
+  const db = admin.database();
+  if (!(await db.ref('flow8/licenties/' + bedrijfId + '/abonnement').get()).exists()) return;   // geen abonnement: niets te tellen
+  const snap = await db.ref('flow8/gebruikers').orderByChild('bedrijfId').equalTo(bedrijfId).get();
+  const g = { kantoor: 0, werkbon: 0 };
+  snap.forEach((c) => { const p = c.val() || {}; if (p.actief === true && p.platformBeheer !== true) g[licSoort(p)]++; });
+  await db.ref('flow8/licenties/' + bedrijfId + '/gebruik').set({ kantoor: g.kantoor, werkbon: g.werkbon, bijgewerkt: Date.now() });
+}
+
+// Een profiel verandert (actief, rol, bedrijf of soort): beide betrokken bedrijven opnieuw tellen
+exports.licentieGebruik = onValueWritten({ ref: 'flow8/gebruikers/{uid}', instance: LIC_DB, region: LIC_REGIO }, async (event) => {
+  const voor = event.data.before.val() || {}, na = event.data.after.val() || {};
+  if (voor.actief === na.actief && voor.rol === na.rol && voor.bedrijfId === na.bedrijfId && voor.licentie === na.licentie) return;
+  for (const bid of new Set([voor.bedrijfId, na.bedrijfId].filter(Boolean))) await licTel(bid);
+});
+// Een abonnement wordt vastgelegd of gewijzigd: meteen tellen
+exports.licentieAbonnement = onValueWritten({ ref: 'flow8/licenties/{bedrijfId}/abonnement', instance: LIC_DB, region: LIC_REGIO }, async (event) => {
+  if (event.data.after.exists()) await licTel(event.params.bedrijfId);
+});
+
+async function licLog(bedrijfId, regel) {
+  await admin.database().ref('flow8/licenties/' + bedrijfId + '/log').push(Object.assign({ ts: Date.now() }, regel));
+}
+// Licentie van één account voorbij de einddatum: account op inactief, opzegging weg, gelogd
+async function licStopAccount(bedrijfId, uid, o) {
+  const db = admin.database(), prof = db.ref('flow8/gebruikers/' + uid);
+  const p = (await prof.get()).val();
+  if (p && p.bedrijfId === bedrijfId && p.actief === true) await prof.child('actief').set(false);   // telt daarna vanzelf opnieuw
+  await db.ref('flow8/licenties/' + bedrijfId + '/opzeggingen/' + uid).remove();
+  await licLog(bedrijfId, { wat: 'licentie gestopt', uid, email: (p && p.email) || null, per: o.per });
+}
+// Hele abonnement voorbij de einddatum: status gestopt, 90 dagen alleen bekijken en exporteren
+async function licStopAbonnement(bedrijfId, o) {
+  const tot = licPlusDagen(o.per, 90);
+  await admin.database().ref('flow8/licenties/' + bedrijfId).update({ status: 'gestopt', gestoptOp: licVandaag(), alleenLezenTot: tot });
+  await licLog(bedrijfId, { wat: 'abonnement gestopt', per: o.per, alleenLezenTot: tot });
+}
+
+exports.licentieDagelijks = onSchedule({ schedule: 'every day 02:30', timeZone: 'Europe/Amsterdam', region: LIC_REGIO }, async () => {
+  const vandaag = licVandaag(), taken = [];
+  (await admin.database().ref('flow8/licenties').get()).forEach((b) => {
+    const bid = b.key, v = b.val() || {};
+    Object.entries(v.opzeggingen || {}).forEach(([uid, o]) => { if (o && o.per && o.per < vandaag) taken.push(licStopAccount(bid, uid, o)); });
+    if (v.opzegging && v.opzegging.per && v.opzegging.per < vandaag && v.status !== 'gestopt') taken.push(licStopAbonnement(bid, v.opzegging));
+  });
+  const uit = await Promise.allSettled(taken);
+  uit.filter((x) => x.status === 'rejected').forEach((x) => console.error('licentieDagelijks:', x.reason));
+});
