@@ -8408,6 +8408,7 @@ async function laadData() {
     dbLoad('verzuim',        'verzuim'),
     laadVerzuimDetail(),
     _licLuister(),
+    _licEigenLuister(),
     dbLoad('wp_pompen',      'wp_pompen'),
     dbLoad('pr_objecten',    'pr_objecten'),
     dbLoad('mailLog',        'mailLog'),
@@ -35231,6 +35232,22 @@ function _licVanDb(v){
   });
 }
 // Alleen voor de beheerder en platformbeheer (de rules geven anderen geen leesrecht); blijft bij wijzigingen bij
+// Eigen licentiesoort volgen: wijzigt de beheerder die, dan het token verversen (claim lic). Blokkeert het laden niet.
+function _licEigenLuister(){
+  var uid = (AUTH.currentUser && AUTH.currentUser.uid) || (APP.profiel && APP.profiel.uid);
+  if(!uid) return Promise.resolve();
+  var ref = FB.ref('flow8/gebruikers/'+uid+'/licentie'), eerste = true, vorige = null;
+  APP.listeners.eigenLicentie = ref;
+  ref.on('value', function(s){
+    var w = s.val() || null;
+    if(eerste){ eerste = false; vorige = w; return; }
+    if(w === vorige) return;
+    vorige = w;
+    log('INFO', 'CLAIM', 'Licentiesoort gewijzigd, token verversen');
+    _zetClaimEnVerversToken();
+  }, function(){});
+  return Promise.resolve();
+}
 function _licLuister(){
   APP.licentie = null;
   if(!APP.bedrijfId || !(isAdmin() || isPlatformBeheer())) return Promise.resolve();

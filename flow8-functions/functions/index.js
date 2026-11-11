@@ -466,6 +466,102 @@ exports.verstuurMail = onRequest(
 // admin.initializeApp() staat bovenaan al — NIET nog een keer toevoegen.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Claims van één account, uit het profiel in de RTDB (bron van waarheid). Gedeeld door zetGebruikersClaim
+// (bij inloggen) en licZetClaims (de server zet ze meteen opnieuw na een wijziging).
+async function berekenClaims(uid, tokenEmail) {
+  // 2. Eigen profiel lezen uit de RTDB (bron van waarheid)
+  const profSnap = await admin.database().ref('flow8/gebruikers/' + uid).get();
+  if (!profSnap.exists()) return { fout: 403, error: 'Geen Flow8-profiel gevonden' };
+  const profiel = profSnap.val();
+  const bedrijfId = profiel.bedrijfId;
+  const rol = profiel.rol || null;
+  const actief = profiel.actief === true;
+  const email = (profiel.email || tokenEmail || '').toLowerCase();
+  if (!bedrijfId) return { fout: 403, error: 'Geen bedrijf gekoppeld aan profiel' };
+
+  // 3. medId opzoeken (email → medewerker), zelfde logica als getMijnMedId
+  let medId = null;
+  if (email) {
+    const medSnap = await admin.database()
+      .ref('flow8/bedrijven/' + bedrijfId + '/medewerkers').get();
+    if (medSnap.exists()) {
+      const meds = medSnap.val() || {};
+      for (const sleutel of Object.keys(meds)) {
+        const med = meds[sleutel] || {};
+        const medEmail = (med.email || '').toLowerCase();
+        if (medEmail && medEmail === email) {
+          medId = (med.id != null) ? String(med.id) : String(sleutel);
+          break;
+        }
+      }
+    }
+  }
+
+  // 4. Rechten afleiden uit de rollenmatrix → per module 's'/'e'/'g'
+  function letterVoor(r, isAdmin) {
+    r = r || {};
+    if (isAdmin || r.schrijven === true || r.beheren === true) return 's';
+    if (r.eigen === true) return 'e';
+    return 'g';
+  }
+
+  const rch = {};
+  let ouRecht = 'g', okRecht = 'g', vlRecht = 'g', vzRecht = 'g';
+  let vzInzage = 'g';
+  if (rol) {
+    const rolSnap = await admin.database()
+      .ref('flow8/bedrijven/' + bedrijfId + '/rollen/' + rol + '/rechten').get();
+    const rechten = rolSnap.exists() ? (rolSnap.val() || {}) : {};
+    const isAdmin = (rol === 'admin');
+
+    // rch (Firestore): alle modules in de matrix
+    Object.keys(rechten).forEach(function(mod){
+      rch[mod] = letterVoor(rechten[mod], isAdmin);
+    });
+    if (isAdmin) {
+      ['werkbonnen','werkorders','overuren','onkosten','verlof','verzuim',
+       'medewerkers','planning','agenda','serviceklanten','debiteuren','instellingen']
+        .forEach(function(mod){ rch[mod] = 's'; });
+    }
+
+    // Platte RTDB-claims: de vier submodules apart
+    ouRecht = isAdmin ? 's' : letterVoor(rechten.overuren, false);
+    okRecht = isAdmin ? 's' : letterVoor(rechten.onkosten, false);
+    vlRecht = isAdmin ? 's' : letterVoor(rechten.verlof, false);
+    vzRecht = isAdmin ? 's' : letterVoor(rechten.verzuim, false);
+
+    // Inzage in verzuim staat los van schrijfrecht: alleen admin of het vinkje 'I'.
+    // Zelfde formule als magVerzuimInzageAlle() in de app.
+    vzInzage = (isAdmin || (rechten.verzuim && rechten.verzuim.inzageAlle === true)) ? 'a' : 'g';
+  }
+
+  // lic: de soort licentie ('werkbon'/'kantoor'), alleen als het bedrijf een abonnement heeft. Zonder abonnement
+  // of voor platformbeheer geen lic: dan geldt er straks ook geen beperking (licentiemanager fase 2).
+  let lic = null;
+  if (profiel.platformBeheer !== true
+      && (await admin.database().ref('flow8/licenties/' + bedrijfId + '/abonnement').get()).exists()) {
+    lic = licSoort(profiel);
+  }
+  const claims = { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage };
+  if (lic) claims.lic = lic;
+  return { claims };
+}
+// Zelfde claims als nu op het token? Dan hoeft er niets te gebeuren.
+function claimsGelijk(oud, c) {
+  oud = oud || {};
+  return (oud.bedrijfId || null) === c.bedrijfId &&
+    (oud.rol || null) === c.rol &&
+    (oud.actief === true) === c.actief &&
+    (oud.medId || null) === c.medId &&
+    JSON.stringify(oud.rch || {}) === JSON.stringify(c.rch) &&
+    (oud.ouRecht || 'g') === c.ouRecht &&
+    (oud.okRecht || 'g') === c.okRecht &&
+    (oud.vlRecht || 'g') === c.vlRecht &&
+    (oud.vzRecht || 'g') === c.vzRecht &&
+    (oud.vzInzage || 'g') === c.vzInzage &&
+    (oud.lic || null) === (c.lic || null);
+}
+
 exports.zetGebruikersClaim = onRequest(
   { region: 'europe-west1', cors: true, memory: '256MiB', timeoutSeconds: 30 },
   async (req, res) => {
@@ -478,95 +574,14 @@ exports.zetGebruikersClaim = onRequest(
       if (!m) { res.status(401).json({ error: 'Geen autorisatie-token' }); return; }
       const decoded = await admin.auth().verifyIdToken(m[1]);
 
-      // 2. Eigen profiel lezen uit de RTDB (bron van waarheid)
-      const profSnap = await admin.database().ref('flow8/gebruikers/' + decoded.uid).get();
-      if (!profSnap.exists()) { res.status(403).json({ error: 'Geen Flow8-profiel gevonden' }); return; }
-      const profiel = profSnap.val();
-      const bedrijfId = profiel.bedrijfId;
-      const rol = profiel.rol || null;
-      const actief = profiel.actief === true;
-      const email = (profiel.email || decoded.email || '').toLowerCase();
-      if (!bedrijfId) { res.status(403).json({ error: 'Geen bedrijf gekoppeld aan profiel' }); return; }
+      // 2. Claims berekenen (profiel, medewerker, rechten, licentie)
+      const r = await berekenClaims(decoded.uid, decoded.email);
+      if (r.fout) { res.status(r.fout).json({ error: r.error }); return; }
 
-      // 3. medId opzoeken (email → medewerker), zelfde logica als getMijnMedId
-      let medId = null;
-      if (email) {
-        const medSnap = await admin.database()
-          .ref('flow8/bedrijven/' + bedrijfId + '/medewerkers').get();
-        if (medSnap.exists()) {
-          const meds = medSnap.val() || {};
-          for (const sleutel of Object.keys(meds)) {
-            const med = meds[sleutel] || {};
-            const medEmail = (med.email || '').toLowerCase();
-            if (medEmail && medEmail === email) {
-              medId = (med.id != null) ? String(med.id) : String(sleutel);
-              break;
-            }
-          }
-        }
-      }
-
-      // 4. Rechten afleiden uit de rollenmatrix → per module 's'/'e'/'g'
-      function letterVoor(r, isAdmin) {
-        r = r || {};
-        if (isAdmin || r.schrijven === true || r.beheren === true) return 's';
-        if (r.eigen === true) return 'e';
-        return 'g';
-      }
-
-      const rch = {};
-      let ouRecht = 'g', okRecht = 'g', vlRecht = 'g', vzRecht = 'g';
-      let vzInzage = 'g';
-      if (rol) {
-        const rolSnap = await admin.database()
-          .ref('flow8/bedrijven/' + bedrijfId + '/rollen/' + rol + '/rechten').get();
-        const rechten = rolSnap.exists() ? (rolSnap.val() || {}) : {};
-        const isAdmin = (rol === 'admin');
-
-        // rch (Firestore): alle modules in de matrix
-        Object.keys(rechten).forEach(function(mod){
-          rch[mod] = letterVoor(rechten[mod], isAdmin);
-        });
-        if (isAdmin) {
-          ['werkbonnen','werkorders','overuren','onkosten','verlof','verzuim',
-           'medewerkers','planning','agenda','serviceklanten','debiteuren','instellingen']
-            .forEach(function(mod){ rch[mod] = 's'; });
-        }
-
-        // Platte RTDB-claims: de vier submodules apart
-        ouRecht = isAdmin ? 's' : letterVoor(rechten.overuren, false);
-        okRecht = isAdmin ? 's' : letterVoor(rechten.onkosten, false);
-        vlRecht = isAdmin ? 's' : letterVoor(rechten.verlof, false);
-        vzRecht = isAdmin ? 's' : letterVoor(rechten.verzuim, false);
-
-        // Inzage in verzuim staat los van schrijfrecht: alleen admin of het vinkje 'I'.
-        // Zelfde formule als magVerzuimInzageAlle() in de app.
-        vzInzage = (isAdmin || (rechten.verzuim && rechten.verzuim.inzageAlle === true)) ? 'a' : 'g';
-      }
-
-      // 5. Idempotent
-      const rchGelijk = JSON.stringify(decoded.rch || {}) === JSON.stringify(rch);
-      const gelijk =
-        (decoded.bedrijfId || null) === bedrijfId &&
-        (decoded.rol || null) === rol &&
-        (decoded.actief === true) === actief &&
-        (decoded.medId || null) === medId &&
-        rchGelijk &&
-        (decoded.ouRecht || 'g') === ouRecht &&
-        (decoded.okRecht || 'g') === okRecht &&
-        (decoded.vlRecht || 'g') === vlRecht &&
-        (decoded.vzRecht || 'g') === vzRecht &&
-        (decoded.vzInzage || 'g') === vzInzage;
-      if (gelijk) {
-        res.json({ ok: true, gewijzigd: false, claim: { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage } });
-        return;
-      }
-
-      // 6. Claim zetten
-      await admin.auth().setCustomUserClaims(decoded.uid, {
-        bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage,
-      });
-      res.json({ ok: true, gewijzigd: true, claim: { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage } });
+      // 3. Idempotent: alleen zetten als er iets verandert
+      if (claimsGelijk(decoded, r.claims)) { res.json({ ok: true, gewijzigd: false, claim: r.claims }); return; }
+      await admin.auth().setCustomUserClaims(decoded.uid, r.claims);
+      res.json({ ok: true, gewijzigd: true, claim: r.claims });
     } catch (e) {
       const boodschap = (e && e.code === 'auth/id-token-expired')
         ? 'Sessie verlopen — log opnieuw in'
@@ -741,15 +756,35 @@ async function licTel(bedrijfId) {
   await db.ref('flow8/licenties/' + bedrijfId + '/gebruik').set({ kantoor: g.kantoor, werkbon: g.werkbon, bijgewerkt: Date.now() });
 }
 
-// Een profiel verandert (actief, rol, bedrijf of soort): beide betrokken bedrijven opnieuw tellen
+// Claims van één account meteen opnieuw zetten (zelfde berekening als bij inloggen). Het token van een ingelogde
+// gebruiker neemt ze over bij de volgende verversing (binnen een uur, of direct als de app ververst).
+async function licZetClaims(uid) {
+  let gebruiker;
+  try { gebruiker = await admin.auth().getUser(uid); } catch (e) { return; }   // geen Auth-account bij dit profiel
+  const r = await berekenClaims(uid, gebruiker.email);
+  if (r.fout || claimsGelijk(gebruiker.customClaims, r.claims)) return;
+  await admin.auth().setCustomUserClaims(uid, r.claims);
+}
+async function licZetClaimsBedrijf(bedrijfId) {
+  const snap = await admin.database().ref('flow8/gebruikers').orderByChild('bedrijfId').equalTo(bedrijfId).get();
+  const uids = []; snap.forEach((c) => { uids.push(c.key); });
+  const uit = await Promise.allSettled(uids.map(licZetClaims));
+  uit.filter((x) => x.status === 'rejected').forEach((x) => console.error('licZetClaimsBedrijf:', x.reason));
+}
+
+// Een profiel verandert (actief, rol, bedrijf of soort): beide betrokken bedrijven opnieuw tellen en de claims bijwerken
 exports.licentieGebruik = onValueWritten({ ref: 'flow8/gebruikers/{uid}', instance: LIC_DB, region: LIC_REGIO }, async (event) => {
   const voor = event.data.before.val() || {}, na = event.data.after.val() || {};
   if (voor.actief === na.actief && voor.rol === na.rol && voor.bedrijfId === na.bedrijfId && voor.licentie === na.licentie) return;
   for (const bid of new Set([voor.bedrijfId, na.bedrijfId].filter(Boolean))) await licTel(bid);
+  if (event.data.after.exists()) await licZetClaims(event.params.uid);
 });
-// Een abonnement wordt vastgelegd of gewijzigd: meteen tellen
+// Een abonnement wordt vastgelegd of gewijzigd: meteen tellen. Komt het erbij of verdwijnt het, dan verandert de
+// claim lic voor iedereen van het bedrijf.
 exports.licentieAbonnement = onValueWritten({ ref: 'flow8/licenties/{bedrijfId}/abonnement', instance: LIC_DB, region: LIC_REGIO }, async (event) => {
-  if (event.data.after.exists()) await licTel(event.params.bedrijfId);
+  const bid = event.params.bedrijfId;
+  if (event.data.after.exists()) await licTel(bid);
+  if (event.data.before.exists() !== event.data.after.exists()) await licZetClaimsBedrijf(bid);
 });
 
 async function licLog(bedrijfId, regel) {
