@@ -877,6 +877,9 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .ist-acc .ist-raster{column-gap:40px;row-gap:8px}
 .ist-acc .ist-kaart{background:none;border:0;border-radius:0;padding:14px 0 0}
 .ist-intro{margin:0 0 2px;font-size:13px;color:var(--muted)}
+.inst-ov .iov-zoek{margin:12px 0 4px;max-width:520px}
+.inst-ov .iov-rij .lf-l small{white-space:normal;line-height:1.4;max-width:62ch}
+.inst-ov .iov-rij[hidden],.inst-ov .iov-blok[hidden]{display:none}
 .ist-acc-een .ist-kaart > .ist-voet{display:none}
 .ist-voet.ist-blokvoet{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
 .lf-rij.ist-geen-ic{grid-template-columns:minmax(0,1fr) auto}
@@ -34821,7 +34824,7 @@ function renderRapStoringsdienst(el) {
 // ═══════════════════════════════════════════════════════════════
 // MODULE: INSTELLINGEN
 // ═══════════════════════════════════════════════════════════════
-var _instTab = 'bedrijf';
+var _instTab = 'overzicht';
 
 // Schrijven in Instellingen: de melding pas na bevestiging van de database. Een losse .set()
 // met direct een toast meldde "opgeslagen" ook als de rules weigerden (Firebase draait de
@@ -34927,10 +34930,68 @@ function _rolBalkBijwerken(){
   c.querySelectorAll('.rol-vk').forEach(function(l){ var i = l.querySelector('input'); l.classList.toggle('gew', !!i && _instVeldGewijzigd(i)); });
 }
 
+// Groepen van Instellingen (menu en overzicht) en per onderdeel één zin: wat stel je daar in
+var _INST_GROEPEN = [
+  ['Bedrijf', ['bedrijf','administraties','notificaties']],
+  ['Planning en werk', ['planning','opdrachten','contracten','register']],
+  ['Werkbonnen en werkorders', ['werkbonnen','werkorders']],
+  ['Mensen en rechten', ['team','gebruikers','rollen','goedkeuring']]
+];
+var _INST_MEEST = ['bedrijf','planning','opdrachten','rollen'];
+var _INST_UITLEG = {
+  bedrijf: 'Naam, adres, contactgegevens, logo en de huisstijlkleur van mails. Vanaf het adres rekent de planner routes.',
+  administraties: 'Werk je met meer bedrijven of administraties, dan kies en beheer je ze hier.',
+  notificaties: 'Welke gebeurtenissen een melding geven bij het belletje: verlof, overuren, onkosten en verzuim.',
+  planning: 'Plandagen, blokkadedagen, de beschikbaarheidsbalk, wat zichtbaar is in de planning en de jaarplanning van servicecontracten.',
+  opdrachten: 'De soorten opdrachten waaruit je kiest bij het inplannen, met kleur, icoon, duur en standaard werkomschrijving.',
+  contracten: 'Servicecontracten: hoe vaak een beurt terugkomt en met hoeveel monteurs.',
+  register: 'Hoe het register heet (pompen, ketels, machines) en welke velden een item heeft.',
+  werkbonnen: 'Wie werkbonnen uitvoert, reistijd, extern nummer, prijzen, de pdf-opmaak, de mail bij de pdf en checklists.',
+  werkorders: 'Werkordertypen met hun opbouw en statussen, nummering, prijzen en dringende werkorders.',
+  team: 'Vakantiedagen per jaar, werkuren per dag, standaard werktijden en pauzes.',
+  gebruikers: 'Wie kan inloggen: accounts aanmaken, medewerkers zonder login koppelen en wachtwoorden opnieuw instellen.',
+  rollen: 'Rollen en wat elke rol per module mag: lezen, alleen eigen gegevens, schrijven en beheren.',
+  goedkeuring: 'Wie de aanvragen van welke medewerker beoordeelt: verlof, overuren en onkosten.'
+};
+// Startpagina van Instellingen: alle onderdelen met uitleg, zoeken en hulp
+function renderInstOverzicht(el, tabs){
+  var naam = {}, woorden = {};
+  _GZ_INST.forEach(function(x){ naam[x[0]] = x[1]; woorden[x[0]] = x[2]; });
+  var ico = function(k){ var t = tabs.filter(function(x){ return x.k === k; })[0]; var m = t && t.l.match(/<svg[\s\S]*?<\/svg>/); return m ? m[0] : ICO.settings; };
+  var rij = function(k, groep){ return _lfNavRij('iov-'+groep+'-'+k, ico(k), esc(naam[k] || k), _INST_UITLEG[k] || '', '').replace('class="lf-rij lf-kies"', 'class="lf-rij lf-kies iov-rij" data-inst-naar="'+k+'" data-zoek="'+esc(_gzNorm([naam[k], _INST_UITLEG[k], woorden[k]].join(' ')))+'"'); };
+  var h = '<div class="ist-wrap lf inst-ov">';
+  h += '<p class="ist-intro">Hier richt je Flow8 in voor je bedrijf. Kies een onderdeel, of zoek op wat je wilt instellen.</p>';
+  h += '<input type="search" class="input iov-zoek" placeholder="Zoek een instelling, bijvoorbeeld plandagen, logo of rechten" aria-label="Zoek een instelling" autocomplete="off">';
+  h += '<div class="iov-blok iov-meest">'+_zpGroep('Meest gebruikt')+_zpKaart(_INST_MEEST.map(function(k){ return rij(k, 'm'); }).join(''))+'</div>';
+  _INST_GROEPEN.forEach(function(g, i){
+    h += '<div class="iov-blok">'+_zpGroep(g[0])+_zpKaart(g[1].map(function(k){ return rij(k, 'g'+i); }).join(''))+'</div>';
+  });
+  h += '<p class="lf-leeg iov-leeg" hidden>Geen instelling gevonden. Zoek in de hele app met ⌘K, daar staat ook uitleg.</p>';
+  var hulp = ['status','dubbel','bezetting','afwezig','rechten','plandagen'].filter(function(k){ return _UITLEG[k]; });
+  h += '<div class="iov-blok iov-hulp">'+_zpGroep('Hulp')+_zpKaart(
+    hulp.map(function(k){ return _lfNavRij('iov-u-'+k, ICO.info, esc(_UITLEG[k].t), '', '').replace('class="lf-rij lf-kies"', 'class="lf-rij lf-kies" data-uitleg="'+k+'"'); }).join('')
+    + _lfNavRij('iov-zoek-app', ICO.search, 'Zoeken in de hele app', 'Gegevens, pagina\'s, acties en uitleg; sneltoets ⌘K of Ctrl K', ''))+'</div>';
+  h += '</div>';
+  el.innerHTML = h;
+  el.querySelectorAll('[data-inst-naar]').forEach(function(b){ b.addEventListener('click', function(){ _instTab = b.dataset.instNaar; renderInstellingen(); var c = document.getElementById('content'); if(c) c.scrollTop = 0; }); });
+  var za = el.querySelector('#iov-zoek-app'); if(za) za.addEventListener('click', function(){ openGlobaalZoek(); });
+  var z = el.querySelector('.iov-zoek');
+  z.addEventListener('input', function(){
+    var w = _gzNorm(z.value).split(/\s+/).filter(Boolean), iets = false;
+    el.querySelector('.iov-meest').hidden = w.length > 0;
+    el.querySelectorAll('.iov-blok:not(.iov-meest):not(.iov-hulp)').forEach(function(blok){
+      var zicht = 0;
+      blok.querySelectorAll('.iov-rij').forEach(function(r){ var ok = !w.length || w.every(function(x){ return r.dataset.zoek.indexOf(x) >= 0; }); r.hidden = !ok; if(ok) zicht++; });
+      blok.hidden = !zicht; if(zicht) iets = true;
+    });
+    el.querySelector('.iov-leeg').hidden = iets;
+  });
+}
 function renderInstellingen() {
   var el = document.getElementById('content');
 
   var tabs = [
+    { k:'overzicht',   l:'<span style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overzicht</span>' },
     { k:'bedrijf',     l:'<span style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Bedrijf</span>' },
     { k:'contracten',  l:'<span style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Contracttypes</span>' },
     { k:'opdrachten',  l:'<span style="display:inline-flex;align-items:center;gap:5px"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Opdrachttypes</span>' },
@@ -34955,14 +35016,10 @@ function renderInstellingen() {
   // Menu (desktop = verticaal links, telefoon = lijst van onderen)
   h += '<nav class="inst-menu" aria-label="Instellingen">';
   // Vier groepen in plaats van dertien losse tabbladen; een tabblad zonder groep komt achteraan
-  var _instGroepen = [
-    ['Bedrijf', ['bedrijf','administraties','notificaties']],
-    ['Planning en werk', ['planning','opdrachten','contracten','register']],
-    ['Werkbonnen en werkorders', ['werkbonnen','werkorders']],
-    ['Mensen en rechten', ['team','gebruikers','rollen','goedkeuring']]
-  ];
+  var _instGroepen = _INST_GROEPEN;
   var _tabKnop = function(t){ return '<button type="button" class="inst-menu-item'+(_instTab===t.k?' active':'')+'" data-inst-tab="'+t.k+'"'+(_instTab===t.k?' aria-current="page"':'')+'>'+t.l+'</button>'; };
-  var _gehad = {};
+  var _gehad = { overzicht:1 };
+  h += _tabKnop(tabs[0]);   // Overzicht bovenaan, buiten de groepen
   _instGroepen.forEach(function(g){
     var inGroep = g[1].map(function(k){ return tabs.filter(function(t){ return t.k === k; })[0]; }).filter(Boolean);
     if(!inGroep.length) return;
@@ -34989,7 +35046,8 @@ function renderInstellingen() {
   el.querySelector('.inst-menu-scherm').addEventListener('click', _menuDicht);
 
   var c = document.getElementById('inst-content');
-  if      (_instTab==='bedrijf')    renderInstBedrijf(c);
+  if      (_instTab==='overzicht')  renderInstOverzicht(c, tabs);
+  else if (_instTab==='bedrijf')    renderInstBedrijf(c);
   else if (_instTab==='contracten') renderInstContracten(c);
   else if (_instTab==='opdrachten') renderInstOpdrachten(c);
   else if (_instTab==='rollen')     renderInstRollen(c);
