@@ -730,6 +730,11 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .zp-kop-getal small{display:block;font-size:12px;color:var(--muted);margin-top:3px}
 .zp-voet .zp-knop-af{display:flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;padding:0 20px;background:var(--surface2);border:1px solid rgba(239,68,68,.35);color:var(--red-t)}
 .zp-voet .zp-knop-af svg{width:18px;height:18px}
+.zp-voet .zp-knop-bew{flex:0 0 auto;padding:0 20px;background:var(--surface);border:1px solid color-mix(in srgb,var(--accent) 45%,var(--border));color:var(--accent-t)}
+.zp-voet .zp-knop-bew:hover{background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.zp-voet .zp-knop-bew + .lf-knop{flex:1 1 auto;min-width:0}
+.zp-voet .lf-knop svg{flex:none}
+.zp-voet .zp-knop-bew + .lf-knop{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .zp-bonnen{display:flex;gap:10px;flex-wrap:wrap}
 .zp-bon{width:88px;height:88px;padding:0;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;background:var(--surface2);cursor:pointer}
 .zp-bon img{width:100%;height:100%;object-fit:cover;display:block}
@@ -13235,6 +13240,11 @@ function _zpPersoonRij(ini, kleur, naam, sub){
 }
 function _zpKnop(id, ico, tekst, cls){ return '<button type="button" class="btn btn-primary lf-knop'+(cls ? ' '+cls : '')+'" id="'+id+'">'+(ico||'')+esc(tekst)+'</button>'; }
 function _zpVoet(knop){ return knop ? '<div class="zp-voet">'+knop+'</div>' : ''; }
+// Bewerken naast de hoofdknop onderaan (omlijnd); zonder hoofdknop is Bewerken zelf de hoofdknop
+function _zpKnopBew(id){ return '<button type="button" class="btn lf-knop zp-knop-bew" id="'+id+'">'+ICO.edit+'Bewerken</button>'; }
+// Inhoud van de voet: Bewerken naast de hoofdknop, of alleen Bewerken
+function _zpKnopBewOf(id, hoofd){ return hoofd ? _zpKnopBew(id) + hoofd : _zpKnop(id, ICO.edit, 'Bewerken'); }
+function _zpVoetBew(id, hoofd){ return _zpVoet(hoofd ? _zpKnopBew(id) + hoofd : _zpKnop(id, ICO.edit, 'Bewerken')); }
 function _zpVerwijder(id, tekst){ return '<button type="button" class="lf-verwijder" id="'+id+'">'+ICO.trash+' '+esc(tekst)+'</button>'; }
 // Verwijderen hoort in het bewerkvenster, niet als prullenbak in de lijstrij: een rij openen en iets
 // weghalen zijn twee verschillende handelingen. Zet onderaan het open venster een "… verwijderen".
@@ -13512,9 +13522,9 @@ function openSkPanel(id, opties) {
   h += _zpGroep('Historie') + '<div id="sp-werkbonnen" class="zp-klap"><p class="lf-leeg">Werkbonnen laden…</p></div>';
 
   var magSk = magSchrijven('serviceklanten'), magPl = magSchrijven('planning');
-  if(magSk && magPl) h += _zpGroep('Acties') + _zpKaart(_lfNavRij('sp-edit', ICO.edit, 'Bewerken', '', ''));
   if(magSk) h += _zpVerwijder('sp-del', 'Serviceklant verwijderen');
-  h += _zpVoet(magPl ? _zpKnop('sp-inplan', ICO.kalender, 'Inplannen') : (magSk ? _zpKnop('sp-edit', ICO.edit, 'Bewerken') : ''));
+  var _spPlan = magPl ? _zpKnop('sp-inplan', ICO.kalender, 'Inplannen') : '';
+  h += magSk ? _zpVoetBew('sp-edit', _spPlan) : _zpVoet(_spPlan);
 
   var pb = _zpOpen('Serviceklant', h);
   // Werkbon-historie laden (accordion; open bij terugkeer vanuit een werkbon)
@@ -21548,9 +21558,9 @@ function openOpdrachtPanel(id) {
   if (o.status === 'actie' && o.actietype === 'Niet thuis' && kanPlannen) acties += _lfNavRij('op-herplan', _ZP_HERPLAN, 'Herplannen', 'Kies een nieuwe datum', '');
   // Onderaan één vaste knop: de werkbon als die er is, anders bewerken.
   var _voet = '';
-  if (o.werkbonId) _voet = _zpKnop('op-werkbon', ICO.clipboard, 'Werkbon openen', 'zp-knop-groen');
-  else if (kanPlannen) _voet = _zpKnop('op-edit', ICO.edit, 'Bewerken');
-  if (kanPlannen && o.werkbonId) acties += _lfNavRij('op-edit', ICO.edit, 'Bewerken', '', '');
+  var _wbKnop = o.werkbonId ? _zpKnop('op-werkbon', ICO.clipboard, 'Werkbon openen', 'zp-knop-groen') : '';
+  if (kanPlannen) _voet = _zpKnopBewOf('op-edit', _wbKnop);
+  else _voet = _wbKnop;
   if (acties) h += _zpGroep('Acties') + _zpKaart(acties);
   if (kanPlannen) h += _zpVerwijder('op-del', 'Opdracht verwijderen');
   h += _zpVoet(_voet);
@@ -23266,7 +23276,8 @@ function openOverurenPanel(id) {
   // goedkeurder/schrijver/admin altijd. Voorkomt een knop die stil door de rules wordt geweigerd.
   var _ouMagBewerken = kanGoedkeuren || magSchrijven('overuren') || isAdmin()
     || ( String(o.medId)===String(getMijnMedId()) && o.status==='aangevraagd' );
-  if(_ouMagBewerken) acties += _lfNavRij('op-edit', ICO.edit, 'Bewerken', '', '');
+  var _ouBeoordeel = o.status==='aangevraagd' && magTekenen;
+  if(_ouMagBewerken && _ouBeoordeel) acties += _lfNavRij('op-edit', ICO.edit, 'Bewerken', '', '');
   if(acties) h += _zpGroep('Acties') + _zpKaart(acties);
   if((kanGoedkeuren || magSchrijven('overuren') || isAdmin()) && o.status!=='uitbetaald'){
     h += _zpVerwijder('op-del', 'Overuren verwijderen');
@@ -23274,7 +23285,7 @@ function openOverurenPanel(id) {
     // Eigen, nog niet getekende aanvraag terugtrekken — zelfde grens als bewerken hierboven.
     h += _zpVerwijder('op-intrek', 'Aanvraag intrekken');
   }
-  h += _zpVoet(o.status==='aangevraagd' && magTekenen ? _zpKnopAf('op-af') + _zpKnop('op-goed', _ZP_VINK, 'Goedkeuren') : '');
+  h += _zpVoet(_ouBeoordeel ? _zpKnopAf('op-af') + _zpKnop('op-goed', _ZP_VINK, 'Goedkeuren') : (_ouMagBewerken ? _zpKnop('op-edit', ICO.edit, 'Bewerken') : ''));
 
   var pb = _zpOpen('Overuren', h);
   var gB=pb.querySelector('#op-goed'); if(gB) gB.addEventListener('click',function(){keurOveruren(id,'goedgekeurd');closePanel();});
@@ -23716,10 +23727,11 @@ function openOnkostenPanel(id){
   // Zelfde slot-logica als overuren: eigen record alleen bewerken/verwijderen zolang 'aangevraagd'.
   var _okMagBewerken = kanGoedkeuren || magSchrijven('onkosten') || isAdmin()
     || ( String(o.medId)===String(getMijnMedId()) && o.status==='aangevraagd' );
-  if(_okMagBewerken) acties += _lfNavRij('okp-edit', ICO.edit, 'Bewerken', '', '');
+  var _okBeoordeel = kanGoedkeuren && o.status==='aangevraagd';
+  if(_okMagBewerken && _okBeoordeel) acties += _lfNavRij('okp-edit', ICO.edit, 'Bewerken', '', '');
   if(acties) h += _zpGroep('Acties') + _zpKaart(acties);
   if(_okMagBewerken) h += _zpVerwijder('okp-del', 'Declaratie verwijderen');
-  h += _zpVoet(kanGoedkeuren&&o.status==='aangevraagd' ? _zpKnopAf('okp-af') + _zpKnop('okp-goed', _ZP_VINK, 'Goedkeuren') : '');
+  h += _zpVoet(_okBeoordeel ? _zpKnopAf('okp-af') + _zpKnop('okp-goed', _ZP_VINK, 'Goedkeuren') : (_okMagBewerken ? _zpKnop('okp-edit', ICO.edit, 'Bewerken') : ''));
 
   var pb = _zpOpen('Onkosten', h);
   pb.querySelectorAll('.zp-bon').forEach(function(b){
@@ -24183,10 +24195,9 @@ function openVerzuimPanel(id){
   // verwijderen alleen voor beheerders — spiegelt de RTDB-rule (vzRecht=='s').
   var acties = '';
   if(kanBeheren&&v.status==='actief'&&duren>42) acties += _lfNavRij('vzp-lang', ICO.warn, 'Markeer als langdurig', 'Langer dan zes weken ziek', '').replace('class="lf-rij lf-kies"', 'class="lf-rij lf-kies zp-oranje-rij"');
-  if(kanBeheren) acties += _lfNavRij('vzp-edit', ICO.edit, 'Bewerken', '', '');
   if(acties) h += _zpGroep('Acties') + _zpKaart(acties);
   if(kanBeheren) h += _zpVerwijder('vzp-del', 'Verzuim verwijderen');
-  h += _zpVoet(kanBeheren&&(v.status==='actief'||v.status==='langdurig') ? _zpKnop('vzp-herstel', _ZP_VINK, 'Markeer als hersteld', 'zp-knop-groen') : '');
+  if(kanBeheren) h += _zpVoetBew('vzp-edit', (v.status==='actief'||v.status==='langdurig') ? _zpKnop('vzp-herstel', _ZP_VINK, 'Markeer als hersteld', 'zp-knop-groen') : '');
 
   var pb = _zpOpen('Verzuim', h);
   var hB=pb.querySelector('#vzp-herstel');if(hB)hB.addEventListener('click',function(){
@@ -25278,9 +25289,8 @@ function openAgendaPanel(id) {
     deelnemers.forEach(function(m){ dn += _zpPersoonRij(initials(m), medKleur(m), m.voornaam+' '+m.achternaam, m.functie||''); });
     h += _zpGroep('Deelnemers · '+deelnemers.length) + _zpKaart(dn);
   }
-  h += _zpGroep('Acties') + _zpKaart(_lfNavRij('agp-edit', ICO.edit, 'Bewerken', '', ''));
   h += _zpVerwijder('agp-del', 'Afspraak verwijderen');
-  h += _zpVoet(_zpKnop('agp-ics', ICO.kalender, 'Uitnodiging versturen (ICS)'));
+  h += _zpVoetBew('agp-edit', _zpKnop('agp-ics', ICO.kalender, 'Uitnodigen'));
 
   var pb = _zpOpen('Afspraak', h);
   pb.querySelector('#agp-ics').addEventListener('click',function(){ downloadICS(a); });
