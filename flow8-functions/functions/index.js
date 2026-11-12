@@ -860,6 +860,88 @@ async function licProefMelding(bedrijfId, proefTot, drempel, dagen) {
   await licLog(bedrijfId, { wat: 'proef melding', drempel, proefTot });
 }
 
+// ── Licenties aanpassen (wizard van de beheerder) ──────────────────────────────
+const LIC_MELD_NAAR = defineString('LIC_MELD_NAAR', { default: 'info@flow-8.nl' });
+// Wanneer gaat een licentie minder in? Tijdens de proef direct, per maand aan het eind van de maand, anders na de looptijd.
+function licIngangMinder(a, vandaag) {
+  if (a.proefTot && a.proefTot >= vandaag) return vandaag;
+  if (a.cyclus === 'maand') { const d = new Date(vandaag + 'T12:00:00Z'); return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString().slice(0, 10); }
+  return a.periodeTot && a.periodeTot >= vandaag ? licPlusDagen(a.periodeTot, 1) : vandaag;
+}
+// De nieuwe regels voor een wijziging { werkbon, kantoor } (verschil, mag negatief), of { fout }. Zelfde rekenwerk als de app.
+function licPlan(v, soortVan, delta, vandaag) {
+  const a = v.abonnement || {}, pr = a.prijzen || {}, regels = [];
+  for (const soort of ['werkbon', 'kantoor']) {
+    const d = Number((delta || {})[soort]) || 0;
+    if (!Number.isInteger(d)) return { fout: 'Het aantal moet een heel getal zijn' };
+    if (!d) continue;
+    const woord = soort === 'werkbon' ? 'werkbonlicenties' : 'kantoorlicenties';
+    if (d > 50) return { fout: 'Je kunt maximaal 50 ' + woord + ' tegelijk bijnemen' };
+    if (d > 0) { regels.push({ soort, aantal: d, van: vandaag, tot: null, status: 'actief', prijs: Number(pr[soort]) || 0 }); continue; }
+    const ingang = licIngangMinder(a, vandaag);
+    const stopt = Object.entries(v.opzeggingen || {}).filter(([uid, o]) => o && o.per && o.per < ingang && soortVan(uid) === soort).length;
+    const nodig = Math.max(0, ((v.gebruik || {})[soort] || 0) - stopt), dan = licAantal(v.regels, soort, ingang);
+    if (dan + d < nodig) return { fout: 'Op ' + licNL(ingang) + ' gebruiken nog ' + nodig + ' mensen een ' + woord.slice(0, -1) + '. Zeg eerst bij Licenties per medewerker de licentie op van wie stopt.' };
+    regels.push({ soort, aantal: d, van: ingang, tot: null, status: 'minder', prijs: Number(pr[soort]) || 0 });
+  }
+  if (!regels.length) return { fout: 'Er is niets gewijzigd' };
+  return { regels };
+}
+function licPlanTekst(r) {
+  const n = Math.abs(r.aantal), w = (r.soort === 'werkbon' ? 'werkbonlicentie' : 'kantoorlicentie') + (n === 1 ? '' : 's');
+  return r.aantal > 0 ? n + ' ' + w + ' erbij, per direct (' + licNL(r.van) + ')' : n + ' ' + w + ' minder, per ' + licNL(r.van);
+}
+exports.licentieAanpassen = onRequest(
+  { region: LIC_REGIO, secrets: [RESEND_API_KEY], cors: true, memory: '256MiB', timeoutSeconds: 30 },
+  async (req, res) => {
+    try {
+      if (req.method !== 'POST') { res.status(405).json({ error: 'Alleen POST toegestaan' }); return; }
+      const m = (req.headers.authorization || '').match(/^Bearer (.+)$/);
+      if (!m) { res.status(401).json({ error: 'Geen autorisatie-token' }); return; }
+      const decoded = await admin.auth().verifyIdToken(m[1]);
+      const db = admin.database();
+      const p = (await db.ref('flow8/gebruikers/' + decoded.uid).get()).val();
+      if (!p || !p.bedrijfId) { res.status(403).json({ error: 'Geen bedrijf gekoppeld aan dit account' }); return; }
+      if (!(p.platformBeheer === true || (p.rol === 'admin' && p.actief === true))) { res.status(403).json({ error: 'Alleen een beheerder kan licenties aanpassen' }); return; }
+      const bid = p.bedrijfId, v = (await db.ref('flow8/licenties/' + bid).get()).val() || {};
+      if (!v.abonnement) { res.status(409).json({ error: 'Dit bedrijf heeft nog geen abonnement' }); return; }
+      if (v.status === 'gestopt') { res.status(409).json({ error: 'Het abonnement is gestopt' }); return; }
+      const prof = (await db.ref('flow8/gebruikers').orderByChild('bedrijfId').equalTo(bid).get()).val() || {};
+      const vandaag = licVandaag(), body = req.body || {};
+      const plan = licPlan(v, (uid) => (prof[uid] ? licSoort(prof[uid]) : null), { werkbon: body.werkbon, kantoor: body.kantoor }, vandaag);
+      if (plan.fout) { res.status(400).json({ error: plan.fout }); return; }
+      for (const r of plan.regels) await db.ref('flow8/licenties/' + bid + '/regels').push(Object.assign({}, r, { door: decoded.uid, bron: 'wizard', op: vandaag }));
+      const regelsTekst = plan.regels.map(licPlanTekst), wie = p.naam || p.email || 'Een beheerder';
+      await licLog(bid, { wat: 'licenties aangepast', door: decoded.uid, email: p.email || null, wijziging: regelsTekst.join('; ') });
+      await licMeldBeheerders(bid, 'Licenties aangepast', wie + ': ' + regelsTekst.join('; ') + '.');
+      // Mail naar Flow8 voor de factuur; mislukt die, dan staan de regels er toch (het log ook)
+      let mail = false;
+      try {
+        const naam = (await db.ref('flow8/bedrijven/' + bid + '/instellingen/bedrijf/naam').get()).val() || bid;
+        const v2 = (await db.ref('flow8/licenties/' + bid).get()).val() || {}, a = v2.abonnement || {}, pr = a.prijzen || {};
+        const nu = { werkbon: licAantal(v2.regels, 'werkbon', vandaag), kantoor: licAantal(v2.regels, 'kantoor', vandaag) };
+        const tekst = 'Bedrijf: ' + naam + ' (' + bid + ')\nDoor: ' + wie + (p.email ? ' <' + p.email + '>' : '') + '\n\n' + regelsTekst.join('\n')
+          + '\n\nVanaf vandaag: ' + nu.werkbon + ' werkbon en ' + nu.kantoor + ' kantoor'
+          + '\nPrijzen per maand: werkbon € ' + (pr.werkbon || 0) + ', kantoor € ' + (pr.kantoor || 0)
+          + '\nAbonnement: per ' + (a.cyclus === 'maand' ? 'maand' : 'jaar') + ', looptijd ' + licNL(a.periodeVan) + ' t/m ' + licNL(a.periodeTot)
+          + (a.proefTot ? ', gratis proef t/m ' + licNL(a.proefTot) : '');
+        const onderwerp = _headerVeilig('Licenties aangepast — ' + naam);
+        const resp = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + RESEND_API_KEY.value(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ from: MAIL_FROM.value(), to: [LIC_MELD_NAAR.value() || 'info@flow-8.nl'], reply_to: p.email || undefined, subject: onderwerp, text: tekst,
+            html: bouwMailHtml({ naam: 'Flow 8', mailKleur: '#4f6ef5', website: 'flow-8.nl' }, onderwerp, tekst, 'Licentiemanager') }),
+        });
+        mail = resp.ok;
+        if (!resp.ok) console.error('licentieAanpassen — Resend faalde:', resp.status);
+      } catch (e) { console.error('licentieAanpassen — mail:', e.message || e); }
+      res.json({ ok: true, regels: plan.regels, tekst: regelsTekst, mail });
+    } catch (e) {
+      res.status(500).json({ error: (e && e.code === 'auth/id-token-expired') ? 'Sessie verlopen — log opnieuw in' : (e.message || 'Onbekende fout') });
+    }
+  }
+);
+
 exports.licentieDagelijks = onSchedule({ schedule: 'every day 02:30', timeZone: 'Europe/Amsterdam', region: LIC_REGIO }, async () => {
   const vandaag = licVandaag(), taken = [];
   (await admin.database().ref('flow8/licenties').get()).forEach((b) => {
