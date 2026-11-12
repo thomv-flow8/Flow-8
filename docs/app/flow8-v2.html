@@ -912,6 +912,41 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .inst-abon .ab-pm-rij .lf-w{display:flex;align-items:center;gap:8px}
 .inst-abon .ab-pm-rij .tag{white-space:nowrap}
 .inst-abon .ab-rol{font-weight:600;color:var(--text)}
+.lic-tegels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.lic-tegels.compact{margin:0 0 16px}
+.lic-tegel{display:flex;flex-direction:column;gap:10px;text-align:left;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);font:inherit;color:var(--text);min-width:0}
+button.lic-tegel{cursor:pointer;transition:border-color .15s}
+button.lic-tegel:hover{border-color:var(--accent)}
+button.lic-tegel:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lic-tegel-kop{display:flex;align-items:center;gap:12px}
+.lic-tegel-kop > span:nth-child(2){flex:1;min-width:0}
+.lic-beeld{flex:none;width:48px;height:48px;border-radius:var(--radius);display:grid;place-items:center;color:var(--accent-t);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.lic-beeld-kantoor{color:color-mix(in srgb,var(--accent2) 70%,var(--text));background:color-mix(in srgb,var(--accent2) 12%,var(--surface))}
+.lic-stoelen{display:flex;flex-wrap:wrap;gap:4px}
+.lic-st{width:22px;height:22px;border-radius:var(--radius-sm);display:grid;place-items:center;border:1.5px solid var(--border);color:var(--muted2);background:var(--surface)}
+.lic-st svg{width:14px;height:14px;fill:currentColor}
+.lic-st.bezet{background:var(--accent);border-color:var(--accent);color:#fff}
+.lic-st.vrij{color:color-mix(in srgb,var(--muted) 60%,transparent)}
+.lic-st.weg{border-style:dashed;border-color:var(--orange)}
+.lic-st.bezet.weg{background:color-mix(in srgb,var(--orange) 70%,var(--accent))}
+.lic-st.erbij{border-style:dashed;border-color:var(--accent);color:var(--accent-t)}
+.lic-st.teveel{background:var(--red-knop);border-color:var(--red-knop);color:#fff}
+.lic-stoelen.klein .lic-st{width:10px;height:10px;border-radius:50%}
+.lic-tegels.compact .lic-st{width:18px;height:18px}
+.lic-tegels.compact .lic-st svg{width:12px;height:12px}
+.lic-tegels.compact .lic-beeld{width:40px;height:40px}
+.lic-tegel-kop b{font-size:15px;font-weight:600}
+.lic-tegel-kop small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.lic-tegel-getal{display:flex;flex-direction:column;align-items:flex-end;font-size:12.5px;color:var(--muted);flex:none}
+.lic-tegel-getal b{font:700 24px/1.1 'Space Mono',monospace;color:var(--text)}
+.lic-tegel.vol .lic-tegel-getal b{color:var(--orange-t)}
+
+.lic-tegel-voet{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.lic-tegel-actie{display:inline-flex;align-items:center;gap:2px;color:var(--accent-t);font-weight:600;white-space:nowrap}
+.lic-tegel-actie svg{width:14px;height:14px}
+.lic-tegels.compact .lic-tegel{padding:12px 14px;gap:8px}
+.lic-tegels.compact .lic-tegel-getal b{font-size:18px}
+@media(max-width:768px){.lic-tegels{grid-template-columns:1fr}}
 .inst-abon .ab-straks,.inst-abon .ab-pm-kop span b{font-weight:600;color:var(--orange-t)}
 tr.plan-geenlic > td{background-image:repeating-linear-gradient(135deg,transparent 0 8px,color-mix(in srgb,var(--muted) 6%,transparent) 8px 16px)}
 tr.plan-geenlic .plan-new-dag-btn{display:none}
@@ -35247,7 +35282,7 @@ function _licIngangMinder(L, vandaag){
   return L.periodeTot && L.periodeTot >= vandaag ? _licPlusDagen(L.periodeTot, 1) : vandaag;
 }
 // Wizard: per soort het nieuwe aantal, een overzicht dat meeloopt, en bevestigen (de server rekent en schrijft)
-function _licWizard(L){
+function _licWizard(L, focus){
   var vandaag = vandaagISO(), ingang = _licIngangMinder(L, vandaag), pr = L.prijzen || {}, inProef = !!(L.proefTot && L.proefTot >= vandaag);
   _licGebruikersLaden().then(function(acc){
     var stopt = { werkbon:0, kantoor:0 };
@@ -35296,6 +35331,7 @@ function _licWizard(L){
     };
     ['werkbon','kantoor'].forEach(function(k){ document.getElementById('lw-'+k).addEventListener('input', function(){ setTimeout(toon, 0); }); });   // na de standaard-controle van het venster, die de knop anders weer aanzet
     toon();
+    if(focus){ var fi = document.getElementById('lw-'+focus); if(fi){ fi.focus(); fi.select(); } }
     ok.addEventListener('click', function(){
       var r = lees(); if(r.fout || !r.regels.length) return;
       ok.disabled = true; var tekst = ok.textContent; ok.textContent = 'Bezig…';
@@ -35343,6 +35379,41 @@ function _licVolgendeWijziging(L, soort, vandaag){
   return null;
 }
 function _licWijzigingTekst(L, soort, vandaag){ var w = _licVolgendeWijziging(L, soort, vandaag); return w ? 'vanaf '+fmtD(w.datum)+': '+w.n : ''; }
+// Beeld per soort (lijnstijl 1.8): werkbon = klembord met vinkje en moersleutel, kantoor = scherm met planbord
+var _LIC_BEELD = {
+  werkbon:'<svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="16" height="21" rx="2.5"/><path d="M11 4.5h6v3.5h-6z"/><path d="M10 15l2.5 2.5L18 12"/><path d="M10 22h6"/><path d="M27.5 17.5a3.5 3.5 0 0 1-4.6 3.3l-3.4 3.4a1.4 1.4 0 0 1-2-2l3.4-3.4a3.5 3.5 0 0 1 4.6-4.6l-2 2 .5 1.6 1.6.5z"/></svg>',
+  kantoor:'<svg viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="25" height="17" rx="2.5"/><path d="M12 27h8M16 22v5"/><path d="M8 10h16M8 14h16M8 18h9"/><path d="M13 10v8M19 10v4"/></svg>'
+};
+var _LIC_POP = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5.2" r="2.7"/><path d="M2.8 14.2c.4-2.9 2.6-4.6 5.2-4.6s4.8 1.7 5.2 4.6z"/></svg>';
+// Plaatsjes: één per licentie (vanaf 31 bolletjes). In gebruik, vrij, valt weg op een datum, komt erbij, of zonder licentie.
+function _licStoelen(n, g, later){
+  var weg = later && later.n < n ? n - later.n : 0, erbij = later && later.n > n ? later.n - n : 0, teVeel = Math.max(0, g - n);
+  var totaal = n + erbij + teVeel, klein = totaal > 30, h = '';
+  var st = function(cls, titel){ return '<span class="lic-st '+cls+'" title="'+titel+'">'+(klein ? '' : _LIC_POP)+'</span>'; };
+  for(var i = 0; i < n; i++){
+    var bezet = i < g, vervalt = i >= n - weg;
+    h += st((bezet ? 'bezet' : 'vrij')+(vervalt ? ' weg' : ''), (bezet ? 'In gebruik' : 'Vrij')+(vervalt ? ', vervalt op '+fmtD(later.datum) : ''));
+  }
+  for(var j = 0; j < erbij; j++) h += st('erbij', 'Komt erbij op '+fmtD(later.datum));
+  for(var k = 0; k < teVeel; k++) h += st('teveel', 'Account zonder licentie');
+  return '<span class="lic-stoelen'+(klein ? ' klein' : '')+'" role="img" aria-label="'+g+' van '+n+' licenties in gebruik">'+h+'</span>';
+}
+// Blokjes per soort; klikbaar (wizard) voor de beheerder zolang het abonnement loopt
+function _licTegels(L, compact){
+  var vandaag = vandaagISO(), kan = L.status !== 'gestopt' && (isAdmin() || isPlatformBeheer());
+  return '<div class="lic-tegels'+(compact ? ' compact' : '')+'">' + ['werkbon','kantoor'].map(function(k){
+    var n = _licAantal(L, k, vandaag), g = (L.gebruik || {})[k] || 0, vrij = Math.max(0, n - g), pct = n ? Math.min(100, g / n * 100) : (g ? 100 : 0), vol = g >= n, w = _licWijzigingTekst(L, k, vandaag);
+    var open = kan ? '<button type="button" class="lic-tegel'+(vol ? ' vol' : '')+'" data-lic-soort="'+k+'" aria-label="'+_LIC_SOORT[k][1]+' aanpassen: '+g+' van '+n+' in gebruik">' : '<div class="lic-tegel'+(vol ? ' vol' : '')+'">';
+    return open
+      + '<span class="lic-tegel-kop"><span class="lic-beeld lic-beeld-'+k+'">'+_LIC_BEELD[k]+'</span><span><b>'+_LIC_SOORT[k][1]+'</b><small>'+_LIC_SOORT[k][2]+'</small></span>'
+      + '<span class="lic-tegel-getal"><b>'+g+'</b><span>van '+n+'</span></span></span>'
+      + _licStoelen(n, g, _licVolgendeWijziging(L, k, vandaag))
+      + '<span class="lic-tegel-voet"><span>'+(vrij ? vrij+' vrij' : 'Geen vrij')+' · '+_licEuro((L.prijzen || {})[k])+' per maand'+(w ? ' · <b class="ab-straks">'+esc(w)+'</b>' : '')+'</span>'
+      + (kan ? '<span class="lic-tegel-actie">Aanpassen '+_LF_CHEV+'</span>' : '')+'</span>'
+      + (kan ? '</button>' : '</div>');
+  }).join('') + '</div>';
+}
+function _licTegelsBind(root, L){ root.querySelectorAll('button.lic-tegel').forEach(function(b){ b.addEventListener('click', function(){ _licWizard(L, b.dataset.licSoort); }); }); }
 // Keuzelijst per account: Op rol (met wat dat nu betekent), Werkbon of Kantoor
 function _licSoortKeuze(g, naam){
   var w = g.licentie === 'werkbon' || g.licentie === 'kantoor' ? g.licentie : '';
@@ -35682,7 +35753,7 @@ function renderInstAbonnement(el){
     return '<div class="lf-rij ab-gebruik">'+_lfIco(ICO.user)+'<span class="lf-l">'+_LIC_SOORT[k][1]+'<small>'+_LIC_SOORT[k][2]+' · '+_licEuro((L.prijzen || {})[k])+' per maand'+(_licWijzigingTekst(L, k, vandaag) ? ' · <b class="ab-straks">'+esc(_licWijzigingTekst(L, k, vandaag))+'</b>' : '')+'</small></span>'
       + '<span class="lf-w ab-meter"><span class="dash-spoor" role="img" aria-label="'+g+' van '+n+' in gebruik"><span class="dash-vul'+(isVol ? ' vol' : '')+'" style="width:'+pct+'%"></span></span><span class="ab-tel"><b>'+g+'</b> van '+n+'</span></span></div>';
   }).join('');
-  h += _zpGroep('In gebruik') + _zpKaart(gebruik);
+  h += _zpGroep('In gebruik') + _licTegels(L);
   if(vol.length && L.status !== 'gestopt') h += _zpMelding('actie', 'Geen licentie vrij', 'Alle '+vol.map(function(k){ return _LIC_SOORT[k][1].toLowerCase(); }).join(' en ')+' zijn in gebruik. Een nieuw account kan pas inloggen als er een licentie bij komt of iemand op inactief gaat.'
     + '<div class="zp-dubbel-knoppen"><button type="button" class="lf-link" id="ab-naar-gebr">Gebruikers bekijken</button></div>');
   // Licentieregels
@@ -35712,6 +35783,7 @@ function renderInstAbonnement(el){
   _licPlatformBind(el, L);
   _licPerMedewerker(el.querySelector('#ab-pm'), L, function(){ renderInstAbonnement(el); });
   var aa = el.querySelector('#ab-aanpassen'); if(aa) aa.addEventListener('click', function(){ _licWizard(L); });
+  _licTegelsBind(el, L);
   var ng = el.querySelector('#ab-naar-gebr'); if(ng) ng.addEventListener('click', function(){ _instTab = 'gebruikers'; renderInstellingen(); });
   var oz = el.querySelector('#ab-opzeggen'); if(oz) oz.addEventListener('click', function(){ _licAbonOpzeggen(L, nLic, nGebr, function(){ renderInstAbonnement(el); }); });
   var oi = el.querySelector('#ab-opz-intrek'); if(oi) oi.addEventListener('click', function(){
@@ -37581,7 +37653,8 @@ function renderInstGebruikers(el) {
       html+='</tr>';
     });
     html+='</tbody></table></div>';
-    wrap.innerHTML=html;
+    wrap.innerHTML=(APP.licentie ? _licTegels(APP.licentie, true) : '')+html;
+    if(APP.licentie) _licTegelsBind(wrap, APP.licentie);
     // Rol wijzigen — naar beide paden, zodat rechten en lijst gelijk blijven.
     wrap.querySelectorAll('.gb-rol').forEach(function(sel){
       sel.addEventListener('change', function(){
