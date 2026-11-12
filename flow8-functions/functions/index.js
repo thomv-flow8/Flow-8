@@ -801,7 +801,13 @@ function licAantal(regels, soort, op) {
 async function licVangnet(bedrijfId, uid, soort, p) {
   const db = admin.database();
   const v = (await db.ref('flow8/licenties/' + bedrijfId).get()).val() || {};
-  if (!v.abonnement) return;
+  if (!v.abonnement) {   // zonder abonnement niemand erbij (besluit Thomas 11-11-2026)
+    await db.ref('flow8/gebruikers/' + uid + '/actief').set(false);
+    await licLog(bedrijfId, { wat: 'geen abonnement', uid, email: p.email || null, soort });
+    await licMeldBeheerders(bedrijfId, 'Geen abonnement',
+      (p.naam || p.email || 'Een account') + ' staat weer op inactief: voor dit bedrijf is nog geen abonnement vastgelegd. Neem contact op met Flow8.');
+    return;
+  }
   const aantal = licAantal(v.regels, soort, licVandaag()), gebruik = (v.gebruik || {})[soort] || 0;
   if (gebruik <= aantal) return;
   await db.ref('flow8/gebruikers/' + uid + '/actief').set(false);   // telt daarna vanzelf opnieuw

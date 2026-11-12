@@ -35208,7 +35208,9 @@ function _licSoortOpRol(gb){ return (gb.rol === 'monteur' || gb.rol === 'extern'
 // Is de soort vol? null = er mag iemand bij (of er is geen abonnement); anders { n, g } (licenties, in gebruik).
 // Gebruik komt van de server (licentieGebruik telt bij elke wijziging), net als het vangnet daar.
 function _licVol(soort){
-  var L = APP.licentie; if(!L || (soort !== 'werkbon' && soort !== 'kantoor')) return null;
+  if(soort !== 'werkbon' && soort !== 'kantoor') return null;
+  var L = APP.licentie;
+  if(!L) return APP._licGeladen ? { n:0, g:0, geenAbonnement:true } : null;   // zonder abonnement niemand erbij
   var n = _licAantal(L, soort, vandaagISO()), g = (L.gebruik || {})[soort] || 0;
   return g >= n ? { n:n, g:g } : null;
 }
@@ -35217,10 +35219,20 @@ function _licNaamVan(gb){ var m = gb && gb.medId ? getMed(gb.medId) : null; retu
 // Uitleg als er geen licentie vrij is, met de weg naar Abonnement
 function _licGeenVrij(soort, vol, wie){
   var w = soort === 'werkbon' ? 'werkbonlicentie' : 'kantoorlicentie';
+  if(vol && vol.geenAbonnement) return _licGeenAbonnement(wie);
   var b = '<div class="uitleg"><p>'+(wie ? esc(wie)+' kan geen ' : 'Er kan niemand een ')+w+' krijgen: alle <b>'+vol.n+'</b> '+w+'s zijn in gebruik.</p>'
     + '<p>Zeg bij Abonnement › Licenties per medewerker de licentie op van iemand die stopt, of zet iemand anders eerst op inactief. Een licentie erbij regel je voorlopig via Flow8.</p></div>';
   var f = '<button type="button" class="btn btn-ghost" id="lic-vol-sluit">Sluiten</button><button type="button" class="btn btn-primary" id="lic-vol-abon">Naar Abonnement</button>';
   openModal('Geen '+w+' vrij', b, f);
+  document.getElementById('lic-vol-sluit').addEventListener('click', function(){ closeModal(); });
+  document.getElementById('lic-vol-abon').addEventListener('click', function(){ closeModal(); _instTab = 'abonnement'; if(APP.activePage === 'instellingen') renderInstellingen(); else navigateTo('instellingen'); });
+}
+// Bedrijf zonder abonnement: niemand kan worden aangezet
+function _licGeenAbonnement(wie){
+  var b = '<div class="uitleg"><p>'+(wie ? esc(wie)+' kan niet worden aangezet' : 'Er kan niemand worden aangezet')+': voor dit bedrijf is nog geen abonnement vastgelegd.</p>'
+    + '<p>Neem contact op met Flow8 om een abonnement of een gratis proef te starten.</p></div>';
+  var f = '<button type="button" class="btn btn-ghost" id="lic-vol-sluit">Sluiten</button><button type="button" class="btn btn-primary" id="lic-vol-abon">Naar Abonnement</button>';
+  openModal('Geen abonnement', b, f);
   document.getElementById('lic-vol-sluit').addEventListener('click', function(){ closeModal(); });
   document.getElementById('lic-vol-abon').addEventListener('click', function(){ closeModal(); _instTab = 'abonnement'; if(APP.activePage === 'instellingen') renderInstellingen(); else navigateTo('instellingen'); });
 }
@@ -35273,14 +35285,14 @@ function _licEigenLuister(){
   return Promise.resolve();
 }
 function _licLuister(){
-  APP.licentie = null;
+  APP.licentie = null; APP._licGeladen = false;
   if(!APP.bedrijfId || !(isAdmin() || isPlatformBeheer())) return Promise.resolve();
   var ref = _licRef();
   APP.listeners.licenties = ref;
   return new Promise(function(klaar){
     var eerste = true;
     ref.on('value', function(s){
-      APP.licentie = _licVanDb(s.val());
+      APP.licentie = _licVanDb(s.val()); APP._licGeladen = true;
       if(eerste){ eerste = false; klaar(); return; }
       // Niet hertekenen terwijl iemand in het beheerformulier typt
       var a = document.activeElement;
@@ -35507,7 +35519,7 @@ function renderInstAbonnement(el){
   if(!isAdmin() && !isPlatformBeheer()){ el.innerHTML = '<div class="ist-wrap lf"><p class="lf-leeg">Alleen een beheerder ziet het abonnement.</p></div>'; return; }
   var L = APP.licentie;
   var h = '<div class="ist-wrap lf inst-abon"><p class="ist-intro">Hoeveel gebruikers je bedrijf kan laten inloggen, wat dat kost en hoe lang het abonnement loopt. Medewerkers zonder login tellen niet mee.</p>';
-  if(!L){ el.innerHTML = h + '<p class="lf-leeg">Er is nog geen abonnement vastgelegd voor dit bedrijf.</p>' + (isPlatformBeheer() ? _licPlatformHtml(null) : '') + '</div>'; _licPlatformBind(el, null); return; }
+  if(!L){ el.innerHTML = h + '<p class="lf-leeg">Er is nog geen abonnement vastgelegd voor dit bedrijf. Zolang dat zo is, kan er niemand worden aangezet; neem contact op met Flow8.</p>' + (isPlatformBeheer() ? _licPlatformHtml(null) : '') + '</div>'; _licPlatformBind(el, null); return; }
   var vandaag = vandaagISO(), soorten = ['werkbon','kantoor'];
   var perMaand = soorten.reduce(function(t, k){ return t + _licAantal(L, k, vandaag) * ((L.prijzen || {})[k] || 0); }, 0);
   var perJaar = perMaand * (12 - (L.jaarKorting || 0));
