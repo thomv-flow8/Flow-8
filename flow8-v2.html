@@ -912,6 +912,7 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .inst-abon .ab-pm-rij .lf-w{display:flex;align-items:center;gap:8px}
 .inst-abon .ab-pm-rij .tag{white-space:nowrap}
 .inst-abon .ab-rol{font-weight:600;color:var(--text)}
+.inst-abon .ab-straks,.inst-abon .ab-pm-kop span b{font-weight:600;color:var(--orange-t)}
 tr.plan-geenlic > td{background-image:repeating-linear-gradient(135deg,transparent 0 8px,color-mix(in srgb,var(--muted) 6%,transparent) 8px 16px)}
 tr.plan-geenlic .plan-new-dag-btn{display:none}
 .plan-geenlic-tag{margin-top:4px;font-size:11px;font-weight:600;color:var(--orange-t)}
@@ -976,6 +977,7 @@ tr.plan-geenlic .plan-new-dag-btn{display:none}
 .ist-uitleg-voet{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:12px}
 @media(max-width:768px){.ist-pdfgrid{grid-template-columns:1fr}.ist-pdfvb{position:static}.ist-uitleg-twee{grid-template-columns:1fr}}
 @media(max-width:768px){.ist-gb.rap-kaarten tr{grid-template-columns:minmax(0,1fr) auto auto;align-items:end}}
+@media(max-width:768px){.ist-gb-lic.rap-kaarten tr{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ist-gb-lic.rap-kaarten td:nth-child(4){justify-self:start}.ist-gb-lic.rap-kaarten td:nth-child(5){justify-self:end;align-self:end}}
 .ist-acc .inst-acc-body > .lf-rij:last-child{border-bottom:0}
 .ist-raster{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px;align-items:start}
 .ist-schakel{cursor:pointer}
@@ -35315,6 +35317,32 @@ function _licGeenAbonnement(wie){
   document.getElementById('lic-vol-sluit').addEventListener('click', function(){ closeModal(); });
   document.getElementById('lic-vol-abon').addEventListener('click', function(){ closeModal(); _instTab = 'abonnement'; if(APP.activePage === 'instellingen') renderInstellingen(); else navigateTo('instellingen'); });
 }
+// "nog 3 werkbon vrij · nog 2 kantoor vrij" (null zonder abonnement)
+function _licVrijTekst(){
+  var L = APP.licentie; if(!L) return null;
+  var vandaag = vandaagISO();
+  return ['werkbon','kantoor'].map(function(k){ var vrij = Math.max(0, _licAantal(L, k, vandaag) - ((L.gebruik || {})[k] || 0)); return (vrij ? 'nog '+vrij : 'geen')+' '+k+' vrij'; }).join(' · ');
+}
+// Licentiesoort van een account wijzigen, met controle op een vrije licentie en Ongedaan. klaar(nieuweWaarde) na opslaan.
+function _licSoortWijzig(gb, uid, nieuw, naam, terugzetten, klaar){
+  var oud = gb.licentie === 'werkbon' || gb.licentie === 'kantoor' ? gb.licentie : null;
+  var nuS = _licSoortVan(gb), wordtS = _licSoortVan(Object.assign({}, gb, { licentie:nieuw }));
+  if(gb.actief === true && !gb.platformBeheer && wordtS !== nuS){ var vol = _licVol(wordtS); if(vol){ terugzetten(oud); _licGeenVrij(wordtS, vol, naam); return; } }
+  var zet = function(w){ return FB.ref('flow8/gebruikers/'+uid+'/licentie').set(w); };
+  zet(nieuw).then(function(){
+    gb.licentie = nieuw; klaar(nieuw);
+    toast(naam+' is nu '+_LIC_SOORT[wordtS][0].toLowerCase()+(nieuw ? '' : ' (op rol)'), 'success', function(){ zet(oud).then(function(){ gb.licentie = oud; klaar(oud); }); });
+  }).catch(function(e){ terugzetten(oud); toast('Wijzigen lukte niet: '+_foutNL((e && e.message) || String(e)), 'error'); });
+}
+// Eerstvolgende datum waarop het aantal licenties van een soort verandert (een regel gaat in of loopt af), of null
+function _licVolgendeWijziging(L, soort, vandaag){
+  var nu = _licAantal(L, soort, vandaag), data = [];
+  (L.regels || []).forEach(function(r){ if(r.soort !== soort) return; if(r.van && r.van > vandaag) data.push(r.van); if(r.tot && r.tot >= vandaag) data.push(_licPlusDagen(r.tot, 1)); });
+  data.sort();
+  for(var i = 0; i < data.length; i++){ var n = _licAantal(L, soort, data[i]); if(n !== nu) return { datum:data[i], n:n }; }
+  return null;
+}
+function _licWijzigingTekst(L, soort, vandaag){ var w = _licVolgendeWijziging(L, soort, vandaag); return w ? 'vanaf '+fmtD(w.datum)+': '+w.n : ''; }
 // Keuzelijst per account: Op rol (met wat dat nu betekent), Werkbon of Kantoor
 function _licSoortKeuze(g, naam){
   var w = g.licentie === 'werkbon' || g.licentie === 'kantoor' ? g.licentie : '';
@@ -35589,8 +35617,8 @@ function _licPerMedewerker(box, L, opnieuw){
         var keuze = L.status === 'gestopt' ? '' : _licSoortKeuze(g, naam);
         return '<div class="lf-rij ab-pm-rij">'+av+'<span class="lf-l">'+esc(naam)+'<small>'+(g.rol ? '<span class="ab-rol">'+esc(_rolNaam(g.rol))+'</span>' : '')+(med ? esc(g.email || '') : 'niet gekoppeld aan een medewerker')+'</small></span><span class="lf-w">'+keuze+status+knop+'</span></div>';
       }).join('');
-      for(var i = 0; i < vrij; i++) rijen += '<div class="lf-rij ab-vrij">'+_lfIco(ICO.user)+'<span class="lf-l">Vrije licentie<small>nog aan niemand gekoppeld</small></span></div>';
-      h += '<div class="ab-pm-kop"><b>'+_LIC_SOORT[soort][1]+'</b><span>'+lijst.length+' van '+n+' in gebruik</span></div>' + _zpKaart(rijen || '<p class="lf-leeg">Geen accounts.</p>');
+      if(vrij) rijen += '<div class="lf-rij ab-vrij">'+_lfIco(ICO.user)+'<span class="lf-l">'+vrij+(vrij === 1 ? ' vrije licentie' : ' vrije licenties')+'<small>nog aan niemand gekoppeld</small></span></div>';
+      h += '<div class="ab-pm-kop"><b>'+_LIC_SOORT[soort][1]+'</b><span>'+lijst.length+' van '+n+' in gebruik'+(_licWijzigingTekst(L, soort, vandaag) ? ' · <b>'+esc(_licWijzigingTekst(L, soort, vandaag))+'</b>' : '')+'</span></div>' + _zpKaart(rijen || '<p class="lf-leeg">Geen accounts.</p>');
       if(lijst.length > n) h += _zpMelding('actie', 'Meer accounts dan licenties', (lijst.length - n)+' '+(lijst.length - n === 1 ? 'account heeft' : 'accounts hebben')+' geen licentie. Zeg een licentie op bij iemand die hem niet meer nodig heeft, of laat er een bijkomen.');
     });
     h += '<p class="ab-hint ab-pm-hint">Per persoon kies je welke licentie die gebruikt. <b>Op rol</b> volgt Instellingen › Planning: wie je inplant is werkbongebruiker, de andere rollen zijn kantoorgebruiker. Alleen werkbongebruikers kun je inplannen. Opzeggen gaat in aan het eind van de looptijd ('+esc(fmtD(L.periodeTot))+'). Tot die dag blijft het account werken; daarna zet Flow8 het op inactief en telt de licentie niet meer mee.</p>';
@@ -35651,7 +35679,7 @@ function renderInstAbonnement(el){
   var gebruik = soorten.map(function(k){
     var n = _licAantal(L, k, vandaag), g = (L.gebruik || {})[k] || 0, pct = n ? Math.min(100, g / n * 100) : (g ? 100 : 0);
     var isVol = g >= n; if(isVol) vol.push(k);
-    return '<div class="lf-rij ab-gebruik">'+_lfIco(ICO.user)+'<span class="lf-l">'+_LIC_SOORT[k][1]+'<small>'+_LIC_SOORT[k][2]+' · '+_licEuro((L.prijzen || {})[k])+' per maand</small></span>'
+    return '<div class="lf-rij ab-gebruik">'+_lfIco(ICO.user)+'<span class="lf-l">'+_LIC_SOORT[k][1]+'<small>'+_LIC_SOORT[k][2]+' · '+_licEuro((L.prijzen || {})[k])+' per maand'+(_licWijzigingTekst(L, k, vandaag) ? ' · <b class="ab-straks">'+esc(_licWijzigingTekst(L, k, vandaag))+'</b>' : '')+'</small></span>'
       + '<span class="lf-w ab-meter"><span class="dash-spoor" role="img" aria-label="'+g+' van '+n+' in gebruik"><span class="dash-vul'+(isVol ? ' vol' : '')+'" style="width:'+pct+'%"></span></span><span class="ab-tel"><b>'+g+'</b> van '+n+'</span></span></div>';
   }).join('');
   h += _zpGroep('In gebruik') + _zpKaart(gebruik);
@@ -37498,6 +37526,7 @@ function renderInstGebruikers(el) {
         var rr=(APP.rollen||{})[r]||{};
         return '<option value="'+esc(r)+'"'+(r==='monteur'?' selected':'')+'>'+esc(_rolNaam(r))+'</option>';
       }).join('')+'</select>', {titel:'Rol (rechten in de app)', sub:'Rechten in de app'})
+    + (APP.licentie ? lfKies(ICO.user, 'Licentie', '<select class="input" id="gb-lic-nieuw"><option value="">Op rol: '+_licSoortOpRol({ rol:'monteur' })+'</option><option value="werkbon">Werkbon</option><option value="kantoor">Kantoor</option></select>', {titel:'Licentie', sub:esc(_licVrijTekst() || '')}) : '')
     + lfRij(_ZP_SLOT, 'Tijdelijk wachtwoord', '<input class="lf-tekst" type="password" id="gb-pw" placeholder="Min. 6 tekens" autocomplete="new-password">', {voor:'gb-pw'})
     + '<p class="lf-uitleg">De medewerker kan dit wachtwoord zelf wijzigen. Wil je liever geen wachtwoord doorgeven, stuur dan hieronder een resetmail.</p>',
     'gb-aanmaken', 'Account aanmaken');
@@ -37508,6 +37537,11 @@ function renderInstGebruikers(el) {
   h += '</div>';
   el.innerHTML = h;
   lfBind(el.querySelector('.ist-wrap'), el.querySelector('#gb-aanmaken'));
+  var _rolNieuw = el.querySelector('#gb-rol-nieuw'), _licNieuw = el.querySelector('#gb-lic-nieuw');
+  if(_rolNieuw && _licNieuw){
+    var _licOpRol = function(){ _licNieuw.options[0].textContent = 'Op rol: '+_licSoortOpRol({ rol:_rolNieuw.value }); lfKiesTekst(_licNieuw); };
+    _rolNieuw.addEventListener('change', _licOpRol); _licOpRol();
+  }
 
   // Laad gebruikers
   function renderGbTabel(data) {
@@ -37518,8 +37552,9 @@ function renderInstGebruikers(el) {
     var alleRolIds = Object.keys(APP.rollen||{});
     if(!alleRolIds.length) alleRolIds=['admin','planner','monteur','extern','verkoop','administratie','magazijn'];
 
-    var html='<div class="table-wrap ist-tabel ist-gb"><table><thead><tr>';
-    html+='<th>Gebruiker</th><th style="width:180px">Rol (rechten)</th><th style="width:90px">Toegang</th><th style="width:48px"></th>';
+    var html='<div class="table-wrap ist-tabel ist-gb'+(APP.licentie ? ' ist-gb-lic' : '')+'"><table><thead><tr>';
+    var _metLic = !!APP.licentie;
+    html+='<th>Gebruiker</th><th style="width:180px">Rol (rechten)</th>'+(_metLic ? '<th style="width:170px">Licentie</th>' : '')+'<th style="width:90px">Toegang</th><th style="width:48px"></th>';
     html+='</tr></thead><tbody>';
     items.forEach(function(gb){
       var med=(APP.medewerkers||[]).find(function(m){return String(m.id)===String(gb.medId);});
@@ -37540,6 +37575,7 @@ function renderInstGebruikers(el) {
         return '<option value="'+esc(r)+'"'+(gb.rol===r?' selected':'')+'>'+esc(_rolNaam(r))+'</option>';
       }).join('');
       html+='</select></td>';
+      if(_metLic) html+='<td>'+(gb.platformBeheer ? '<span class="ist-let">Flow8 (telt niet mee)</span>' : _licSoortKeuze(gb, _licNaamVan(gb)).replace('class="input ab-soort" data-uid=', 'class="input ist-cel gb-lic" data-uid='))+'</td>';
       html+='<td><label class="lf-sw ist-sw-in" title="'+(isActief?'Toegang actief':'Toegang geblokkeerd')+'"><input type="checkbox" role="switch" class="gb-actief" data-key="'+esc(gb._key)+'" data-nu="'+(isActief?'1':'0')+'" aria-label="Toegang"'+(isActief?' checked':'')+'><i></i></label></td>';
       html+='<td><button type="button" class="btn btn-ghost btn-wis btn-icoon gb-del" data-key="'+esc(gb._key)+'" aria-label="Gebruiker verwijderen" title="Verwijderen">'+ICO.trash+'</button></td>';
       html+='</tr>';
@@ -37568,12 +37604,25 @@ function renderInstGebruikers(el) {
             return;
           }
           toast('Rol gewijzigd naar '+nieuweRol,'success');
+          gbNu.rol = nieuweRol;
+          var _li = wrap.querySelector('.gb-lic[data-uid="'+uid+'"]'); if(_li) _li.options[0].textContent = 'Op rol: '+_licSoortOpRol({ rol:nieuweRol });
           // Zichzelf van rol veranderen kan de eigen toegang wegnemen; dan opnieuw laden.
           if(APP.profiel && APP.profiel.uid === uid) {
             APP.profiel.rol = nieuweRol;
             toast('Je hebt je eigen rol gewijzigd — herlaad de pagina','warn');
           }
         });
+      });
+    });
+
+    // Licentiesoort wijzigen (zelfde controle als Abonnement)
+    wrap.querySelectorAll('.gb-lic').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        var uid = sel.dataset.uid, gb = items.find(function(x){ return x._key === uid; }) || {};
+        sel.disabled = true;
+        _licSoortWijzig(gb, uid, sel.value || null, _licNaamVan(gb),
+          function(w){ sel.disabled = false; sel.value = w || ''; },
+          function(w){ sel.disabled = false; sel.value = w || ''; });
       });
     });
 
@@ -37721,8 +37770,9 @@ function renderInstGebruikers(el) {
     // Rol komt uit het formulier; voorheen werd hij stilzwijgend van de medewerker
     // overgenomen, waardoor je bij het aanmaken niet zag wat je toekende.
     var rol=(el.querySelector('#gb-rol-nieuw')||{}).value || (med?(med.rol||'monteur'):'monteur');
-    var volN = _licVol(_licSoortOpRol({ rol:rol }));
-    if(volN){ _licGeenVrij(_licSoortOpRol({ rol:rol }), volN, email); return; }
+    var licKeuze = (el.querySelector('#gb-lic-nieuw') || {}).value || null;
+    var soortN = licKeuze || _licSoortOpRol({ rol:rol }), volN = _licVol(soortN);
+    if(volN){ _licGeenVrij(soortN, volN, email); return; }
     var secondApp;
     try{secondApp=firebase.app('secondary');}catch(e){secondApp=firebase.initializeApp(firebase.app().options,'secondary');}
     secondApp.auth().createUserWithEmailAndPassword(email,pw)
@@ -37732,7 +37782,7 @@ function renderInstGebruikers(el) {
         var medObj = med || {};
         var profielData = {
           uid:uid, email:email, naam:(medObj.voornaam?medObj.voornaam+' '+(medObj.achternaam||''):email.split('@')[0]),
-          rol:rol, bedrijfId:APP.bedrijfId, medId:medId||null, actief:true
+          rol:rol, bedrijfId:APP.bedrijfId, medId:medId||null, actief:true, licentie:licKeuze || null
         };
         secondApp.auth().signOut();
 
