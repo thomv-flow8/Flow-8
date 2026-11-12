@@ -540,7 +540,7 @@ async function berekenClaims(uid, tokenEmail) {
   let lic = null;
   if (profiel.platformBeheer !== true
       && (await admin.database().ref('flow8/licenties/' + bedrijfId + '/abonnement').get()).exists()) {
-    lic = licSoort(profiel);
+    lic = licSoort(profiel, await licPlanRollen(bedrijfId));
   }
   const claims = { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage };
   if (lic) claims.lic = lic;
@@ -737,10 +737,16 @@ exports.demoAanvraag = onRequest(
 const LIC_DB = 'flow8-715de-default-rtdb';
 const LIC_REGIO = 'europe-west1';
 
-// Soort licentie van een account: vastgelegd op het profiel, anders uit de rol (wie werkbonnen uitvoert = werkbon)
-function licSoort(p) {
+// Soort licentie van een account: vastgelegd op het profiel, anders uit de rol: een rol die het bedrijf inplant
+// (Instellingen › Planning, planningsrollen) is werkbon, elke andere rol kantoor (besluit Thomas 12-11-2026)
+const LIC_STD_ROLLEN = ['monteur', 'extern'];
+function licSoort(p, rollen) {
   if (p.licentie === 'werkbon' || p.licentie === 'kantoor') return p.licentie;
-  return (p.rol === 'monteur' || p.rol === 'extern') ? 'werkbon' : 'kantoor';
+  return (rollen || LIC_STD_ROLLEN).indexOf(p.rol) >= 0 ? 'werkbon' : 'kantoor';
+}
+async function licPlanRollen(bedrijfId) {
+  const r = (await admin.database().ref('flow8/bedrijven/' + bedrijfId + '/instellingen/planningRollen').get()).val();
+  return Array.isArray(r) && r.length ? r : LIC_STD_ROLLEN;
 }
 // Datum als jjjj-mm-dd in Nederlandse tijd (de einddatum in de rules en de app is ook zo geschreven)
 function licVandaag() { return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Amsterdam' }); }
@@ -749,11 +755,22 @@ function licPlusDagen(iso, n) { const d = new Date(iso + 'T12:00:00Z'); d.setUTC
 async function licTel(bedrijfId) {
   if (!bedrijfId) return;
   const db = admin.database();
-  if (!(await db.ref('flow8/licenties/' + bedrijfId + '/abonnement').get()).exists()) return;   // geen abonnement: niets te tellen
+  if (!(await db.ref('flow8/licenties/' + bedrijfId + '/abonnement').get()).exists()) {   // geen abonnement: niets te tellen
+    await db.ref('flow8/licenties/' + bedrijfId + '/planbaar').remove();
+    return;
+  }
+  const rollen = await licPlanRollen(bedrijfId);
   const snap = await db.ref('flow8/gebruikers').orderByChild('bedrijfId').equalTo(bedrijfId).get();
-  const g = { kantoor: 0, werkbon: 0 };
-  snap.forEach((c) => { const p = c.val() || {}; if (p.actief === true && p.platformBeheer !== true) g[licSoort(p)]++; });
+  const meds = (await db.ref('flow8/bedrijven/' + bedrijfId + '/medewerkers').get()).val() || {};
+  // Medewerker bij een account: medId op het profiel, anders op e-mail (zelfde koppeling als de claims)
+  const medVan = (p) => { if (p.medId) return String(p.medId); const e = String(p.email || '').toLowerCase(); if (!e) return null;
+    const k = Object.keys(meds).find((x) => String((meds[x] || {}).email || '').toLowerCase() === e); return k ? String(meds[k].id != null ? meds[k].id : k) : null; };
+  const g = { kantoor: 0, werkbon: 0 }, planbaar = {};
+  snap.forEach((c) => { const p = c.val() || {}; if (p.actief === true && p.platformBeheer !== true) {
+    const soort = licSoort(p, rollen); g[soort]++;
+    if (soort === 'werkbon') { const m = medVan(p); if (m) planbaar[m] = true; } } });
   await db.ref('flow8/licenties/' + bedrijfId + '/gebruik').set({ kantoor: g.kantoor, werkbon: g.werkbon, bijgewerkt: Date.now() });
+  await db.ref('flow8/licenties/' + bedrijfId + '/planbaar').set({ meds: planbaar, bijgewerkt: Date.now() });
 }
 
 // Claims van één account meteen opnieuw zetten (zelfde berekening als bij inloggen). Het token van een ingelogde
@@ -775,15 +792,21 @@ async function licZetClaimsBedrijf(bedrijfId) {
 // Een profiel verandert (actief, rol, bedrijf of soort): beide betrokken bedrijven opnieuw tellen en de claims bijwerken
 exports.licentieGebruik = onValueWritten({ ref: 'flow8/gebruikers/{uid}', instance: LIC_DB, region: LIC_REGIO }, async (event) => {
   const voor = event.data.before.val() || {}, na = event.data.after.val() || {};
-  if (voor.actief === na.actief && voor.rol === na.rol && voor.bedrijfId === na.bedrijfId && voor.licentie === na.licentie) return;
+  if (voor.actief === na.actief && voor.rol === na.rol && voor.bedrijfId === na.bedrijfId && voor.licentie === na.licentie && voor.medId === na.medId && voor.email === na.email) return;
   for (const bid of new Set([voor.bedrijfId, na.bedrijfId].filter(Boolean))) await licTel(bid);
   // Vangnet: telde dit account eerder niet mee in deze soort bij dit bedrijf, dan moet er een licentie vrij zijn
   if (na.actief === true && na.platformBeheer !== true && na.bedrijfId) {
-    const soort = licSoort(na);
-    const teldeAl = voor.actief === true && voor.platformBeheer !== true && voor.bedrijfId === na.bedrijfId && licSoort(voor) === soort;
+    const rollen = await licPlanRollen(na.bedrijfId), soort = licSoort(na, rollen);
+    const teldeAl = voor.actief === true && voor.platformBeheer !== true && voor.bedrijfId === na.bedrijfId && licSoort(voor, rollen) === soort;
     if (!teldeAl) await licVangnet(na.bedrijfId, event.params.uid, soort, na);
   }
   if (event.data.after.exists()) await licZetClaims(event.params.uid);
+});
+// Andere planningsrollen: de soort "Op rol" verandert, dus opnieuw tellen (geen vangnet: niemand gaat eruit) en claims bijwerken
+exports.licentieRollen = onValueWritten({ ref: 'flow8/bedrijven/{bedrijfId}/instellingen/planningRollen', instance: LIC_DB, region: LIC_REGIO }, async (event) => {
+  const bid = event.params.bedrijfId;
+  await licTel(bid);
+  await licZetClaimsBedrijf(bid);
 });
 // Een abonnement wordt vastgelegd of gewijzigd: meteen tellen. Komt het erbij of verdwijnt het, dan verandert de
 // claim lic voor iedereen van het bedrijf.
@@ -908,7 +931,8 @@ exports.licentieAanpassen = onRequest(
       if (v.status === 'gestopt') { res.status(409).json({ error: 'Het abonnement is gestopt' }); return; }
       const prof = (await db.ref('flow8/gebruikers').orderByChild('bedrijfId').equalTo(bid).get()).val() || {};
       const vandaag = licVandaag(), body = req.body || {};
-      const plan = licPlan(v, (uid) => (prof[uid] ? licSoort(prof[uid]) : null), { werkbon: body.werkbon, kantoor: body.kantoor }, vandaag);
+      const rollen = await licPlanRollen(bid);
+      const plan = licPlan(v, (uid) => (prof[uid] ? licSoort(prof[uid], rollen) : null), { werkbon: body.werkbon, kantoor: body.kantoor }, vandaag);
       if (plan.fout) { res.status(400).json({ error: plan.fout }); return; }
       for (const r of plan.regels) await db.ref('flow8/licenties/' + bid + '/regels').push(Object.assign({}, r, { door: decoded.uid, bron: 'wizard', op: vandaag }));
       const regelsTekst = plan.regels.map(licPlanTekst), wie = p.naam || p.email || 'Een beheerder';

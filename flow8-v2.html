@@ -912,6 +912,9 @@ button.lf-rij.wo-pompdoc{width:100%;border:0;border-bottom:1px solid var(--borde
 .inst-abon .ab-pm-rij .lf-w{display:flex;align-items:center;gap:8px}
 .inst-abon .ab-pm-rij .tag{white-space:nowrap}
 .inst-abon .ab-rol{font-weight:600;color:var(--text)}
+tr.plan-geenlic > td{background-image:repeating-linear-gradient(135deg,transparent 0 8px,color-mix(in srgb,var(--muted) 6%,transparent) 8px 16px)}
+tr.plan-geenlic .plan-new-dag-btn{display:none}
+.plan-geenlic-tag{margin-top:4px;font-size:11px;font-weight:600;color:var(--orange-t)}
 .lw-overzicht{margin:14px 2px 2px}
 .lw-overzicht .lw-lijst{margin:0 0 8px;padding-left:18px;font-size:14px;line-height:1.6}
 .lw-overzicht .lw-fout{margin:0;color:var(--red-t);font-size:14px}
@@ -8418,6 +8421,7 @@ async function laadData() {
     laadVerzuimDetail(),
     _licLuister(),
     _licEigenLuister(),
+    _licPlanLuister(),
     dbLoad('wp_pompen',      'wp_pompen'),
     dbLoad('pr_objecten',    'pr_objecten'),
     dbLoad('mailLog',        'mailLog'),
@@ -19427,7 +19431,7 @@ var _HP_DAG = ['zo','ma','di','wo','do','vr','za'];
 function openHerplannen(a){
   var m = a.m, ops = a.ops.slice().sort(function(x, y){ return (x.datum+(x.tijdVan||'')).localeCompare(y.datum+(y.tijdVan||'')); });
   var rollen = APP.planningRollen || ['monteur','extern'];
-  var anderen = APP.medewerkers.filter(function(x){ return x.status !== 'inactief' && rollen.indexOf(x.rol) >= 0 && String(x.id) !== String(m.id); });
+  var anderen = APP.medewerkers.filter(function(x){ return x.status !== 'inactief' && rollen.indexOf(x.rol) >= 0 && String(x.id) !== String(m.id) && _isPlanbaar(x); });
   var vrij0 = {}, keuze = ops.map(function(){ return ''; });
   ops.forEach(function(o){ anderen.forEach(function(x){ var k = x.id+'|'+o.datum; if(!(k in vrij0)){ var u = _medDagUren(x, o.datum); vrij0[k] = u.afwezig ? null : u.beschikbaar - u.gepland; } }); });
   var n = ops.length;
@@ -19624,10 +19628,7 @@ function _planInhoudHtmlBasis(monteurs, mob){
 function _planHertekenInhoud(){
   var pc = document.getElementById('plan-content');
   if(!pc){ renderPlanning(); return; }
-  var planningRollen = APP.planningRollen || ['monteur','extern'];
-  var monteurs = APP.medewerkers.filter(function(m){
-    return m.status !== 'inactief' && planningRollen.indexOf(m.rol) >= 0;
-  }).sort(_medVolgorde);
+  var monteurs = _planMonteurLijst();   // alleen inplanbaar, plus wie in beeld al werk heeft
   pc.innerHTML = _planInhoudHtml(monteurs);
   bindPlanningEvents();
   _planAfwezigVul();
@@ -19640,10 +19641,7 @@ function renderPlanning() {
   _PERF._planN = (_PERF._planN || 0) + 1;
   var el = document.getElementById('content');
   // Welke rollen zichtbaar in planning - later via Instellingen instelbaar
-  var planningRollen = APP.planningRollen || ['monteur','extern'];
-  var monteurs = APP.medewerkers.filter(function(m){
-    return m.status !== 'inactief' && planningRollen.indexOf(m.rol) >= 0;
-  }).sort(_medVolgorde);
+  var monteurs = _planMonteurLijst();   // alleen inplanbaar, plus wie in beeld al werk heeft
 
   // ── Toolbar ──
   var h = '<div class="werkbalk" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
@@ -19925,6 +19923,7 @@ function bindPlanningEvents() {
       var oudMonteur = o.monteurId;
       var vanMonteur = _dragVanMonteur || oudMonteur || '';
       if (nieuwDag === oudDag && String(nieuwMonteur||'') === String(vanMonteur)) return; // geen wijziging
+      if (nieuwMonteur && !_isPlanbaarId(nieuwMonteur)) { _geenLicMelding(nieuwMonteur); return; }
       var _terug = { datum:o.datum, id:o.monteurId == null ? null : o.monteurId, ids:Array.isArray(o.monteurIds) ? o.monteurIds.slice() : [] };
       o.datum      = nieuwDag;
       _monteurVervangen(o, vanMonteur, nieuwMonteur);
@@ -21159,11 +21158,13 @@ function renderPlanWeek(monteurs) {
 
   zichtbareMonteurs.forEach(function(m) {
     var kl = medKleur(m);
-    h += '<tr data-monteur-id="'+m.id+'">';
+    var _geenLic = !_isPlanbaar(m);
+    h += '<tr data-monteur-id="'+m.id+'"'+(_geenLic ? ' class="plan-geenlic"' : '')+'>';
     h += '<td style="background:var(--surface2);padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--border)">';
     h += '<div style="display:flex;align-items:center;gap:6px">';
     h += '<div class="avatar" style="width:30px;height:30px;font-size:11px;background:'+kl+';color:'+_tekstOpKleur(kl)+'">'+initials(m)+'</div>';
     h += '<div style="font-size:12px;font-weight:600">'+esc(m.voornaam+' '+m.achternaam)+'</div></div>';
+    if(_geenLic) h += '<div class="plan-geenlic-tag" title="Alleen medewerkers met een werkbonlicentie kun je inplannen">Geen werkbonlicentie</div>';
     // Bezetting deze week: geplande uren tegen beschikbare uren (min ziekte en verlof)
     var _bz = _medBezetting(m, dagen);
     h += '<div class="wk-bez" title="'+esc(m.voornaam+' '+m.achternaam)+': '+_urenKort(_bz.gepland)+' van '+_urenKort(_bz.beschikbaar)+' uur gepland deze week'+(_bz.vol ? ' (overboekt)' : '')+'">'
@@ -21745,6 +21746,7 @@ function openOpdrachtModal(id, prefill) {
 
   // Monteur opties - meerdere selecteerbaar
   var huidigeMonteurs = Array.isArray(o.monteurIds) ? o.monteurIds.map(String) : (o.monteurId ? [String(o.monteurId)] : []);
+  if(isNew) huidigeMonteurs = huidigeMonteurs.filter(function(x){ return _isPlanbaarId(x); });
   var monteurOpts = '';
   APP.medewerkers.filter(function(m){ return m.status !== 'inactief'; }).forEach(function(m){
     var sel = huidigeMonteurs.indexOf(String(m.id)) >= 0 ? ' selected' : '';
@@ -21833,7 +21835,7 @@ function openOpdrachtModal(id, prefill) {
   var _planRollenModal = APP.planningRollen || ['monteur','extern'];
   var _opDatum = o.datum || vandaagISO();
   var monteurGrid = '<div id="op-monteur-lijst" class="lf-mt-raster">';
-  APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && _planRollenModal.indexOf(m.rol) >= 0; }).forEach(function(m){
+  APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && _planRollenModal.indexOf(m.rol) >= 0 && (_isPlanbaar(m) || huidigeMonteurs.indexOf(String(m.id)) >= 0); }).forEach(function(m){
     var isChecked = huidigeMonteurs.indexOf(String(m.id)) >= 0;
     var verlofWaarschuwing = checkVerlofBeschikbaar(m.id, _opDatum, o.tijdVan || null);
     var opVerzuim = !!verzuimOpDag(m.id, _opDatum);
@@ -22483,6 +22485,10 @@ function _doSaveOpdracht(id, datum, type) {
   var bestaand = o2;
   var monteurIds = Array.from(document.querySelectorAll('.op-mont-cb')).filter(function(inp){ return inp.dataset.checked === '1'; }).map(function(inp){return inp.dataset.id;}).filter(Boolean);
   var monteurId  = monteurIds[0] || null;
+  // Wie er nieuw op komt, moet een werkbonlicentie hebben (wie er al op stond, mag blijven)
+  var _oudeM = Array.isArray(o2.monteurIds) ? o2.monteurIds.map(String) : (o2.monteurId ? [String(o2.monteurId)] : []);
+  var _zonderLic = monteurIds.filter(function(x){ return _oudeM.indexOf(String(x)) < 0 && !_isPlanbaarId(x); });
+  if(_zonderLic.length){ _geenLicMelding(_zonderLic[0]); return; }
 
   var data = Object.assign({}, bestaand, {
     id:        id || uid(),
@@ -22873,7 +22879,7 @@ function _planBulkKlik(e){
       function(m){ m.addEventListener('click', function(ev){ var b = ev.target.closest('[data-st]'); if(!b) return; _opMenuSluit(); _planBulkStatus(ids, b.dataset.st); }); });
   } else if(act === 'monteur'){
     var rollen = APP.planningRollen || ['monteur','extern'];
-    var meds = APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0; });
+    var meds = APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0 && _isPlanbaar(m); });
     _pbMenu(k, meds.map(function(m){ return _pbItem('data-m="'+esc(m.id)+'"', '<span class="op-menu-av" style="background:'+medKleur(m)+';color:'+_tekstOpKleur(medKleur(m))+'">'+esc(initials(m))+'</span>', esc(m.voornaam+' '+m.achternaam)); }).join('')
       + '<div class="op-menu-sep" role="separator"></div>' + _pbItem('data-m=""', ICO.user, 'Niet toegewezen'),
       function(m){ m.addEventListener('click', function(ev){ var b = ev.target.closest('[data-m]'); if(!b) return; _opMenuSluit(); _planBulkMonteur(ids, b.dataset.m); }); });
@@ -23053,7 +23059,7 @@ function openBatchInplanModal(skIds) {
 
   // Monteur opties
   var planRollen = APP.planningRollen || ['monteur','extern'];
-  var monteurs = APP.medewerkers.filter(function(m){ return m.status!=='inactief' && planRollen.indexOf(m.rol)>=0; });
+  var monteurs = APP.medewerkers.filter(function(m){ return m.status!=='inactief' && planRollen.indexOf(m.rol)>=0 && _isPlanbaar(m); });
   var montOpts = '<option value="">Nog niet toewijzen</option>';
   monteurs.forEach(function(m){ montOpts += '<option value="'+m.id+'">'+esc(m.voornaam+' '+m.achternaam)+'</option>'; });
 
@@ -35198,7 +35204,7 @@ var _INST_UITLEG = {
 // Instellingen › Abonnement (licentiemanager, fase 1: tellen en tonen). APP.licentie komt uit flow8/licenties/{bedrijfId} (_licVanDb):
 // { cyclus, periodeVan, periodeTot, volgendeFactuur, proefTot, jaarKorting, prijzen:{kantoor,werkbon},
 // gebruik:{kantoor,werkbon}, regels:[{ soort, aantal, van, tot, status:'actief'|'opzegging'|'gepland', prijs }] }.
-var _LIC_SOORT = { kantoor:['Kantoorgebruiker','Kantoorgebruikers','alle andere rollen, zoals planner en beheerder'], werkbon:['Werkbongebruiker','Werkbongebruikers','monteur; vult werkbonnen in'] };
+var _LIC_SOORT = { kantoor:['Kantoorgebruiker','Kantoorgebruikers','alle andere rollen, zoals planner en beheerder'], werkbon:['Werkbongebruiker','Werkbongebruikers','wie je inplant; vult werkbonnen in'] };
 function _licEuro(n){ return '€ '+Number(n || 0).toLocaleString('nl-NL', { minimumFractionDigits:0, maximumFractionDigits:2 }); }
 // Licenties per soort op een datum: regels die dan lopen (Opzegging gepland telt mee tot het eind)
 function _licAantal(L, soort, op){ return (L.regels || []).filter(function(r){ return r.soort === soort && r.van <= op && (!r.tot || r.tot >= op); }).reduce(function(t, r){ return t + (r.aantal || 0); }, 0); }
@@ -35208,7 +35214,7 @@ function _licSoortVan(gb){
   return _licSoortOpRol(gb);
 }
 // Zonder eigen keuze volgt de soort de rol: zelfde regel als licSoort() op de server
-function _licSoortOpRol(gb){ return (gb.rol === 'monteur' || gb.rol === 'extern') ? 'werkbon' : 'kantoor'; }
+function _licSoortOpRol(gb){ return (APP.planningRollen || ['monteur','extern']).indexOf(gb.rol) >= 0 ? 'werkbon' : 'kantoor'; }   // wie je inplant = werkbon
 // Is de soort vol? null = er mag iemand bij (of er is geen abonnement); anders { n, g } (licenties, in gebruik).
 // Gebruik komt van de server (licentieGebruik telt bij elke wijziging), net als het vangnet daar.
 function _licVol(soort){
@@ -35341,6 +35347,37 @@ function _licVanDb(v){
   });
 }
 // Alleen voor de beheerder en platformbeheer (de rules geven anderen geen leesrecht); blijft bij wijzigingen bij
+// Wie mag je inplannen? flow8/licenties/{bid}/planbaar (de server houdt hem bij). Geen lijst (geen abonnement, of niet te
+// laden) = geen beperking. Blokkeert het laden niet; bij een wijziging tekent Planning opnieuw.
+function _licPlanLuister(){
+  APP.licPlanbaar = null;
+  if(!APP.bedrijfId) return Promise.resolve();
+  var ref = FB.ref('flow8/licenties/'+APP.bedrijfId+'/planbaar'), eerste = true;
+  APP.listeners.licPlanbaar = ref;
+  ref.on('value', function(s){
+    var v = s.val(); APP.licPlanbaar = v ? (v.meds || {}) : null;
+    if(eerste){ eerste = false; return; }
+    if(APP.activePage === 'planning' && typeof _planHertekenInhoud === 'function') _planHertekenInhoud();
+  }, function(){ APP.licPlanbaar = null; });
+  return Promise.resolve();
+}
+function _isPlanbaarId(id){ return !APP.licPlanbaar || !!APP.licPlanbaar[String(id)]; }
+function _isPlanbaar(m){ return !!m && _isPlanbaarId(m.id); }
+function _geenLicMelding(id){ var m = getMed(id); toast((m ? m.voornaam+' '+m.achternaam : 'Deze medewerker')+' heeft geen werkbonlicentie en kan geen opdrachten krijgen', 'error'); }
+// Monteurs op het planbord: inplanbaar, of zonder werkbonlicentie maar met werk in beeld (zodat er niets verdwijnt)
+function _planMonteurLijst(){
+  var rollen = APP.planningRollen || ['monteur','extern'];
+  var alle = APP.medewerkers.filter(function(m){ return m.status !== 'inactief' && rollen.indexOf(m.rol) >= 0; });
+  if(APP.licPlanbaar){
+    var dagen = _planView === 'week' ? _planWeekDagen(_planDatum) : _planView === 'dag' ? [_planDatum] : null, werk = {};
+    APP.opdrachten.forEach(function(o){
+      if(dagen && dagen.indexOf(o.datum) < 0) return;
+      (Array.isArray(o.monteurIds) ? o.monteurIds : []).concat(o.monteurId ? [o.monteurId] : []).forEach(function(x){ if(x) werk[String(x)] = 1; });
+    });
+    alle = alle.filter(function(m){ return _isPlanbaar(m) || werk[String(m.id)]; });
+  }
+  return alle.sort(_medVolgorde);
+}
 // Eigen licentiesoort volgen: wijzigt de beheerder die, dan het token verversen (claim lic). Blokkeert het laden niet.
 function _licEigenLuister(){
   var uid = (AUTH.currentUser && AUTH.currentUser.uid) || (APP.profiel && APP.profiel.uid);
@@ -35556,7 +35593,7 @@ function _licPerMedewerker(box, L, opnieuw){
       h += '<div class="ab-pm-kop"><b>'+_LIC_SOORT[soort][1]+'</b><span>'+lijst.length+' van '+n+' in gebruik</span></div>' + _zpKaart(rijen || '<p class="lf-leeg">Geen accounts.</p>');
       if(lijst.length > n) h += _zpMelding('actie', 'Meer accounts dan licenties', (lijst.length - n)+' '+(lijst.length - n === 1 ? 'account heeft' : 'accounts hebben')+' geen licentie. Zeg een licentie op bij iemand die hem niet meer nodig heeft, of laat er een bijkomen.');
     });
-    h += '<p class="ab-hint ab-pm-hint">Per persoon kies je welke licentie die gebruikt. <b>Op rol</b> volgt de rol: een monteur is werkbongebruiker, de andere rollen zijn kantoorgebruiker. Opzeggen gaat in aan het eind van de looptijd ('+esc(fmtD(L.periodeTot))+'). Tot die dag blijft het account werken; daarna zet Flow8 het op inactief en telt de licentie niet meer mee.</p>';
+    h += '<p class="ab-hint ab-pm-hint">Per persoon kies je welke licentie die gebruikt. <b>Op rol</b> volgt Instellingen › Planning: wie je inplant is werkbongebruiker, de andere rollen zijn kantoorgebruiker. Alleen werkbongebruikers kun je inplannen. Opzeggen gaat in aan het eind van de looptijd ('+esc(fmtD(L.periodeTot))+'). Tot die dag blijft het account werken; daarna zet Flow8 het op inactief en telt de licentie niet meer mee.</p>';
     box.innerHTML = h;
     box.querySelectorAll('.ab-opzeg').forEach(function(b){ b.addEventListener('click', function(){
       var uid = b.dataset.uid, naam = b.dataset.naam;

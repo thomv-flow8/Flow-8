@@ -36,6 +36,9 @@
       },
       "licenties": {
         "$bedrijfId": {
+          "planbaar": {
+            ".read": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true"
+          },
           ".read": "auth != null && (root.child('flow8/gebruikers/'+auth.uid+'/platformBeheer').val() === true || (root.child('flow8/gebruikers/'+auth.uid+'/bedrijfId').val() === $bedrijfId && root.child('flow8/gebruikers/'+auth.uid+'/actief').val() === true && root.child('flow8/gebruikers/'+auth.uid+'/rol').val() === 'admin'))",
           ".write": "auth != null && root.child('flow8/gebruikers/'+auth.uid+'/platformBeheer').val() === true",
           "opzeggingen": {
