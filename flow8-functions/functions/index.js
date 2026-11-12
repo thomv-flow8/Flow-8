@@ -738,11 +738,11 @@ const LIC_DB = 'flow8-715de-default-rtdb';
 const LIC_REGIO = 'europe-west1';
 
 // Soort licentie van een account: vastgelegd op het profiel, anders uit de rol: een rol die het bedrijf inplant
-// (Instellingen › Planning, planningsrollen) is werkbon, elke andere rol kantoor (besluit Thomas 12-11-2026)
+// (Instellingen › Planning, planningsrollen) is werkbon, net als een beheerder; elke andere rol kantoor (besluit Thomas 12-11-2026)
 const LIC_STD_ROLLEN = ['monteur', 'extern'];
 function licSoort(p, rollen) {
   if (p.licentie === 'werkbon' || p.licentie === 'kantoor') return p.licentie;
-  return (rollen || LIC_STD_ROLLEN).indexOf(p.rol) >= 0 ? 'werkbon' : 'kantoor';
+  return p.rol === 'admin' || (rollen || LIC_STD_ROLLEN).indexOf(p.rol) >= 0 ? 'werkbon' : 'kantoor';
 }
 async function licPlanRollen(bedrijfId) {
   const r = (await admin.database().ref('flow8/bedrijven/' + bedrijfId + '/instellingen/planningRollen').get()).val();

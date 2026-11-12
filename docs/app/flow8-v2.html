@@ -4237,6 +4237,7 @@ function openWerkbonVanuitPlanning(werkbonId, forceerCompact) {
 
 // Mag de huidige gebruiker deze werkbon bewerken?
 function _magWerkbonBewerken(wb) {
+  if(_licKantoorMij()) return false;   // kantoorlicentie: bekijken en verwerken, niet invullen
   // Admin mag altijd (kantoor-correcties), behalve als administratief verwerkt.
   if(isAdmin()) return wb.status !== 'verwerkt';
   if(magSchrijven('werkbonnen')) {
@@ -4595,7 +4596,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   // (Handtekening zit in de afrond-flow, niet als losse sectie in de invulbon.)
 
   // ── Acties ──
-  var magOppakken = !isAdmin() && magSchrijven('werkbonnen') && wb.status === 'klaargezet';
+  var magOppakken = !isAdmin() && magSchrijven('werkbonnen') && wb.status === 'klaargezet' && !_licKantoorMij();
   if(magOppakken){
     // Bon nog niet opgepakt: toon een duidelijke hint + oppak-knop. Invullen kan pas erna.
     h += '<div style="background:rgba(79,110,245,.08);border:1px solid rgba(79,110,245,.3);border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:12px;color:var(--muted)">Pak de bon op om te starten \u2014 de planning ziet dan dat je onderweg/bezig bent. Daarna kun je invullen.</div>';
@@ -4805,6 +4806,7 @@ function _wbTimerElapsedStr(startOp){
 // nodig heeft, in rijen met het label links en de waarde rechts — dat leest sneller
 // dan labels boven de velden en scheelt de helft van de hoogte.
 function _wbNieuweBonDialoog(){
+  if(_licKantoorMij()){ toast('Met een kantoorlicentie maak je geen werkbonnen aan; dat doet een werkbongebruiker of de planning', 'error'); return; }
   var mijnMed   = getMijnMedId();
   var magKiezen = isAdmin() || magSchrijven('planning');
   var nu = new Date();
@@ -25879,6 +25881,7 @@ async function _zetClaimEnVerversToken() {
       return;
     }
     var data = await resp.json().catch(function(){ return {}; });
+    APP.licMijn = (data && data.claim && data.claim.lic) || null;
     // Alleen het token verversen als de claim daadwerkelijk veranderde — anders
     // onnodig een netwerkronde. Bij een verse login is 'gewijzigd' meestal true.
     if (data && data.gewijzigd) {
@@ -30515,9 +30518,9 @@ function renderWerkbonnen() {
   if(!isHist){
     _knoppen = _mob
       ? '<button type="button" id="wb-archief" class="wbl-ikn" title="Archief (afgehandeld)" aria-label="Archief: afgehandelde werkbonnen">'+_icoArch+'</button>'
-        + '<button type="button" id="wb-nieuw" class="wbl-ikn pri" title="Nieuwe werkbon" aria-label="Nieuwe werkbon">'+_icoPlus+'</button>'
+        + (_licKantoorMij() ? '' : '<button type="button" id="wb-nieuw" class="wbl-ikn pri" title="Nieuwe werkbon" aria-label="Nieuwe werkbon">'+_icoPlus+'</button>')
       : '<button type="button" id="wb-archief" class="btn btn-ghost btn-sm" title="Afgehandelde werkbonnen">'+_icoArch+' Archief</button>'
-        + '<button type="button" id="wb-nieuw" class="btn btn-primary btn-sm">'+_icoPlus+' Werkbon</button>';
+        + (_licKantoorMij() ? '' : '<button type="button" id="wb-nieuw" class="btn btn-primary btn-sm">'+_icoPlus+' Werkbon</button>');
   }
   var _titel = isHist
     ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">'
@@ -35241,7 +35244,7 @@ var _INST_UITLEG = {
 // Instellingen › Abonnement (licentiemanager, fase 1: tellen en tonen). APP.licentie komt uit flow8/licenties/{bedrijfId} (_licVanDb):
 // { cyclus, periodeVan, periodeTot, volgendeFactuur, proefTot, jaarKorting, prijzen:{kantoor,werkbon},
 // gebruik:{kantoor,werkbon}, regels:[{ soort, aantal, van, tot, status:'actief'|'opzegging'|'gepland', prijs }] }.
-var _LIC_SOORT = { kantoor:['Kantoorgebruiker','Kantoorgebruikers','alle andere rollen, zoals planner en beheerder'], werkbon:['Werkbongebruiker','Werkbongebruikers','wie je inplant; vult werkbonnen in'] };
+var _LIC_SOORT = { kantoor:['Kantoorgebruiker','Kantoorgebruikers','overige rollen, zoals planner en administratie; bekijkt en verwerkt werkbonnen'], werkbon:['Werkbongebruiker','Werkbongebruikers','wie je inplant en de beheerder; vult werkbonnen in'] };
 function _licEuro(n){ return '€ '+Number(n || 0).toLocaleString('nl-NL', { minimumFractionDigits:0, maximumFractionDigits:2 }); }
 // Licenties per soort op een datum: regels die dan lopen (Opzegging gepland telt mee tot het eind)
 function _licAantal(L, soort, op){ return (L.regels || []).filter(function(r){ return r.soort === soort && r.van <= op && (!r.tot || r.tot >= op); }).reduce(function(t, r){ return t + (r.aantal || 0); }, 0); }
@@ -35251,7 +35254,7 @@ function _licSoortVan(gb){
   return _licSoortOpRol(gb);
 }
 // Zonder eigen keuze volgt de soort de rol: zelfde regel als licSoort() op de server
-function _licSoortOpRol(gb){ return (APP.planningRollen || ['monteur','extern']).indexOf(gb.rol) >= 0 ? 'werkbon' : 'kantoor'; }   // wie je inplant = werkbon
+function _licSoortOpRol(gb){ return gb.rol === 'admin' || (APP.planningRollen || ['monteur','extern']).indexOf(gb.rol) >= 0 ? 'werkbon' : 'kantoor'; }   // beheerder en wie je inplant = werkbon
 // Is de soort vol? null = er mag iemand bij (of er is geen abonnement); anders { n, g } (licenties, in gebruik).
 // Gebruik komt van de server (licentieGebruik telt bij elke wijziging), net als het vangnet daar.
 function _licVol(soort){
@@ -35446,6 +35449,8 @@ function _licVanDb(v){
   });
 }
 // Alleen voor de beheerder en platformbeheer (de rules geven anderen geen leesrecht); blijft bij wijzigingen bij
+// Kantoorlicentie: werkbonnen en werkorders bekijken en verwerken, niet invullen (de Firestore-rules dwingen het ook af)
+function _licKantoorMij(){ return APP.licMijn === 'kantoor'; }
 // Wie mag je inplannen? flow8/licenties/{bid}/planbaar (de server houdt hem bij). Geen lijst (geen abonnement, of niet te
 // laden) = geen beperking. Blokkeert het laden niet; bij een wijziging tekent Planning opnieuw.
 function _licPlanLuister(){
@@ -35692,7 +35697,7 @@ function _licPerMedewerker(box, L, opnieuw){
       h += '<div class="ab-pm-kop"><b>'+_LIC_SOORT[soort][1]+'</b><span>'+lijst.length+' van '+n+' in gebruik'+(_licWijzigingTekst(L, soort, vandaag) ? ' · <b>'+esc(_licWijzigingTekst(L, soort, vandaag))+'</b>' : '')+'</span></div>' + _zpKaart(rijen || '<p class="lf-leeg">Geen accounts.</p>');
       if(lijst.length > n) h += _zpMelding('actie', 'Meer accounts dan licenties', (lijst.length - n)+' '+(lijst.length - n === 1 ? 'account heeft' : 'accounts hebben')+' geen licentie. Zeg een licentie op bij iemand die hem niet meer nodig heeft, of laat er een bijkomen.');
     });
-    h += '<p class="ab-hint ab-pm-hint">Per persoon kies je welke licentie die gebruikt. <b>Op rol</b> volgt Instellingen › Planning: wie je inplant is werkbongebruiker, de andere rollen zijn kantoorgebruiker. Alleen werkbongebruikers kun je inplannen. Opzeggen gaat in aan het eind van de looptijd ('+esc(fmtD(L.periodeTot))+'). Tot die dag blijft het account werken; daarna zet Flow8 het op inactief en telt de licentie niet meer mee.</p>';
+    h += '<p class="ab-hint ab-pm-hint">Per persoon kies je welke licentie die gebruikt. <b>Op rol</b>: de beheerder en wie je inplant (Instellingen › Planning) zijn werkbongebruiker, de andere rollen kantoorgebruiker. Alleen werkbongebruikers kun je inplannen en vullen werkbonnen en werkorders in; kantoorgebruikers bekijken en verwerken ze. Opzeggen gaat in aan het eind van de looptijd ('+esc(fmtD(L.periodeTot))+'). Tot die dag blijft het account werken; daarna zet Flow8 het op inactief en telt de licentie niet meer mee.</p>';
     box.innerHTML = h;
     box.querySelectorAll('.ab-opzeg').forEach(function(b){ b.addEventListener('click', function(){
       var uid = b.dataset.uid, naam = b.dataset.naam;
@@ -40099,7 +40104,8 @@ function _woOpenDetail(id) {
         blokken: (Array.isArray(wo.blokken) && wo.blokken.length) ? wo.blokken : (type && type.blokken ? type.blokken : []),
         velden: (Array.isArray(wo.veldTemplate) && wo.veldTemplate.length) ? wo.veldTemplate : (type && type.veldTemplate ? type.veldTemplate : []),
         antwoorden: wo.velden || {},
-        bewerkbaar: (isAdmin() || magSchrijven('werkorders')),
+        bewerkbaar: (isAdmin() || magSchrijven('werkorders')) && !_licKantoorMij(),   // invullen: velden, uren, materiaal, foto's, handtekening, afronden
+        kantoorBewerkbaar: (isAdmin() || magSchrijven('werkorders')),                   // verwerken: status, interne memo
         openBlok: 0,
       };
       _woRenderDetail();
@@ -40173,7 +40179,7 @@ function _woRenderDetail(){
 
   // Status (staat op brede schermen bovenin de navigatiekolom)
   var _opties = [];
-  if(kanBeheren && st.bewerkbaar && type && Array.isArray(type.statussen) && type.statussen.length){
+  if(kanBeheren && st.kantoorBewerkbaar && type && Array.isArray(type.statussen) && type.statussen.length){
     if(statusObj && Array.isArray(statusObj.naar) && statusObj.naar.length){
       statusObj.naar.forEach(function(k){ var x = type.statussen.find(function(z){ return z.key===k; }); if(x) _opties.push(x); });
     } else {
@@ -40237,7 +40243,7 @@ function _woRenderDetail(){
   h += _sec('memo', '<path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.8 21.8 0 015.06-6.06"/><path d="M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.8 21.8 0 01-2.16 3.19"/><path d="M14.12 14.12a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/>',
     'Interne memo', wo.interneMemo ? '<span class="wbx-cnt-badge">1</span>' : '',
     '<p class="lf-uitleg" style="padding-top:0">Alleen zichtbaar voor het team \u2014 komt niet op de PDF of in de mail naar de klant.</p>'
-    + '<textarea class="wbx-field area wox-memo" placeholder="Notitie voor jezelf of collega\u2019s\u2026"'+dis+'>'+esc(wo.interneMemo||'')+'</textarea>'
+    + '<textarea class="wbx-field area wox-memo" placeholder="Notitie voor jezelf of collega\u2019s\u2026"'+(st.kantoorBewerkbaar ? '' : ' disabled')+'>'+esc(wo.interneMemo||'')+'</textarea>'
     + '<div class="wbx-save-status wox-memo-status"></div>');
 
   if(heeftBlokken){
@@ -40379,7 +40385,7 @@ function _woInfoblokHtml(wo, type){
 function _woStatusWisselHtml(wo, type, statusObj){
   // Handmatig status wisselen is beheren; de monteur verandert de status via afronden.
   if(!(isAdmin() || magBeheren('werkorders'))) return '';
-  if(!_woDetailState.bewerkbaar) return '';
+  if(!_woDetailState.kantoorBewerkbaar) return '';
   if(!type || !Array.isArray(type.statussen) || !type.statussen.length) return '';
   // Toegestane volgende statussen: uit 'naar' van de huidige status, of alle als leeg
   var opties = [];
@@ -41072,7 +41078,7 @@ function _woBindDetail(fullscreen){
   // Interne memo: automatisch opslaan (eigen vertraging), zoals op de werkbon
   var memoEl = root.querySelector('.wox-memo');
   _memoMeegroeien(memoEl);
-  if(memoEl && st.bewerkbaar){
+  if(memoEl && st.kantoorBewerkbaar){
     var _memoTimer = null;
     memoEl.addEventListener('input', function(){
       st.wo.interneMemo = memoEl.value;
