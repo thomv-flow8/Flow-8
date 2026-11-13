@@ -1711,6 +1711,13 @@ tr[data-klik]:focus-visible,.vz-acc-header:focus-visible,.pr-acc-hdr:focus-visib
 #content:focus{outline:none}
 .topbar-title{font-size:17px;font-weight:600;letter-spacing:-.02em;flex:1;margin:0;line-height:inherit}
 .content{flex:1;overflow-y:auto;padding:24px;background:var(--bg-gradient);color:var(--text);min-height:0}
+/* Abonnement gestopt (licentiemanager stap 5): smalle statusstrook onder de bovenbalk, op elke pagina */
+.lic-balk{flex:none;display:flex;align-items:center;gap:10px;padding:9px 24px;font-size:13px;line-height:1.4;color:var(--text);background:color-mix(in srgb,var(--orange) 14%,var(--surface));border-bottom:1px solid color-mix(in srgb,var(--orange) 35%,var(--border))}
+.lic-balk[hidden]{display:none}
+.lic-balk-ic{flex:none;display:inline-flex;color:var(--orange-t)}
+.lic-balk-ic svg{width:16px;height:16px}
+.lic-balk b{font-weight:600}
+@media(max-width:768px){.lic-balk{padding:8px 12px;font-size:12px;align-items:flex-start}}
 .page{display:none}.page.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 /* Filter chips */
@@ -3284,6 +3291,7 @@ label:has(> .wbx-chip-add:not(.wox-doc-drop)){pointer-events:none}
         <button id="log-btn" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius-sm);padding:4px 10px;font-size:11px;cursor:pointer"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="vertical-align:-1px"><path d="M4 6h16M4 12h16M4 18h10"/></svg> Log</button>
       </div>
     </div>
+    <div id="lic-balk" class="lic-balk" role="status" hidden></div>
     <main class="content" id="content" tabindex="-1"></main>
   </div>
 </div>
@@ -4238,6 +4246,7 @@ function openWerkbonVanuitPlanning(werkbonId, forceerCompact) {
 // Mag de huidige gebruiker deze werkbon bewerken?
 function _magWerkbonBewerken(wb) {
   if(_licKantoorMij()) return false;   // kantoorlicentie: bekijken en verwerken, niet invullen
+  if(_licAlleenLezen()) return false;  // abonnement gestopt: alleen bekijken
   // Admin mag altijd (kantoor-correcties), behalve als administratief verwerkt.
   if(isAdmin()) return wb.status !== 'verwerkt';
   if(magSchrijven('werkbonnen')) {
@@ -4596,7 +4605,7 @@ function _renderWerkbonInvul(werkbonId, wb, uren, fotos, documenten, forceerComp
   // (Handtekening zit in de afrond-flow, niet als losse sectie in de invulbon.)
 
   // ── Acties ──
-  var magOppakken = !isAdmin() && magSchrijven('werkbonnen') && wb.status === 'klaargezet' && !_licKantoorMij();
+  var magOppakken = !isAdmin() && magSchrijven('werkbonnen') && wb.status === 'klaargezet' && !_licKantoorMij() && !_licAlleenLezen();
   if(magOppakken){
     // Bon nog niet opgepakt: toon een duidelijke hint + oppak-knop. Invullen kan pas erna.
     h += '<div style="background:rgba(79,110,245,.08);border:1px solid rgba(79,110,245,.3);border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:12px;color:var(--muted)">Pak de bon op om te starten \u2014 de planning ziet dan dat je onderweg/bezig bent. Daarna kun je invullen.</div>';
@@ -4807,6 +4816,7 @@ function _wbTimerElapsedStr(startOp){
 // dan labels boven de velden en scheelt de helft van de hoogte.
 function _wbNieuweBonDialoog(){
   if(_licKantoorMij()){ toast('Met een kantoorlicentie maak je geen werkbonnen aan; dat doet een werkbongebruiker of de planning', 'error'); return; }
+  if(_licAlleenLezen()){ toast(_LIC_GESTOPT_TEKST, 'error'); return; }
   var mijnMed   = getMijnMedId();
   var magKiezen = isAdmin() || magSchrijven('planning');
   var nu = new Date();
@@ -7570,6 +7580,7 @@ var _pendingWrites = 0;
 function _dbFoutTekst(e, werkwoord){
   var code = String((e && (e.code || e.message)) || '').toUpperCase();
   if(code.indexOf('PERMISSION') >= 0 || code.indexOf('DENIED') >= 0) {
+    if(APP.licGestopt) return _LIC_GESTOPT_TEKST;
     return 'Geen rechten om dit te ' + werkwoord;
   }
   return werkwoord.charAt(0).toUpperCase() + werkwoord.slice(1) + ' mislukt — check je verbinding';
@@ -7611,7 +7622,9 @@ function dbSaveItem(key, id, data, _retries) {
       // Automatisch opnieuw proberen bij netwerkstoringen (max 2x). Kijkt naar
       // _fbVerbonden (.info/connected) en niet naar navigator.onLine: die blijft op iOS
       // na vliegtuigmodus-uit hangen, dezelfde reden als bij de fotoqueue (C1).
-      if (_retries < 2 && _fbVerbonden) {
+      // Geweigerd door de rules: opnieuw proberen helpt niet (en de melding komt dan pas seconden later)
+      var _geweigerd = /PERMISSION|DENIED/i.test(String((e && (e.code || e.message)) || ''));
+      if (_retries < 2 && _fbVerbonden && !_geweigerd) {
         log('WARN', 'DB', 'Opslaan mislukt, poging ' + (_retries+2) + '/3: ' + path);
         return new Promise(function(resolve) { setTimeout(resolve, 1000 * (_retries + 1)); })
           .then(function() { return dbSaveItem(key, id, data, _retries + 1); });
@@ -8461,6 +8474,7 @@ async function laadData() {
     _licLuister(),
     _licEigenLuister(),
     _licPlanLuister(),
+    _licStatusLuister(),
     dbLoad('wp_pompen',      'wp_pompen'),
     dbLoad('pr_objecten',    'pr_objecten'),
     dbLoad('mailLog',        'mailLog'),
@@ -9882,6 +9896,7 @@ var _FOUT_NL = [
 function _foutNL(m){
   var s = String(m == null ? '' : m), oud = s;
   _FOUT_NL.forEach(function(r){ s = s.replace(r[0], r[1]); });
+  if(APP.licGestopt && s.indexOf('je hebt hier geen rechten voor') >= 0) return _LIC_GESTOPT_TEKST;
   return s === oud ? s : s.charAt(0).toUpperCase() + s.slice(1);
 }
 function toast(msg, type, undoCallback) {
@@ -21780,6 +21795,7 @@ function _opContactOpties(cts, huidigeNaam){
 }
 
 function openOpdrachtModal(id, prefill) {
+  if(_licAlleenLezen()){ toast(_LIC_GESTOPT_TEKST, 'error'); return; }   // abonnement gestopt: bekijken kan via het paneel
   var isNew = !id;
   var o = id ? (APP.opdrachten.find(function(x){ return String(x.id) === String(id); }) || {}) : (prefill || {});
 
@@ -26825,6 +26841,7 @@ function _uploadFoutTekst(e) {
   var msg = (e && e.message) || '';
   var code = (e && e.code) || '';
   if(code === 'storage/unauthorized' || /unauthorized|permission/i.test(msg)) {
+    if(APP.licGestopt) return _LIC_GESTOPT_TEKST + '.';
     return 'Geen uploadrechten voor deze omgeving. Controleer de Firebase Storage-regels of neem contact op met de beheerder.';
   }
   if(code === 'storage/canceled') return 'Upload geannuleerd.';
@@ -30518,9 +30535,9 @@ function renderWerkbonnen() {
   if(!isHist){
     _knoppen = _mob
       ? '<button type="button" id="wb-archief" class="wbl-ikn" title="Archief (afgehandeld)" aria-label="Archief: afgehandelde werkbonnen">'+_icoArch+'</button>'
-        + (_licKantoorMij() ? '' : '<button type="button" id="wb-nieuw" class="wbl-ikn pri" title="Nieuwe werkbon" aria-label="Nieuwe werkbon">'+_icoPlus+'</button>')
+        + (_licKantoorMij() || _licAlleenLezen() ? '' : '<button type="button" id="wb-nieuw" class="wbl-ikn pri" title="Nieuwe werkbon" aria-label="Nieuwe werkbon">'+_icoPlus+'</button>')
       : '<button type="button" id="wb-archief" class="btn btn-ghost btn-sm" title="Afgehandelde werkbonnen">'+_icoArch+' Archief</button>'
-        + (_licKantoorMij() ? '' : '<button type="button" id="wb-nieuw" class="btn btn-primary btn-sm">'+_icoPlus+' Werkbon</button>');
+        + (_licKantoorMij() || _licAlleenLezen() ? '' : '<button type="button" id="wb-nieuw" class="btn btn-primary btn-sm">'+_icoPlus+' Werkbon</button>');
   }
   var _titel = isHist
     ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">'
@@ -35451,6 +35468,39 @@ function _licVanDb(v){
 // Alleen voor de beheerder en platformbeheer (de rules geven anderen geen leesrecht); blijft bij wijzigingen bij
 // Kantoorlicentie: werkbonnen en werkorders bekijken en verwerken, niet invullen (de Firestore-rules dwingen het ook af)
 function _licKantoorMij(){ return APP.licMijn === 'kantoor'; }
+// Abonnement gestopt (stap 5): alleen nog bekijken en exporteren. De rules dwingen het af (RTDB op de status, Firestore en
+// Storage op de claim ro); de app zet de invulknoppen dicht en zegt het bovenaan. Platformbeheer kan wel wijzigen.
+function _licAlleenLezen(){ return !!APP.licGestopt && !isPlatformBeheer(); }
+var _LIC_GESTOPT_TEKST = 'Flow8 is gestopt: je kunt alles nog bekijken en exporteren, maar niets meer wijzigen';
+function _licBalkTekenen(){
+  var el = document.getElementById('lic-balk'); if(!el) return;
+  if(!APP.licGestopt){ el.hidden = true; el.innerHTML = ''; return; }
+  var tot = APP.licGestopt.tot;
+  el.innerHTML = '<span class="lic-balk-ic" aria-hidden="true">'+ICO.lock+'</span><span><b>Flow8 is gestopt.</b> Je kunt alles nog bekijken en exporteren'+(tot ? ' tot en met '+esc(fmtD(tot)) : '')+', maar niets meer wijzigen.'
+    + (isPlatformBeheer() ? ' Als platformbeheer kun jij wel wijzigen.' : isAdmin() ? ' Wil je verder, neem dan contact op met Flow8.' : ' Vragen? Neem contact op met je beheerder.')+'</span>';
+  el.hidden = false;
+}
+function _licStatusLuister(){
+  APP.licGestopt = null; _licBalkTekenen();
+  if(!APP.bedrijfId) return Promise.resolve();
+  var ref = FB.ref('flow8/licenties/'+APP.bedrijfId+'/status'), eerste = true;
+  APP.listeners.licStatus = ref;
+  return new Promise(function(klaar){
+    ref.on('value', function(s){
+      var gestopt = s.val() === 'gestopt', was = !!APP.licGestopt;
+      var verder = function(tot){
+        APP.licGestopt = gestopt ? { tot:tot || null } : null;
+        _licBalkTekenen();
+        if(eerste){ eerste = false; klaar(); return; }
+        if(gestopt === was) return;
+        _zetClaimEnVerversToken();                         // claim ro voor Firestore en Storage
+        if(APP.activePage) toonPagina(APP.activePage);    // knoppen opnieuw, nu met of zonder alleen bekijken
+      };
+      if(!gestopt) return verder(null);
+      FB.ref('flow8/licenties/'+APP.bedrijfId+'/alleenLezenTot').once('value').then(function(t){ verder(t.val()); }, function(){ verder(null); });
+    }, function(){ APP.licGestopt = null; _licBalkTekenen(); if(eerste){ eerste = false; klaar(); } });
+  });
+}
 // Wie mag je inplannen? flow8/licenties/{bid}/planbaar (de server houdt hem bij). Geen lijst (geen abonnement, of niet te
 // laden) = geen beperking. Blokkeert het laden niet; bij een wijziging tekent Planning opnieuw.
 function _licPlanLuister(){
@@ -35574,7 +35624,8 @@ function _licPlatformHtml(L){
       + lfRij(ICO.euro, 'Prijs werkbongebruiker', inp('pb-pw', 'number', pr.werkbon == null ? 24 : pr.werkbon, ' min="0" step="0.01"'), { voor:'pb-pw', sub:'per maand, excl. btw' }))
     + '<div class="ab-acties"><button type="button" class="btn btn-primary" id="pb-opslaan">Abonnement opslaan</button>'
     + (a.proefTot ? '<button type="button" class="btn btn-ghost" id="pb-omzetten">Proef omzetten</button>' : '')
-    + (L && L.status === 'gestopt' ? '<button type="button" class="btn btn-ghost" id="pb-herstart">Weer starten</button>' : '')+'</div>';
+    + (L && L.status === 'gestopt' ? '<button type="button" class="btn btn-ghost" id="pb-herstart">Weer starten</button>' : '')
+    + (L && L.status !== 'gestopt' ? '<button type="button" class="btn btn-ghost" id="pb-stoppen">Abonnement nu stoppen</button>' : '')+'</div>';
   // Zonder abonnement toont het scherm geen regels: dan eerst het abonnement, anders lijken nieuwe regels niet te bestaan
   if(!L) return h + '<p class="ab-hint ab-pb-uitleg"><b>Sla eerst het abonnement op.</b> Daarna voeg je hier de licentieregels toe.</p></div>';
   var regels = L.regels || [];
@@ -35642,6 +35693,14 @@ function _licPlatformBind(el, L){
         .then(function(){ return _licRef('log').push({ ts:Date.now(), wat:'weer gestart', door:(APP.profiel && APP.profiel.uid) || null }); })
         .then(function(){ toast('Abonnement weer gestart', 'success'); }).catch(fout);
     });
+  });
+  var stop = el.querySelector('#pb-stoppen'); if(stop) stop.addEventListener('click', function(){
+    var vandaag = vandaagISO(), tot = _licPlusDagen(vandaag, 90);
+    bevestigActie('Abonnement nu stoppen', 'Flow8 stopt vandaag voor '+APP.bedrijfId+'. Iedereen kan tot en met '+fmtD(tot)+' alles nog bekijken en exporteren, maar niets meer wijzigen. Met Weer starten zet je het terug.', function(){
+      _licRef().update({ status:'gestopt', gestoptOp:vandaag, gestoptReden:'handmatig', alleenLezenTot:tot })
+        .then(function(){ return _licRef('log').push({ ts:Date.now(), wat:'abonnement gestopt (handmatig)', alleenLezenTot:tot, door:(APP.profiel && APP.profiel.uid) || null }); })
+        .then(function(){ toast('Abonnement gestopt: alleen nog bekijken', 'success'); }).catch(fout);
+    }, 'warn');
   });
   var ok = el.querySelector('#pb-opslaan'); if(ok) ok.addEventListener('click', function(){
     var ab = { cyclus:w('pb-cyclus') || 'jaar', periodeVan:w('pb-van') || null, periodeTot:w('pb-tot') || null, volgendeFactuur:w('pb-fact') || null,
@@ -40104,8 +40163,8 @@ function _woOpenDetail(id) {
         blokken: (Array.isArray(wo.blokken) && wo.blokken.length) ? wo.blokken : (type && type.blokken ? type.blokken : []),
         velden: (Array.isArray(wo.veldTemplate) && wo.veldTemplate.length) ? wo.veldTemplate : (type && type.veldTemplate ? type.veldTemplate : []),
         antwoorden: wo.velden || {},
-        bewerkbaar: (isAdmin() || magSchrijven('werkorders')) && !_licKantoorMij(),   // invullen: velden, uren, materiaal, foto's, handtekening, afronden
-        kantoorBewerkbaar: (isAdmin() || magSchrijven('werkorders')),                   // verwerken: status, interne memo
+        bewerkbaar: (isAdmin() || magSchrijven('werkorders')) && !_licKantoorMij() && !_licAlleenLezen(),   // invullen: velden, uren, materiaal, foto's, handtekening, afronden
+        kantoorBewerkbaar: (isAdmin() || magSchrijven('werkorders')) && !_licAlleenLezen(),                 // verwerken: status, interne memo
         openBlok: 0,
       };
       _woRenderDetail();

@@ -15,9 +15,14 @@ service firebase.storage {
     // ─────────────────────────────────────────────────────────────────────────
 
     match /flow8/{bedrijfId}/{allePaden=**} {
-      allow read, write: if request.auth != null
+      allow read: if request.auth != null
         && request.auth.token.bedrijfId == bedrijfId
         && request.auth.token.actief == true;
+      // Abonnement gestopt (claim ro, licentiemanager fase 2 stap 5): bekijken en downloaden wel, uploaden en verwijderen niet
+      allow write: if request.auth != null
+        && request.auth.token.bedrijfId == bedrijfId
+        && request.auth.token.actief == true
+        && request.auth.token.get('ro', false) != true;
     }
 
     // Alles daarbuiten dicht.

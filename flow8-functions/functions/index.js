@@ -542,8 +542,13 @@ async function berekenClaims(uid, tokenEmail) {
       && (await admin.database().ref('flow8/licenties/' + bedrijfId + '/abonnement').get()).exists()) {
     lic = licSoort(profiel, await licPlanRollen(bedrijfId));
   }
+  // ro: het abonnement is gestopt, alleen nog bekijken en exporteren (fase 2, stap 5). De Firestore- en Storage-rules
+  // lezen hem; de RTDB-rules kijken zelf naar flow8/licenties/{bedrijfId}/status. Platformbeheer krijgt hem niet.
+  const ro = profiel.platformBeheer !== true
+    && (await admin.database().ref('flow8/licenties/' + bedrijfId + '/status').get()).val() === 'gestopt';
   const claims = { bedrijfId, rol, actief, medId, rch, ouRecht, okRecht, vlRecht, vzRecht, vzInzage };
   if (lic) claims.lic = lic;
+  if (ro) claims.ro = true;
   return { claims };
 }
 // Zelfde claims als nu op het token? Dan hoeft er niets te gebeuren.
@@ -559,7 +564,8 @@ function claimsGelijk(oud, c) {
     (oud.vlRecht || 'g') === c.vlRecht &&
     (oud.vzRecht || 'g') === c.vzRecht &&
     (oud.vzInzage || 'g') === c.vzInzage &&
-    (oud.lic || null) === (c.lic || null);
+    (oud.lic || null) === (c.lic || null) &&
+    (oud.ro === true) === (c.ro === true);
 }
 
 exports.zetGebruikersClaim = onRequest(
@@ -816,6 +822,12 @@ exports.licentieAbonnement = onValueWritten({ ref: 'flow8/licenties/{bedrijfId}/
   if (event.data.before.exists() !== event.data.after.exists()) await licZetClaimsBedrijf(bid);
 });
 
+// Het abonnement stopt of loopt weer (status gestopt): de claim ro voor iedereen van het bedrijf bijwerken
+exports.licentieStatus = onValueWritten({ ref: 'flow8/licenties/{bedrijfId}/status', instance: LIC_DB, region: LIC_REGIO }, async (event) => {
+  if ((event.data.before.val() === 'gestopt') === (event.data.after.val() === 'gestopt')) return;
+  await licZetClaimsBedrijf(event.params.bedrijfId);
+});
+
 // Licenties van een soort op een datum: de regels die dan lopen (zelfde regel als _licAantal in de app)
 function licAantal(regels, soort, op) {
   return Object.values(regels || {}).filter((r) => r && r.soort === soort && r.van && r.van <= op && (!r.tot || r.tot >= op))
@@ -872,6 +884,9 @@ async function licStopAbonnement(bedrijfId, o, reden) {
   const tot = licPlusDagen(o.per, 90);
   await admin.database().ref('flow8/licenties/' + bedrijfId).update({ status: 'gestopt', gestoptOp: licVandaag(), gestoptReden: reden || 'opzegging', alleenLezenTot: tot });
   await licLog(bedrijfId, { wat: reden === 'proef' ? 'proef afgelopen' : 'abonnement gestopt', per: o.per, alleenLezenTot: tot });
+  await licMeldBeheerders(bedrijfId, 'Flow8 is gestopt',
+    (reden === 'proef' ? 'De gratis proef is afgelopen. ' : 'Het abonnement is gestopt. ') + 'Tot en met ' + licNL(tot)
+    + ' kan iedereen alles nog bekijken en exporteren, maar niets meer wijzigen. Wil je verder, neem dan contact op met Flow8.');
 }
 function licNL(iso) { return String(iso || '').split('-').reverse().join('-'); }   // dd-mm-jjjj
 function licDagenTot(iso, vandaag) { return Math.round((Date.parse(iso + 'T12:00:00Z') - Date.parse(vandaag + 'T12:00:00Z')) / 864e5); }

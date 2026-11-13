@@ -57,6 +57,11 @@ service cloud.firestore {
              && resource.data.get('status', '') != 'gearchiveerd' );
     }
 
+    // Licentiemanager fase 2 (stap 5): is het abonnement gestopt (claim ro), dan alleen nog bekijken en exporteren.
+    function magWijzigen() {
+      return request.auth.token.get('ro', false) != true;
+    }
+
     // Is deze bon aan de ingelogde gebruiker toegewezen? monteurIds is een lijst
     // van medewerker-id's; het token draagt medId.
     function isToegewezen(bonData) {
@@ -77,18 +82,18 @@ service cloud.firestore {
         && ( magAlleBonnen() || magEigenBonnen() );
 
       // Aanmaken: alle-recht altijd; eigen-recht alleen als hij zichzelf toewijst.
-      allow create: if isActiefBedrijf(bedrijfId)
+      allow create: if isActiefBedrijf(bedrijfId) && magWijzigen()
         && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(request.resource.data)) );
 
       // Wijzigen: alle-recht altijd; eigen-recht alleen als de bon zowel vóór als
       // ná de wijziging aan hem toegewezen blijft.
-      allow update: if isActiefBedrijf(bedrijfId)
+      allow update: if isActiefBedrijf(bedrijfId) && magWijzigen()
         && ( magAlleBonnen()
              || (magEigenBonnen() && isToegewezen(resource.data) && isToegewezen(request.resource.data)) )
         && !(isKantoor() && vultIn());
 
       // Verwijderen: alle-recht altijd; eigen-recht alleen zijn eigen bon.
-      allow delete: if isActiefBedrijf(bedrijfId)
+      allow delete: if isActiefBedrijf(bedrijfId) && magWijzigen()
         && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(resource.data)) );
 
       // Subcollecties (uren, fotos, documenten, ...) erven de toegang van de bon.
@@ -104,28 +109,33 @@ service cloud.firestore {
         allow get, list: if isActiefBedrijf(bedrijfId)
           && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(bon())) );
         // Uren, foto's en documenten: invullen, dus niet met een kantoorlicentie
-        allow write: if isActiefBedrijf(bedrijfId) && !isKantoor()
+        allow write: if isActiefBedrijf(bedrijfId) && !isKantoor() && magWijzigen()
           && ( magAlleBonnen() || (magEigenBonnen() && isToegewezen(bon())) );
       }
     }
 
-    // ── Overige collecties: niveau-1 bedrijfscheiding (ongewijzigd) ────────────
+    // ── Overige collecties: niveau-1 bedrijfscheiding; schrijven niet als het abonnement gestopt is ──
     match /bedrijven/{bedrijfId}/werkorders/{id} {
-      allow read, write: if isActiefBedrijf(bedrijfId);
-      match /{sub}/{subId} { allow read, write: if isActiefBedrijf(bedrijfId); }
+      allow read: if isActiefBedrijf(bedrijfId);
+      allow write: if isActiefBedrijf(bedrijfId) && magWijzigen();
+      match /{sub}/{subId} { allow read: if isActiefBedrijf(bedrijfId); allow write: if isActiefBedrijf(bedrijfId) && magWijzigen(); }
     }
     match /bedrijven/{bedrijfId}/werkorderTypen/{id} {
-      allow read, write: if isActiefBedrijf(bedrijfId);
-      match /{sub}/{subId} { allow read, write: if isActiefBedrijf(bedrijfId); }
+      allow read: if isActiefBedrijf(bedrijfId);
+      allow write: if isActiefBedrijf(bedrijfId) && magWijzigen();
+      match /{sub}/{subId} { allow read: if isActiefBedrijf(bedrijfId); allow write: if isActiefBedrijf(bedrijfId) && magWijzigen(); }
     }
     match /bedrijven/{bedrijfId}/werkdocumenten/{id} {
-      allow read, write: if isActiefBedrijf(bedrijfId);
+      allow read: if isActiefBedrijf(bedrijfId);
+      allow write: if isActiefBedrijf(bedrijfId) && magWijzigen();
     }
     match /bedrijven/{bedrijfId}/artikelen/{id} {
-      allow read, write: if isActiefBedrijf(bedrijfId);
+      allow read: if isActiefBedrijf(bedrijfId);
+      allow write: if isActiefBedrijf(bedrijfId) && magWijzigen();
     }
     match /bedrijven/{bedrijfId}/checklistTemplates/{id} {
-      allow read, write: if isActiefBedrijf(bedrijfId);
+      allow read: if isActiefBedrijf(bedrijfId);
+      allow write: if isActiefBedrijf(bedrijfId) && magWijzigen();
     }
 
     // Alles buiten de bedrijfsstructuur blijft dicht.

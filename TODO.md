@@ -273,6 +273,10 @@ Geprioriteerd. Werk dit bij zodra iets af is. Het volledige historische logboek 
       zonder vrije licentie kan niet inloggen; een kantoorlicentie kan geen werkbonnen invullen; een gestopt abonnement is
       alleen-lezen. Vraagt claims (`lic`), rules en app samen. Daarmee ook dicht: nu kan een beheerder een monteur op
       kantoor zetten (goedkoper) terwijl die gewoon werkbonnen blijft invullen.
+      Stand 13 november 2026: stap 1–4b live (wizard, vrije licentie, werkbonlicentie, kantoor vult niet in). Stap 5
+      (gestopt = alleen bekijken) gebouwd: claim `ro` + trigger `licentieStatus`, 21 RTDB-schrijfregels op de status,
+      Firestore/Storage schrijven dicht, strook bovenaan, knop Abonnement nu stoppen. Nog te deployen en live te testen.
+      Niet elke knop is verborgen (+ Opdracht, slepen, Instellingen): daar weigert de server met een duidelijke melding.
 - [ ] **H12 fase 3** — betalen: Mollie of automatische incasso (zie Incasso instellen), facturen downloaden in de app,
       mail 14 dagen voordat de gegevens van een gestopt abonnement worden verwijderd.
 
